@@ -7,6 +7,10 @@ jSQLBox is a micro scale ORM Framework, simpler than Hibernate and EBean, based 
 ideal similar like jBeanBox and jWebBox project.  
 ##(jSQLBox is only a concept design,  hasn't start to code, looking partners to do this project)  
 
+Other ORM frameworks' problem:
+The configurations of entity beans are fixed, "One to Many", "Many to One", "Cascade Update/Delete" relationships are  
+fixed, hard to create/modify configuations at runtime.  
+
 Feature of jSQLBox:  
 1) Simple, very few source code(less than 2000 lines), No XML, very few Annotations(if have). Easy to learn and use.  
 2) The Java-Based Bean configuration is simple and easy to use, can be automatically created by source code generation tool.  
