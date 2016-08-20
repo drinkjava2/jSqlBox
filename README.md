@@ -15,13 +15,13 @@ Feature of jSQLBox:
 1) Simple, very few source code(less than 2000 lines), No XML, very few Annotations(if have). Easy to learn and use.  
 2) The Java-Based Bean configuration is simple and easy to use, can be automatically created by source code generation tool.  
 3) The Java-Based Bean configuration can be dynamically created/modified at runtime(similar like jBeanBox project).  
-4) Do not set "many to one", "One to Many", "Cascade update" at start, user can set these relationships at runtime(in  
-business logic layer).  
-4) jSQLBox is based on Active Record design, but, it supports transparent persistence benifits from it's dynamic Bean  
+4) Do not force use to set "many to one", "One to Many", "Cascade update" relationships at beginning, user can set these relationships at runtime, this give more flexibility on business logic implementation.
+5) jSQLBox is based on Active Record design, but, it supports transparent persistence benifits from it's dynamic Bean  
 configuration.  
-5) jSQLBox offers basic CURD methods but encourage mixed use them with raw SQL.  
-6) Current version jSQLBox only support MySQL, but it's easy to improve to support other databases.  
-7) jSQLBox only focus on database access, do not supply upper layer functions like pagination/Lucene/caches/...  
+6) jSQLBox offers basic CURD methods but encourage mixed use with raw SQL, it's SQL safe. Not like Hibernate mixed use  
+raw SQL may damage first level cache.
+7) Current version jSQLBox only support MySQL, but it's easy to improve to support other databases.  
+8) To make it easy to learn and use (The time you spent to learn = the hard other people to maintenance project), jSQLBox only focus on basic O-R Mapping, do not offer complicated functions like pagination/Lucene/caches/...
 
 How to use jSQLBox?  
 Download jsqlbox-x.x.jar or jsqlbox-x.x-src.jar from jSQLBox project site, and put below jars in lib folder:  
