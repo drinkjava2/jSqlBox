@@ -61,15 +61,10 @@ public static class Customer extends SQLBox{//Automatically created by source co
 public class Tester {
     public void insertOrder(String customerID){
       Order order=new Order();
-      
       order.setCustomerID(customerID);
-      
-      //To disable Transparent persistence, use Customer.loadybID(customeriD)
-      Customer customer=order.loadbyID(customerID); // now customer linked to order 
-      //To disable Transparent persistence, can also use customer.setTrans(false) after order.orderbyID();
-            
+      //To disable Transparent persistence, use Customer.loadybID(customeriD) to replace order.loadybID()
+      Customer customer=order.loadbyID(CustomerID.class,customerID); // now customer linked to order 
       customer.setTotalOrderCounts(customer.getTotalOrderCounts()+1);
-      
       order.save();//customer also be saved, it's called Transparent Persistence
     }
     
@@ -79,25 +74,22 @@ public class Tester {
     }
 } 
 
-In above example, use a default global singleton datasource setting, source code ignored here (in fact I haven't start to code), but basic concept please see jBeanBox example#3.
+In above example, use a default global singleton datasource setting, similar concept like jBeanBox project example#3.
 ```
  
 Example 2 - Bean extends
 ```
  public static class Customer2 extends Customer{ 
-   String customerID; 
-   String customerName;  
-   Integer totalOrderCounts;
    String address1;
    String address2;
    //getters & setters...
    {setDBField("address1","db_address1");   //address1 map to database field "db_address1" in table "customer"
     //setDBField("address2",Null);//Set Null means address2 do not map to any db field, it's default setting
-    setDBField("customerName",Null);//Set Null means  customerID will not fetch from SQL.
+    setDBField("customerName",Null);//Set Null means  customerID will not be fetched in SQL.
   }
 } 
 
 Now Customer2.class has a new field "address1" map to database, and new field "address2" does not map to any database field.
-Please note Customer2.class can be created dynamically in services layer, it's a child class of Customer but if run a SQL, it will fetch address1 from DB but no longer fetch customerName from DB.
+Customer2.class can be created dynamically in services layer, it's a child class of Customer, and by SQL, it will fetch address1 from DB but no longer fetch customerName from DB.
 ```
 
