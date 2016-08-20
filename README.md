@@ -4,7 +4,7 @@ jSQLBox
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 jSQLBox is a micro scale ORM Framework, simpler than Hibernate and EBean, based on same "box oriented programming"  
-concept similar like jBeanBox and jWebBox project.  
+ideal similar like jBeanBox and jWebBox project.  
 *(jSQLBox hasn't start to code, looking partners to do this project)  
 
 Feature of jSQLBox:  
@@ -34,7 +34,7 @@ How to import jSQLBox project into Eclipse?
 
 A basic introduction of how to use jSQLBox:
 ---
-Example 1 - Basic CRUD 
+Example 1 - Basic CRUD & Transparent Persistence demo
 ```
 public static class Order extends SQLBox{//Automatically created by source code generation tool
    String orderID;  
@@ -49,13 +49,22 @@ public static class Order extends SQLBox{//Automatically created by source code 
 public static class Customer extends SQLBox{//Automatically created by source code generation tool
    String customerID; 
    String customerName;  
-   Integer totalOrders;
+   Integer totalOrderCount;
    //getters & setters...
 } 
 
 public class Tester {
     public void insertOrder(String customerID){
-    
+      Order order=new Order();
+      
+      order.setCustomerID(customerID);
+      
+      //To disable Transparent persistence, use Customer.loadybID(customeriD) or customer.setTrans(false) 
+      Customer customer=order.loadbyID(customerID);  
+      
+      customer.setTotalOrderCount(customer.getTotalOrderCount()+1);
+      
+      order.save();//customer also be saved, it's called Transparent Persistence
     }
     
     public static void main(String[] args) {
@@ -63,5 +72,7 @@ public class Tester {
         t.insertOrder();
     }
 } 
+
+At above example, use a default global singleton datasource setting, source code ignored here, but basic concept please see jBeanBox example3.
 ```
 
