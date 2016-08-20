@@ -14,8 +14,7 @@ Feature of jSQLBox:
 4) jSQLBox is based on Active Record design, but, it supports transparent persistence benifits from it's dynamic Bean  
 configuration.  
 5) jSQLBox offers basic CURD methods but encourage mixed use them with raw SQL.  
-6) Current version jSQLBox only support MySQL, but it's easy to immigrate to other databases, in future(if more people   
-use it), it may support more databases.
+6) Current version jSQLBox only support MySQL, but it's easy to improve to support other databases.  
 7) jSQLBox only focus on database access, do not supply upper layer functions like pagination/Lucene/caches/...  
 
 How to use jSQLBox?  
