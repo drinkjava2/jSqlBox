@@ -77,19 +77,19 @@ public class Tester {
 In above example, use a default global singleton datasource setting, similar concept like jBeanBox project example#3.
  
  
-Example 2 - Bean extends
+Example 2 - Bean extending
 ```
  public static class Customer2 extends Customer{ 
    String address1;
    String address2;
    //getters & setters...
-   {setDBField("address1","db_address1");   //address1 map to database field "db_address1" in table "customer"
+   {setDBField("address1","db_address1");   //address1 map to database field "db_address1"
     //setDBField("address2",Null);//Set Null means address2 do not map to any db field, it's default setting
     setDBField("customerName",Null);//Set Null means  customerID will not be fetched in SQL.
   }
 } 
 ```
 Now Customer2.class has a new field "address1" map to database, and new field "address2" does not map to any database field.
-Customer2.class can be created dynamically in services layer, it's a child class of Customer, and by SQL, it will fetch address1 from DB but no longer fetch customerName from DB.
+Customer2.class can be created dynamically in services layer, it's a child class of Customer, and in sql, it will fetch address1 from DB but no longer fetch customerName from DB.
  
 
