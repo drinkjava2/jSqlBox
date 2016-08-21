@@ -46,8 +46,8 @@ public static class Order extends SQLBox{//Automatically created by source code 
    String orderNO;  
    String customerID;  
    //getters & setters...
-   {//setDBTable("Order");   //if DB table name same as class name, default no need set it manually 
-    //setDBField("orderID","DBOrderID");//If DB column name same as field name, default no need set it manually 
+   {//setDBTable("Order");   //if DB table name same as class name, no need set it manually 
+    //setDBField("orderID","DBOrderID");//If DB column name same as field name, no need set it manually 
   }
 }
 
