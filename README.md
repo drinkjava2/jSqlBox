@@ -59,8 +59,7 @@ public class Tester {
     public void insertOrder(String customerID){
       Order order=new Order();
       order.setCustomerID(customerID);
-      Customer customer=Customer.loadbyID(customerID);//not order linked to customer; 
-      order.hook(customer)//now customer be hooked on order; 
+      Customer customer=Customer.loadbyID(customerID).hookedBy(order);//equal to order.hook(customer);
       customer.setOrderCounts('select count(*)+1 from order where orderID=?', order.getID()));
       order.save();//customer also be saved, it's called Transparent Persistence
     }
