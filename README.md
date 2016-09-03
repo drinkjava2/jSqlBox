@@ -3,7 +3,7 @@
 
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-jSQLBox is a micro scale ORM Framework, simpler than Hibernate but powerful than JDBC/JDBCTemplate/MyBatis/DButils.
+jSQLBox is a micro scale ORM Framework, simpler than Hibernate but more powerful and easier to use than JDBC/JDBCTemplate/MyBatis/DButils.  
 #(jSQLBox project is in pending, currently only made some concept design)  
 
 Other ORM frameworks' problem:
