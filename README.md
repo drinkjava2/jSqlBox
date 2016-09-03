@@ -60,7 +60,7 @@ public class Tester {
       Order order=new Order();
       order.setCustomerID(customerID);
       Customer customer=Customer.loadbyID(customerID).hookedBy(order);//equal to order.hook(customer);
-      customer.setOrderCounts('select count(*)+1 from "+ORDER()+" where " + OrderID() + "=" +order.getID()));
+      customer.setOrderCounts('select count(*)+1 from order where orderID =? ", order.getID()));
       order.save();//customer also be saved, it's called Transparent Persistence
     }
     
