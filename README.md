@@ -3,10 +3,10 @@
 
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-jSQLBox is a micro scale Active-Record tool, simpler than Hibernate but more powerful and easier to use than JDBC/JDBCTemplate/MyBatis/DButils.  
-#(jSQLBox project is in pending, currently only made some concept design)  
+jSQLBox is a micro scale database access tool, simpler than Hibernate but more powerful and simplier than JDBC/JDBCTemplate/MyBatis/DButils.  
+#(jSQLBox project is in pending, currently only have concept design)  
 
-Other Persistence tools' problem:
+Other persistence tools' problem:
 Hibernate: it's ORM tool, too complicated, the configurations of entity beans are fixed, fields definations, "One to Many", "Many to One" relationships are fixed, hard to create/modify configuations at runtime.  
 Other tools:Have no a balance between powerfulness and simpliness. 
 
