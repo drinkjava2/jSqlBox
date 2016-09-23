@@ -6,9 +6,9 @@
 jSQLBox is a micro scale database access tool, simpler than Hibernate but more powerful and simplier than JDBC/JDBCTemplate/MyBatis/DButils.  
 #(jSQLBox project is in pending, currently only have concept design)  
 
-Other persistence tools' problem:
-Hibernate: It's ORM tool, too complicated, the XML or Annotation configurations are fixed, fields definations, "One to Many", "Many to One" relationships are fixed, hard to create/modify configuations at runtime.  
-Other tools: Have no a balance between powerfulness and simpliness. 
+Other persistence tools' problem:  
+Hibernate: It's a ORM tool, too complicated, the XML or Annotation configurations are fixed, fields definations, "One to Many", "Many to One" relationships are fixed, hard to create/modify/extends/re-use configuations at runtime. For example, can not to temporally change configuration in program to exclude some fields to avoid lazy loading.  
+Other DB tools: Have no a balance between powerfulness and simpliness.  
 
 Feature of jSQLBox:  
 1) Simple, very few source code, No XML, easy to learn and use.   
