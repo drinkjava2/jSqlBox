@@ -57,7 +57,7 @@ public class Tester {
       //customer also be cached, as I said, default setBeanCache is true
       Customer customer=Customer.loadbyID(customerID);
       
-      /* Below code use a raw sql, jSQLBox does not re-invent SQL language but support cache beans' 
+      /* Below code use a raw sql, jSQLBox does not re-invent SQL language but support cached beans' 
        * dirty-checking to impliment transparent persistence, it's based on a threadlocal variable works on 
        * background, and it also do some other complex jobs like change it to PreparedStatement to prevent 
        * SQL injection, all above functions are benefited from ActiveRecord design architecture.
