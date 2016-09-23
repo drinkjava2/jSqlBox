@@ -7,19 +7,19 @@ jSQLBox is a micro scale database access tool, simpler than Hibernate but more p
 #(jSQLBox project is in pending, currently only have concept design)  
 
 Other persistence tools' problem:
-Hibernate: it's ORM tool, too complicated, the configurations of entity beans are fixed, fields definations, "One to Many", "Many to One" relationships are fixed, hard to create/modify configuations at runtime.  
-Other tools:Have no a balance between powerfulness and simpliness. 
+Hibernate: It's ORM tool, too complicated, the XML or Annotation configurations are fixed, fields definations, "One to Many", "Many to One" relationships are fixed, hard to create/modify configuations at runtime.  
+Other tools: Have no a balance between powerfulness and simpliness. 
 
 Feature of jSQLBox:  
-1) Simple, very few source code, No XML, Easy to learn and use.   
+1) Simple, very few source code, No XML, easy to learn and use.   
 2) The Java-Based Bean configuration can be created/modified dynamically at runtime(similar like jBeanBox project).  
-3) The Java-Based Bean configuration can be created by source code generation tool because it's a simple map of DB structure;  
-4) jSQLBox is based on Active Record design, but support transparent persistence by register beans in cache.  
-5) There is no "many to one", "One to Many", "Cascade update" concept in jSQLBox.  
-6) jSQLBox support transparent persistence based on a bean cache.  
-7) jSQLBox offers basic CURD methods, but still encourage mixed use with raw SQL, it's SQL safe to mixed use CRUD mehtod and cache.  
-8) Current version jSQLBox only support MySQL, in future version will support more databases depends how many develpers involved.  
-8) To make it simple (The more time you learn = the harder to maintenance), jSQLBox only focus on basic CRUD method + SQL + transparent persistence, do not offer complicated functions.  
+3) The configuration and Bean classes can be created by source code generation tool because it's a simple map of database tables, it's a database driven tool，design database first, then config it 2nd.
+4) jSQLBox is based on Active Record mode.  
+5) There is no "many to one", "One to Many", "Cascade update" concept in jSQLBox, need load and maintence beans by hand. 
+6) jSQLBox support transparent persistence based on a transaction scope bean cache (supported by AOP tool like jBeanBox)
+7) jSQLBox offers basic CURD methods, but encourage mixed use with raw SQL, it's safe to mix use CRUD methods and sql, jSQLBox do not re-invent SQL language, only do a simple pack of SQL to let it can work with bean cache. 
+8) Current version jSQLBox only support MySQL, in future version will support most databases(depends on how many contrubutors.)
+9) To make it simple (The more time you learn = the harder to maintenance), jSQLBox project only focus on basic CRUD method + SQL + transparent persistence, do not offer complex functions like paginnation, lazy load. 
 
 How to use jSQLBox?  
 //to add  
@@ -29,19 +29,19 @@ How to import jSQLBox project into Eclipse?
 
 A basic introduction of how to use jSQLBox:
 ---
-Example 1 - Basic CRUD & Transparent Persistence demo
+Example 1 - Basic configuration and CRUD & Transparent Persistence
 ```
-public static class Order extends SQLBox{//Can automatically created by code generation tool based on DB
+public static class Order extends SQLBox{//Can automatically created by code generation tool
    String orderID;  
    String orderNO;  
    String customerID;  
    //getters & setters...
    { setDBTable("Order");   //if DB table name same as class name, no need write this line
-     setDBField("orderID","DBOrderID");//If DB column name same as field name, no need write this line
+     setDBField(orderID,"DBOrderID");//If DB column name same as field name, no need write this line
    }
 }
 
-public static class Customer extends SQLBox{//Can automatically created by code generation tool based on DB
+public static class Customer extends SQLBox{// Can automatically created by code generation tool
    String customerID; 
    String customerName;  
    Integer totalOrderCounts;
@@ -50,27 +50,33 @@ public static class Customer extends SQLBox{//Can automatically created by code 
 
 public class Tester {
     public void insertOrder(String customerID){
-      Order order=new Order();
-      order.setCustomerID(customerID).putinCache();  //.putinCache can omit if SQLBOX.setCacheAll(true) be set
+      Order order=new Order(); 
+      //".putInCache()" can omit if SQLBox.setBeanCache(true) be called, default is true
+      order.setCustomerID(customerID).putInCache(); 
+      
+      //customer also be cached, as I said, default setBeanCache is true
       Customer customer=Customer.loadbyID(customerID);
       
-      /* Important! below code use a raw sql, jSQLBox does not re-invent SQL language but support cache 
-       * dirty-checking to impliment transparent persistence, it's based on a threadlocal variable works on background,
-       * and it also do some other jobs like change it to PreparedStatement to avoid SQL injection, all above functions are 
-       * benefited from ActiveRecord architecture.
+      /* Below code use a raw sql, jSQLBox does not re-invent SQL language but support cache beans' 
+       * dirty-checking to impliment transparent persistence, it's based on a threadlocal variable works on 
+       * background, and it also do some other complex jobs like change it to PreparedStatement to prevent SQL
+       * injection, all above functions are benefited from ActiveRecord design architecture.
+       * ORDER() is a static imported method to tell SQLBox the table name.
        */
       customer.setOrderCounts('select count(*)+1 from "+ORDER()+" where "+ORDER.OrderID()+" = "+ order.getID()));
       
-      SQLBOX.flushCache(); //All beans in cache are saved, = SQLBOX.defaultContext.flushCache();
+      //below line = SQLBox.defaultContext.flushCache();
+      //SQLBox.flushCache(); //All beans in cache, if be modified will be saved, 
+      //In fact, there is no need explicitly call flushCache method, it can be configurated in AOP like transation.
     }
     
     public static void main(String[] args) {
         Tester t=new Tester();
-        t.insertOrder();
+        t.insertOrder("001");
     }
 } 
 ```
-In above example, a default global singleton defaultContext be used, similar concept see jBeanBox project example#3, this defaultContext included datasource setting.
+In above example, a default global singleton defaultContext be used, similar concept can see jBeanBox project example#3, this defaultContext included datasource setting, if in a project used multipule datasource, need use context's methods instead of directly use SQLBox's (default global context) static methods.
  
 Example 2 - Bean configuration reuse
 ```
@@ -88,8 +94,7 @@ Example 2 - Bean configuration reuse
   }
 } 
 ```
-Now Customer2.class has a new field "newAddress" map to database field New_Address, Customer2.class can be created dynamically in services layer, it's a child class of Customer, and in loadByID method, it will fetch New_Address from DB but no longer fetch customerName.
-And Customer3 only keep customerID and newAddress fields, other fields are dispeared.
+Now Customer2.class has a new field "newAddress" map to database field New_Address, Customer2.class can be created dynamically in services layer, it's a child class of Customer, and in loadByID method, it will fetch New_Address from DB but no longer fetch customerName. And Customer3 only keep customerID and newAddress fields, other fields are disappeared.
 
 Example 3 - This example shows how to use jBeanBox and jSQLBOx to achieve "Declarative Transaction". This example integrated "C3P0" + "jSQLBox" + "Spring Declarative Transaction Service" but replace Spring's IOC/AOP core with jBeanBox, more detail of jBeanBox project can see https://github.com/drinkjava2/jBeanBox.
 ```
@@ -126,7 +131,7 @@ public class TesterBox extends BeanBox {
 
     public static class SQLBoxBox extends BeanBox {
         {
-            setConstructor(SQLBox.class, DSPoolBeanBox.class);
+            setConstructor(SQLBox.class, DSPoolBeanBox.class);// to think it, not finish
         }
     }
 }
@@ -134,7 +139,7 @@ public class TesterBox extends BeanBox {
 public class Tester { 
 
     public void insertUser() {
-        SQLBox.execute("insert into "+USERS()+" values ('"+VALUE("User1")+"')");
+        SQLBox.execute("insert into "+USERS()+" values ('"+VAL("User1")+"')");
         // int i = 1 / 0; // Throw a runtime Exception to roll back transaction
         SQLBox.execute("insert into users values ('User2')");
     }
