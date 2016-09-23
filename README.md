@@ -13,13 +13,13 @@ Other tools: Have no a balance between powerfulness and simpliness.
 Feature of jSQLBox:  
 1) Simple, very few source code, No XML, easy to learn and use.   
 2) The Java-Based Bean configuration can be created/modified dynamically at runtime(similar like jBeanBox project).  
-3) The configuration and Bean classes can be created by source code generation tool because it's a simple map of database tables, it's a database driven tool，design database first, then config it 2nd.
+3) The configuration and Bean classes can be created by source code generation tool because it's a simple map of database tables, it's a database driven tool，design database first, then config it 2nd.  
 4) jSQLBox is based on Active Record mode.  
-5) There is no "many to one", "One to Many", "Cascade update" concept in jSQLBox, need load and maintence beans by hand. 
-6) jSQLBox support transparent persistence based on a transaction scope bean cache (supported by AOP tool like jBeanBox)
-7) jSQLBox offers basic CURD methods, but encourage mixed use with raw SQL, it's safe to mix use CRUD methods and sql, jSQLBox do not re-invent SQL language, only do a simple pack of SQL to let it can work with bean cache. 
-8) Current version jSQLBox only support MySQL, in future version will support most databases(depends on how many contrubutors.)
-9) To make it simple (The more time you learn = the harder to maintenance), jSQLBox project only focus on basic CRUD method + SQL + transparent persistence, do not offer complex functions like paginnation, lazy load. 
+5) There is no "many to one", "One to Many", "Cascade update" concept in jSQLBox, need load and maintence beans by hand.  
+6) jSQLBox support transparent persistence based on a transaction scope bean cache (supported by AOP tool like jBeanBox)  
+7) jSQLBox offers basic CURD methods, but encourage mixed use with raw SQL, it's safe to mix use CRUD methods and sql, jSQLBox do not re-invent SQL language, only do a simple pack of SQL to let it can work with bean cache.  
+8) Current version jSQLBox only support MySQL, in future version will support most databases(depends on how many contrubutors.)  
+9) To make it simple (The more time you learn = the harder to maintenance), jSQLBox project only focus on basic CRUD method + SQL + transparent persistence, do not offer complex functions like paginnation, lazy load.  
 
 How to use jSQLBox?  
 //to add  
@@ -90,8 +90,8 @@ Example 2 - Bean configuration reuse
 } 
 
  public static class Customer3 extends Customer{ 
-   { setOnlyKeep(customerID);    
-     setOnlyKeep(newAddress); //only "customerID" and "newAddress" are kept, other fields are not visible
+   { setOnlyYou(customerID);    
+     setOnlyYou(newAddress); //only "customerID" and "newAddress" are kept, other fields are not visible
   }
 } 
 ```
