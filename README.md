@@ -54,8 +54,8 @@ public class Tester {
       //".putInCache()" can omit if SQLBox.setBeanCache(true) be called, default is true
       order.setCustomerID(customerID).putInCache(); 
       
-      //customer also be cached, as I said, default setBeanCache is true
-      Customer customer=Customer.loadbyID(customerID);
+      //customer also be cached, as said before, default setBeanCache is true
+      Customer customer=Customer.loadbyID(customerID); //load from DB or from cache 
       
       /* Below code use a raw sql, jSQLBox does not re-invent SQL language but support cached beans' 
        * dirty-checking to impliment transparent persistence, it's based on a threadlocal variable works on 
@@ -63,12 +63,12 @@ public class Tester {
        * SQL injection, all above functions are benefited from ActiveRecord design architecture.
        * ORDER() is a static imported method to tell SQLBox the table name.
        */
-      customer.setOrderCounts('select count(*)+1 from "+ORDER()+" where "+ORDER.OrderID()
+      customer.setOrderCounts('select count(*)+1 from "+ORDER()+" where "+ORDER.CustomerID()
                    +" = "+ order.getID()));
       
       //below line = SQLBox.defaultContext.flushCache();
       SQLBox.flushCache(); //All beans in cache, if be modified will be saved, 
-      //There is no need explicitly call flushCache method, it can be configured in AOP like transation.
+      //In fact, no need explicitly call flushCache method, it can be configured in AOP like transation.
     }
     
     public static void main(String[] args) {
