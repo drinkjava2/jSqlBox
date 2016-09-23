@@ -58,9 +58,9 @@ public class Tester {
       Customer customer=Customer.loadbyID(customerID); //load from DB or from cache 
       
       /* Below code use a raw sql, jSQLBox does not re-invent SQL language but support cached beans' 
-       * dirty-checking to impliment transparent persistence, it's based on a threadlocal variable works on 
-       * background, and it also do some other complex jobs like change it to PreparedStatement to prevent 
-       * SQL injection, all above functions are benefited from ActiveRecord design architecture.
+       * dirty-checking to impliment transparent persistence, it's based on a threadlocal cache works on 
+       * background, and it also do some other complex jobs like change sql to PreparedStatement to 
+       * prevent SQL injection, all above functions are benefited from ActiveRecord design architecture.
        * ORDER() is a static imported method to tell SQLBox the table name.
        */
       customer.setOrderCounts('select count(*)+1 from "+ORDER()+" where "+ORDER.CustomerID()
@@ -103,6 +103,7 @@ public class TesterBox extends BeanBox {
     static {
         BeanBox.defaultBeanBoxContext.setAOPAround("examples.example3_transaction.Test\\w*", "insert\\w*",
                 new TxInterceptorBox(), "invoke");
+        SQLBox.defaultContext.setDataSource(BeanBox.getBean(DSPoolBeanBox.class));       
     }
 
     static class DSPoolBeanBox extends BeanBox {
@@ -122,17 +123,19 @@ public class TesterBox extends BeanBox {
         }
     }
 
-    static class TxInterceptorBox extends BeanBox {// Advice
+    static class TxInterceptorBox extends BeanBox {// Advice for Spring transaction
         {
             Properties props = new Properties();
             props.put("insert*", "PROPAGATION_REQUIRED");
             setConstructor(TransactionInterceptor.class, TxManagerBox.class, props);
         }
     }
-
-    public static class SQLBoxBox extends BeanBox {
+    
+    static class JSQLCacheIntercepterBox extends BeanBox {// Advice for jSQLBox Cache
         {
-            setConstructor(SQLBox.class, DSPoolBeanBox.class);// to think it, not finish
+            Properties props = new Properties();
+            props.put("insert*", "FLUSHCACHE_WHEN_EXIT");
+            setConstructor(JSQLCacheIntercepter.class, SQLBox.defaultContext, props);
         }
     }
 }
