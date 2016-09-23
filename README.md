@@ -59,15 +59,16 @@ public class Tester {
       
       /* Below code use a raw sql, jSQLBox does not re-invent SQL language but support cache beans' 
        * dirty-checking to impliment transparent persistence, it's based on a threadlocal variable works on 
-       * background, and it also do some other complex jobs like change it to PreparedStatement to prevent SQL
-       * injection, all above functions are benefited from ActiveRecord design architecture.
+       * background, and it also do some other complex jobs like change it to PreparedStatement to prevent 
+       * SQL injection, all above functions are benefited from ActiveRecord design architecture.
        * ORDER() is a static imported method to tell SQLBox the table name.
        */
-      customer.setOrderCounts('select count(*)+1 from "+ORDER()+" where "+ORDER.OrderID()+" = "+ order.getID()));
+      customer.setOrderCounts('select count(*)+1 from "+ORDER()+" where "+ORDER.OrderID()
+                   +" = "+ order.getID()));
       
       //below line = SQLBox.defaultContext.flushCache();
-      //SQLBox.flushCache(); //All beans in cache, if be modified will be saved, 
-      //In fact, there is no need explicitly call flushCache method, it can be configurated in AOP like transation.
+      SQLBox.flushCache(); //All beans in cache, if be modified will be saved, 
+      //There is no need explicitly call flushCache method, it can be configured in AOP like transation.
     }
     
     public static void main(String[] args) {
@@ -90,7 +91,7 @@ Example 2 - Bean configuration reuse
 
  public static class Customer3 extends Customer{ 
    { setOnlyKeep(customerID);    
-     setOnlyKeep(newAddress);  //only field "customerID" and "newAddress" are kept, other fields are not visible
+     setOnlyKeep(newAddress); //only "customerID" and "newAddress" are kept, other fields are not visible
   }
 } 
 ```
