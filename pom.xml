@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright (c) 2016 Yong Zhu(Yong9981@gmail.com), All rights reserved.
+
+This program is licensed to you under the Apache License Version 2.0,
+and you may not use this file except in compliance with the Apache License Version 2.0.
+You may obtain a copy of the Apache License Version 2.0 at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the Apache License Version 2.0 is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <packaging>pom</packaging>
+
+  <groupId>com.github.drinkjava2</groupId>
+
+  <artifactId>jsqlbox-package</artifactId>
+
+  <version>1.0.0</version>
+
+  <name>jSQLBox</name>
+
+  <description>jSQLBox is a micro scale persistence tool for Java 7 and above</description>
+
+  <modules>
+    <!-- core of jSQLBox -->
+    <module>jsqlbox</module>
+    
+    <!-- examples how to use jSQLBox -->
+    <module>jsqlbox-example</module>
+  </modules>
+
+  <properties> 
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+
+  <build>
+      <finalName>jsqlbox</finalName>
+      <plugins>
+          <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+	      <version>2.3.2</version>
+              <configuration>
+                  <source>1.6</source>
+                  <target>1.6</target>
+	          <encoding>${project.build.sourceEncoding}</encoding>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+ 
+</project>
