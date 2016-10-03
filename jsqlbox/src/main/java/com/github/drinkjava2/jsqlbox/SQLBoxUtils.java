@@ -23,40 +23,40 @@ public class SQLBoxUtils {
 		throw new RuntimeException(errorMsg);
 	}
 
-	public static Object createProxyPO(Class<?> clazz, BaseDao dao) {
+	public static Object createProxyBean(Class<?> clazz, Dao dao) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(clazz);
-		enhancer.setCallback(new ProxyPO(clazz, dao));
+		enhancer.setCallback(new ProxyBean(clazz, dao));
 		Object proxyBean = enhancer.create();
 		try {
-			Method m = clazz.getMethod("setDao", new Class[] { BaseDao.class });
+			Method m = clazz.getMethod("setDao", new Class[] { Dao.class });
 			m.invoke(proxyBean, new Object[] { dao });
 		} catch (Exception e) {
-			throwEX(e, "SQLBoxUtils createProxyPO error, clazz=" + clazz);
+			throwEX(e, "SQLBoxUtils createProxyBean error, clazz=" + clazz);
 		}
 		dao.setBeanClass(clazz);
 		dao.setBean(proxyBean);
 		return proxyBean;
 	}
 
-	public static Object findID(Object po, BaseDao sqlbox) {
+	public static Object findID(Object po, Dao sqlbox) {
 		return null;
 	}
 
-	public static Class<BaseDao> findSQLBoxClass(Class<?> fieldClass, Context context) {
+	public static Class<Dao> findSQLBoxClass(Class<?> fieldClass, Context context) {
 		Class<?> box = null;
 		{
 			if (fieldClass == null)
 				SQLBoxUtils.throwEX(null, "SQLBoxUtils getBeanBox error! target class not set");
-			if (BaseDao.class.isAssignableFrom(fieldClass))
+			if (Dao.class.isAssignableFrom(fieldClass))
 				box = fieldClass;
 			if (box == null)
-				box = SQLBoxUtils.checkIfExist(fieldClass.getName() + context.getBoxIdentity());
+				box = SQLBoxUtils.checkIfExist(fieldClass.getName() + Context.daoIdentity);
 			if (box == null)
-				box = SQLBoxUtils.checkIfExist(
-						fieldClass.getName() + "$" + fieldClass.getSimpleName() + context.getBoxIdentity());
+				box = SQLBoxUtils
+						.checkIfExist(fieldClass.getName() + "$" + fieldClass.getSimpleName() + Context.daoIdentity);
 		}
-		return (Class<BaseDao>) box;
+		return (Class<Dao>) box;
 	}
 
 	public static Class<?> checkIfExist(String className) {
@@ -64,7 +64,7 @@ public class SQLBoxUtils {
 		if (i == null)
 			try {
 				Class<?> clazz = Class.forName(className);
-				if (BaseDao.class.isAssignableFrom((Class<?>) clazz)) {
+				if (Dao.class.isAssignableFrom((Class<?>) clazz)) {
 					classExistCache.put(className, 1);
 					return clazz;
 				}
@@ -84,9 +84,8 @@ public class SQLBoxUtils {
 		return null;
 	}
 
-	public static void injectDao(Object bean, BaseDao dao) {
+	public static void injectDao(Object bean, Dao dao) {
 		try {
-			System.out.println("bean=" + bean);
 			Field field = bean.getClass().getDeclaredField(Context.daoMethod);
 			field.set(bean, dao);
 		} catch (Exception e) {

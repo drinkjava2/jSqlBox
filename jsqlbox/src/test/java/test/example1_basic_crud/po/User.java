@@ -1,19 +1,19 @@
 package test.example1_basic_crud.po;
 
-import com.github.drinkjava2.jsqlbox.BaseDao;
+import com.github.drinkjava2.jsqlbox.Dao;
 
 /**
  * This file should automatically created by a database to Java code generator tool<br/>
  *
  */
 public class User {
-	public BaseDao dao;
+	public Dao dao;
 
-	public BaseDao getDao() {
+	public Dao getDao() {
 		return dao;
 	}
 
-	public void setDao(BaseDao dao) {
+	public void setDao(Dao dao) {
 		this.dao = dao;
 	}
 

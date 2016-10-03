@@ -5,12 +5,12 @@ import java.lang.reflect.Method;
 import com.github.drinkjava2.cglib3_2_0.proxy.MethodInterceptor;
 import com.github.drinkjava2.cglib3_2_0.proxy.MethodProxy;
 
-class ProxyPO implements MethodInterceptor {
+class ProxyBean implements MethodInterceptor {
 	private Class<?> poClass;
 	private Boolean dirty = false;
-	private BaseDao sqlbox; 
+	private Dao sqlbox; 
 
-	public ProxyPO(Class<?> poClass, BaseDao sqlbox ) {
+	public ProxyBean(Class<?> poClass, Dao sqlbox ) {
 		this.poClass = poClass;
 		this.sqlbox = sqlbox; 
 	}
@@ -24,7 +24,7 @@ class ProxyPO implements MethodInterceptor {
 				System.out.println("methodname=" + method.getName());
 				System.out.println("sqlbox=" + sqlbox);
 				System.out.println("poClass=" + poClass);
-				BaseDao.poCache.get().put(SQLBoxUtils.findID(obj, sqlbox), obj);
+				Dao.poCache.get().put(SQLBoxUtils.findID(obj, sqlbox), obj);
 			}
 		return cgLibMethodProxy.invokeSuper(obj, args);
 	}

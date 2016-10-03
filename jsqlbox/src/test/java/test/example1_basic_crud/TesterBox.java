@@ -9,12 +9,12 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.BaseDao;
+import com.github.drinkjava2.jsqlbox.Context;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class TesterBox extends BeanBox {
 	static {
-		BaseDao.defaultContext.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
+		Context.defaultContext.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
 		BeanBox.defaultContext.setAOPAround("test.example1_basic_crud.Test\\w*", "tx_\\w*", new TxInterceptorBox(),
 				"invoke");
 	}

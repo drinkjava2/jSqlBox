@@ -20,7 +20,15 @@
 
 package com.github.drinkjava2.jsqlbox;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
@@ -33,15 +41,15 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * @update 2016-09-28
  */
 @SuppressWarnings("unchecked")
-public class BaseDao {
+public class Dao {
 	private Class<?> beanClass;
 	private Object bean;
 
 	private String sql;
 	private String tablename;
 	private HashMap<Object, Column> fields = new HashMap<Object, Column>();
-	public static final Context defaultContext = new Context();
-	public Context context = defaultContext;
+	private Context context = Context.defaultContext;
+	public JdbcTemplate jdbc;
 
 	public static ThreadLocal<HashMap<Object, Object>> poCache = new ThreadLocal<HashMap<Object, Object>>() {
 		protected HashMap<Object, Object> initialValue() {
@@ -58,11 +66,11 @@ public class BaseDao {
 	// ====================== CRUD methods begin======================
 
 	public static <T> T create(Class<?> clazz) {
-		return defaultContext.create(clazz);
+		return Context.defaultContext.create(clazz);
 	}
 
 	public <T> T create() {
-		return (T) SQLBoxUtils.createProxyPO(beanClass, this);
+		return (T) SQLBoxUtils.createProxyBean(beanClass, this);
 	}
 
 	public static <T> T get(Object id) {
@@ -70,7 +78,19 @@ public class BaseDao {
 	}
 
 	public <T> T save() {
-		return null;
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		jdbc.update(new PreparedStatementCreator() {
+			@Override
+			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+				PreparedStatement ps = connection.prepareStatement("insert into tb_test1(name,password) values(?,?)",
+						new String[] { "id" });
+				ps.setString(1, "");
+				ps.setString(2, "");
+				return ps;
+			}
+		}, keyHolder);
+
+		return (T) keyHolder.getKeyList().get(0);
 	}
 
 	public <T> T update() {
@@ -89,7 +109,7 @@ public class BaseDao {
 		return bean;
 	}
 
-	public BaseDao setBean(Object bean) {
+	public Dao setBean(Object bean) {
 		this.bean = bean;
 		return this;
 	}
@@ -98,7 +118,7 @@ public class BaseDao {
 		return beanClass;
 	}
 
-	public BaseDao setBeanClass(Class<?> beanClass) {
+	public Dao setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
 		return this;
 	}
@@ -107,7 +127,7 @@ public class BaseDao {
 		return sql;
 	}
 
-	public BaseDao setSql(String sql) {
+	public Dao setSql(String sql) {
 		this.sql = sql;
 		return this;
 	}
@@ -116,12 +136,12 @@ public class BaseDao {
 		return tablename;
 	}
 
-	public BaseDao setTablename(String tablename) {
+	public Dao setTablename(String tablename) {
 		this.tablename = tablename;
 		return this;
 	}
 
-	public BaseDao setField(Object field, Column column) {
+	public Dao setField(Object field, Column column) {
 		System.out.println(field);
 		fields.put(field, column);
 		return this;
@@ -131,8 +151,9 @@ public class BaseDao {
 		return context;
 	}
 
-	public BaseDao setContext(Context context) {
+	public Dao setContext(Context context) {
 		this.context = context;
+		jdbc = context.getJdbc();
 		return this;
 	}
 	// ====================== Getter & Setter methods end======================
