@@ -3,27 +3,30 @@ package test.example1_basic_crud.po;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 /**
- * This file should automatically created by a database to Java code generator tool<br/>
+ * This file should automatically created by a robot, it's not a human's job
  *
  */
 public class User {
-	public Dao dao;
+	public static Dao dao = Dao.defaultDao(User.class);
 
-	public Dao getDao() {
+	public Dao dao() {
 		return dao;
 	}
 
-	public void setDao(Dao dao) {
-		this.dao = dao;
-	}
-
 	public void save() {
+		dao.save();
 	};
 
-	public void load(Object... args) {
+	public void load(Object[] args) {
+		dao.load(args);
 	};
 
-	public void delete(Object... args) {
+	public void delete(Object[] args) {
+		dao.delete(args);
+	};
+
+	public void find(Object[] args) {
+		dao.find(args);
 	};
 
 	public static final String Id = "id";

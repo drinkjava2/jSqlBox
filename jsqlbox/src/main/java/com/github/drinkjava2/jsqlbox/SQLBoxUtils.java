@@ -15,11 +15,12 @@ public class SQLBoxUtils {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException. The only place throw Exception in this project
+	 * Transfer all Exceptions to RuntimeException. The only place throw
+	 * Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) throws AssertionError {
 		if (e != null)
-			e.printStackTrace();
+			e.printStackTrace();// I hate Log4j package conflict
 		throw new RuntimeException(errorMsg);
 	}
 
@@ -29,7 +30,7 @@ public class SQLBoxUtils {
 		enhancer.setCallback(new ProxyBean(clazz, dao));
 		Object proxyBean = enhancer.create();
 		try {
-			Method m = clazz.getMethod("setDao", new Class[] { Dao.class });
+			Method m = clazz.getMethod("putDao", new Class[] { Dao.class });
 			m.invoke(proxyBean, new Object[] { dao });
 		} catch (Exception e) {
 			throwEX(e, "SQLBoxUtils createProxyBean error, clazz=" + clazz);
@@ -43,7 +44,7 @@ public class SQLBoxUtils {
 		return null;
 	}
 
-	public static Class<Dao> findSQLBoxClass(Class<?> fieldClass, Context context) {
+	public static Class<Dao> findDaoClass(Class<?> fieldClass, Context context) {
 		Class<?> box = null;
 		{
 			if (fieldClass == null)
@@ -93,4 +94,16 @@ public class SQLBoxUtils {
 		}
 	}
 
+	public static Dao findDao(Class<?> clazz, Context context) {
+		Class<Dao> daoClass = SQLBoxUtils.findDaoClass(clazz, context);
+		if (daoClass != null)
+			try {
+				Dao box = daoClass.newInstance().setContext(context);
+				return box.create();
+			} catch (Exception e) {
+				SQLBoxUtils.throwEX(e, "SQLBox create error, clazz=" + clazz);
+			}
+		Dao dao = new Dao().setBeanClass(clazz).setContext(context);
+		return dao;
+	}
 }

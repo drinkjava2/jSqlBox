@@ -7,17 +7,18 @@ import test.example1_basic_crud.po.User;
 
 public class Tester {
 
-	public void tx_updateUser() {  
-		User user =Dao.create(User.class);
+	public void tx_updateUser() {
+		User user = Dao.create(User.class);
 		user.setAddress("aaaa");
 		user.dao.setSql("aaa");
 		user.save();
+		System.out.println(user.dao.getSql());
 	}
 
 	public void tx_insertUser() {
-		User user = Dao.create(User.class);
+		User user = new User();
 		user.setId(23);
-		System.out.println("insert" + user);
+		user.save();
 		tx_updateUser();
 	}
 

@@ -15,7 +15,7 @@
  */
 
 /**
- * For developers: this project is set to each line 120 characters.  
+ * Dedicate this project to my wife Mei, thanks she work hard and take care of whole family.
  */
 
 package com.github.drinkjava2.jsqlbox;
@@ -49,7 +49,8 @@ public class Dao {
 	private String tablename;
 	private HashMap<Object, Column> fields = new HashMap<Object, Column>();
 	private Context context = Context.defaultContext;
-	public JdbcTemplate jdbc;
+	public JdbcTemplate jdbc = context.getJdbc();
+	public static Dao defaultDao = new Dao().setContext(Context.defaultContext);
 
 	public static ThreadLocal<HashMap<Object, Object>> poCache = new ThreadLocal<HashMap<Object, Object>>() {
 		protected HashMap<Object, Object> initialValue() {
@@ -58,6 +59,10 @@ public class Dao {
 	};
 
 	// ====================== Utils methods begin======================
+	public static Dao defaultDao(Object bean) {
+		return SQLBoxUtils.findDao(bean.getClass(), Context.defaultContext).setBean(bean);
+	}
+
 	public Object findID(Object o, Class<?> poClass) {
 		return null;
 	}
@@ -77,33 +82,32 @@ public class Dao {
 		return null;
 	}
 
-	public <T> T save() {
+	public void save() {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 		jdbc.update(new PreparedStatementCreator() {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				PreparedStatement ps = connection.prepareStatement("insert into tb_test1(name,password) values(?,?)",
-						new String[] { "id" });
-				ps.setString(1, "");
-				ps.setString(2, "");
+				PreparedStatement ps = connection.prepareStatement("insert into users(username) values(?)",
+						new String[] { "username" });
+				ps.setString(1, "ÕÅÈý");
 				return ps;
 			}
 		}, keyHolder);
-
-		return (T) keyHolder.getKeyList().get(0);
+		System.out.println(keyHolder.getKeyList());
 	}
 
-	public <T> T update() {
-		return null;
-	}
+	public void load(Object... args) {
+	};
 
-	public <T> T delete() {
-		return null;
-	}
+	public void delete(Object... args) {
+	};
+
+	public void find(Object... args) {
+	};
 
 	// ====================== CRUD methods end======================
 
-	// ====================== Getter & Setter methods begin======================
+	// =============Garbage Getter & Setter code begin========
 
 	public Object getBean() {
 		return bean;
@@ -156,5 +160,5 @@ public class Dao {
 		jdbc = context.getJdbc();
 		return this;
 	}
-	// ====================== Getter & Setter methods end======================
+	// =============Garbage Getter & Setter code end========
 }

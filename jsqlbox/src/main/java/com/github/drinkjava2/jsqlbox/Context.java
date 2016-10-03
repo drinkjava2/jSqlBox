@@ -19,28 +19,12 @@ public class Context {
 		this.jdbc = jdbc;
 	}
 
-	DataSource dataSource;
-
-	public DataSource getDataSource() {
-		return dataSource;
-	}
-
 	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
 		jdbc.setDataSource(dataSource);
 	}
 
 	public <T> T create(Class<?> clazz) {
-		Class<Dao> daoClass = SQLBoxUtils.findSQLBoxClass(clazz, this);
-		if (daoClass != null)
-			try {
-				Dao box = daoClass.newInstance().setContext(this);
-				return box.create();
-			} catch (Exception e) {
-				SQLBoxUtils.throwEX(e, "SQLBox create error, clazz=" + clazz);
-			}
-		Dao dao = new Dao().setBeanClass(clazz).setContext(this);
+		Dao dao = SQLBoxUtils.findDao(clazz, this);
 		return (T) SQLBoxUtils.createProxyBean(clazz, dao);
 	}
-
 }
