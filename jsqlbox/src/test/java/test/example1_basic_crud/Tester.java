@@ -1,24 +1,32 @@
 package test.example1_basic_crud;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SQLBox;
+import com.github.drinkjava2.jsqlbox.BaseDao;
+import com.github.drinkjava2.jsqlbox.Context;
 
 import test.example1_basic_crud.po.User;
-import test.example1_basic_crud.po.UserBox2;
 
 public class Tester {
 
-	public void insertUser() {
-		User user = SQLBox.create(UserBox2.class);
+	public void tx_updateUser() {
+		Context c=null;
+		c.setDataSource(null); 
+		User user = BaseDao.create(User.class);
 		user.setAddress("aaaa");
-		System.out.println(user);
+		user.dao.setSql("aaa");
+		user.dao.save();
+	}
 
+	public void tx_insertUser() {
+		User user = BaseDao.create(User.class);
+		user.setId(23);
+		System.out.println("insert" + user);
+		tx_updateUser();
 	}
 
 	public static void main(String[] args) {
 		Tester tester = BeanBox.getBean(Tester.class);
-		tester.insertUser();
-
+		tester.tx_insertUser();
 	}
 
 }

@@ -33,17 +33,17 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * @update 2016-09-28
  */
 @SuppressWarnings("unchecked")
-public class SQLBox {
-	public static final String SQLBoxIdentity = "Box";
-	private Class<?> entityClass;
+public class BaseDao {
+	private Class<?> beanClass;
+	private Object bean;
+
 	private String sql;
 	private String tablename;
 	private HashMap<Object, Column> fields = new HashMap<Object, Column>();
-	public static final SQLBoxContext defaultSQLBoxContext = new SQLBoxContext();
-	public SQLBoxContext context = defaultSQLBoxContext;
+	public static final Context defaultContext = new Context();
+	public Context context = defaultContext;
 
 	public static ThreadLocal<HashMap<Object, Object>> poCache = new ThreadLocal<HashMap<Object, Object>>() {
-
 		protected HashMap<Object, Object> initialValue() {
 			return new HashMap<Object, Object>();
 		}
@@ -58,11 +58,11 @@ public class SQLBox {
 	// ====================== CRUD methods begin======================
 
 	public static <T> T create(Class<?> clazz) {
-		return defaultSQLBoxContext.create(clazz);
+		return defaultContext.create(clazz);
 	}
 
 	public <T> T create() {
-		return (T) SQLBoxUtils.createProxyPO(entityClass, this, this.context);
+		return (T) SQLBoxUtils.createProxyPO(beanClass, this);
 	}
 
 	public static <T> T get(Object id) {
@@ -84,12 +84,22 @@ public class SQLBox {
 	// ====================== CRUD methods end======================
 
 	// ====================== Getter & Setter methods begin======================
-	public Class<?> getEntityClass() {
-		return entityClass;
+
+	public Object getBean() {
+		return bean;
 	}
 
-	public SQLBox setEntityClass(Class<?> entityClass) {
-		this.entityClass = entityClass;
+	public BaseDao setBean(Object bean) {
+		this.bean = bean;
+		return this;
+	}
+
+	public Class<?> getBeanClass() {
+		return beanClass;
+	}
+
+	public BaseDao setBeanClass(Class<?> beanClass) {
+		this.beanClass = beanClass;
 		return this;
 	}
 
@@ -97,7 +107,7 @@ public class SQLBox {
 		return sql;
 	}
 
-	public SQLBox setSql(String sql) {
+	public BaseDao setSql(String sql) {
 		this.sql = sql;
 		return this;
 	}
@@ -106,22 +116,22 @@ public class SQLBox {
 		return tablename;
 	}
 
-	public SQLBox setTablename(String tablename) {
+	public BaseDao setTablename(String tablename) {
 		this.tablename = tablename;
 		return this;
 	}
 
-	public SQLBox setField(Object field, Column column) {
+	public BaseDao setField(Object field, Column column) {
 		System.out.println(field);
 		fields.put(field, column);
 		return this;
 	}
 
-	public SQLBoxContext getContext() {
+	public Context getContext() {
 		return context;
 	}
 
-	public SQLBox setContext(SQLBoxContext context) {
+	public BaseDao setContext(Context context) {
 		this.context = context;
 		return this;
 	}

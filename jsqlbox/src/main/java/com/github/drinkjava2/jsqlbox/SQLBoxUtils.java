@@ -1,5 +1,7 @@
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.cglib3_2_0.proxy.Enhancer;
@@ -21,31 +23,40 @@ public class SQLBoxUtils {
 		throw new RuntimeException(errorMsg);
 	}
 
-	public static Object createProxyPO(Class<?> clazz, SQLBox sqlboxClass, SQLBoxContext context) {
+	public static Object createProxyPO(Class<?> clazz, BaseDao dao) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(clazz);
-		enhancer.setCallback(new ProxyPO(clazz, sqlboxClass,context));
-		return enhancer.create();
+		enhancer.setCallback(new ProxyPO(clazz, dao));
+		Object proxyBean = enhancer.create();
+		try {
+			Method m = clazz.getMethod("setDao", new Class[] { BaseDao.class });
+			m.invoke(proxyBean, new Object[] { dao });
+		} catch (Exception e) {
+			throwEX(e, "SQLBoxUtils createProxyPO error, clazz=" + clazz);
+		}
+		dao.setBeanClass(clazz);
+		dao.setBean(proxyBean);
+		return proxyBean;
 	}
 
-	public static Object findID(Object po, SQLBox sqlbox) {
+	public static Object findID(Object po, BaseDao sqlbox) {
 		return null;
 	}
 
-	public static Class<SQLBox> findSQLBoxClass(Class<?> fieldClass) {
+	public static Class<BaseDao> findSQLBoxClass(Class<?> fieldClass, Context context) {
 		Class<?> box = null;
 		{
 			if (fieldClass == null)
 				SQLBoxUtils.throwEX(null, "SQLBoxUtils getBeanBox error! target class not set");
-			if (SQLBox.class.isAssignableFrom(fieldClass))
+			if (BaseDao.class.isAssignableFrom(fieldClass))
 				box = fieldClass;
 			if (box == null)
-				box = SQLBoxUtils.checkIfExist(fieldClass.getName() + SQLBox.SQLBoxIdentity);// #5
+				box = SQLBoxUtils.checkIfExist(fieldClass.getName() + context.getBoxIdentity());
 			if (box == null)
-				box = SQLBoxUtils
-						.checkIfExist(fieldClass.getName() + "$" + fieldClass.getSimpleName() + SQLBox.SQLBoxIdentity);// #6
+				box = SQLBoxUtils.checkIfExist(
+						fieldClass.getName() + "$" + fieldClass.getSimpleName() + context.getBoxIdentity());
 		}
-		return (Class<SQLBox>) box;
+		return (Class<BaseDao>) box;
 	}
 
 	public static Class<?> checkIfExist(String className) {
@@ -53,7 +64,7 @@ public class SQLBoxUtils {
 		if (i == null)
 			try {
 				Class<?> clazz = Class.forName(className);
-				if (SQLBox.class.isAssignableFrom((Class<?>) clazz)) {
+				if (BaseDao.class.isAssignableFrom((Class<?>) clazz)) {
 					classExistCache.put(className, 1);
 					return clazz;
 				}
@@ -72,4 +83,15 @@ public class SQLBoxUtils {
 		}
 		return null;
 	}
+
+	public static void injectDao(Object bean, BaseDao dao) {
+		try {
+			System.out.println("bean=" + bean);
+			Field field = bean.getClass().getDeclaredField(Context.daoMethod);
+			field.set(bean, dao);
+		} catch (Exception e) {
+			throwEX(e, "SQLBoxUtils forceInjectFieldValue error, bean=" + bean + "dao=" + dao);
+		}
+	}
+
 }
