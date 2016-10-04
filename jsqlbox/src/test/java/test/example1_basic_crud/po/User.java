@@ -3,30 +3,36 @@ package test.example1_basic_crud.po;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 /**
- * This file should automatically created by a robot, it's not a human's job
+ * This file should automatically created by a robot
  *
  */
 public class User {
-	public static Dao dao = Dao.defaultDao(User.class);
+	public Dao dao;
 
-	public Dao dao() {
+	protected Dao dao() {
+		if (dao == null)
+			dao = Dao.createDefaultDao(this); 
 		return dao;
 	}
 
+	public void putDao(Dao dao) {
+		this.dao = dao;
+	}
+
 	public void save() {
-		dao.save();
+		dao().save();
 	};
 
 	public void load(Object[] args) {
-		dao.load(args);
+		dao().load(args);
 	};
 
 	public void delete(Object[] args) {
-		dao.delete(args);
+		dao().delete(args);
 	};
 
 	public void find(Object[] args) {
-		dao.find(args);
+		dao().find(args);
 	};
 
 	public static final String Id = "id";
@@ -38,8 +44,8 @@ public class User {
 	public static final String Address = "address";
 	private String address;
 
-	public static final String Phone = "phone";
-	private String phone;
+	public static final String Age = "age";
+	private Integer age;
 
 	public Integer getId() {
 		return id;
@@ -65,12 +71,12 @@ public class User {
 		this.address = address;
 	}
 
-	public String getPhone() {
-		return phone;
+	public Integer getAge() {
+		return age;
 	}
 
-	public void setPhone(String phone) {
-		this.phone = phone;
+	public void setAge(Integer age) {
+		this.age = age;
 	}
 
 }

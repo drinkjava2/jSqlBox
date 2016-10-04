@@ -48,19 +48,13 @@ public class Dao {
 	private String sql;
 	private String tablename;
 	private HashMap<Object, Column> fields = new HashMap<Object, Column>();
-	private Context context = Context.defaultContext;
+	private SQLBoxContext context = SQLBoxContext.defaultContext;
 	public JdbcTemplate jdbc = context.getJdbc();
-	public static Dao defaultDao = new Dao().setContext(Context.defaultContext);
 
-	public static ThreadLocal<HashMap<Object, Object>> poCache = new ThreadLocal<HashMap<Object, Object>>() {
-		protected HashMap<Object, Object> initialValue() {
-			return new HashMap<Object, Object>();
-		}
-	};
 
 	// ====================== Utils methods begin======================
-	public static Dao defaultDao(Object bean) {
-		return SQLBoxUtils.findDao(bean.getClass(), Context.defaultContext).setBean(bean);
+	public static Dao createDefaultDao(Object bean) {
+		return SQLBoxUtils.findDao(bean.getClass(), SQLBoxContext.defaultContext).setBean(bean);
 	}
 
 	public Object findID(Object o, Class<?> poClass) {
@@ -70,9 +64,6 @@ public class Dao {
 
 	// ====================== CRUD methods begin======================
 
-	public static <T> T create(Class<?> clazz) {
-		return Context.defaultContext.create(clazz);
-	}
 
 	public <T> T create() {
 		return (T) SQLBoxUtils.createProxyBean(beanClass, this);
@@ -83,13 +74,15 @@ public class Dao {
 	}
 
 	public void save() {
+		System.out.println("saved");
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 		jdbc.update(new PreparedStatementCreator() {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				PreparedStatement ps = connection.prepareStatement("insert into users(username) values(?)",
+				PreparedStatement ps = connection.prepareStatement("insert into user(username, address) values(?,?)",
 						new String[] { "username" });
-				ps.setString(1, "ÕÅÈý");
+				ps.setString(1, "123");
+				ps.setString(2, "456");
 				return ps;
 			}
 		}, keyHolder);
@@ -151,11 +144,11 @@ public class Dao {
 		return this;
 	}
 
-	public Context getContext() {
+	public SQLBoxContext getContext() {
 		return context;
 	}
 
-	public Dao setContext(Context context) {
+	public Dao setContext(SQLBoxContext context) {
 		this.context = context;
 		jdbc = context.getJdbc();
 		return this;

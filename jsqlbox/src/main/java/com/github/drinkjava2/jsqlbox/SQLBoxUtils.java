@@ -1,6 +1,5 @@
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,8 +14,7 @@ public class SQLBoxUtils {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException. The only place throw
-	 * Exception in this project
+	 * Transfer all Exceptions to RuntimeException. The only place throw Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) throws AssertionError {
 		if (e != null)
@@ -44,7 +42,7 @@ public class SQLBoxUtils {
 		return null;
 	}
 
-	public static Class<Dao> findDaoClass(Class<?> fieldClass, Context context) {
+	public static Class<Dao> findDaoClass(Class<?> fieldClass, SQLBoxContext context) {
 		Class<?> box = null;
 		{
 			if (fieldClass == null)
@@ -52,10 +50,10 @@ public class SQLBoxUtils {
 			if (Dao.class.isAssignableFrom(fieldClass))
 				box = fieldClass;
 			if (box == null)
-				box = SQLBoxUtils.checkIfExist(fieldClass.getName() + Context.daoIdentity);
+				box = SQLBoxUtils.checkIfExist(fieldClass.getName() + SQLBoxContext.daoIdentity);
 			if (box == null)
-				box = SQLBoxUtils
-						.checkIfExist(fieldClass.getName() + "$" + fieldClass.getSimpleName() + Context.daoIdentity);
+				box = SQLBoxUtils.checkIfExist(
+						fieldClass.getName() + "$" + fieldClass.getSimpleName() + SQLBoxContext.daoIdentity);
 		}
 		return (Class<Dao>) box;
 	}
@@ -85,21 +83,12 @@ public class SQLBoxUtils {
 		return null;
 	}
 
-	public static void injectDao(Object bean, Dao dao) {
-		try {
-			Field field = bean.getClass().getDeclaredField(Context.daoMethod);
-			field.set(bean, dao);
-		} catch (Exception e) {
-			throwEX(e, "SQLBoxUtils forceInjectFieldValue error, bean=" + bean + "dao=" + dao);
-		}
-	}
-
-	public static Dao findDao(Class<?> clazz, Context context) {
+	public static Dao findDao(Class<?> clazz, SQLBoxContext context) {
 		Class<Dao> daoClass = SQLBoxUtils.findDaoClass(clazz, context);
 		if (daoClass != null)
 			try {
 				Dao box = daoClass.newInstance().setContext(context);
-				return box.create();
+				return box;
 			} catch (Exception e) {
 				SQLBoxUtils.throwEX(e, "SQLBox create error, clazz=" + clazz);
 			}
