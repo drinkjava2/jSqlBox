@@ -18,8 +18,9 @@ public class Tester {
 	public void tx_insertDefaultProxyUser() {
 		User user = SQLBoxContext.createDefaultProxy(User.class);
 		user.setUsername("cccc");
-		user.setAddress("dddd");
+		user.setAddress("dddd"); 
 		user.save();
+
 	}
 
 	public void tx_insertCtxProxyUser() {
@@ -30,11 +31,15 @@ public class Tester {
 		user.save();
 	}
 
+	public void tx_main() {
+		tx_insertNormalUser();
+		tx_insertDefaultProxyUser();
+		tx_insertCtxProxyUser();
+	}
+
 	public static void main(String[] args) {
 		Tester tester = BeanBox.getBean(Tester.class);
-		tester.tx_insertNormalUser();
-		tester.tx_insertDefaultProxyUser();
-		tester.tx_insertCtxProxyUser();
+		tester.tx_main();
 	}
 
 }

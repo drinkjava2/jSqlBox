@@ -39,7 +39,7 @@ public class TesterBox extends BeanBox {
 	static class TxInterceptorBox extends BeanBox {// Advice
 		{
 			Properties props = new Properties();
-			props.put("insert*", "PROPAGATION_REQUIRED");
+			props.put("tx_*", "PROPAGATION_REQUIRED");
 			setConstructor(TransactionInterceptor.class, TxManagerBox.class, props);
 		}
 	}

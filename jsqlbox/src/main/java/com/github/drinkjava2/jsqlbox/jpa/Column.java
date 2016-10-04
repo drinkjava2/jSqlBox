@@ -1,15 +1,52 @@
 package com.github.drinkjava2.jsqlbox.jpa;
 
 public class Column {
-	String name = "";
-	boolean unique = false;
-	boolean nullable = true;
-	boolean insertable = true;
-	boolean updatable = true;
-	String columnDefinition = "";
-	int length = 255;
-	int precision = 0;
-	int scale = 0;
+	private String name = "";
+	private boolean unique = false;
+	private boolean nullable = true;
+	private boolean insertable = true;
+	private boolean updatable = true;
+	private String columnDefinition = "";
+	private int length = 255;
+	private int precision = 0;
+	private int scale = 0;
+	// below fields are for JSQLBox
+	private Class<?> propertyType;
+	private Object value;
+	private boolean onlyKeep = false;
+	private boolean ignore = false;
+
+	public Object getValue() {
+		return value;
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
+	public boolean isOnlyKeep() {
+		return onlyKeep;
+	}
+
+	public void setOnlyKeep(boolean onlyKeep) {
+		this.onlyKeep = onlyKeep;
+	}
+
+	public boolean isIgnore() {
+		return ignore;
+	}
+
+	public void setIgnore(boolean ignore) {
+		this.ignore = ignore;
+	}
+
+	public Class<?> getPropertyType() {
+		return propertyType;
+	}
+
+	public void setPropertyType(Class<?> propertyType) {
+		this.propertyType = propertyType;
+	}
 
 	public String getName() {
 		return name;
