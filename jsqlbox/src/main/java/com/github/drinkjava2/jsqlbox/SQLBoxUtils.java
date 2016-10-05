@@ -16,7 +16,7 @@ public class SQLBoxUtils {
 	/**
 	 * Transfer all Exceptions to RuntimeException. The only place throw Exception in this project
 	 */
-	public static void throwEX(Exception e, String errorMsg) throws AssertionError {
+	public static void throwEX(Exception e, String errorMsg) throws RuntimeException {
 		if (e != null)
 			e.printStackTrace();// I hate Log4j package conflict
 		throw new RuntimeException(errorMsg);

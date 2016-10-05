@@ -1,8 +1,11 @@
 package test.example1_basic_crud;
 
+import static com.github.drinkjava2.jsqlbox.SQLHelper.V;
+
+import java.sql.SQLException;
+
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SQLBoxContext;
-import static com.github.drinkjava2.jsqlbox.SQLHelper.V;
 
 import test.example1_basic_crud.TesterBox.Context2;
 import test.example1_basic_crud.po.User;
@@ -21,8 +24,14 @@ public class Tester {
 		user.setUsername("cccc");
 		user.setAddress("dddd");
 		user.save();
-		user.sqlHelper()
-				.execute("update user set username='newuser' where username<>" + V("abcd") + " and age<>" + V(0));
+		try {
+			user.sqlHelper()
+					.prepareStatement(
+							"update user set username='newuser' where username<>" + V("abcd") + " and age<>" + V(0))
+					.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void tx_insertCtxProxyUser() {

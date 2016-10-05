@@ -6,6 +6,11 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 public class SQLHelper {
+	public static class SQLandParameters {
+		public String sql;
+		public String[] parameters;
+	}
+
 	Connection connection;
 	private static ThreadLocal<ArrayList<String>> sqlCache = new ThreadLocal<ArrayList<String>>() {
 		protected ArrayList<String> initialValue() {
@@ -14,60 +19,40 @@ public class SQLHelper {
 	};
 
 	public static String V(Object obj) {
-		sqlCache.get().add(""+obj);
+		sqlCache.get().add("" + obj);
 		return "?";
+	}
+
+	public SQLHelper() {
+		// Empty sqlCache before build SQL PreparedStatement
+		sqlCache.get().clear();
 	}
 
 	public SQLHelper(Connection connection) {
 		this.connection = connection;
-		sqlCache.get().clear();// important!
+		// Empty sqlCache before build SQL PreparedStatement
+		sqlCache.get().clear();
+	}
+
+	public SQLandParameters prepareSQL(String sql) {
+		SQLandParameters sp = new SQLandParameters();
+		ArrayList<String> list = sqlCache.get();
+		sp.parameters = (String[]) list.toArray(new String[list.size()]);
+		sqlCache.get().clear();
+		return sp;
 	}
 
 	public PreparedStatement prepareStatement(String sql) {
-		ArrayList<String> list = sqlCache.get();
-		String[] args = (String[]) list.toArray(new String[list.size()]);
-		sqlCache.get().clear();
+		SQLandParameters sp = prepareSQL(sql);
 		try {
-			System.out.println("sql=" + sql);
-			PreparedStatement ps = connection.prepareStatement(sql);
+			PreparedStatement state = connection.prepareStatement(sql);
 			int index = 1;
-			for (String string : args) {
-				System.out.println(index + " " + string);
-				ps.setString(index++, string);
+			for (String parameter : sp.parameters) {
+				state.setString(index++, parameter);
 			}
-			return ps;
+			return state;
 		} catch (Exception e) {
 			SQLBoxUtils.throwEX(e, "SQLHelper exec error, sql=" + sql);
-			return null;
-		}
-	}
-
-	public Object execute(String sql) {
-		PreparedStatement ps = prepareStatement(sql);
-		try {
-			return ps.execute();
-		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "SQLHelper execute error, sql=" + sql);
-			return null;
-		}
-	}
-
-	public Object executeQuery(String sql) {
-		PreparedStatement ps = prepareStatement(sql);
-		try {
-			return ps.executeQuery();
-		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "SQLHelper executeQuery error, sql=" + sql);
-			return null;
-		}
-	}
-
-	public Object executeUpdate(String sql) {
-		PreparedStatement ps = prepareStatement(sql);
-		try {
-			return ps.executeUpdate();
-		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "SQLHelper executeUpdate error, sql=" + sql);
 			return null;
 		}
 	}
