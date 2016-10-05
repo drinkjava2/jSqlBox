@@ -95,4 +95,8 @@ public class SQLBoxUtils {
 		Dao dao = new Dao().setBeanClass(clazz).setContext(context);
 		return dao;
 	}
+
+	// private static boolean isCapitialString(String s) {
+	// return (s.charAt(0) >= 'A') && (s.charAt(0) <= 'Z');
+	// }
 }

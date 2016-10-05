@@ -2,6 +2,7 @@ package test.example1_basic_crud;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SQLBoxContext;
+import static com.github.drinkjava2.jsqlbox.SQLHelper.V;
 
 import test.example1_basic_crud.TesterBox.Context2;
 import test.example1_basic_crud.po.User;
@@ -18,9 +19,10 @@ public class Tester {
 	public void tx_insertDefaultProxyUser() {
 		User user = SQLBoxContext.createDefaultProxy(User.class);
 		user.setUsername("cccc");
-		user.setAddress("dddd"); 
+		user.setAddress("dddd");
 		user.save();
-
+		user.sqlHelper()
+				.execute("update user set username='newuser' where username<>" + V("abcd") + " and age<>" + V(0));
 	}
 
 	public void tx_insertCtxProxyUser() {

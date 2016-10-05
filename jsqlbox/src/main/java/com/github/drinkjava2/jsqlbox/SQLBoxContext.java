@@ -11,6 +11,7 @@ public class SQLBoxContext {
 	public static final String daoIdentity = "Dao";
 	public static final SQLBoxContext defaultContext = new SQLBoxContext(null);
 	private JdbcTemplate jdbc = new JdbcTemplate();
+
 	public ThreadLocal<HashMap<Object, Object>> poCache = new ThreadLocal<HashMap<Object, Object>>() {
 		protected HashMap<Object, Object> initialValue() {
 			return new HashMap<Object, Object>();
@@ -31,6 +32,10 @@ public class SQLBoxContext {
 
 	public void setDataSource(DataSource dataSource) {
 		jdbc.setDataSource(dataSource);
+	}
+
+	public DataSource getDataSource() {
+		return jdbc.getDataSource();
 	}
 
 	public static <T> T createDefaultProxy(Class<?> clazz) {

@@ -27,6 +27,7 @@ import java.util.HashMap;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -72,9 +73,7 @@ public class Dao {
 	}
 
 	public void fillColumnValues(ArrayList<Column> columns) {
-		for (Column column : columns) {
-			//todo
-		}
+
 	}
 
 	public ArrayList<Column> getBeanProperties() {
@@ -88,10 +87,11 @@ public class Dao {
 		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
 		for (PropertyDescriptor pd : pds) {
 			if (!"class".equals(pd.getName())) {
+				System.out.println("name=" + pd.getName());
 				Method md = pd.getReadMethod();
 				Column column = new Column();
 				try {
-					column.setValue(md.invoke(this, new Object[] {}));
+					column.setValue(md.invoke(bean, new Object[] {}));
 				} catch (Exception e) {
 					SQLBoxUtils.throwEX(e, "Dao introspector error, beanClass=" + beanClass + ", name=" + pd.getName());
 				}
@@ -104,6 +104,11 @@ public class Dao {
 		return columns;
 	}
 
+	public SQLHelper sqlHelper() {
+		Connection con = DataSourceUtils.getConnection(context.getDataSource());
+		return new SQLHelper(con);
+	}
+
 	public void save() {
 		ArrayList<Column> columns = getBeanProperties();
 		fillColumnValues(columns);
@@ -112,10 +117,11 @@ public class Dao {
 		jdbc.update(new PreparedStatementCreator() {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				PreparedStatement ps = connection.prepareStatement("insert into user(username, address) values(?,?)",
-						new String[] { "username" });
+				PreparedStatement ps = connection.prepareStatement(
+						"insert into user(username, address, age) values(?,?,?)", new String[] { "id" });
 				ps.setString(1, "123");
 				ps.setString(2, "456");
+				ps.setString(3, "50");
 				return ps;
 			}
 		}, keyHolder);
