@@ -1,6 +1,6 @@
 package test.example1_basic_crud;
 
-import static com.github.drinkjava2.jsqlbox.SQLHelper.s0;
+import static com.github.drinkjava2.jsqlbox.SQLHelper.*;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SQLBoxContext;
@@ -15,16 +15,16 @@ public class Tester {
 
 		User user = new User();
 		user.dao().execute("delete from user");
-		user.setUsername("aaaa");
-		user.setAddress("bbbb");
-		user.setAge(9);
+		user.setUsername("Xiao Ming");
+		user.setAddress("Guiling");
+		user.setAge(30);
 		user.dao().save();
 
 		long start = System.currentTimeMillis();
 		int qty = 1000;
 		for (int i = 0; i < qty; i++)
 			user.dao().execute("insert user (username,age, address) values(?,?,?)" + s0("Zhang San") + s0("" + i)
-					+ s0("some city"));
+					+ s0("Nanjing"));
 		long end = System.currentTimeMillis();
 		System.out.println(
 				String.format("%45s|%6sms", "Insert " + qty + " lines without batch, time used:", end - start));
@@ -33,10 +33,12 @@ public class Tester {
 		user.dao().cleanCachedSql();
 		for (int i = 0; i < qty; i++)
 			user.dao().cacheSQL("insert user (username,age, address) values(?,?,?)" + s0("Zhang San") + s0("" + i)
-					+ s0("some city"));
+					+ s0("Nanjing"));
 		user.dao().executeCatchedSQLs();
 		end = System.currentTimeMillis();
 		System.out.println(String.format("%45s|%6sms", "Insert " + qty + " lines with batch, time used:", end - start));
+
+		user.dao().execute("update user set username=" + s("Li Shi") + ", address=" + s("BeiJing") + " where age <20");
 
 	}
 
