@@ -21,16 +21,19 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 
+import com.github.drinkjava2.jsqlbox.SQLHelper.SqlAndParameters;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
@@ -60,13 +63,100 @@ public class Dao {
 	public Object findID(Object o, Class<?> poClass) {
 		return null;
 	}
-	// ====================== Utils methods end======================
-
-	// ====================== CRUD methods begin======================
 
 	public <T> T create() {
 		return (T) SQLBoxUtils.createProxyBean(beanClass, this);
 	}
+
+	public static void initialize() {
+		SQLHelper.clearSQLCache();
+	}
+	// ====================== Utils methods end======================
+
+	// ========JdbcTemplate wrap methods begin============
+	private static ThreadLocal<ArrayList<SqlAndParameters>> sqlBatchCache = new ThreadLocal<ArrayList<SqlAndParameters>>() {
+		protected ArrayList<SqlAndParameters> initialValue() {
+			return new ArrayList<SqlAndParameters>();
+		}
+	};
+	private static ThreadLocal<String> sqlForBatch = new ThreadLocal<String>() {
+		protected String initialValue() {
+			return "";
+		}
+	};
+
+	public void cleanCachedSql() {
+		SQLHelper.clearSQLCache();
+		sqlBatchCache.get().clear();
+	}
+
+	public void cacheSQL(String sql) {
+		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+		sqlBatchCache.get().add(sp);
+		sqlForBatch.set(sql);
+	}
+
+	public void executeCatchedSQLs() {
+		int batchSize =500;
+		List<List<SqlAndParameters>> subSPlist = SQLBoxUtils.subList(sqlBatchCache.get(), batchSize);
+		for (final List<SqlAndParameters> splist : subSPlist) {
+			jdbc.batchUpdate(sqlForBatch.get(), new BatchPreparedStatementSetter() {
+				public void setValues(PreparedStatement ps, int i) throws SQLException {
+					SqlAndParameters sp = splist.get(i);
+					int index = 1;
+					for (String parameter : sp.parameters) {
+						ps.setString(index++, parameter);
+					}
+				}
+
+				public int getBatchSize() {
+					return splist.size();
+				}
+			});
+		}
+		sqlBatchCache.get().clear();
+	}
+
+	public Boolean execute(String sql) {
+		return (Boolean) doRealExecute(sql, 0);
+	}
+
+	public ResultSet executeQuery(String sql) {
+		return (ResultSet) doRealExecute(sql, 1);
+	}
+
+	public Integer executeUpdate(String sql) {
+		return (Integer) doRealExecute(sql, 2);
+	}
+
+	private Object doRealExecute(String sql, int doWhat) {
+		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+		DataSource ds = context.getDataSource();
+		Connection con = DataSourceUtils.getConnection(ds);
+		try {
+			PreparedStatement stat = con.prepareStatement(sql);
+			int index = 1;
+			for (String parameter : sp.parameters) {
+				stat.setString(index++, parameter);
+			}
+			if (doWhat == 0)
+				return stat.execute();
+			if (doWhat == 1)
+				return stat.executeQuery();
+			if (doWhat == 2)
+				return stat.executeUpdate();
+			return null;
+		} catch (Exception e) {
+			SQLBoxUtils.throwEX(e, "SQLHelper exec error, sql=" + sql);
+		} finally {
+			DataSourceUtils.releaseConnection(con, ds);
+		}
+		return false;
+	}
+
+	// ========JdbcTemplate wrap methods end============
+
+	// ====================== CRUD methods begin======================
 
 	public static <T> T get(Object id) {
 		return null;
@@ -87,7 +177,6 @@ public class Dao {
 		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
 		for (PropertyDescriptor pd : pds) {
 			if (!"class".equals(pd.getName())) {
-				System.out.println("name=" + pd.getName());
 				Method md = pd.getReadMethod();
 				Column column = new Column();
 				try {
@@ -104,28 +193,22 @@ public class Dao {
 		return columns;
 	}
 
-	public SQLHelper sqlHelper() {
-		Connection con = DataSourceUtils.getConnection(context.getDataSource());
-		return new SQLHelper(con);
-	}
-
 	public void save() {
 		ArrayList<Column> columns = getBeanProperties();
 		fillColumnValues(columns);
 		System.out.println("saved");
-		KeyHolder keyHolder = new GeneratedKeyHolder();
-		jdbc.update(new PreparedStatementCreator() {
-			@Override
-			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				PreparedStatement ps = connection.prepareStatement(
-						"insert into user(username, address, age) values(?,?,?)", new String[] { "id" });
-				ps.setString(1, "123");
-				ps.setString(2, "456");
-				ps.setString(3, "50");
-				return ps;
-			}
-		}, keyHolder);
-		System.out.println(keyHolder.getKeyList());
+		// KeyHolder keyHolder = new GeneratedKeyHolder();
+		// jdbc.update(new PreparedStatementCreator() {
+		// @Override
+		// public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+		// PreparedStatement ps = connection.prepareStatement(
+		// "insert into user(username, address, age) values(?,?,?)", new String[] { "id" });
+		// ps.setString(1, "123");
+		// ps.setString(2, "456");
+		// ps.setString(3, "50");
+		// return ps;
+		// }
+		// }, keyHolder);
 	}
 
 	public void load(Object... args) {

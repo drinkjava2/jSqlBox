@@ -1,18 +1,17 @@
 package test.example1_basic_crud.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.SQLHelper;
 
 /**
  * This file should automatically created by a code generator robot
  *
  */
 public class User {
-	// Oh my god, why there is no "#include" keyword in Java
-	// ============= have to copy below garbage in each entity class: =========
-	public Dao dao;
+	// ============= have to copy below Dao methods in each entity class: =========
+	private Dao dao;
 
-	protected Dao dao() {
+	public Dao dao() {
+		Dao.initialize();
 		if (dao == null)
 			dao = Dao.createDefaultDao(this);
 		return dao;
@@ -21,28 +20,7 @@ public class User {
 	public void putDao(Dao dao) {
 		this.dao = dao;
 	}
-
-	public SQLHelper sqlHelper() {
-		return dao().sqlHelper();
-	};
-
-	public void save() {
-		dao().save();
-	};
-
-	public void load(Object[] args) {
-		dao().load(args);
-	};
-
-	public void delete(Object[] args) {
-		dao().delete(args);
-	};
-
-	public void find(Object[] args) {
-		dao().find(args);
-	};
-
-	// ============= garbage code end =========
+	// ============= Dao code end =========
 
 	private Integer id;
 

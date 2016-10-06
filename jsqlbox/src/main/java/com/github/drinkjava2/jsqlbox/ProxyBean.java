@@ -6,6 +6,7 @@ import com.github.drinkjava2.cglib3_2_0.proxy.MethodInterceptor;
 import com.github.drinkjava2.cglib3_2_0.proxy.MethodProxy;
 
 class ProxyBean implements MethodInterceptor {
+	@SuppressWarnings("unused")
 	private Class<?> beanClass;
 	private Boolean dirty = false;
 	private Dao dao;
@@ -16,8 +17,7 @@ class ProxyBean implements MethodInterceptor {
 	}
 
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy cgLibMethodProxy) throws Throwable {
-		String methodname = method.getName();
-		System.out.println("methodname=" + methodname);
+		String methodname = method.getName(); 
 		if ("dao".equals(methodname))
 			return dao;
 		else if ("save".equals(methodname)) {
@@ -36,9 +36,9 @@ class ProxyBean implements MethodInterceptor {
 		if (!dirty)
 			if (methodname.startsWith("set")) {
 				dirty = true;
-				System.out.println("methodname=" + methodname);
-				System.out.println("dao=" + dao);
-				System.out.println("beanClass=" + beanClass);
+				// System.out.println("methodname=" + methodname);
+				// System.out.println("dao=" + dao);
+				// System.out.println("beanClass=" + beanClass);
 				dao.getContext().poCache.get().put(SQLBoxUtils.findID(obj, dao), obj);
 			}
 		return cgLibMethodProxy.invokeSuper(obj, args);

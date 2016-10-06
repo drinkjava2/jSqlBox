@@ -1,6 +1,8 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.cglib3_2_0.proxy.Enhancer;
@@ -16,10 +18,10 @@ public class SQLBoxUtils {
 	/**
 	 * Transfer all Exceptions to RuntimeException. The only place throw Exception in this project
 	 */
-	public static void throwEX(Exception e, String errorMsg) throws RuntimeException {
+	public static void throwEX(Exception e, String errorMsg) throws SQLBoxException {
 		if (e != null)
-			e.printStackTrace();// I hate Log4j package conflict
-		throw new RuntimeException(errorMsg);
+			e.printStackTrace();
+		throw new SQLBoxException(errorMsg);
 	}
 
 	public static Object createProxyBean(Class<?> clazz, Dao dao) {
@@ -96,7 +98,28 @@ public class SQLBoxUtils {
 		return dao;
 	}
 
-	// private static boolean isCapitialString(String s) {
-	// return (s.charAt(0) >= 'A') && (s.charAt(0) <= 'Z');
-	// }
+	/**
+	 * SubList a List, divide a list by given blockSize
+	 */
+	public static <T> List<List<T>> subList(List<T> list, int blockSize) {
+		List<List<T>> lists = new ArrayList<List<T>>();
+		if (list != null && blockSize > 0) {
+			int listSize = list.size();
+			if (listSize <= blockSize) {
+				lists.add(list);
+				return lists;
+			}
+			int batchSize = listSize / blockSize;
+			int remain = listSize % blockSize;
+			for (int i = 0; i < batchSize; i++) {
+				int fromIndex = i * blockSize;
+				int toIndex = fromIndex + blockSize;
+				lists.add(list.subList(fromIndex, toIndex));
+			}
+			if (remain > 0)
+				lists.add(list.subList(listSize - remain, listSize));
+		}
+		return lists;
+	}
+
 }
