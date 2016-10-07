@@ -48,10 +48,10 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 public class Dao {
 	private Class<?> beanClass;
 	private Object bean;
-
-	private String sql;
 	private String tablename;
-	private HashMap<Object, Column> fields = new HashMap<Object, Column>();
+	private String id;
+
+	private HashMap<String, Column> columns = new HashMap<String, Column>();
 	private SQLBoxContext context = SQLBoxContext.defaultContext;
 	public JdbcTemplate jdbc = context.getJdbc();
 
@@ -97,7 +97,7 @@ public class Dao {
 	}
 
 	public void executeCatchedSQLs() {
-		int batchSize =500;
+		int batchSize = 500;
 		List<List<SqlAndParameters>> subSPlist = SQLBoxUtils.subList(sqlBatchCache.get(), batchSize);
 		for (final List<SqlAndParameters> splist : subSPlist) {
 			jdbc.batchUpdate(sqlForBatch.get(), new BatchPreparedStatementSetter() {
@@ -166,8 +166,7 @@ public class Dao {
 
 	}
 
-	public ArrayList<Column> getBeanProperties() {
-		ArrayList<Column> columns = new ArrayList<Column>();
+	public void fillColumns() {
 		BeanInfo beanInfo = null;
 		try {
 			beanInfo = Introspector.getBeanInfo(beanClass);
@@ -176,26 +175,24 @@ public class Dao {
 		}
 		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
 		for (PropertyDescriptor pd : pds) {
+			System.out.println("pd.getName()=" + pd.getName());
 			if (!"class".equals(pd.getName())) {
 				Method md = pd.getReadMethod();
 				Column column = new Column();
 				try {
 					column.setValue(md.invoke(bean, new Object[] {}));
+					System.out.println("value=" + column.getValue());
 				} catch (Exception e) {
 					SQLBoxUtils.throwEX(e, "Dao introspector error, beanClass=" + beanClass + ", name=" + pd.getName());
 				}
-				column.setName(pd.getName());
-				column.setColumnDefinition(pd.getName());// to be changed
 				column.setPropertyType(pd.getPropertyType());
-				columns.add(column);
+				columns.put(pd.getName(), column);
 			}
 		}
-		return columns;
 	}
 
 	public void save() {
-		ArrayList<Column> columns = getBeanProperties();
-		fillColumnValues(columns);
+		fillColumns();
 		System.out.println("saved");
 		// KeyHolder keyHolder = new GeneratedKeyHolder();
 		// jdbc.update(new PreparedStatementCreator() {
@@ -242,13 +239,12 @@ public class Dao {
 		return this;
 	}
 
-	public String getSql() {
-		return sql;
+	public String getId() {
+		return id;
 	}
 
-	public Dao setSql(String sql) {
-		this.sql = sql;
-		return this;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getTablename() {
@@ -260,11 +256,9 @@ public class Dao {
 		return this;
 	}
 
-	public Dao setField(Object field, Column column) {
-		System.out.println(field);
-		fields.put(field, column);
-		return this;
-	}
+	public Column getColumn(String fieldID) {
+		return columns.get(fieldID);
+	};
 
 	public SQLBoxContext getContext() {
 		return context;

@@ -11,7 +11,7 @@ import test.example1_basic_crud.po.User;
 public class Tester {
 
 	public void tx_insertNormalUser() {
-		System.out.println("====Test 1.1====");
+		System.out.println("====tx_insertNormalUser====");
 
 		User user = new User();
 		user.dao().execute("delete from user");
@@ -19,12 +19,16 @@ public class Tester {
 		user.setAddress("Guiling");
 		user.setAge(30);
 		user.dao().save();
+	}
 
+	public void tx_batchInsert() {
+		System.out.println("====tx_batchInsert====");
+		User user = new User();
 		long start = System.currentTimeMillis();
 		int qty = 1000;
 		for (int i = 0; i < qty; i++)
-			user.dao().execute("insert user (username,age, address) values(?,?,?)" + s0("Zhang San") + s0("" + i)
-					+ s0("Nanjing"));
+			user.dao().execute(
+					"insert user (username,age, address) values(?,?,?)" + s0("Zhang San") + s0("" + i) + s0("Nanjing"));
 		long end = System.currentTimeMillis();
 		System.out.println(
 				String.format("%45s|%6sms", "Insert " + qty + " lines without batch, time used:", end - start));
@@ -32,8 +36,8 @@ public class Tester {
 		start = System.currentTimeMillis();
 		user.dao().cleanCachedSql();
 		for (int i = 0; i < qty; i++)
-			user.dao().cacheSQL("insert user (username,age, address) values(?,?,?)" + s0("Zhang San") + s0("" + i)
-					+ s0("Nanjing"));
+			user.dao().cacheSQL(
+					"insert user (username,age, address) values(?,?,?)" + s0("Zhang San") + s0("" + i) + s0("Nanjing"));
 		user.dao().executeCatchedSQLs();
 		end = System.currentTimeMillis();
 		System.out.println(String.format("%45s|%6sms", "Insert " + qty + " lines with batch, time used:", end - start));
@@ -43,7 +47,7 @@ public class Tester {
 	}
 
 	public void tx_insertDefaultProxyUser() {
-		System.out.println("====Test 1.2====");
+		System.out.println("====tx_insertDefaultProxyUser====");
 		User user = SQLBoxContext.createDefaultProxy(User.class);
 		user.setUsername("cccc");
 		user.setAddress("dddd");
@@ -51,7 +55,7 @@ public class Tester {
 	}
 
 	public void tx_insertCtxProxyUser() {
-		System.out.println("====Test 1.3====");
+		System.out.println("====tx_insertCtxProxyUser====");
 		SQLBoxContext ctx = BeanBox.getBean(Context2.class);
 		User user = ctx.createProxy(User.class);
 		user.setUsername("eeee");
@@ -61,6 +65,7 @@ public class Tester {
 
 	public void tx_main() {
 		tx_insertNormalUser();
+		// tx_batchInsert();
 		// tx_insertDefaultProxyUser();
 		// tx_insertCtxProxyUser();
 	}

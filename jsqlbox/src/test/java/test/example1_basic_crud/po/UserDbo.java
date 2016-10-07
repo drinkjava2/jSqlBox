@@ -5,5 +5,6 @@ import com.github.drinkjava2.jsqlbox.Dao;
 public class UserDbo extends Dao {
 	{
 		this.setBeanClass(User.class);
+		this.getColumn(User.UserName);
 	}
 }

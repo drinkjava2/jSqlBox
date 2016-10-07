@@ -22,12 +22,16 @@ public class User {
 	}
 	// ============= Dao code end =========
 
+	public static String Id = "id";
 	private Integer id;
 
-	private String username;
+	public static String UserName = "user_name";
+	private String userName;
 
+	public static String Address = "address";
 	private String address;
 
+	public static String Age = "age";
 	private Integer age;
 
 	public Integer getId() {
@@ -39,11 +43,11 @@ public class User {
 	}
 
 	public String getUsername() {
-		return username;
+		return userName;
 	}
 
 	public void setUsername(String username) {
-		this.username = username;
+		this.userName = username;
 	}
 
 	public String getAddress() {
@@ -62,4 +66,10 @@ public class User {
 		this.age = age;
 	}
 
+	// public static void main(String[] args) throws Exception {
+	// Field[] fields = User.class.getFields();
+	// for (Field field : fields) {
+	// System.out.println(field.getName() + "=" + field.get(null));
+	// }
+	// }
 }
