@@ -53,6 +53,7 @@ public class Dao {
 
 	private HashMap<String, Column> columns = new HashMap<String, Column>();
 	private SQLBoxContext context = SQLBoxContext.defaultContext;
+	public static Dao dao = new Dao().setContext(SQLBoxContext.defaultContext);
 	public JdbcTemplate jdbc = context.getJdbc();
 
 	// ====================== Utils methods begin======================
@@ -97,24 +98,27 @@ public class Dao {
 	}
 
 	public void executeCatchedSQLs() {
-		int batchSize = 500;
-		List<List<SqlAndParameters>> subSPlist = SQLBoxUtils.subList(sqlBatchCache.get(), batchSize);
-		for (final List<SqlAndParameters> splist : subSPlist) {
-			jdbc.batchUpdate(sqlForBatch.get(), new BatchPreparedStatementSetter() {
-				public void setValues(PreparedStatement ps, int i) throws SQLException {
-					SqlAndParameters sp = splist.get(i);
-					int index = 1;
-					for (String parameter : sp.parameters) {
-						ps.setString(index++, parameter);
+		try {
+			int batchSize = 500;
+			List<List<SqlAndParameters>> subSPlist = SQLBoxUtils.subList(sqlBatchCache.get(), batchSize);
+			for (final List<SqlAndParameters> splist : subSPlist) {
+				jdbc.batchUpdate(sqlForBatch.get(), new BatchPreparedStatementSetter() {
+					public void setValues(PreparedStatement ps, int i) throws SQLException {
+						SqlAndParameters sp = splist.get(i);
+						int index = 1;
+						for (String parameter : sp.parameters) {
+							ps.setString(index++, parameter);
+						}
 					}
-				}
 
-				public int getBatchSize() {
-					return splist.size();
-				}
-			});
+					public int getBatchSize() {
+						return splist.size();
+					}
+				});
+			}
+		} finally {
+			this.cleanCachedSql();
 		}
-		sqlBatchCache.get().clear();
 	}
 
 	public Boolean execute(String sql) {
@@ -149,6 +153,7 @@ public class Dao {
 		} catch (Exception e) {
 			SQLBoxUtils.throwEX(e, "SQLHelper exec error, sql=" + sql);
 		} finally {
+			this.cleanCachedSql();
 			DataSourceUtils.releaseConnection(con, ds);
 		}
 		return false;
@@ -175,13 +180,13 @@ public class Dao {
 		}
 		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
 		for (PropertyDescriptor pd : pds) {
-			System.out.println("pd.getName()=" + pd.getName());
+			// System.out.println("pd.getName()=" + pd.getName());
 			if (!"class".equals(pd.getName())) {
 				Method md = pd.getReadMethod();
 				Column column = new Column();
 				try {
 					column.setValue(md.invoke(bean, new Object[] {}));
-					System.out.println("value=" + column.getValue());
+					// System.out.println("value=" + column.getValue());
 				} catch (Exception e) {
 					SQLBoxUtils.throwEX(e, "Dao introspector error, beanClass=" + beanClass + ", name=" + pd.getName());
 				}
@@ -192,14 +197,17 @@ public class Dao {
 	}
 
 	public void save() {
+		System.out.println("saved");// TODO not finished
 		fillColumns();
-		System.out.println("saved");
+
 		// KeyHolder keyHolder = new GeneratedKeyHolder();
 		// jdbc.update(new PreparedStatementCreator() {
 		// @Override
-		// public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+		// public PreparedStatement createPreparedStatement(Connection
+		// connection) throws SQLException {
 		// PreparedStatement ps = connection.prepareStatement(
-		// "insert into user(username, address, age) values(?,?,?)", new String[] { "id" });
+		// "insert into user(username, address, age) values(?,?,?)", new
+		// String[] { "id" });
 		// ps.setString(1, "123");
 		// ps.setString(2, "456");
 		// ps.setString(3, "50");
