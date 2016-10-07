@@ -19,13 +19,7 @@ public class SQLHelper {
 		sqlCache.get().clear();
 	}
 
-	public static String S(Object... obj) {
-		for (Object o : obj)
-			sqlCache.get().add("" + o);
-		return "?";
-	}
-
-	public static String D(Object... obj) {
+	public static String W(Object... obj) {
 		String result = "";
 		for (int i = 0; i < obj.length; i++) {
 			sqlCache.get().add("" + obj[i]);

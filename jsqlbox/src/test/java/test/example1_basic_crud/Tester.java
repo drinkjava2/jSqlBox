@@ -1,8 +1,7 @@
 package test.example1_basic_crud;
 
-import static com.github.drinkjava2.jsqlbox.SQLHelper.D;
+import static com.github.drinkjava2.jsqlbox.SQLHelper.W;
 import static com.github.drinkjava2.jsqlbox.SQLHelper.K;
-import static com.github.drinkjava2.jsqlbox.SQLHelper.S;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
@@ -15,13 +14,13 @@ public class Tester {
 
 	public void tx_insertDemo() {
 		Dao.dao.execute("delete from user");
-		Dao.dao.execute("insert user (username,age) values(" + S("user1") + "," + S(10) + ")");
-		Dao.dao.execute("insert user (username,age) values(" + D("user2", 20) + ")");
+		Dao.dao.execute("insert user (username,age) values(" + W("user1") + "," + W(10) + ")");
+		Dao.dao.execute("insert user (username,age) values(" + W("user2", 20) + ")");
 		Dao.dao.execute("insert user (username,age) values(?,?)" + K("user3") + K(30));
 		Dao.dao.execute("insert user (username,age) values(?,?)" + K("user4", 40));
 		Dao.dao.execute(
-				"insert " + User.Table + " (" + User.UserName + "," + User.Age + ") values(" + D("user5", 50) + ")");
-		Dao.dao.execute("update user set username=?,address=? " + K("Sam", "BeiJing") + " where age=" + S(50));
+				"insert " + User.Table + " (" + User.UserName + "," + User.Age + ") values(" + W("user5", 50) + ")");
+		Dao.dao.execute("update user set username=?,address=? " + K("Sam", "BeiJing") + " where age=" + W(50));
 		User user = new User();
 		user.setUsername("user3");
 		user.setAge(40);
