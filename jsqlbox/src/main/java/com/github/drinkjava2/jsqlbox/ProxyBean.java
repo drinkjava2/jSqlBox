@@ -17,7 +17,7 @@ class ProxyBean implements MethodInterceptor {
 	}
 
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy cgLibMethodProxy) throws Throwable {
-		String methodname = method.getName(); 
+		String methodname = method.getName();
 		if ("dao".equals(methodname))
 			return dao;
 		else if ("save".equals(methodname)) {
@@ -39,7 +39,7 @@ class ProxyBean implements MethodInterceptor {
 				// System.out.println("methodname=" + methodname);
 				// System.out.println("dao=" + dao);
 				// System.out.println("beanClass=" + beanClass);
-				dao.getContext().poCache.get().put(SQLBoxUtils.findID(obj, dao), obj);
+				// dao.getContext().poCache.get().put(SQLBoxUtils.findID(obj, dao), obj);
 			}
 		return cgLibMethodProxy.invokeSuper(obj, args);
 	}

@@ -37,10 +37,15 @@ public class SQLHelper {
 		return "";
 	}
 
-	public static SqlAndParameters splitSQLandParameters(String sql) {
+	public static SqlAndParameters splitSQLandParameters(String[] sqls) {
+		String sql = "";
+		for (String string : sqls) {
+			sql += string;
+		}
 		SqlAndParameters sp = new SqlAndParameters();
 		ArrayList<String> list = sqlCache.get();
 		sp.parameters = (String[]) list.toArray(new String[list.size()]);
+		sp.sql = sql;
 		clearSQLCache();
 		return sp;
 	}

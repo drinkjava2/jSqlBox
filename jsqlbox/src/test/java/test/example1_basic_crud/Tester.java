@@ -20,10 +20,20 @@ public class Tester {
 		Dao.dao.execute("insert user (username,age) values(?,?)" + K("user4", 40));
 		Dao.dao.execute(
 				"insert " + User.Table + " (" + User.UserName + "," + User.Age + ") values(" + W("user5", 50) + ")");
-		Dao.dao.execute("update user set username=?,address=? " + K("Sam", "BeiJing") + " where age=" + W(50));
+		Dao.dao.execute("update user set username=?,address=? " + K("Sam", "BeiJing") + " where age=" + W(20));
+		Dao.dao.execute("update user set username=?,address=? ", K("John", "Shanghai"), " where age=", W(30));
+		Dao.dao.execute("update user set", //
+				" username=?", K("Peter"), //
+				",address=? ", K("Nanjing"), //
+				" where age=?", K(40));
+		Dao.dao.execute("update user set", //
+				" username=", W("Jeffery"), //
+				",address=", W("Tianjing"), //
+				" where age=", W(50));
+
 		User user = new User();
 		user.setUsername("user3");
-		user.setAge(40);
+		user.setAge(70);
 		user.dao().save();// TODO not finished
 	}
 
@@ -34,7 +44,7 @@ public class Tester {
 	}
 
 	public void tx_insertDefaultProxyUser() {
-		User user = SQLBoxContext.createDefaultProxy(User.class);
+		User user = SQLBoxContext.createDefaultProxyBean(User.class);
 		user.setUsername("cccc");
 		user.setAddress("dddd");
 		user.dao().save();
@@ -42,7 +52,7 @@ public class Tester {
 
 	public void tx_insertCtxProxyUser() {
 		SQLBoxContext ctx = BeanBox.getBean(Context2.class);
-		User user = ctx.createProxy(User.class);
+		User user = ctx.createProxyBean(User.class);
 		user.setUsername("eeee");
 		user.setAddress("ffff");
 		user.dao().save();
@@ -51,8 +61,8 @@ public class Tester {
 	public void tx_main() {
 		tx_insertDemo();
 		tx_batchInsertDemo();
-		// tx_insertDefaultProxyUser();
-		// tx_insertCtxProxyUser();
+		tx_insertDefaultProxyUser();
+		tx_insertCtxProxyUser();
 	}
 
 	public static void main(String[] args) {

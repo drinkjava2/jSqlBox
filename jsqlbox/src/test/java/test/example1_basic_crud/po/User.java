@@ -7,13 +7,12 @@ import com.github.drinkjava2.jsqlbox.Dao;
  *
  */
 public class User {
-	// ============= have to copy below Dao methods in each entity class:
-	// =========
+	// ==== have to copy below Dao methods in each entity class:=====
 	private Dao dao;
 
 	public Dao dao() {
 		if (dao == null)
-			dao = Dao.createDefaultDao(this);
+			dao = Dao.createDao(this);
 		return dao;
 	}
 

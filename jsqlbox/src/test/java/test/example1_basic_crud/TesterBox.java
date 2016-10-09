@@ -22,7 +22,8 @@ public class TesterBox extends BeanBox {
 	static class DSPoolBeanBox extends BeanBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
-			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?user=root&password=root888&rewriteBatchedStatements=true&useSSL=false");
+			setProperty("jdbcUrl",
+					"jdbc:mysql://127.0.0.1:3306/test?user=root&password=root888&rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClass", "com.mysql.jdbc.Driver");// change to your jdbc driver name
 			setProperty("maxPoolSize", 100);
 			setProperty("CheckoutTimeout", 2000);
@@ -51,8 +52,8 @@ public class TesterBox extends BeanBox {
 	}
 
 	public static class Context2 extends BeanBox {
-		{
-			setConstructor(SQLBoxContext.class, DSPoolBeanBox.class);
+		public SQLBoxContext create() {
+			return new SQLBoxContext((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
 		}
 	}
 

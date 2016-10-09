@@ -1,11 +1,8 @@
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.github.drinkjava2.cglib3_2_0.proxy.Enhancer;
 
 @SuppressWarnings("unchecked")
 public class SQLBoxUtils {
@@ -24,31 +21,11 @@ public class SQLBoxUtils {
 		throw new SQLBoxException(errorMsg);
 	}
 
-	public static Object createProxyBean(Class<?> clazz, Dao dao) {
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(clazz);
-		enhancer.setCallback(new ProxyBean(clazz, dao));
-		Object proxyBean = enhancer.create();
-		try {
-			Method m = clazz.getMethod("putDao", new Class[] { Dao.class });
-			m.invoke(proxyBean, new Object[] { dao });
-		} catch (Exception e) {
-			throwEX(e, "SQLBoxUtils createProxyBean error, clazz=" + clazz);
-		}
-		dao.setBeanClass(clazz);
-		dao.setBean(proxyBean);
-		return proxyBean;
-	}
-
-	public static Object findID(Object po, Dao sqlbox) {
-		return null;
-	}
-
 	public static Class<Dao> findDaoClass(Class<?> fieldClass, SQLBoxContext context) {
 		Class<?> box = null;
 		{
 			if (fieldClass == null)
-				SQLBoxUtils.throwEX(null, "SQLBoxUtils getBeanBox error! target class not set");
+				SQLBoxUtils.throwEX(null, "SQLBoxUtils findDaoClass error! target class not set");
 			if (Dao.class.isAssignableFrom(fieldClass))
 				box = fieldClass;
 			if (box == null)
@@ -92,7 +69,7 @@ public class SQLBoxUtils {
 				Dao box = daoClass.newInstance().setContext(context);
 				return box;
 			} catch (Exception e) {
-				SQLBoxUtils.throwEX(e, "SQLBox create error, clazz=" + clazz);
+				SQLBoxUtils.throwEX(e, "SQLBoxUtils findDao error, clazz=" + clazz);
 			}
 		Dao dao = new Dao().setBeanClass(clazz).setContext(context);
 		return dao;

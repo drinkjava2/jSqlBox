@@ -54,10 +54,18 @@ public class Dao {
 	private HashMap<String, Column> columns = new HashMap<String, Column>();
 	private SQLBoxContext context = SQLBoxContext.defaultContext;
 	public static Dao dao = new Dao().setContext(SQLBoxContext.defaultContext);
-	public JdbcTemplate jdbc = context.getJdbc();
+	private JdbcTemplate jdbc = null;
 
 	// ====================== Utils methods begin======================
-	public static Dao createDefaultDao(Object bean) {
+	public JdbcTemplate jdbc() {
+		if (jdbc == null) {
+			jdbc = new JdbcTemplate();
+			jdbc.setDataSource(this.getContext().getDataSource());
+		}
+		return jdbc;
+	}
+
+	public static Dao createDao(Object bean) {
 		return SQLBoxUtils.findDao(bean.getClass(), SQLBoxContext.defaultContext).setBean(bean);
 	}
 
@@ -65,8 +73,8 @@ public class Dao {
 		return null;
 	}
 
-	public <T> T create() {
-		return (T) SQLBoxUtils.createProxyBean(beanClass, this);
+	public <T> T createProxyBean() {
+		return (T) this.context.createProxyBean(beanClass);
 	}
 
 	public static void initialize() {
@@ -91,10 +99,10 @@ public class Dao {
 		sqlBatchCache.get().clear();
 	}
 
-	public void cacheSQL(String sql) {
+	public void cacheSQL(String... sql) {
 		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
 		sqlBatchCache.get().add(sp);
-		sqlForBatch.set(sql);
+		sqlForBatch.set(sp.sql);
 	}
 
 	public void executeCatchedSQLs() {
@@ -102,7 +110,7 @@ public class Dao {
 			int batchSize = 500;
 			List<List<SqlAndParameters>> subSPlist = SQLBoxUtils.subList(sqlBatchCache.get(), batchSize);
 			for (final List<SqlAndParameters> splist : subSPlist) {
-				jdbc.batchUpdate(sqlForBatch.get(), new BatchPreparedStatementSetter() {
+				jdbc().batchUpdate(sqlForBatch.get(), new BatchPreparedStatementSetter() {
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						SqlAndParameters sp = splist.get(i);
 						int index = 1;
@@ -121,24 +129,24 @@ public class Dao {
 		}
 	}
 
-	public Boolean execute(String sql) {
-		return (Boolean) doRealExecute(sql, 0);
+	public Boolean execute(String... sql) {
+		return (Boolean) doRealExecute(0, sql);
 	}
 
-	public ResultSet executeQuery(String sql) {
-		return (ResultSet) doRealExecute(sql, 1);
+	public ResultSet executeQuery(String... sql) {
+		return (ResultSet) doRealExecute(1, sql);
 	}
 
-	public Integer executeUpdate(String sql) {
-		return (Integer) doRealExecute(sql, 2);
+	public Integer executeUpdate(String... sql) {
+		return (Integer) doRealExecute(2, sql);
 	}
 
-	private Object doRealExecute(String sql, int doWhat) {
-		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+	private Object doRealExecute(int doWhat, String... sqls) {
+		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sqls);
 		DataSource ds = context.getDataSource();
 		Connection con = DataSourceUtils.getConnection(ds);
 		try {
-			PreparedStatement stat = con.prepareStatement(sql);
+			PreparedStatement stat = con.prepareStatement(sp.sql);
 			int index = 1;
 			for (String parameter : sp.parameters) {
 				stat.setString(index++, parameter);
@@ -151,7 +159,7 @@ public class Dao {
 				return stat.executeUpdate();
 			return null;
 		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "SQLHelper exec error, sql=" + sql);
+			SQLBoxUtils.throwEX(e, "SQLHelper exec error, sql=" + sp.sql);
 		} finally {
 			this.cleanCachedSql();
 			DataSourceUtils.releaseConnection(con, ds);
@@ -171,7 +179,7 @@ public class Dao {
 
 	}
 
-	public void fillColumns() {
+	public Dao fillColumns() {
 		BeanInfo beanInfo = null;
 		try {
 			beanInfo = Introspector.getBeanInfo(beanClass);
@@ -194,6 +202,7 @@ public class Dao {
 				columns.put(pd.getName(), column);
 			}
 		}
+		return this;
 	}
 
 	public void save() {
@@ -274,7 +283,6 @@ public class Dao {
 
 	public Dao setContext(SQLBoxContext context) {
 		this.context = context;
-		jdbc = context.getJdbc();
 		return this;
 	}
 	// =============Garbage Getter & Setter code end========
