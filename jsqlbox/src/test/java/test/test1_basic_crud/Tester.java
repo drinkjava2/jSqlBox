@@ -18,6 +18,11 @@ public class Tester {
 		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user4", 40));
 		Dao.dao.execute(
 				"insert " + User.Table + " (" + User.UserName + "," + User.Age + ") values(" + q("user5", 50) + ")");
+		Dao.dao.execute("insert user ", //
+				" (username", e("Andy"), //
+				", address", e("Guanzhou"), //
+				", age)", e("60"), //
+				" values(?,?,?)");
 		Dao.dao.execute("update user set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
 		Dao.dao.execute("update user set username=?,address=? ", e("John", "Shanghai"), " where age=", q(20));
 		Dao.dao.execute("update user set", //
@@ -28,6 +33,7 @@ public class Tester {
 				" username=", q("Jeffery"), //
 				",address=", q("Tianjing"), //
 				" where age=", q(40));
+
 		User user = new User();
 		user.setUsername("user3");
 		user.setAge(70);
@@ -36,8 +42,8 @@ public class Tester {
 	}
 
 	public void tx_batchInsertDemo() {
-		for (int i = 6; i < 10000; i++)
-			Dao.dao.cacheSQL("insert user (username,age) values(?,?)" + e("user" + i, 60));
+		for (int i = 7; i < 100000; i++)
+			Dao.dao.cacheSQL("insert user (username,age) values(?,?)" + e("user" + i, 70));
 		Dao.dao.executeCachedSQLs();
 		System.out.println("tx_batchInsertDemo Done");
 	}
