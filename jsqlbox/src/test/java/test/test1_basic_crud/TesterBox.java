@@ -1,4 +1,4 @@
-package test.example1_basic_crud;
+package test.test1_basic_crud;
 
 import java.util.Properties;
 

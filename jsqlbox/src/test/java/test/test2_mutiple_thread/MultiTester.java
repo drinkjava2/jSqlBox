@@ -1,8 +1,8 @@
-package test.example2_mutiple_thread;
+package test.test2_mutiple_thread;
 
 import com.github.drinkjava2.BeanBox;
 
-import test.example1_basic_crud.Tester;
+import test.test1_basic_crud.Tester;
 
 public class MultiTester {
 

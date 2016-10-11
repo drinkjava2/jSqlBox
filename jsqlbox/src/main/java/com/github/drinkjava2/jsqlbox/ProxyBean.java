@@ -23,24 +23,10 @@ class ProxyBean implements MethodInterceptor {
 		else if ("save".equals(methodname)) {
 			dao.save();
 			return null;
-		} else if ("load".equals(methodname)) {
-			dao.load(args);
-			return null;
-		} else if ("delete".equals(methodname)) {
-			dao.delete(args);
-			return null;
-		} else if ("find".equals(methodname)) {
-			dao.find(args);
-			return null;
 		}
-		if (!dirty)
-			if (methodname.startsWith("set")) {
-				dirty = true;
-				// System.out.println("methodname=" + methodname);
-				// System.out.println("dao=" + dao);
-				// System.out.println("beanClass=" + beanClass);
-				// dao.getContext().poCache.get().put(SQLBoxUtils.findID(obj, dao), obj);
-			}
+		if (!dirty && methodname.startsWith("set")) {
+			dirty = true;
+		}
 		return cgLibMethodProxy.invokeSuper(obj, args);
 	}
 }

@@ -1,4 +1,4 @@
-package test.example1_basic_crud.po;
+package test.test1_basic_crud.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
@@ -11,9 +11,7 @@ public class User {
 	private Dao dao;
 
 	public Dao dao() {
-		if (dao == null)
-			dao = Dao.createDao(this);
-		return dao;
+		return dao == null ? Dao.dao : dao;
 	}
 
 	public void putDao(Dao dao) {

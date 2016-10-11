@@ -15,26 +15,13 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-
-import com.github.drinkjava2.jsqlbox.SQLHelper.SqlAndParameters;
-import com.github.drinkjava2.jsqlbox.jpa.Column;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -42,248 +29,92 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
  * @since 1.0
- * @update 2016-09-28
  */
-@SuppressWarnings("unchecked")
 public class Dao {
-	private Class<?> beanClass;
-	private Object bean;
-	private String tablename;
-	private String id;
+	private SQLBox sqlBox;
+	private JdbcTemplate jdbc;
+	public static final Dao dao = new Dao(SQLBox.defaultSQLBox);
 
-	private HashMap<String, Column> columns = new HashMap<String, Column>();
-	private SQLBoxContext context = SQLBoxContext.defaultContext;
-	public static Dao dao = new Dao().setContext(SQLBoxContext.defaultContext);
-	private JdbcTemplate jdbc = null;
-
-	// ====================== Utils methods begin======================
-	public JdbcTemplate jdbc() {
-		if (jdbc == null) {
-			jdbc = new JdbcTemplate();
-			jdbc.setDataSource(this.getContext().getDataSource());
-		}
-		return jdbc;
+	public Dao(SQLBox sqlBox) {
+		this.sqlBox = sqlBox;
+		this.jdbc = new JdbcTemplate(sqlBox.getContext().getDataSource());
 	}
-
-	public static Dao createDao(Object bean) {
-		return SQLBoxUtils.findDao(bean.getClass(), SQLBoxContext.defaultContext).setBean(bean);
-	}
-
-	public Object findID(Object o, Class<?> poClass) {
-		return null;
-	}
-
-	public <T> T createProxyBean() {
-		return (T) this.context.createProxyBean(beanClass);
-	}
-
-	public static void initialize() {
-		SQLHelper.clearSQLCache();
-	}
-	// ====================== Utils methods end======================
 
 	// ========JdbcTemplate wrap methods begin============
-	private static ThreadLocal<ArrayList<SqlAndParameters>> sqlBatchCache = new ThreadLocal<ArrayList<SqlAndParameters>>() {
-		protected ArrayList<SqlAndParameters> initialValue() {
-			return new ArrayList<SqlAndParameters>();
-		}
-	};
-	private static ThreadLocal<String> sqlForBatch = new ThreadLocal<String>() {
-		protected String initialValue() {
-			return "";
-		}
-	};
-
-	public void cleanCachedSql() {
-		SQLHelper.clearSQLCache();
-		sqlBatchCache.get().clear();
-	}
 
 	public void cacheSQL(String... sql) {
-		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
-		sqlBatchCache.get().add(sp);
-		sqlForBatch.set(sp.sql);
+		SQLHelper.cacheSQL(sql);
 	}
 
-	public void executeCatchedSQLs() {
+	public void executeCachedSQLs() {
 		try {
-			int batchSize = 500;
-			List<List<SqlAndParameters>> subSPlist = SQLBoxUtils.subList(sqlBatchCache.get(), batchSize);
+			List<List<SqlAndParameters>> subSPlist = SQLHelper.getSQLandParameterSubList();
 			for (final List<SqlAndParameters> splist : subSPlist) {
-				jdbc().batchUpdate(sqlForBatch.get(), new BatchPreparedStatementSetter() {
+				jdbc.batchUpdate(SQLHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
+					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						SqlAndParameters sp = splist.get(i);
 						int index = 1;
-						for (String parameter : sp.parameters) {
+						for (String parameter : sp.getParameters()) {
 							ps.setString(index++, parameter);
 						}
 					}
 
+					@Override
 					public int getBatchSize() {
 						return splist.size();
 					}
 				});
 			}
 		} finally {
-			this.cleanCachedSql();
+			SQLHelper.clearBatchSQLs();
 		}
 	}
 
-	public Boolean execute(String... sql) {
-		return (Boolean) doRealExecute(0, sql);
-	}
-
-	public ResultSet executeQuery(String... sql) {
-		return (ResultSet) doRealExecute(1, sql);
-	}
-
-	public Integer executeUpdate(String... sql) {
-		return (Integer) doRealExecute(2, sql);
-	}
-
-	private Object doRealExecute(int doWhat, String... sqls) {
-		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sqls);
-		DataSource ds = context.getDataSource();
-		Connection con = DataSourceUtils.getConnection(ds);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List query(RowMapper rowMapper, String... sql) {
 		try {
-			PreparedStatement stat = con.prepareStatement(sp.sql);
-			int index = 1;
-			for (String parameter : sp.parameters) {
-				stat.setString(index++, parameter);
-			}
-			if (doWhat == 0)
-				return stat.execute();
-			if (doWhat == 1)
-				return stat.executeQuery();
-			if (doWhat == 2)
-				return stat.executeUpdate();
-			return null;
-		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "SQLHelper exec error, sql=" + sp.sql);
+			SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+			return jdbc.query(sp.getSql(), sp.getParameters(), rowMapper);
 		} finally {
-			this.cleanCachedSql();
-			DataSourceUtils.releaseConnection(con, ds);
+			SQLHelper.clearLastSQL();
 		}
-		return false;
+	}
+
+	public Integer execute(String... sql) {
+		try {
+			SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+			return jdbc.update(sp.getSql(), (Object[]) sp.getParameters());
+		} finally {
+			SQLHelper.clearLastSQL();
+		}
 	}
 
 	// ========JdbcTemplate wrap methods end============
 
-	// ====================== CRUD methods begin======================
-
-	public static <T> T get(Object id) {
-		return null;
-	}
-
-	public void fillColumnValues(ArrayList<Column> columns) {
-
-	}
-
-	public Dao fillColumns() {
-		BeanInfo beanInfo = null;
-		try {
-			beanInfo = Introspector.getBeanInfo(beanClass);
-		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "Dao introspector error, beanClass=" + beanClass);
-		}
-		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor pd : pds) {
-			// System.out.println("pd.getName()=" + pd.getName());
-			if (!"class".equals(pd.getName())) {
-				Method md = pd.getReadMethod();
-				Column column = new Column();
-				try {
-					column.setValue(md.invoke(bean, new Object[] {}));
-					// System.out.println("value=" + column.getValue());
-				} catch (Exception e) {
-					SQLBoxUtils.throwEX(e, "Dao introspector error, beanClass=" + beanClass + ", name=" + pd.getName());
-				}
-				column.setPropertyType(pd.getPropertyType());
-				columns.put(pd.getName(), column);
-			}
-		}
-		return this;
-	}
+	// =============== CRUD methods begin ===============
 
 	public void save() {
-		System.out.println("saved");// TODO not finished
-		fillColumns();
-
-		// KeyHolder keyHolder = new GeneratedKeyHolder();
-		// jdbc.update(new PreparedStatementCreator() {
-		// @Override
-		// public PreparedStatement createPreparedStatement(Connection
-		// connection) throws SQLException {
-		// PreparedStatement ps = connection.prepareStatement(
-		// "insert into user(username, address, age) values(?,?,?)", new
-		// String[] { "id" });
-		// ps.setString(1, "123");
-		// ps.setString(2, "456");
-		// ps.setString(3, "50");
-		// return ps;
-		// }
-		// }, keyHolder);
+		//
 	}
 
-	public void load(Object... args) {
-	};
+	// =============== CRUD methods end ===============
 
-	public void delete(Object... args) {
-	};
-
-	public void find(Object... args) {
-	};
-
-	// ====================== CRUD methods end======================
-
-	// =============Garbage Getter & Setter code begin========
-
-	public Object getBean() {
-		return bean;
+	// ================ Getters & Setters===============
+	public JdbcTemplate getJdbc() {
+		return jdbc;
 	}
 
-	public Dao setBean(Object bean) {
-		this.bean = bean;
+	public void setJdbc(JdbcTemplate jdbc) {
+		this.jdbc = jdbc;
+	}
+
+	public SQLBox getSqlBox() {
+		return sqlBox;
+	}
+
+	public Dao setSqlBox(SQLBox sqlBox) {
+		this.sqlBox = sqlBox;
 		return this;
 	}
-
-	public Class<?> getBeanClass() {
-		return beanClass;
-	}
-
-	public Dao setBeanClass(Class<?> beanClass) {
-		this.beanClass = beanClass;
-		return this;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getTablename() {
-		return tablename;
-	}
-
-	public Dao setTablename(String tablename) {
-		this.tablename = tablename;
-		return this;
-	}
-
-	public Column getColumn(String fieldID) {
-		return columns.get(fieldID);
-	};
-
-	public SQLBoxContext getContext() {
-		return context;
-	}
-
-	public Dao setContext(SQLBoxContext context) {
-		this.context = context;
-		return this;
-	}
-	// =============Garbage Getter & Setter code end========
 }
