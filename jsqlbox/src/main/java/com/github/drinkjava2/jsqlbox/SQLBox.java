@@ -34,6 +34,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  */
 public class SQLBox {
 	private Class<?> beanClass;
+	private Object bean;
 	private String tablename;
 	private Map<String, Column> columns = new HashMap<>();
 	private SQLBoxContext context = SQLBoxContext.defaultContext;
@@ -53,6 +54,15 @@ public class SQLBox {
 
 	public SQLBox setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
+		return this;
+	}
+
+	public Object getBean() {
+		return bean;
+	}
+
+	public SQLBox setBean(Object bean) {
+		this.bean = bean;
 		return this;
 	}
 

@@ -40,6 +40,13 @@ public class Dao {
 		this.jdbc = new JdbcTemplate(sqlBox.getContext().getDataSource());
 	}
 
+	public static Dao defaultDao(Object bean) {
+		SQLBox box = new SQLBox(SQLBoxContext.defaultContext);
+		box.setBeanClass(bean.getClass());
+		box.setBean(bean);
+		return new Dao(box);
+	}
+
 	// ========JdbcTemplate wrap methods begin============
 
 	public void cacheSQL(String... sql) {
@@ -95,7 +102,9 @@ public class Dao {
 	// =============== CRUD methods begin ===============
 
 	public void save() {
-		//
+		if (sqlBox.getBeanClass() == null)
+			SQLBoxUtils.throwEX(null, "Dao save error, BeanClass is null");
+		
 	}
 
 	// =============== CRUD methods end ===============

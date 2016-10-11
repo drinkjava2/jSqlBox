@@ -11,7 +11,9 @@ public class User {
 	private Dao dao;
 
 	public Dao dao() {
-		return dao == null ? Dao.dao : dao;
+		if (dao == null)
+			dao = Dao.defaultDao(this);
+		return dao;
 	}
 
 	public void putDao(Dao dao) {

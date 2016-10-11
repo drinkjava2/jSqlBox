@@ -15,7 +15,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 public class TesterBox extends BeanBox {
 	static {
 		SQLBoxContext.defaultContext.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
-		BeanBox.defaultContext.setAOPAround("test.example1_basic_crud.Test\\w*", "tx_\\w*", new TxInterceptorBox(),
+		BeanBox.defaultContext.setAOPAround("test.test1_basic_crud.Test\\w*", "tx_\\w*", new TxInterceptorBox(),
 				"invoke");
 	}
 

@@ -18,17 +18,16 @@ public class Tester {
 		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user4", 40));
 		Dao.dao.execute(
 				"insert " + User.Table + " (" + User.UserName + "," + User.Age + ") values(" + q("user5", 50) + ")");
-		Dao.dao.execute("update user set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(20));
-		Dao.dao.execute("update user set username=?,address=? ", e("John", "Shanghai"), " where age=", q(30));
+		Dao.dao.execute("update user set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
+		Dao.dao.execute("update user set username=?,address=? ", e("John", "Shanghai"), " where age=", q(20));
 		Dao.dao.execute("update user set", //
 				" username=?", e("Peter"), //
 				",address=? ", e("Nanjing"), //
-				" where age=?", e(40));
+				" where age=?", e(30));
 		Dao.dao.execute("update user set", //
 				" username=", q("Jeffery"), //
 				",address=", q("Tianjing"), //
-				" where age=", q(50));
-
+				" where age=", q(40));
 		User user = new User();
 		user.setUsername("user3");
 		user.setAge(70);
