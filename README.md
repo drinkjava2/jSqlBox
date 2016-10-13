@@ -1,14 +1,12 @@
-#jSQLBox
-====
-
+##jSQLBox
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)  
 
 jSQLBox是一个微型的、易学易用的、支持基本的透明持久化的工具，目标是用来代替功能强大但过于复杂的Hibernate以及一些简单的但功能不足的持久层工具如JDBC/JDBCTemplate/MyBatis/DButils/EBean/OpenJPA/jFinal/jActiveRecord/ActiveJDBC/JOOQ等。目前jSQLBox项目正在开发中。
 
-一张图显示jSQLBox项目的定位和开发目标：
+一张对比图显示jSQLBox项目的定位和开发目标：
 ![image](jsqlbox.png)
 
-jSQLBox优点:
+jSQLBox优点:  
 *提供CRUD方法，CRUD占持久层日常~70%的工作量，对一个持久层工具来说是必须提供的基本功能。  
 *无DAO显示注入，将与业务无关的持久层对象从业务代码中剔除。  
 *不重新发明SQL,直接使用原生SQL。  
@@ -32,7 +30,9 @@ jSQLBox缺点:
 *暂无版本检查和二级缓存功能，可能在后续版本中加入  
 *无分页、全文检索等高级功能，需手工实现。  
 
-##(以下为旧的README.md内容，是关于jSQLBox项目最初的一些构思，实际开发中代码已与下文不符，待修正)
+##(以下为旧的README.md内容， 是关于jSQLBox项目最初的一些构思，实际开发中代码已与下文不符，待改正)
+jSQLBox is a micro scale persistence tool based on Active Record design, simpler than Hibernate but more powerful than JDBC/JDBCTemplate/MyBatis/DButils/EBean/OpenJPA/jFinal/jActiveRecord/ActiveJDBC/JOOQ.  
+#(jSQLBox project is in pending, currently only have concept design)  
 
 Other persistence tools' problem:  
 Hibernate: It's a ORM tool, too complicated, the XML or Annotation configurations are fixed, fields definations, "One to Many", "Many to One" relationships are fixed, hard to create/modify/re-use configuations at runtime. For example, can not temporally change configuration at runtime to exclude some fields to avoid lazy loading.  
