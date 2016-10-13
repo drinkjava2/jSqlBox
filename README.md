@@ -3,7 +3,7 @@
 
 jSQLBox是一个微型的、易学易用的、支持基本的透明持久化的工具，目标是用来代替功能强大但过于复杂的Hibernate以及一些简单的但功能不足的持久层工具如JDBC/JDBCTemplate/MyBatis/DButils/EBean/OpenJPA/jFinal/jActiveRecord/ActiveJDBC/JOOQ等。 目前jSQLBox项目正在开发阶段，欢迎有兴趣者加入。
 
-一张对比图显示jSQLBox项目的定位和开发目标：
+一张对比图显示jSQLBox项目的定位和开发目标：(打分仅为个人看法，5分制，X表示不及格, 空着的表示不了解，不好打分）
 ![image](jsqlbox.png)
 
 jSQLBox优点:  
