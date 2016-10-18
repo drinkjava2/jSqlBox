@@ -15,6 +15,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -22,6 +23,8 @@ import java.util.List;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+
+import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -99,12 +102,38 @@ public class Dao {
 
 	// ========JdbcTemplate wrap methods end============
 
-	// =============== CRUD methods begin ===============
+	// ===========utils methods begin==========
 
+	// ===========utils methods end==========
+
+	// =============== CRUD methods begin ===============
+	/**
+	 * 1. find User.class 2. use default bean property to fill column 3. if find
+	 * config, use config value to override column
+	 */
 	public void save() {
-		if (sqlBox.getBeanClass() == null)
-			SQLBoxUtils.throwEX(null, "Dao save error, BeanClass is null");
-		
+		sqlBox.buildDefaultConfig();
+		StringBuilder sb = new StringBuilder();
+		sb.append("insert into ").append(sqlBox.getTablename()).append(" (");
+		sqlBox.getColumns().keySet();
+		int howManyFields = 0;
+		for (Column col : sqlBox.getColumns().values()) {
+			if (!col.isPrimeKey()) {
+				howManyFields++;
+				sb.append(col.getColumnDefinition()).append(",");
+				Method m = col.getReadMethod();
+				Object value = null;
+				try {
+					value = m.invoke(sqlBox.getBean(), new Object[] {});
+				} catch (Exception e) {
+					SQLBoxUtils.throwEX(null, "Dao save error, invoke method wrong.");
+				}
+				SQLHelper.e(value);
+			}
+		}
+		sb.deleteCharAt(sb.length() - 1).append(") ");
+		sb.append(SQLHelper.createValueString(howManyFields));
+		dao.execute(sb.toString()); 
 	}
 
 	// =============== CRUD methods end ===============
@@ -126,4 +155,5 @@ public class Dao {
 		this.sqlBox = sqlBox;
 		return this;
 	}
+
 }

@@ -92,6 +92,21 @@ public class SQLHelper {
 	}
 
 	/**
+	 * Create "value(?,?,?,?)" string by given howManyQuestionMark
+	 */
+	public static String createValueString(int howManyQuestionMark) {
+		StringBuilder sb = new StringBuilder("values(");
+		for (int i = 0; i < howManyQuestionMark; i++) {
+			if (i != howManyQuestionMark - 1)
+				sb.append("?,");
+			else
+				sb.append("?");
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+
+	/**
 	 * SubList a List, divide a list by given blockSize
 	 */
 	private static <T> List<List<T>> subList(List<T> list, int blockSize) {

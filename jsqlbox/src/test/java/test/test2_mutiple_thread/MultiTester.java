@@ -9,7 +9,7 @@ public class MultiTester {
 	public static class MultiThread implements Runnable {
 		public void run() {
 			Tester tester = BeanBox.getBean(Tester.class);
-			tester.tx_batchInsertDemo();
+			tester.tx_BatchInsertDemo();
 		}
 	}
 

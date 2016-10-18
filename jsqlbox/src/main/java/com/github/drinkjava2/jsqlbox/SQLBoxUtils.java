@@ -19,6 +19,7 @@ public class SQLBoxUtils {
 	 * Transfer all Exceptions to RuntimeException. The only place throw Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) {
+		System.out.println(e.getMessage());
 		log.log(Level.SEVERE, errorMsg, e);
 		throw new SQLBoxException(errorMsg);
 	}

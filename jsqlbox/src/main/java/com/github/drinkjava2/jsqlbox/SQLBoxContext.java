@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 public class SQLBoxContext {
 	public static final String SQLBOX_IDENTITY = "Dao";
 	public static final SQLBoxContext defaultContext = new SQLBoxContext(null);
-	private DataSource dataSource;
+	private DataSource dataSource = null;
 	public static final ThreadLocal<HashMap<Object, Object>> poCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
 		protected HashMap<Object, Object> initialValue() {

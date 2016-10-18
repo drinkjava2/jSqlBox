@@ -1,25 +1,56 @@
 package com.github.drinkjava2.jsqlbox.jpa;
 
+import java.lang.reflect.Method;
+
 public class Column {
-	// private String name = "";disable this
+	private String name = "";
 	private boolean unique = false;
 	private boolean nullable = true;
 	private boolean insertable = true;
 	private boolean updatable = true;
-	// private String columnDefinition = ""; disable this
+	private String columnDefinition = "";
 	private int length = 255;
 	private int precision = 0;
 	private int scale = 0;
 	// below fields are for JSQLBox
-	private Class<?> propertyType;
-	private Object value;
+	private boolean primeKey = false;
+	private String foreignKey = "";
 
-	public Object getValue() {
-		return value;
+	private Class<?> propertyType;
+	private Method readMethod = null;
+	private Method writeMethod = null;
+
+	public boolean isPrimeKey() {
+		return primeKey;
 	}
 
-	public void setValue(Object value) {
-		this.value = value;
+	public void setPrimeKey(boolean primeKey) {
+		this.primeKey = primeKey;
+	}
+
+ 
+	public String getForeignKey() {
+		return foreignKey;
+	}
+
+	public void setForeignKey(String foreignKey) {
+		this.foreignKey = foreignKey;
+	}
+
+	public Method getReadMethod() {
+		return readMethod;
+	}
+
+	public void setReadMethod(Method readMethod) {
+		this.readMethod = readMethod;
+	}
+
+	public Method getWriteMethod() {
+		return writeMethod;
+	}
+
+	public void setWriteMethod(Method writeMethod) {
+		this.writeMethod = writeMethod;
 	}
 
 	public Class<?> getPropertyType() {
@@ -32,6 +63,22 @@ public class Column {
 
 	public boolean isUnique() {
 		return unique;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getColumnDefinition() {
+		return columnDefinition;
+	}
+
+	public void setColumnDefinition(String columnDefinition) {
+		this.columnDefinition = columnDefinition;
 	}
 
 	public Column setUnique(boolean unique) {

@@ -20,7 +20,10 @@
 
 package com.github.drinkjava2.jsqlbox;
 
-import java.util.HashMap;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
@@ -36,7 +39,7 @@ public class SQLBox {
 	private Class<?> beanClass;
 	private Object bean;
 	private String tablename;
-	private Map<String, Column> columns = new HashMap<>();
+	private LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
 	private SQLBoxContext context = SQLBoxContext.defaultContext;
 	public static final SQLBox defaultSQLBox = new SQLBox(SQLBoxContext.defaultContext);
 
@@ -78,13 +81,17 @@ public class SQLBox {
 		return columns;
 	}
 
-	public SQLBox setColumns(Map<String, Column> columns) {
+	public SQLBox setColumns(LinkedHashMap<String, Column> columns) {
 		this.columns = columns;
 		return null;
 	}
 
 	public Column getColumn(String fieldID) {
 		return columns.get(fieldID);
+	}
+
+	public void putColumn(String fieldID, Column column) {
+		this.columns.put(fieldID, column);
 	}
 
 	public SQLBoxContext getContext() {
@@ -94,6 +101,34 @@ public class SQLBox {
 	public SQLBox setContext(SQLBoxContext context) {
 		this.context = context;
 		return this;
+	}
+
+	public void buildDefaultConfig() {
+		if (this.getBeanClass() == null)
+			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, BeanClass is null");
+		if (this.getBean() == null)
+			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, Bean is null");
+		BeanInfo beanInfo = null;
+		try {
+			beanInfo = Introspector.getBeanInfo(this.getBeanClass());
+		} catch (Exception e) {
+			SQLBoxUtils.throwEX(e, "Dao fillDefaultProperties error");
+		}
+		this.setTablename(getBeanClass().getSimpleName());
+		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
+		for (PropertyDescriptor pd : pds) {
+			if (!"class".equals(pd.getName())) {
+				Column column = new Column();
+				column.setName(pd.getName());
+				if ("id".equals(pd.getName()))
+					column.setPrimeKey(true);
+				column.setColumnDefinition(pd.getName());
+				column.setPropertyType(pd.getPropertyType());
+				column.setReadMethod(pd.getReadMethod());
+				column.setWriteMethod(pd.getWriteMethod());
+				this.putColumn(pd.getName(), column);
+			}
+		}
 	}
 
 	// ==========static methods=========
