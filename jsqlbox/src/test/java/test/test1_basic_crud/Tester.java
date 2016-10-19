@@ -24,7 +24,7 @@ public class Tester {
 		Dao.dao.execute("insert user (username,age) values(" + q("user2", 20) + ")");
 		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user3") + e(30));
 		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user4", 40));
-		Dao.dao.execute("insert " + User + " (" + UserName + "," + Age + ") values(" + q("user5", 50) + ")");
+		Dao.dao.execute("insert " + USER + " (" + UserName + "," + Age + ") values(" + q("user5", 50) + ")");
 		Dao.dao.execute("insert user ", //
 				" (username", e("Andy"), //
 				", address", e("Guanzhou"), //
@@ -32,6 +32,9 @@ public class Tester {
 				" values(?,?,?)");
 		Dao.dao.execute("update user set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
 		Dao.dao.execute("update user set username=", q("John"), ",address=", q("Shanghai"), " where age=", q(20));
+		Dao.dao.execute("insert user set", //
+				" username=?", e("PeterPeter"), //
+				",address=? ", e("Nanjing")); //
 		Dao.dao.execute("update user set", //
 				" username=?", e("Peter"), //
 				",address=? ", e("Nanjing"), //

@@ -23,6 +23,7 @@ package com.github.drinkjava2.jsqlbox;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -103,6 +104,9 @@ public class SQLBox {
 		return this;
 	}
 
+	/**
+	 * Use default bean field name as database table name and column definitions
+	 */
 	public void buildDefaultConfig() {
 		if (this.getBeanClass() == null)
 			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, BeanClass is null");
@@ -114,6 +118,7 @@ public class SQLBox {
 		} catch (Exception e) {
 			SQLBoxUtils.throwEX(e, "Dao fillDefaultProperties error");
 		}
+		// set Bean class name as database table name
 		this.setTablename(getBeanClass().getSimpleName());
 		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
 		for (PropertyDescriptor pd : pds) {
@@ -129,6 +134,35 @@ public class SQLBox {
 				this.putColumn(pd.getName(), column);
 			}
 		}
+	}
+
+	/**
+	 * Find public static fields to override table name and column definitions
+	 */
+	public void buildBeanConfig() {
+		Field[] fields = this.getBeanClass().getFields();
+		for (Field field : fields) {
+			String fieldname = SQLBoxUtils.toLowerCaseFirstOne(field.getName());
+			Column col = this.getColumn(fieldname);
+			if (col != null)
+				try {
+					col.setColumnDefinition((String) field.get(null));
+				} catch (Exception e) {
+					SQLBoxUtils.throwEX(e, "Dao findBeanConfig error, field=" + fieldname);
+				}
+			else if (SQLBoxUtils.isCapitalAndEqualClassName(fieldname, this.getBeanClass().getSimpleName())) {
+				try {
+					this.setTablename((String) field.get(null));
+				} catch (Exception e) {
+					SQLBoxUtils.throwEX(e, "Dao findBeanConfig error, field=" + fieldname);
+				}
+			}
+		}
+	}
+
+	public void buildConfiguations() {
+		buildDefaultConfig();
+		buildBeanConfig();
 	}
 
 	// ==========static methods=========

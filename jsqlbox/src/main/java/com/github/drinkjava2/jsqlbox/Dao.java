@@ -115,7 +115,6 @@ public class Dao {
 		sqlBox.buildDefaultConfig();
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(sqlBox.getTablename()).append(" (");
-		sqlBox.getColumns().keySet();
 		int howManyFields = 0;
 		for (Column col : sqlBox.getColumns().values()) {
 			if (!col.isPrimeKey()) {
@@ -133,7 +132,7 @@ public class Dao {
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SQLHelper.createValueString(howManyFields));
-		dao.execute(sb.toString()); 
+		this.execute(sb.toString()); 
 	}
 
 	// =============== CRUD methods end ===============

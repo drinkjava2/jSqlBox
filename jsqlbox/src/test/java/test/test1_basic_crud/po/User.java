@@ -1,5 +1,7 @@
 package test.test1_basic_crud.po;
 
+import java.lang.reflect.Field;
+
 import com.github.drinkjava2.jsqlbox.Dao;
 
 /**
@@ -21,7 +23,7 @@ public class User {
 	}
 	// ============= Dao code end =========
 
-	public static String User = "user";
+	public static String USER = "user";
 	public static String Id = "id";
 	private Integer id;
 
@@ -66,10 +68,10 @@ public class User {
 		this.age = age;
 	}
 
-	// public static void main(String[] args) throws Exception {
-	// Field[] fields = User.class.getFields();
-	// for (Field field : fields) {
-	// System.out.println(field.getName() + "=" + field.get(null));
-	// }
-	// }
+	public static void main(String[] args) throws Exception {
+		Field[] fields = User.class.getFields();
+		for (Field field : fields) {
+			System.out.println(field.getName() + "=" + field.get(null));
+		}
+	}
 }
