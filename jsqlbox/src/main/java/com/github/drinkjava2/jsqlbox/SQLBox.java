@@ -24,8 +24,9 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
@@ -40,7 +41,7 @@ public class SQLBox {
 	private Class<?> beanClass;
 	private Object bean;
 	private String tablename;
-	private LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
+	private Map<String, Column> columns = new HashMap<>();
 	private SQLBoxContext context = SQLBoxContext.defaultContext;
 	public static final SQLBox defaultSQLBox = new SQLBox(SQLBoxContext.defaultContext);
 
@@ -82,7 +83,7 @@ public class SQLBox {
 		return columns;
 	}
 
-	public SQLBox setColumns(LinkedHashMap<String, Column> columns) {
+	public SQLBox setColumns(Map<String, Column> columns) {
 		this.columns = columns;
 		return null;
 	}
@@ -113,14 +114,15 @@ public class SQLBox {
 		if (this.getBean() == null)
 			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, Bean is null");
 		BeanInfo beanInfo = null;
+		PropertyDescriptor[] pds = null;
 		try {
 			beanInfo = Introspector.getBeanInfo(this.getBeanClass());
+			pds = beanInfo.getPropertyDescriptors();
 		} catch (Exception e) {
 			SQLBoxUtils.throwEX(e, "Dao fillDefaultProperties error");
 		}
 		// set Bean class name as database table name
 		this.setTablename(getBeanClass().getSimpleName());
-		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
 		for (PropertyDescriptor pd : pds) {
 			if (!"class".equals(pd.getName())) {
 				Column column = new Column();
@@ -142,6 +144,16 @@ public class SQLBox {
 	public void buildBeanConfig() {
 		Field[] fields = this.getBeanClass().getFields();
 		for (Field field : fields) {
+			if (this.getBeanClass() != field.getDeclaringClass())
+				continue;
+			if ("Table".equals(field.getName())) {
+				try {
+					this.setTablename((String) field.get(null));
+					continue;
+				} catch (Exception e) {
+					SQLBoxUtils.throwEX(e, "Dao findBeanConfig error, field=" + field.getName());
+				}
+			}
 			String fieldname = SQLBoxUtils.toLowerCaseFirstOne(field.getName());
 			Column col = this.getColumn(fieldname);
 			if (col != null)
@@ -150,13 +162,6 @@ public class SQLBox {
 				} catch (Exception e) {
 					SQLBoxUtils.throwEX(e, "Dao findBeanConfig error, field=" + fieldname);
 				}
-			else if (SQLBoxUtils.isCapitalAndEqualClassName(fieldname, this.getBeanClass().getSimpleName())) {
-				try {
-					this.setTablename((String) field.get(null));
-				} catch (Exception e) {
-					SQLBoxUtils.throwEX(e, "Dao findBeanConfig error, field=" + fieldname);
-				}
-			}
 		}
 	}
 
@@ -165,5 +170,19 @@ public class SQLBox {
 		buildBeanConfig();
 	}
 
-	// ==========static methods=========
+	public void debug() {
+		Set<String> columnkeys = columns.keySet();
+		for (String fieldname : columnkeys) {
+			Column col = columns.get(fieldname);
+			System.out.println("=============================");
+			System.out.println("fieldname=" + fieldname);
+			System.out.println("getColumnDefinition=" + col.getColumnDefinition());
+			System.out.println("getForeignKey=" + col.getForeignKey());
+			System.out.println("getName=" + col.getName());
+			System.out.println("getPropertyType=" + col.getPropertyType());
+			System.out.println("getReadMethod=" + col.getReadMethod());
+			System.out.println("getWriteMethod=" + col.getWriteMethod());
+			System.out.println("isPrimeKey=" + col.isPrimeKey());
+		}
+	}
 }

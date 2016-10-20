@@ -7,15 +7,21 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.test1_basic_crud.po.User;
-import static test.test1_basic_crud.po.User.*;
+import test.test1_basic_crud.po.User2;
 
 public class Tester {
 	public void tx_CrudDemo() {
 		User user = new User();
-		user.setUsername("Yong");
+		user.setUserName("Yong");
 		user.setAddress("Nanjing");
 		user.setAge(5);
 		user.dao().save();
+
+		User2 user2 = new User2();
+		user2.setUserName("user2");
+		user2.setAddress("Address2");
+		user2.setAge(2);
+		user2.dao().save();
 		System.out.println("tx_CrudDemo Done");
 	}
 
@@ -24,7 +30,7 @@ public class Tester {
 		Dao.dao.execute("insert user (username,age) values(" + q("user2", 20) + ")");
 		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user3") + e(30));
 		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user4", 40));
-		Dao.dao.execute("insert " + USER + " (" + UserName + "," + Age + ") values(" + q("user5", 50) + ")");
+		// Dao.dao.execute("insert " + USER + " (" + UserName + "," + Age + ") values(" + q("user5", 50) + ")");
 		Dao.dao.execute("insert user ", //
 				" (username", e("Andy"), //
 				", address", e("Guanzhou"), //
@@ -56,8 +62,8 @@ public class Tester {
 	public void tx_main() {
 		Dao.dao.execute("delete from user");
 		tx_CrudDemo();
-		tx_JdbcDemo();
-		tx_BatchInsertDemo();
+		// tx_JdbcDemo();
+		// tx_BatchInsertDemo();
 	}
 
 	public static void main(String[] args) {

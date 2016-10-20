@@ -5,7 +5,7 @@ import java.util.HashMap;
 import javax.sql.DataSource;
 
 public class SQLBoxContext {
-	public static final String SQLBOX_IDENTITY = "Dao";
+	public static final String SQLBOX_IDENTITY = "BX";
 	public static final SQLBoxContext defaultContext = new SQLBoxContext(null);
 	private DataSource dataSource = null;
 	public static final ThreadLocal<HashMap<Object, Object>> poCache = new ThreadLocal<HashMap<Object, Object>>() {

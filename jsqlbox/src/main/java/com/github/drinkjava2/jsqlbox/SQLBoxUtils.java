@@ -16,11 +16,9 @@ public class SQLBoxUtils {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException. The only place throw
-	 * Exception in this project
+	 * Transfer all Exceptions to RuntimeException. The only place throw Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) {
-		System.out.println(e.getMessage());
 		log.log(Level.SEVERE, errorMsg, e);
 		throw new SQLBoxException(errorMsg);
 	}
@@ -60,15 +58,6 @@ public class SQLBoxUtils {
 			return s;
 		else
 			return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
-	}
-
-	public static boolean isCapitalAndEqualClassName(String word, String classname) {
-		for (int i = 0; i < word.length(); i++)
-			if (Character.isLowerCase(word.charAt(i)))
-				return false;
-		if (classname.toUpperCase().equals(word))
-			return true;
-		return false;
 	}
 
 }

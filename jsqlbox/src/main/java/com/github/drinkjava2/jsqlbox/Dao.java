@@ -108,11 +108,12 @@ public class Dao {
 
 	// =============== CRUD methods begin ===============
 	/**
-	 * 1. find User.class 2. use default bean property to fill column 3. if find
-	 * config, use config value to override column
+	 * 1. find User.class 2. use default bean property to fill column 3. if find config, use config value to override
+	 * column
 	 */
 	public void save() {
-		sqlBox.buildDefaultConfig();
+		sqlBox.buildConfiguations();
+		sqlBox.debug();
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(sqlBox.getTablename()).append(" (");
 		int howManyFields = 0;
@@ -125,14 +126,14 @@ public class Dao {
 				try {
 					value = m.invoke(sqlBox.getBean(), new Object[] {});
 				} catch (Exception e) {
-					SQLBoxUtils.throwEX(null, "Dao save error, invoke method wrong.");
+					SQLBoxUtils.throwEX(e, "Dao save error, invoke method wrong.");
 				}
 				SQLHelper.e(value);
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SQLHelper.createValueString(howManyFields));
-		this.execute(sb.toString()); 
+		this.execute(sb.toString());
 	}
 
 	// =============== CRUD methods end ===============
