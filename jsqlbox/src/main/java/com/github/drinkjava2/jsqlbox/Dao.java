@@ -112,8 +112,8 @@ public class Dao {
 	 * column
 	 */
 	public void save() {
-		sqlBox.buildConfiguations();
-		sqlBox.debug();
+		sqlBox.buildDefaultConfig();
+		//sqlBox.findConfiguration();
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(sqlBox.getTablename()).append(" (");
 		int howManyFields = 0;

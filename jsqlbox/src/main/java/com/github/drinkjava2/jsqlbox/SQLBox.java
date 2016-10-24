@@ -105,31 +105,59 @@ public class SQLBox {
 		return this;
 	}
 
-	/**
-	 * Use default bean field name as database table name and column definitions
-	 */
 	public void buildDefaultConfig() {
 		if (this.getBeanClass() == null)
 			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, BeanClass is null");
 		if (this.getBean() == null)
 			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, Bean is null");
+		HashMap<String, String> fieldMap = new HashMap<>();
+		Field[] fields = this.getBeanClass().getFields();
+		for (Field field : fields) {
+			if (SQLBoxUtils.isCapitalizedString(field.getName())) {
+				String value = null;
+				try {
+					value = (String) field.get(null);
+				} catch (Exception e) {
+					SQLBoxUtils.logException(e);
+				}
+				fieldMap.put(SQLBoxUtils.toFirstLetterLowerCase(field.getName()), value);
+				if ("Table".equals(field.getName()))
+					this.setTablename(value);
+			}
+		}
+		// fields declared by self
+		fields = this.getBeanClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (SQLBoxUtils.isCapitalizedString(field.getName())) {
+				String value = null;
+				try {
+					value = (String) field.get(null);
+				} catch (Exception e) {
+					SQLBoxUtils.logException(e);
+				}
+				fieldMap.put(SQLBoxUtils.toFirstLetterLowerCase(field.getName()), value);
+				if ("Table".equals(field.getName()))
+					this.setTablename(value);
+			}
+		}
+
 		BeanInfo beanInfo = null;
 		PropertyDescriptor[] pds = null;
 		try {
 			beanInfo = Introspector.getBeanInfo(this.getBeanClass());
 			pds = beanInfo.getPropertyDescriptors();
 		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "Dao fillDefaultProperties error");
+			SQLBoxUtils.throwEX(e, "SQLBox buildDefaultConfig error");
 		}
-		// set Bean class name as database table name
-		this.setTablename(getBeanClass().getSimpleName());
+
 		for (PropertyDescriptor pd : pds) {
-			if (!"class".equals(pd.getName())) {
+			String columnDef = fieldMap.get(pd.getName());
+			if (!SQLBoxUtils.isEmptyStr(columnDef)) {
 				Column column = new Column();
 				column.setName(pd.getName());
 				if ("id".equals(pd.getName()))
 					column.setPrimeKey(true);
-				column.setColumnDefinition(pd.getName());
+				column.setColumnDefinition(columnDef);
 				column.setPropertyType(pd.getPropertyType());
 				column.setReadMethod(pd.getReadMethod());
 				column.setWriteMethod(pd.getWriteMethod());
@@ -138,39 +166,8 @@ public class SQLBox {
 		}
 	}
 
-	/**
-	 * Find public static fields to override table name and column definitions
-	 */
-	public void buildBeanConfig() {
-		Field[] fields = this.getBeanClass().getFields();
-		for (Field field : fields) {
-			if (this.getBeanClass() != field.getDeclaringClass())
-				continue;
-			if ("Table".equals(field.getName())) {
-				try {
-					this.setTablename((String) field.get(null));
-					continue;
-				} catch (Exception e) {
-					SQLBoxUtils.throwEX(e, "Dao findBeanConfig error, field=" + field.getName());
-				}
-			}
-			String fieldname = SQLBoxUtils.toLowerCaseFirstOne(field.getName());
-			Column col = this.getColumn(fieldname);
-			if (col != null)
-				try {
-					col.setColumnDefinition((String) field.get(null));
-				} catch (Exception e) {
-					SQLBoxUtils.throwEX(e, "Dao findBeanConfig error, field=" + fieldname);
-				}
-		}
-	}
-
-	public void buildConfiguations() {
-		buildDefaultConfig();
-		buildBeanConfig();
-	}
-
 	public void debug() {
+		System.out.println("Table=" + this.getTablename());
 		Set<String> columnkeys = columns.keySet();
 		for (String fieldname : columnkeys) {
 			Column col = columns.get(fieldname);

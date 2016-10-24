@@ -53,7 +53,12 @@ public class SQLBoxUtils {
 		return null;
 	}
 
-	public static String toLowerCaseFirstOne(String s) {
+	public static boolean isCapitalizedString(String str) {
+		char c = str.substring(0, 1).toCharArray()[0];
+		return c >= 'A' && c <= 'Z';
+	}
+
+	public static String toFirstLetterLowerCase(String s) {
 		if (Character.isLowerCase(s.charAt(0)))
 			return s;
 		else

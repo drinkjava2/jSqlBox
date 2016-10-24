@@ -28,6 +28,9 @@ public class User {
 	public static final String UserName = "username";
 	private String userName;
 
+	public static final String PhoneNumber = "phone_number";
+	private String phoneNumber;
+
 	public static final String Address = "address";
 	private String address;
 
@@ -48,6 +51,14 @@ public class User {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String getAddress() {

@@ -8,20 +8,32 @@ import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.test1_basic_crud.po.User;
 import test.test1_basic_crud.po.User2;
+import test.test1_basic_crud.po.User3;
 
 public class Tester {
 	public void tx_CrudDemo() {
 		User user = new User();
-		user.setUserName("Yong");
-		user.setAddress("Nanjing");
-		user.setAge(5);
+		user.setUserName("User1");
+		user.setAddress("Address1");
+		user.setPhoneNumber("111-1111111");
+		user.setAge(1);
 		user.dao().save();
 
 		User2 user2 = new User2();
-		user2.setUserName("user2");
+		user2.setUserName("User2");
+		user2.setPhoneNumber("222-2222222");
 		user2.setAddress("Address2");
 		user2.setAge(2);
 		user2.dao().save();
+
+		User3 user3 = new User3();
+		user3.setUserName("User3");
+		user3.setPhoneNumber("333-3333333");
+		user3.setAddress("Address3");
+		user3.setAge(3);
+		user3.dao().save();
+		// user3.dao().getSqlBox().debug();
+
 		System.out.println("tx_CrudDemo Done");
 	}
 
@@ -61,6 +73,8 @@ public class Tester {
 
 	public void tx_main() {
 		Dao.dao.execute("delete from user");
+		Dao.dao.execute("delete from user2");
+		Dao.dao.execute("delete from user3");
 		tx_CrudDemo();
 		// tx_JdbcDemo();
 		// tx_BatchInsertDemo();
