@@ -15,20 +15,17 @@ public class User {
 			dao = Dao.defaultDao(this);
 		return dao;
 	}
-
-	public void putDao(Dao dao) {
-		this.dao = dao;
-	}
 	// ============= Dao code end =========
 
 	public static final String Table = "user";
+
 	public static String Id = "id";
 	private Integer id;
 
-	public static final String UserName = "username";
+	public static final String UserName = "userName";
 	private String userName;
 
-	public static final String PhoneNumber = "phone_number";
+	public static final String PhoneNumber = "phoneNumber";
 	private String phoneNumber;
 
 	public static final String Address = "address";

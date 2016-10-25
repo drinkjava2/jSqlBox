@@ -14,7 +14,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class TesterBox extends BeanBox {
 	static {
-		SQLBoxContext.defaultContext.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
+		SQLBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
 		BeanBox.defaultContext.setAOPAround("test.test1_basic_crud.Test\\w*", "tx_\\w*", new TxInterceptorBox(),
 				"invoke");
 	}
@@ -24,7 +24,7 @@ public class TesterBox extends BeanBox {
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("jdbcUrl",
 					"jdbc:mysql://127.0.0.1:3306/test?user=root&password=root888&rewriteBatchedStatements=true&useSSL=false");
-			setProperty("driverClass", "com.mysql.jdbc.Driver");// change to your jdbc driver name
+			setProperty("driverClass", "com.mysql.jdbc.Driver");
 			setProperty("maxPoolSize", 100);
 			setProperty("CheckoutTimeout", 2000);
 		}

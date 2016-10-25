@@ -36,7 +36,8 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 public class Dao {
 	private SQLBox sqlBox;
 	private JdbcTemplate jdbc;
-	public static final Dao dao = new Dao(SQLBox.defaultSQLBox);
+	private Object bean; // PO Bean Instance
+	public static final Dao dao = new Dao(SQLBox.DEFAULT_SQLBOX);
 
 	public Dao(SQLBox sqlBox) {
 		this.sqlBox = sqlBox;
@@ -44,10 +45,10 @@ public class Dao {
 	}
 
 	public static Dao defaultDao(Object bean) {
-		SQLBox box = new SQLBox(SQLBoxContext.defaultContext);
-		box.setBeanClass(bean.getClass());
-		box.setBean(bean);
-		return new Dao(box);
+		SQLBox box = SQLBoxContext.DEFAULT_SQLBOX_CONTEXT.findAndBuildSQLBox(bean.getClass());
+		Dao doa = new Dao(box);
+		doa.setBean(bean);
+		return doa;
 	}
 
 	// ========JdbcTemplate wrap methods begin============
@@ -108,12 +109,10 @@ public class Dao {
 
 	// =============== CRUD methods begin ===============
 	/**
-	 * 1. find User.class 2. use default bean property to fill column 3. if find config, use config value to override
-	 * column
+	 * 1. find User.class 2. use default bean property to fill column 3. if find
+	 * config, use config value to override column
 	 */
 	public void save() {
-		sqlBox.buildDefaultConfig();
-		//sqlBox.findConfiguration();
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(sqlBox.getTablename()).append(" (");
 		int howManyFields = 0;
@@ -124,7 +123,7 @@ public class Dao {
 				Method m = col.getReadMethod();
 				Object value = null;
 				try {
-					value = m.invoke(sqlBox.getBean(), new Object[] {});
+					value = m.invoke(this.bean, new Object[] {});
 				} catch (Exception e) {
 					SQLBoxUtils.throwEX(e, "Dao save error, invoke method wrong.");
 				}
@@ -139,6 +138,14 @@ public class Dao {
 	// =============== CRUD methods end ===============
 
 	// ================ Getters & Setters===============
+	public Object getBean() {
+		return bean;
+	}
+
+	public void setBean(Object bean) {
+		this.bean = bean;
+	}
+
 	public JdbcTemplate getJdbc() {
 		return jdbc;
 	}

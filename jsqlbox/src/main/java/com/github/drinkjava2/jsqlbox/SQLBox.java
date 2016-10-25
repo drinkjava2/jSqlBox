@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Dedicate this project to my wife Mei, thanks her work hard take care of our family
- */
-
 package com.github.drinkjava2.jsqlbox;
 
 import java.beans.BeanInfo;
@@ -39,11 +35,10 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  */
 public class SQLBox {
 	private Class<?> beanClass;
-	private Object bean;
 	private String tablename;
 	private Map<String, Column> columns = new HashMap<>();
-	private SQLBoxContext context = SQLBoxContext.defaultContext;
-	public static final SQLBox defaultSQLBox = new SQLBox(SQLBoxContext.defaultContext);
+	private SQLBoxContext context = SQLBoxContext.DEFAULT_SQLBOX_CONTEXT;
+	public static final SQLBox DEFAULT_SQLBOX = new SQLBox(SQLBoxContext.DEFAULT_SQLBOX_CONTEXT);
 
 	public SQLBox() {
 		// Default Constructor
@@ -53,21 +48,16 @@ public class SQLBox {
 		this.context = context;
 	}
 
+	public static <T> T get(Class<?> beanOrBoxClass) {
+		return SQLBoxContext.DEFAULT_SQLBOX_CONTEXT.get(beanOrBoxClass);
+	}
+
 	public Class<?> getBeanClass() {
 		return beanClass;
 	}
 
 	public SQLBox setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
-		return this;
-	}
-
-	public Object getBean() {
-		return bean;
-	}
-
-	public SQLBox setBean(Object bean) {
-		this.bean = bean;
 		return this;
 	}
 
@@ -88,6 +78,15 @@ public class SQLBox {
 		return null;
 	}
 
+	public SQLBox setColumnDefinition(String fieldID, String columnDefinition) {
+		Column col = this.getColumn(fieldID);
+		if (col == null)
+			col = new Column();
+		col.setColumnDefinition(columnDefinition);
+		this.getColumns().put(fieldID, col);
+		return this;
+	}
+
 	public Column getColumn(String fieldID) {
 		return columns.get(fieldID);
 	}
@@ -105,14 +104,25 @@ public class SQLBox {
 		return this;
 	}
 
+	public void initialize() {
+		buildDefaultConfig();
+		buildBoxConfiguration();
+	}
+
+	public void buildBoxConfiguration() {
+		SQLBoxUtils.eatException(null);
+	}
+
+	/**
+	 * Use default Bean configuration written in Bean to fill sqlBox
+	 */
 	public void buildDefaultConfig() {
 		if (this.getBeanClass() == null)
 			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, BeanClass is null");
-		if (this.getBean() == null)
-			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, Bean is null");
 		HashMap<String, String> fieldMap = new HashMap<>();
 		Field[] fields = this.getBeanClass().getFields();
-		for (Field field : fields) {
+		for (int i = fields.length - 1; i >= 0; i--) {
+			Field field = fields[i];
 			if (SQLBoxUtils.isCapitalizedString(field.getName())) {
 				String value = null;
 				try {
@@ -125,22 +135,13 @@ public class SQLBox {
 					this.setTablename(value);
 			}
 		}
-		// fields declared by self
-		fields = this.getBeanClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (SQLBoxUtils.isCapitalizedString(field.getName())) {
-				String value = null;
-				try {
-					value = (String) field.get(null);
-				} catch (Exception e) {
-					SQLBoxUtils.logException(e);
-				}
-				fieldMap.put(SQLBoxUtils.toFirstLetterLowerCase(field.getName()), value);
-				if ("Table".equals(field.getName()))
-					this.setTablename(value);
-			}
-		}
+		fillProperties(fieldMap);
+	}
 
+	/**
+	 * Use Introspector to fill column properties
+	 */
+	private void fillProperties(HashMap<String, String> fieldMap) {
 		BeanInfo beanInfo = null;
 		PropertyDescriptor[] pds = null;
 		try {
@@ -149,7 +150,6 @@ public class SQLBox {
 		} catch (Exception e) {
 			SQLBoxUtils.throwEX(e, "SQLBox buildDefaultConfig error");
 		}
-
 		for (PropertyDescriptor pd : pds) {
 			String columnDef = fieldMap.get(pd.getName());
 			if (!SQLBoxUtils.isEmptyStr(columnDef)) {
@@ -167,19 +167,19 @@ public class SQLBox {
 	}
 
 	public void debug() {
-		System.out.println("Table=" + this.getTablename());
+		SQLBoxUtils.debug("Table=" + this.getTablename());
 		Set<String> columnkeys = columns.keySet();
 		for (String fieldname : columnkeys) {
 			Column col = columns.get(fieldname);
-			System.out.println("=============================");
-			System.out.println("fieldname=" + fieldname);
-			System.out.println("getColumnDefinition=" + col.getColumnDefinition());
-			System.out.println("getForeignKey=" + col.getForeignKey());
-			System.out.println("getName=" + col.getName());
-			System.out.println("getPropertyType=" + col.getPropertyType());
-			System.out.println("getReadMethod=" + col.getReadMethod());
-			System.out.println("getWriteMethod=" + col.getWriteMethod());
-			System.out.println("isPrimeKey=" + col.isPrimeKey());
+			SQLBoxUtils.debug("=============================");
+			SQLBoxUtils.debug("fieldname=" + fieldname);
+			SQLBoxUtils.debug("getColumnDefinition=" + col.getColumnDefinition());
+			SQLBoxUtils.debug("getForeignKey=" + col.getForeignKey());
+			SQLBoxUtils.debug("getName=" + col.getName());
+			SQLBoxUtils.debug("getPropertyType=" + col.getPropertyType());
+			SQLBoxUtils.debug("getReadMethod=" + col.getReadMethod());
+			SQLBoxUtils.debug("getWriteMethod=" + col.getWriteMethod());
+			SQLBoxUtils.debug("isPrimeKey=" + col.isPrimeKey());
 		}
 	}
 }
