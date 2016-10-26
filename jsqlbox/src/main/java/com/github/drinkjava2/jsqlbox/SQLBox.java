@@ -22,6 +22,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
@@ -37,6 +38,9 @@ public class SQLBox {
 	private Class<?> beanClass;
 	private String tablename;
 	private Map<String, Column> columns = new HashMap<>();
+	private Map<String, String> configColumns = new HashMap<>();
+	private String overrideTableName;
+
 	private SQLBoxContext context = SQLBoxContext.DEFAULT_SQLBOX_CONTEXT;
 	public static final SQLBox DEFAULT_SQLBOX = new SQLBox(SQLBoxContext.DEFAULT_SQLBOX_CONTEXT);
 
@@ -65,6 +69,10 @@ public class SQLBox {
 		return tablename;
 	}
 
+	public void overrideTableName(String tableName) {
+		overrideTableName = tableName;
+	}
+
 	public void setTablename(String tablename) {
 		this.tablename = tablename;
 	}
@@ -78,12 +86,8 @@ public class SQLBox {
 		return null;
 	}
 
-	public SQLBox setColumnDefinition(String fieldID, String columnDefinition) {
-		Column col = this.getColumn(fieldID);
-		if (col == null)
-			col = new Column();
-		col.setColumnDefinition(columnDefinition);
-		this.getColumns().put(fieldID, col);
+	public SQLBox overrideColumnDefinition(String fieldID, String columnDefinition) {
+		configColumns.put(fieldID, columnDefinition);
 		return this;
 	}
 
@@ -106,11 +110,8 @@ public class SQLBox {
 
 	public void initialize() {
 		buildDefaultConfig();
-		buildBoxConfiguration();
-	}
-
-	public void buildBoxConfiguration() {
-		SQLBoxUtils.eatException(null);
+		automaticCorrectColumnName();
+		changeColumnNameAccordingConfig();
 	}
 
 	/**
@@ -128,7 +129,7 @@ public class SQLBox {
 				try {
 					value = (String) field.get(null);
 				} catch (Exception e) {
-					SQLBoxUtils.logException(e);
+					SQLBoxUtils.throwEX(e, "SQLBox buildDefaultConfig error, can not get field value");
 				}
 				fieldMap.put(SQLBoxUtils.toFirstLetterLowerCase(field.getName()), value);
 				if ("Table".equals(field.getName()))
@@ -136,6 +137,39 @@ public class SQLBox {
 			}
 		}
 		fillProperties(fieldMap);
+	}
+
+	/**
+	 * Override configuration by given SQLBox configuration
+	 */
+	private void changeColumnNameAccordingConfig() {
+		if (!SQLBoxUtils.isEmptyStr(overrideTableName))
+			this.setTablename(overrideTableName);
+		for (Entry<String, String> f : configColumns.entrySet()) {
+			Column col = columns.get(f.getKey());
+			col.setColumnDefinition(f.getValue());
+			if (SQLBoxUtils.isEmptyStr(f.getValue()))
+				columns.remove(f.getKey());
+		}
+	}
+
+	/**
+	 * Correct column name, <br/>
+	 * "userName" field auto correct to "UserName" or "user_name"
+	 */
+	private void automaticCorrectColumnName() {
+		if (!context.existTable(tablename))
+			context.loadTableStructure(tablename);
+		Map<String, Column> _columns = context.getTableStructure(tablename);
+
+		for (Entry<String, Column> entry : columns.entrySet()) {
+			String fieldname = entry.getKey();
+			Column col = entry.getValue();
+			col.getColumnDefinition();
+			//TODO
+
+		}
+
 	}
 
 	/**

@@ -15,8 +15,8 @@ public class Column {
 	// below fields are for JSQLBox
 	private boolean primeKey = false;
 	private String foreignKey = "";
-
 	private Class<?> propertyType;
+	private String propertyTypeName;
 	private Method readMethod = null;
 	private Method writeMethod = null;
 
@@ -28,7 +28,14 @@ public class Column {
 		this.primeKey = primeKey;
 	}
 
- 
+	public String getPropertyTypeName() {
+		return propertyTypeName;
+	}
+
+	public void setPropertyTypeName(String propertyTypeName) {
+		this.propertyTypeName = propertyTypeName;
+	}
+
 	public String getForeignKey() {
 		return foreignKey;
 	}

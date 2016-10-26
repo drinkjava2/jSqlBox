@@ -2,8 +2,15 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
+
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+
+import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
  * @author Yong Zhu (Yong9981@gmail.com)
@@ -17,6 +24,8 @@ public class SQLBoxContext {
 	public static final String SQLBOX_IDENTITY = "BX";
 
 	private DataSource dataSource = null;
+
+	private ConcurrentHashMap<String, Map<String, Column>> databaseStructure = new ConcurrentHashMap<>();
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -88,6 +97,38 @@ public class SQLBoxContext {
 			SQLBoxUtils.logException(e);
 		}
 		return (T) bean;
+	}
+
+	public boolean existTable(String tablename) {
+		return databaseStructure.get(tablename) != null;
+	}
+
+	/**
+	 * Load table MetaData structure for future use
+	 */
+	public void loadTableStructure(String tablename) {
+		Dao dao = new Dao(new SQLBox(this));
+		SqlRowSet rowSet = dao.getJdbc().queryForRowSet("select * from " + tablename + " limit 0");
+		SqlRowSetMetaData metaData = rowSet.getMetaData();
+		if (metaData == null) {
+			databaseStructure.remove(tablename);
+			return;
+		}
+		Map<String, Column> columns = new HashMap<>();
+		int columnCount = metaData.getColumnCount();
+		for (int i = 1; i <= columnCount; i++) {
+			Column col = new Column();
+			col.setColumnDefinition(metaData.getColumnName(i));
+			col.setScale(metaData.getScale(i));
+			col.setPrecision(metaData.getPrecision(i));
+			col.setPropertyTypeName(metaData.getColumnTypeName(i));
+			columns.put(metaData.getColumnName(i), col);
+		}
+		databaseStructure.put(tablename, columns);
+	}
+
+	public Map<String, Column> getTableStructure(String tablename) {
+		return databaseStructure.get(tablename);
 	}
 
 }

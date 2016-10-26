@@ -5,26 +5,26 @@ import static com.github.drinkjava2.jsqlbox.SQLHelper.q;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SQLBox;
 
 import test.test1_basic_crud.po.User;
 
 public class Tester {
 	public void tx_CrudDemo() {
-		User user = new User();
-		user.setUserName("User1");
-		user.setAddress("Address1");
-		user.setPhoneNumber("11111");
-		user.setAge(1);
-		user.dao().save();
+		// User user = new User();
+		// user.setUserName("User1");
+		// user.setAddress("Address1");
+		// user.setPhoneNumber("11111");
+		// user.setAge(1);
+		// user.dao().save();
 
 		//TODO: user2 
-		// User user2 = SQLBox.get(User.class);
-		// user2.setUserName("User2");
-		// user2.setPhoneNumber("222");
-		// user2.setAddress("Address2");
-		// user2.setAge(2);
-		// user2.dao().getSqlBox().debug();
-		// user2.dao().save();
+		 User user2 = SQLBox.get(User.class);
+		 user2.setUserName("User2");
+		 user2.setPhoneNumber("222");
+		 user2.setAddress("Address2");
+		 user2.setAge(2);
+		 user2.dao().save();
 
 		System.out.println("tx_CrudDemo Done");
 	}

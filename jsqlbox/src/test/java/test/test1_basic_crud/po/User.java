@@ -10,6 +10,10 @@ public class User {
 	// ==== have to copy below Dao methods in each entity class:=====
 	private Dao dao;
 
+	public void putDao(Dao dao) {
+		this.dao = dao;
+	}
+
 	public Dao dao() {
 		if (dao == null)
 			dao = Dao.defaultDao(this);
