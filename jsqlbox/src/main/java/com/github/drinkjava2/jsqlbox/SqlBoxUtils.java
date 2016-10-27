@@ -19,7 +19,8 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
+	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only
+	 * place throw Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) {
 		log.log(Level.SEVERE, errorMsg, e);
@@ -45,8 +46,22 @@ public class SqlBoxUtils {
 	/**
 	 * Print message, usually for debug use
 	 */
-	public static void debug(String msg) {
+	public static void print(String msg) {
+		System.out.print(msg); // NOSONAR
+	}
+
+	/**
+	 * Println message, usually for debug use
+	 */
+	public static void println(String msg) {
 		System.out.println(msg); // NOSONAR
+	}
+
+	/**
+	 * Println, usually for debug use
+	 */
+	public static void println() {
+		System.out.println(); // NOSONAR
 	}
 
 	/**

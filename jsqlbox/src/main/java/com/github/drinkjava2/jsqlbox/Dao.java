@@ -60,6 +60,7 @@ public class Dao {
 	public void executeCachedSQLs() {
 		try {
 			List<List<SqlAndParameters>> subSPlist = SqlHelper.getSQLandParameterSubList();
+			printCachedSQL(subSPlist);
 			for (final List<SqlAndParameters> splist : subSPlist) {
 				jdbc.batchUpdate(SqlHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
 					@Override
@@ -86,6 +87,7 @@ public class Dao {
 	public List query(RowMapper rowMapper, String... sql) {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			printSQL(sp);
 			return jdbc.query(sp.getSql(), sp.getParameters(), rowMapper);
 		} finally {
 			SqlHelper.clearLastSQL();
@@ -95,9 +97,56 @@ public class Dao {
 	public Integer execute(String... sql) {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			printSQL(sp);
 			return jdbc.update(sp.getSql(), (Object[]) sp.getParameters());
 		} finally {
 			SqlHelper.clearLastSQL();
+		}
+	}
+
+	/**
+	 * Print SQL and parameters, usually used for debug
+	 */
+	private void printSQL(SqlAndParameters sp) {
+		// check if allowed print SQL
+		if (!this.getSqlBox().getContext().isShowSql())
+			return;
+		SqlBoxUtils.println(sp.getSql());
+		String[] args = sp.getParameters();
+		if (args.length > 0) {
+			SqlBoxUtils.print("Parameters: ");
+			for (int i = 0; i < args.length; i++) {
+				SqlBoxUtils.print(args[i]);
+				if (i != args.length - 1)
+					SqlBoxUtils.print(",");
+				else
+					SqlBoxUtils.println();
+			}
+		}
+		SqlBoxUtils.println();
+	}
+
+	/**
+	 * Print Cached SQL and parameters, usually used for debug
+	 */
+	private void printCachedSQL(List<List<SqlAndParameters>> subSPlist) {
+		if (this.getSqlBox().getContext().isShowSql()) {
+			if (subSPlist != null) {
+				List<SqlAndParameters> l = subSPlist.get(0);
+				if (l != null) {
+					SqlAndParameters sp = l.get(0);
+					SqlBoxUtils.println("First Cached SQL:");
+					printSQL(sp);
+				}
+			}
+			if (subSPlist != null) {
+				List<SqlAndParameters> l = subSPlist.get(subSPlist.size() - 1);
+				if (l != null) {
+					SqlAndParameters sp = l.get(l.size() - 1);
+					SqlBoxUtils.println("Last Cached SQL:");
+					printSQL(sp);
+				}
+			}
 		}
 	}
 
@@ -109,17 +158,26 @@ public class Dao {
 
 	// =============== CRUD methods begin ===============
 	/**
-	 * 1. find User.class 2. use default bean property to fill column 3. if find config, use config value to override
-	 * column
+	 * Insert a Bean to Database
 	 */
 	public void save() {
+		try {
+			doSave();
+		} finally {
+			SqlHelper.clearLastSQL();
+		}
+	}
+
+	/**
+	 * Insert a Bean to Database
+	 */
+	private void doSave() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("insert into ").append(sqlBox.getTablename()).append(" (");
+		sb.append("insert into ").append(sqlBox.getTableName()).append(" (");
 		int howManyFields = 0;
 		for (Column col : sqlBox.getColumns().values()) {
 			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnDefinition())) {
-				howManyFields++;
-				sb.append(col.getColumnDefinition()).append(",");
+
 				Method m = col.getReadMethod();
 				Object value = null;
 				try {
@@ -127,7 +185,11 @@ public class Dao {
 				} catch (Exception e) {
 					SqlBoxUtils.throwEX(e, "Dao save error, invoke method wrong.");
 				}
-				SqlHelper.e(value);
+				if (null != value) {
+					howManyFields++;
+					sb.append(col.getColumnDefinition()).append(",");
+					SqlHelper.e(value);
+				}
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");

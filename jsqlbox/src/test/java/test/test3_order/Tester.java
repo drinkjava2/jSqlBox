@@ -1,4 +1,4 @@
-package test.test1_basic_crud;
+package test.test3_order;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
@@ -16,6 +16,7 @@ public class Tester {
 		user.dao().getSqlBox().setColumnName(User.PhoneNumber, null);
 		user.setPhoneNumber("11111");
 		user.setAge(1);
+		user.dao().getSqlBox().debug();
 		user.dao().save();
 
 		// User user2 = SqlBox.get(User.class);

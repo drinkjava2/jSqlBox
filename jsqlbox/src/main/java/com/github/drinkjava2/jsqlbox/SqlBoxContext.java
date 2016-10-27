@@ -21,11 +21,12 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 public class SqlBoxContext {
 
 	public static final SqlBoxContext DEFAULT_SQLBOX_CONTEXT = new SqlBoxContext(null);
-	public static final String SQLBOX_IDENTITY = "BX";
+	public static final String SQLBOX_IDENTITY = "Other";
 
 	private DataSource dataSource = null;
 
 	private ConcurrentHashMap<String, Map<String, Column>> databaseStructure = new ConcurrentHashMap<>();
+	private boolean showSql = false;// output SQL to console or log
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -44,6 +45,14 @@ public class SqlBoxContext {
 
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	public boolean isShowSql() {
+		return showSql;
+	}
+
+	public void setShowSql(boolean showSql) {
+		this.showSql = showSql;
 	}
 
 	/**
@@ -127,8 +136,8 @@ public class SqlBoxContext {
 		databaseStructure.put(tablename, columns);
 	}
 
-	public Map<String, Column> getTableStructure(String tablename) {
-		return databaseStructure.get(tablename);
+	public Map<String, Column> getTableStructure(String tableName) {
+		return databaseStructure.get(tableName);
 	}
 
 }

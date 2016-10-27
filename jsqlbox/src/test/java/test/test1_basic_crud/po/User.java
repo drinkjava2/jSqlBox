@@ -38,6 +38,17 @@ public class User {
 	public static final String Age = "age";
 	private Integer age;
 
+	public static final String Alive = "alive";
+	private Boolean alive;
+
+	public Boolean getAlive() {
+		return alive;
+	}
+
+	public void setAlive(Boolean alive) {
+		this.alive = alive;
+	}
+
 	public Integer getId() {
 		return id;
 	}

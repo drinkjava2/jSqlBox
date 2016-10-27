@@ -19,132 +19,99 @@ public class Column {
 	private String propertyTypeName;
 	private Method readMethod = null;
 	private Method writeMethod = null;
-
-	public boolean isPrimeKey() {
-		return primeKey;
-	}
-
-	public void setPrimeKey(boolean primeKey) {
-		this.primeKey = primeKey;
-	}
-
-	public String getPropertyTypeName() {
-		return propertyTypeName;
-	}
-
-	public void setPropertyTypeName(String propertyTypeName) {
-		this.propertyTypeName = propertyTypeName;
-	}
-
-	public String getForeignKey() {
-		return foreignKey;
-	}
-
-	public void setForeignKey(String foreignKey) {
-		this.foreignKey = foreignKey;
-	}
-
-	public Method getReadMethod() {
-		return readMethod;
-	}
-
-	public void setReadMethod(Method readMethod) {
-		this.readMethod = readMethod;
-	}
-
-	public Method getWriteMethod() {
-		return writeMethod;
-	}
-
-	public void setWriteMethod(Method writeMethod) {
-		this.writeMethod = writeMethod;
-	}
-
-	public Class<?> getPropertyType() {
-		return propertyType;
-	}
-
-	public void setPropertyType(Class<?> propertyType) {
-		this.propertyType = propertyType;
-	}
-
-	public boolean isUnique() {
-		return unique;
-	}
-
+	
+	
+	
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public String getColumnDefinition() {
-		return columnDefinition;
+	public boolean isUnique() {
+		return unique;
 	}
-
-	public void setColumnDefinition(String columnDefinition) {
-		this.columnDefinition = columnDefinition;
-	}
-
-	public Column setUnique(boolean unique) {
+	public void setUnique(boolean unique) {
 		this.unique = unique;
-		return this;
 	}
-
 	public boolean isNullable() {
 		return nullable;
 	}
-
-	public Column setNullable(boolean nullable) {
+	public void setNullable(boolean nullable) {
 		this.nullable = nullable;
-		return this;
 	}
-
 	public boolean isInsertable() {
 		return insertable;
 	}
-
-	public Column setInsertable(boolean insertable) {
+	public void setInsertable(boolean insertable) {
 		this.insertable = insertable;
-		return this;
 	}
-
 	public boolean isUpdatable() {
 		return updatable;
 	}
-
-	public Column setUpdatable(boolean updatable) {
+	public void setUpdatable(boolean updatable) {
 		this.updatable = updatable;
-		return this;
 	}
-
+	public String getColumnDefinition() {
+		return columnDefinition;
+	}
+	public void setColumnDefinition(String columnDefinition) {
+		this.columnDefinition = columnDefinition;
+	}
 	public int getLength() {
 		return length;
 	}
-
-	public Column setLength(int length) {
+	public void setLength(int length) {
 		this.length = length;
-		return this;
 	}
-
 	public int getPrecision() {
 		return precision;
 	}
-
-	public Column setPrecision(int precision) {
+	public void setPrecision(int precision) {
 		this.precision = precision;
-		return this;
 	}
-
 	public int getScale() {
 		return scale;
 	}
-
-	public Column setScale(int scale) {
+	public void setScale(int scale) {
 		this.scale = scale;
-		return this;
 	}
+	public boolean isPrimeKey() {
+		return primeKey;
+	}
+	public void setPrimeKey(boolean primeKey) {
+		this.primeKey = primeKey;
+	}
+	public String getForeignKey() {
+		return foreignKey;
+	}
+	public void setForeignKey(String foreignKey) {
+		this.foreignKey = foreignKey;
+	}
+	public Class<?> getPropertyType() {
+		return propertyType;
+	}
+	public void setPropertyType(Class<?> propertyType) {
+		this.propertyType = propertyType;
+	}
+	public String getPropertyTypeName() {
+		return propertyTypeName;
+	}
+	public void setPropertyTypeName(String propertyTypeName) {
+		this.propertyTypeName = propertyTypeName;
+	}
+	public Method getReadMethod() {
+		return readMethod;
+	}
+	public void setReadMethod(Method readMethod) {
+		this.readMethod = readMethod;
+	}
+	public Method getWriteMethod() {
+		return writeMethod;
+	}
+	public void setWriteMethod(Method writeMethod) {
+		this.writeMethod = writeMethod;
+	}
+ 
 
 }
