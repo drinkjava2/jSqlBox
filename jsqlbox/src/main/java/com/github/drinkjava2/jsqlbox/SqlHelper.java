@@ -4,7 +4,7 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLHelper {
+public class SqlHelper {
 	private static ThreadLocal<ArrayList<String>> sqlCache = new ThreadLocal<ArrayList<String>>() {
 		@Override
 		protected ArrayList<String> initialValue() {
@@ -25,7 +25,7 @@ public class SQLHelper {
 		}
 	};
 
-	private SQLHelper() {
+	private SqlHelper() {
 	}
 
 	public static ThreadLocal<ArrayList<String>> getSqlCache() {
@@ -41,7 +41,7 @@ public class SQLHelper {
 	}
 
 	public static void cacheSQL(String... sql) {
-		SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+		SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 		sqlBatchCache.get().add(sp);
 		sqlBatchString.set(sp.getSql());
 	}

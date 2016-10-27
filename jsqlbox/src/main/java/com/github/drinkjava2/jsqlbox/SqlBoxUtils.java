@@ -4,11 +4,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SQLBoxUtils {
-	private static final Logger log = Logger.getLogger(SQLBoxUtils.class.toString());
+public class SqlBoxUtils {
+	private static final Logger log = Logger.getLogger(SqlBoxUtils.class.toString());
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<>();
 
-	private SQLBoxUtils() {
+	private SqlBoxUtils() {
 	}
 
 	/**
@@ -19,12 +19,11 @@ public class SQLBoxUtils {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException SQLBoxException. The only
-	 * place throw Exception in this project
+	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) {
 		log.log(Level.SEVERE, errorMsg, e);
-		throw new SQLBoxException(errorMsg);
+		throw new SqlBoxException(errorMsg);
 	}
 
 	/**
@@ -53,19 +52,19 @@ public class SQLBoxUtils {
 	/**
 	 * Check class if exist
 	 */
-	public static Class<?> checkSQLBoxClassExist(String className) {
+	public static Class<?> checkSqlBoxClassExist(String className) {
 		Integer i = classExistCache.get(className);
 		if (i == null)
 			try {
 				Class<?> clazz = Class.forName(className);
-				if (SQLBox.class.isAssignableFrom((Class<?>) clazz)) {
+				if (SqlBox.class.isAssignableFrom((Class<?>) clazz)) {
 					classExistCache.put(className, 1);
 					return clazz;
 				}
 				classExistCache.put(className, 0);
 				return null;
 			} catch (Exception e) {
-				SQLBoxUtils.eatException(e);
+				SqlBoxUtils.eatException(e);
 				classExistCache.put(className, 0);
 				return null;
 			}
@@ -97,4 +96,21 @@ public class SQLBoxUtils {
 			return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
 	}
 
+	/**
+	 * Camel string change to lower case underline string, "AbcDef" to "abc_def"
+	 */
+	public static String camelToLowerCaseUnderline(String name) {
+		StringBuilder sb = new StringBuilder();
+		if (name != null && name.length() > 0) {
+			sb.append(name.substring(0, 1).toLowerCase());
+			for (int i = 1; i < name.length(); i++) {
+				String s = name.substring(i, i + 1);
+				char c = s.substring(0, 1).toCharArray()[0];
+				if (c >= 'A' && c <= 'Z')
+					sb.append("_");
+				sb.append(s.toLowerCase());
+			}
+		}
+		return sb.toString();
+	}
 }

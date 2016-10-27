@@ -1,30 +1,38 @@
 package test.test1_basic_crud;
 
-import static com.github.drinkjava2.jsqlbox.SQLHelper.e;
-import static com.github.drinkjava2.jsqlbox.SQLHelper.q;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.SQLBox;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.test1_basic_crud.po.User;
+import test.test1_basic_crud.po.User2;
 
 public class Tester {
 	public void tx_CrudDemo() {
-		// User user = new User();
-		// user.setUserName("User1");
-		// user.setAddress("Address1");
-		// user.setPhoneNumber("11111");
-		// user.setAge(1);
-		// user.dao().save();
+		User user = new User();
+		user.setUserName("User1");
+		user.setAddress("Address1");
+		user.dao().getSqlBox().setColumnName(User.PhoneNumber, null);
+		user.setPhoneNumber("11111");
+		user.setAge(1);
+		user.dao().save();
 
-		//TODO: user2 
-		 User user2 = SQLBox.get(User.class);
-		 user2.setUserName("User2");
-		 user2.setPhoneNumber("222");
-		 user2.setAddress("Address2");
-		 user2.setAge(2);
-		 user2.dao().save();
+		User user2 = SqlBox.get(User.class);
+		user2.setUserName("User2");
+		user2.setPhoneNumber("222");
+		user2.setAddress("Address2");
+		user2.setAge(2);
+		user2.dao().save();
+
+		User2 u2 = new User2();
+		u2.setUserName("u2");
+		u2.setAddress("a2");
+		u2.setPhoneNumber("u2");
+		u2.setAge(22);
+		u2.dao().save();
 
 		System.out.println("tx_CrudDemo Done");
 	}

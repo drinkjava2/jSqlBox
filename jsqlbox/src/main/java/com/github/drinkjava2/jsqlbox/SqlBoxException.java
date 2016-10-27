@@ -1,14 +1,14 @@
 
 package com.github.drinkjava2.jsqlbox;
 
-public class SQLBoxException extends RuntimeException {
+public class SqlBoxException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	public SQLBoxException() {
+	public SqlBoxException() {
 		// Default public constructor
 	}
 
-	public SQLBoxException(String message) {
+	public SqlBoxException(String message) {
 		super(message);
 	}
 }

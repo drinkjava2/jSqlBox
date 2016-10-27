@@ -34,18 +34,18 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * @since 1.0
  */
 public class Dao {
-	private SQLBox sqlBox;
+	private SqlBox sqlBox;
 	private JdbcTemplate jdbc;
 	private Object bean; // PO Bean Instance
-	public static final Dao dao = new Dao(SQLBox.DEFAULT_SQLBOX);
+	public static final Dao dao = new Dao(SqlBox.DEFAULT_SQLBOX);
 
-	public Dao(SQLBox sqlBox) {
+	public Dao(SqlBox sqlBox) {
 		this.sqlBox = sqlBox;
 		this.jdbc = new JdbcTemplate(sqlBox.getContext().getDataSource());
 	}
 
 	public static Dao defaultDao(Object bean) {
-		SQLBox box = SQLBoxContext.DEFAULT_SQLBOX_CONTEXT.findAndBuildSQLBox(bean.getClass());
+		SqlBox box = SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.findAndBuildSqlBox(bean.getClass());
 		Dao doa = new Dao(box);
 		doa.setBean(bean);
 		return doa;
@@ -54,14 +54,14 @@ public class Dao {
 	// ========JdbcTemplate wrap methods begin============
 
 	public void cacheSQL(String... sql) {
-		SQLHelper.cacheSQL(sql);
+		SqlHelper.cacheSQL(sql);
 	}
 
 	public void executeCachedSQLs() {
 		try {
-			List<List<SqlAndParameters>> subSPlist = SQLHelper.getSQLandParameterSubList();
+			List<List<SqlAndParameters>> subSPlist = SqlHelper.getSQLandParameterSubList();
 			for (final List<SqlAndParameters> splist : subSPlist) {
-				jdbc.batchUpdate(SQLHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
+				jdbc.batchUpdate(SqlHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						SqlAndParameters sp = splist.get(i);
@@ -78,26 +78,26 @@ public class Dao {
 				});
 			}
 		} finally {
-			SQLHelper.clearBatchSQLs();
+			SqlHelper.clearBatchSQLs();
 		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List query(RowMapper rowMapper, String... sql) {
 		try {
-			SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			return jdbc.query(sp.getSql(), sp.getParameters(), rowMapper);
 		} finally {
-			SQLHelper.clearLastSQL();
+			SqlHelper.clearLastSQL();
 		}
 	}
 
 	public Integer execute(String... sql) {
 		try {
-			SqlAndParameters sp = SQLHelper.splitSQLandParameters(sql);
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			return jdbc.update(sp.getSql(), (Object[]) sp.getParameters());
 		} finally {
-			SQLHelper.clearLastSQL();
+			SqlHelper.clearLastSQL();
 		}
 	}
 
@@ -109,15 +109,15 @@ public class Dao {
 
 	// =============== CRUD methods begin ===============
 	/**
-	 * 1. find User.class 2. use default bean property to fill column 3. if find
-	 * config, use config value to override column
+	 * 1. find User.class 2. use default bean property to fill column 3. if find config, use config value to override
+	 * column
 	 */
 	public void save() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(sqlBox.getTablename()).append(" (");
 		int howManyFields = 0;
 		for (Column col : sqlBox.getColumns().values()) {
-			if (!col.isPrimeKey()) {
+			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnDefinition())) {
 				howManyFields++;
 				sb.append(col.getColumnDefinition()).append(",");
 				Method m = col.getReadMethod();
@@ -125,13 +125,13 @@ public class Dao {
 				try {
 					value = m.invoke(this.bean, new Object[] {});
 				} catch (Exception e) {
-					SQLBoxUtils.throwEX(e, "Dao save error, invoke method wrong.");
+					SqlBoxUtils.throwEX(e, "Dao save error, invoke method wrong.");
 				}
-				SQLHelper.e(value);
+				SqlHelper.e(value);
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
-		sb.append(SQLHelper.createValueString(howManyFields));
+		sb.append(SqlHelper.createValueString(howManyFields));
 		this.execute(sb.toString());
 	}
 
@@ -154,11 +154,11 @@ public class Dao {
 		this.jdbc = jdbc;
 	}
 
-	public SQLBox getSqlBox() {
+	public SqlBox getSqlBox() {
 		return sqlBox;
 	}
 
-	public Dao setSqlBox(SQLBox sqlBox) {
+	public Dao setSqlBox(SqlBox sqlBox) {
 		this.sqlBox = sqlBox;
 		return this;
 	}

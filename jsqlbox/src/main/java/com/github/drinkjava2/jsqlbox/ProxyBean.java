@@ -15,7 +15,8 @@ class ProxyBean implements MethodInterceptor {
 		this.beanClass = beanClass;
 		this.dao = dao;
 	}
-
+ 
+	@Override
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy cgLibMethodProxy) throws Throwable {
 		String methodname = method.getName();
 		if ("dao".equals(methodname))

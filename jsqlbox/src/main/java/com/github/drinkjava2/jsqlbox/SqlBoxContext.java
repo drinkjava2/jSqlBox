@@ -18,9 +18,9 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * @since 1.0
  */
 @SuppressWarnings("unchecked")
-public class SQLBoxContext {
+public class SqlBoxContext {
 
-	public static final SQLBoxContext DEFAULT_SQLBOX_CONTEXT = new SQLBoxContext(null);
+	public static final SqlBoxContext DEFAULT_SQLBOX_CONTEXT = new SqlBoxContext(null);
 	public static final String SQLBOX_IDENTITY = "BX";
 
 	private DataSource dataSource = null;
@@ -34,7 +34,7 @@ public class SQLBoxContext {
 		}
 	};
 
-	public SQLBoxContext(DataSource dataSource) {
+	public SqlBoxContext(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
@@ -47,33 +47,33 @@ public class SQLBoxContext {
 	}
 
 	/**
-	 * Find and create a SQLBox instance according bean class or SQLBox Class
+	 * Find and create a SqlBox instance according bean class or SqlBox Class
 	 */
-	protected SQLBox findAndBuildSQLBox(Class<?> beanOrSQLBoxClass) {
+	protected SqlBox findAndBuildSqlBox(Class<?> beanOrSqlBoxClass) {
 		Class<?> boxClass = null;
-		if (beanOrSQLBoxClass == null) {
-			SQLBoxUtils.throwEX(null, "SQLBoxContext findAndBuildSQLBox error! Bean Or SQLBox Class not set");
+		if (beanOrSqlBoxClass == null) {
+			SqlBoxUtils.throwEX(null, "SqlBoxContext findAndBuildSqlBox error! Bean Or SqlBox Class not set");
 			return null;
 		}
-		if (SQLBox.class.isAssignableFrom(beanOrSQLBoxClass))
-			boxClass = beanOrSQLBoxClass;
+		if (SqlBox.class.isAssignableFrom(beanOrSqlBoxClass))
+			boxClass = beanOrSqlBoxClass;
 		if (boxClass == null)
-			boxClass = SQLBoxUtils.checkSQLBoxClassExist(beanOrSQLBoxClass.getName() + SQLBOX_IDENTITY);
+			boxClass = SqlBoxUtils.checkSqlBoxClassExist(beanOrSqlBoxClass.getName() + SQLBOX_IDENTITY);
 		if (boxClass == null)
-			boxClass = SQLBoxUtils.checkSQLBoxClassExist(
-					beanOrSQLBoxClass.getName() + "$" + beanOrSQLBoxClass.getSimpleName() + SQLBOX_IDENTITY);
-		SQLBox box = null;
+			boxClass = SqlBoxUtils.checkSqlBoxClassExist(
+					beanOrSqlBoxClass.getName() + "$" + beanOrSqlBoxClass.getSimpleName() + SQLBOX_IDENTITY);
+		SqlBox box = null;
 		if (boxClass == null) {
-			box = new SQLBox(this);
-			box.setBeanClass(beanOrSQLBoxClass);
+			box = new SqlBox(this);
+			box.setBeanClass(beanOrSqlBoxClass);
 		} else {
 			try {
-				box = (SQLBox) boxClass.newInstance();
+				box = (SqlBox) boxClass.newInstance();
 				if (box.getBeanClass() == null)
-					box.setBeanClass(beanOrSQLBoxClass);
+					box.setBeanClass(beanOrSqlBoxClass);
 				box.setContext(this);
 			} catch (Exception e) {
-				SQLBoxUtils.throwEX(e, "SQLBoxContext findAndBuildSQLBox error! Can not create SQLBox instance");
+				SqlBoxUtils.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
 			}
 		}
 		if (box != null)
@@ -84,8 +84,8 @@ public class SQLBoxContext {
 	/**
 	 * create a PO bean instance
 	 */
-	public <T> T get(Class<?> beanOrSQLBoxClass) {
-		SQLBox box = findAndBuildSQLBox(beanOrSQLBoxClass);
+	public <T> T get(Class<?> beanOrSqlBoxClass) {
+		SqlBox box = findAndBuildSqlBox(beanOrSqlBoxClass);
 		Object bean = null;
 		try {
 			bean = box.getBeanClass().newInstance();
@@ -94,7 +94,7 @@ public class SQLBoxContext {
 			Method m = box.getBeanClass().getMethod("putDao", new Class[] { Dao.class });
 			m.invoke(bean, new Object[] { dao });
 		} catch (Exception e) {
-			SQLBoxUtils.logException(e);
+			SqlBoxUtils.logException(e);
 		}
 		return (T) bean;
 	}
@@ -104,10 +104,10 @@ public class SQLBoxContext {
 	}
 
 	/**
-	 * Load table MetaData structure for future use
+	 * Cache table MetaData for future use, use lower case column name as key
 	 */
 	public void loadTableStructure(String tablename) {
-		Dao dao = new Dao(new SQLBox(this));
+		Dao dao = new Dao(new SqlBox(this));
 		SqlRowSet rowSet = dao.getJdbc().queryForRowSet("select * from " + tablename + " limit 0");
 		SqlRowSetMetaData metaData = rowSet.getMetaData();
 		if (metaData == null) {
@@ -122,7 +122,7 @@ public class SQLBoxContext {
 			col.setScale(metaData.getScale(i));
 			col.setPrecision(metaData.getPrecision(i));
 			col.setPropertyTypeName(metaData.getColumnTypeName(i));
-			columns.put(metaData.getColumnName(i), col);
+			columns.put(metaData.getColumnName(i).toLowerCase(), col);
 		}
 		databaseStructure.put(tablename, columns);
 	}

@@ -28,39 +28,39 @@ import java.util.Set;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
- * jSQLBox is a macro scale persistence tool for Java 7 and above.
+ * jSqlBox is a macro scale persistence tool for Java 7 and above.
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
  * @since 1.0
  */
-public class SQLBox {
+public class SqlBox {
 	private Class<?> beanClass;
 	private String tablename;
 	private Map<String, Column> columns = new HashMap<>();
 	private Map<String, String> configColumns = new HashMap<>();
 	private String overrideTableName;
 
-	private SQLBoxContext context = SQLBoxContext.DEFAULT_SQLBOX_CONTEXT;
-	public static final SQLBox DEFAULT_SQLBOX = new SQLBox(SQLBoxContext.DEFAULT_SQLBOX_CONTEXT);
+	private SqlBoxContext context = SqlBoxContext.DEFAULT_SQLBOX_CONTEXT;
+	public static final SqlBox DEFAULT_SQLBOX = new SqlBox(SqlBoxContext.DEFAULT_SQLBOX_CONTEXT);
 
-	public SQLBox() {
+	public SqlBox() {
 		// Default Constructor
 	}
 
-	public SQLBox(SQLBoxContext context) {
+	public SqlBox(SqlBoxContext context) {
 		this.context = context;
 	}
 
 	public static <T> T get(Class<?> beanOrBoxClass) {
-		return SQLBoxContext.DEFAULT_SQLBOX_CONTEXT.get(beanOrBoxClass);
+		return SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.get(beanOrBoxClass);
 	}
 
 	public Class<?> getBeanClass() {
 		return beanClass;
 	}
 
-	public SQLBox setBeanClass(Class<?> beanClass) {
+	public SqlBox setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
 		return this;
 	}
@@ -81,13 +81,16 @@ public class SQLBox {
 		return columns;
 	}
 
-	public SQLBox setColumns(Map<String, Column> columns) {
+	public SqlBox setColumns(Map<String, Column> columns) {
 		this.columns = columns;
 		return null;
 	}
 
-	public SQLBox overrideColumnDefinition(String fieldID, String columnDefinition) {
+	public SqlBox setColumnName(String fieldID, String columnDefinition) {
 		configColumns.put(fieldID, columnDefinition);
+		Column col=columns.get(fieldID);
+		if (col != null)
+			col.setColumnDefinition(columnDefinition);
 		return this;
 	}
 
@@ -99,39 +102,40 @@ public class SQLBox {
 		this.columns.put(fieldID, column);
 	}
 
-	public SQLBoxContext getContext() {
+	public SqlBoxContext getContext() {
 		return context;
 	}
 
-	public SQLBox setContext(SQLBoxContext context) {
+	public SqlBox setContext(SqlBoxContext context) {
 		this.context = context;
 		return this;
 	}
 
 	public void initialize() {
 		buildDefaultConfig();
-		automaticCorrectColumnName();
 		changeColumnNameAccordingConfig();
+		automaticFitColumnName();
 	}
 
 	/**
-	 * Use default Bean configuration written in Bean to fill sqlBox
+	 * Use default Bean configuration written in Bean to fill sqlBox<br/>
+	 * Field name will be used as database table column name
 	 */
 	public void buildDefaultConfig() {
 		if (this.getBeanClass() == null)
-			SQLBoxUtils.throwEX(null, "SQLBox buildDefaultConfig error, BeanClass is null");
+			SqlBoxUtils.throwEX(null, "SqlBox buildDefaultConfig error, BeanClass is null");
 		HashMap<String, String> fieldMap = new HashMap<>();
 		Field[] fields = this.getBeanClass().getFields();
 		for (int i = fields.length - 1; i >= 0; i--) {
 			Field field = fields[i];
-			if (SQLBoxUtils.isCapitalizedString(field.getName())) {
+			if (SqlBoxUtils.isCapitalizedString(field.getName())) {
 				String value = null;
 				try {
 					value = (String) field.get(null);
 				} catch (Exception e) {
-					SQLBoxUtils.throwEX(e, "SQLBox buildDefaultConfig error, can not get field value");
+					SqlBoxUtils.throwEX(e, "SqlBox buildDefaultConfig error, can not get field value");
 				}
-				fieldMap.put(SQLBoxUtils.toFirstLetterLowerCase(field.getName()), value);
+				fieldMap.put(SqlBoxUtils.toFirstLetterLowerCase(field.getName()), value);
 				if ("Table".equals(field.getName()))
 					this.setTablename(value);
 			}
@@ -140,36 +144,44 @@ public class SQLBox {
 	}
 
 	/**
-	 * Override configuration by given SQLBox configuration
+	 * Override configuration by given SqlBox configuration
 	 */
 	private void changeColumnNameAccordingConfig() {
-		if (!SQLBoxUtils.isEmptyStr(overrideTableName))
+		if (!SqlBoxUtils.isEmptyStr(overrideTableName))
 			this.setTablename(overrideTableName);
 		for (Entry<String, String> f : configColumns.entrySet()) {
 			Column col = columns.get(f.getKey());
 			col.setColumnDefinition(f.getValue());
-			if (SQLBoxUtils.isEmptyStr(f.getValue()))
+			if (SqlBoxUtils.isEmptyStr(f.getValue()))
 				columns.remove(f.getKey());
 		}
 	}
 
 	/**
-	 * Correct column name, <br/>
-	 * "userName" field auto correct to "UserName" or "user_name"
+	 * Correct column name, for "userName" field <br/>
+	 * 1. Check if exist column key "username" in cached table structure<br/>
+	 * 2. If not found, check and correct to "user_name"<br/>
+	 * 3. if not found or found both, throw SqlBoxException
 	 */
-	private void automaticCorrectColumnName() {
+	private void automaticFitColumnName() {
 		if (!context.existTable(tablename))
 			context.loadTableStructure(tablename);
-		Map<String, Column> _columns = context.getTableStructure(tablename);
+		Map<String, Column> databaseColumns = context.getTableStructure(tablename);
 
 		for (Entry<String, Column> entry : columns.entrySet()) {
-			String fieldname = entry.getKey();
 			Column col = entry.getValue();
-			col.getColumnDefinition();
-			//TODO
-
+			String columnName = col.getColumnDefinition();
+			if (!SqlBoxUtils.isEmptyStr(columnName)) {
+				String lowerCase = columnName.toLowerCase();
+				String lowerCaseUnderline = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
+				if (databaseColumns.get(lowerCase) == null && databaseColumns.get(lowerCaseUnderline) == null)
+					SqlBoxUtils.throwEX(null, "SqlBox automaticFitColumnName error, in table " + tablename
+							+ ", column defination " + columnName + " does match any table column");
+				if (!lowerCase.equals(lowerCaseUnderline) && databaseColumns.get(lowerCase) == null
+						&& databaseColumns.get(lowerCaseUnderline) != null)
+					col.setColumnDefinition(lowerCaseUnderline);
+			}
 		}
-
 	}
 
 	/**
@@ -182,11 +194,11 @@ public class SQLBox {
 			beanInfo = Introspector.getBeanInfo(this.getBeanClass());
 			pds = beanInfo.getPropertyDescriptors();
 		} catch (Exception e) {
-			SQLBoxUtils.throwEX(e, "SQLBox buildDefaultConfig error");
+			SqlBoxUtils.throwEX(e, "SqlBox buildDefaultConfig error");
 		}
 		for (PropertyDescriptor pd : pds) {
 			String columnDef = fieldMap.get(pd.getName());
-			if (!SQLBoxUtils.isEmptyStr(columnDef)) {
+			if (!SqlBoxUtils.isEmptyStr(columnDef)) {
 				Column column = new Column();
 				column.setName(pd.getName());
 				if ("id".equals(pd.getName()))
@@ -201,19 +213,19 @@ public class SQLBox {
 	}
 
 	public void debug() {
-		SQLBoxUtils.debug("Table=" + this.getTablename());
+		SqlBoxUtils.debug("Table=" + this.getTablename());
 		Set<String> columnkeys = columns.keySet();
 		for (String fieldname : columnkeys) {
 			Column col = columns.get(fieldname);
-			SQLBoxUtils.debug("=============================");
-			SQLBoxUtils.debug("fieldname=" + fieldname);
-			SQLBoxUtils.debug("getColumnDefinition=" + col.getColumnDefinition());
-			SQLBoxUtils.debug("getForeignKey=" + col.getForeignKey());
-			SQLBoxUtils.debug("getName=" + col.getName());
-			SQLBoxUtils.debug("getPropertyType=" + col.getPropertyType());
-			SQLBoxUtils.debug("getReadMethod=" + col.getReadMethod());
-			SQLBoxUtils.debug("getWriteMethod=" + col.getWriteMethod());
-			SQLBoxUtils.debug("isPrimeKey=" + col.isPrimeKey());
+			SqlBoxUtils.debug("=============================");
+			SqlBoxUtils.debug("fieldname=" + fieldname);
+			SqlBoxUtils.debug("getColumnDefinition=" + col.getColumnDefinition());
+			SqlBoxUtils.debug("getForeignKey=" + col.getForeignKey());
+			SqlBoxUtils.debug("getName=" + col.getName());
+			SqlBoxUtils.debug("getPropertyType=" + col.getPropertyType());
+			SqlBoxUtils.debug("getReadMethod=" + col.getReadMethod());
+			SqlBoxUtils.debug("getWriteMethod=" + col.getWriteMethod());
+			SqlBoxUtils.debug("isPrimeKey=" + col.isPrimeKey());
 		}
 	}
 }
