@@ -1,4 +1,4 @@
-package test.cleanDatabase;
+package test.test1_cleanDatabase;
 
 import test.Config;
 

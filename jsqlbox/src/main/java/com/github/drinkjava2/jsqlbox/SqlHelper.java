@@ -109,7 +109,7 @@ public class SqlHelper {
 	/**
 	 * SubList a List, divide a list by given blockSize
 	 */
-	private static <T> List<List<T>> subList(List<T> list, int blockSize) {
+	private static <T> List<List<T>> subList(List<T> list, int blockSize) {//NOSONAR
 		List<List<T>> lists = new ArrayList<>();
 		if (list != null && blockSize > 0) {
 			int listSize = list.size();

@@ -1,4 +1,4 @@
-package test.mutiple_thread;
+package test.test3_mutiple_thread;
 
 import com.github.drinkjava2.BeanBox;
 
@@ -8,7 +8,7 @@ public class MultiTester {
 
 	public static class MultiThread implements Runnable {
 		public void run() {
-			test.jdbc.Tester tester = BeanBox.getBean(test.jdbc.Tester.class);
+			test.test2_jdbc.Tester tester = BeanBox.getBean(test.test2_jdbc.Tester.class);
 			tester.tx_BatchInsertDemo();
 		}
 	}

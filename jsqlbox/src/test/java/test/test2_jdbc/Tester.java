@@ -1,4 +1,4 @@
-package test.jdbc;
+package test.test2_jdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
@@ -23,10 +23,10 @@ public class Tester {
 		Dao.dao.execute("update user set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
 		Dao.dao.execute("update user set username=", q("John"), ",address=", q("Shanghai"), " where age=", q(20));
 		Dao.dao.execute("insert user set", //
-				" username=?", e("PeterPeter"), //
+				" username=?", e("Peter"), //
 				",address=? ", e("Nanjing")); //
 		Dao.dao.execute("update user set", //
-				" username=?", e("Peter"), //
+				" username=?", e("Tom"), //
 				",address=? ", e("Nanjing"), //
 				" where age=?", e(30));
 		Dao.dao.execute("update user set", //

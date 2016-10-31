@@ -1,9 +1,9 @@
-package test.basic_crud;
+package test.test4_crud;
 
 import com.github.drinkjava2.BeanBox;
 
 import test.Config;
-import test.basic_crud.po.User;
+import test.test4_crud.po.User; 
 
 public class Tester {
 	public void tx_CrudDemo() {
@@ -38,14 +38,10 @@ public class Tester {
 		// System.out.println("tx_CrudDemo Done");
 	}
 
-	public void tx_main() {
-		tx_CrudDemo();
-	}
-
 	public static void main(String[] args) {
 		Config.recreateDatabase();
 		Tester tester = BeanBox.getBean(Tester.class);
-		tester.tx_main();
+		tester.tx_CrudDemo();
 	}
 
 }

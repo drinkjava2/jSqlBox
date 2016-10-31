@@ -6,8 +6,8 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.basic_crud.po.User;
-
+import test.test4_crud.po.User;
+ 
 public class Tester {
 	public void tx_CrudDemo() {
 		User user = new User();
