@@ -1,4 +1,4 @@
-package test.test1_basic_crud.po;
+package test.basic_crud.po;
 
 import com.github.drinkjava2.jsqlbox.SqlBox;
 

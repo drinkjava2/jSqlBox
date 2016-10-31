@@ -159,7 +159,6 @@ public class SqlBox {
 		if (!context.existTable(tableName))
 			context.loadTableStructure(tableName);
 		Map<String, Column> databaseColumns = context.getTableStructure(tableName);
-
 		for (Entry<String, Column> entry : columns.entrySet()) {
 			Column col = entry.getValue();
 			String columnName = col.getColumnDefinition();
@@ -167,8 +166,8 @@ public class SqlBox {
 				String lowerCase = columnName.toLowerCase();
 				String lowerCaseUnderline = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
 				if (databaseColumns.get(lowerCase) == null && databaseColumns.get(lowerCaseUnderline) == null)
-					SqlBoxUtils.throwEX(null, "SqlBox automaticFitColumnName error, in table " + tableName
-							+ ", column defination " + columnName + " does match any table column");
+					SqlBoxUtils.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+							+ "\" does match any table column in table " + tableName);
 				if (!lowerCase.equals(lowerCaseUnderline) && databaseColumns.get(lowerCase) == null
 						&& databaseColumns.get(lowerCaseUnderline) != null)
 					col.setColumnDefinition(lowerCaseUnderline);

@@ -1,4 +1,4 @@
-package test.test1_basic_crud.po;
+package test.basic_crud.po;
 
 /**
  * This file should automatically created by a code generator robot
