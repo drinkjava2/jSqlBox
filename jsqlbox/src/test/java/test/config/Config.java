@@ -1,4 +1,4 @@
-package test;
+package test.config;
 
 import java.util.Properties;
 

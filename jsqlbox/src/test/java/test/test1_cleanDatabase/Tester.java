@@ -1,6 +1,6 @@
 package test.test1_cleanDatabase;
 
-import test.Config;
+import test.config.Config;
 
 public class Tester {
 	public static void main(String[] args) {

@@ -2,7 +2,7 @@ package test.test4_crud;
 
 import com.github.drinkjava2.BeanBox;
 
-import test.Config;
+import test.config.Config;
 import test.test4_crud.po.User; 
 
 public class Tester {

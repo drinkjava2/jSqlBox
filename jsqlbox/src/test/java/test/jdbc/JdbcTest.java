@@ -1,14 +1,21 @@
-package test.test2_jdbc;
+package test.jdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.Config;
+import test.config.Config;
 
-public class Tester {
+public class JdbcTest {
+	@Before
+	public void recreateDatabase() {
+		Config.recreateDatabase();
+	}
 
 	public void tx_JdbcDemo() {
 		Dao.dao.execute("insert user (username,age) values(" + q("user1") + "," + q(10) + ")");
@@ -43,14 +50,14 @@ public class Tester {
 		System.out.println("tx_BatchInsertDemo Done");
 	}
 
+	@Test
 	public void tx_main() {
 		tx_JdbcDemo();
 		tx_BatchInsertDemo();
 	}
 
-	public static void main(String[] args) {
-		Config.recreateDatabase();
-		Tester tester = BeanBox.getBean(Tester.class);
+	public void test() {
+		JdbcTest tester = BeanBox.getBean(JdbcTest.class);
 		tester.tx_main();
 	}
 
