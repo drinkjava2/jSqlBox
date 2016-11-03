@@ -1,4 +1,4 @@
-package test.test4_crud.po;
+package test.crud_method.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 

@@ -15,7 +15,7 @@ import test.config.Config;
 
 public class DeclarativeTransactionTest {
 	@Before
-	public void recreateDatabase() {
+	public void setup() {
 		Config.recreateDatabase();
 	}
 
@@ -31,41 +31,29 @@ public class DeclarativeTransactionTest {
 		Dao.dao.execute("insert into user ", //
 				" (username", e("user2"), //
 				", address", e("address2"), //
-				", age)", e("20"), // 0
+				", age)", e("20"), //
 				" values(?,?,?)");
 	}
 
-	public void tx_InsertGood() {
+	public void tx_doInsert() {
 		tx_InsertUser1();
+		int i = Dao.dao.queryForInteger("select count(*) from user");
+		Assert.assertEquals(1, i);
+		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();
-	}
-
-	public void tx_InsertBad() {
-		tx_InsertUser1();
-		int i = 1 / 0;
-		tx_InsertUser2();
-	}
-
-	@Test
-	public void testGoodInsert() {
-		DeclarativeTransactionTest tester = BeanBox.getBean(DeclarativeTransactionTest.class);
-		tester.tx_InsertGood();
-		int i = Dao.dao.getJdbc().queryForObject("select count(*) from user", Integer.class);
-		Assert.assertEquals(2, i);
 	}
 
 	@Test(expected = InvocationTargetException.class)
-	public void testBadInsert() {
+	public void doTest() {
 		DeclarativeTransactionTest tester = BeanBox.getBean(DeclarativeTransactionTest.class);
-		Exception e = null;
 		try {
-			tester.tx_InsertBad();
-		} catch (Exception e1) {
-			e = e1;
+			tester.tx_doInsert();
+		} catch (Exception e) {
+			Assert.assertEquals(InvocationTargetException.class.getName(), e.getClass().getName());
+			int i = Dao.dao.queryForInteger("select count(*) from user");
+			Assert.assertEquals(0, i);
+			throw e;
 		}
-
-		int i = Dao.dao.getJdbc().queryForObject("select count(*) from user", Integer.class);
-		Assert.assertEquals(0, i);
 	}
 
 }

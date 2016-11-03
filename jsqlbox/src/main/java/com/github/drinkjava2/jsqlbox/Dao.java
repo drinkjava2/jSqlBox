@@ -53,6 +53,20 @@ public class Dao {
 
 	// ========JdbcTemplate wrap methods begin============
 
+	/**
+	 * Equal to jdbcTemplate.queryForObject(sql,Integer.class)
+	 */
+	public Integer queryForInteger(String sql) {
+		return getJdbc().queryForObject(sql, Integer.class);
+	}
+
+	/**
+	 * Equal to jdbcTemplate.queryForObject(sql,Long.class)
+	 */
+	public Long queryForLong(String sql) {
+		return getJdbc().queryForObject(sql, Long.class);
+	}
+
 	public void cacheSQL(String... sql) {
 		SqlHelper.cacheSQL(sql);
 	}
@@ -208,6 +222,11 @@ public class Dao {
 		this.bean = bean;
 	}
 
+	/**
+	 * If possible, do not use JdbcTemplate directly, JDBCTemplate may be deleted in future version *
+	 * 
+	 * @return JdbcTemplate
+	 */
 	public JdbcTemplate getJdbc() {
 		return jdbc;
 	}

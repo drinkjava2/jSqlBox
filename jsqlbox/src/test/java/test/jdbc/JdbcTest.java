@@ -3,6 +3,7 @@ package test.jdbc;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,25 +14,28 @@ import test.config.Config;
 
 public class JdbcTest {
 	@Before
-	public void recreateDatabase() {
+	public void setup() {
 		Config.recreateDatabase();
 	}
 
-	public void tx_JdbcDemo() {
-		Dao.dao.execute("insert user (username,age) values(" + q("user1") + "," + q(10) + ")");
-		Dao.dao.execute("insert user (username,age) values(" + q("user2", 20) + ")");
-		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user3") + e(30));
-		Dao.dao.execute("insert user (username,age) values(?,?)" + e("user4", 40));
+	/**
+	 * Test Jdbc methods, SQL be automatically wrapped to preparedStatement
+	 */
+	@Test
+	public void tx_jdbcTest() {
+		Dao.dao.execute(
+				"insert user (username,address,age) values(" + q("user1") + "," + q("address1") + "," + q(10) + ")");
+		Dao.dao.execute("insert user (username,address,age) values(", q("user2"), ",", q("address2"), ",", q(20), ")");
+		Dao.dao.execute("insert user (username,address,age) values(" + q("user3", "address3", 30) + ")");
+		Dao.dao.execute("insert user (username,address,age) values(?,?,?)" + e("user4") + e("address4") + e(40));
+		Dao.dao.execute("insert user (username,address,age) values(?,?,?)" + e("user5", "address5", 50));
 		Dao.dao.execute("insert user ", //
-				" (username", e("Andy"), //
-				", address", e("Guanzhou"), //
+				" (username", e("user6"), //
+				", address", e("address6"), //
 				", age)", e("60"), //
 				" values(?,?,?)");
 		Dao.dao.execute("update user set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
 		Dao.dao.execute("update user set username=", q("John"), ",address=", q("Shanghai"), " where age=", q(20));
-		Dao.dao.execute("insert user set", //
-				" username=?", e("Peter"), //
-				",address=? ", e("Nanjing")); //
 		Dao.dao.execute("update user set", //
 				" username=?", e("Tom"), //
 				",address=? ", e("Nanjing"), //
@@ -40,25 +44,16 @@ public class JdbcTest {
 				" username=", q("Jeffery"), //
 				",address=", q("Tianjing"), //
 				" where age=", q(40));
-		System.out.println("tx_JdbcDemo Done");
+		Assert.assertEquals(6, (int) Dao.dao.queryForInteger("select count(*) from user"));
 	}
 
-	public void tx_BatchInsertDemo() {
-		for (int i = 0; i < 10009; i++)
-			Dao.dao.cacheSQL("insert user (username", e("user" + i), ",age", e("70"), ") values(?,?)");
-		Dao.dao.executeCachedSQLs();
-		System.out.println("tx_BatchInsertDemo Done");
-	}
-
+	/**
+	 * Do test with Transaction
+	 */
 	@Test
-	public void tx_main() {
-		tx_JdbcDemo();
-		tx_BatchInsertDemo();
-	}
-
-	public void test() {
-		JdbcTest tester = BeanBox.getBean(JdbcTest.class);
-		tester.tx_main();
+	public void doTestWithTransaction() {
+		JdbcTest t = BeanBox.getBean(JdbcTest.class); // get Proxy bean
+		t.tx_jdbcTest(); // use Spring Declarative Transaction
 	}
 
 }
