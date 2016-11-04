@@ -46,6 +46,7 @@ public class Config {
 	static class DSPoolBeanBox extends BeanBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
+			// Change to your schema, username & password below
 			setProperty("jdbcUrl",
 					"jdbc:mysql://127.0.0.1:3306/test?user=root&password=root888&rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClass", "com.mysql.jdbc.Driver");

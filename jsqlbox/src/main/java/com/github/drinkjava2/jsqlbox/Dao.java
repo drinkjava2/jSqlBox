@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
@@ -33,6 +32,8 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * @version 1.0.0
  * @since 1.0
  */
+
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Dao {
 	private SqlBox sqlBox;
 	private JdbcTemplate jdbc;
@@ -52,25 +53,77 @@ public class Dao {
 	}
 
 	// ========JdbcTemplate wrap methods begin============
+	// Wrapped some most common used methods
 
 	/**
-	 * Equal to jdbcTemplate.queryForObject(sql,Integer.class)
+	 * Return long type query result, if null, return 0; sql be translated to prepared statement
 	 */
-	public Integer queryForInteger(String sql) {
-		return getJdbc().queryForObject(sql, Integer.class);
+	public int queryForInt0(String... sql) {
+		Integer i = queryForInteger(sql);
+		if (i == null)
+			return 0;
+		else
+			return i;
 	}
 
 	/**
-	 * Equal to jdbcTemplate.queryForObject(sql,Long.class)
+	 * Return long type query result, if null, return 0; sql be translated to prepared statement
+	 * 
 	 */
-	public Long queryForLong(String sql) {
-		return getJdbc().queryForObject(sql, Long.class);
+	public long queryForLong0(String... sql) {
+		Long l = queryForLong(sql);
+		if (l == null)
+			return 0;
+		else
+			return l;
 	}
 
+	/**
+	 * Return Integer type query result, sql be translated to prepared statement
+	 */
+	public Integer queryForInteger(String... sql) {
+		return this.queryForObject(Integer.class, sql);
+	}
+
+	/**
+	 * Return Long type query result, sql be translated to prepared statement
+	 */
+	public Long queryForLong(String... sql) {
+		return this.queryForObject(Long.class, sql);
+	}
+
+	/**
+	 * Return String type query result, sql be translated to prepared statement
+	 */
+	public String queryForString(String... sql) {
+		return this.queryForObject(String.class, sql);
+	}
+
+	/**
+	 * Return Object type query result, sql be translated to prepared statement
+	 */
+	public <T> T queryForObject(Class<?> clazz, String... sql) {
+		try {
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			printSQL(sp);
+			return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
+		} finally {
+			SqlHelper.clearLastSQL();
+		}
+	}
+
+	/**
+	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
+	 * 
+	 * @param sql
+	 */
 	public void cacheSQL(String... sql) {
 		SqlHelper.cacheSQL(sql);
 	}
 
+	/**
+	 * Transfer cached SQLs to Prepared Statement and batch execute these SQLs
+	 */
 	public void executeCachedSQLs() {
 		try {
 			List<List<SqlAndParameters>> subSPlist = SqlHelper.getSQLandParameterSubList();
@@ -97,17 +150,31 @@ public class Dao {
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public List query(RowMapper rowMapper, String... sql) {
+	/**
+	 * Query and return entity list by given entity or SqlBox Class or instance and sql, sql be translated to prepared
+	 * statement
+	 * 
+	 */
+	public List query(Object entityOrSqlBoxClassOrInstance, String... sql) {
 		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			printSQL(sp);
-			return jdbc.query(sp.getSql(), sp.getParameters(), rowMapper);
+			return null;// TODO
 		} finally {
 			SqlHelper.clearLastSQL();
 		}
 	}
 
+	/**
+	 * Query and return entity list by given sql, sql be translated to prepared statement
+	 * 
+	 */
+	public List queryEntity(String... sql) {
+		return this.query(this.getBean(), sql);
+	}
+
+	/**
+	 * Execute a sql and return how many record be affected, sql be translated to prepared statement
+	 * 
+	 */
 	public Integer execute(String... sql) {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
@@ -119,7 +186,8 @@ public class Dao {
 	}
 
 	/**
-	 * Print SQL and parameters, usually used for debug
+	 * Print SQL and parameters to console, usually used for debug <br/>
+	 * Use context.setShowSql to control, Default showSql is "false"
 	 */
 	private void printSQL(SqlAndParameters sp) {
 		// check if allowed print SQL
@@ -141,7 +209,8 @@ public class Dao {
 	}
 
 	/**
-	 * Print Cached SQL and parameters, usually used for debug
+	 * Print Cached SQL and parameters, usually used for debug <br/>
+	 * Use context.setShowSql to control, Default showSql is "false"
 	 */
 	private void printCachedSQL(List<List<SqlAndParameters>> subSPlist) {
 		if (this.getSqlBox().getContext().isShowSql()) {
@@ -172,7 +241,7 @@ public class Dao {
 
 	// =============== CRUD methods begin ===============
 	/**
-	 * Insert a Bean to Database
+	 * Insert or Update a Bean to Database
 	 */
 	public void save() {
 		try {
@@ -183,7 +252,7 @@ public class Dao {
 	}
 
 	/**
-	 * Insert a Bean to Database
+	 * Insert or Update a Bean to Database
 	 */
 	private void doSave() {
 		StringBuilder sb = new StringBuilder();
@@ -214,16 +283,24 @@ public class Dao {
 	// =============== CRUD methods end ===============
 
 	// ================ Getters & Setters===============
+	/**
+	 * Return Bean instance which related to this dao
+	 */
 	public Object getBean() {
 		return bean;
 	}
 
+	/**
+	 * Set a Bean instance related to this dao
+	 */
 	public void setBean(Object bean) {
 		this.bean = bean;
 	}
 
 	/**
-	 * If possible, do not use JdbcTemplate directly, JDBCTemplate may be deleted in future version *
+	 * Return a JdbcTemplate instance<br/>
+	 * Note: It's not suggest use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
+	 * replaced by pure JDBC in future version to make this project clean
 	 * 
 	 * @return JdbcTemplate
 	 */
