@@ -53,43 +53,9 @@ public class Dao {
 	}
 
 	// ========JdbcTemplate wrap methods begin============
-	// Wrapped some most common used methods
-
-	/**
-	 * Return long type query result, if null, return 0; sql be translated to prepared statement
-	 */
-	public int queryForInt0(String... sql) {
-		Integer i = queryForInteger(sql);
-		if (i == null)
-			return 0;
-		else
-			return i;
-	}
-
-	/**
-	 * Return long type query result, if null, return 0; sql be translated to prepared statement
-	 * 
-	 */
-	public long queryForLong0(String... sql) {
-		Long l = queryForLong(sql);
-		if (l == null)
-			return 0;
-		else
-			return l;
-	}
-
-	/**
-	 * Return Integer type query result, sql be translated to prepared statement
-	 */
+	// Only wrap some common used JdbcTemplate methods
 	public Integer queryForInteger(String... sql) {
 		return this.queryForObject(Integer.class, sql);
-	}
-
-	/**
-	 * Return Long type query result, sql be translated to prepared statement
-	 */
-	public Long queryForLong(String... sql) {
-		return this.queryForObject(Long.class, sql);
 	}
 
 	/**
@@ -162,7 +128,9 @@ public class Dao {
 			SqlHelper.clearLastSQL();
 		}
 	}
+	// ========JdbcTemplate wrap methods End============
 
+	// ========Dao query/crud methods begin=======
 	/**
 	 * Query and return entity list by given sql, sql be translated to prepared statement
 	 * 
@@ -233,13 +201,6 @@ public class Dao {
 		}
 	}
 
-	// ========JdbcTemplate wrap methods end============
-
-	// ===========utils methods begin==========
-
-	// ===========utils methods end==========
-
-	// =============== CRUD methods begin ===============
 	/**
 	 * Insert or Update a Bean to Database
 	 */
@@ -279,8 +240,7 @@ public class Dao {
 		sb.append(SqlHelper.createValueString(howManyFields));
 		this.execute(sb.toString());
 	}
-
-	// =============== CRUD methods end ===============
+	// ========Dao query/crud methods end=======
 
 	// ================ Getters & Setters===============
 	/**

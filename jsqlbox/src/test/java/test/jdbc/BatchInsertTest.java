@@ -27,7 +27,7 @@ public class BatchInsertTest {
 	public void doTest() {
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();
-		Assert.assertEquals(10000, Dao.dao.queryForInt0("select count(*) from user"));
+		Assert.assertEquals(10000, (int) Dao.dao.queryForInteger("select count(*) from user"));
 	}
 
 }

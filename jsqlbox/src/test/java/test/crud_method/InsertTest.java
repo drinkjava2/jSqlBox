@@ -27,7 +27,8 @@ public class InsertTest {
 		user.setPhoneNumber("111");
 		user.setAge(10);
 		user.dao().save();
-		Assert.assertEquals(111, Dao.dao.queryForInt0("select PhoneNumber from user where username=" + q("User1")));
+		Assert.assertEquals(111,
+				(int) Dao.dao.queryForInteger("select PhoneNumber from user where username=" + q("User1")));
 		Assert.assertEquals((Integer) 111,
 				Dao.dao.queryForInteger("select PhoneNumber from user where username=" + q("User1")));
 	}
