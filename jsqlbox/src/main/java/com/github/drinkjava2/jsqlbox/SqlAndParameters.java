@@ -3,7 +3,7 @@ package com.github.drinkjava2.jsqlbox;
 
 public class SqlAndParameters {
 	private String sql;
-	private String[] parameters;
+	private Object[] parameters;
 
 	public String getSql() {
 		return sql;
@@ -13,11 +13,11 @@ public class SqlAndParameters {
 		this.sql = sql;
 	}
 
-	public String[] getParameters() {
+	public Object[] getParameters() {
 		return parameters;
 	}
 
-	public void setParameters(String[] parameters) {
+	public void setParameters(Object[] parameters) {
 		this.parameters = parameters;
 	}
 }

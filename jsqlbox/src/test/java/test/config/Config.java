@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -19,7 +21,8 @@ public class Config {
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 	}
 
-	public static void recreateDatabase() {
+	public static void recreateTables() {
+		Assert.assertNotEquals(null, Dao.dao.getSqlBox().getContext().getDataSource());
 		try {
 			Dao.dao.execute("drop table user");
 			Dao.dao.execute("drop tables user2");
@@ -76,4 +79,10 @@ public class Config {
 		}
 	}
 
+	@Test
+	public void testCreateTables() {
+		recreateTables();
+		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from user"));
+		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from user2"));
+	}
 }

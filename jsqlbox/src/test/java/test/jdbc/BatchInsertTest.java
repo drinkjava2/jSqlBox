@@ -14,7 +14,7 @@ import test.config.Config;
 public class BatchInsertTest {
 	@Before
 	public void setup() {
-		Config.recreateDatabase();
+		Config.recreateTables();
 	}
 
 	public void tx_BatchInsertDemo() {

@@ -16,10 +16,10 @@ public class InsertTest {
 
 	@Before
 	public void setup() {
-		Config.recreateDatabase();
+		Config.recreateTables();
 	}
 
-	// @Test
+	@Test
 	public void insertUser1() {
 		User user = new User();
 		user.setUserName("User1");
@@ -33,7 +33,7 @@ public class InsertTest {
 				Dao.dao.queryForInteger("select PhoneNumber from user where username=" + q("User1")));
 	}
 
-	// @Test
+	@Test
 	public void insertUser2() {
 		User user2 = new User();
 		user2.dao().getSqlBox().setColumnName(User.PhoneNumber, null);
@@ -45,14 +45,14 @@ public class InsertTest {
 		Assert.assertEquals(null, Dao.dao.queryForString("select PhoneNumber from user where username=" + q("User2")));
 	}
 
+	@Test
 	public void tx_insertUsers() {
 		insertUser1();
-		// int i=1/0; //Throw a RuntimeException will roll back transaction
 		insertUser2();
 	}
 
 	@Test
-	public void doWithTransaction() {
+	public void insertUsersWithinTransaction() {
 		InsertTest t = BeanBox.getBean(InsertTest.class); // get Proxy bean
 		t.tx_insertUsers(); // use Spring Declarative Transaction
 	}

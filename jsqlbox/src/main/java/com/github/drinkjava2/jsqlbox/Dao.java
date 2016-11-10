@@ -79,7 +79,8 @@ public class Dao {
 	}
 
 	/**
-	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
+	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to
+	 * prepared statement
 	 * 
 	 * @param sql
 	 */
@@ -100,8 +101,8 @@ public class Dao {
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						SqlAndParameters sp = splist.get(i);
 						int index = 1;
-						for (String parameter : sp.getParameters()) {
-							ps.setString(index++, parameter);
+						for (Object parameter : sp.getParameters()) {
+							ps.setObject(index++, parameter);
 						}
 					}
 
@@ -116,31 +117,44 @@ public class Dao {
 		}
 	}
 
-	/**
-	 * Query and return entity list by given entity or SqlBox Class or instance and sql, sql be translated to prepared
-	 * statement
-	 * 
-	 */
-	public List query(Object entityOrSqlBoxClassOrInstance, String... sql) {
-		try {
-			return null;// TODO
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
-	}
 	// ========JdbcTemplate wrap methods End============
 
 	// ========Dao query/crud methods begin=======
 	/**
-	 * Query and return entity list by given sql, sql be translated to prepared statement
-	 * 
+	 * Query and return entity list by sql
 	 */
 	public List queryEntity(String... sql) {
-		return this.query(this.getBean(), sql);
+		return this.queryEntity(this.getSqlBox(), sql);
 	}
 
 	/**
-	 * Execute a sql and return how many record be affected, sql be translated to prepared statement
+	 * Query and return entity list by sql
+	 */
+	public List queryEntity(Class<?> beanOrSqlBoxClass, String... sql) {
+		SqlBox box = this.getSqlBox().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
+		return this.queryEntity(box, sql);
+	}
+
+	/**
+	 * Query and return entity list by SqlBox and sql
+	 */
+	private <T> List<T> queryEntity(SqlBox sqlBox, String... sql) {
+		if (sqlBox == null)
+			throw new SqlBoxException("Dao queryEntity error: sqlBox is null");
+		try {
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			printSQL(sp);
+			return null;// TODO
+			// return getJdbc().query(sp.getSql(), sqlBox.getRowMapper(sp) ,
+			// sp.getParameters());
+		} finally {
+			SqlHelper.clearLastSQL();
+		}
+	}
+
+	/**
+	 * Execute a sql and return how many record be affected, sql be translated
+	 * to prepared statement
 	 * 
 	 */
 	public Integer execute(String... sql) {
@@ -162,11 +176,11 @@ public class Dao {
 		if (!this.getSqlBox().getContext().isShowSql())
 			return;
 		SqlBoxUtils.println(sp.getSql());
-		String[] args = sp.getParameters();
+		Object[] args = sp.getParameters();
 		if (args.length > 0) {
 			SqlBoxUtils.print("Parameters: ");
 			for (int i = 0; i < args.length; i++) {
-				SqlBoxUtils.print(args[i]);
+				SqlBoxUtils.print("" + args[i]);
 				if (i != args.length - 1)
 					SqlBoxUtils.print(",");
 				else
@@ -259,8 +273,9 @@ public class Dao {
 
 	/**
 	 * Return a JdbcTemplate instance<br/>
-	 * Note: It's not suggest use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
-	 * replaced by pure JDBC in future version to make this project clean
+	 * Note: It's not suggest use JdbcTemplate directly unless very necessary,
+	 * JdbcTemplate may be deprecated or replaced by pure JDBC in future version
+	 * to make this project clean
 	 * 
 	 * @return JdbcTemplate
 	 */

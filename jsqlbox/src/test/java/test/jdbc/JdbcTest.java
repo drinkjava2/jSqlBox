@@ -15,7 +15,7 @@ import test.config.Config;
 public class JdbcTest {
 	@Before
 	public void setup() {
-		Config.recreateDatabase();
+		Config.recreateTables();
 	}
 
 	/**

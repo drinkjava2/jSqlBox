@@ -16,7 +16,7 @@ import test.config.Config;
 public class DeclarativeTransactionTest {
 	@Before
 	public void setup() {
-		Config.recreateDatabase();
+		Config.recreateTables();
 	}
 
 	public void tx_InsertUser1() {

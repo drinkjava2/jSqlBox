@@ -20,10 +20,14 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.springframework.jdbc.core.RowMapper;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
@@ -175,6 +179,23 @@ public class SqlBox {
 		}
 	}
 
+	public static class SqlBoxRowMapper implements RowMapper<Object> {
+		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return null;
+		}
+	}
+
+	protected RowMapper<Object> getRowMapper(SqlAndParameters sp) {
+		return new RowMapper<Object>() {
+			public Object mapRow(ResultSet rs, int index) throws SQLException {
+				return null;
+			}
+		};
+	}
+
+	/**
+	 * Print Debug info, for debug use only
+	 */
 	public void debug() {
 		SqlBoxUtils.println("Table=" + tableName);
 		Set<String> columnkeys = columns.keySet();
@@ -210,6 +231,7 @@ public class SqlBox {
 		}
 
 	}
+
 	// ========getter & setters below==============
 
 	public Class<?> getBeanClass() {
