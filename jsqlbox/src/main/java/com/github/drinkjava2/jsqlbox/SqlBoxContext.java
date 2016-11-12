@@ -13,9 +13,9 @@ import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu
  * @version 1.0.0
- * @since 1.0
+ * @since 1.0.0
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
@@ -26,7 +26,7 @@ public class SqlBoxContext {
 	private DataSource dataSource = null;
 
 	private ConcurrentHashMap<String, Map<String, Column>> databaseStructure = new ConcurrentHashMap<>();
-	private boolean showSql = false;// output SQL to console or log
+	private boolean showSql = false;// print SQL to console or log depends logging.properties
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -103,7 +103,7 @@ public class SqlBoxContext {
 			Method m = box.getBeanClass().getMethod("putDao", new Class[] { Dao.class });
 			m.invoke(bean, new Object[] { dao });
 		} catch (Exception e) {
-			SqlBoxUtils.logException(e);
+			SqlBoxUtils.eatException(e);
 		}
 		return (T) bean;
 	}

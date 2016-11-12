@@ -21,6 +21,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
- * @since 1.0
+ * @since 1.0.0
  */
 public class SqlBox {
 	private Class<?> beanClass;
@@ -179,55 +180,76 @@ public class SqlBox {
 		}
 	}
 
+	/**
+	 * SqlBoxRowMapper implements RowMapper interface
+	 */
 	public static class SqlBoxRowMapper implements RowMapper<Object> {
+		SqlBox box;
+
+		public SqlBoxRowMapper(SqlBox box) {
+			this.box = box;
+		}
+
+		@Override
 		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-			return null;
+			Object bean = null;
+			try {
+				bean = box.getBeanClass().newInstance();
+				ResultSetMetaData metaData = rs.getMetaData();
+				for (int i = 1; i <= metaData.getColumnCount(); i++) {
+					LogUtils.print(metaData.getTableName(i) + ".");
+					LogUtils.print(metaData.getColumnName(i) + "\t|\t");
+					LogUtils.println(metaData.getColumnTypeName(i));
+				}
+			} catch (Exception e) {
+				SqlBoxUtils.throwEX(e, "SqlBox getRowMapper error, beanClass=" + box.getBeanClass());
+			}
+			return bean;
 		}
 	}
 
-	protected RowMapper<Object> getRowMapper(SqlAndParameters sp) {
-		return new RowMapper<Object>() {
-			public Object mapRow(ResultSet rs, int index) throws SQLException {
-				return null;
-			}
-		};
+	/**
+	 * Get RowMapper
+	 */
+	protected RowMapper<Object> getRowMapper() {
+		return new SqlBoxRowMapper(this);
 	}
 
 	/**
 	 * Print Debug info, for debug use only
 	 */
 	public void debug() {
-		SqlBoxUtils.println("Table=" + tableName);
+		LogUtils.println("Table=" + tableName);
 		Set<String> columnkeys = columns.keySet();
-		SqlBoxUtils.println("==============Column values===============");
+		LogUtils.println("==============Column values===============");
 		for (String fieldname : columnkeys) {
 			Column col = columns.get(fieldname);
-			SqlBoxUtils.println("fieldname=" + fieldname);
-			SqlBoxUtils.println("getColumnDefinition=" + col.getColumnDefinition());
-			SqlBoxUtils.println("getForeignKey=" + col.getForeignKey());
-			SqlBoxUtils.println("getName=" + col.getName());
-			SqlBoxUtils.println("getPropertyType=" + col.getPropertyType());
-			SqlBoxUtils.println("PropertyTypeName=" + col.getPropertyTypeName());
-			SqlBoxUtils.println("getReadMethod=" + col.getReadMethod());
-			SqlBoxUtils.println("getWriteMethod=" + col.getWriteMethod());
-			SqlBoxUtils.println("isPrimeKey=" + col.isPrimeKey());
-			SqlBoxUtils.println();
+			LogUtils.println("fieldname=" + fieldname);
+			LogUtils.println("getColumnDefinition=" + col.getColumnDefinition());
+			LogUtils.println("getForeignKey=" + col.getForeignKey());
+			LogUtils.println("getName=" + col.getName());
+			LogUtils.println("getPropertyType=" + col.getPropertyType());
+			LogUtils.println("PropertyTypeName=" + col.getPropertyTypeName());
+			LogUtils.println("getReadMethod=" + col.getReadMethod());
+			LogUtils.println("getWriteMethod=" + col.getWriteMethod());
+			LogUtils.println("isPrimeKey=" + col.isPrimeKey());
+			LogUtils.println();
 		}
 		Map<String, Column> tableStructure = this.getContext().getTableStructure(tableName);
 		columnkeys = tableStructure.keySet();
-		SqlBoxUtils.println("==============Table structure values===============");
+		LogUtils.println("==============Table structure values===============");
 		for (String fieldname : columnkeys) {
 			Column col = tableStructure.get(fieldname);
-			SqlBoxUtils.println("fieldname=" + fieldname);
-			SqlBoxUtils.println("getColumnDefinition=" + col.getColumnDefinition());
-			SqlBoxUtils.println("getForeignKey=" + col.getForeignKey());
-			SqlBoxUtils.println("getName=" + col.getName());
-			SqlBoxUtils.println("getPropertyType=" + col.getPropertyType());
-			SqlBoxUtils.println("PropertyTypeName=" + col.getPropertyTypeName());
-			SqlBoxUtils.println("getReadMethod=" + col.getReadMethod());
-			SqlBoxUtils.println("getWriteMethod=" + col.getWriteMethod());
-			SqlBoxUtils.println("isPrimeKey=" + col.isPrimeKey());
-			SqlBoxUtils.println();
+			LogUtils.println("fieldname=" + fieldname);
+			LogUtils.println("getColumnDefinition=" + col.getColumnDefinition());
+			LogUtils.println("getForeignKey=" + col.getForeignKey());
+			LogUtils.println("getName=" + col.getName());
+			LogUtils.println("getPropertyType=" + col.getPropertyType());
+			LogUtils.println("PropertyTypeName=" + col.getPropertyTypeName());
+			LogUtils.println("getReadMethod=" + col.getReadMethod());
+			LogUtils.println("getWriteMethod=" + col.getWriteMethod());
+			LogUtils.println("isPrimeKey=" + col.isPrimeKey());
+			LogUtils.println();
 		}
 
 	}

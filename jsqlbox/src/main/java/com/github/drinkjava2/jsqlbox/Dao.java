@@ -54,8 +54,8 @@ public class Dao {
 
 	// ========JdbcTemplate wrap methods begin============
 	// Only wrap some common used JdbcTemplate methods
-	public Integer queryForInteger(String... sql) {
-		return this.queryForObject(Integer.class, sql);
+	public Integer queryForInteger(String... sql) { 
+		return this.queryForObject(Integer.class, sql); 
 	}
 
 	/**
@@ -79,13 +79,28 @@ public class Dao {
 	}
 
 	/**
-	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to
-	 * prepared statement
+	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
 	 * 
 	 * @param sql
 	 */
 	public void cacheSQL(String... sql) {
 		SqlHelper.cacheSQL(sql);
+	}
+
+	// ========JdbcTemplate wrap methods End============
+
+	/**
+	 * Execute a sql and return how many record be affected, sql be translated to prepared statement
+	 * 
+	 */
+	public Integer execute(String... sql) {
+		try {
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			printSQL(sp);
+			return jdbc.update(sp.getSql(), (Object[]) sp.getParameters());
+		} finally {
+			SqlHelper.clearLastSQL();
+		}
 	}
 
 	/**
@@ -130,7 +145,7 @@ public class Dao {
 	/**
 	 * Query and return entity list by sql
 	 */
-	public List queryEntity(Class<?> beanOrSqlBoxClass, String... sql) {
+	public <T> List<T> queryEntity(Class<?> beanOrSqlBoxClass, String... sql) {
 		SqlBox box = this.getSqlBox().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
 		return this.queryEntity(box, sql);
 	}
@@ -138,30 +153,13 @@ public class Dao {
 	/**
 	 * Query and return entity list by SqlBox and sql
 	 */
-	private <T> List<T> queryEntity(SqlBox sqlBox, String... sql) {
+	private List queryEntity(SqlBox sqlBox, String... sql) {
 		if (sqlBox == null)
 			throw new SqlBoxException("Dao queryEntity error: sqlBox is null");
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			printSQL(sp);
-			return null;// TODO
-			// return getJdbc().query(sp.getSql(), sqlBox.getRowMapper(sp) ,
-			// sp.getParameters());
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
-	}
-
-	/**
-	 * Execute a sql and return how many record be affected, sql be translated
-	 * to prepared statement
-	 * 
-	 */
-	public Integer execute(String... sql) {
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			printSQL(sp);
-			return jdbc.update(sp.getSql(), (Object[]) sp.getParameters());
+			return getJdbc().query(sp.getSql(), sqlBox.getRowMapper(), sp.getParameters());
 		} finally {
 			SqlHelper.clearLastSQL();
 		}
@@ -175,19 +173,19 @@ public class Dao {
 		// check if allowed print SQL
 		if (!this.getSqlBox().getContext().isShowSql())
 			return;
-		SqlBoxUtils.println(sp.getSql());
+		LogUtils.println(sp.getSql());
 		Object[] args = sp.getParameters();
 		if (args.length > 0) {
-			SqlBoxUtils.print("Parameters: ");
+			LogUtils.print("Parameters: ");
 			for (int i = 0; i < args.length; i++) {
-				SqlBoxUtils.print("" + args[i]);
+				LogUtils.print("" + args[i]);
 				if (i != args.length - 1)
-					SqlBoxUtils.print(",");
+					LogUtils.print(",");
 				else
-					SqlBoxUtils.println();
+					LogUtils.println();
 			}
 		}
-		SqlBoxUtils.println();
+		LogUtils.println();
 	}
 
 	/**
@@ -200,7 +198,7 @@ public class Dao {
 				List<SqlAndParameters> l = subSPlist.get(0);
 				if (l != null) {
 					SqlAndParameters sp = l.get(0);
-					SqlBoxUtils.println("First Cached SQL:");
+					LogUtils.println("First Cached SQL:");
 					printSQL(sp);
 				}
 			}
@@ -208,7 +206,7 @@ public class Dao {
 				List<SqlAndParameters> l = subSPlist.get(subSPlist.size() - 1);
 				if (l != null) {
 					SqlAndParameters sp = l.get(l.size() - 1);
-					SqlBoxUtils.println("Last Cached SQL:");
+					LogUtils.println("Last Cached SQL:");
 					printSQL(sp);
 				}
 			}
@@ -232,10 +230,8 @@ public class Dao {
 	private void doSave() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(sqlBox.getTableName()).append(" (");
-		int howManyFields = 0;
 		for (Column col : sqlBox.getColumns().values()) {
 			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnDefinition())) {
-
 				Method m = col.getReadMethod();
 				Object value = null;
 				try {
@@ -244,14 +240,13 @@ public class Dao {
 					SqlBoxUtils.throwEX(e, "Dao save error, invoke method wrong.");
 				}
 				if (null != value) {
-					howManyFields++;
 					sb.append(col.getColumnDefinition()).append(",");
 					SqlHelper.e(value);
 				}
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
-		sb.append(SqlHelper.createValueString(howManyFields));
+		sb.append(SqlHelper.values());
 		this.execute(sb.toString());
 	}
 	// ========Dao query/crud methods end=======
@@ -273,9 +268,8 @@ public class Dao {
 
 	/**
 	 * Return a JdbcTemplate instance<br/>
-	 * Note: It's not suggest use JdbcTemplate directly unless very necessary,
-	 * JdbcTemplate may be deprecated or replaced by pure JDBC in future version
-	 * to make this project clean
+	 * It's not recommended to use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
+	 * replaced by pure JDBC in future version
 	 * 
 	 * @return JdbcTemplate
 	 */

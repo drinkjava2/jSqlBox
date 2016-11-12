@@ -2,10 +2,16 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+/**
+ * @author Yong Zhu
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class SqlBoxUtils {
-	private static final Logger log = Logger.getLogger(SqlBoxUtils.class.toString());
+	// Use standard JDK logger
+
+	// To check if a class exist, if exist, cache it to avoid check again
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<>();
 
 	private SqlBoxUtils() {
@@ -19,19 +25,11 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only
-	 * place throw Exception in this project
+	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) {
-		log.log(Level.SEVERE, errorMsg, e);
+		LogUtils.log(Level.WARNING, errorMsg, e);
 		throw new SqlBoxException(errorMsg);
-	}
-
-	/**
-	 * Log exception
-	 */
-	public static void logException(Exception e) {
-		log.log(Level.INFO, "", e);
 	}
 
 	/**
@@ -40,28 +38,7 @@ public class SqlBoxUtils {
 	public static void eatException(Exception e) {
 		int i = 0;
 		if (i == 1)
-			log.log(Level.OFF, "Eat Exceptions which not worth to log it", e);
-	}
-
-	/**
-	 * Print message, usually for debug use
-	 */
-	public static void print(String msg) {
-		System.out.print(msg); // NOSONAR
-	}
-
-	/**
-	 * Println message, usually for debug use
-	 */
-	public static void println(String msg) {
-		System.out.println(msg); // NOSONAR
-	}
-
-	/**
-	 * Println, usually for debug use
-	 */
-	public static void println() {
-		System.out.println(); // NOSONAR
+			LogUtils.log(Level.OFF, "Eat Exceptions which not worth to log it", e);
 	}
 
 	/**
@@ -87,7 +64,7 @@ public class SqlBoxUtils {
 			try {
 				return Class.forName(className);
 			} catch (Exception e) {
-				logException(e);
+				eatException(e);
 			}
 		}
 		return null;

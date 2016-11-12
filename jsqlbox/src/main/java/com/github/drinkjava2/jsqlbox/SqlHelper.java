@@ -4,7 +4,16 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Yong Zhu
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class SqlHelper {
+
+	/**
+	 * For store sql and parameters in threadlocal
+	 */
 	private static ThreadLocal<ArrayList<String>> sqlCache = new ThreadLocal<ArrayList<String>>() {
 		@Override
 		protected ArrayList<String> initialValue() {
@@ -12,12 +21,19 @@ public class SqlHelper {
 		}
 	};
 
+	/**
+	 * For batch store SQL and Parameters in threadlocal
+	 */
 	private static ThreadLocal<ArrayList<SqlAndParameters>> sqlBatchCache = new ThreadLocal<ArrayList<SqlAndParameters>>() {
 		@Override
 		protected ArrayList<SqlAndParameters> initialValue() {
 			return new ArrayList<>();
 		}
 	};
+
+	/**
+	 * For store last batch Sql in threadlocal
+	 */
 	private static ThreadLocal<String> sqlBatchString = new ThreadLocal<String>() {
 		@Override
 		protected String initialValue() {
@@ -25,31 +41,49 @@ public class SqlHelper {
 		}
 	};
 
-	private SqlHelper() {
+	private SqlHelper() {// Disable default public constructor
 	}
 
+	/**
+	 * Get SQL cached in Threadlocal
+	 */
 	public static ThreadLocal<ArrayList<String>> getSqlCache() {
 		return sqlCache;
 	}
 
+	/**
+	 * Get SQL batch cached in threadlocal
+	 */
 	public static ThreadLocal<ArrayList<SqlAndParameters>> getSqlBatchCache() {
 		return sqlBatchCache;
 	}
 
+	/**
+	 * Get last SQL for batch cached in threadlocal
+	 */
 	public static ThreadLocal<String> getSqlForBatch() {
 		return sqlBatchString;
 	}
 
+	/**
+	 * Cache SQL in threadlocal
+	 */
 	public static void cacheSQL(String... sql) {
 		SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 		sqlBatchCache.get().add(sp);
 		sqlBatchString.set(sp.getSql());
 	}
 
+	/**
+	 * Clear last SQL cached in threadlocal
+	 */
 	public static void clearLastSQL() {
 		sqlCache.get().clear();
 	}
 
+	/**
+	 * Clear batch SQL cached in threadlocal
+	 */
 	public static void clearBatchSQLs() {
 		sqlCache.get().clear();
 		sqlBatchCache.get().clear();
@@ -68,12 +102,18 @@ public class SqlHelper {
 		return result.toString();
 	}
 
-	public static String e(Object... obj) {
-		for (Object o : obj)
+	/**
+	 * Cache parameters in thread local and return a empty string
+	 */
+	public static String e(Object... parameters) {
+		for (Object o : parameters)
 			sqlCache.get().add("" + o);
 		return "";
 	}
 
+	/**
+	 * Get cached sql and parameters from threadlocal, return a SqlAndParameters instance
+	 */
 	public static SqlAndParameters splitSQLandParameters(String[] sqls) {
 		StringBuilder sql = new StringBuilder("");
 		for (String str : sqls) {
@@ -87,14 +127,21 @@ public class SqlHelper {
 		return sp;
 	}
 
+	/**
+	 * Get cached sql and parameters from threadlocal, return a sublisted SqlAndParameters list
+	 */
 	public static List<List<SqlAndParameters>> getSQLandParameterSubList() {
 		return subList(sqlBatchCache.get(), 500);
+	}
+
+	public static String values() {
+		return createValueString(sqlCache.get().size());
 	}
 
 	/**
 	 * Create "value(?,?,?,?)" string by given howManyQuestionMark
 	 */
-	public static String createValueString(int howManyQuestionMark) {
+	private static String createValueString(int howManyQuestionMark) {
 		StringBuilder sb = new StringBuilder("values(");
 		for (int i = 0; i < howManyQuestionMark; i++) {
 			if (i != howManyQuestionMark - 1)
@@ -109,7 +156,7 @@ public class SqlHelper {
 	/**
 	 * SubList a List, divide a list by given blockSize
 	 */
-	private static <T> List<List<T>> subList(List<T> list, int blockSize) {//NOSONAR
+	private static <T> List<List<T>> subList(List<T> list, int blockSize) {// NOSONAR
 		List<List<T>> lists = new ArrayList<>();
 		if (list != null && blockSize > 0) {
 			int listSize = list.size();

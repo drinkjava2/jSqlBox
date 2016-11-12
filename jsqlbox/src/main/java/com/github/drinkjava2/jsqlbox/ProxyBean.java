@@ -5,6 +5,13 @@ import java.lang.reflect.Method;
 import com.github.drinkjava2.cglib3_2_0.proxy.MethodInterceptor;
 import com.github.drinkjava2.cglib3_2_0.proxy.MethodProxy;
 
+/**
+ * ProxyBean class is used to create an entity proxy
+ * 
+ * @author Yong Zhu
+ * @version 1.0.0
+ * @since 1.0
+ */
 class ProxyBean implements MethodInterceptor {
 	@SuppressWarnings("unused")
 	private Class<?> beanClass;
@@ -15,7 +22,7 @@ class ProxyBean implements MethodInterceptor {
 		this.beanClass = beanClass;
 		this.dao = dao;
 	}
- 
+
 	@Override
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy cgLibMethodProxy) throws Throwable {
 		String methodname = method.getName();

@@ -12,44 +12,21 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.LogUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class Config {
 	static {
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
+		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(true);// print sql to console & log
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
-	}
-
-	public static void recreateTables() {
-		Assert.assertNotEquals(null, Dao.dao.getSqlBox().getContext().getDataSource());
-		try {
-			Dao.dao.execute("drop table user");
-			Dao.dao.execute("drop tables user2");
-		} catch (Exception e) {
-			System.out.println("Exception found when drop table.");
-		}
-		Dao.dao.execute("create table user", //
-				"( ID integer auto_increment ,", //
-				"constraint const1 primary key (ID),", //
-				"UserName Varchar  (50) ,", //
-				"PhoneNumber Varchar  (50) ,", //
-				"Address Varchar  (50) ,", //
-				"Alive Boolean, ", //
-				"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-		Dao.dao.execute("create table user2", //
-				"( id integer auto_increment ,", //
-				"constraint const1 primary key (ID),", //
-				"user_name Varchar  (50) ,", //
-				"phone_number Varchar  (50) ,", //
-				"address Varchar  (50) ,", //
-				"age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 	}
 
 	static class DSPoolBeanBox extends BeanBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
-			// Change to your schema, username & password below
+			// Change to your schema, username & password
 			setProperty("jdbcUrl",
 					"jdbc:mysql://127.0.0.1:3306/test?user=root&password=root888&rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClass", "com.mysql.jdbc.Driver");
@@ -79,10 +56,37 @@ public class Config {
 		}
 	}
 
+	public static void recreateTables() {
+		LogUtils.println("==========Drop and recreate all tables=============");
+		Assert.assertNotEquals(null, Dao.dao.getSqlBox().getContext().getDataSource());
+		try {
+			Dao.dao.execute("drop table user");
+			Dao.dao.execute("drop tables user2");
+		} catch (Exception e) {
+			System.out.println("Exception found when drop table.");
+		}
+		Dao.dao.execute("create table user", //
+				"( ID integer auto_increment ,", //
+				"constraint const1 primary key (ID),", //
+				"UserName Varchar  (50) ,", //
+				"PhoneNumber Varchar  (50) ,", //
+				"Address Varchar  (50) ,", //
+				"Alive Boolean, ", //
+				"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		Dao.dao.execute("create table user2", //
+				"( id integer auto_increment ,", //
+				"constraint const1 primary key (ID),", //
+				"user_name Varchar  (50) ,", //
+				"phone_number Varchar  (50) ,", //
+				"address Varchar  (50) ,", //
+				"age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	}
+
 	@Test
 	public void testCreateTables() {
 		recreateTables();
 		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from user"));
 		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from user2"));
 	}
+
 }
