@@ -12,7 +12,6 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.LogUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -57,7 +56,6 @@ public class Config {
 	}
 
 	public static void recreateTables() {
-		LogUtils.println("==========Drop and recreate all tables=============");
 		Assert.assertNotEquals(null, Dao.dao.getSqlBox().getContext().getDataSource());
 		try {
 			Dao.dao.execute("drop table user");

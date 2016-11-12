@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -35,6 +37,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Dao {
+	private static final Log log = LogFactory.getLog(Dao.class);
 	private SqlBox sqlBox;
 	private JdbcTemplate jdbc;
 	private Object bean; // PO Bean Instance
@@ -54,8 +57,8 @@ public class Dao {
 
 	// ========JdbcTemplate wrap methods begin============
 	// Only wrap some common used JdbcTemplate methods
-	public Integer queryForInteger(String... sql) { 
-		return this.queryForObject(Integer.class, sql); 
+	public Integer queryForInteger(String... sql) {
+		return this.queryForObject(Integer.class, sql);
 	}
 
 	/**
@@ -71,7 +74,7 @@ public class Dao {
 	public <T> T queryForObject(Class<?> clazz, String... sql) {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			printSQL(sp);
+			logSql(sp);
 			return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
 		} finally {
 			SqlHelper.clearLastSQL();
@@ -96,7 +99,7 @@ public class Dao {
 	public Integer execute(String... sql) {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			printSQL(sp);
+			logSql(sp);
 			return jdbc.update(sp.getSql(), (Object[]) sp.getParameters());
 		} finally {
 			SqlHelper.clearLastSQL();
@@ -109,7 +112,7 @@ public class Dao {
 	public void executeCachedSQLs() {
 		try {
 			List<List<SqlAndParameters>> subSPlist = SqlHelper.getSQLandParameterSubList();
-			printCachedSQL(subSPlist);
+			logCachedSQL(subSPlist);
 			for (final List<SqlAndParameters> splist : subSPlist) {
 				jdbc.batchUpdate(SqlHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
 					@Override
@@ -158,7 +161,7 @@ public class Dao {
 			throw new SqlBoxException("Dao queryEntity error: sqlBox is null");
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			printSQL(sp);
+			logSql(sp);
 			return getJdbc().query(sp.getSql(), sqlBox.getRowMapper(), sp.getParameters());
 		} finally {
 			SqlHelper.clearLastSQL();
@@ -169,45 +172,45 @@ public class Dao {
 	 * Print SQL and parameters to console, usually used for debug <br/>
 	 * Use context.setShowSql to control, Default showSql is "false"
 	 */
-	private void printSQL(SqlAndParameters sp) {
+	private void logSql(SqlAndParameters sp) {
 		// check if allowed print SQL
 		if (!this.getSqlBox().getContext().isShowSql())
 			return;
-		LogUtils.println(sp.getSql());
+		StringBuilder sb = new StringBuilder(sp.getSql());
 		Object[] args = sp.getParameters();
 		if (args.length > 0) {
-			LogUtils.print("Parameters: ");
+			sb.append("\r\nParameters: ");
 			for (int i = 0; i < args.length; i++) {
-				LogUtils.print("" + args[i]);
+				sb.append("" + args[i]);
 				if (i != args.length - 1)
-					LogUtils.print(",");
+					sb.append(",");
 				else
-					LogUtils.println();
+					sb.append("\r\n");
 			}
 		}
-		LogUtils.println();
+		log.info(sb.toString());
 	}
 
 	/**
 	 * Print Cached SQL and parameters, usually used for debug <br/>
 	 * Use context.setShowSql to control, Default showSql is "false"
 	 */
-	private void printCachedSQL(List<List<SqlAndParameters>> subSPlist) {
+	private void logCachedSQL(List<List<SqlAndParameters>> subSPlist) {
 		if (this.getSqlBox().getContext().isShowSql()) {
 			if (subSPlist != null) {
 				List<SqlAndParameters> l = subSPlist.get(0);
 				if (l != null) {
 					SqlAndParameters sp = l.get(0);
-					LogUtils.println("First Cached SQL:");
-					printSQL(sp);
+					log.info("First Cached SQL:");
+					logSql(sp);
 				}
 			}
 			if (subSPlist != null) {
 				List<SqlAndParameters> l = subSPlist.get(subSPlist.size() - 1);
 				if (l != null) {
 					SqlAndParameters sp = l.get(l.size() - 1);
-					LogUtils.println("Last Cached SQL:");
-					printSQL(sp);
+					log.info("Last Cached SQL:");
+					logSql(sp);
 				}
 			}
 		}
@@ -237,7 +240,7 @@ public class Dao {
 				try {
 					value = m.invoke(this.bean, new Object[] {});
 				} catch (Exception e) {
-					SqlBoxUtils.throwEX(e, "Dao save error, invoke method wrong.");
+					SqlBoxException.throwEX(e, "Dao save error, invoke method wrong.");
 				}
 				if (null != value) {
 					sb.append(col.getColumnDefinition()).append(",");

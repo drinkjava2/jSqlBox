@@ -5,7 +5,7 @@ import com.github.drinkjava2.BeanBox;
 import test.config.Config;
 import test.jdbc.BatchInsertTest;
 
-public class MultiThreadTester {
+public class BatchInsertTester {
 
 	public static class MultiThread implements Runnable {
 		public void run() {

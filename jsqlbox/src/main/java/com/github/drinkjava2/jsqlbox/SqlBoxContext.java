@@ -61,7 +61,7 @@ public class SqlBoxContext {
 	protected SqlBox findAndBuildSqlBox(Class<?> beanOrSqlBoxClass) {
 		Class<?> boxClass = null;
 		if (beanOrSqlBoxClass == null) {
-			SqlBoxUtils.throwEX(null, "SqlBoxContext findAndBuildSqlBox error! Bean Or SqlBox Class not set");
+			SqlBoxException.throwEX(null, "SqlBoxContext findAndBuildSqlBox error! Bean Or SqlBox Class not set");
 			return null;
 		}
 		if (SqlBox.class.isAssignableFrom(beanOrSqlBoxClass))
@@ -82,7 +82,7 @@ public class SqlBoxContext {
 					box.setBeanClass(beanOrSqlBoxClass);
 				box.setContext(this);
 			} catch (Exception e) {
-				SqlBoxUtils.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
+				SqlBoxException.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
 			}
 		}
 		if (box != null)

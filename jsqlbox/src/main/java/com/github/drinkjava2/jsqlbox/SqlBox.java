@@ -79,7 +79,7 @@ public class SqlBox {
 	 */
 	private void buildDefaultConfig() {
 		if (this.getBeanClass() == null)
-			SqlBoxUtils.throwEX(null, "SqlBox buildDefaultConfig error, BeanClass is null");
+			SqlBoxException.throwEX(null, "SqlBox buildDefaultConfig error, BeanClass is null");
 		HashMap<String, String> fieldIdNameMap = new HashMap<>();
 		Field[] fields = this.getBeanClass().getFields();
 		for (int i = fields.length - 1; i >= 0; i--) {
@@ -89,7 +89,7 @@ public class SqlBox {
 				try {
 					value = (String) field.get(null);
 				} catch (Exception e) {
-					SqlBoxUtils.throwEX(e,
+					SqlBoxException.throwEX(e,
 							"SqlBox buildDefaultConfig error, cann't access field \"" + field.getName() + "\"");
 				}
 
@@ -112,7 +112,7 @@ public class SqlBox {
 			beanInfo = Introspector.getBeanInfo(this.getBeanClass());
 			pds = beanInfo.getPropertyDescriptors();
 		} catch (Exception e) {
-			SqlBoxUtils.throwEX(e, "SqlBox buildDefaultConfig error");
+			SqlBoxException.throwEX(e, "SqlBox buildDefaultConfig error");
 		}
 		for (PropertyDescriptor pd : pds) {
 			String fieldname = fieldIdNameMap.get(pd.getName());
@@ -130,7 +130,7 @@ public class SqlBox {
 		}
 		for (Entry<String, String> keyAndName : fieldIdNameMap.entrySet())
 			if (columns.get(keyAndName.getKey()) == null)
-				SqlBoxUtils.throwEX(null, "SqlBox fillProperties error, no getter/setter method found for field \""
+				SqlBoxException.throwEX(null, "SqlBox fillProperties error, no getter/setter method found for field \""
 						+ keyAndName.getKey() + "\"");
 	}
 
@@ -171,7 +171,7 @@ public class SqlBox {
 				String lowerCase = columnName.toLowerCase();
 				String lowerCaseUnderline = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
 				if (databaseColumns.get(lowerCase) == null && databaseColumns.get(lowerCaseUnderline) == null)
-					SqlBoxUtils.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
 							+ "\" does match any table column in table " + tableName);
 				if (!lowerCase.equals(lowerCaseUnderline) && databaseColumns.get(lowerCase) == null
 						&& databaseColumns.get(lowerCaseUnderline) != null)
@@ -197,12 +197,12 @@ public class SqlBox {
 				bean = box.getBeanClass().newInstance();
 				ResultSetMetaData metaData = rs.getMetaData();
 				for (int i = 1; i <= metaData.getColumnCount(); i++) {
-					LogUtils.print(metaData.getTableName(i) + ".");
-					LogUtils.print(metaData.getColumnName(i) + "\t|\t");
-					LogUtils.println(metaData.getColumnTypeName(i));
+					Debugger.print(metaData.getTableName(i) + ".");
+					Debugger.print(metaData.getColumnName(i) + "\t|\t");
+					Debugger.println(metaData.getColumnTypeName(i));
 				}
 			} catch (Exception e) {
-				SqlBoxUtils.throwEX(e, "SqlBox getRowMapper error, beanClass=" + box.getBeanClass());
+				SqlBoxException.throwEX(e, "SqlBox getRowMapper error, beanClass=" + box.getBeanClass());
 			}
 			return bean;
 		}
@@ -219,37 +219,37 @@ public class SqlBox {
 	 * Print Debug info, for debug use only
 	 */
 	public void debug() {
-		LogUtils.println("Table=" + tableName);
+		Debugger.println("Table=" + tableName);
 		Set<String> columnkeys = columns.keySet();
-		LogUtils.println("==============Column values===============");
+		Debugger.println("==============Column values===============");
 		for (String fieldname : columnkeys) {
 			Column col = columns.get(fieldname);
-			LogUtils.println("fieldname=" + fieldname);
-			LogUtils.println("getColumnDefinition=" + col.getColumnDefinition());
-			LogUtils.println("getForeignKey=" + col.getForeignKey());
-			LogUtils.println("getName=" + col.getName());
-			LogUtils.println("getPropertyType=" + col.getPropertyType());
-			LogUtils.println("PropertyTypeName=" + col.getPropertyTypeName());
-			LogUtils.println("getReadMethod=" + col.getReadMethod());
-			LogUtils.println("getWriteMethod=" + col.getWriteMethod());
-			LogUtils.println("isPrimeKey=" + col.isPrimeKey());
-			LogUtils.println();
+			Debugger.println("fieldname=" + fieldname);
+			Debugger.println("getColumnDefinition=" + col.getColumnDefinition());
+			Debugger.println("getForeignKey=" + col.getForeignKey());
+			Debugger.println("getName=" + col.getName());
+			Debugger.println("getPropertyType=" + col.getPropertyType());
+			Debugger.println("PropertyTypeName=" + col.getPropertyTypeName());
+			Debugger.println("getReadMethod=" + col.getReadMethod());
+			Debugger.println("getWriteMethod=" + col.getWriteMethod());
+			Debugger.println("isPrimeKey=" + col.isPrimeKey());
+			Debugger.println();
 		}
 		Map<String, Column> tableStructure = this.getContext().getTableStructure(tableName);
 		columnkeys = tableStructure.keySet();
-		LogUtils.println("==============Table structure values===============");
+		Debugger.println("==============Table structure values===============");
 		for (String fieldname : columnkeys) {
 			Column col = tableStructure.get(fieldname);
-			LogUtils.println("fieldname=" + fieldname);
-			LogUtils.println("getColumnDefinition=" + col.getColumnDefinition());
-			LogUtils.println("getForeignKey=" + col.getForeignKey());
-			LogUtils.println("getName=" + col.getName());
-			LogUtils.println("getPropertyType=" + col.getPropertyType());
-			LogUtils.println("PropertyTypeName=" + col.getPropertyTypeName());
-			LogUtils.println("getReadMethod=" + col.getReadMethod());
-			LogUtils.println("getWriteMethod=" + col.getWriteMethod());
-			LogUtils.println("isPrimeKey=" + col.isPrimeKey());
-			LogUtils.println();
+			Debugger.println("fieldname=" + fieldname);
+			Debugger.println("getColumnDefinition=" + col.getColumnDefinition());
+			Debugger.println("getForeignKey=" + col.getForeignKey());
+			Debugger.println("getName=" + col.getName());
+			Debugger.println("getPropertyType=" + col.getPropertyType());
+			Debugger.println("PropertyTypeName=" + col.getPropertyTypeName());
+			Debugger.println("getReadMethod=" + col.getReadMethod());
+			Debugger.println("getWriteMethod=" + col.getWriteMethod());
+			Debugger.println("isPrimeKey=" + col.isPrimeKey());
+			Debugger.println();
 		}
 
 	}

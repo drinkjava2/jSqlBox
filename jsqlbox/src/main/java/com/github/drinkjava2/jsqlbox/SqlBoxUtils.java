@@ -1,7 +1,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Yong Zhu
@@ -25,20 +25,12 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
-	 */
-	public static void throwEX(Exception e, String errorMsg) {
-		LogUtils.log(Level.WARNING, errorMsg, e);
-		throw new SqlBoxException(errorMsg);
-	}
-
-	/**
-	 * Eat exception
+	 * Eat unimportant exception
 	 */
 	public static void eatException(Exception e) {
 		int i = 0;
 		if (i == 1)
-			LogUtils.log(Level.OFF, "Eat Exceptions which not worth to log it", e);
+			Logger.getLogger("log").info("" + e); // just to eat this exception
 	}
 
 	/**
