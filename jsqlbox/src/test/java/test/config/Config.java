@@ -1,6 +1,8 @@
 package test.config;
 
+import java.io.InputStream;
 import java.util.Properties;
+import java.util.Scanner;
 
 import javax.sql.DataSource;
 
@@ -13,24 +15,41 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
+import test.crud_method.po.User;
 
 public class Config {
 	static {
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
-		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(true);// print sql to console & log
+		// SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(true);
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 	}
 
-	static class DSPoolBeanBox extends BeanBox {
+	static class MySqlConfigBox extends BeanBox {
+		{ // Change to your schema, username & password
+			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
+			setProperty("driverClass", "com.mysql.jdbc.Driver");
+		}
+	}
+
+	static class OracleConfigBox extends BeanBox {
+		{ // Change to your schema, username & password
+			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
+			setProperty("driverClass", "oracle.jdbc.OracleDriver");
+		}
+	}
+
+	static class DSPoolBeanBox extends MySqlConfigBox {// change here to switch Test Database
 		{
 			setClassOrValue(ComboPooledDataSource.class);
-			// Change to your schema, username & password
-			setProperty("jdbcUrl",
-					"jdbc:mysql://127.0.0.1:3306/test?user=root&password=root888&rewriteBatchedStatements=true&useSSL=false");
-			setProperty("driverClass", "com.mysql.jdbc.Driver");
-			setProperty("maxPoolSize", 100);
-			setProperty("CheckoutTimeout", 2000);
+			setProperty("user", "root");
+			setProperty("password", "root888");
+			setProperty("minPoolSize", 4);
+			setProperty("maxPoolSize", 30);
+			setProperty("CheckoutTimeout", 5000);
 		}
 	}
 
@@ -56,35 +75,43 @@ public class Config {
 	}
 
 	public static void recreateTables() {
-		Assert.assertNotEquals(null, Dao.dao.getSqlBox().getContext().getDataSource());
 		try {
-			Dao.dao.execute("drop table user");
-			Dao.dao.execute("drop tables user2");
+			Dao.dao.execute("drop table USERS");
+			Dao.dao.execute("drop table USERS2");
 		} catch (Exception e) {
-			System.out.println("Exception found when drop table.");
+			System.out.println(e.getMessage());
+			SqlBoxUtils.eatException(e);
 		}
-		Dao.dao.execute("create table user", //
-				"( ID integer auto_increment ,", //
-				"constraint const1 primary key (ID),", //
-				"UserName Varchar  (50) ,", //
-				"PhoneNumber Varchar  (50) ,", //
-				"Address Varchar  (50) ,", //
-				"Alive Boolean, ", //
-				"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-		Dao.dao.execute("create table user2", //
-				"( id integer auto_increment ,", //
-				"constraint const1 primary key (ID),", //
-				"user_name Varchar  (50) ,", //
-				"phone_number Varchar  (50) ,", //
-				"address Varchar  (50) ,", //
-				"age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		ComboPooledDataSource pool = (ComboPooledDataSource) BeanBox.getBean(DSPoolBeanBox.class);
+		String driverClassName = pool.getDriverClass().toLowerCase();
+		if (driverClassName.indexOf("mysql") != -1)
+			executeResourceSQLs("/CreateMysqlDatabase.sql");
+		else if (driverClassName.indexOf("oracle") != -1)
+			executeResourceSQLs("/CreateOracleDatabase.sql");
+	}
+
+	private static void executeResourceSQLs(String sqlResourceFile) {
+		InputStream in = Config.class.getResourceAsStream(sqlResourceFile);
+		if (in == null)
+			throw new SqlBoxException("Can not find SQL resource file " + sqlResourceFile + " in resources folder");
+		Scanner sc = new Scanner(in);
+		try {
+			while (sc.useDelimiter(";").hasNext())
+				Dao.dao.execute(sc.next());
+		} finally {
+			sc.close();
+		}
 	}
 
 	@Test
 	public void testCreateTables() {
 		recreateTables();
-		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from user"));
-		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from user2"));
+		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from ", User.Table));
+		Assert.assertEquals((Integer) 0, Dao.dao.queryForInteger("select count(*) from ", User.Table));
+	}
+
+	public static void main(String[] args) {
+		recreateTables();
 	}
 
 }

@@ -113,9 +113,9 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Cache table MetaData for future use, use lower case column name as key
+	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
 	 */
-	public void loadTableStructure(String tablename) {
+	public void cacheTableStructure(String tablename) {
 		Dao dao = new Dao(new SqlBox(this));
 		SqlRowSet rowSet = dao.getJdbc().queryForRowSet("select * from " + tablename + " limit 0");
 		SqlRowSetMetaData metaData = rowSet.getMetaData();

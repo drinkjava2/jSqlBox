@@ -28,9 +28,9 @@ public class InsertTest {
 		user.setAge(10);
 		user.dao().save();
 		Assert.assertEquals(111,
-				(int) Dao.dao.queryForInteger("select PhoneNumber from user where username=" + q("User1")));
+				(int) Dao.dao.queryForInteger("select PhoneNumber from users where username=" + q("User1")));
 		Assert.assertEquals((Integer) 111,
-				Dao.dao.queryForInteger("select PhoneNumber from user where username=" + q("User1")));
+				Dao.dao.queryForInteger("select PhoneNumber from users where username=" + q("User1")));
 	}
 
 	@Test
@@ -42,7 +42,7 @@ public class InsertTest {
 		user2.setPhoneNumber("222");// this phone number will not write to table
 		user2.setAge(20);
 		user2.dao().save();
-		Assert.assertEquals(null, Dao.dao.queryForString("select PhoneNumber from user where username=" + q("User2")));
+		Assert.assertEquals(null, Dao.dao.queryForString("select PhoneNumber from users where username=" + q("User2")));
 	}
 
 	@Test

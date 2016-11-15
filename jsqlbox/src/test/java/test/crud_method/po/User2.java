@@ -5,5 +5,5 @@ package test.crud_method.po;
  *
  */
 public class User2 extends User {
-	public static final String Table = "user2";
+	public static final String Table = "users2";
 }

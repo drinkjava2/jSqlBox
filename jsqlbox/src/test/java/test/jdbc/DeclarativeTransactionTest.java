@@ -20,7 +20,7 @@ public class DeclarativeTransactionTest {
 	}
 
 	public void tx_InsertUser1() {
-		Dao.dao.execute("insert into user ", //
+		Dao.dao.execute("insert into users ", //
 				" (username", e("user1"), //
 				", address", e("address1"), //
 				", age)", e("10"), //
@@ -28,7 +28,7 @@ public class DeclarativeTransactionTest {
 	}
 
 	public void tx_InsertUser2() {
-		Dao.dao.execute("insert into user ", //
+		Dao.dao.execute("insert into users ", //
 				" (username", e("user2"), //
 				", address", e("address2"), //
 				", age)", e("20"), //
@@ -37,7 +37,7 @@ public class DeclarativeTransactionTest {
 
 	public void tx_doInsert() {
 		tx_InsertUser1();
-		int i = Dao.dao.queryForInteger("select count(*) from user");
+		int i = Dao.dao.queryForInteger("select count(*) from users");
 		Assert.assertEquals(1, i);
 		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();
@@ -50,7 +50,7 @@ public class DeclarativeTransactionTest {
 			tester.tx_doInsert();
 		} catch (Exception e) {
 			Assert.assertEquals(InvocationTargetException.class.getName(), e.getClass().getName());
-			int i = Dao.dao.queryForInteger("select count(*) from user");
+			int i = Dao.dao.queryForInteger("select count(*) from users");
 			Assert.assertEquals(0, i);
 			throw e;
 		}

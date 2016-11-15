@@ -24,27 +24,27 @@ public class JdbcTest {
 	@Test
 	public void tx_jdbcTest() {
 		Dao.dao.execute(
-				"insert user (username,address,age) values(" + q("user1") + "," + q("address1") + "," + q(10) + ")");
-		Dao.dao.execute("insert user (username,address,age) values(", q("user2"), ",", q("address2"), ",", q(20), ")");
-		Dao.dao.execute("insert user (username,address,age) values(" + q("user3", "address3", 30) + ")");
-		Dao.dao.execute("insert user (username,address,age) values(?,?,?)" + e("user4") + e("address4") + e(40));
-		Dao.dao.execute("insert user (username,address,age) values(?,?,?)" + e("user5", "address5", 50));
-		Dao.dao.execute("insert user ", //
+				"insert users (username,address,age) values(" + q("user1") + "," + q("address1") + "," + q(10) + ")");
+		Dao.dao.execute("insert users (username,address,age) values(", q("user2"), ",", q("address2"), ",", q(20), ")");
+		Dao.dao.execute("insert users (username,address,age) values(" + q("user3", "address3", 30) + ")");
+		Dao.dao.execute("insert users (username,address,age) values(?,?,?)" + e("user4") + e("address4") + e(40));
+		Dao.dao.execute("insert users (username,address,age) values(?,?,?)" + e("user5", "address5", 50));
+		Dao.dao.execute("insert users ", //
 				" (username", e("user6"), //
 				", address", e("address6"), //
 				", age)", e("60"), //
 				" values(?,?,?)");
-		Dao.dao.execute("update user set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
-		Dao.dao.execute("update user set username=", q("John"), ",address=", q("Shanghai"), " where age=", q(20));
-		Dao.dao.execute("update user set", //
+		Dao.dao.execute("update users set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
+		Dao.dao.execute("update users set username=", q("John"), ",address=", q("Shanghai"), " where age=", q(20));
+		Dao.dao.execute("update users set", //
 				" username=?", e("Tom"), //
 				",address=? ", e("Nanjing"), //
 				" where age=?", e(30));
-		Dao.dao.execute("update user set", //
+		Dao.dao.execute("update users set", //
 				" username=", q("Jeffery"), //
 				",address=", q("Tianjing"), //
 				" where age=", q(40));
-		Assert.assertEquals(6, (int) Dao.dao.queryForInteger("select count(*) from user"));
+		Assert.assertEquals(6, (int) Dao.dao.queryForInteger("select count(*) from users"));
 	}
 
 	/**

@@ -21,7 +21,7 @@ public class User {
 	}
 	// ============= Dao code end =========
 
-	public static final String Table = "user";
+	public static final String Table = "users";
 
 	public static String Id = "id";
 	private Integer id;

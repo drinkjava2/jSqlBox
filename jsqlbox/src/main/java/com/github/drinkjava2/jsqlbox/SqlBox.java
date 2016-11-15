@@ -63,14 +63,14 @@ public class SqlBox {
 
 	/**
 	 * Initialize a SqlBox instance<br/>
-	 * 1. Use bean field as column name<br/>
-	 * 2. If find Configuration, use it<br/>
-	 * 3. Correct column name to automatic fit camel and underline format<br/>
+	 * 1. Use bean field as column name, field userName map to DB userName column <br/>
+	 * 2. If find configuration column name, use it, for example: user_name<br/>
+	 * 3. Fit column name to real DB column name, automatic fit camel and underline format<br/>
 	 */
 	public void initialize() {
-		buildDefaultConfig();
-		changeColumnNameAccordingConfig();
-		automaticFitColumnName();
+		buildDefaultConfig();// field userName map to column userName
+		changeColumnNameAccordingConfig(); // map to column ConfigUserName
+		automaticFitColumnName();// fit to ConfigUserName or config_user_name
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class SqlBox {
 	 */
 	private void automaticFitColumnName() {
 		if (!context.existTable(tableName))
-			context.loadTableStructure(tableName);
+			context.cacheTableStructure(tableName);
 		Map<String, Column> databaseColumns = context.getTableStructure(tableName);
 		for (Entry<String, Column> entry : columns.entrySet()) {
 			Column col = entry.getValue();
@@ -171,8 +171,8 @@ public class SqlBox {
 				String lowerCase = columnName.toLowerCase();
 				String lowerCaseUnderline = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
 				if (databaseColumns.get(lowerCase) == null && databaseColumns.get(lowerCaseUnderline) == null)
-					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
-							+ "\" does match any table column in table " + tableName);
+					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \""
+							+ columnName + "\" does match any table column in table " + tableName);
 				if (!lowerCase.equals(lowerCaseUnderline) && databaseColumns.get(lowerCase) == null
 						&& databaseColumns.get(lowerCaseUnderline) != null)
 					col.setColumnDefinition(lowerCaseUnderline);
@@ -199,6 +199,7 @@ public class SqlBox {
 				for (int i = 1; i <= metaData.getColumnCount(); i++) {
 					Debugger.print(metaData.getTableName(i) + ".");
 					Debugger.print(metaData.getColumnName(i) + "\t|\t");
+					Debugger.print(metaData.getColumnLabel(i) + "\t|\t");
 					Debugger.println(metaData.getColumnTypeName(i));
 				}
 			} catch (Exception e) {
