@@ -25,7 +25,7 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Eat unimportant exception
+	 * Eat exception to avoid SONAR warning
 	 */
 	public static void eatException(Exception e) {
 		int i = 0;

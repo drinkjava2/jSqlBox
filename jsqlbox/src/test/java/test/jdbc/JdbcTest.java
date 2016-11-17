@@ -9,13 +9,15 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import test.config.Config;
+import test.config.InitializeDatabase;
+import test.crud_method.po.User;
 
 public class JdbcTest {
 	@Before
 	public void setup() {
-		Config.recreateTables();
+		InitializeDatabase.recreateTables();
 	}
 
 	/**
@@ -23,32 +25,40 @@ public class JdbcTest {
 	 */
 	@Test
 	public void tx_jdbcTest() {
-		Dao.dao.execute(
-				"insert users (username,address,age) values(" + q("user1") + "," + q("address1") + "," + q(10) + ")");
-		Dao.dao.execute("insert users (username,address,age) values(", q("user2"), ",", q("address2"), ",", q(20), ")");
-		Dao.dao.execute("insert users (username,address,age) values(" + q("user3", "address3", 30) + ")");
-		Dao.dao.execute("insert users (username,address,age) values(?,?,?)" + e("user4") + e("address4") + e(40));
-		Dao.dao.execute("insert users (username,address,age) values(?,?,?)" + e("user5", "address5", 50));
-		Dao.dao.execute("insert users ", //
-				" (username", e("user6"), //
-				", address", e("address6"), //
-				", age)", e("60"), //
-				" values(?,?,?)");
-		Dao.dao.execute("update users set username=?,address=? " + e("Sam", "BeiJing") + " where age=" + q(10));
-		Dao.dao.execute("update users set username=", q("John"), ",address=", q("Shanghai"), " where age=", q(20));
-		Dao.dao.execute("update users set", //
-				" username=?", e("Tom"), //
-				",address=? ", e("Nanjing"), //
-				" where age=?", e(30));
-		Dao.dao.execute("update users set", //
-				" username=", q("Jeffery"), //
-				",address=", q("Tianjing"), //
-				" where age=", q(40));
-		Assert.assertEquals(6, (int) Dao.dao.queryForInteger("select count(*) from users"));
+		User u = new User();
+		Dao.dao.execute("insert into " + u.Table() + " (" + u.UserName() + e("user1") + ", " + u.Address()
+				+ e("address1") + ", " + u.Age() + e("1") + ") values(?,?,?)");
+
+		Dao.dao.execute("insert into ", u.Table(), //
+				" (", u.UserName(), e("user2"), //
+				", ", u.Address(), e("address2"), //
+				", ", u.Age(), e("2"), //
+				") values(?,?,?)");
+
+		Dao.dao.execute("insert into ", u.Table(), //
+				" (", u.UserName(), e("user3"), //
+				", ", u.Address(), e("address3"), //
+				", ", u.Age(), e("3"), //
+				")", SqlHelper.questionMarks());
+
+		Dao.dao.execute("update " + u.Table() + " set " + u.UserName() + "=" + q("John") + "," + u.Address() + "="
+				+ q("Shanghai") + " where " + u.Age() + "=" + q(1));
+
+		Dao.dao.execute("update ", u.Table(), " set ", //
+				u.UserName(), "=", q("Jeffery"), ",", //
+				u.Address(), " =", q("Tianjing"), //
+				" where ", u.Age(), "=", q(2));
+
+		Dao.dao.execute("update ", u.Table(), " set ", //
+				u.UserName(), "=?", e("Tom"), ",", //
+				u.Address(), " =?", e("Nanjing"), //
+				" where ", u.Age(), "=?", e(3));
+
+		Assert.assertEquals(3, (int) Dao.dao.queryForInteger("select count(*) from " + u.Table()));
 	}
 
 	/**
-	 * Do test with Transaction
+	 * Do test within transaction
 	 */
 	@Test
 	public void doTestWithTransaction() {

@@ -8,18 +8,22 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import test.config.Config;
+import test.config.InitializeDatabase;
+import test.crud_method.po.User;
 
 public class BatchInsertTest {
 	@Before
 	public void setup() {
-		Config.recreateTables();
+		InitializeDatabase.recreateTables();
 	}
 
 	public void tx_BatchInsertDemo() {
+		User u = new User();
 		for (int i = 0; i < 10000; i++)
-			Dao.dao.cacheSQL("insert users (username", e("user" + i), ",age", e("70"), ") values(?,?)");
+			Dao.dao.cacheSQL("insert ", u.Table(), " (", u.UserName(), e("user" + i), ",", u.Age(), e("70"), ") ",
+					SqlHelper.questionMarks());
 		Dao.dao.executeCachedSQLs();
 	}
 
@@ -27,7 +31,7 @@ public class BatchInsertTest {
 	public void doTest() {
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();
-		Assert.assertEquals(10000, (int) Dao.dao.queryForInteger("select count(*) from users"));
+		Assert.assertEquals(10000, (int) Dao.dao.queryForInteger("select count(*) from ", User.Table));
 	}
 
 }

@@ -3,7 +3,7 @@ package test.crud_method.po;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 /**
- * This file should automatically created by a code generator robot
+ * This file should automatically created by a code generator tool
  *
  */
 public class User {
@@ -19,27 +19,52 @@ public class User {
 			dao = Dao.defaultDao(this);
 		return dao;
 	}
+
 	// ============= Dao code end =========
 
 	public static final String Table = "users";
 
+	public String Table() {
+		return dao().getSqlBox().getTableName();
+	}
+
 	public static String Id = "id";
 	private Integer id;
 
-	public static final String UserName = "userName";
 	private String userName;
+	public static final String UserName = "userName";
+
+	public String UserName() {
+		return dao().getSqlBox().getColumn(UserName).getColumnDefinition();
+	}
 
 	public static final String PhoneNumber = "phoneNumber";
 	private String phoneNumber;
 
+	public String PhoneNumber() {
+		return dao().getSqlBox().getColumn(PhoneNumber).getColumnDefinition();
+	}
+
 	public static final String Address = "address";
 	private String address;
+
+	public String Address() {
+		return dao().getSqlBox().getColumn(Address).getColumnDefinition();
+	}
 
 	public static final String Age = "age";
 	private Integer age;
 
+	public String Age() {
+		return dao().getSqlBox().getColumn(Age).getColumnDefinition();
+	}
+
 	public static final String Alive = "alive";
 	private Boolean alive;
+
+	public String Alive() {
+		return dao().getSqlBox().getColumn(Alive).getColumnDefinition();
+	}
 
 	public Boolean getAlive() {
 		return alive;

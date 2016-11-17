@@ -134,7 +134,7 @@ public class SqlHelper {
 		return subList(sqlBatchCache.get(), 500);
 	}
 
-	public static String values() {
+	public static String questionMarks() {
 		return createValueString(sqlCache.get().size());
 	}
 

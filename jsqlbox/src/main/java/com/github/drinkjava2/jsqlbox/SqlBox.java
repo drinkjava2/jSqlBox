@@ -41,8 +41,8 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  */
 public class SqlBox {
 	private Class<?> beanClass;
-	private String tableName;
 	private Map<String, Column> columns = new HashMap<>();
+	private String tableName;
 	private Map<String, String> configColumns = new HashMap<>();
 	private String configTableName;
 
@@ -156,11 +156,10 @@ public class SqlBox {
 
 	/**
 	 * Correct column name, for "userName" field <br/>
-	 * 1. Check if exist column key "username" in cached table structure<br/>
-	 * 2. If not found, check and correct to "user_name"<br/>
-	 * 3. if not found or found both, throw SqlBoxException
+	 * Find column ignore case like "userName","UserName","USERNAME","username", or "user_name"<br/>
+	 * if not found or more than 1, throw SqlBoxException
 	 */
-	private void automaticFitColumnName() {
+	private void automaticFitColumnName() {// NOSONAR
 		if (!context.existTable(tableName))
 			context.cacheTableStructure(tableName);
 		Map<String, Column> databaseColumns = context.getTableStructure(tableName);
@@ -168,14 +167,36 @@ public class SqlBox {
 			Column col = entry.getValue();
 			String columnName = col.getColumnDefinition();
 			if (!SqlBoxUtils.isEmptyStr(columnName)) {
+
 				String lowerCase = columnName.toLowerCase();
-				String lowerCaseUnderline = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
-				if (databaseColumns.get(lowerCase) == null && databaseColumns.get(lowerCaseUnderline) == null)
+				String realColumnNameignoreCase = null;
+				Column realColumn = databaseColumns.get(lowerCase);
+				if (realColumn != null)
+					realColumnNameignoreCase = realColumn.getColumnDefinition();
+				System.out.println("lowerCase=" + lowerCase);
+				System.out.println("realColumnNameignoreCase=" + realColumnNameignoreCase);
+
+				String underlineCase = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
+				String realColumnNameUnderline = null;
+				realColumn = databaseColumns.get(underlineCase);
+				if (realColumn != null)
+					realColumnNameUnderline = realColumn.getColumnDefinition();
+				System.out.println("underlineCase=" + underlineCase);
+				System.out.println("realColumnNameUnderline=" + realColumnNameUnderline);
+
+				if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
 					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \""
 							+ columnName + "\" does match any table column in table " + tableName);
-				if (!lowerCase.equals(lowerCaseUnderline) && databaseColumns.get(lowerCase) == null
-						&& databaseColumns.get(lowerCaseUnderline) != null)
-					col.setColumnDefinition(lowerCaseUnderline);
+
+				if (realColumnNameignoreCase != null && realColumnNameUnderline != null
+						&& !realColumnNameignoreCase.equals(realColumnNameUnderline))
+					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \""
+							+ columnName + "\" found mutiple columns in table " + tableName);
+
+				if (realColumnNameignoreCase != null)
+					col.setColumnDefinition(realColumnNameignoreCase);
+				else if (realColumnNameUnderline != null)
+					col.setColumnDefinition(realColumnNameUnderline);
 			}
 		}
 	}

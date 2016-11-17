@@ -1,14 +1,17 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+import org.springframework.jdbc.core.support.SqlLobValue;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
@@ -21,11 +24,11 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 public class SqlBoxContext {
 
 	public static final SqlBoxContext DEFAULT_SQLBOX_CONTEXT = new SqlBoxContext(null);
-	public static final String SQLBOX_IDENTITY = "Other";
+	public static final String SQLBOX_IDENTITY = "OTHER";
 
 	private DataSource dataSource = null;
 
-	private ConcurrentHashMap<String, Map<String, Column>> databaseStructure = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Map<String, Column>> databaseStructureCache = new ConcurrentHashMap<>();
 	private boolean showSql = false;// print SQL to console or log depends logging.properties
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
@@ -109,35 +112,49 @@ public class SqlBoxContext {
 	}
 
 	public boolean existTable(String tablename) {
-		return databaseStructure.get(tablename) != null;
+		return databaseStructureCache.get(tablename) != null;
 	}
 
 	/**
 	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
 	 */
-	public void cacheTableStructure(String tablename) {
-		Dao dao = new Dao(new SqlBox(this));
-		SqlRowSet rowSet = dao.getJdbc().queryForRowSet("select * from " + tablename + " limit 0");
-		SqlRowSetMetaData metaData = rowSet.getMetaData();
-		if (metaData == null) {
-			databaseStructure.remove(tablename);
-			return;
+	public void cacheTableStructure(String tableName) {
+		databaseStructureCache.remove(tableName);
+		DataSource ds = this.getDataSource();
+		ResultSet resultSet = null;
+		Connection con = DataSourceUtils.getConnection(ds);// NOSONAR
+		try {
+			resultSet = con.getMetaData().getColumns(null, null, tableName, null);
+			if (resultSet == null){
+				Debugger.println("No resultset found");
+				return;
+			}
+			Map<String, Column> columns = new HashMap<>();
+			while (resultSet.next()) {
+				Column col = new Column();
+				col.setColumnDefinition(resultSet.getString("COLUMN_NAME"));
+				col.setPropertyTypeName(resultSet.getString("TYPE_NAME"));
+				columns.put(resultSet.getString("COLUMN_NAME").toLowerCase(), col);
+				System.out.println("putting " + resultSet.getString("COLUMN_NAME").toLowerCase() + "   ="
+						+ resultSet.getString("COLUMN_NAME"));
+			}
+			databaseStructureCache.put(tableName, columns);
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SQLHelper exec error");
+		} finally {
+			if (resultSet != null)
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					SqlBoxException.throwEX(e, "SqlBoxContext cacheTableStructure error, failed to close resultSet");
+				} finally {
+					DataSourceUtils.releaseConnection(con, ds);
+				}
 		}
-		Map<String, Column> columns = new HashMap<>();
-		int columnCount = metaData.getColumnCount();
-		for (int i = 1; i <= columnCount; i++) {
-			Column col = new Column();
-			col.setColumnDefinition(metaData.getColumnName(i));
-			col.setScale(metaData.getScale(i));
-			col.setPrecision(metaData.getPrecision(i));
-			col.setPropertyTypeName(metaData.getColumnTypeName(i));
-			columns.put(metaData.getColumnName(i).toLowerCase(), col);
-		}
-		databaseStructure.put(tablename, columns);
 	}
 
 	public Map<String, Column> getTableStructure(String tableName) {
-		return databaseStructure.get(tableName);
+		return databaseStructureCache.get(tableName);
 	}
 
 }

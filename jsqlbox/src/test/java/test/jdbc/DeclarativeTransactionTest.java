@@ -10,29 +10,33 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import test.config.Config;
+import test.config.InitializeDatabase;
+import test.crud_method.po.User;
 
 public class DeclarativeTransactionTest {
 	@Before
 	public void setup() {
-		Config.recreateTables();
+		InitializeDatabase.recreateTables();
 	}
 
 	public void tx_InsertUser1() {
-		Dao.dao.execute("insert into users ", //
-				" (username", e("user1"), //
-				", address", e("address1"), //
-				", age)", e("10"), //
-				" values(?,?,?)");
+		User u = new User();
+		Dao.dao.execute("insert into ", u.Table(), //
+				" (", u.UserName(), e("user1"), //
+				", ", u.Address(), e("address1"), //
+				", ", u.Age(), ")", e("10"), //
+				SqlHelper.questionMarks());
 	}
 
 	public void tx_InsertUser2() {
-		Dao.dao.execute("insert into users ", //
-				" (username", e("user2"), //
-				", address", e("address2"), //
-				", age)", e("20"), //
-				" values(?,?,?)");
+		User u = new User();
+		Dao.dao.execute("insert into ", u.Table(), //
+				" (", u.UserName(), e("user2"), //
+				", ", u.Address(), e("address2"), //
+				", ", u.Age(), ")", e("20"), //
+				SqlHelper.questionMarks());
 	}
 
 	public void tx_doInsert() {

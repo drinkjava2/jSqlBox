@@ -249,7 +249,7 @@ public class Dao {
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
-		sb.append(SqlHelper.values());
+		sb.append(SqlHelper.questionMarks());
 		this.execute(sb.toString());
 	}
 	// ========Dao query/crud methods end=======
