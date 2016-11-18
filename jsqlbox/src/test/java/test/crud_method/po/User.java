@@ -23,6 +23,9 @@ public class User {
 	// ============= Dao code end =========
 
 	public static final String Table = "users";
+	public static final String PKey = "id";
+	public static final String PKeyGenerator = "";
+	
 
 	public String Table() {
 		return dao().getSqlBox().getTableName();

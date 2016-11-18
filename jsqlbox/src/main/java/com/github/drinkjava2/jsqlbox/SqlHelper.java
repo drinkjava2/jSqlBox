@@ -142,7 +142,7 @@ public class SqlHelper {
 	 * Create "value(?,?,?,?)" string by given howManyQuestionMark
 	 */
 	private static String createValueString(int howManyQuestionMark) {
-		StringBuilder sb = new StringBuilder("values(");
+		StringBuilder sb = new StringBuilder(" values(");
 		for (int i = 0; i < howManyQuestionMark; i++) {
 			if (i != howManyQuestionMark - 1)
 				sb.append("?,");

@@ -63,9 +63,11 @@ public class SqlBox {
 
 	/**
 	 * Initialize a SqlBox instance<br/>
-	 * 1. Use bean field as column name, field userName map to DB userName column <br/>
+	 * 1. Use bean field as column name, field userName map to DB userName
+	 * column <br/>
 	 * 2. If find configuration column name, use it, for example: user_name<br/>
-	 * 3. Fit column name to real DB column name, automatic fit camel and underline format<br/>
+	 * 3. Fit column name to real DB column name, automatic fit camel and
+	 * underline format<br/>
 	 */
 	public void initialize() {
 		buildDefaultConfig();// field userName map to column userName
@@ -156,12 +158,13 @@ public class SqlBox {
 
 	/**
 	 * Correct column name, for "userName" field <br/>
-	 * Find column ignore case like "userName","UserName","USERNAME","username", or "user_name"<br/>
+	 * Find column ignore case like "userName","UserName","USERNAME","username",
+	 * or "user_name"<br/>
 	 * if not found or more than 1, throw SqlBoxException
 	 */
 	private void automaticFitColumnName() {// NOSONAR
 		if (!context.existTable(tableName))
-			context.cacheTableStructure(tableName);
+			tableName = context.cacheTableStructure(tableName);
 		Map<String, Column> databaseColumns = context.getTableStructure(tableName);
 		for (Entry<String, Column> entry : columns.entrySet()) {
 			Column col = entry.getValue();
@@ -173,17 +176,11 @@ public class SqlBox {
 				Column realColumn = databaseColumns.get(lowerCase);
 				if (realColumn != null)
 					realColumnNameignoreCase = realColumn.getColumnDefinition();
-				System.out.println("lowerCase=" + lowerCase);
-				System.out.println("realColumnNameignoreCase=" + realColumnNameignoreCase);
-
 				String underlineCase = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
 				String realColumnNameUnderline = null;
 				realColumn = databaseColumns.get(underlineCase);
 				if (realColumn != null)
 					realColumnNameUnderline = realColumn.getColumnDefinition();
-				System.out.println("underlineCase=" + underlineCase);
-				System.out.println("realColumnNameUnderline=" + realColumnNameUnderline);
-
 				if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
 					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \""
 							+ columnName + "\" does match any table column in table " + tableName);

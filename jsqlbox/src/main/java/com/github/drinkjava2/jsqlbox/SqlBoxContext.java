@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
@@ -28,8 +27,11 @@ public class SqlBoxContext {
 
 	private DataSource dataSource = null;
 
-	private ConcurrentHashMap<String, Map<String, Column>> databaseStructureCache = new ConcurrentHashMap<>();
-	private boolean showSql = false;// print SQL to console or log depends logging.properties
+	private ConcurrentHashMap<String, Map<String, Column>> databaseColumnsCache = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
+
+	// print SQL to console or log depends logging.properties
+	private boolean showSql = false;
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -112,49 +114,58 @@ public class SqlBoxContext {
 	}
 
 	public boolean existTable(String tablename) {
-		return databaseStructureCache.get(tablename) != null;
+		return databaseColumnsCache.get(tablename) != null;
 	}
 
 	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
+	 * Cache table MetaData in SqlBoxContext for future use, use lower case
+	 * column name as key
 	 */
-	public void cacheTableStructure(String tableName) {
-		databaseStructureCache.remove(tableName);
+	public String cacheTableStructure(String tableName) {
+		String realTableName = null;
 		DataSource ds = this.getDataSource();
-		ResultSet resultSet = null;
+		ResultSet rs = null;
 		Connection con = DataSourceUtils.getConnection(ds);// NOSONAR
 		try {
-			resultSet = con.getMetaData().getColumns(null, null, tableName, null);
-			if (resultSet == null){
-				Debugger.println("No resultset found");
-				return;
-			}
+			rs = con.getMetaData().getTables(null, null, null, new String[] { "TABLE", "VIEW" });
+			while (rs.next())
+				databaseTableNameCache.put(rs.getString("TABLE_NAME").toLowerCase(), rs.getString("TABLE_NAME"));
+			realTableName = databaseTableNameCache.get(tableName.toLowerCase());
+			if (SqlBoxUtils.isEmptyStr(realTableName))
+				SqlBoxException.throwEX(null,
+						"SqlBoxContext cacheTableStructure error, table " + tableName + " does not exist");
+			rs.close();
+			rs = con.getMetaData().getColumns(null, null, realTableName, null);
+			if (rs == null)
+				SqlBoxException.throwEX(null,
+						"SqlBoxContext cacheTableStructure error, table " + tableName + " does not exist");
 			Map<String, Column> columns = new HashMap<>();
-			while (resultSet.next()) {
+			while (rs != null && rs.next()) {
 				Column col = new Column();
-				col.setColumnDefinition(resultSet.getString("COLUMN_NAME"));
-				col.setPropertyTypeName(resultSet.getString("TYPE_NAME"));
-				columns.put(resultSet.getString("COLUMN_NAME").toLowerCase(), col);
-				System.out.println("putting " + resultSet.getString("COLUMN_NAME").toLowerCase() + "   ="
-						+ resultSet.getString("COLUMN_NAME"));
+				col.setColumnDefinition(rs.getString("COLUMN_NAME"));
+				col.setPropertyTypeName(rs.getString("TYPE_NAME"));
+				columns.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
 			}
-			databaseStructureCache.put(tableName, columns);
+			databaseColumnsCache.put(realTableName, columns);
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SQLHelper exec error");
 		} finally {
-			if (resultSet != null)
+			if (rs != null)
 				try {
-					resultSet.close();
+					rs.close();
 				} catch (SQLException e) {
-					SqlBoxException.throwEX(e, "SqlBoxContext cacheTableStructure error, failed to close resultSet");
+					SqlBoxException.throwEX(e, "SqlBoxContext cacheTableStructure error, failed to close ResultSet");
 				} finally {
 					DataSourceUtils.releaseConnection(con, ds);
 				}
+			else
+				DataSourceUtils.releaseConnection(con, ds);
 		}
+		return realTableName;
 	}
 
 	public Map<String, Column> getTableStructure(String tableName) {
-		return databaseStructureCache.get(tableName);
+		return databaseColumnsCache.get(tableName);
 	}
 
 }

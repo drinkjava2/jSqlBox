@@ -9,7 +9,6 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import oracle.net.aso.q;
 import test.config.InitializeDatabase;
 import test.crud_method.po.User;
 
