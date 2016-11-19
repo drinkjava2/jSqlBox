@@ -1,4 +1,4 @@
-package test.crud_method.po;
+package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.SqlBox;
 

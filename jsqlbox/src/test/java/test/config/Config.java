@@ -19,7 +19,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  */
 public class Config {
 	// jSqlBox & jBeanBox initialize
-	static void initialize() {
+	public static void initialize() {
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(true);
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
@@ -42,7 +42,7 @@ public class Config {
 	}
 
 	// Data source pool setting
-	static class DSPoolBeanBox extends OracleConfigBox {
+	static class DSPoolBeanBox extends MySqlConfigBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user

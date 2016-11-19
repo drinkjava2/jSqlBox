@@ -1,4 +1,4 @@
-package test.crud_method.po;
+package test.config.po;
 
 /**
  * This file should automatically created by a code generator robot

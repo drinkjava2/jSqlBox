@@ -12,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
 import test.config.InitializeDatabase;
-import test.crud_method.po.User;
+import test.config.po.User;
 
 public class JdbcTest {
 	@Before

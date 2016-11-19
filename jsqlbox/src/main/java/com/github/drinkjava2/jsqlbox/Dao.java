@@ -82,7 +82,8 @@ public class Dao {
 	}
 
 	/**
-	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
+	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to
+	 * prepared statement
 	 * 
 	 * @param sql
 	 */
@@ -93,7 +94,8 @@ public class Dao {
 	// ========JdbcTemplate wrap methods End============
 
 	/**
-	 * Execute a sql and return how many record be affected, sql be translated to prepared statement
+	 * Execute a sql and return how many record be affected, sql be translated
+	 * to prepared statement
 	 * 
 	 */
 	public Integer execute(String... sql) {
@@ -254,6 +256,13 @@ public class Dao {
 	}
 	// ========Dao query/crud methods end=======
 
+	// =============Misc methods begin==========
+	public String columnName(String fieldID) {
+		return this.getSqlBox().getColumn(fieldID).getColumnDefinition();
+	}
+
+	// =============Misc methods end==========
+
 	// ================ Getters & Setters===============
 	/**
 	 * Return Bean instance which related to this dao
@@ -271,8 +280,8 @@ public class Dao {
 
 	/**
 	 * Return a JdbcTemplate instance<br/>
-	 * It's not recommended to use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
-	 * replaced by pure JDBC in future version
+	 * It's not recommended to use JdbcTemplate directly unless very necessary,
+	 * JdbcTemplate may be deprecated or replaced by pure JDBC in future version
 	 * 
 	 * @return JdbcTemplate
 	 */

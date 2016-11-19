@@ -1,4 +1,4 @@
-package test.crud_method.po;
+package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
@@ -23,52 +23,57 @@ public class User {
 	// ============= Dao code end =========
 
 	public static final String Table = "users";
-	public static final String PKey = "id";
-	public static final String PKeyGenerator = "";
-	
 
 	public String Table() {
 		return dao().getSqlBox().getTableName();
 	}
 
+	public static final String PKey = "id";
+	public static final String PKeyGenerator = "";
+
 	public static String Id = "id";
 	private Integer id;
+
+	public String Id() {
+		return dao().columnName(Id);
+	}
 
 	private String userName;
 	public static final String UserName = "userName";
 
 	public String UserName() {
-		return dao().getSqlBox().getColumn(UserName).getColumnDefinition();
+		return dao().columnName(UserName);
 	}
 
 	public static final String PhoneNumber = "phoneNumber";
 	private String phoneNumber;
 
 	public String PhoneNumber() {
-		return dao().getSqlBox().getColumn(PhoneNumber).getColumnDefinition();
+		return dao().columnName(PhoneNumber);
 	}
 
 	public static final String Address = "address";
 	private String address;
 
 	public String Address() {
-		return dao().getSqlBox().getColumn(Address).getColumnDefinition();
+		return dao().columnName(Address);
 	}
 
 	public static final String Age = "age";
 	private Integer age;
 
 	public String Age() {
-		return dao().getSqlBox().getColumn(Age).getColumnDefinition();
+		return dao().columnName(Age);
 	}
 
 	public static final String Alive = "alive";
 	private Boolean alive;
 
 	public String Alive() {
-		return dao().getSqlBox().getColumn(Alive).getColumnDefinition();
+		return dao().columnName(Alive);
 	}
 
+	// getter & setters
 	public Boolean getAlive() {
 		return alive;
 	}

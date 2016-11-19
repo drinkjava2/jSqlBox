@@ -86,19 +86,20 @@ public class SqlBox {
 		Field[] fields = this.getBeanClass().getFields();
 		for (int i = fields.length - 1; i >= 0; i--) {
 			Field field = fields[i];
-			if (SqlBoxUtils.isCapitalizedString(field.getName())) {
+			String fieldname = field.getName();
+			if (SqlBoxUtils.isCapitalizedString(fieldname)) {
 				String value = null;
 				try {
 					value = (String) field.get(null);
 				} catch (Exception e) {
 					SqlBoxException.throwEX(e,
-							"SqlBox buildDefaultConfig error, cann't access field \"" + field.getName() + "\"");
+							"SqlBox buildDefaultConfig error, cann't access field \"" + fieldname + "\"");
 				}
 
-				if ("Table".equals(field.getName()))
+				if ("Table".equals(fieldname))
 					this.tableName = value;
 				else
-					fieldIdNameMap.put(SqlBoxUtils.toFirstLetterLowerCase(field.getName()), value);
+					fieldIdNameMap.put(SqlBoxUtils.toFirstLetterLowerCase(fieldname), value);
 			}
 		}
 		fillProperties(fieldIdNameMap);
@@ -130,10 +131,6 @@ public class SqlBox {
 				this.putColumn(pd.getName(), column);
 			}
 		}
-		for (Entry<String, String> keyAndName : fieldIdNameMap.entrySet())
-			if (columns.get(keyAndName.getKey()) == null)
-				SqlBoxException.throwEX(null, "SqlBox fillProperties error, no getter/setter method found for field \""
-						+ keyAndName.getKey() + "\"");
 	}
 
 	/**
