@@ -20,29 +20,30 @@ public class User {
 		return dao;
 	}
 
-	// ============= Dao code end =========
+	public void initialize() {
+		dao().setTableName("users");
+	}
 
+	// ============= Dao code end =========
 	public static final String Table = "users";
 
 	public String Table() {
-		return dao().getSqlBox().getTableName();
+		return dao().tableName();
 	}
 
-	public static final String PKey = "id";
-	public static final String PKeyGenerator = "";
-
 	public static String Id = "id";
+
 	private Integer id;
 
 	public String Id() {
-		return dao().columnName(Id);
+		return dao().columnName("id");
 	}
 
 	private String userName;
 	public static final String UserName = "userName";
 
 	public String UserName() {
-		return dao().columnName(UserName);
+		return dao().columnName(User.UserName);
 	}
 
 	public static final String PhoneNumber = "phoneNumber";

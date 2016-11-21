@@ -23,7 +23,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 public class SqlBoxContext {
 
 	public static final SqlBoxContext DEFAULT_SQLBOX_CONTEXT = new SqlBoxContext(null);
-	public static final String SQLBOX_IDENTITY = "OTHER";
+	public static final String SQLBOX_IDENTITY = "BOX";
 
 	private DataSource dataSource = null;
 

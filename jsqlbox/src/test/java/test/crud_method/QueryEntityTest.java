@@ -17,7 +17,7 @@ public class QueryEntityTest {
 	@Before
 	public void setup() {
 		InitializeDatabase.recreateTables();
-		User u = new User(); 
+		User u = new User();
 		u.dao().execute("insert into ", u.Table(), //
 				" (", u.UserName(), e("user1"), //
 				", ", u.Address(), e("address1"), //
@@ -32,7 +32,7 @@ public class QueryEntityTest {
 		u.setAddress("address3");
 		u.setAge(3);
 		u.dao().save();
-		Assert.assertEquals(3, (int) Dao.dao.queryForInteger("select count(*) from ", User.Table));
+		Assert.assertEquals(3, (int) Dao.dao.queryForInteger("select count(*) from ", u.Table()));
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public class QueryEntityTest {
 
 	public static void main(String[] args) {
 		InitializeDatabase.recreateTables();
-		QueryEntityTest t=new QueryEntityTest();
+		QueryEntityTest t = new QueryEntityTest();
 		t.setup();
 	}
 }

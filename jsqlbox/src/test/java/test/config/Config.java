@@ -21,7 +21,7 @@ public class Config {
 	// jSqlBox & jBeanBox initialize
 	public static void initialize() {
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
-		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(true);
+		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(false);
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 	}
 
