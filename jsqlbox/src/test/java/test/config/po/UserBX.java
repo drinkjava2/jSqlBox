@@ -5,9 +5,9 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 public class UserBX extends SqlBox {
 	{
 		//this.setBeanClass(User.class);
-		this.setTableName("users");
-		this.setColumnName(User.UserName, "UserName");
-		this.setColumnName(User.Address, "Address");
-		this.setColumnName(User.PhoneNumber, "PhoneNumber");
+		this.configTableName("users");
+		this.configColumnName(User.UserName, "UserName");
+		this.configColumnName(User.Address, "Address");
+		this.configColumnName(User.PhoneNumber, "PhoneNumber");
 	}
 }

@@ -260,7 +260,7 @@ public class Dao {
 	}
 
 	public void setTableName(String tableName) {
-		this.getSqlBox().setTableName(tableName);
+		this.getSqlBox().configTableName(tableName);
 	}
 
 	public String columnName(String fieldID) {

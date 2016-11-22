@@ -1,5 +1,7 @@
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -96,5 +98,29 @@ public class SqlBoxUtils {
 			}
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Make the given method accessible, explicitly setting it accessible if
+	 * necessary.
+	 */
+	public static void makeAccessible(Method method) {
+		if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers()))
+				&& !method.isAccessible()) {
+			method.setAccessible(true);
+		}
+	}
+
+	/**
+	 * @param instance
+	 */
+	public static void beanInitialize(Class<?> beanClass, SqlBox box) {
+		try {
+			Method m = beanClass.getDeclaredMethod("initialize", new Class[] { SqlBox.class });
+			if (m != null)
+				m.invoke(null, new Object[] { box });
+		} catch (Exception e) {
+			SqlBoxUtils.eatException(e);
+		}
 	}
 }
