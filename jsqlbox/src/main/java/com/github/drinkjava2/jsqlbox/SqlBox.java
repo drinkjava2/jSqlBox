@@ -63,11 +63,9 @@ public class SqlBox {
 
 	/**
 	 * Initialize a SqlBox instance<br/>
-	 * 1. Use bean field as column name, field userName map to DB userName
-	 * column <br/>
+	 * 1. Use bean field as column name, field userName map to DB userName column <br/>
 	 * 2. If find configuration column name, use it, for example: user_name<br/>
-	 * 3. Fit column name to real DB column name, automatic fit camel and
-	 * underline format<br/>
+	 * 3. Fit column name to real DB column name, automatic fit camel and underline format<br/>
 	 */
 	public void initialize() {
 		buildDefaultConfig();// field userName map to column userName
@@ -155,8 +153,7 @@ public class SqlBox {
 
 	/**
 	 * Correct column name, for "userName" field <br/>
-	 * Find column ignore case like "userName","UserName","USERNAME","username",
-	 * or "user_name"<br/>
+	 * Find column ignore case like "userName","UserName","USERNAME","username", or "user_name"<br/>
 	 * if not found or more than 1, throw SqlBoxException
 	 */
 	private void automaticFitColumnName() {// NOSONAR
@@ -274,10 +271,14 @@ public class SqlBox {
 
 	public void configTableName(String tableName) {
 		configTableName = tableName;
+		this.tableName = tableName;
 	}
 
 	public void configColumnName(String fieldID, String columnDefinition) {
 		configColumns.put(fieldID, columnDefinition);
+		Column col = columns.get(fieldID);
+		if (col != null)
+			col.setColumnDefinition(columnDefinition);
 	}
 	// ========Config methods end==============
 

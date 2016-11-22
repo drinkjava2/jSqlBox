@@ -1,6 +1,7 @@
 package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 
 /**
  * This file should automatically created by a code generator tool
@@ -20,8 +21,8 @@ public class User {
 		return dao;
 	}
 
-	public void initialize() {
-		dao().setTableName("users");
+	public static void initialize(SqlBox box) {
+		box.configTableName("users");
 	}
 
 	// ============= Dao code end =========

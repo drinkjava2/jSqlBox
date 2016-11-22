@@ -13,8 +13,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
- * This Java class is a configuration file, equal to XML in Spring, see jBeanBox
- * project
+ * This Java class is a configuration file, equal to XML in Spring, see jBeanBox project
  *
  */
 public class Config {
@@ -42,7 +41,7 @@ public class Config {
 	}
 
 	// Data source pool setting
-	static class DSPoolBeanBox extends MySqlConfigBox {
+	public static class DSPoolBeanBox extends MySqlConfigBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user

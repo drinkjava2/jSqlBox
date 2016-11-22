@@ -34,8 +34,7 @@ public class InsertTest {
 	@Test
 	public void insertUser2() {
 		User u = new User();
-		u.dao().getSqlBox().configColumnName(User.PhoneNumber, null);
-		u.dao().getSqlBox().initialize();
+		u.dao().getSqlBox().configColumnName(User.PhoneNumber, null); 
 		u.setUserName("User2");
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");// this phone number will not write to table

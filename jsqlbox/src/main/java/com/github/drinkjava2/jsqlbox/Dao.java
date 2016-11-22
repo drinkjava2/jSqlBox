@@ -255,14 +255,6 @@ public class Dao {
 	// ========Dao query/crud methods end=======
 
 	// =============Misc methods begin==========
-	public void setColumnName(String fieldID, String columanName) {
-		this.getSqlBox().getColumn(fieldID).setColumnDefinition(columanName);
-	}
-
-	public void setTableName(String tableName) {
-		this.getSqlBox().configTableName(tableName);
-	}
-
 	public String columnName(String fieldID) {
 		return this.getSqlBox().getColumn(fieldID).getColumnDefinition();
 	}

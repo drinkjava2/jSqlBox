@@ -10,4 +10,6 @@ public class UserBX extends SqlBox {
 		this.configColumnName(User.Address, "Address");
 		this.configColumnName(User.PhoneNumber, "PhoneNumber");
 	}
+	
+	
 }
