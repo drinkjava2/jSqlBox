@@ -24,7 +24,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <version>1.0.0</version>
 
-  <name>jSQLBox</name>
+  <name>jsqlbox-package</name>
 
   <description>jSQLBox is a micro scale persistence tool for Java 7 and above</description>
 
@@ -33,7 +33,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <module>jsqlbox</module>
     
     <!-- examples how to use jSQLBox -->
-    <module>jsqlbox-example</module>
+    <module>jsqlbox-test</module>
   </modules>
 
   <properties> 
@@ -42,7 +42,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
 
   <build>
-      <finalName>jsqlbox</finalName>
+      <finalName>jsqlbox-package</finalName>
       <plugins>
           <plugin>
               <artifactId>maven-compiler-plugin</artifactId>
