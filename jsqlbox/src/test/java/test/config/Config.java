@@ -13,35 +13,33 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
- * This Java class is a configuration file, equal to XML in Spring, see jBeanBox project
+ * This Java class is a configuration file, equal to XML in Spring, see jBeanBox
+ * project
  *
  */
 public class Config {
 	// jSqlBox & jBeanBox initialize
 	public static void initialize() {
-		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DSPoolBeanBox.class));
+		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(MySqlDataSource.class));
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(false);
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 	}
 
-	// MySql connection URL
-	static class MySqlConfigBox extends BeanBox {
+	public static class OracleCTX extends BeanBox {
 		{
-			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
-			setProperty("driverClass", "com.mysql.jdbc.Driver");
+			this.setClassOrValue(SqlBoxContext.class);
+			this.setProperty("dataSource", MySqlDataSource.class);
 		}
 	}
 
-	// Oracle connection URL
-	static class OracleConfigBox extends BeanBox {
+	public static class MySqlCTX extends OracleCTX {
 		{
-			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
-			setProperty("driverClass", "oracle.jdbc.OracleDriver");
+			this.setProperty("dataSource", MySqlDataSource.class);
 		}
 	}
 
 	// Data source pool setting
-	public static class DSPoolBeanBox extends MySqlConfigBox {
+	public static class DSPoolBeanBox extends BeanBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user
@@ -49,6 +47,22 @@ public class Config {
 			setProperty("minPoolSize", 4);
 			setProperty("maxPoolSize", 30);
 			setProperty("CheckoutTimeout", 5000);
+		}
+	}
+
+	// MySql connection URL
+	static class MySqlDataSource extends DSPoolBeanBox {
+		{
+			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
+			setProperty("driverClass", "com.mysql.jdbc.Driver");
+		}
+	}
+
+	// Oracle connection URL
+	static class OracleDataSource extends DSPoolBeanBox {
+		{
+			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
+			setProperty("driverClass", "oracle.jdbc.OracleDriver");
 		}
 	}
 

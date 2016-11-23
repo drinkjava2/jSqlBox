@@ -40,6 +40,10 @@ public class SqlBoxContext {
 		}
 	};
 
+	public SqlBoxContext() {
+		// Default constructor
+	}
+
 	public SqlBoxContext(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
@@ -90,7 +94,7 @@ public class SqlBoxContext {
 				SqlBoxException.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
 			}
 		}
-		if (box != null){
+		if (box != null) {
 			SqlBoxUtils.beanInitialize(box.getBeanClass(), box);
 			box.initialize();
 		}

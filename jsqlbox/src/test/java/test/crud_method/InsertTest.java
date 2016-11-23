@@ -25,6 +25,7 @@ public class InsertTest {
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
+		u.setAlive(true);
 		u.setAge(10);
 		u.dao().save();
 		Assert.assertEquals(111, (int) Dao.dao.queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
@@ -34,10 +35,11 @@ public class InsertTest {
 	@Test
 	public void insertUser2() {
 		User u = new User();
-		u.dao().getSqlBox().configColumnName(User.PhoneNumber, null); 
+		u.dao().getSqlBox().configColumnName(User.PhoneNumber, null);
 		u.setUserName("User2");
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");// this phone number will not write to table
+		u.setAlive(true);
 		u.setAge(20);
 		u.dao().save();
 		Assert.assertEquals(null, Dao.dao.queryForString("select ", u.PhoneNumber(), " from ", u.Table(), " where ",

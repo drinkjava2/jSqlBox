@@ -81,6 +81,16 @@ public class SqlBoxUtils {
 		else
 			return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
 	}
+	
+	/**
+	 * Change first letter to upper case
+	 */
+	public static String toFirstLetterUpperCase(String s) {
+		if (Character.isUpperCase(s.charAt(0)))
+			return s;
+		else
+			return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
+	}
 
 	/**
 	 * Camel string change to lower case underline string, "AbcDef" to "abc_def"

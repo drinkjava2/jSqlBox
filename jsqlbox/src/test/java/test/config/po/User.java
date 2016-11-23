@@ -13,6 +13,7 @@ public class User {
 
 	public void putDao(Dao dao) {
 		this.dao = dao;
+		dao.setBean(this);
 	}
 
 	public Dao dao() {

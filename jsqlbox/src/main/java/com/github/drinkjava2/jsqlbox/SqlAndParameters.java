@@ -17,7 +17,8 @@
 package com.github.drinkjava2.jsqlbox;
 
 /**
- * SqlAndParameters class used by SqlBox for store sql and parameters in threadlocal
+ * SqlAndParameters class used by SqlBox for store sql and parameters in
+ * threadlocal
  * 
  * @author Yong Zhu
  * @version 1.0.0
@@ -26,6 +27,15 @@ package com.github.drinkjava2.jsqlbox;
 public class SqlAndParameters {
 	private String sql;
 	private Object[] parameters;
+
+	public SqlAndParameters() {
+		// default Constructor
+	}
+
+	public SqlAndParameters(String sql, Object[] parameters) {
+		this.sql = sql;
+		this.parameters = parameters;
+	}
 
 	public String getSql() {
 		return sql;

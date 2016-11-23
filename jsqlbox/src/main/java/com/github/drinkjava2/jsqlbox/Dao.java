@@ -18,6 +18,7 @@ package com.github.drinkjava2.jsqlbox;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -39,8 +40,10 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 public class Dao {
 	private static final Log log = LogFactory.getLog(Dao.class);
 	private SqlBox sqlBox;
-	private JdbcTemplate jdbc;
-	private Object bean; // PO Bean Instance
+	private JdbcTemplate jdbc; // Spring JDBCTemplate
+	// In future version may delete JDBCTemplate and only use pure JDBC
+
+	private Object bean; // Entity Bean Instance
 	public static final Dao dao = new Dao(SqlBox.DEFAULT_SQLBOX);
 
 	public Dao(SqlBox sqlBox) {
@@ -82,7 +85,8 @@ public class Dao {
 	}
 
 	/**
-	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
+	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to
+	 * prepared statement
 	 * 
 	 * @param sql
 	 */
@@ -93,7 +97,8 @@ public class Dao {
 	// ========JdbcTemplate wrap methods End============
 
 	/**
-	 * Execute a sql and return how many record be affected, sql be translated to prepared statement
+	 * Execute a sql and return how many record be affected, sql be translated
+	 * to prepared statement
 	 * 
 	 */
 	public Integer execute(String... sql) {
@@ -219,39 +224,46 @@ public class Dao {
 	/**
 	 * Insert or Update a Bean to Database
 	 */
-	public void save() {
-		try {
-			doSave();
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
-	}
-
-	/**
-	 * Insert or Update a Bean to Database
-	 */
-	private void doSave() {
+	public Integer save() {
+		if (bean == null)
+			SqlBoxException.throwEX(null, "Dao doSave error, bean is null");
 		StringBuilder sb = new StringBuilder();
+		List<Object> parameters = new ArrayList<>();
+		int count = 0;
 		sb.append("insert into ").append(sqlBox.getTableName()).append(" (");
 		for (Column col : sqlBox.getColumns().values()) {
 			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnDefinition())) {
-				Method m = col.getReadMethod();
+				String methodName = col.getReadMethodName();
 				Object value = null;
+				Method m;
 				try {
+					m = bean.getClass().getDeclaredMethod(methodName, new Class[] {});// NOSONAR
 					value = m.invoke(this.bean, new Object[] {});
-				} catch (Exception e) {
-					SqlBoxException.throwEX(e, "Dao save error, invoke method wrong.");
+				} catch (Exception e1) {
+					SqlBoxException.throwEX(e1,
+							"Dao doSave error, method " + methodName + " not found in class " + bean);
 				}
-				if (null != value) {
+				if (value != null) {
 					sb.append(col.getColumnDefinition()).append(",");
-					SqlHelper.e(value);
+					if (Boolean.class.isInstance(value)) {// NOSONAR
+						if (((Boolean) value).equals(true))
+							value = 1;
+						else
+							value = 0;
+					}
+					parameters.add(value);
+					count++;
 				}
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
-		sb.append(SqlHelper.questionMarks());
-		this.execute(sb.toString());
+		sb.append(SqlHelper.createValueString(count));
+		if (this.getSqlBox().getContext().isShowSql())
+			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+		return jdbc.update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
+
 	}
+
 	// ========Dao query/crud methods end=======
 
 	// =============Misc methods begin==========
@@ -282,8 +294,8 @@ public class Dao {
 
 	/**
 	 * Return a JdbcTemplate instance<br/>
-	 * It's not recommended to use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
-	 * replaced by pure JDBC in future version
+	 * It's not recommended to use JdbcTemplate directly unless very necessary,
+	 * JdbcTemplate may be deprecated or replaced by pure JDBC in future version
 	 * 
 	 * @return JdbcTemplate
 	 */

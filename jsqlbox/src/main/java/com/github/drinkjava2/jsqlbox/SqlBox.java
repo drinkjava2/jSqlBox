@@ -57,15 +57,13 @@ public class SqlBox {
 		this.context = context;
 	}
 
-	public static <T> T get(Class<?> beanOrBoxClass) {
-		return SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.get(beanOrBoxClass);
-	}
-
 	/**
 	 * Initialize a SqlBox instance<br/>
-	 * 1. Use bean field as column name, field userName map to DB userName column <br/>
+	 * 1. Use bean field as column name, field userName map to DB userName
+	 * column <br/>
 	 * 2. If find configuration column name, use it, for example: user_name<br/>
-	 * 3. Fit column name to real DB column name, automatic fit camel and underline format<br/>
+	 * 3. Fit column name to real DB column name, automatic fit camel and
+	 * underline format<br/>
 	 */
 	public void initialize() {
 		buildDefaultConfig();// field userName map to column userName
@@ -124,8 +122,8 @@ public class SqlBox {
 					column.setPrimeKey(true);
 				column.setColumnDefinition(fieldname);
 				column.setPropertyType(pd.getPropertyType());
-				column.setReadMethod(pd.getReadMethod());
-				column.setWriteMethod(pd.getWriteMethod());
+				column.setReadMethodName(pd.getReadMethod().getName());
+				column.setWriteMethodName(pd.getWriteMethod().getName());
 				this.putColumn(pd.getName(), column);
 			}
 		}
@@ -153,7 +151,8 @@ public class SqlBox {
 
 	/**
 	 * Correct column name, for "userName" field <br/>
-	 * Find column ignore case like "userName","UserName","USERNAME","username", or "user_name"<br/>
+	 * Find column ignore case like "userName","UserName","USERNAME","username",
+	 * or "user_name"<br/>
 	 * if not found or more than 1, throw SqlBoxException
 	 */
 	private void automaticFitColumnName() {// NOSONAR
@@ -243,8 +242,8 @@ public class SqlBox {
 			Debugger.println("getName=" + col.getName());
 			Debugger.println("getPropertyType=" + col.getPropertyType());
 			Debugger.println("PropertyTypeName=" + col.getPropertyTypeName());
-			Debugger.println("getReadMethod=" + col.getReadMethod());
-			Debugger.println("getWriteMethod=" + col.getWriteMethod());
+			Debugger.println("getReadMethodName=" + col.getReadMethodName());
+			Debugger.println("getWriteMethodName=" + col.getWriteMethodName());
 			Debugger.println("isPrimeKey=" + col.isPrimeKey());
 			Debugger.println();
 		}
@@ -259,8 +258,8 @@ public class SqlBox {
 			Debugger.println("getName=" + col.getName());
 			Debugger.println("getPropertyType=" + col.getPropertyType());
 			Debugger.println("PropertyTypeName=" + col.getPropertyTypeName());
-			Debugger.println("getReadMethod=" + col.getReadMethod());
-			Debugger.println("getWriteMethod=" + col.getWriteMethod());
+			Debugger.println("getReadMethodName=" + col.getReadMethodName());
+			Debugger.println("getWriteMethodName=" + col.getWriteMethodName());
 			Debugger.println("isPrimeKey=" + col.isPrimeKey());
 			Debugger.println();
 		}
