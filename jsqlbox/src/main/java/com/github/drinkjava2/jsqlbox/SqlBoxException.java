@@ -1,6 +1,8 @@
 
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.logging.Logger;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,5 +30,14 @@ public class SqlBoxException extends RuntimeException {
 	public static void throwEX(Exception e, String errorMsg) {
 		log.error(errorMsg, e);
 		throw new SqlBoxException(errorMsg);
+	}
+
+	/**
+	 * Eat exception to avoid SONAR warning
+	 */
+	public static void eatException(Exception e) {
+		int i = 0;
+		if (i == 1)
+			Logger.getLogger("log").info(e.getMessage()); // will never run here
 	}
 }

@@ -1,9 +1,9 @@
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 /**
  * @author Yong Zhu
@@ -27,15 +27,6 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Eat exception to avoid SONAR warning
-	 */
-	public static void eatException(Exception e) {
-		int i = 0;
-		if (i == 1)
-			Logger.getLogger("log").info("" + e); // just to eat this exception
-	}
-
-	/**
 	 * Check class if exist
 	 */
 	public static Class<?> checkSqlBoxClassExist(String className) {
@@ -50,7 +41,7 @@ public class SqlBoxUtils {
 				classExistCache.put(className, 0);
 				return null;
 			} catch (Exception e) {
-				SqlBoxUtils.eatException(e);
+				SqlBoxException.eatException(e);
 				classExistCache.put(className, 0);
 				return null;
 			}
@@ -58,7 +49,7 @@ public class SqlBoxUtils {
 			try {
 				return Class.forName(className);
 			} catch (Exception e) {
-				eatException(e);
+				SqlBoxException.eatException(e);
 			}
 		}
 		return null;
@@ -81,7 +72,7 @@ public class SqlBoxUtils {
 		else
 			return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
 	}
-	
+
 	/**
 	 * Change first letter to upper case
 	 */
@@ -111,13 +102,13 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Make the given method accessible, explicitly setting it accessible if
-	 * necessary.
+	 * Make the given field accessible, only called when actually necessary, to avoid unnecessary conflicts with a JVM
+	 * SecurityManager (if active).
 	 */
-	public static void makeAccessible(Method method) {
-		if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers()))
-				&& !method.isAccessible()) {
-			method.setAccessible(true);
+	public static void makeAccessible(Field field) {
+		if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
+				|| Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
+			field.setAccessible(true);
 		}
 	}
 
@@ -130,7 +121,7 @@ public class SqlBoxUtils {
 			if (m != null)
 				m.invoke(null, new Object[] { box });
 		} catch (Exception e) {
-			SqlBoxUtils.eatException(e);
+			SqlBoxException.eatException(e);
 		}
 	}
 }

@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.Config.MySqlCTX;
+import test.config.Config.CtxBox;
 import test.config.InitializeDatabase;
 import test.config.po.User;
 
@@ -36,7 +36,7 @@ public class ContextTest {
 		}
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		User u = ctx.get(User.class);
+		User u = ctx.create(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
@@ -48,8 +48,8 @@ public class ContextTest {
 
 	@Test
 	public void insertUser2() {
-		SqlBoxContext ctx = BeanBox.getBean(MySqlCTX.class);
-		User u = ctx.get(User.class);
+		SqlBoxContext ctx = BeanBox.getBean(CtxBox.class); 
+		User u = ctx.create(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
@@ -61,8 +61,9 @@ public class ContextTest {
 
 	public static void main(String[] args) {
 		ContextTest t = new ContextTest();
-		t.setup();
+		InitializeDatabase.recreateTables();
 		t.insertUser1();
+		InitializeDatabase.recreateTables();
 		t.insertUser2();
 	}
 

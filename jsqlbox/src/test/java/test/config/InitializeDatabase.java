@@ -9,10 +9,9 @@ import org.junit.Test;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.Config.DSPoolBeanBox;
+import test.config.Config.DataSourceBox;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -29,9 +28,9 @@ public class InitializeDatabase {
 			Dao.dao.execute("drop table users2");
 		} catch (Exception e) {
 			System.out.println("Exception found when drop tables");
-			SqlBoxUtils.eatException(e);
+			SqlBoxException.eatException(e);
 		}
-		ComboPooledDataSource pool = (ComboPooledDataSource) BeanBox.getBean(DSPoolBeanBox.class);
+		ComboPooledDataSource pool = (ComboPooledDataSource) BeanBox.getBean(DataSourceBox.class);
 		String driverClassName = pool.getDriverClass().toLowerCase();
 		if (driverClassName.indexOf("mysql") != -1)
 			executeResourceSQLs("/CreateMysqlDatabase.sql");

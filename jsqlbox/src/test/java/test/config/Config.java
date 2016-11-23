@@ -13,33 +13,19 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
- * This Java class is a configuration file, equal to XML in Spring, see jBeanBox
- * project
+ * This Java class is a configuration file, equal to XML in Spring, see jBeanBox project
  *
  */
 public class Config {
 	// jSqlBox & jBeanBox initialize
 	public static void initialize() {
-		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(MySqlDataSource.class));
+		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(false);
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 	}
 
-	public static class OracleCTX extends BeanBox {
-		{
-			this.setClassOrValue(SqlBoxContext.class);
-			this.setProperty("dataSource", MySqlDataSource.class);
-		}
-	}
-
-	public static class MySqlCTX extends OracleCTX {
-		{
-			this.setProperty("dataSource", MySqlDataSource.class);
-		}
-	}
-
 	// Data source pool setting
-	public static class DSPoolBeanBox extends BeanBox {
+	public static class C3P0Box extends BeanBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user
@@ -51,7 +37,7 @@ public class Config {
 	}
 
 	// MySql connection URL
-	static class MySqlDataSource extends DSPoolBeanBox {
+	static class MySqlDataSourceBox extends C3P0Box {
 		{
 			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClass", "com.mysql.jdbc.Driver");
@@ -59,10 +45,21 @@ public class Config {
 	}
 
 	// Oracle connection URL
-	static class OracleDataSource extends DSPoolBeanBox {
+	static class OracleDataSource extends C3P0Box {
 		{
 			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
 			setProperty("driverClass", "oracle.jdbc.OracleDriver");
+		}
+	}
+
+	// Data source pool setting
+	public static class DataSourceBox extends MySqlDataSourceBox {
+	}
+
+	// CtxBox is a SqlBoxContent singleton
+	public static class CtxBox extends BeanBox {
+		{
+			this.setConstructor(SqlBoxContext.class, DataSourceBox.class);
 		}
 	}
 
@@ -70,7 +67,7 @@ public class Config {
 	static class TxManagerBox extends BeanBox {
 		{
 			setClassOrValue(DataSourceTransactionManager.class);
-			setProperty("dataSource", DSPoolBeanBox.class);
+			setProperty("dataSource", DataSourceBox.class);
 		}
 	}
 
@@ -85,7 +82,7 @@ public class Config {
 
 	public static class JdbcTemplateBox extends BeanBox {
 		{
-			setConstructor(JdbcTemplate.class, DSPoolBeanBox.class);
+			setConstructor(JdbcTemplate.class, DataSourceBox.class);
 		}
 	}
 

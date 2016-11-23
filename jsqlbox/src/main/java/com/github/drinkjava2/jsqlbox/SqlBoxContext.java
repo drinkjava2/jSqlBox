@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,10 +39,6 @@ public class SqlBoxContext {
 			return new HashMap<>();
 		}
 	};
-
-	public SqlBoxContext() {
-		// Default constructor
-	}
 
 	public SqlBoxContext(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -102,19 +98,21 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * create a PO bean instance
+	 * Create an entity instance
 	 */
-	public <T> T get(Class<?> beanOrSqlBoxClass) {
+	public <T> T create(Class<?> beanOrSqlBoxClass) {
 		SqlBox box = findAndBuildSqlBox(beanOrSqlBoxClass);
 		Object bean = null;
+
 		try {
 			bean = box.getBeanClass().newInstance();
 			Dao dao = new Dao(box);
 			dao.setBean(bean);
-			Method m = box.getBeanClass().getMethod("putDao", new Class[] { Dao.class });
-			m.invoke(bean, new Object[] { dao });
+			Field daoField = box.getBeanClass().getDeclaredField("dao");
+			SqlBoxUtils.makeAccessible(daoField);
+			daoField.set(bean, dao);
 		} catch (Exception e) {
-			SqlBoxUtils.eatException(e);
+			SqlBoxException.throwEX(e, "SqlBoxContext create error");
 		}
 		return (T) bean;
 	}
@@ -124,8 +122,7 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case
-	 * column name as key
+	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
 	 */
 	public String cacheTableStructure(String tableName) {
 		String realTableName = null;
