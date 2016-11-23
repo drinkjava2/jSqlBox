@@ -21,7 +21,7 @@ public class BatchInsertTest {
 
 	public void tx_BatchInsertDemo() {
 		User u = new User();
-		for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 100000; i++)
 			Dao.dao.cacheSQL("insert ", u.Table(), " (", u.UserName(), e("user" + i), ",", u.Age(), e("70"), ") ",
 					SqlHelper.questionMarks());
 		Dao.dao.executeCachedSQLs();
