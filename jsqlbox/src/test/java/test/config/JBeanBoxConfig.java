@@ -16,7 +16,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * This Java class is a configuration file, equal to XML in Spring, see jBeanBox project
  *
  */
-public class Config {
+public class JBeanBoxConfig {
 	// jSqlBox & jBeanBox initialize
 	public static void initialize() {
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
@@ -34,6 +34,16 @@ public class Config {
 			setProperty("maxPoolSize", 30);
 			setProperty("CheckoutTimeout", 5000);
 		}
+ 
+		// public ComboPooledDataSource create() {
+		// ComboPooledDataSource ds = new ComboPooledDataSource();
+		// ds.setUser("root");// set to your user
+		// ds.setPassword("root888");// set to your password
+		// ds.setMinPoolSize(4);
+		// ds.setMaxPoolSize(30);
+		// ds.setCheckoutTimeout(5000);
+		// return ds;
+		// }
 	}
 
 	// MySql connection URL

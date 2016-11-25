@@ -29,11 +29,11 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <description>jSQLBox is a micro scale persistence tool for Java 7 and above</description>
 
   <modules>
-    <!-- core of jSQLBox -->
+    <!-- jSQLBox -->
     <module>jsqlbox</module>
     
     <!-- examples how to use jSQLBox -->
-    <module>jsqlbox-test</module>
+    <!--module>jsqlbox-examples</module-->
   </modules>
 
   <properties> 

@@ -39,12 +39,10 @@
 
 
     <properties>
-     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-     <spring.version>3.2.16</spring.version>
-
+     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <version.java>1.7</version.java>
         <version.javadoc>7</version.javadoc>
-
         <version.compiler-plugin>3.3</version.compiler-plugin>
         <version.war-plugin>2.6</version.war-plugin>
         <version.clean-plugin>3.0.0</version.clean-plugin>
@@ -55,43 +53,80 @@
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
 
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	<spring.version>4.3.2</spring.version>
+
     </properties>
 
-
+   <!-- this is not offical site, but have to use this to download Oracle driver to do unit test -->	
+   <repositories>
+ 	 <repository>
+    	  <id>codelds</id>
+    	  <url>https://code.lds.org/nexus/content/groups/main-repo</url>
+    	</repository>
+   </repositories>
 
  <dependencies> 
-  
-    <dependency>
-        <groupId>com.github.drinkjava2</groupId>
-        <artifactId>jbeanbox</artifactId>
-        <version>2.4.1</version>
-    </dependency>
 
-   <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
- 
     <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging-api</artifactId>
         <version>1.0.4</version>
     </dependency>
-  
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}.RELEASE</version>
+    </dependency> 
+    
     <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-jdbc</artifactId>
         <version>${spring.version}.RELEASE</version>
     </dependency>
+  
+
+    <!-- below dependencies are only for unit test, scope is set to "test", will not be deployed -->
  
+    
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>com.github.drinkjava2</groupId>
+        <artifactId>jbeanbox</artifactId>
+        <version>2.4.1</version>
+        <scope>test</scope>
+    </dependency>
+ 
+    <dependency>
+        <groupId>c3p0</groupId>
+        <artifactId>c3p0</artifactId>
+        <version>0.9.1.2</version>
+	<scope>test</scope>
+    </dependency>
+
+    <!-- Mysql Database driver in this test-->	
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>5.1.39</version>
+	<scope>test</scope>
+    </dependency>
+	
+    <!-- Oracle Database driver in this test-->	
+    <dependency>
+    	<groupId>com.oracle</groupId>
+    	<artifactId>ojdbc6</artifactId>
+    	<version>11.2.0.3</version>
+	<scope>test</scope>
+    </dependency>
 
  </dependencies> 
-
-
 	<build>
         <plugins>
             <plugin>

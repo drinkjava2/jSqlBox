@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.Config.CtxBox;
+import test.config.JBeanBoxConfig.CtxBox;
 import test.config.InitializeDatabase;
 import test.config.po.User;
 

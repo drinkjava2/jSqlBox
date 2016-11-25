@@ -11,7 +11,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.Config.DataSourceBox;
+import test.config.JBeanBoxConfig.DataSourceBox;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -19,7 +19,7 @@ import test.config.Config.DataSourceBox;
  */
 public class InitializeDatabase {
 	static {
-		Config.initialize();
+		JBeanBoxConfig.initialize();
 	}
 
 	public static void recreateTables() {
@@ -39,7 +39,7 @@ public class InitializeDatabase {
 	}
 
 	private static void executeResourceSQLs(String sqlResourceFile) {
-		InputStream in = Config.class.getResourceAsStream(sqlResourceFile);
+		InputStream in = JBeanBoxConfig.class.getResourceAsStream(sqlResourceFile);
 		if (in == null)
 			throw new SqlBoxException("Can not find SQL resource file " + sqlResourceFile + " in resources folder");
 		Scanner sc = new Scanner(in);
