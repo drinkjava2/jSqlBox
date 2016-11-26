@@ -52,6 +52,11 @@ public class SqlBoxContext {
 		this.dataSource = dataSource;
 	}
 
+	public void close() {
+		if (this.getDataSource() != null)
+			this.setDataSource(null);
+	}
+
 	public boolean isShowSql() {
 		return showSql;
 	}
@@ -122,7 +127,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
+	 * Cache table MetaData in SqlBoxContext for future use, use lower case
+	 * column name as key
 	 */
 	public String cacheTableStructure(String tableName) {
 		String realTableName = null;

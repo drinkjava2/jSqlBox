@@ -47,8 +47,15 @@ public class Dao {
 	public static final Dao dao = new Dao(SqlBox.DEFAULT_SQLBOX);
 
 	public Dao(SqlBox sqlBox) {
+		if (sqlBox == null)
+			SqlBoxException.throwEX(null, "Dao create error, sqlBox can not be null");
+		if (sqlBox.getContext() == null)//NOSONAR
+			SqlBoxException.throwEX(null, "Dao create error, sqlBoxContext can not be null");
+		if (sqlBox.getContext().getDataSource() == null)
+			SqlBoxException.throwEX(null, "Dao create error, dataSource can not be null");
 		this.sqlBox = sqlBox;
-		this.jdbc = new JdbcTemplate(sqlBox.getContext().getDataSource());
+		if (sqlBox.getContext().getDataSource() != null)
+			this.jdbc = new JdbcTemplate(sqlBox.getContext().getDataSource());
 	}
 
 	public static Dao defaultDao(Object bean) {

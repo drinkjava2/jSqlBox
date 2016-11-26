@@ -41,6 +41,7 @@
     <properties>
      	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
         <version.java>1.7</version.java>
         <version.javadoc>7</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
@@ -66,6 +67,11 @@
    </repositories>
 
  <dependencies> 
+    <dependency>
+        <groupId>com.github.drinkjava2</groupId>
+        <artifactId>jbeanbox</artifactId>
+        <version>2.4.1</version>
+    </dependency>
 
     <dependency>
         <groupId>commons-logging</groupId>
@@ -96,13 +102,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-        <groupId>com.github.drinkjava2</groupId>
-        <artifactId>jbeanbox</artifactId>
-        <version>2.4.1</version>
-        <scope>test</scope>
-    </dependency>
- 
     <dependency>
         <groupId>c3p0</groupId>
         <artifactId>c3p0</artifactId>
@@ -136,6 +135,7 @@
                 <configuration>
                     <source>${version.java}</source>
                     <target>${version.java}</target>
+		    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -188,6 +188,7 @@
                         </executions>
                         <configuration>
                             <attach>true</attach>
+			    <encoding>UTF-8</encoding>
                         </configuration>
                     </plugin>
                     <plugin>

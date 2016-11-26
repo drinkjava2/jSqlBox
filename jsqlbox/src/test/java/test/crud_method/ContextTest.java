@@ -9,12 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.JBeanBoxConfig.CtxBox;
 import test.config.InitializeDatabase;
+import test.config.JBeanBoxConfig.CtxBox;
 import test.config.po.User;
 
 public class ContextTest {
@@ -42,20 +41,20 @@ public class ContextTest {
 		u.setPhoneNumber("111");
 		u.setAge(10);
 		u.dao().save();
-		Assert.assertEquals(111, (int) Dao.dao.queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
+		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
 				" where ", u.UserName(), "=", q("User1")));
 	}
 
 	@Test
 	public void insertUser2() {
-		SqlBoxContext ctx = BeanBox.getBean(CtxBox.class); 
+		SqlBoxContext ctx = BeanBox.getBean(CtxBox.class);
 		User u = ctx.create(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
 		u.dao().save();
-		Assert.assertEquals(111, (int) Dao.dao.queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
+		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
 				" where ", u.UserName(), "=", q("User1")));
 	}
 

@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.InitializeDatabase;
 import test.config.po.User;
@@ -28,7 +27,7 @@ public class InsertTest {
 		u.setAlive(true);
 		u.setAge(10);
 		u.dao().save();
-		Assert.assertEquals(111, (int) Dao.dao.queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
+		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
 				" where ", u.UserName(), "=", q("User1")));
 	}
 
@@ -42,7 +41,7 @@ public class InsertTest {
 		u.setAlive(true);
 		u.setAge(20);
 		u.dao().save();
-		Assert.assertEquals(null, Dao.dao.queryForString("select ", u.PhoneNumber(), " from ", u.Table(), " where ",
+		Assert.assertEquals(null, u.dao().queryForString("select ", u.PhoneNumber(), " from ", u.Table(), " where ",
 				u.UserName(), "=" + q("User2")));
 	}
 
