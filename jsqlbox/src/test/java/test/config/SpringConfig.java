@@ -34,7 +34,6 @@ public class SpringConfig {
 	public void doConfigTest() {
 		AnnotationConfigApplicationContext springCtx = new AnnotationConfigApplicationContext(SpringConfig.class);
 		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
-		sc.setShowSql(true);
 		User u = sc.createBean(User.class);
 		u.setUserName("Spring");
 		u.dao().save();

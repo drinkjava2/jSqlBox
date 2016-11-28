@@ -30,7 +30,7 @@ public class SqlBoxContext {
 	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
 
 	// print SQL to console or log depends logging.properties
-	private boolean showSql = true;
+	private boolean showSql = false;
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override

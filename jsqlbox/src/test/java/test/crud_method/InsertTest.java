@@ -22,7 +22,6 @@ public class InsertTest {
 	@Test
 	public void insertUser1() {
 		User u = new User();
-		u.dao().getSqlBox().getContext().setShowSql(true);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");

@@ -41,24 +41,26 @@ public class DeclarativeTransactionTest {
 	public void tx_doInsert() {
 		User u = new User();
 		tx_InsertUser1();
-		int i = u.dao().queryForInteger("select count(*) from users");
+		int i = u.dao().queryForInteger("select count(*) from ",u.Table());
 		Assert.assertEquals(1, i);
 		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();
 	}
 
-	@Test(expected = InvocationTargetException.class)
+	@Test
 	public void doTest() {
 		User u = new User();
 		DeclarativeTransactionTest tester = BeanBox.getBean(DeclarativeTransactionTest.class);
+		boolean foundException = false;
 		try {
 			tester.tx_doInsert();
 		} catch (Exception e) {
+			foundException = true;
 			Assert.assertEquals(InvocationTargetException.class.getName(), e.getClass().getName());
 			int i = u.dao().queryForInteger("select count(*) from users");
 			Assert.assertEquals(0, i);
-			throw e;
 		}
+		Assert.assertEquals(foundException, true);
 	}
 
 }

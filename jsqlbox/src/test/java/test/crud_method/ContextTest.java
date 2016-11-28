@@ -17,6 +17,7 @@ import test.config.JBeanBoxConfig.CtxBox;
 import test.config.po.User;
 
 public class ContextTest {
+
 	@Before
 	public void setup() {
 		InitializeDatabase.recreateTables();

@@ -20,9 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+ 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -38,7 +36,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Dao {
-	private static final Log log = LogFactory.getLog(Dao.class);
+	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
 	private SqlBox sqlBox;
 	private JdbcTemplate jdbc; // Spring JDBCTemplate
 	// In future version may delete JDBCTemplate and only use pure JDBC
