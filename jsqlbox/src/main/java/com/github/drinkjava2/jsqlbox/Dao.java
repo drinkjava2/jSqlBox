@@ -44,25 +44,50 @@ public class Dao {
 	// In future version may delete JDBCTemplate and only use pure JDBC
 
 	private Object bean; // Entity Bean Instance
-	public static final Dao dao = new Dao(SqlBox.DEFAULT_SQLBOX);
+
+	public Dao(SqlBoxContext ctx) {
+		if (ctx == null)
+			SqlBoxException.throwEX(null, "Dao create error, SqlBoxContext  can not be null");
+		else if (ctx.getDataSource() == null)
+			SqlBoxException.throwEX(null, "Dao create error,  dataSource can not be null");
+		else
+			this.jdbc = new JdbcTemplate(ctx.getDataSource());
+		SqlBox sb = new SqlBox(ctx);
+		this.sqlBox = sb; 
+	}
 
 	public Dao(SqlBox sqlBox) {
 		if (sqlBox == null)
 			SqlBoxException.throwEX(null, "Dao create error, sqlBox can not be null");
-		if (sqlBox.getContext() == null)//NOSONAR
+		else if (sqlBox.getContext() == null)
 			SqlBoxException.throwEX(null, "Dao create error, sqlBoxContext can not be null");
-		if (sqlBox.getContext().getDataSource() == null)
+		else if (sqlBox.getContext().getDataSource() == null)
 			SqlBoxException.throwEX(null, "Dao create error, dataSource can not be null");
-		this.sqlBox = sqlBox;
-		if (sqlBox.getContext().getDataSource() != null)
+		else
 			this.jdbc = new JdbcTemplate(sqlBox.getContext().getDataSource());
+		this.sqlBox = sqlBox;
 	}
 
+	/**
+	 * Get default Dao
+	 */
 	public static Dao defaultDao(Object bean) {
-		SqlBox box = SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.findAndBuildSqlBox(bean.getClass());
-		Dao doa = new Dao(box);
-		doa.setBean(bean);
-		return doa;
+		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
+		SqlBox box = ctx.findAndBuildSqlBox(bean.getClass());
+		box.initialize();
+		box.beanInitialize(bean);
+		Dao d = new Dao(box);
+		d.setBean(bean);
+		return d;
+	}
+
+	/**
+	 * Get default Dao
+	 */
+	public static Dao dao() {
+		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
+		SqlBox box = new SqlBox(ctx);
+		return new Dao(box);
 	}
 
 	// ========JdbcTemplate wrap methods begin============
@@ -92,8 +117,7 @@ public class Dao {
 	}
 
 	/**
-	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to
-	 * prepared statement
+	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
 	 * 
 	 * @param sql
 	 */
@@ -104,8 +128,7 @@ public class Dao {
 	// ========JdbcTemplate wrap methods End============
 
 	/**
-	 * Execute a sql and return how many record be affected, sql be translated
-	 * to prepared statement
+	 * Execute a sql and return how many record be affected, sql be translated to prepared statement
 	 * 
 	 */
 	public Integer execute(String... sql) {
@@ -237,8 +260,8 @@ public class Dao {
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
-		sb.append("insert into ").append(sqlBox.getTableName()).append(" (");
-		for (Column col : sqlBox.getColumns().values()) {
+		sb.append("insert into ").append(sqlBox.getRuntimeTableName()).append(" ( ");
+		for (Column col : sqlBox.getRuntimeColumns().values()) {
 			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnDefinition())) {
 				String methodName = col.getReadMethodName();
 				Object value = null;
@@ -273,13 +296,25 @@ public class Dao {
 
 	// ========Dao query/crud methods end=======
 
-	// =============Misc methods begin==========
+	// =============identical methods copied from SqlBox==========
 	public String columnName(String fieldID) {
-		return this.getSqlBox().getColumn(fieldID).getColumnDefinition();
+		return this.getSqlBox().getRuntimeColumn(fieldID).getColumnDefinition();
 	}
 
 	public String tableName() {
-		return this.getSqlBox().getTableName();
+		return this.getSqlBox().getRuntimeTableName();
+	}
+
+	public void setTableName(String tableName) {
+		this.getSqlBox().setRuntimeTableName(tableName);
+	}
+
+	public void setColumnName(String fieldID, String columnName) {
+		this.getSqlBox().getRuntimeColumn(fieldID).setColumnDefinition(columnName);
+	}
+
+	public <T> T createBean() {
+		return this.getSqlBox().createBean();
 	}
 
 	// =============Misc methods end==========
@@ -301,8 +336,8 @@ public class Dao {
 
 	/**
 	 * Return a JdbcTemplate instance<br/>
-	 * It's not recommended to use JdbcTemplate directly unless very necessary,
-	 * JdbcTemplate may be deprecated or replaced by pure JDBC in future version
+	 * It's not recommended to use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
+	 * replaced by pure JDBC in future version
 	 * 
 	 * @return JdbcTemplate
 	 */

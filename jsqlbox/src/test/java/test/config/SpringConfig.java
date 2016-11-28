@@ -1,47 +1,46 @@
 package test.config;
 
+import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
+
 import java.beans.PropertyVetoException;
 
 import javax.sql.DataSource;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import test.config.po.User;
+
 /**
- * This Java class is a configuration file, equal to XML in Spring, see jBeanBox
- * project
+ * This Java class is a configuration file, equal to XML in Spring, see jBeanBox project
  *
  */
 @Configuration
 public class SpringConfig {
-	public static void main(String[] args) {
-		new SpringConfig().doConfigTest();
+
+	@Before
+	public void setup() {
+		InitializeDatabase.recreateTables();
 	}
 
 	@Test
 	public void doConfigTest() {
-		// TODO: split SqlBox to 2 classes, one is runtime, another is config time
-		// @SuppressWarnings("resource")
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SpringConfig.class);
-		DataSource ds = ctx.getBean("MySqlDataSourceBean", DataSource.class);
-		SqlBoxContext sbCTX = new SqlBoxContext(ds);
-		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource(ds);
-		SqlBox sb = new SqlBox(sbCTX);
-		System.out.println(sb.getContext().getDataSource());
-		Dao dao = new Dao(sb);
-		dao.execute("drop table if exists tmp_users");
-		dao.execute("create table tmp_users (UserName Varchar (10))");
-		dao.execute("insert into tmp_users (username) values('spring')");
-		Assert.assertEquals("spring", dao.queryForString("select username from tmp_users where username='spring'"));
-		// ctx.close(); //TODO: can not close it, will cause unit test fail need fix this problem
+		AnnotationConfigApplicationContext springCtx = new AnnotationConfigApplicationContext(SpringConfig.class);
+		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
+		sc.setShowSql(true);
+		User u = sc.createBean(User.class);
+		u.setUserName("Spring");
+		u.dao().save();
+		Assert.assertEquals("Spring", u.dao().queryForString(
+				"select " + u.UserName() + " from " + u.Table() + " where " + u.UserName() + "=" + q("Spring")));
+		springCtx.close();
 	}
 
 	@Bean
@@ -54,7 +53,7 @@ public class SpringConfig {
 		return ds;
 	}
 
-	@Bean(name = "MySqlDataSourceBean") // This is not good
+	@Bean
 	public DataSource MySqlDataSourceBean() {
 		ComboPooledDataSource ds = C3P0Bean();
 		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
@@ -66,7 +65,7 @@ public class SpringConfig {
 		return ds;
 	}
 
-	@Bean
+	@Bean(name = "sqlBoxCtxBean") // This is not good
 	public SqlBoxContext sqlBoxCtxBean() {
 		return new SqlBoxContext(MySqlDataSourceBean());
 	}

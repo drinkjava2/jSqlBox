@@ -1,7 +1,6 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -112,16 +111,4 @@ public class SqlBoxUtils {
 		}
 	}
 
-	/**
-	 * @param instance
-	 */
-	public static void beanInitialize(Class<?> beanClass, SqlBox box) {
-		try {
-			Method m = beanClass.getDeclaredMethod("initialize", new Class[] { SqlBox.class });
-			if (m != null)
-				m.invoke(null, new Object[] { box });
-		} catch (Exception e) {
-			SqlBoxException.eatException(e);
-		}
-	}
 }

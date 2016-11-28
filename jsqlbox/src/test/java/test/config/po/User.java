@@ -1,6 +1,7 @@
 package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 
 /**
  * This file should automatically created by a code generator tool
@@ -10,10 +11,18 @@ public class User {
 	// ==== have to copy below Dao methods in each entity class:=====
 	private Dao dao;
 
+	public void putDao(Dao dao) {
+		this.dao = dao;
+	}
+
 	public Dao dao() {
 		if (dao == null)
 			dao = Dao.defaultDao(this);
 		return dao;
+	}
+
+	public void initialize(SqlBox box) {
+		box.setRuntimeTableName("users2");
 	}
 
 	// ============= Dao code end =========

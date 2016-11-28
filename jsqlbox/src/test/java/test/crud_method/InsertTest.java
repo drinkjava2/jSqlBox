@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.config.InitializeDatabase;
 import test.config.po.User;
@@ -21,6 +22,7 @@ public class InsertTest {
 	@Test
 	public void insertUser1() {
 		User u = new User();
+		u.dao().getSqlBox().getContext().setShowSql(true);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
@@ -33,7 +35,7 @@ public class InsertTest {
 
 	@Test
 	public void insertUser2() {
-		User u = new User();
+		User u = SqlBox.createBean(User.class);
 		u.dao().getSqlBox().configColumnName(User.PhoneNumber, null);
 		u.setUserName("User2");
 		u.setAddress("Address2");

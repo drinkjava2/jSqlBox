@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
 import test.config.InitializeDatabase;
@@ -17,7 +18,7 @@ public class QueryEntityTest {
 	@Before
 	public void setup() {
 		InitializeDatabase.recreateTables();
-		User u = new User();
+		User u = SqlBox.createBean(User.class);
 		u.dao().execute("insert into ", u.Table(), //
 				" (", u.UserName(), e("user1"), //
 				", ", u.Address(), e("address1"), //
@@ -32,7 +33,7 @@ public class QueryEntityTest {
 		u.setAddress("address3");
 		u.setAge(3);
 		u.dao().save();
-		Assert.assertEquals(3, (int) Dao.dao.queryForInteger("select count(*) from ", u.Table()));
+		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from ", u.Table()));
 	}
 
 	@Test

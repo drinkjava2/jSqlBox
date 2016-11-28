@@ -1,4 +1,4 @@
-create table uSers 
+create table users 
 (id integer auto_increment ,
 constraint const1 primary key (ID),
 UserName Varchar (50) ,

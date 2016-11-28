@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,7 +22,6 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
 
-	public static final SqlBoxContext DEFAULT_SQLBOX_CONTEXT = new SqlBoxContext(null);
 	public static final String SQLBOX_IDENTITY = "BOX";
 
 	private DataSource dataSource = null;
@@ -31,7 +30,7 @@ public class SqlBoxContext {
 	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
 
 	// print SQL to console or log depends logging.properties
-	private boolean showSql = false;
+	private boolean showSql = true;
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -66,6 +65,32 @@ public class SqlBoxContext {
 	}
 
 	/**
+	 * Return a default global SqlBoxContext <br/>
+	 * Note: a config class SqlBoxConfig.java is needed in class root folder
+	 */
+	public static SqlBoxContext getDefaultSqlBoxContext() {
+		SqlBoxContext ctx = null;
+		try {
+			Class<?> configClass = Class.forName("SqlBoxConfig");
+			Method method = configClass.getMethod("getSqlBoxContext", new Class[] {});
+			ctx = (SqlBoxContext) method.invoke(configClass, new Object[] {});
+			if (ctx == null)
+				SqlBoxException.throwEX(null, "");
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "jSqlbox Dao Error: DefaultConfig.getSqlBoxContext() invoke error");
+		}
+		return ctx;
+	}
+
+	/**
+	 * Create an entity instance
+	 */
+	public <T> T createBean(Class<?> beanOrSqlBoxClass) {
+		SqlBox box = findAndBuildSqlBox(beanOrSqlBoxClass);
+		return (T) box.createBean();
+	}
+
+	/**
 	 * Find and create a SqlBox instance according bean class or SqlBox Class
 	 */
 	public SqlBox findAndBuildSqlBox(Class<?> beanOrSqlBoxClass) {
@@ -95,31 +120,7 @@ public class SqlBoxContext {
 				SqlBoxException.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
 			}
 		}
-		if (box != null) {
-			SqlBoxUtils.beanInitialize(box.getBeanClass(), box);
-			box.initialize();
-		}
 		return box;
-	}
-
-	/**
-	 * Create an entity instance
-	 */
-	public <T> T create(Class<?> beanOrSqlBoxClass) {
-		SqlBox box = findAndBuildSqlBox(beanOrSqlBoxClass);
-		Object bean = null;
-
-		try {
-			bean = box.getBeanClass().newInstance();
-			Dao dao = new Dao(box);
-			dao.setBean(bean);
-			Field daoField = box.getBeanClass().getDeclaredField("dao");
-			SqlBoxUtils.makeAccessible(daoField);
-			daoField.set(bean, dao);
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SqlBoxContext create error");
-		}
-		return (T) bean;
 	}
 
 	public boolean existTable(String tablename) {
@@ -127,8 +128,7 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case
-	 * column name as key
+	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
 	 */
 	public String cacheTableStructure(String tableName) {
 		String realTableName = null;

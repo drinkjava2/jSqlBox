@@ -12,7 +12,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
-import test.config.po.User;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -21,11 +20,10 @@ import test.config.po.User;
 public class InitializeDatabase {
 
 	public static void recreateTables() {
-		User u = new User();
 		JBeanBoxConfig.initialize();
 		try {
-			u.dao().execute("drop table users");
-			u.dao().execute("drop table users2");
+			Dao.dao().execute("drop table users");
+			Dao.dao().execute("drop table users2");
 		} catch (Exception e) {
 			System.out.println("Exception found when drop tables");
 			SqlBoxException.eatException(e);
@@ -38,15 +36,14 @@ public class InitializeDatabase {
 			executeResourceSQLs("/CreateOracleDatabase.sql");
 	}
 
-	private static void executeResourceSQLs(String sqlResourceFile) {
-		User u = new User();
+	private static void executeResourceSQLs(String sqlResourceFile) { 
 		InputStream in = InitializeDatabase.class.getResourceAsStream(sqlResourceFile);
 		if (in == null)
 			throw new SqlBoxException("Can not find SQL resource file " + sqlResourceFile + " in resources folder");
 		Scanner sc = new Scanner(in);
 		try {
 			while (sc.useDelimiter(";").hasNext())
-				u.dao().execute(sc.next());
+				Dao.dao().execute(sc.next());
 		} finally {
 			sc.close();
 		}
@@ -55,8 +52,8 @@ public class InitializeDatabase {
 	@Test
 	public void testCreateTables() {
 		recreateTables();
-		Assert.assertEquals(0, (int) Dao.dao.queryForInteger("select count(*) from users"));
-		Assert.assertEquals(0, (int) Dao.dao.queryForInteger("select count(*) from users2"));
+		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users"));
+		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users2"));
 	}
 
 	public static void main(String[] args) {

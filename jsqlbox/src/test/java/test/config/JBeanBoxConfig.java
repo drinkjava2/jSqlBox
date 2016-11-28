@@ -2,8 +2,6 @@ package test.config;
 
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -19,8 +17,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 public class JBeanBoxConfig {
 	// jSqlBox & jBeanBox initialize
 	public static void initialize() {
-		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
-		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setShowSql(false);
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 	}
 
@@ -34,7 +30,7 @@ public class JBeanBoxConfig {
 			setProperty("maxPoolSize", 30);
 			setProperty("CheckoutTimeout", 5000);
 		}
- 
+
 		// public ComboPooledDataSource create() {
 		// ComboPooledDataSource ds = new ComboPooledDataSource();
 		// ds.setUser("root");// set to your user
