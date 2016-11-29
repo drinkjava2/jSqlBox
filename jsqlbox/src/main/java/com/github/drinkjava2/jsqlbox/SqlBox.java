@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 
 import org.springframework.jdbc.core.RowMapper;
 
+import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
+import com.github.drinkjava2.jsqlbox.id.GenerationType;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
@@ -40,11 +42,26 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  */
 @SuppressWarnings("unchecked")
 public class SqlBox {
+
+	// The entity bean class
 	private Class<?> beanClass;
+
+	// RuntimeColumns, use it after entity bean be created
 	private Map<String, Column> runtimeColumns = new HashMap<>();
+
+	// RuntimeTableName, use it after entity bean be created
 	private String runtimeTableName;
+
+	// ConfigColumns, set it before entity bean be created
 	private Map<String, String> configColumns = new HashMap<>();
+
+	// ConfigTableName, set it before entity bean be created
 	private String configTableName;
+
+	// Prime key generate strategy value
+	private GeneratedValue generatedValue;
+
+	private GenerationType generationType;
 
 	private SqlBoxContext context;
 
@@ -276,6 +293,15 @@ public class SqlBox {
 
 	public void setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
+	}
+
+	public void setPKStrategy(GenerationType generationType, String... args) {
+		this.generationType = generationType;
+		if (generationType == GenerationType.AUTO) {
+			// TODO
+		} else if (generationType == GenerationType.TABLE) {
+			// TODO
+		}
 	}
 
 	public String getRuntimeTableName() {

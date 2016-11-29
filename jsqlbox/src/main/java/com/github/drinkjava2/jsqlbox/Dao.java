@@ -35,7 +35,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  */
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Dao {
+public class Dao { 
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
 	private SqlBox sqlBox;
 	private JdbcTemplate jdbc; // Spring JDBCTemplate
@@ -82,10 +82,10 @@ public class Dao {
 	/**
 	 * Get default Dao
 	 */
-	public static Dao dao() {
+	public static Dao dao() { 
 		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
 		SqlBox box = new SqlBox(ctx);
-		return new Dao(box);
+		return new Dao(box); 
 	}
 
 	// ========JdbcTemplate wrap methods begin============

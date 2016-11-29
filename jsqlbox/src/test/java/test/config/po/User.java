@@ -2,9 +2,10 @@ package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.id.GenerationType;
 
 /**
- * This file should automatically created by a code generator tool
+ * This entity class should automatically created by a code generator tool
  * 
  */
 public class User {
@@ -22,7 +23,9 @@ public class User {
 	}
 
 	public void initialize(SqlBox box) {
-		box.setRuntimeTableName("users2");
+		box.setRuntimeTableName("users");
+		box.setPKStrategy(GenerationType.AUTO);
+		box.setPKStrategy(GenerationType.TABLE, "id_table", "pk", "pk_user", "user_id");
 	}
 
 	// ============= Dao code end =========

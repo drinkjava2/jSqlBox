@@ -2,6 +2,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -109,6 +110,13 @@ public class SqlBoxUtils {
 				|| Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
 			field.setAccessible(true);
 		}
+	}
+
+	/**
+	 * Get JDK random type4 UUID
+	 */
+	public static String getHex32UUID() {
+		return UUID.randomUUID().toString().replace("-", "").toUpperCase();
 	}
 
 }
