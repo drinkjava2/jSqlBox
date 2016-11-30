@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -19,7 +20,8 @@ import test.config.JBeanBoxConfig.DataSourceBox;
  */
 public class InitializeDatabase {
 
-	public static void recreateTables() {
+	public static void dropAndRecreateTables() {
+		SqlBoxContext.resetDefaultContext();
 		JBeanBoxConfig.initialize();
 		try {
 			Dao.dao().execute("drop table users");
@@ -36,7 +38,7 @@ public class InitializeDatabase {
 			executeResourceSQLs("/CreateOracleDatabase.sql");
 	}
 
-	private static void executeResourceSQLs(String sqlResourceFile) { 
+	private static void executeResourceSQLs(String sqlResourceFile) {
 		InputStream in = InitializeDatabase.class.getResourceAsStream(sqlResourceFile);
 		if (in == null)
 			throw new SqlBoxException("Can not find SQL resource file " + sqlResourceFile + " in resources folder");
@@ -51,13 +53,13 @@ public class InitializeDatabase {
 
 	@Test
 	public void testCreateTables() {
-		recreateTables();
+		dropAndRecreateTables();
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users2"));
 	}
 
 	public static void main(String[] args) {
-		recreateTables();
+		dropAndRecreateTables();
 	}
 
 }

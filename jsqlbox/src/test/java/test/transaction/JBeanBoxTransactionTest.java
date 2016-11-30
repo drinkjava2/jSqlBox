@@ -1,4 +1,4 @@
-package test.jdbc;
+package test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
 
@@ -14,10 +14,19 @@ import com.github.drinkjava2.jsqlbox.SqlHelper;
 import test.config.InitializeDatabase;
 import test.config.po.User;
 
-public class DeclarativeTransactionTest {
+/**
+ * This is to test use Spring's Declarative Transaction but use jBeanBox replaced Spring's IOC/AOP core. <br/>
+ * More detail please see jBeanBox project
+ *
+ * @author Yong Zhu
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+public class JBeanBoxTransactionTest {
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 	}
 
 	public void tx_InsertUser1() {
@@ -41,7 +50,7 @@ public class DeclarativeTransactionTest {
 	public void tx_doInsert() {
 		User u = new User();
 		tx_InsertUser1();
-		int i = u.dao().queryForInteger("select count(*) from ",u.Table());
+		int i = u.dao().queryForInteger("select count(*) from ", u.Table());
 		Assert.assertEquals(1, i);
 		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();
@@ -50,7 +59,7 @@ public class DeclarativeTransactionTest {
 	@Test
 	public void doTest() {
 		User u = new User();
-		DeclarativeTransactionTest tester = BeanBox.getBean(DeclarativeTransactionTest.class);
+		JBeanBoxTransactionTest tester = BeanBox.getBean(JBeanBoxTransactionTest.class);
 		boolean foundException = false;
 		try {
 			tester.tx_doInsert();

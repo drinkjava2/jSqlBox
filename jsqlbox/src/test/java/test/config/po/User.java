@@ -2,7 +2,7 @@ package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.id.GenerationType;
+import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
 
 /**
  * This entity class should automatically created by a code generator tool
@@ -23,7 +23,6 @@ public class User {
 	}
 
 	public void initialize(SqlBox box) {
-		box.setRuntimeTableName("users");
 		box.setPKStrategy(GenerationType.AUTO);
 		box.setPKStrategy(GenerationType.TABLE, "id_table", "pk", "pk_user", "user_id");
 	}
@@ -32,7 +31,7 @@ public class User {
 	public static final String Table = "users";
 
 	public String Table() {
-		return dao().tableName();
+		return dao().getRealTable();
 	}
 
 	public static String Id = "id";
@@ -40,42 +39,42 @@ public class User {
 	private Integer id;
 
 	public String Id() {
-		return dao().columnName("id");
+		return dao().getRealColumnName("id");
 	}
 
 	private String userName;
 	public static final String UserName = "userName";
 
 	public String UserName() {
-		return dao().columnName(User.UserName);
+		return dao().getRealColumnName(User.UserName);
 	}
 
 	public static final String PhoneNumber = "phoneNumber";
 	private String phoneNumber;
 
 	public String PhoneNumber() {
-		return dao().columnName(PhoneNumber);
+		return dao().getRealColumnName(PhoneNumber);
 	}
 
 	public static final String Address = "address";
 	private String address;
 
 	public String Address() {
-		return dao().columnName(Address);
+		return dao().getRealColumnName(Address);
 	}
 
 	public static final String Age = "age";
 	private Integer age;
 
 	public String Age() {
-		return dao().columnName(Age);
+		return dao().getRealColumnName(Age);
 	}
 
 	public static final String Alive = "alive";
 	private Boolean alive;
 
 	public String Alive() {
-		return dao().columnName(Alive);
+		return dao().getRealColumnName(Alive);
 	}
 
 	// getter & setters

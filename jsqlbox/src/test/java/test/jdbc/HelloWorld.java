@@ -8,7 +8,7 @@ import test.config.po.User;
 public class HelloWorld {
 
 	public static void main(String[] args) {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		Dao.dao().execute("insert into users (username) values('user1')");
 		User u = new User();
 		u.dao();

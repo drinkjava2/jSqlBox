@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.id;
+package com.github.drinkjava2.jsqlbox.jpa;
 
 /**
  * Interface for all ID generators
@@ -27,4 +27,5 @@ public interface IdGenerator {
 	 * Return next id
 	 */
 	public Object getNextID();
+
 }

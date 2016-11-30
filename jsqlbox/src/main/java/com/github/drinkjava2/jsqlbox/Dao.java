@@ -20,7 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
- 
+
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -31,11 +31,11 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
- * @since 1.0
+ * @since 1.0.0
  */
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Dao { 
+public class Dao {
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
 	private SqlBox sqlBox;
 	private JdbcTemplate jdbc; // Spring JDBCTemplate
@@ -51,7 +51,7 @@ public class Dao {
 		else
 			this.jdbc = new JdbcTemplate(ctx.getDataSource());
 		SqlBox sb = new SqlBox(ctx);
-		this.sqlBox = sb; 
+		this.sqlBox = sb;
 	}
 
 	public Dao(SqlBox sqlBox) {
@@ -82,10 +82,10 @@ public class Dao {
 	/**
 	 * Get default Dao
 	 */
-	public static Dao dao() { 
+	public static Dao dao() {
 		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
 		SqlBox box = new SqlBox(ctx);
-		return new Dao(box); 
+		return new Dao(box);
 	}
 
 	// ========JdbcTemplate wrap methods begin============
@@ -258,9 +258,9 @@ public class Dao {
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
-		sb.append("insert into ").append(sqlBox.getRuntimeTableName()).append(" ( ");
-		for (Column col : sqlBox.getRuntimeColumns().values()) {
-			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnDefinition())) {
+		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
+		for (Column col : sqlBox.getRealColumns().values()) {
+			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnName())) {
 				String methodName = col.getReadMethodName();
 				Object value = null;
 				Method m;
@@ -272,7 +272,7 @@ public class Dao {
 							"Dao doSave error, method " + methodName + " not found in class " + bean);
 				}
 				if (value != null) {
-					sb.append(col.getColumnDefinition()).append(",");
+					sb.append(col.getColumnName()).append(",");
 					if (Boolean.class.isInstance(value)) {// NOSONAR
 						if (((Boolean) value).equals(true))
 							value = 1;
@@ -295,20 +295,20 @@ public class Dao {
 	// ========Dao query/crud methods end=======
 
 	// =============identical methods copied from SqlBox==========
-	public String columnName(String fieldID) {
-		return this.getSqlBox().getRuntimeColumn(fieldID).getColumnDefinition();
+	public String getRealColumnName(String fieldID) {
+		return this.getSqlBox().getRealColumn(fieldID).getColumnName();
 	}
 
-	public String tableName() {
-		return this.getSqlBox().getRuntimeTableName();
+	public String getRealTable() {
+		return this.getSqlBox().getRealTable();
 	}
 
-	public void setTableName(String tableName) {
-		this.getSqlBox().setRuntimeTableName(tableName);
+	public void setRealTable(String realTable) {
+		this.getSqlBox().setRealTable(realTable);
 	}
 
-	public void setColumnName(String fieldID, String columnName) {
-		this.getSqlBox().getRuntimeColumn(fieldID).setColumnDefinition(columnName);
+	public void setRealColumnName(String fieldID, String realColumnName) {
+		this.getSqlBox().getRealColumn(fieldID).setColumnName(realColumnName);
 	}
 
 	public <T> T createBean() {

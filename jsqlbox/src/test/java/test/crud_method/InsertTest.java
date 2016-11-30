@@ -16,7 +16,7 @@ public class InsertTest {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 	}
 
 	@Test
@@ -25,8 +25,6 @@ public class InsertTest {
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
-		u.setAlive(true);
-		u.setAge(10);
 		u.dao().save();
 		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
 				" where ", u.UserName(), "=", q("User1")));
@@ -35,14 +33,11 @@ public class InsertTest {
 	@Test
 	public void insertUser2() {
 		User u = SqlBox.createBean(User.class);
-		u.dao().getSqlBox().configColumnName(User.PhoneNumber, null);
 		u.setUserName("User2");
 		u.setAddress("Address2");
-		u.setPhoneNumber("222");// this phone number will not write to table
-		u.setAlive(true);
-		u.setAge(20);
+		u.setPhoneNumber("222");
 		u.dao().save();
-		Assert.assertEquals(null, u.dao().queryForString("select ", u.PhoneNumber(), " from ", u.Table(), " where ",
+		Assert.assertEquals("222", u.dao().queryForString("select ", u.PhoneNumber(), " from ", u.Table(), " where ",
 				u.UserName(), "=" + q("User2")));
 	}
 
@@ -59,8 +54,8 @@ public class InsertTest {
 	}
 
 	public static void main(String[] args) {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		InsertTest t = new InsertTest();
-		t.insertUser1();
+		t.insertUser2();
 	}
 }

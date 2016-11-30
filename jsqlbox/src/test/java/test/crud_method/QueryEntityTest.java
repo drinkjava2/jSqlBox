@@ -17,7 +17,7 @@ public class QueryEntityTest {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
 		u.dao().execute("insert into ", u.Table(), //
 				" (", u.UserName(), e("user1"), //
@@ -45,7 +45,7 @@ public class QueryEntityTest {
 	}
 
 	public static void main(String[] args) {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		QueryEntityTest t = new QueryEntityTest();
 		t.setup();
 	}

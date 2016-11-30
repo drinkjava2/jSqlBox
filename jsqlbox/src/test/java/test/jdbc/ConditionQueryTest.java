@@ -16,7 +16,7 @@ import test.config.po.User;
 public class ConditionQueryTest {
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");

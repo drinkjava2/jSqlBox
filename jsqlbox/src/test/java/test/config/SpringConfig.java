@@ -12,22 +12,27 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import test.config.po.User;
+import test.transaction.SpringTransactionTest;
 
 /**
- * This Java class is a configuration file, equal to XML in Spring, see jBeanBox project
+ * This is traditional Spring configuration
  *
  */
+@EnableTransactionManagement
 @Configuration
 public class SpringConfig {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 	}
 
 	@Test
@@ -67,6 +72,18 @@ public class SpringConfig {
 	@Bean(name = "sqlBoxCtxBean") // This is not good
 	public SqlBoxContext sqlBoxCtxBean() {
 		return new SqlBoxContext(MySqlDataSourceBean());
+	}
+
+	@Bean
+	public PlatformTransactionManager transactionManager() {
+		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+		transactionManager.setDataSource(MySqlDataSourceBean());
+		return transactionManager;
+	}
+
+	@Bean
+	public SpringTransactionTest springTransactionTest() {
+		return new SpringTransactionTest();
 	}
 
 }

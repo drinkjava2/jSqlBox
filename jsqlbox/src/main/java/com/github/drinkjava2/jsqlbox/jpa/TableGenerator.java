@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.id;
+package com.github.drinkjava2.jsqlbox.jpa;
 
 /**
  * Defines a table primary key generator, copied from JPA but deleted some unused fields
@@ -23,27 +23,31 @@ package com.github.drinkjava2.jsqlbox.id;
  * @since 1.0.0
  */
 public class TableGenerator implements IdGenerator {
+	/**
+	 * (Required) A unique generator name that can be referenced by one or more classes to be the generator
+	 */
+	private String name;
 
 	/**
 	 * Name of table that stores the generated id values. Defaults to a name chosen by persistence provider.
 	 */
-	private String table = "";
+	private String table;
 
 	/**
 	 * Name of the primary key column in the table. Defaults to a provider-chosen name.
 	 */
-	private String pkColumnName = "";
+	private String pkColumnName;
 
 	/**
 	 * Name of the column that stores the last value generated. Defaults to a provider-chosen name.
 	 */
-	private String valueColumnName = "";
+	private String valueColumnName;
 
 	/**
 	 * The primary key value in the generator table that distinguishes this set of generated values from others that may
 	 * be stored in the table.
 	 */
-	private String pkColumnValue = "";
+	private String pkColumnValue;
 
 	/**
 	 * The initial value to be used to initialize the column that stores the last value generated.
@@ -72,9 +76,18 @@ public class TableGenerator implements IdGenerator {
 
 	@Override
 	public String getNextID() {
-		//TODO return Dao.dao().queryForString("select ", valueColumnName, "+1", " from ", table, " where pkColumnName =",
+		// TODO return Dao.dao().queryForString("select ", valueColumnName, "+1", " from ", table, " where pkColumnName
+		// =",
 		// pkColumnValue);
 		return null;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getTable() {

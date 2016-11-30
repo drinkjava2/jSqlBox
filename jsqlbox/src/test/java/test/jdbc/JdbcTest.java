@@ -18,7 +18,7 @@ import test.config.po.User;
 public class JdbcTest {
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 	}
 
 	/**

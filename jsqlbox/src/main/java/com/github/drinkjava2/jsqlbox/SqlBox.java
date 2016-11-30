@@ -29,9 +29,9 @@ import java.util.Map.Entry;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.id.GenerationType;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
+import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
+import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -46,22 +46,20 @@ public class SqlBox {
 	// The entity bean class
 	private Class<?> beanClass;
 
-	// RuntimeColumns, use it after entity bean be created
-	private Map<String, Column> runtimeColumns = new HashMap<>();
+	// Real Columns, use it after entity bean be created
+	private Map<String, Column> realColumns = new HashMap<>();
 
-	// RuntimeTableName, use it after entity bean be created
-	private String runtimeTableName;
+	// Real Table Name, use it after entity bean be created
+	private String realTable;
 
-	// ConfigColumns, set it before entity bean be created
+	// Configuration Columns, set it before entity bean be created
 	private Map<String, String> configColumns = new HashMap<>();
 
-	// ConfigTableName, set it before entity bean be created
-	private String configTableName;
+	// Configuration Table Name, set it before entity bean be created
+	private String configTable;
 
 	// Prime key generate strategy value
 	private GeneratedValue generatedValue;
-
-	private GenerationType generationType;
 
 	private SqlBoxContext context;
 
@@ -144,7 +142,7 @@ public class SqlBox {
 				}
 
 				if ("Table".equals(fieldname))
-					this.runtimeTableName = value;
+					this.realTable = value;
 				else
 					fieldIdNameMap.put(SqlBoxUtils.toFirstLetterLowerCase(fieldname), value);
 			}
@@ -171,11 +169,11 @@ public class SqlBox {
 				column.setName(pd.getName());
 				if ("id".equals(pd.getName()))
 					column.setPrimeKey(true);
-				column.setColumnDefinition(fieldname);
+				column.setColumnName(fieldname);
 				column.setPropertyType(pd.getPropertyType());
 				column.setReadMethodName(pd.getReadMethod().getName());
 				column.setWriteMethodName(pd.getWriteMethod().getName());
-				this.putRuntimeColumn(pd.getName(), column);
+				this.putRealColumn(pd.getName(), column);
 			}
 		}
 	}
@@ -184,18 +182,18 @@ public class SqlBox {
 	 * Override configuration by given SqlBox configuration
 	 */
 	private void changeColumnNameAccordingConfig() {
-		if (!SqlBoxUtils.isEmptyStr(configTableName))
-			this.runtimeTableName = configTableName;
+		if (!SqlBoxUtils.isEmptyStr(configTable))
+			this.realTable = configTable;
 		for (Entry<String, String> f : configColumns.entrySet()) {
-			Column col = runtimeColumns.get(f.getKey());
+			Column col = realColumns.get(f.getKey());
 			if (col == null) {
 				Column newCol = new Column();
-				newCol.setColumnDefinition(f.getValue());
-				runtimeColumns.put(f.getKey(), newCol);
+				newCol.setColumnName(f.getValue());
+				realColumns.put(f.getKey(), newCol);
 			} else {
-				col.setColumnDefinition(f.getValue());
+				col.setColumnName(f.getValue());
 				if (SqlBoxUtils.isEmptyStr(f.getValue()))
-					runtimeColumns.remove(f.getKey());
+					realColumns.remove(f.getKey());
 			}
 		}
 	}
@@ -206,37 +204,37 @@ public class SqlBox {
 	 * if not found or more than 1, throw SqlBoxException
 	 */
 	private void automaticFitColumnName() {// NOSONAR
-		if (!context.existTable(runtimeTableName))
-			runtimeTableName = context.cacheTableStructure(runtimeTableName);
-		Map<String, Column> databaseColumns = context.getTableStructure(runtimeTableName);
-		for (Entry<String, Column> entry : runtimeColumns.entrySet()) {
+		if (!context.existTable(realTable))
+			realTable = context.cacheTableStructure(realTable);
+		Map<String, Column> databaseColumns = context.getTableStructure(realTable);
+		for (Entry<String, Column> entry : realColumns.entrySet()) {
 			Column col = entry.getValue();
-			String columnName = col.getColumnDefinition();
+			String columnName = col.getColumnName();
 			if (!SqlBoxUtils.isEmptyStr(columnName)) {
 
 				String lowerCase = columnName.toLowerCase();
 				String realColumnNameignoreCase = null;
 				Column realColumn = databaseColumns.get(lowerCase);
 				if (realColumn != null)
-					realColumnNameignoreCase = realColumn.getColumnDefinition();
+					realColumnNameignoreCase = realColumn.getColumnName();
 				String underlineCase = SqlBoxUtils.camelToLowerCaseUnderline(columnName);
 				String realColumnNameUnderline = null;
 				realColumn = databaseColumns.get(underlineCase);
 				if (realColumn != null)
-					realColumnNameUnderline = realColumn.getColumnDefinition();
+					realColumnNameUnderline = realColumn.getColumnName();
 				if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
 					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \""
-							+ columnName + "\" does not match any table column in table " + runtimeTableName);
+							+ columnName + "\" does not match any table column in table " + realTable);
 
 				if (realColumnNameignoreCase != null && realColumnNameUnderline != null
 						&& !realColumnNameignoreCase.equals(realColumnNameUnderline))
 					SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \""
-							+ columnName + "\" found mutiple columns in table " + runtimeTableName);
+							+ columnName + "\" found mutiple columns in table " + realTable);
 
 				if (realColumnNameignoreCase != null)
-					col.setColumnDefinition(realColumnNameignoreCase);
+					col.setColumnName(realColumnNameignoreCase);
 				else if (realColumnNameUnderline != null)
-					col.setColumnDefinition(realColumnNameUnderline);
+					col.setColumnName(realColumnNameUnderline);
 			}
 		}
 	}
@@ -272,16 +270,13 @@ public class SqlBox {
 
 	// ========Config methods begin==============
 
-	public void configTableName(String tableName) {
-		configTableName = tableName;
-		this.runtimeTableName = tableName;
+	public void configTable(String tableName) {
+		configTable = tableName;
+		this.realTable = tableName;
 	}
 
-	public void configColumnName(String fieldID, String columnDefinition) {
-		configColumns.put(fieldID, columnDefinition);
-		Column col = runtimeColumns.get(fieldID);
-		if (col != null)
-			col.setColumnDefinition(columnDefinition);
+	public void configColumnName(String fieldID, String cfgColumnName) {
+		configColumns.put(fieldID, cfgColumnName);
 	}
 	// ========Config methods end==============
 
@@ -296,36 +291,31 @@ public class SqlBox {
 	}
 
 	public void setPKStrategy(GenerationType generationType, String... args) {
-		this.generationType = generationType;
-		if (generationType == GenerationType.AUTO) {
-			// TODO
-		} else if (generationType == GenerationType.TABLE) {
-			// TODO
-		}
+		this.setGeneratedValue(GeneratedValue.getGeneratedValue(generationType, args));
 	}
 
-	public String getRuntimeTableName() {
-		return runtimeTableName;
+	public String getRealTable() {
+		return realTable;
 	}
 
-	public void setRuntimeTableName(String runtimeTableName) {
-		this.runtimeTableName = runtimeTableName;
+	public void setRealTable(String realTable) {
+		this.realTable = realTable;
 	}
 
-	public Map<String, Column> getRuntimeColumns() {
-		return runtimeColumns;
+	public Map<String, Column> getRealColumns() {
+		return realColumns;
 	}
 
-	public void setRuntimeColumns(Map<String, Column> realColumns) {
-		this.runtimeColumns = realColumns;
+	public void setRealColumns(Map<String, Column> realColumns) {
+		this.realColumns = realColumns;
 	}
 
-	public void putRuntimeColumn(String fieldID, Column column) {
-		this.runtimeColumns.put(fieldID, column);
+	public void putRealColumn(String fieldID, Column column) {
+		this.realColumns.put(fieldID, column);
 	}
 
-	public Column getRuntimeColumn(String fieldID) {
-		return runtimeColumns.get(fieldID);
+	public Column getRealColumn(String fieldID) {
+		return realColumns.get(fieldID);
 	}
 
 	public SqlBoxContext getContext() {
@@ -335,4 +325,13 @@ public class SqlBox {
 	public void setContext(SqlBoxContext context) {
 		this.context = context;
 	}
+
+	public GeneratedValue getGeneratedValue() {
+		return generatedValue;
+	}
+
+	public void setGeneratedValue(GeneratedValue generatedValue) {
+		this.generatedValue = generatedValue;
+	}
+
 }

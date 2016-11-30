@@ -28,11 +28,12 @@ public class Column {
 	private boolean nullable = true;
 	private boolean insertable = true;
 	private boolean updatable = true;
-	private String columnDefinition = "";
+	// String columnDefinition not used
 	private int length = 255;
 	private int precision = 0;
 	private int scale = 0;
 	// below fields are for JSQLBox
+	private String columnName = "";
 	private boolean primeKey = false;
 	private String foreignKey = "";
 	private Class<?> propertyType;
@@ -80,12 +81,12 @@ public class Column {
 		this.updatable = updatable;
 	}
 
-	public String getColumnDefinition() {
-		return columnDefinition;
+	public String getColumnName() {
+		return columnName;
 	}
 
-	public void setColumnDefinition(String columnDefinition) {
-		this.columnDefinition = columnDefinition;
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
 	}
 
 	public int getLength() {

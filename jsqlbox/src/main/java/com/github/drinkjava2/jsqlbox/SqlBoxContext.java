@@ -21,6 +21,10 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
+	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
+
+	private static String sqlBoxConfigClass = "SqlBoxConfig";
+	private static String getSqlBoxContextMethod = "getSqlBoxContext";
 
 	public static final String SQLBOX_IDENTITY = "BOX";
 
@@ -65,19 +69,37 @@ public class SqlBoxContext {
 	}
 
 	/**
+	 * Config a global invoke method, used to get a default SqlBoxContext for global use<br/>
+	 * The default method is: public static SqlBoxContext getSqlBoxContext() in SqlBoxConfig class
+	 */
+	public static void configDefaultContext(String configClassName, String invokeMethodName) {
+		sqlBoxConfigClass = configClassName;
+		getSqlBoxContextMethod = invokeMethodName;
+	}
+
+	public static void resetDefaultContext() {
+		sqlBoxConfigClass = "SqlBoxConfig";
+		getSqlBoxContextMethod = "getSqlBoxContext";
+	}
+
+	/**
 	 * Return a default global SqlBoxContext <br/>
 	 * Note: a config class SqlBoxConfig.java is needed in class root folder
 	 */
 	public static SqlBoxContext getDefaultSqlBoxContext() {
+		final String errorinfo = "jSqlBox initialization error: class or method not found:";
 		SqlBoxContext ctx = null;
 		try {
-			Class<?> configClass = Class.forName("SqlBoxConfig");
-			Method method = configClass.getMethod("getSqlBoxContext", new Class[] {});
+			Class<?> configClass = Class.forName(sqlBoxConfigClass);
+			Method method = configClass.getMethod(getSqlBoxContextMethod, new Class[] {});
 			ctx = (SqlBoxContext) method.invoke(configClass, new Object[] {});
 			if (ctx == null)
-				SqlBoxException.throwEX(null, "");
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "jSqlbox Dao Error: DefaultConfig.getSqlBoxContext() invoke error");
+				SqlBoxException.throwEX(null, errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
+		} catch (Exception e1) {
+			SqlBoxException.throwEX(e1, errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
+		} catch (Error error) {// NOSONAR
+			log.error(errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
+			throw error;
 		}
 		return ctx;
 	}
@@ -151,7 +173,7 @@ public class SqlBoxContext {
 			Map<String, Column> columns = new HashMap<>();
 			while (rs != null && rs.next()) {
 				Column col = new Column();
-				col.setColumnDefinition(rs.getString("COLUMN_NAME"));
+				col.setColumnName(rs.getString("COLUMN_NAME"));
 				col.setPropertyTypeName(rs.getString("TYPE_NAME"));
 				columns.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
 			}

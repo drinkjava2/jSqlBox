@@ -16,11 +16,19 @@ import test.config.InitializeDatabase;
 import test.config.JBeanBoxConfig.CtxBox;
 import test.config.po.User;
 
+/**
+ * This is to test jSqlBoxContext class
+ *
+ * @author Yong Zhu
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class ContextTest {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 	}
 
 	@Test
@@ -61,9 +69,9 @@ public class ContextTest {
 
 	public static void main(String[] args) {
 		ContextTest t = new ContextTest();
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		t.insertUser1();
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		t.insertUser2();
 	}
 

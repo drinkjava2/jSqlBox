@@ -17,7 +17,7 @@ import test.config.po.User;
 public class BatchInsertTest {
 	@Before
 	public void setup() {
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 	}
 
 	public void tx_BatchInsertDemo() {

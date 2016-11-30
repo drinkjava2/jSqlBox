@@ -15,7 +15,7 @@ public class BatchInsertTester {
 	}
 
 	public static void main(String[] args) {// jUnit cann't do multiple thread test
-		InitializeDatabase.recreateTables();
+		InitializeDatabase.dropAndRecreateTables();
 		MultiThread m = new MultiThread();
 		new Thread(m).start();
 		new Thread(m).start();

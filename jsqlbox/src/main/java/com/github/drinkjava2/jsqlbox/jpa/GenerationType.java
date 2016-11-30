@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.id;
+package com.github.drinkjava2.jsqlbox.jpa;
 
 /**
  * Defines the primary key generation strategies, copied from JPA

@@ -11,12 +11,18 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
- * This Java class is a configuration file, equal to XML in Spring, see jBeanBox project
+ * This is jBeanBox configuration file, equal to XML in Spring <br/>
+ * About jBeanBox project can google it
+ * 
+ * @author Yong Zhu
  *
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class JBeanBoxConfig {
 	// jSqlBox & jBeanBox initialize
 	public static void initialize() {
+		BeanBox.defaultContext.close();
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 	}
 
@@ -31,15 +37,6 @@ public class JBeanBoxConfig {
 			setProperty("CheckoutTimeout", 5000);
 		}
 
-		// public ComboPooledDataSource create() {
-		// ComboPooledDataSource ds = new ComboPooledDataSource();
-		// ds.setUser("root");// set to your user
-		// ds.setPassword("root888");// set to your password
-		// ds.setMinPoolSize(4);
-		// ds.setMaxPoolSize(30);
-		// ds.setCheckoutTimeout(5000);
-		// return ds;
-		// }
 	}
 
 	// MySql connection URL
