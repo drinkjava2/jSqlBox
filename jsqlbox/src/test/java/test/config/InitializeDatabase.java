@@ -21,7 +21,7 @@ import test.config.JBeanBoxConfig.DataSourceBox;
 public class InitializeDatabase {
 
 	public static void dropAndRecreateTables() {
-		SqlBoxContext.resetDefaultContext();
+		SqlBoxContext.configDefaultContext(SqlBoxConfig.class.getName(), "getSqlBoxContext");
 		JBeanBoxConfig.initialize();
 		try {
 			Dao.dao().execute("drop table users");

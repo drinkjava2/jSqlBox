@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.RowMapper;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
 import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
+import com.github.drinkjava2.jsqlbox.jpa.TableGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -73,9 +74,11 @@ public class SqlBox {
 
 	/**
 	 * Initialize a SqlBox instance<br/>
-	 * 1. Use bean field as column name, field userName map to DB userName column <br/>
+	 * 1. Use bean field as column name, field userName map to DB userName
+	 * column <br/>
 	 * 2. If find configuration column name, use it, for example: user_name<br/>
-	 * 3. Fit column name to real DB column name, automatic fit camel and underline format<br/>
+	 * 3. Fit column name to real DB column name, automatic fit camel and
+	 * underline format<br/>
 	 */
 	public void initialize() {
 		buildDefaultConfig();// field userName map to column userName
@@ -200,7 +203,8 @@ public class SqlBox {
 
 	/**
 	 * Correct column name, for "userName" field <br/>
-	 * Find column ignore case like "userName","UserName","USERNAME","username", or "user_name"<br/>
+	 * Find column ignore case like "userName","UserName","USERNAME","username",
+	 * or "user_name"<br/>
 	 * if not found or more than 1, throw SqlBoxException
 	 */
 	private void automaticFitColumnName() {// NOSONAR
@@ -278,6 +282,21 @@ public class SqlBox {
 	public void configColumnName(String fieldID, String cfgColumnName) {
 		configColumns.put(fieldID, cfgColumnName);
 	}
+
+	public void setGenerator(GenerationType type, String name) {
+		this.setGeneratedValue(new GeneratedValue(type, name));
+	}
+
+	public String defineTableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
+			String valueColumnName, int initialValue, int allocationSize) {
+		if (!this.getContext().existGeneratorInCache(name)) {
+			TableGenerator generator = new TableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName,
+					initialValue, allocationSize);
+			this.getContext().putGeneratorToCache(name, generator);
+		}
+		return name;
+	}
+
 	// ========Config methods end==============
 
 	// ========getter & setters below==============
@@ -288,10 +307,6 @@ public class SqlBox {
 
 	public void setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
-	}
-
-	public void setPKStrategy(GenerationType generationType, String... args) {
-		this.setGeneratedValue(GeneratedValue.getGeneratedValue(generationType, args));
 	}
 
 	public String getRealTable() {

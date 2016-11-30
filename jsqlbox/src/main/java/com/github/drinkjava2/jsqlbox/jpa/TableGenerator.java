@@ -16,7 +16,8 @@
 package com.github.drinkjava2.jsqlbox.jpa;
 
 /**
- * Defines a table primary key generator, copied from JPA but deleted some unused fields
+ * Defines a table primary key generator, copied from JPA but deleted some
+ * unused fields
  * 
  * @author Yong Zhu
  * @version 1.0.0
@@ -24,33 +25,38 @@ package com.github.drinkjava2.jsqlbox.jpa;
  */
 public class TableGenerator implements IdGenerator {
 	/**
-	 * (Required) A unique generator name that can be referenced by one or more classes to be the generator
+	 * (Required) A unique generator name that can be referenced by one or more
+	 * classes to be the generator
 	 */
 	private String name;
 
 	/**
-	 * Name of table that stores the generated id values. Defaults to a name chosen by persistence provider.
+	 * Name of table that stores the generated id values. Defaults to a name
+	 * chosen by persistence provider.
 	 */
 	private String table;
 
 	/**
-	 * Name of the primary key column in the table. Defaults to a provider-chosen name.
+	 * Name of the primary key column in the table. Defaults to a
+	 * provider-chosen name.
 	 */
 	private String pkColumnName;
 
 	/**
-	 * Name of the column that stores the last value generated. Defaults to a provider-chosen name.
+	 * Name of the column that stores the last value generated. Defaults to a
+	 * provider-chosen name.
 	 */
 	private String valueColumnName;
 
 	/**
-	 * The primary key value in the generator table that distinguishes this set of generated values from others that may
-	 * be stored in the table.
+	 * The primary key value in the generator table that distinguishes this set
+	 * of generated values from others that may be stored in the table.
 	 */
 	private String pkColumnValue;
 
 	/**
-	 * The initial value to be used to initialize the column that stores the last value generated.
+	 * The initial value to be used to initialize the column that stores the
+	 * last value generated.
 	 */
 	private int initialValue = 0;
 
@@ -59,24 +65,21 @@ public class TableGenerator implements IdGenerator {
 	 */
 	private int allocationSize = 50;
 
-	public TableGenerator() {
-		// default constructor
-	}
-
-	public TableGenerator(String table) {
-
-	}
-
-	public TableGenerator(String table, String pkColumnName, String pkColumnValue, String valueColumnName) {
+	public TableGenerator(String name, String table, String pkColumnName, String pkColumnValue, String valueColumnName,
+			int initialValue, int allocationSize) {
+		this.name = name;
 		this.table = table;
 		this.pkColumnName = pkColumnName;
 		this.valueColumnName = valueColumnName;
 		this.pkColumnValue = pkColumnValue;
+		this.initialValue = initialValue;
+		this.allocationSize = allocationSize;
 	}
 
 	@Override
 	public String getNextID() {
-		// TODO return Dao.dao().queryForString("select ", valueColumnName, "+1", " from ", table, " where pkColumnName
+		// TODO return Dao.dao().queryForString("select ", valueColumnName,
+		// "+1", " from ", table, " where pkColumnName
 		// =",
 		// pkColumnValue);
 		return null;

@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
+import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
 
 /**
  * @author Yong Zhu
@@ -21,6 +22,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
+
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
 
 	private static String sqlBoxConfigClass = "SqlBoxConfig";
@@ -32,6 +34,9 @@ public class SqlBoxContext {
 
 	private ConcurrentHashMap<String, Map<String, Column>> databaseColumnsCache = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
+
+	// ID Generator singleton cache
+	private HashMap<String, IdGenerator> generatorCache = new HashMap<>();
 
 	// print SQL to console or log depends logging.properties
 	private boolean showSql = false;
@@ -68,9 +73,29 @@ public class SqlBoxContext {
 		this.showSql = showSql;
 	}
 
+	public boolean existGeneratorInCache(String name) {
+		synchronized (generatorCache) {
+			return generatorCache.get(name) != null;
+		}
+	}
+
+	public void putGeneratorToCache(String name, IdGenerator generator) {
+		synchronized (generatorCache) {
+			generatorCache.put(name, generator);
+		}
+	}
+
+	public IdGenerator getGeneratorFromCache(String name) {
+		synchronized (generatorCache) {
+			return generatorCache.get(name);
+		}
+	}
+
 	/**
-	 * Config a global invoke method, used to get a default SqlBoxContext for global use<br/>
-	 * The default method is: public static SqlBoxContext getSqlBoxContext() in SqlBoxConfig class
+	 * Config a global invoke method, used to get a default SqlBoxContext for
+	 * global use<br/>
+	 * The default method is: public static SqlBoxContext getSqlBoxContext() in
+	 * SqlBoxConfig class
 	 */
 	public static void configDefaultContext(String configClassName, String invokeMethodName) {
 		sqlBoxConfigClass = configClassName;
@@ -150,7 +175,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
+	 * Cache table MetaData in SqlBoxContext for future use, use lower case
+	 * column name as key
 	 */
 	public String cacheTableStructure(String tableName) {
 		String realTableName = null;

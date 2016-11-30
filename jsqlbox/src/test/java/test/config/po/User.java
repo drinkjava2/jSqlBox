@@ -23,8 +23,8 @@ public class User {
 	}
 
 	public void initialize(SqlBox box) {
-		box.setPKStrategy(GenerationType.AUTO);
-		box.setPKStrategy(GenerationType.TABLE, "id_table", "pk", "pk_user", "user_id");
+		box.defineTableGenerator("id_table_userID", "id_table", "pk_col_name", "pk_col_val", "val_col_name", 1, 50);
+		box.setGenerator(GenerationType.TABLE, "id_table_userID");
 	}
 
 	// ============= Dao code end =========

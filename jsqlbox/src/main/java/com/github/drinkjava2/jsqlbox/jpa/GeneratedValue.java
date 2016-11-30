@@ -15,10 +15,6 @@
 */
 package com.github.drinkjava2.jsqlbox.jpa;
 
-import java.util.HashMap;
-
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
-
 /**
  * Defines the value of primary key generation strategy, copied from JPA
  * 
@@ -27,18 +23,26 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  * @since 1.0.0
  */
 public class GeneratedValue {
-	public static HashMap<String, GeneratedValue> generatedValueCache = new HashMap<>();
 
 	/**
-	 * (Optional) The primary key generation strategy that the persistence provider must use to generate the annotated
-	 * entity primary key.
+	 * (Optional) The primary key generation strategy that the persistence
+	 * provider must use to generate the entity primary key.
 	 */
 	private GenerationType generationType = null;
 
 	/**
-	 * (Optional) The name of the primary key generator to use as specified in the {@link SequenceGenerator} or
+	 * (Optional) The name of the primary key generator
 	 */
-	private String generator;
+	private String generatorName;
+
+	public GeneratedValue(GenerationType generationType) {
+		this.generationType = generationType;
+	}
+
+	public GeneratedValue(GenerationType generationType, String generatorName) {
+		this.generationType = generationType;
+		this.generatorName = generatorName;
+	}
 
 	public GenerationType getGenerationType() {
 		return generationType;
@@ -48,42 +52,12 @@ public class GeneratedValue {
 		this.generationType = generationType;
 	}
 
-	public String getGenerator() {
-		return generator;
+	public String getGeneratorName() {
+		return generatorName;
 	}
 
-	public void setGenerator(String generator) {
-		this.generator = generator;
-	}
-
-	/**
-	 * Find a singleton GeneratedValue instance from cache, if no, create a new one and cache it
-	 */
-	public static GeneratedValue getGeneratedValue(GenerationType generationType, String... args) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(generationType);
-		for (String arg : args) {
-			sb.append("/").append(arg);
-		}
-		String key = sb.toString();
-		GeneratedValue generatedValue;
-		synchronized (generatedValueCache) {
-			generatedValue = generatedValueCache.get(key);
-		}
-		if (generatedValue != null)
-			return generatedValue;
-
-		if (generationType == GenerationType.AUTO) {
-			generatedValue = new GeneratedValue();
-		} else if (generationType == GenerationType.TABLE) {
-
-		}
-		if (generatedValue == null)
-			SqlBoxException.throwEX(null, "SqlBox GeneratedValue error, can not create GeneratedValue: " + key);
-		synchronized (generatedValueCache) {
-			generatedValueCache.put(key, generatedValue);
-		}
-		return generatedValue;
+	public void setGeneratorName(String generatorName) {
+		this.generatorName = generatorName;
 	}
 
 }
