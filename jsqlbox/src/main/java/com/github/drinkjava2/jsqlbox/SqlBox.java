@@ -235,7 +235,7 @@ public class SqlBox {
 		this.setGeneratedValue(new GeneratedValue(type));
 	}
 
-	public void configIdGenerator(GenerationType type, String name) {
+	public void configIdGenerator(String fieldID, GenerationType type, String name) {
 		this.setGeneratedValue(new GeneratedValue(type, name));
 	}
 

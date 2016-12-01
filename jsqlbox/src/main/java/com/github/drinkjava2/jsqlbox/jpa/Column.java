@@ -39,8 +39,8 @@ public class Column {
 	private Class<?> propertyType;
 	private String propertyTypeName;
 	private String readMethodName;
-	private String writeMethodName;
-
+	private String writeMethodName; 
+	
 	public String getName() {
 		return name;
 	}

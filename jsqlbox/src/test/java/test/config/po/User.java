@@ -22,8 +22,7 @@ public class User {
 	}
 
 	public void initialize() {
-		dao().configTableGenerator("id_table_userID", "id_table", "pk_col_name", "pk_col_val", "val_col_name", 1, 50);
-		dao().configIdGenerator(GenerationType.TABLE, "id_table_userID");
+		// do nothing here
 	}
 
 	// ============= Dao code end =========

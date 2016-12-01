@@ -23,13 +23,11 @@ public class InitializeDatabase {
 	public static void dropAndRecreateTables() {
 		SqlBoxContext.configDefaultContext(SqlBoxConfig.class.getName(), "getSqlBoxContext");
 		JBeanBoxConfig.initialize();
-		try {
-			Dao.dao().execute("drop table users");
-			Dao.dao().execute("drop table users2");
-		} catch (Exception e) {
-			System.out.println("Exception found when drop tables");
-			SqlBoxException.eatException(e);
-		}
+
+		// No exception will throw if mistake happen
+		Dao.dao().executeInSilence("drop table users");
+		Dao.dao().executeInSilence("drop table users2");
+
 		ComboPooledDataSource pool = (ComboPooledDataSource) BeanBox.getBean(DataSourceBox.class);
 		String driverClassName = pool.getDriverClass().toLowerCase();
 		if (driverClassName.indexOf("mysql") != -1)

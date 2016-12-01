@@ -135,6 +135,15 @@ public class Dao {
 		}
 	}
 
+	public Integer executeInSilence(String... sql) {
+		try {
+			return execute(sql);
+		} catch (Exception e) {
+			SqlBoxException.eatException(e);
+			return null;
+		}
+	}
+
 	/**
 	 * Transfer cached SQLs to Prepared Statement and batch execute these SQLs
 	 */
@@ -311,8 +320,8 @@ public class Dao {
 		this.getSqlBox().configIdGenerator(type);
 	}
 
-	public void configIdGenerator(GenerationType type, String name) {
-		this.getSqlBox().configIdGenerator(type, name);
+	public void configIdGenerator(String fieldID, GenerationType type, String name) {
+		this.getSqlBox().configIdGenerator(fieldID, type, name);
 	}
 
 	public String configTableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
