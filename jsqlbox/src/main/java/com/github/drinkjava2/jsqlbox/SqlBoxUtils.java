@@ -20,10 +20,10 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Same as StringUtils.isEmptyStr()
+	 * Return true if a String is null or ""
 	 */
 	public static boolean isEmptyStr(String str) {
-		return str == null || "".equals(str);
+		return str == null || str.length() == 0;
 	}
 
 	/**
@@ -84,6 +84,19 @@ public class SqlBoxUtils {
 	}
 
 	/**
+	 * Invoke to get field value by its fieldID
+	 */
+	public static String getStaticStringField(Class<?> beanClass, String fieldID) {
+		try {
+			Field field = beanClass.getField(fieldID);
+			return (String) field.get(null);
+		} catch (Exception e) {
+			SqlBoxException.eatException(e);
+		}
+		return null;
+	}
+
+	/**
 	 * Camel string change to lower case underline string, "AbcDef" to "abc_def"
 	 */
 	public static String camelToLowerCaseUnderline(String name) {
@@ -102,8 +115,8 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Make the given field accessible, only called when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
+	 * Make the given field accessible, only called when actually necessary, to
+	 * avoid unnecessary conflicts with a JVM SecurityManager (if active).
 	 */
 	public static void makeAccessible(Field field) {
 		if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers())

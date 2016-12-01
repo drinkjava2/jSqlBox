@@ -69,6 +69,12 @@
  <dependencies>  
     <!-- jSqlBox used Spring Transaction & Spring JDBC, I hope in future version can find replacement to shrink its size -->
     <dependency>
+        <groupId>com.github.drinkjava2</groupId>
+        <artifactId>jbeanbox</artifactId>
+        <version>2.4.1</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>${spring.version}.RELEASE</version>
@@ -83,12 +89,6 @@
     <!-- ======================================================================================= -->
     <!-- below dependencies are only for unit test, scope is set to "test", will not be deployed -->
     <!-- ======================================================================================= -->
-    <dependency>
-        <groupId>com.github.drinkjava2</groupId>
-        <artifactId>jbeanbox</artifactId>
-        <version>2.4.1</version>
-        <scope>test</scope> 
-    </dependency>
     
     <dependency>  
   	     <groupId>log4j</groupId>  

@@ -71,8 +71,8 @@ public class ContextTest {
 		ContextTest t = new ContextTest();
 		InitializeDatabase.dropAndRecreateTables();
 		t.insertUser1();
-		InitializeDatabase.dropAndRecreateTables();
-		t.insertUser2();
+//		InitializeDatabase.dropAndRecreateTables();
+//		t.insertUser2();
 	}
 
 }

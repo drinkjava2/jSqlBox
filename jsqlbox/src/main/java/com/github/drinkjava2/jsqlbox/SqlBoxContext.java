@@ -26,6 +26,9 @@ public class SqlBoxContext {
 
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
 
+	// print SQL to console or log depends logging.properties
+	private boolean showSql = false;
+
 	private static String sqlBoxConfigClass = "SqlBoxConfig";
 	private static String getSqlBoxContextMethod = "getSqlBoxContext";
 
@@ -34,14 +37,11 @@ public class SqlBoxContext {
 	private JdbcTemplate jdbc = new JdbcTemplate();
 	private DataSource dataSource = null;
 
-	private ConcurrentHashMap<String, Map<String, Column>> databaseColumnsCache = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Map<String, Column>> tableMetaDataCache = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
 
 	// ID Generator singleton cache
 	private HashMap<String, IdGenerator> generatorCache = new HashMap<>();
-
-	// print SQL to console or log depends logging.properties
-	private boolean showSql = false;
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -157,7 +157,7 @@ public class SqlBoxContext {
 	}
 
 	public boolean existTable(String tablename) {
-		return databaseColumnsCache.get(tablename) != null;
+		return tableMetaDataCache.get(tablename) != null;
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class SqlBoxContext {
 				col.setPropertyTypeName(rs.getString("TYPE_NAME"));
 				columns.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
 			}
-			databaseColumnsCache.put(realTableName, columns);
+			tableMetaDataCache.put(realTableName, columns);
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SQLHelper exec error");
 		} finally {
@@ -208,8 +208,8 @@ public class SqlBoxContext {
 
 	// ================== getter & setters below============
 
-	public Map<String, Column> getTableStructure(String tableName) {
-		return databaseColumnsCache.get(tableName);
+	public Map<String, Column> getTableMetaData(String tableName) {
+		return tableMetaDataCache.get(tableName);
 	}
 
 	public DataSource getDataSource() {

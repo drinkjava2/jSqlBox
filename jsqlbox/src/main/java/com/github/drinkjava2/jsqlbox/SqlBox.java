@@ -16,6 +16,10 @@
 
 package com.github.drinkjava2.jsqlbox;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +73,6 @@ public class SqlBox {
 	 */
 	public <T> T createBean() {
 		Object bean = null;
-		// this.initialize();
 		try {
 			bean = this.getBeanClass().newInstance();
 			this.beanInitialize(bean);
@@ -88,30 +91,123 @@ public class SqlBox {
 	 */
 	public void beanInitialize(Object bean) {
 		try {
-			Method m = this.getBeanClass().getMethod("initialize", new Class[] { SqlBox.class });
+			Method m = this.getBeanClass().getMethod("initialize", new Class[] { null });
 			if (m != null)
-				m.invoke(bean, new Object[] { this });
+				m.invoke(bean, new Object[] {});
 		} catch (Exception e) {
 			SqlBoxException.eatException(e);
 		}
 	}
 
+	/**
+	 * Get real database table name
+	 */
 	public String getRealTable() {
-		return configTable;
-		// TODO add method body
+		String table = null;
+		if (!SqlBoxUtils.isEmptyStr(configTable))
+			table = configTable;
+		if (SqlBoxUtils.isEmptyStr(table))
+			table = SqlBoxUtils.getStaticStringField(this.beanClass, "Table");
+		if (!context.existTable(table))
+			table = context.cacheTableStructure(table);
+		return table;
 	}
 
+	private boolean isGoodFieldID(String fieldID) {
+		try {
+			if (SqlBoxUtils.isCapitalizedString(fieldID))
+				return false;
+			String capitalCase = SqlBoxUtils.toFirstLetterUpperCase(fieldID);
+			Field field = beanClass.getField(capitalCase);
+			if (field == null)
+				return false;
+			Method method = this.beanClass.getMethod(capitalCase, new Class[] {});
+			if (method == null)
+				return false;
+		} catch (Exception e) { // NOSONAR
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Return real Columns match to table meta data
+	 */
 	public Map<String, Column> getRealColumns() {
-		return null;
-		// TODO add method body
+		if (this.beanClass == null)
+			SqlBoxException.throwEX(null, "SqlBox getRealColumns error, beanClass can not be null");
+		Map<String, Column> realColumns = new HashMap<>();
+
+		BeanInfo beanInfo = null;
+		PropertyDescriptor[] pds = null;
+		try {
+			beanInfo = Introspector.getBeanInfo(this.getBeanClass());
+			pds = beanInfo.getPropertyDescriptors();
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SqlBox buildDefaultConfig error");
+		}
+		for (PropertyDescriptor pd : pds) {
+			String fieldID = pd.getName();
+			if (isGoodFieldID(fieldID)) {
+				if (!SqlBoxUtils.isEmptyStr(fieldID)) {// NOSONAR
+					Column column = new Column();
+					column.setName(fieldID);
+					if ("id".equals(fieldID))// NOSONAR
+						column.setPrimeKey(true);
+					column.setColumnName(fieldID);
+					column.setPropertyType(pd.getPropertyType());
+					column.setReadMethodName(pd.getReadMethod().getName());
+					column.setWriteMethodName(pd.getWriteMethod().getName());
+					useConfigToOverrideDefaultValue(fieldID, column);
+					realColumns.put(fieldID, column);
+				}
+			}
+		}
+		return realColumns;
 	}
 
-	public Column getRealColumn(String fieldID) {
-		return null;
-		// TODO add method body
+	private void useConfigToOverrideDefaultValue(String fieldID, Column column) {
+		Column config = this.configColumns.get(fieldID);
+		if (config != null && !SqlBoxUtils.isEmptyStr(config.getColumnName()))
+			column.setColumnName(config.getColumnName());
 	}
 
-  
+	/**
+	 * Get real column name by fieldID <br/>
+	 * userName field will find userName or username or USERNAME or USER_NAME, but only allowed 1
+	 */
+	public String getRealColumnName(String fieldID) {// NOSONAR
+		String columnName = null;
+		Column col = this.configColumns.get(fieldID);
+		if (col != null)
+			columnName = col.getColumnName();
+		if (columnName == null || columnName.length() == 0)
+			columnName = fieldID;
+		String realTable = getRealTable();
+
+		Map<String, Column> dbMetaData = context.getTableMetaData(realTable);
+
+		String realColumnNameignoreCase = null;
+		Column realColumn = dbMetaData.get(columnName.toLowerCase());
+		if (realColumn != null)
+			realColumnNameignoreCase = realColumn.getColumnName();
+
+		String realColumnNameUnderline = null;
+		realColumn = dbMetaData.get(SqlBoxUtils.camelToLowerCaseUnderline(columnName));
+		if (realColumn != null)
+			realColumnNameUnderline = realColumn.getColumnName();
+
+		if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
+			SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+					+ "\" does not match any table column in table " + realTable);
+
+		if (realColumnNameignoreCase != null && realColumnNameUnderline != null
+				&& !realColumnNameignoreCase.equals(realColumnNameUnderline))
+			SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+					+ "\" found mutiple columns in table " + realTable);
+		return realColumnNameignoreCase != null ? realColumnNameignoreCase : realColumnNameUnderline;
+	}
+
 	/**
 	 * Get RowMapper
 	 */
@@ -126,7 +222,17 @@ public class SqlBox {
 	}
 
 	public void configColumnName(String fieldID, String columnName) {
-		configColumns.get(fieldID).setColumnName(columnName);
+		Column col = getConfigColumns().get(fieldID);
+		if (col == null) {
+			col = new Column();
+			getConfigColumns().put(fieldID, col);
+		}
+		col.setColumnName(columnName);
+
+	}
+
+	public void configIdGenerator(GenerationType type) {
+		this.setGeneratedValue(new GeneratedValue(type));
 	}
 
 	public void configIdGenerator(GenerationType type, String name) {

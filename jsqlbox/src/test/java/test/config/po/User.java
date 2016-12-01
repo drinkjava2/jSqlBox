@@ -1,7 +1,6 @@
 package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
 
 /**
@@ -22,9 +21,9 @@ public class User {
 		return dao;
 	}
 
-	public void initialize(SqlBox box) {
-		box.configTableGenerator("id_table_userID", "id_table", "pk_col_name", "pk_col_val", "val_col_name", 1, 50);
-		box.configIdGenerator(GenerationType.TABLE, "id_table_userID");
+	public void initialize() {
+		dao().configTableGenerator("id_table_userID", "id_table", "pk_col_name", "pk_col_val", "val_col_name", 1, 50);
+		dao().configIdGenerator(GenerationType.TABLE, "id_table_userID");
 	}
 
 	// ============= Dao code end =========

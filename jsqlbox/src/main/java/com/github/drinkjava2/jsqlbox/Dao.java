@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
+import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -68,7 +69,6 @@ public class Dao {
 	public static Dao defaultDao(Object bean) {
 		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
 		SqlBox box = ctx.findAndBuildSqlBox(bean.getClass());
-		// box initialize();
 		box.beanInitialize(bean);
 		Dao d = new Dao(box);
 		d.setBean(bean);
@@ -292,7 +292,7 @@ public class Dao {
 
 	// =============identical methods copied from SqlBox==========
 	public String getRealColumnName(String fieldID) {
-		return this.getSqlBox().getRealColumn(fieldID).getColumnName();
+		return this.getSqlBox().getRealColumnName(fieldID);
 	}
 
 	public String getRealTable() {
@@ -300,11 +300,25 @@ public class Dao {
 	}
 
 	public void configTable(String table) {
-		this.getSqlBox().setConfigTable(table);
+		this.getSqlBox().configTable(table);
 	}
 
 	public void configColumnName(String fieldID, String columnName) {
-		this.getSqlBox().getConfigColumns().get(fieldID).setColumnName(columnName);
+		this.getSqlBox().configColumnName(fieldID, columnName);
+	}
+
+	public void configIdGenerator(GenerationType type) {
+		this.getSqlBox().configIdGenerator(type);
+	}
+
+	public void configIdGenerator(GenerationType type, String name) {
+		this.getSqlBox().configIdGenerator(type, name);
+	}
+
+	public String configTableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
+			String valueColumnName, int initialValue, int allocationSize) {
+		return this.getSqlBox().configTableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName,
+				initialValue, allocationSize);
 	}
 
 	public <T> T createBean() {

@@ -31,6 +31,6 @@ public class SqlBoxException extends RuntimeException {
 	 * Eat exception to avoid SONAR warning
 	 */
 	public static void eatException(Exception e) {
-		// do nothing
+		// do some log here?
 	}
 }
