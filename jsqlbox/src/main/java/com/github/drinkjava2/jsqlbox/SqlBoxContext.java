@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
@@ -30,6 +31,7 @@ public class SqlBoxContext {
 
 	public static final String SQLBOX_IDENTITY = "BOX";
 
+	private JdbcTemplate jdbc = new JdbcTemplate();
 	private DataSource dataSource = null;
 
 	private ConcurrentHashMap<String, Map<String, Column>> databaseColumnsCache = new ConcurrentHashMap<>();
@@ -50,27 +52,13 @@ public class SqlBoxContext {
 
 	public SqlBoxContext(DataSource dataSource) {
 		this.dataSource = dataSource;
-	}
-
-	public DataSource getDataSource() {
-		return dataSource;
-	}
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
+		if (dataSource != null)
+			this.jdbc.setDataSource(dataSource);
 	}
 
 	public void close() {
 		if (this.getDataSource() != null)
 			this.setDataSource(null);
-	}
-
-	public boolean isShowSql() {
-		return showSql;
-	}
-
-	public void setShowSql(boolean showSql) {
-		this.showSql = showSql;
 	}
 
 	public boolean existGeneratorInCache(String name) {
@@ -92,10 +80,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Config a global invoke method, used to get a default SqlBoxContext for
-	 * global use<br/>
-	 * The default method is: public static SqlBoxContext getSqlBoxContext() in
-	 * SqlBoxConfig class
+	 * Config a global invoke method, used to get a default SqlBoxContext for global use<br/>
+	 * The default method is: public static SqlBoxContext getSqlBoxContext() in SqlBoxConfig class
 	 */
 	public static void configDefaultContext(String configClassName, String invokeMethodName) {
 		sqlBoxConfigClass = configClassName;
@@ -175,8 +161,7 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case
-	 * column name as key
+	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
 	 */
 	public String cacheTableStructure(String tableName) {
 		String realTableName = null;
@@ -221,8 +206,35 @@ public class SqlBoxContext {
 		return realTableName;
 	}
 
+	// ================== getter & setters below============
+
 	public Map<String, Column> getTableStructure(String tableName) {
 		return databaseColumnsCache.get(tableName);
+	}
+
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+		this.jdbc.setDataSource(dataSource);
+	}
+
+	public boolean isShowSql() {
+		return showSql;
+	}
+
+	public void setShowSql(boolean showSql) {
+		this.showSql = showSql;
+	}
+
+	public JdbcTemplate getJdbc() {
+		return jdbc;
+	}
+
+	public void setJdbc(JdbcTemplate jdbc) {
+		this.jdbc = jdbc;
 	}
 
 }

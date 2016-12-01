@@ -38,7 +38,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 public class Dao {
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
 	private SqlBox sqlBox;
-	private JdbcTemplate jdbc; // Spring JDBCTemplate
+
 	// In future version may delete JDBCTemplate and only use pure JDBC
 
 	private Object bean; // Entity Bean Instance
@@ -48,8 +48,6 @@ public class Dao {
 			SqlBoxException.throwEX(null, "Dao create error, SqlBoxContext  can not be null");
 		else if (ctx.getDataSource() == null)
 			SqlBoxException.throwEX(null, "Dao create error,  dataSource can not be null");
-		else
-			this.jdbc = new JdbcTemplate(ctx.getDataSource());
 		SqlBox sb = new SqlBox(ctx);
 		this.sqlBox = sb;
 	}
@@ -61,8 +59,6 @@ public class Dao {
 			SqlBoxException.throwEX(null, "Dao create error, sqlBoxContext can not be null");
 		else if (sqlBox.getContext().getDataSource() == null)
 			SqlBoxException.throwEX(null, "Dao create error, dataSource can not be null");
-		else
-			this.jdbc = new JdbcTemplate(sqlBox.getContext().getDataSource());
 		this.sqlBox = sqlBox;
 	}
 
@@ -72,7 +68,7 @@ public class Dao {
 	public static Dao defaultDao(Object bean) {
 		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
 		SqlBox box = ctx.findAndBuildSqlBox(bean.getClass());
-		box.initialize();
+		// box initialize();
 		box.beanInitialize(bean);
 		Dao d = new Dao(box);
 		d.setBean(bean);
@@ -133,7 +129,7 @@ public class Dao {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
-			return jdbc.update(sp.getSql(), (Object[]) sp.getParameters());
+			return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
 		} finally {
 			SqlHelper.clearLastSQL();
 		}
@@ -147,7 +143,7 @@ public class Dao {
 			List<List<SqlAndParameters>> subSPlist = SqlHelper.getSQLandParameterSubList();
 			logCachedSQL(subSPlist);
 			for (final List<SqlAndParameters> splist : subSPlist) {
-				jdbc.batchUpdate(SqlHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
+				getJdbc().batchUpdate(SqlHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						SqlAndParameters sp = splist.get(i);
@@ -288,7 +284,7 @@ public class Dao {
 		sb.append(SqlHelper.createValueString(count));
 		if (this.getSqlBox().getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
-		return jdbc.update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
+		return getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 
 	}
 
@@ -303,12 +299,12 @@ public class Dao {
 		return this.getSqlBox().getRealTable();
 	}
 
-	public void setRealTable(String realTable) {
-		this.getSqlBox().setRealTable(realTable);
+	public void configTable(String table) {
+		this.getSqlBox().setConfigTable(table);
 	}
 
-	public void setRealColumnName(String fieldID, String realColumnName) {
-		this.getSqlBox().getRealColumn(fieldID).setColumnName(realColumnName);
+	public void configColumnName(String fieldID, String columnName) {
+		this.getSqlBox().getConfigColumns().get(fieldID).setColumnName(columnName);
 	}
 
 	public <T> T createBean() {
@@ -340,11 +336,7 @@ public class Dao {
 	 * @return JdbcTemplate
 	 */
 	public JdbcTemplate getJdbc() {
-		return jdbc;
-	}
-
-	public void setJdbc(JdbcTemplate jdbc) {
-		this.jdbc = jdbc;
+		return this.getSqlBox().getContext().getJdbc();
 	}
 
 	public SqlBox getSqlBox() {
