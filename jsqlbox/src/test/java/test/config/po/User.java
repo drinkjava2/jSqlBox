@@ -1,7 +1,6 @@
 package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
 
 /**
  * This entity class should automatically created by a code generator tool

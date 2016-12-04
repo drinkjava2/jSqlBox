@@ -113,6 +113,9 @@ public class SqlBox {
 		return table;
 	}
 
+	/**
+	 * A good fieldID must be like "userName", and has UserName field, and has UserName() method
+	 */
 	private boolean isGoodFieldID(String fieldID) {
 		try {
 			if (SqlBoxUtils.isCapitalizedString(fieldID))
@@ -222,20 +225,24 @@ public class SqlBox {
 	}
 
 	public void configColumnName(String fieldID, String columnName) {
-		Column col = getConfigColumns().get(fieldID);
-		if (col == null) {
-			col = new Column();
-			getConfigColumns().put(fieldID, col);
-		}
-		col.setColumnName(columnName);
-
+		getOrBuildConfigColumn(fieldID).setColumnName(columnName);
 	}
 
 	public void configIdGenerator(GenerationType type) {
 		this.setGeneratedValue(new GeneratedValue(type));
 	}
 
+	public Column getOrBuildConfigColumn(String fieldID) {
+		Column col = this.getConfigColumns().get(fieldID);
+		if (col == null) {
+			col = new Column();
+			this.getConfigColumns().put(fieldID, col);
+		}
+		return col;
+	}
+
 	public void configIdGenerator(String fieldID, GenerationType type, String name) {
+
 		this.setGeneratedValue(new GeneratedValue(type, name));
 	}
 

@@ -40,7 +40,7 @@ public class JBeanBoxConfig {
 	}
 
 	// MySql connection URL
-	static class MySqlDataSourceBox extends C3P0Box {
+	public static class MySqlDataSourceBox extends C3P0Box {
 		{
 			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClass", "com.mysql.jdbc.Driver");

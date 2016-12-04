@@ -25,7 +25,6 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
-import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -180,14 +179,14 @@ public class Dao {
 	 * Query and return entity list by sql
 	 */
 	public List queryEntity(String... sql) {
-		return this.queryEntity(this.getSqlBox(), sql);
+		return this.queryEntity(this.box(), sql);
 	}
 
 	/**
 	 * Query and return entity list by sql
 	 */
 	public <T> List<T> queryEntity(Class<?> beanOrSqlBoxClass, String... sql) {
-		SqlBox box = this.getSqlBox().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
+		SqlBox box = this.box().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
 		return this.queryEntity(box, sql);
 	}
 
@@ -212,7 +211,7 @@ public class Dao {
 	 */
 	private void logSql(SqlAndParameters sp) {
 		// check if allowed print SQL
-		if (!this.getSqlBox().getContext().isShowSql())
+		if (!this.box().getContext().isShowSql())
 			return;
 		StringBuilder sb = new StringBuilder(sp.getSql());
 		Object[] args = sp.getParameters();
@@ -234,7 +233,7 @@ public class Dao {
 	 * Use context.setShowSql to control, Default showSql is "false"
 	 */
 	private void logCachedSQL(List<List<SqlAndParameters>> subSPlist) {
-		if (this.getSqlBox().getContext().isShowSql()) {
+		if (this.box().getContext().isShowSql()) {
 			if (subSPlist != null) {
 				List<SqlAndParameters> l = subSPlist.get(0);
 				if (l != null) {
@@ -274,7 +273,7 @@ public class Dao {
 					value = m.invoke(this.bean, new Object[] {});
 				} catch (Exception e1) {
 					SqlBoxException.throwEX(e1,
-							"Dao doSave error, method " + methodName + " not found in class " + bean);
+							"Dao save error, method " + methodName + " not found in class " + bean);
 				}
 				if (value != null) {
 					sb.append(col.getColumnName()).append(",");
@@ -291,7 +290,7 @@ public class Dao {
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
-		if (this.getSqlBox().getContext().isShowSql())
+		if (this.box().getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 		return getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 
@@ -300,40 +299,14 @@ public class Dao {
 	// ========Dao query/crud methods end=======
 
 	// =============identical methods copied from SqlBox==========
-	public String getRealColumnName(String fieldID) {
-		return this.getSqlBox().getRealColumnName(fieldID);
-	}
-
-	public String getRealTable() {
-		return this.getSqlBox().getRealTable();
-	}
-
-	public void configTable(String table) {
-		this.getSqlBox().configTable(table);
-	}
-
-	public void configColumnName(String fieldID, String columnName) {
-		this.getSqlBox().configColumnName(fieldID, columnName);
-	}
-
-	public void configIdGenerator(GenerationType type) {
-		this.getSqlBox().configIdGenerator(type);
-	}
-
-	public void configIdGenerator(String fieldID, GenerationType type, String name) {
-		this.getSqlBox().configIdGenerator(fieldID, type, name);
-	}
-
-	public String configTableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
-			String valueColumnName, int initialValue, int allocationSize) {
-		return this.getSqlBox().configTableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName,
-				initialValue, allocationSize);
-	}
-
-	public <T> T createBean() {
-		return this.getSqlBox().createBean();
-	}
-
+	 public String getRealColumnName(String fieldID) {
+	 return this.box().getRealColumnName(fieldID);
+	 }
+	
+	 public String getRealTable() {
+	 return this.box().getRealTable();
+	 } 
+	 
 	// =============Misc methods end==========
 
 	// ================ Getters & Setters===============
@@ -359,10 +332,10 @@ public class Dao {
 	 * @return JdbcTemplate
 	 */
 	public JdbcTemplate getJdbc() {
-		return this.getSqlBox().getContext().getJdbc();
+		return this.box().getContext().getJdbc();
 	}
 
-	public SqlBox getSqlBox() {
+	public SqlBox box() {
 		return sqlBox;
 	}
 
