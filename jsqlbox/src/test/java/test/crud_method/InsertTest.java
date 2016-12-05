@@ -25,7 +25,7 @@ public class InsertTest {
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
 				" where ", u.UserName(), "=", q("User1")));
 	}
@@ -36,7 +36,7 @@ public class InsertTest {
 		u.setUserName("User2");
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals("222", u.dao().queryForString("select ", u.PhoneNumber(), " from ", u.Table(), " where ",
 				u.UserName(), "=" + q("User2")));
 	}

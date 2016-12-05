@@ -25,8 +25,8 @@ public class InitializeDatabase {
 		JBeanBoxConfig.initialize();
 
 		// No exception will throw if mistake happen
-		Dao.dao().executeInSilence("drop table users");
-		Dao.dao().executeInSilence("drop table users2");
+		Dao.dao().executeQuiet("drop table users");
+		Dao.dao().executeQuiet("drop table users2");
 
 		ComboPooledDataSource pool = (ComboPooledDataSource) BeanBox.getBean(DataSourceBox.class);
 		String driverClassName = pool.getDriverClass().toLowerCase();

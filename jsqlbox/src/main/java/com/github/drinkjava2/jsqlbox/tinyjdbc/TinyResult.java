@@ -111,7 +111,7 @@ public class TinyResult {
 	 */
 	public SortedMap[] getRows() {
 		if (rowMap == null) {
-			return null;
+			return null;// NOSONAR
 		}
 
 		// should just be able to return SortedMap[] object
@@ -126,7 +126,7 @@ public class TinyResult {
 	 */
 	public Object[][] getRowsByIndex() {
 		if (rowByIndex == null) {
-			return null;
+			return null;// NOSONAR
 		}
 
 		// should just be able to return Object[][] object

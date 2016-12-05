@@ -32,7 +32,7 @@ public class QueryEntityTest {
 		u.setUserName("user3");
 		u.setAddress("address3");
 		u.setAge(3);
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from ", u.Table()));
 	}
 

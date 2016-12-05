@@ -20,6 +20,8 @@ package com.github.drinkjava2.jsqlbox.tinyjdbc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
+
 /**
  * 
  * This class is copied from javax.servlet.jsp.jstl.sql package
@@ -36,6 +38,10 @@ import java.sql.SQLException;
  */
 public class ResultSupport {
 
+	private ResultSupport() {
+		// private
+	}
+
 	/**
 	 * Converts a <code>ResultSet</code> object to a <code>Result</code> object.
 	 *
@@ -47,6 +53,7 @@ public class ResultSupport {
 		try {
 			return new TinyResult(rs, -1, -1);
 		} catch (SQLException ex) {
+			SqlBoxException.eatException(ex);
 			return null;
 		}
 	}
@@ -64,6 +71,7 @@ public class ResultSupport {
 		try {
 			return new TinyResult(rs, -1, maxRows);
 		} catch (SQLException ex) {
+			SqlBoxException.eatException(ex);
 			return null;
 		}
 	}

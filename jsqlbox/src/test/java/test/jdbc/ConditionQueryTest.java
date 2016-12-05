@@ -21,7 +21,7 @@ public class ConditionQueryTest {
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setAge(10);
-		u.dao().save();
+		u.dao().insert();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {

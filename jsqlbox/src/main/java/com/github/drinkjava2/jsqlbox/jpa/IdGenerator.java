@@ -15,6 +15,8 @@
 */
 package com.github.drinkjava2.jsqlbox.jpa;
 
+import javax.sql.DataSource;
+
 /**
  * Interface for all ID generators
  * 
@@ -26,6 +28,6 @@ public interface IdGenerator {
 	/**
 	 * Return next id
 	 */
-	public Object getNextID();
+	public Object getNextID(DataSource ds);
 
 }

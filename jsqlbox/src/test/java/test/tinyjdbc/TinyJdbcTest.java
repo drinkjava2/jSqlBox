@@ -34,6 +34,7 @@ public class TinyJdbcTest {
 		InitializeDatabase.dropAndRecreateTables();
 	}
 
+	@Test
 	public void tx_InsertUser1() {
 		User u = new User();
 		u.dao().execute("insert into ", u.Table(), //
@@ -44,6 +45,11 @@ public class TinyJdbcTest {
 		DataSource ds = BeanBox.getBean(MySqlDataSourceBox.class);
 		TinyJdbc.execute(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (username) values(?)",
 				"TinyJdbc");
+		Assert.assertEquals(2, (int) TinyJdbc.queryForInteger(ds, 2, "select count(*) from users"));
+		Assert.assertEquals("TinyJdbc",
+				TinyJdbc.queryForString(ds, 2, "select username from users where username =?", "TinyJdbc"));
+		Assert.assertEquals("TinyJdbc",
+				TinyJdbc.queryForObject(ds, 2, "select username from users where username =?", "TinyJdbc"));
 	}
 
 	public void tx_InsertUser2() {

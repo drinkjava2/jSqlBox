@@ -39,8 +39,10 @@ public class Column {
 	private Class<?> propertyType;
 	private String propertyTypeName;
 	private String readMethodName;
-	private String writeMethodName; 
-	
+	private String writeMethodName;
+	// Prime key generate strategy value
+	private GeneratedValue generatedValue;
+
 	public String getName() {
 		return name;
 	}
@@ -159,6 +161,14 @@ public class Column {
 
 	public void setWriteMethodName(String writeMethodName) {
 		this.writeMethodName = writeMethodName;
+	}
+
+	public GeneratedValue getGeneratedValue() {
+		return generatedValue;
+	}
+
+	public void setGeneratedValue(GeneratedValue generatedValue) {
+		this.generatedValue = generatedValue;
 	}
 
 }

@@ -41,7 +41,7 @@ public class SpringConfig {
 		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
 		User u = sc.createBean(User.class);
 		u.setUserName("Spring");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals("Spring", u.dao().queryForString(
 				"select " + u.UserName() + " from " + u.Table() + " where " + u.UserName() + "=" + q("Spring")));
 		springCtx.close();

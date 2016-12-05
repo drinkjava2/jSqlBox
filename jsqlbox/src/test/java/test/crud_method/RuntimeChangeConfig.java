@@ -21,7 +21,7 @@ public class RuntimeChangeConfig {
 	public void normal() {
 		User u = SqlBox.createBean(User.class);
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(1, (int) Dao.dao().queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users2"));
 	}
@@ -31,7 +31,7 @@ public class RuntimeChangeConfig {
 		User u = SqlBox.createBean(User.class);
 		u.dao().box().configTable("users2");
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users"));
 		Assert.assertEquals(1, (int) Dao.dao().queryForInteger("select count(*) from users2"));
 	}
@@ -41,7 +41,7 @@ public class RuntimeChangeConfig {
 		User u = SqlBox.createBean(User.class);
 		u.dao().box().configColumnName(User.UserName, u.Address());
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(1,
 				(int) Dao.dao().queryForInteger("select count(*) from users where ", u.Address(), "='Sam'"));
 	}
@@ -52,7 +52,7 @@ public class RuntimeChangeConfig {
 		u.dao().box().configTable("users2");
 		u.dao().box().configColumnName(User.UserName, u.Address());
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(1,
 				(int) Dao.dao().queryForInteger("select count(*) from users2 where ", u.Address(), "='Sam'"));
 	}

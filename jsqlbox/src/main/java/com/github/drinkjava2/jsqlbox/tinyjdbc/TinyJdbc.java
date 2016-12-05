@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -25,7 +26,7 @@ public class TinyJdbc {
 		// hide default constructor
 	}
 
-	public static Integer queryForInteger(DataSource ds, int transactionIso, String sql, String... args) {
+	public static Integer queryForInteger(DataSource ds, int transactionIso, String sql, Object... args) {
 		TinyResult rst = executeQuery(ds, transactionIso, sql, args);
 		if (rst != null && rst.getRowCount() == 1) {
 			Map<?, ?> row = rst.getRows()[0];
@@ -38,7 +39,7 @@ public class TinyJdbc {
 		return null;
 	}
 
-	public static Object queryForObject(DataSource ds, int transactionIso, String sql, String... args) {
+	public static Object queryForObject(DataSource ds, int transactionIso, String sql, Object... args) {
 		TinyResult rst = executeQuery(ds, transactionIso, sql, args);
 		if (rst != null && rst.getRowCount() == 1) {
 			Map<?, ?> row = rst.getRows()[0];
@@ -48,11 +49,11 @@ public class TinyJdbc {
 		return null;
 	}
 
-	public static String queryForString(DataSource ds, int transactionIso, String sql, String... args) {
+	public static String queryForString(DataSource ds, int transactionIso, String sql, Object... args) {
 		return (String) queryForObject(ds, transactionIso, sql, args);
 	}
 
-	public static TinyResult executeQuery(DataSource ds, int transactionIso, String sql, String... args) {// NOSONAR
+	public static TinyResult executeQuery(DataSource ds, int transactionIso, String sql, Object... args) {// NOSONAR
 		ResultSet rs = null;
 		Connection con = null;
 		PreparedStatement pst = null;
@@ -105,7 +106,7 @@ public class TinyJdbc {
 		return null;
 	}
 
-	public static int executeUpdate(DataSource ds, int transactionIso, String sql, String... args) {// NOSONAR
+	public static int executeUpdate(DataSource ds, int transactionIso, String sql, Object... args) {// NOSONAR
 		Connection con = null;
 		PreparedStatement pst = null;
 		try {
@@ -193,17 +194,22 @@ public class TinyJdbc {
 		return false;
 	}
 
-	public static int[] executeBatch(DataSource ds, int transactionIso, String sql, String... args) {// NOSONAR
+	public static int[] executeBatch(DataSource ds, int transactionIso, String sql, List<List<Object>> argsList) {// NOSONAR
 		Connection con = null;
 		PreparedStatement pst = null;
 		try {
 			con = ds.getConnection();
 			con.setTransactionIsolation(transactionIso);
 			con.setAutoCommit(false);
-			int i = 1;
+
 			pst = con.prepareStatement(sql);// NOSONAR
-			for (Object obj : args)
-				pst.setObject(i++, obj);
+
+			for (List<Object> args : argsList) {
+				int i = 1;
+				for (Object obj : args)
+					pst.setObject(i++, obj);
+				pst.addBatch();
+			}
 			int[] bl = pst.executeBatch();
 			con.commit();
 			return bl;

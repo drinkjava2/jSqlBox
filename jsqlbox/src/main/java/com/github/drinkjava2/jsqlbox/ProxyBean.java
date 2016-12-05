@@ -29,7 +29,7 @@ class ProxyBean implements MethodInterceptor {
 		if ("dao".equals(methodname))
 			return dao;
 		else if ("save".equals(methodname)) {
-			dao.save();
+			dao.insert();
 			return null;
 		}
 		if (!dirty && methodname.startsWith("set")) {

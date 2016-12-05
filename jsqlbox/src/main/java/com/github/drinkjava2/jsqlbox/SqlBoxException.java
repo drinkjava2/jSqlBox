@@ -23,7 +23,10 @@ public class SqlBoxException extends RuntimeException {
 	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
 	public static void throwEX(Exception e, String errorMsg) {
-		log.error(errorMsg + "\r\n" + e.getMessage());
+		if (e != null)
+			log.error(errorMsg + "\r\n" + e.getMessage());
+		else
+			log.error(errorMsg);
 		throw new SqlBoxException(errorMsg);
 	}
 

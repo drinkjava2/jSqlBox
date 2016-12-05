@@ -49,7 +49,7 @@ public class ContextTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
 				" where ", u.UserName(), "=", q("User1")));
 	}
@@ -62,7 +62,7 @@ public class ContextTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
 				" where ", u.UserName(), "=", q("User1")));
 	}

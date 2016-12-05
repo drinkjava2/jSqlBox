@@ -6,8 +6,6 @@ PhoneNumber Varchar (50) ,
 Address Varchar (50) ,
 Alive Boolean, 
 Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
- 
 create table users2
 (id integer auto_increment ,
 constraint const2 primary key (ID),

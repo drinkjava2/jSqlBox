@@ -25,6 +25,8 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
+import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
+import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -134,12 +136,15 @@ public class Dao {
 		}
 	}
 
-	public Integer executeInSilence(String... sql) {
+	/**
+	 * Return -1 if exception found
+	 */
+	public Integer executeQuiet(String... sql) {
 		try {
 			return execute(sql);
 		} catch (Exception e) {
 			SqlBoxException.eatException(e);
-			return null;
+			return -1;
 		}
 	}
 
@@ -256,7 +261,7 @@ public class Dao {
 	/**
 	 * Insert or Update a Bean to Database
 	 */
-	public Integer save() {
+	public Integer insert() {// NOSONAR
 		if (bean == null)
 			SqlBoxException.throwEX(null, "Dao doSave error, bean is null");
 		StringBuilder sb = new StringBuilder();
@@ -264,17 +269,16 @@ public class Dao {
 		int count = 0;
 		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
 		for (Column col : sqlBox.getRealColumns().values()) {
-			if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnName())) {
-				String methodName = col.getReadMethodName();
-				Object value = null;
-				Method m;
-				try {
-					m = bean.getClass().getDeclaredMethod(methodName, new Class[] {});// NOSONAR
-					value = m.invoke(this.bean, new Object[] {});
-				} catch (Exception e1) {
-					SqlBoxException.throwEX(e1,
-							"Dao save error, method " + methodName + " not found in class " + bean);
-				}
+			if (col.getGeneratedValue() != null) {// PKey field
+				sb.append(col.getColumnName()).append(",");
+				GeneratedValue value = col.getGeneratedValue();
+				IdGenerator idgen = this.box().getContext().getGeneratorFromCache(value.getGeneratorName());
+				Object id = idgen.getNextID(this.box().getContext().getDataSource());
+				setFieldRealValue(col, id);
+				parameters.add(id);
+				count++;
+			} else if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnName())) {// normal fields
+				Object value = getFieldRealValue(col);
 				if (value != null) {
 					sb.append(col.getColumnName()).append(",");
 					if (Boolean.class.isInstance(value)) {// NOSONAR
@@ -296,17 +300,47 @@ public class Dao {
 
 	}
 
+	/**
+	 * Get Field value by it's column defination
+	 */
+	private Object getFieldRealValue(Column col) {
+		String methodName = col.getReadMethodName();
+		Object value = null;
+		Method m;
+		try {
+			m = bean.getClass().getDeclaredMethod(methodName, new Class[] {});// NOSONAR
+			value = m.invoke(this.bean, new Object[] {});
+		} catch (Exception e1) {
+			SqlBoxException.throwEX(e1, "Dao save error, method " + methodName + " invoke error in class " + bean);
+		}
+		return value;
+	}
+
+	/**
+	 * Set Field value by it's column defination
+	 */
+	private void setFieldRealValue(Column col, Object value) {
+		String methodName = col.getWriteMethodName();
+		Method m;
+		try {
+			m = bean.getClass().getDeclaredMethod(methodName, new Class[] { col.getPropertyType() });// NOSONAR
+			m.invoke(this.bean, new Object[] { value });
+		} catch (Exception e1) {
+			SqlBoxException.throwEX(e1, "Dao save error, method " + methodName + " invoke error in class " + bean);
+		}
+	}
+
 	// ========Dao query/crud methods end=======
 
 	// =============identical methods copied from SqlBox==========
-	 public String getRealColumnName(String fieldID) {
-	 return this.box().getRealColumnName(fieldID);
-	 }
-	
-	 public String getRealTable() {
-	 return this.box().getRealTable();
-	 } 
-	 
+	public String getRealColumnName(String fieldID) {
+		return this.box().getRealColumnName(fieldID);
+	}
+
+	public String getRealTable() {
+		return this.box().getRealTable();
+	}
+
 	// =============Misc methods end==========
 
 	// ================ Getters & Setters===============

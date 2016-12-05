@@ -50,9 +50,6 @@ public class SqlBox {
 	// Configuration Table Name, set it before entity bean be created
 	private String configTable;
 
-	// Prime key generate strategy value
-	private GeneratedValue generatedValue;
-
 	private SqlBoxContext context;
 
 	public SqlBox() {
@@ -114,9 +111,10 @@ public class SqlBox {
 	}
 
 	/**
-	 * A good fieldID must be like "userName", and has UserName field, and has UserName() method
+	 * In entity class, a legal fieldID must be "userName" format, and has public UserName static field, and has public
+	 * String UserName() method
 	 */
-	private boolean isGoodFieldID(String fieldID) {
+	private boolean isLegalFieldID(String fieldID) {
 		try {
 			if (SqlBoxUtils.isCapitalizedString(fieldID))
 				return false;
@@ -151,7 +149,7 @@ public class SqlBox {
 		}
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
-			if (isGoodFieldID(fieldID)) {
+			if (isLegalFieldID(fieldID)) {
 				if (!SqlBoxUtils.isEmptyStr(fieldID)) {// NOSONAR
 					Column column = new Column();
 					column.setName(fieldID);
@@ -161,7 +159,7 @@ public class SqlBox {
 					column.setPropertyType(pd.getPropertyType());
 					column.setReadMethodName(pd.getReadMethod().getName());
 					column.setWriteMethodName(pd.getWriteMethod().getName());
-					useConfigToOverrideDefaultValue(fieldID, column);
+					useConfigToOverrideDefaultSetting(fieldID, column);
 					realColumns.put(fieldID, column);
 				}
 			}
@@ -169,10 +167,12 @@ public class SqlBox {
 		return realColumns;
 	}
 
-	private void useConfigToOverrideDefaultValue(String fieldID, Column column) {
-		Column config = this.configColumns.get(fieldID);
-		if (config != null && !SqlBoxUtils.isEmptyStr(config.getColumnName()))
-			column.setColumnName(config.getColumnName());
+	private void useConfigToOverrideDefaultSetting(String fieldID, Column realColumn) {
+		Column config = this.getOrBuildConfigColumn(fieldID);
+		if (!SqlBoxUtils.isEmptyStr(config.getColumnName()))
+			realColumn.setColumnName(config.getColumnName());
+		if (config.getGeneratedValue() != null)
+			realColumn.setGeneratedValue(config.getGeneratedValue());
 	}
 
 	/**
@@ -180,10 +180,8 @@ public class SqlBox {
 	 * userName field will find userName or username or USERNAME or USER_NAME, but only allowed 1
 	 */
 	public String getRealColumnName(String fieldID) {// NOSONAR
-		String columnName = null;
-		Column col = this.configColumns.get(fieldID);
-		if (col != null)
-			columnName = col.getColumnName();
+		Column col = getOrBuildConfigColumn(fieldID);
+		String columnName = col.getColumnName();
 		if (columnName == null || columnName.length() == 0)
 			columnName = fieldID;
 		String realTable = getRealTable();
@@ -219,17 +217,12 @@ public class SqlBox {
 	}
 
 	// ========Config methods begin==============
-
 	public void configTable(String table) {
 		configTable = table;
 	}
 
 	public void configColumnName(String fieldID, String columnName) {
 		getOrBuildConfigColumn(fieldID).setColumnName(columnName);
-	}
-
-	public void configIdGenerator(GenerationType type) {
-		this.setGeneratedValue(new GeneratedValue(type));
 	}
 
 	public Column getOrBuildConfigColumn(String fieldID) {
@@ -241,17 +234,29 @@ public class SqlBox {
 		return col;
 	}
 
-	public void configIdGenerator(String fieldID, GenerationType type, String name) {
+	public void configIdGenerator(String fieldID, GenerationType type) {
+		Column config = getOrBuildConfigColumn(fieldID);
+		config.setGeneratedValue(new GeneratedValue(type));
+	}
 
-		this.setGeneratedValue(new GeneratedValue(type, name));
+	public void configGeneratedValue(String fieldID, GenerationType type, String name) {
+		Column config = getOrBuildConfigColumn(fieldID);
+		config.setGeneratedValue(new GeneratedValue(type, name));
 	}
 
 	public String configTableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
 			String valueColumnName, int initialValue, int allocationSize) {
-		if (!this.getContext().existGeneratorInCache(name)) {
-			TableGenerator generator = new TableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName,
-					initialValue, allocationSize);
+		TableGenerator generator = (TableGenerator) this.getContext().getGeneratorFromCache(name);
+		if (generator == null) {
+			generator = new TableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName, initialValue,
+					allocationSize);
 			this.getContext().putGeneratorToCache(name, generator);
+		} else {
+			if (!generator.ifEqual(name, table, pkColumnName, pkColumnValue, valueColumnName, initialValue,
+					allocationSize))
+				SqlBoxException.throwEX(null,
+						"SqlBox configTableGenerator error: duplicated TableGenerator name but different defines, name: "
+								+ name);
 		}
 		return name;
 	}
@@ -281,14 +286,6 @@ public class SqlBox {
 
 	public void setConfigTable(String configTable) {
 		this.configTable = configTable;
-	}
-
-	public GeneratedValue getGeneratedValue() {
-		return generatedValue;
-	}
-
-	public void setGeneratedValue(GeneratedValue generatedValue) {
-		this.generatedValue = generatedValue;
 	}
 
 	public SqlBoxContext getContext() {
