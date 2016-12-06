@@ -1,21 +1,14 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 
-import com.github.drinkjava2.jsqlbox.jpa.Column;
 import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 /**
@@ -38,9 +31,7 @@ public class SqlBoxContext {
 	private JdbcTemplate jdbc = new JdbcTemplate();
 	private DataSource dataSource = null;
 
-	private ConcurrentHashMap<String, Map<String, Column>> tableMetaDataCache = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
-	private DatabaseMetaData databaseMetaData;
+	private TinyDbMetaData metaData;
 
 	// ID Generator singleton cache
 	private HashMap<String, IdGenerator> generatorCache = new HashMap<>();
@@ -54,8 +45,10 @@ public class SqlBoxContext {
 
 	public SqlBoxContext(DataSource dataSource) {
 		this.dataSource = dataSource;
-		if (dataSource != null)
+		if (dataSource != null) {
 			this.jdbc.setDataSource(dataSource);
+			refreshMetaData();
+		}
 
 	}
 
@@ -154,74 +147,34 @@ public class SqlBoxContext {
 		return box;
 	}
 
-	public boolean existTable(String tablename) {
-		return tableMetaDataCache.get(tablename) != null;
-	}
-
 	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
+	 * Find real table name from database meta data
 	 */
-	public String cacheTableStructure(String tableName) {
-		String realTableName = null;
-		DataSource ds = this.getDataSource();
-		ResultSet rs = null;
-		Connection con = DataSourceUtils.getConnection(ds);// NOSONAR
-		try {
-			rs = con.getMetaData().getTables(null, null, null, new String[] { "TABLE", "VIEW" });
-			while (rs.next())
-				databaseTableNameCache.put(rs.getString("TABLE_NAME").toLowerCase(), rs.getString("TABLE_NAME"));
-			realTableName = databaseTableNameCache.get(tableName.toLowerCase());
-			if (SqlBoxUtils.isEmptyStr(realTableName))
-				SqlBoxException.throwEX(null,
-						"SqlBoxContext cacheTableStructure error, table " + tableName + " does not exist");
-			rs.close();
-			rs = con.getMetaData().getColumns(null, null, realTableName, null);
-			if (rs == null)
-				SqlBoxException.throwEX(null,
-						"SqlBoxContext cacheTableStructure error, table " + tableName + " does not exist");
-			Map<String, Column> columns = new HashMap<>();
-			while (rs != null && rs.next()) {
-				Column col = new Column();
-				col.setColumnName(rs.getString("COLUMN_NAME"));
-				col.setPropertyTypeName(rs.getString("TYPE_NAME"));
-				columns.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
-			}
-			tableMetaDataCache.put(realTableName, columns);
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SQLHelper exec error");
-		} finally {
-			if (rs != null)
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					SqlBoxException.throwEX(e, "SqlBoxContext cacheTableStructure error, failed to close ResultSet");
-				} finally {
-					DataSourceUtils.releaseConnection(con, ds);
-				}
-			else
-				DataSourceUtils.releaseConnection(con, ds);
-		}
-		return realTableName;
+	public String findRealTableName(String tableName) {
+		String realTableName;
+		TinyDbMetaData meta = this.getMetaData();
+		realTableName = meta.getTableNames().get(tableName.toLowerCase());
+		if (!SqlBoxUtils.isEmptyStr(realTableName))
+			return realTableName;
+		realTableName = meta.getTableNames().get(tableName.toLowerCase() + 's');
+		if (!SqlBoxUtils.isEmptyStr(realTableName))
+			return realTableName;
+		return null;
 	}
 
 	private String getJdbcDriverName() {
-		try {
-			return this.getDatabaseMetaData().getDriverName();
-		} catch (SQLException e) {
-			return (String) SqlBoxException.throwEX(e, "SqlBoxContext getJdbcDriverName error.");
-		}
+		return this.getMetaData().getJdbcDriverName();
 	}
 
 	public Object getDatabaseType() {// NOSONAR
 		return DatabaseType.getType(getJdbcDriverName());
 	}
 
-	// ================== getter & setters below============
-
-	public Map<String, Column> getTableMetaData(String tableName) {
-		return tableMetaDataCache.get(tableName);
+	public void refreshMetaData() {
+		this.metaData = TinyJdbc.getMetaData(dataSource);
 	}
 
+	// ================== getter & setters below============
 	public DataSource getDataSource() {
 		return dataSource;
 	}
@@ -229,7 +182,7 @@ public class SqlBoxContext {
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 		this.jdbc.setDataSource(dataSource);
-		this.databaseMetaData = null;
+		refreshMetaData();
 	}
 
 	public boolean isShowSql() {
@@ -248,15 +201,12 @@ public class SqlBoxContext {
 		this.jdbc = jdbc;
 	}
 
-	public DatabaseMetaData getDatabaseMetaData() {
-		if (databaseMetaData == null) {
-			databaseMetaData = TinyJdbc.getDatabaseMetaData(dataSource);
-		}
-		return databaseMetaData;
+	public TinyDbMetaData getMetaData() {
+		return metaData;
 	}
 
-	public void setDatabaseMetaData(DatabaseMetaData databaseMetaData) {
-		this.databaseMetaData = databaseMetaData;
+	public void setMetaData(TinyDbMetaData metaData) {
+		this.metaData = metaData;
 	}
 
 }

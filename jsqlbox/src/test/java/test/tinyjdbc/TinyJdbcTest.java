@@ -36,10 +36,10 @@ public class TinyJdbcTest {
 	@Test
 	public void tx_InsertUser1() {
 		User u = new User();
-		u.dao().execute("insert into ", u.Table(), //
-				" (", u.UserName(), e("user1"), //
-				", ", u.Address(), e("address1"), //
-				", ", u.Age(), ")", e("10"), //
+		u.dao().execute("insert into ", u.table(), //
+				" (", u.userName(), e("user1"), //
+				", ", u.address(), e("address1"), //
+				", ", u.age(), ")", e("10"), //
 				SqlHelper.questionMarks());
 		DataSource ds = BeanBox.getBean(MySqlDataSourceBox.class);
 		TinyJdbc.execute(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");

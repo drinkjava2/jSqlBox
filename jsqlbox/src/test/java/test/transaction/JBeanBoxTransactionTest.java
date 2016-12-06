@@ -31,26 +31,26 @@ public class JBeanBoxTransactionTest {
 
 	public void tx_InsertUser1() {
 		User u = new User();
-		u.dao().execute("insert into ", u.Table(), //
-				" (", u.UserName(), e("user1"), //
-				", ", u.Address(), e("address1"), //
-				", ", u.Age(), ")", e("10"), //
+		u.dao().execute("insert into ", u.table(), //
+				" (", u.userName(), e("user1"), //
+				", ", u.address(), e("address1"), //
+				", ", u.age(), ")", e("10"), //
 				SqlHelper.questionMarks());
 	}
 
 	public void tx_InsertUser2() {
 		User u = new User();
-		u.dao().execute("insert into ", u.Table(), //
-				" (", u.UserName(), e("user2"), //
-				", ", u.Address(), e("address2"), //
-				", ", u.Age(), ")", e("20"), //
+		u.dao().execute("insert into ", u.table(), //
+				" (", u.userName(), e("user2"), //
+				", ", u.address(), e("address2"), //
+				", ", u.age(), ")", e("20"), //
 				SqlHelper.questionMarks());
 	}
 
 	public void tx_doInsert() {
 		User u = new User();
 		tx_InsertUser1();
-		int i = u.dao().queryForInteger("select count(*) from ", u.Table());
+		int i = u.dao().queryForInteger("select count(*) from ", u.table());
 		Assert.assertEquals(1, i);
 		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();

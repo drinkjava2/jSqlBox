@@ -22,8 +22,8 @@ public class BatchInsertTest {
 
 	public void tx_BatchInsertDemo() {
 		User u = SqlBox.createBean(User.class);
-		for (int i = 0; i < 10000; i++)
-			Dao.dao().cacheSQL("insert ", u.Table(), " (", u.UserName(), e("user" + i), ",", u.Age(), e("70"), ") ",
+		for (int i = 0; i < 1000; i++)
+			Dao.dao().cacheSQL("insert ", u.table(), " (", u.userName(), e("user" + i), ",", u.age(), e("70"), ") ",
 					SqlHelper.questionMarks());
 		Dao.dao().executeCachedSQLs();
 	}
@@ -33,7 +33,7 @@ public class BatchInsertTest {
 		User u = SqlBox.createBean(User.class);
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();
-		Assert.assertEquals(10000, (int) Dao.dao().queryForInteger("select count(*) from ", u.Table()));
+		Assert.assertEquals(1000, (int) Dao.dao().queryForInteger("select count(*) from ", u.table()));
 	}
 
 }

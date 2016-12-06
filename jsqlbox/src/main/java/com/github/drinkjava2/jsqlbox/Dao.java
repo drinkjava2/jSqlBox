@@ -67,12 +67,20 @@ public class Dao {
 	/**
 	 * Get default Dao
 	 */
-	public static Dao defaultDao(Object bean) {
+	public static Dao getDao(Object bean, Dao dao) {
+		if (dao != null)
+			return dao;
 		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
 		SqlBox box = ctx.findAndBuildSqlBox(bean.getClass());
 		box.beanInitialize(bean);
 		Dao d = new Dao(box);
 		d.setBean(bean);
+		try {
+			Method m = bean.getClass().getMethod("putDao", new Class[] { Dao.class });
+			m.invoke(bean, new Object[] { d });
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
+		}
 		return d;
 	}
 
@@ -331,13 +339,20 @@ public class Dao {
 
 	// ========Dao query/crud methods end=======
 
-	// =============identical methods copied from SqlBox==========
-	public String getRealColumnName(String fieldID) {
-		return this.getBox().getRealColumnName(fieldID);
+	// =============identical methods copied from SqlBox or SqlBoxContext==========
+	public String getColumnName() {
+		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
+		String realMethodName = "getColumnName".equals(method1)
+				? Thread.currentThread().getStackTrace()[2].getMethodName() : method1;
+		return this.getBox().getRealColumnName(realMethodName);
 	}
 
-	public String getRealTable() {
+	public String getTable() {
 		return this.getBox().getRealTable();
+	}
+
+	public void refreshMetaData() {
+		this.getContext().refreshMetaData();
 	}
 
 	// =============Misc methods end==========

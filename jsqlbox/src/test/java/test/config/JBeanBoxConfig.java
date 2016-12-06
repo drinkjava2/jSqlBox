@@ -36,7 +36,6 @@ public class JBeanBoxConfig {
 			setProperty("maxPoolSize", 5);
 			setProperty("CheckoutTimeout", 5000);
 		}
-
 	}
 
 	// MySql connection URL
@@ -48,7 +47,7 @@ public class JBeanBoxConfig {
 	}
 
 	// Oracle connection URL
-	static class OracleDataSource extends C3P0Box {
+	public static class OracleDataSourceBox extends C3P0Box {
 		{
 			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
 			setProperty("driverClass", "oracle.jdbc.OracleDriver");

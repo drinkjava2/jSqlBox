@@ -39,21 +39,21 @@ public class RuntimeChangeConfig {
 	@Test
 	public void changeColumnName() {
 		User u = SqlBox.createBean(User.class);
-		u.dao().getBox().configColumnName(User.UserName, u.Address());
+		u.dao().getBox().configColumnName("userName", u.address());
 		u.setUserName("Sam");
 		u.dao().insert();
 		Assert.assertEquals(1,
-				(int) Dao.dao().queryForInteger("select count(*) from users where ", u.Address(), "='Sam'"));
+				(int) Dao.dao().queryForInteger("select count(*) from users where ", u.address(), "='Sam'"));
 	}
 
 	@Test
 	public void changeTableAndColumnName() {
 		User u = SqlBox.createBean(User.class);
 		u.dao().getBox().configTable("users2");
-		u.dao().getBox().configColumnName(User.UserName, u.Address());
+		u.dao().getBox().configColumnName("userName", u.address());
 		u.setUserName("Sam");
 		u.dao().insert();
 		Assert.assertEquals(1,
-				(int) Dao.dao().queryForInteger("select count(*) from users2 where ", u.Address(), "='Sam'"));
+				(int) Dao.dao().queryForInteger("select count(*) from users2 where ", u.address(), "='Sam'"));
 	}
 }

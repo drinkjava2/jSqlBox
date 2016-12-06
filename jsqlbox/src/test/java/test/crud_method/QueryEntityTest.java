@@ -19,21 +19,21 @@ public class QueryEntityTest {
 	public void setup() {
 		InitializeDatabase.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
-		u.dao().execute("insert into ", u.Table(), //
-				" (", u.UserName(), e("user1"), //
-				", ", u.Address(), e("address1"), //
-				", ", u.Age(), ")", e("1"), //
+		u.dao().execute("insert into ", u.table(), //
+				" (", u.userName(), e("user1"), //
+				", ", u.address(), e("address1"), //
+				", ", u.age(), ")", e("1"), //
 				SqlHelper.questionMarks());
-		u.dao().execute("insert into ", u.Table(), //
-				" (", u.UserName(), e("user2"), //
-				", ", u.Address(), e("address2"), //
-				", ", u.Age(), ")", e("2"), //
+		u.dao().execute("insert into ", u.table(), //
+				" (", u.userName(), e("user2"), //
+				", ", u.address(), e("address2"), //
+				", ", u.age(), ")", e("2"), //
 				SqlHelper.questionMarks());
 		u.setUserName("user3");
 		u.setAddress("address3");
 		u.setAge(3);
 		u.dao().insert();
-		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from ", u.Table()));
+		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from ", u.table()));
 	}
 
 	@Test

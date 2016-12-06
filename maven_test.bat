@@ -1,2 +1,2 @@
-call mvn test
+call mvn clean test
 pause

@@ -5,12 +5,15 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
  * A tiny Jdbc tool to access database use separated transaction not related to Spring<br/>
@@ -244,14 +247,57 @@ public class TinyJdbc {
 		return new int[0];
 	}
 
-	public static DatabaseMetaData getDatabaseMetaData(DataSource ds) {// NOSONAR
+	public static TinyDbMetaData getMetaData(DataSource ds) {// NOSONAR
 		Connection con = null;
+		ResultSet rs = null;
 		try {
 			con = ds.getConnection();
-			return con.getMetaData();
+			DatabaseMetaData meta = con.getMetaData();
+			TinyDbMetaData tiny = new TinyDbMetaData();
+			tiny.setJdbcDriverName(meta.getDriverName());
+			rs = meta.getTables(null, null, null, new String[] { "TABLE" });
+			while (rs.next()) {
+				// System.out.println(rs.getString("TABLE_NAME"));
+				tiny.getTableNames().put(rs.getString("TABLE_NAME").toLowerCase(), rs.getString("TABLE_NAME"));
+			}
+			rs.close();
+			Collection<String> tables = tiny.getTableNames().values();
+			for (String realTableName : tables) {
+				if (!realTableName.contains("=")) {
+					// System.out.println(realTableName);
+					rs = con.getMetaData().getColumns(null, null, realTableName, null);
+					Map<String, Column> oneTable = new HashMap<>();
+					while (rs.next()) {
+						Column col = new Column();
+						// System.out.println("======" + rs.getString("COLUMN_NAME"));
+						col.setColumnName(rs.getString("COLUMN_NAME"));
+						col.setPropertyTypeName(rs.getString("TYPE_NAME"));
+						col.setLength(rs.getInt("COLUMN_SIZE"));
+						col.setNullable(rs.getInt("NULLABLE") > 0);
+						col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
+						oneTable.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
+					}
+					tiny.getTables().put(realTableName.toLowerCase(), oneTable);
+					rs.close();
+				}
+			}
+			return tiny;
 		} catch (SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
+			try {
+				if (con != null)
+					con.rollback();
+			} catch (SQLException e1) {
+				SqlBoxException.throwEX(e1, e1.getMessage());
+			}
 		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					SqlBoxException.throwEX(e, e.getMessage());
+				}
+			}
 			try {
 				if (con != null && !con.isClosed()) {
 					try {// NOSONAR

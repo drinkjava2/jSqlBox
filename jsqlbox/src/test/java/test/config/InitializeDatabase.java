@@ -28,6 +28,7 @@ public class InitializeDatabase {
 			executeResourceSQLs("/CreateMysqlDatabase.sql");
 		if (Dao.dao().getDatabaseType() == DatabaseType.ORACLE)
 			executeResourceSQLs("/CreateOracleDatabase.sql");
+		Dao.dao().refreshMetaData();
 	}
 
 	private static void executeResourceSQLs(String sqlResourceFile) {

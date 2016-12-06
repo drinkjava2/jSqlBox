@@ -27,35 +27,35 @@ public class JdbcTest {
 	@Test
 	public void tx_jdbcTest() {
 		User u = SqlBox.createBean(User.class);
-		Dao.dao().execute("insert into " + u.Table() + " (" + u.UserName() + e("user1") + ", " + u.Address()
-				+ e("address1") + ", " + u.Age() + e("1") + ") values(?,?,?)");
+		Dao.dao().execute("insert into " + u.table() + " (" + u.userName() + e("user1") + ", " + u.address()
+				+ e("address1") + ", " + u.age() + e("1") + ") values(?,?,?)");
 
-		Dao.dao().execute("insert into ", u.Table(), //
-				" (", u.UserName(), e("user2"), //
-				", ", u.Address(), e("address2"), //
-				", ", u.Age(), e("2"), //
+		Dao.dao().execute("insert into ", u.table(), //
+				" (", u.userName(), e("user2"), //
+				", ", u.address(), e("address2"), //
+				", ", u.age(), e("2"), //
 				") values(?,?,?)");
 
-		Dao.dao().execute("insert into ", u.Table(), //
-				" (", u.UserName(), e("user3"), //
-				", ", u.Address(), e("address3"), //
-				", ", u.Age(), e("3"), //
+		Dao.dao().execute("insert into ", u.table(), //
+				" (", u.userName(), e("user3"), //
+				", ", u.address(), e("address3"), //
+				", ", u.age(), e("3"), //
 				")", SqlHelper.questionMarks());
 
-		Dao.dao().execute("update " + u.Table() + " set " + u.UserName() + "=" + q("John") + "," + u.Address() + "="
-				+ q("Shanghai") + " where " + u.Age() + "=" + q(1));
+		Dao.dao().execute("update " + u.table() + " set " + u.userName() + "=" + q("John") + "," + u.address() + "="
+				+ q("Shanghai") + " where " + u.age() + "=" + q(1));
 
-		Dao.dao().execute("update ", u.Table(), " set ", //
-				u.UserName(), "=", q("Jeffery"), ",", //
-				u.Address(), " =", q("Tianjing"), //
-				" where ", u.Age(), "=", q(2));
+		Dao.dao().execute("update ", u.table(), " set ", //
+				u.userName(), "=", q("Jeffery"), ",", //
+				u.address(), " =", q("Tianjing"), //
+				" where ", u.age(), "=", q(2));
 
-		Dao.dao().execute("update ", u.Table(), " set ", //
-				u.UserName(), "=?", e("Tom"), ",", //
-				u.Address(), " =?", e("Nanjing"), //
-				" where ", u.Age(), "=?", e(3));
+		Dao.dao().execute("update ", u.table(), " set ", //
+				u.userName(), "=?", e("Tom"), ",", //
+				u.address(), " =?", e("Nanjing"), //
+				" where ", u.age(), "=?", e(3));
 
-		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from " + u.Table()));
+		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from " + u.table()));
 	}
 
 	/**

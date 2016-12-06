@@ -99,25 +99,24 @@ public class SqlBox {
 	 * Get real database table name
 	 */
 	public String getRealTable() {
-		String table = null;
-		if (!SqlBoxUtils.isEmptyStr(configTable))
-			table = configTable;
-		if (SqlBoxUtils.isEmptyStr(table))
-			table = SqlBoxUtils.getStaticStringField(this.entityClass, "Table");
-		if (!context.existTable(table))
-			table = context.cacheTableStructure(table);
-		return table;
+		String realTable = configTable;
+		if (SqlBoxUtils.isEmptyStr(realTable))
+			realTable = this.getEntityClass().getSimpleName();
+		String resultTable = context.findRealTableName(realTable);
+		if (SqlBoxUtils.isEmptyStr(resultTable))
+			SqlBoxException.throwEX(null,
+					"SqlBox getRealTable error: " + this.getEntityClass() + ", table name:" + realTable);
+		return resultTable;
 	}
 
 	/**
-	 * In entity class, a legal fieldID must be "userName" format, and has a public UserName() method
+	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
 	 */
 	private boolean isLegalFieldID(String fieldID) {
 		try {
 			if (SqlBoxUtils.isCapitalizedString(fieldID))
 				return false;
-			String capitalCase = SqlBoxUtils.toFirstLetterUpperCase(fieldID);
-			Method method = this.entityClass.getMethod(capitalCase, new Class[] {});
+			Method method = this.entityClass.getMethod(fieldID, new Class[] {});
 			if (method == null)
 				return false;
 		} catch (Exception e) { // NOSONAR
@@ -231,7 +230,7 @@ public class SqlBox {
 			columnName = fieldID;
 		String realTable = getRealTable();
 
-		Map<String, Column> dbMetaData = context.getTableMetaData(realTable);
+		Map<String, Column> dbMetaData = context.getMetaData().getOneTable(realTable);
 
 		String realColumnNameignoreCase = null;
 		Column realColumn = dbMetaData.get(columnName.toLowerCase());

@@ -15,63 +15,47 @@ public class User {
 	}
 
 	public Dao dao() {
-		if (dao == null)
-			dao = Dao.defaultDao(this);
-		return dao;
+		return Dao.getDao(this, dao);
 	}
 
-	public void initialize() {
-		// do nothing here
+	public String table() {
+		return dao().getTable();
 	}
-
-	// ============= Dao code end =========
-	public static final String Table = "users";
-
-	public String Table() {
-		return dao().getRealTable();
-	}
-
-	public static String Id = "id";
 
 	private Integer id;
 
-	public String Id() {
-		return dao().getRealColumnName("id");
+	public String id() {
+		return dao().getColumnName();
 	}
 
 	private String userName;
-	public static final String UserName = "userName";
 
-	public String UserName() {
-		return dao().getRealColumnName(User.UserName);
+	public String userName() {
+		return dao().getColumnName();
 	}
 
-	public static final String PhoneNumber = "phoneNumber";
 	private String phoneNumber;
 
-	public String PhoneNumber() {
-		return dao().getRealColumnName(PhoneNumber);
+	public String phoneNumber() {
+		return dao().getColumnName();
 	}
 
-	public static final String Address = "address";
 	private String address;
 
-	public String Address() {
-		return dao().getRealColumnName(Address);
+	public String address() {
+		return dao().getColumnName();
 	}
 
-	public static final String Age = "age";
 	private Integer age;
 
-	public String Age() {
-		return dao().getRealColumnName(Age);
+	public String age() {
+		return dao().getColumnName();
 	}
 
-	public static final String Alive = "alive";
 	private Boolean alive;
 
-	public String Alive() {
-		return dao().getRealColumnName(Alive);
+	public String alive() {
+		return dao().getColumnName();
 	}
 
 	// getter & setters

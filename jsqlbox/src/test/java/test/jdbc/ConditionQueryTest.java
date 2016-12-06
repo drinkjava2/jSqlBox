@@ -26,15 +26,15 @@ public class ConditionQueryTest {
 
 	public int conditionQuery(int condition, Object parameter) {
 		User u = SqlBox.createBean(User.class);
-		String sql = "Select count(*) from " + u.Table() + " where ";
+		String sql = "Select count(*) from " + u.table() + " where ";
 		if (condition == 1 || condition == 3)
-			sql = sql + u.UserName() + "=" + q(parameter) + " and " + u.Address() + "=" + q("Address1");
+			sql = sql + u.userName() + "=" + q(parameter) + " and " + u.address() + "=" + q("Address1");
 
 		if (condition == 2)
-			sql = sql + u.UserName() + "=" + q(parameter);
+			sql = sql + u.userName() + "=" + q(parameter);
 
 		if (condition == 3)
-			sql = sql + " or " + u.Age() + "=" + q(parameter);
+			sql = sql + " or " + u.age() + "=" + q(parameter);
 
 		return Dao.dao().queryForInteger(sql);
 	}

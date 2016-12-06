@@ -1,7 +1,7 @@
 create table users 
 (id integer auto_increment ,
 constraint const1 primary key (ID),
-USER_NAME Varchar (50) ,
+username Varchar (50) ,
 PhoneNumber Varchar (50) ,
 Address Varchar (50) ,
 Alive Boolean, 
