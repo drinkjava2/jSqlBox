@@ -22,7 +22,7 @@ public class SqlBoxException extends RuntimeException {
 	/**
 	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
-	public static void throwEX(Exception e, String errorMsg) {
+	public static Object throwEX(Exception e, String errorMsg) {
 		if (e != null)
 			log.error(errorMsg + "\r\n" + e.getMessage());
 		else

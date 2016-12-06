@@ -22,8 +22,8 @@ public class TableGeneratorTest {
 		User u = new User();
 		u.dao().executeQuiet("drop table t");
 		u.dao().executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-		u.dao().box().configTableGenerator("creator1", "t", "pk", "pv", "v", 1, 50);
-		u.dao().box().configGeneratedValue(User.Age, GenerationType.TABLE, "creator1");
+		u.dao().getBox().configTableGenerator("creator1", "t", "pk", "pv", "v", 1, 50);
+		u.dao().getBox().configGeneratedValue(User.Age, GenerationType.TABLE, "creator1");
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.dao().insert();
@@ -31,12 +31,12 @@ public class TableGeneratorTest {
 	}
 
 	@Test(expected = SqlBoxException.class)
-	public void duplicateGeneratorName() {
+	public void duplicateGeneratorName_Oracle() {
 		User u = new User();
 		u.dao().executeQuiet("drop table t");
 		u.dao().executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-		u.dao().box().configTableGenerator("creator1", "t", "pk", "pv", "v", 1, 50);
-		u.dao().box().configTableGenerator("creator1", "t2", "pk", "pv", "v", 1, 50);
+		u.dao().getBox().configTableGenerator("creator1", "T", "PK", "PV", "V", 1, 50);
+		u.dao().getBox().configTableGenerator("creator1", "T", "PK2", "PV", "V", 1, 50);
 	}
 
 }

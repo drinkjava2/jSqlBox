@@ -32,8 +32,8 @@ public class JBeanBoxConfig {
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user
 			setProperty("password", "root888");// set to your password
-			setProperty("minPoolSize", 4);
-			setProperty("maxPoolSize", 30);
+			setProperty("minPoolSize", 1);
+			setProperty("maxPoolSize", 5);
 			setProperty("CheckoutTimeout", 5000);
 		}
 

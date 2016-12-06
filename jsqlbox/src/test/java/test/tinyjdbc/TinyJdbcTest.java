@@ -2,7 +2,6 @@ package test.tinyjdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 
 import javax.sql.DataSource;
@@ -43,13 +42,8 @@ public class TinyJdbcTest {
 				", ", u.Age(), ")", e("10"), //
 				SqlHelper.questionMarks());
 		DataSource ds = BeanBox.getBean(MySqlDataSourceBox.class);
-		TinyJdbc.execute(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (username) values(?)",
-				"TinyJdbc");
-		Assert.assertEquals(2, (int) TinyJdbc.queryForInteger(ds, 2, "select count(*) from users"));
-		Assert.assertEquals("TinyJdbc",
-				TinyJdbc.queryForString(ds, 2, "select username from users where username =?", "TinyJdbc"));
-		Assert.assertEquals("TinyJdbc",
-				TinyJdbc.queryForObject(ds, 2, "select username from users where username =?", "TinyJdbc"));
+		TinyJdbc.execute(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");
+		Assert.assertEquals(20, (int) TinyJdbc.queryForInteger(ds, 2, "select age from users where age =?", "20"));
 	}
 
 	public void tx_InsertUser2() {
@@ -63,16 +57,12 @@ public class TinyJdbcTest {
 
 	@Test
 	public void doTest() {
-		User u = new User();
 		TinyJdbcTest tester = BeanBox.getBean(TinyJdbcTest.class);
 		boolean foundException = false;
 		try {
 			tester.tx_doInsert();
 		} catch (Exception e) {
 			foundException = true;
-			Assert.assertEquals(InvocationTargetException.class.getName(), e.getClass().getName());
-			int i = u.dao().queryForInteger("select count(*) from users");
-			Assert.assertEquals(1, i);
 		}
 		Assert.assertEquals(foundException, true);
 	}

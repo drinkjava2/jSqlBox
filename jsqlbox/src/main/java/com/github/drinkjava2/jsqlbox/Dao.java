@@ -184,14 +184,14 @@ public class Dao {
 	 * Query and return entity list by sql
 	 */
 	public List queryEntity(String... sql) {
-		return this.queryEntity(this.box(), sql);
+		return this.queryEntity(this.getBox(), sql);
 	}
 
 	/**
 	 * Query and return entity list by sql
 	 */
 	public <T> List<T> queryEntity(Class<?> beanOrSqlBoxClass, String... sql) {
-		SqlBox box = this.box().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
+		SqlBox box = this.getBox().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
 		return this.queryEntity(box, sql);
 	}
 
@@ -216,7 +216,7 @@ public class Dao {
 	 */
 	private void logSql(SqlAndParameters sp) {
 		// check if allowed print SQL
-		if (!this.box().getContext().isShowSql())
+		if (!this.getBox().getContext().isShowSql())
 			return;
 		StringBuilder sb = new StringBuilder(sp.getSql());
 		Object[] args = sp.getParameters();
@@ -238,7 +238,7 @@ public class Dao {
 	 * Use context.setShowSql to control, Default showSql is "false"
 	 */
 	private void logCachedSQL(List<List<SqlAndParameters>> subSPlist) {
-		if (this.box().getContext().isShowSql()) {
+		if (this.getBox().getContext().isShowSql()) {
 			if (subSPlist != null) {
 				List<SqlAndParameters> l = subSPlist.get(0);
 				if (l != null) {
@@ -268,12 +268,12 @@ public class Dao {
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
 		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
-		for (Column col : sqlBox.getRealColumns().values()) {
+		for (Column col : sqlBox.buildRealColumns().values()) {
 			if (col.getGeneratedValue() != null) {// PKey field
 				sb.append(col.getColumnName()).append(",");
 				GeneratedValue value = col.getGeneratedValue();
-				IdGenerator idgen = this.box().getContext().getGeneratorFromCache(value.getGeneratorName());
-				Object id = idgen.getNextID(this.box().getContext().getDataSource());
+				IdGenerator idgen = this.getBox().getContext().getGeneratorFromCache(value.getGeneratorName());
+				Object id = idgen.getNextID(this.getBox().getContext().getDataSource());
 				setFieldRealValue(col, id);
 				parameters.add(id);
 				count++;
@@ -294,7 +294,7 @@ public class Dao {
 		}
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
-		if (this.box().getContext().isShowSql())
+		if (this.getBox().getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 		return getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 
@@ -305,15 +305,14 @@ public class Dao {
 	 */
 	private Object getFieldRealValue(Column col) {
 		String methodName = col.getReadMethodName();
-		Object value = null;
 		Method m;
 		try {
 			m = bean.getClass().getDeclaredMethod(methodName, new Class[] {});// NOSONAR
-			value = m.invoke(this.bean, new Object[] {});
+			return m.invoke(this.bean, new Object[] {});
 		} catch (Exception e1) {
-			SqlBoxException.throwEX(e1, "Dao save error, method " + methodName + " invoke error in class " + bean);
+			return SqlBoxException.throwEX(e1,
+					"Dao save error, method " + methodName + " invoke error in class " + bean);
 		}
-		return value;
 	}
 
 	/**
@@ -334,11 +333,11 @@ public class Dao {
 
 	// =============identical methods copied from SqlBox==========
 	public String getRealColumnName(String fieldID) {
-		return this.box().getRealColumnName(fieldID);
+		return this.getBox().getRealColumnName(fieldID);
 	}
 
 	public String getRealTable() {
-		return this.box().getRealTable();
+		return this.getBox().getRealTable();
 	}
 
 	// =============Misc methods end==========
@@ -366,11 +365,19 @@ public class Dao {
 	 * @return JdbcTemplate
 	 */
 	public JdbcTemplate getJdbc() {
-		return this.box().getContext().getJdbc();
+		return this.getBox().getContext().getJdbc();
 	}
 
-	public SqlBox box() {
+	public SqlBox getBox() {
 		return sqlBox;
+	}
+
+	public SqlBoxContext getContext() {
+		return sqlBox.getContext();
+	}
+
+	public Object getDatabaseType() {
+		return sqlBox.getContext().getDatabaseType();
 	}
 
 	public Dao setSqlBox(SqlBox sqlBox) {

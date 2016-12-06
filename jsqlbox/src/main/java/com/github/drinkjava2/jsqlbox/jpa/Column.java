@@ -23,7 +23,7 @@ package com.github.drinkjava2.jsqlbox.jpa;
  * @since 1.0
  */
 public class Column {
-	private String name = "";
+	// String name not used
 	private boolean unique = false;
 	private boolean nullable = true;
 	private boolean insertable = true;
@@ -36,19 +36,22 @@ public class Column {
 	private String columnName = "";
 	private boolean primeKey = false;
 	private String foreignKey = "";
+	private GeneratedValue generatedValue;	
+	
 	private Class<?> propertyType;
 	private String propertyTypeName;
 	private String readMethodName;
 	private String writeMethodName;
 	// Prime key generate strategy value
-	private GeneratedValue generatedValue;
 
-	public String getName() {
-		return name;
+	private String fieldID = "";
+
+	public String getFieldID() {
+		return fieldID;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFieldID(String fieldID) {
+		this.fieldID = fieldID;
 	}
 
 	public boolean isUnique() {

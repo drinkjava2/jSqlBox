@@ -2,6 +2,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 /**
  * @author Yong Zhu
@@ -23,7 +25,6 @@ import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
-
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
 
 	// print SQL to console or log depends logging.properties
@@ -39,6 +40,7 @@ public class SqlBoxContext {
 
 	private ConcurrentHashMap<String, Map<String, Column>> tableMetaDataCache = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
+	private DatabaseMetaData databaseMetaData;
 
 	// ID Generator singleton cache
 	private HashMap<String, IdGenerator> generatorCache = new HashMap<>();
@@ -54,11 +56,7 @@ public class SqlBoxContext {
 		this.dataSource = dataSource;
 		if (dataSource != null)
 			this.jdbc.setDataSource(dataSource);
-	}
 
-	public void close() {
-		if (this.getDataSource() != null)
-			this.setDataSource(null);
 	}
 
 	public boolean existGeneratorInCache(String name) {
@@ -142,12 +140,12 @@ public class SqlBoxContext {
 		SqlBox box = null;
 		if (boxClass == null) {
 			box = new SqlBox(this);
-			box.setBeanClass(beanOrSqlBoxClass);
+			box.setEntityClass(beanOrSqlBoxClass);
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
-				if (box.getBeanClass() == null)
-					box.setBeanClass(beanOrSqlBoxClass);
+				if (box.getEntityClass() == null)
+					box.setEntityClass(beanOrSqlBoxClass);
 				box.setContext(this);
 			} catch (Exception e) {
 				SqlBoxException.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
@@ -206,6 +204,18 @@ public class SqlBoxContext {
 		return realTableName;
 	}
 
+	private String getJdbcDriverName() {
+		try {
+			return this.getDatabaseMetaData().getDriverName();
+		} catch (SQLException e) {
+			return (String) SqlBoxException.throwEX(e, "SqlBoxContext getJdbcDriverName error.");
+		}
+	}
+
+	public Object getDatabaseType() {// NOSONAR
+		return DatabaseType.getType(getJdbcDriverName());
+	}
+
 	// ================== getter & setters below============
 
 	public Map<String, Column> getTableMetaData(String tableName) {
@@ -219,6 +229,7 @@ public class SqlBoxContext {
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 		this.jdbc.setDataSource(dataSource);
+		this.databaseMetaData = null;
 	}
 
 	public boolean isShowSql() {
@@ -235,6 +246,17 @@ public class SqlBoxContext {
 
 	public void setJdbc(JdbcTemplate jdbc) {
 		this.jdbc = jdbc;
+	}
+
+	public DatabaseMetaData getDatabaseMetaData() {
+		if (databaseMetaData == null) {
+			databaseMetaData = TinyJdbc.getDatabaseMetaData(dataSource);
+		}
+		return databaseMetaData;
+	}
+
+	public void setDatabaseMetaData(DatabaseMetaData databaseMetaData) {
+		this.databaseMetaData = databaseMetaData;
 	}
 
 }

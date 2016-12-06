@@ -37,11 +37,10 @@ public class TinyJdbcBatchInsert {
 		List<List<Object>> args = new ArrayList<>();
 		for (int i = 0; i < 1000; i++) {
 			List<Object> arg = new ArrayList<>();
-			arg.add("user" + i);
 			arg.add(i);
 			args.add(arg);
 		}
-		TinyJdbc.executeBatch(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (username,age) values(?,?)",
+		TinyJdbc.executeBatch(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)",
 				args);
 		Assert.assertEquals(1000, (int) TinyJdbc.queryForInteger(ds, Connection.TRANSACTION_READ_COMMITTED,
 				"select count(*) from users"));

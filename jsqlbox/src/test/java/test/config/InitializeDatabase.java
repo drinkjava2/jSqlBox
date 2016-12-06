@@ -6,13 +6,10 @@ import java.util.Scanner;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.DatabaseType;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
-import test.config.JBeanBoxConfig.DataSourceBox;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -24,15 +21,12 @@ public class InitializeDatabase {
 		SqlBoxContext.configDefaultContext(SqlBoxConfig.class.getName(), "getSqlBoxContext");
 		JBeanBoxConfig.initialize();
 
-		// No exception will throw if mistake happen
 		Dao.dao().executeQuiet("drop table users");
 		Dao.dao().executeQuiet("drop table users2");
 
-		ComboPooledDataSource pool = (ComboPooledDataSource) BeanBox.getBean(DataSourceBox.class);
-		String driverClassName = pool.getDriverClass().toLowerCase();
-		if (driverClassName.indexOf("mysql") != -1)
+		if (Dao.dao().getDatabaseType() == DatabaseType.MYSQL)
 			executeResourceSQLs("/CreateMysqlDatabase.sql");
-		else if (driverClassName.indexOf("oracle") != -1)
+		if (Dao.dao().getDatabaseType() == DatabaseType.ORACLE)
 			executeResourceSQLs("/CreateOracleDatabase.sql");
 	}
 

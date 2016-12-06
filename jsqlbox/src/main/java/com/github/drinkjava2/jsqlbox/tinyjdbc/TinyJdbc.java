@@ -1,6 +1,7 @@
 package com.github.drinkjava2.jsqlbox.tinyjdbc;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -241,6 +242,29 @@ public class TinyJdbc {
 			}
 		}
 		return new int[0];
+	}
+
+	public static DatabaseMetaData getDatabaseMetaData(DataSource ds) {// NOSONAR
+		Connection con = null;
+		try {
+			con = ds.getConnection();
+			return con.getMetaData();
+		} catch (SQLException e) {
+			SqlBoxException.throwEX(e, e.getMessage());
+		} finally {
+			try {
+				if (con != null && !con.isClosed()) {
+					try {// NOSONAR
+						con.close();
+					} catch (SQLException e) {
+						SqlBoxException.throwEX(e, e.getMessage());
+					}
+				}
+			} catch (SQLException e) {
+				SqlBoxException.throwEX(e, e.getMessage());
+			}
+		}
+		return null;
 	}
 
 }

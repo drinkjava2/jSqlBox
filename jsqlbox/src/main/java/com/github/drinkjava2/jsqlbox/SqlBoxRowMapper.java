@@ -39,9 +39,9 @@ public class SqlBoxRowMapper implements RowMapper<Object> {
 	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 		Object bean = null;
 		try {
-			bean = data.box.getBeanClass().newInstance();
+			bean = data.box.getEntityClass().newInstance();
 		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SqlBox getRowMapper error, beanClass=" + data.box.getBeanClass());
+			SqlBoxException.throwEX(e, "SqlBox getRowMapper error, beanClass=" + data.box.getEntityClass());
 		}
 		return bean;
 	}
