@@ -164,6 +164,20 @@ public class TinyResult {
 		return isLimited;
 	}
 
+	/**
+	 * Only return first column Values
+	 */
+	public List getFirstColumns() {
+		ArrayList<Object> l = new ArrayList<>();
+		SortedMap[] mp = this.getRows();
+		if (mp == null)
+			return l;
+		for (SortedMap oneline : mp)
+			for (Object value : oneline.values())
+				l.add(value);
+		return l;
+	}
+
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\r\nColumn names:\r\n");

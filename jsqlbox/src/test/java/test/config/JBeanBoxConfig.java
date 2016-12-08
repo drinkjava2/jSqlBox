@@ -54,6 +54,14 @@ public class JBeanBoxConfig {
 		}
 	}
 
+	// MsSql Server connection URL
+	public static class MsSqlServerDataSourceBox extends C3P0Box {
+		{
+			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
+			setProperty("driverClass", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		}
+	}
+
 	// Data source pool setting
 	public static class DataSourceBox extends MySqlDataSourceBox {
 	}

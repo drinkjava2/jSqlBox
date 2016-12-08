@@ -27,6 +27,10 @@ public class TinyDbMetaData {
 	}
 	// getter & setters==============
 
+	public DatabaseType getDatabaseType() {
+		return DatabaseType.getDatabaseType(getJdbcDriverName());
+	}
+
 	public String getJdbcDriverName() {
 		return jdbcDriverName;
 	}

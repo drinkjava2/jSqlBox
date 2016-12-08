@@ -6,7 +6,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * For logger output
+ * For logger output, to avoid logger jar conflict, default use JDK log, if found commons log, use it, if found Log4j
+ * use it..., by this way this project has no dependency to any logger jar.
  * 
  * @author Yong Zhu
  * @version 1.0.0

@@ -1,5 +1,5 @@
-create table users 
-(id integer auto_increment ,
+create table users
+(id integer auto_increment,
 constraint const1 primary key (ID),
 username Varchar (50) ,
 PhoneNumber Varchar (50) ,

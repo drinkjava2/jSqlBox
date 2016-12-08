@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.DatabaseType;
 import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.InitializeDatabase;
 import test.config.po.User;

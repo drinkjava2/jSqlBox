@@ -17,7 +17,9 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
  * A tiny Jdbc tool to access database use separated transaction not related to Spring<br/>
- * The reason I wrote this class is I need a tool to update table generator ID through a separated transaction
+ * The reason I wrote this class is I need a tool to get database meta data and create TableGenerator ID through a
+ * separated transaction
+ * 
  *
  * @author Yong Zhu
  *
@@ -250,26 +252,44 @@ public class TinyJdbc {
 	public static TinyDbMetaData getMetaData(DataSource ds) {// NOSONAR
 		Connection con = null;
 		ResultSet rs = null;
+		PreparedStatement pst = null;
 		try {
 			con = ds.getConnection();
 			DatabaseMetaData meta = con.getMetaData();
 			TinyDbMetaData tiny = new TinyDbMetaData();
 			tiny.setJdbcDriverName(meta.getDriverName());
-			rs = meta.getTables(null, null, null, new String[] { "TABLE" });
-			while (rs.next()) {
-				// System.out.println(rs.getString("TABLE_NAME"));
-				tiny.getTableNames().put(rs.getString("TABLE_NAME").toLowerCase(), rs.getString("TABLE_NAME"));
+
+			if (DatabaseType.getDatabaseType(meta.getDriverName()) == DatabaseType.ORACLE) {
+				pst = con.prepareStatement("SELECT TABLE_NAME FROM USER_TABLES");// NOSONAR
+				rs = pst.executeQuery();
+				TinyResult tinyRs = ResultSupport.toResult(rs);
+				for (Object tablename : tinyRs.getFirstColumns())
+					tiny.getTableNames().put(((String) tablename).toLowerCase(), (String) tablename);
+				rs.close();
+				pst.close();
+			} else if (DatabaseType.getDatabaseType(meta.getDriverName()) == DatabaseType.MS_SQLSERVER) {
+				pst = con.prepareStatement("select name from sysobjects where xtype='U'");
+				rs = pst.executeQuery();
+				TinyResult tinyRs = ResultSupport.toResult(rs);
+				for (Object tablename : tinyRs.getFirstColumns())
+					tiny.getTableNames().put(((String) tablename).toLowerCase(), (String) tablename);
+				rs.close();
+				pst.close();
+			} else {
+				rs = meta.getTables(null, null, null, new String[] { "TABLE" });
+				while (rs.next())
+					tiny.getTableNames().put(rs.getString("TABLE_NAME").toLowerCase(), rs.getString("TABLE_NAME"));
+				rs.close();
+
 			}
-			rs.close();
+
 			Collection<String> tables = tiny.getTableNames().values();
 			for (String realTableName : tables) {
 				if (!realTableName.contains("=")) {
-					// System.out.println(realTableName);
 					rs = con.getMetaData().getColumns(null, null, realTableName, null);
 					Map<String, Column> oneTable = new HashMap<>();
-					while (rs.next()) {
+					while (rs.next()) {// NOSONAR
 						Column col = new Column();
-						// System.out.println("======" + rs.getString("COLUMN_NAME"));
 						col.setColumnName(rs.getString("COLUMN_NAME"));
 						col.setPropertyTypeName(rs.getString("TYPE_NAME"));
 						col.setLength(rs.getInt("COLUMN_SIZE"));
@@ -282,7 +302,9 @@ public class TinyJdbc {
 				}
 			}
 			return tiny;
-		} catch (SQLException e) {
+		} catch (
+
+		SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
 			try {
 				if (con != null)
@@ -297,6 +319,12 @@ public class TinyJdbc {
 				} catch (SQLException e) {
 					SqlBoxException.throwEX(e, e.getMessage());
 				}
+			}
+			try {
+				if (pst != null)
+					pst.close();
+			} catch (SQLException e) {
+				SqlBoxException.throwEX(e, e.getMessage());
 			}
 			try {
 				if (con != null && !con.isClosed()) {

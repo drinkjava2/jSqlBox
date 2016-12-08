@@ -2,11 +2,19 @@ package test.tinyjdbc;
 
 import javax.sql.DataSource;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
+import test.config.InitializeDatabase;
+import test.config.JBeanBoxConfig.MsSqlServerDataSourceBox;
 import test.config.JBeanBoxConfig.MySqlDataSourceBox;
+import test.config.JBeanBoxConfig.OracleDataSourceBox;
 
 /**
  * This is to test TinyJDBC get meta data
@@ -18,9 +26,31 @@ import test.config.JBeanBoxConfig.MySqlDataSourceBox;
  */
 public class TinyJdbcGetMetaData {
 
-	public static void main(String[] args) {
-		DataSource ds = BeanBox.getBean(MySqlDataSourceBox.class);
-		TinyDbMetaData meta = TinyJdbc.getMetaData(ds);
-		System.out.println(meta.getDebugInfo());
+	@Before
+	public void setup() {
+		InitializeDatabase.dropAndRecreateTables();
 	}
+
+	@Test
+	public void getMysqlMetadata() {
+		DatabaseType type = Dao.dao().getContext().getDatabaseType();
+		DataSource ds = null;
+		if (type == DatabaseType.MYSQL)
+			ds = BeanBox.getBean(MySqlDataSourceBox.class);
+		if (type == DatabaseType.ORACLE)
+			ds = BeanBox.getBean(OracleDataSourceBox.class);
+		if (type == DatabaseType.MS_SQLSERVER)
+			ds = BeanBox.getBean(MsSqlServerDataSourceBox.class);		
+
+		TinyDbMetaData meta = TinyJdbc.getMetaData(ds);
+		System.out.println(meta.getJdbcDriverName());
+	}
+
+	@Test
+	public void getOracleMetadata() {
+		// DataSource ds = BeanBox.getBean(OracleDataSourceBox.class);
+		// TinyDbMetaData meta = TinyJdbc.getMetaData(ds);
+		// System.out.println(meta.getJdbcDriverName());
+	}
+
 }

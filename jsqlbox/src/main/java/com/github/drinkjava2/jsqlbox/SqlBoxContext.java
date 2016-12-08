@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
@@ -18,10 +19,10 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
-	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
-
 	// print SQL to console or log depends logging.properties
 	private boolean showSql = false;
+
+	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
 
 	private static String sqlBoxConfigClass = "SqlBoxConfig";
 	private static String getSqlBoxContextMethod = "getSqlBoxContext";
@@ -162,12 +163,8 @@ public class SqlBoxContext {
 		return null;
 	}
 
-	private String getJdbcDriverName() {
-		return this.getMetaData().getJdbcDriverName();
-	}
-
-	public Object getDatabaseType() {// NOSONAR
-		return DatabaseType.getType(getJdbcDriverName());
+	public DatabaseType getDatabaseType() {
+		return this.getMetaData().getDatabaseType();
 	}
 
 	public void refreshMetaData() {

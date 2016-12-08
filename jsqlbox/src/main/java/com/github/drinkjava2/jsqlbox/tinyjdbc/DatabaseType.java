@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jsqlbox.tinyjdbc;
 
 /**
  * @author Yong Zhu
@@ -9,7 +9,7 @@ package com.github.drinkjava2.jsqlbox;
 public enum DatabaseType {
 	MYSQL, ORACLE, MS_SQLSERVER, DB2, INFORMIX, SYBASE;
 
-	public static Object getType(String jdbcDriverName) {// NOSONAR
+	public static DatabaseType getDatabaseType(String jdbcDriverName) {// NOSONAR
 		String drv = jdbcDriverName.toUpperCase();
 		if (drv.contains("MYSQL"))
 			return DatabaseType.MYSQL;
