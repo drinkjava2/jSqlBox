@@ -1,6 +1,6 @@
 package test.transaction;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,18 +40,18 @@ public class SpringTransactionTest {
 	public void tx_InsertUser1() {
 		User u = new User();
 		u.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), e("user1"), //
-				", ", u.address(), e("address1"), //
-				", ", u.age(), ")", e("10"), //
+				" (", u.userName(), empty("user1"), //
+				", ", u.address(), empty("address1"), //
+				", ", u.age(), ")", empty("10"), //
 				SqlHelper.questionMarks());
 	}
 
 	public void tx_InsertUser2() {
 		User u = new User();
 		u.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), e("user2"), //
-				", ", u.address(), e("address2"), //
-				", ", u.age(), ")", e("20"), //
+				" (", u.userName(), empty("user2"), //
+				", ", u.address(), empty("address2"), //
+				", ", u.age(), ")", empty("20"), //
 				SqlHelper.questionMarks());
 	}
 

@@ -26,7 +26,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * This class is copied from javax.servlet.jsp.jstl.sql package
+ * This class is copied from javax.servlet.jsp.jstl.sql package but made tiny changes (Yong said)
  * 
  * <p>
  * This class creates a cached version of a <tt>ResultSet</tt>. It's represented as a <tt>Result</tt> implementation,
@@ -36,6 +36,7 @@ import java.util.TreeMap;
  *
  * @author Hans Bergsten
  * @author Justyna Horwat
+ * @author Yong Zhu (in jSQLBox project)
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TinyResult {
@@ -165,7 +166,9 @@ public class TinyResult {
 	}
 
 	/**
-	 * Only return first column Values
+	 * This method is added by Yong Zhu
+	 * 
+	 * @return Get a List only include first column values
 	 */
 	public List getFirstColumns() {
 		ArrayList<Object> l = new ArrayList<>();
@@ -178,6 +181,11 @@ public class TinyResult {
 		return l;
 	}
 
+	/**
+	 * This method is added by Yong Zhu
+	 * 
+	 * @Return Get debug info
+	 */
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\r\nColumn names:\r\n");

@@ -14,7 +14,7 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 import test.config.InitializeDatabase;
-import test.config.JBeanBoxConfig.MySqlDataSourceBox;
+import test.config.JBeanBoxConfig.DataSourceBox;
 
 /**
  * This is to test TinyJDBC use its own Transaction not related to Spring<br/>
@@ -33,15 +33,14 @@ public class TinyJdbcBatchInsert {
 
 	@Test
 	public void doTest() {
-		DataSource ds = BeanBox.getBean(MySqlDataSourceBox.class);
+		DataSource ds = BeanBox.getBean(DataSourceBox.class);
 		List<List<Object>> args = new ArrayList<>();
 		for (int i = 0; i < 1000; i++) {
 			List<Object> arg = new ArrayList<>();
 			arg.add(i);
 			args.add(arg);
 		}
-		TinyJdbc.executeBatch(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)",
-				args);
+		TinyJdbc.executeBatch(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", args);
 		Assert.assertEquals(1000, (int) TinyJdbc.queryForInteger(ds, Connection.TRANSACTION_READ_COMMITTED,
 				"select count(*) from users"));
 	}

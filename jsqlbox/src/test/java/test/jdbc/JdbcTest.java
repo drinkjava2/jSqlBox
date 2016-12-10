@@ -1,6 +1,6 @@
 package test.jdbc;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import org.junit.Assert;
@@ -27,19 +27,19 @@ public class JdbcTest {
 	@Test
 	public void tx_jdbcTest() {
 		User u = SqlBox.createBean(User.class);
-		Dao.dao().execute("insert into " + u.table() + " (" + u.userName() + e("user1") + ", " + u.address()
-				+ e("address1") + ", " + u.age() + e("1") + ") values(?,?,?)");
+		Dao.dao().execute("insert into " + u.table() + " (" + u.userName() + empty("user1") + ", " + u.address()
+				+ empty("address1") + ", " + u.age() + empty("1") + ") values(?,?,?)");
 
 		Dao.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), e("user2"), //
-				", ", u.address(), e("address2"), //
-				", ", u.age(), e("2"), //
+				" (", u.userName(), empty("user2"), //
+				", ", u.address(), empty("address2"), //
+				", ", u.age(), empty("2"), //
 				") values(?,?,?)");
 
 		Dao.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), e("user3"), //
-				", ", u.address(), e("address3"), //
-				", ", u.age(), e("3"), //
+				" (", u.userName(), empty("user3"), //
+				", ", u.address(), empty("address3"), //
+				", ", u.age(), empty("3"), //
 				")", SqlHelper.questionMarks());
 
 		Dao.dao().execute("update " + u.table() + " set " + u.userName() + "=" + q("John") + "," + u.address() + "="
@@ -51,9 +51,9 @@ public class JdbcTest {
 				" where ", u.age(), "=", q(2));
 
 		Dao.dao().execute("update ", u.table(), " set ", //
-				u.userName(), "=?", e("Tom"), ",", //
-				u.address(), " =?", e("Nanjing"), //
-				" where ", u.age(), "=?", e(3));
+				u.userName(), "=?", empty("Tom"), ",", //
+				u.address(), " =?", empty("Nanjing"), //
+				" where ", u.age(), "=?", empty(3));
 
 		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from " + u.table()));
 	}

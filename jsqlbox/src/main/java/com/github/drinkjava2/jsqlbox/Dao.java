@@ -113,7 +113,10 @@ public class Dao {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
-			return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
+			if (sp.getParameters().length != 0)
+				return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
+			else
+				return (T) getJdbc().queryForObject(sp.getSql(), clazz);
 		} finally {
 			SqlHelper.clearLastSQL();
 		}
@@ -131,28 +134,34 @@ public class Dao {
 	// ========JdbcTemplate wrap methods End============
 
 	/**
-	 * Execute a sql and return how many record be affected, sql be translated to prepared statement
+	 * Execute sql and return how many record be affected, sql be translated to prepared statement<br/>
+	 * Return -1 if no parameters sql executed<br/>
 	 * 
 	 */
 	public Integer execute(String... sql) {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
-			return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
+			if (sp.getParameters().length != 0)
+				return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
+			else {
+				getJdbc().execute(sp.getSql());
+				return -1;
+			}
 		} finally {
 			SqlHelper.clearLastSQL();
 		}
 	}
 
 	/**
-	 * Return -1 if exception found
+	 * Execute sql without exception threw, return -1 if no parameters sql executed, return -2 if exception found
 	 */
 	public Integer executeQuiet(String... sql) {
 		try {
 			return execute(sql);
 		} catch (Exception e) {
 			SqlBoxException.eatException(e);
-			return -1;
+			return -2;
 		}
 	}
 
@@ -277,7 +286,7 @@ public class Dao {
 		int count = 0;
 		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
 		for (Column col : sqlBox.buildRealColumns().values()) {
-			if (col.getGeneratedValue() != null) {// PKey field
+			if (col.getGeneratedValue() != null) {// ID fields
 				sb.append(col.getColumnName()).append(",");
 				GeneratedValue value = col.getGeneratedValue();
 				IdGenerator idgen = this.getBox().getContext().getGeneratorFromCache(value.getGeneratorName());
@@ -319,7 +328,7 @@ public class Dao {
 			return m.invoke(this.bean, new Object[] {});
 		} catch (Exception e1) {
 			return SqlBoxException.throwEX(e1,
-					"Dao save error, method " + methodName + " invoke error in class " + bean);
+					"Dao getFieldRealValue error, method " + methodName + " invoke error in class " + bean);
 		}
 	}
 

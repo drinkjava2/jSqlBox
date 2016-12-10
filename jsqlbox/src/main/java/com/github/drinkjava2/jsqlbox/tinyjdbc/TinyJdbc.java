@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2016 Yong Zhu.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.github.drinkjava2.jsqlbox.tinyjdbc;
 
 import java.sql.Connection;
@@ -16,9 +31,9 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
- * A tiny Jdbc tool to access database use separated transaction not related to Spring<br/>
+ * A tiny Jdbc tool to access database use separated transaction not related to current Spring transaction<br/>
  * The reason I wrote this class is I need a tool to get database meta data and create TableGenerator ID through a
- * separated transaction
+ * separated transaction, usually there is no need to use TinyJdbc in project.
  * 
  *
  * @author Yong Zhu
@@ -285,21 +300,19 @@ public class TinyJdbc {
 
 			Collection<String> tables = tiny.getTableNames().values();
 			for (String realTableName : tables) {
-				if (!realTableName.contains("=")) {
-					rs = con.getMetaData().getColumns(null, null, realTableName, null);
-					Map<String, Column> oneTable = new HashMap<>();
-					while (rs.next()) {// NOSONAR
-						Column col = new Column();
-						col.setColumnName(rs.getString("COLUMN_NAME"));
-						col.setPropertyTypeName(rs.getString("TYPE_NAME"));
-						col.setLength(rs.getInt("COLUMN_SIZE"));
-						col.setNullable(rs.getInt("NULLABLE") > 0);
-						col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
-						oneTable.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
-					}
-					tiny.getTables().put(realTableName.toLowerCase(), oneTable);
-					rs.close();
+				rs = con.getMetaData().getColumns(null, null, realTableName, null);
+				Map<String, Column> oneTable = new HashMap<>();
+				while (rs.next()) {// NOSONAR
+					Column col = new Column();
+					col.setColumnName(rs.getString("COLUMN_NAME"));
+					col.setPropertyTypeName(rs.getString("TYPE_NAME"));
+					col.setLength(rs.getInt("COLUMN_SIZE"));
+					col.setNullable(rs.getInt("NULLABLE") > 0);
+					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
+					oneTable.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
 				}
+				tiny.getTables().put(realTableName.toLowerCase(), oneTable);
+				rs.close();
 			}
 			return tiny;
 		} catch (

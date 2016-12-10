@@ -14,6 +14,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import test.config.InitializeDatabase;
 import test.config.JBeanBoxConfig.CtxBox;
+import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.po.User;
 
 /**
@@ -36,15 +37,16 @@ public class ContextTest {
 		ComboPooledDataSource ds = new ComboPooledDataSource();// c3p0
 		ds.setUser("root");
 		ds.setPassword("root888");
-		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
+		ds.setJdbcUrl((String) new DataSourceBox().getProperty("jdbcUrl"));
 		try {
-			ds.setDriverClass("com.mysql.jdbc.Driver");
+			ds.setDriverClass((String) new DataSourceBox().getProperty("driverClass"));
 		} catch (PropertyVetoException e) {
 			e.printStackTrace();
 		}
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		User u = ctx.createBean(User.class);
+		// Can not use User u=new User() here because default global SqlBoxContext not configured
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
@@ -71,8 +73,8 @@ public class ContextTest {
 		ContextTest t = new ContextTest();
 		InitializeDatabase.dropAndRecreateTables();
 		t.insertUser1();
-//		InitializeDatabase.dropAndRecreateTables();
-//		t.insertUser2();
+		// InitializeDatabase.dropAndRecreateTables();
+		// t.insertUser2();
 	}
 
 }

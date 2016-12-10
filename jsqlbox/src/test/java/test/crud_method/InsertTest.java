@@ -56,6 +56,6 @@ public class InsertTest {
 	public static void main(String[] args) {
 		InitializeDatabase.dropAndRecreateTables();
 		InsertTest t = new InsertTest();
-		t.insertUser2();
+		t.insertUser1();
 	}
 }

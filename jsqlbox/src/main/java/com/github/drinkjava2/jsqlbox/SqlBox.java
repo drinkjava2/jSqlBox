@@ -113,6 +113,8 @@ public class SqlBox {
 	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
 	 */
 	private boolean isLegalFieldID(String fieldID) {
+		if (SqlBoxUtils.isEmptyStr(fieldID))
+			return false;
 		try {
 			if (SqlBoxUtils.isCapitalizedString(fieldID))
 				return false;
@@ -144,16 +146,14 @@ public class SqlBox {
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
 			if (isLegalFieldID(fieldID)) {
-				if (!SqlBoxUtils.isEmptyStr(fieldID)) {// NOSONAR
-					Column column = new Column();
-					column.setFieldID(fieldID);
-					column.setColumnName(this.getRealColumnName(fieldID));
-					column.setPropertyType(pd.getPropertyType());
-					column.setReadMethodName(pd.getReadMethod().getName());
-					column.setWriteMethodName(pd.getWriteMethod().getName());
-					useConfigOverrideDefault(fieldID, column);
-					realColumns.put(fieldID, column);
-				}
+				Column column = new Column();
+				column.setFieldID(fieldID);
+				column.setColumnName(this.getRealColumnName(fieldID));
+				column.setPropertyType(pd.getPropertyType());
+				column.setReadMethodName(pd.getReadMethod().getName());
+				column.setWriteMethodName(pd.getWriteMethod().getName());
+				useConfigOverrideDefault(fieldID, column);
+				realColumns.put(fieldID, column);
 			}
 		}
 		findAndSetPrimeKeys(this.getEntityClass(), realColumns);
@@ -229,16 +229,15 @@ public class SqlBox {
 		if (columnName == null || columnName.length() == 0)
 			columnName = fieldID;
 		String realTable = getRealTable();
-
-		Map<String, Column> dbMetaData = context.getMetaData().getOneTable(realTable);
+		Map<String, Column> oneTableMap = context.getMetaData().getOneTable(realTable.toLowerCase());
 
 		String realColumnNameignoreCase = null;
-		Column realColumn = dbMetaData.get(columnName.toLowerCase());
+		Column realColumn = oneTableMap.get(columnName.toLowerCase());
 		if (realColumn != null)
 			realColumnNameignoreCase = realColumn.getColumnName();
 
 		String realColumnNameUnderline = null;
-		realColumn = dbMetaData.get(SqlBoxUtils.camelToLowerCaseUnderline(columnName));
+		realColumn = oneTableMap.get(SqlBoxUtils.camelToLowerCaseUnderline(columnName));
 		if (realColumn != null)
 			realColumnNameUnderline = realColumn.getColumnName();
 

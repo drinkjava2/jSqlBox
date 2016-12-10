@@ -33,7 +33,7 @@ public class JBeanBoxConfig {
 			setProperty("user", "root");// set to your user
 			setProperty("password", "root888");// set to your password
 			setProperty("minPoolSize", 1);
-			setProperty("maxPoolSize", 5);
+			setProperty("maxPoolSize", 2);
 			setProperty("CheckoutTimeout", 5000);
 		}
 	}
@@ -63,7 +63,7 @@ public class JBeanBoxConfig {
 	}
 
 	// Data source pool setting
-	public static class DataSourceBox extends MySqlDataSourceBox {
+	public static class DataSourceBox extends OracleDataSourceBox {
 	}
 
 	// CtxBox is a SqlBoxContent singleton

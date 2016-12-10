@@ -1,6 +1,6 @@
 package test.crud_method;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,14 +20,14 @@ public class QueryEntityTest {
 		InitializeDatabase.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
 		u.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), e("user1"), //
-				", ", u.address(), e("address1"), //
-				", ", u.age(), ")", e("1"), //
+				" (", u.userName(), empty("user1"), //
+				", ", u.address(), empty("address1"), //
+				", ", u.age(), ")", empty("1"), //
 				SqlHelper.questionMarks());
 		u.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), e("user2"), //
-				", ", u.address(), e("address2"), //
-				", ", u.age(), ")", e("2"), //
+				" (", u.userName(), empty("user2"), //
+				", ", u.address(), empty("address2"), //
+				", ", u.age(), ")", empty("2"), //
 				SqlHelper.questionMarks());
 		u.setUserName("user3");
 		u.setAddress("address3");

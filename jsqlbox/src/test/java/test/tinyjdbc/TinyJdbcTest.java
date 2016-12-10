@@ -1,6 +1,6 @@
 package test.tinyjdbc;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.e;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
 import java.sql.Connection;
 
@@ -15,7 +15,6 @@ import com.github.drinkjava2.jsqlbox.SqlHelper;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 import test.config.InitializeDatabase;
-import test.config.JBeanBoxConfig.MySqlDataSourceBox;
 import test.config.po.User;
 
 /**
@@ -37,11 +36,11 @@ public class TinyJdbcTest {
 	public void tx_InsertUser1() {
 		User u = new User();
 		u.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), e("user1"), //
-				", ", u.address(), e("address1"), //
-				", ", u.age(), ")", e("10"), //
+				" (", u.userName(), empty("user1"), //
+				", ", u.address(), empty("address1"), //
+				", ", u.age(), ")", empty("10"), //
 				SqlHelper.questionMarks());
-		DataSource ds = BeanBox.getBean(MySqlDataSourceBox.class);
+		DataSource ds = u.dao().getContext().getDataSource();
 		TinyJdbc.execute(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");
 		Assert.assertEquals(20, (int) TinyJdbc.queryForInteger(ds, 2, "select age from users where age =?", "20"));
 	}
