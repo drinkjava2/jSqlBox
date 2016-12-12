@@ -6,6 +6,7 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +15,7 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.po.User;
 
 /**
@@ -29,7 +30,12 @@ import test.config.po.User;
 public class TinyJdbcTest {
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	@Test

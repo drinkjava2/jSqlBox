@@ -2,6 +2,7 @@ package test.crud_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,14 +11,14 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.po.User;
 
 public class QueryEntityTest {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
 		u.dao().execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user1"), //
@@ -36,6 +37,11 @@ public class QueryEntityTest {
 		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from ", u.table()));
 	}
 
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
+	}
+
 	@Test
 	public void queryUser() {
 		// Assert.assertEquals(2, (int) Dao.dao.queryForInteger("select count(*) from ", User.Table));
@@ -45,7 +51,7 @@ public class QueryEntityTest {
 	}
 
 	public static void main(String[] args) {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 		QueryEntityTest t = new QueryEntityTest();
 		t.setup();
 	}

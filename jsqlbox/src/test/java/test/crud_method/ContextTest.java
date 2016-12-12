@@ -4,6 +4,7 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import java.beans.PropertyVetoException;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +13,7 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.JBeanBoxConfig.CtxBox;
 import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.po.User;
@@ -29,7 +30,12 @@ public class ContextTest {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	@Test
@@ -71,7 +77,7 @@ public class ContextTest {
 
 	public static void main(String[] args) {
 		ContextTest t = new ContextTest();
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 		t.insertUser1();
 		// InitializeDatabase.dropAndRecreateTables();
 		// t.insertUser2();

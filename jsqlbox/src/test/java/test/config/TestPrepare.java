@@ -3,19 +3,26 @@ package test.config;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
+
+import test.config.JBeanBoxConfig.TxInterceptorBox;
 
 /**
  * This is a configuration class, equal to XML in Spring
  *
  */
-public class InitializeDatabase {
+public class TestPrepare {
 
+	/**
+	 * Drop and rebuild all tables
+	 */
 	public static void dropAndRecreateTables() {
+		BeanBox.defaultContext.close();
+		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 		SqlBoxContext.configDefaultContext(SqlBoxConfig.class.getName(), "getSqlBoxContext");
-		JBeanBoxConfig.initialize();
 
 		if (Dao.dao().getDatabaseType() == DatabaseType.ORACLE) {
 			Dao.dao().executeQuiet("DROP TRIGGER TGR_2");
@@ -74,15 +81,19 @@ public class InitializeDatabase {
 		Dao.dao().refreshMetaData();
 	}
 
+	/**
+	 * Close BeanBox Context, c3p0 close method will be called before context be closed
+	 */
+	public static void closeBeanBoxContext() {
+		BeanBox.defaultContext.close();
+	}
+
 	@Test
 	public void testCreateTables() {
 		dropAndRecreateTables();
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users2"));
-	}
-
-	public static void main(String[] args) {
-		dropAndRecreateTables();
+		closeBeanBoxContext();
 	}
 
 }

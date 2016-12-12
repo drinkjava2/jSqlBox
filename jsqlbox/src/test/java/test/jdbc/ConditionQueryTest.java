@@ -10,18 +10,23 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.po.User;
 
 public class ConditionQueryTest {
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setAge(10);
 		u.dao().insert();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {

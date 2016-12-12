@@ -2,6 +2,7 @@ package test.tinyjdbc;
 
 import javax.sql.DataSource;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.JBeanBoxConfig.MsSqlServerDataSourceBox;
 import test.config.JBeanBoxConfig.MySqlDataSourceBox;
 import test.config.JBeanBoxConfig.OracleDataSourceBox;
@@ -28,7 +29,12 @@ public class TinyJdbcGetMetaData {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	@Test
@@ -40,7 +46,7 @@ public class TinyJdbcGetMetaData {
 		if (type == DatabaseType.ORACLE)
 			ds = BeanBox.getBean(OracleDataSourceBox.class);
 		if (type == DatabaseType.MS_SQLSERVER)
-			ds = BeanBox.getBean(MsSqlServerDataSourceBox.class);		
+			ds = BeanBox.getBean(MsSqlServerDataSourceBox.class);
 
 		TinyDbMetaData meta = TinyJdbc.getMetaData(ds);
 		System.out.println(meta.getJdbcDriverName());

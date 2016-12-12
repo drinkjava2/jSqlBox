@@ -105,7 +105,7 @@ public class SqlBoxContext {
 	 * Note: a config class SqlBoxConfig.java is needed in class root folder
 	 */
 	public static SqlBoxContext getDefaultSqlBoxContext() {
-		final String errorinfo = "jSqlBox initialization error: class or method not found:";
+		final String errorinfo = "SqlBoxContext getDefaultSqlBoxContext error: ";
 		SqlBoxContext ctx = null;
 		try {
 			Class<?> configClass = Class.forName(sqlBoxConfigClass);

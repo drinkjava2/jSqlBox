@@ -1,5 +1,6 @@
 package test.config;
 
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,11 +21,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @since 1.0.0
  */
 public class JBeanBoxConfig {
-	// jSqlBox & jBeanBox initialize
-	public static void initialize() {
-		BeanBox.defaultContext.close();
-		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
-	}
 
 	// Data source pool setting
 	public static class C3P0Box extends BeanBox {
@@ -32,9 +28,10 @@ public class JBeanBoxConfig {
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user
 			setProperty("password", "root888");// set to your password
-			setProperty("minPoolSize", 1);
-			setProperty("maxPoolSize", 2);
+			setProperty("minPoolSize", 3);
+			setProperty("maxPoolSize", 10);
 			setProperty("CheckoutTimeout", 5000);
+			this.setPreDestory("close");// Close c3p0 DataSource pool if jBeanBox context close
 		}
 	}
 
@@ -94,6 +91,18 @@ public class JBeanBoxConfig {
 		{
 			setConstructor(JdbcTemplate.class, DataSourceBox.class);
 		}
+	}
+
+	public static Method getDeclaredMethod(Object object, String methodName, Class<?>... parameterTypes) {
+		Method method = null;
+		for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
+			try {
+				method = clazz.getDeclaredMethod(methodName, parameterTypes);
+				return method;
+			} catch (Exception e) {
+			}
+		}
+		return null;
 	}
 
 }

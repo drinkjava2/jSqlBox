@@ -6,6 +6,7 @@ import java.beans.PropertyVetoException;
 
 import javax.sql.DataSource;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,15 @@ import test.transaction.SpringTransactionTest;
 @EnableTransactionManagement
 @Configuration
 public class SpringConfig {
+	@Before
+	public void setup() {
+		TestPrepare.dropAndRecreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
+	}
 
 	@Bean
 	public ComboPooledDataSource C3P0Bean() {
@@ -72,11 +82,6 @@ public class SpringConfig {
 	@Bean
 	public SpringTransactionTest springTransactionTest() {
 		return new SpringTransactionTest();
-	}
-
-	@Before
-	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
 	}
 
 	@Test

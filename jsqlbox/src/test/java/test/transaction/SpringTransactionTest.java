@@ -2,6 +2,7 @@ package test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.SpringConfig;
 import test.config.po.User;
 
@@ -34,7 +35,12 @@ public class SpringTransactionTest {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	public void tx_InsertUser1() {
