@@ -27,6 +27,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
 import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
+import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -47,20 +48,20 @@ public class Dao {
 
 	public Dao(SqlBoxContext ctx) {
 		if (ctx == null)
-			SqlBoxException.throwEX(null, "Dao create error, SqlBoxContext  can not be null");
+			SqlBoxException.throwEX("Dao create error, SqlBoxContext  can not be null");
 		else if (ctx.getDataSource() == null)
-			SqlBoxException.throwEX(null, "Dao create error,  dataSource can not be null");
+			SqlBoxException.throwEX("Dao create error,  dataSource can not be null");
 		SqlBox sb = new SqlBox(ctx);
 		this.sqlBox = sb;
 	}
 
 	public Dao(SqlBox sqlBox) {
 		if (sqlBox == null)
-			SqlBoxException.throwEX(null, "Dao create error, sqlBox can not be null");
+			SqlBoxException.throwEX("Dao create error, sqlBox can not be null");
 		else if (sqlBox.getContext() == null)
-			SqlBoxException.throwEX(null, "Dao create error, sqlBoxContext can not be null");
+			SqlBoxException.throwEX("Dao create error, sqlBoxContext can not be null");
 		else if (sqlBox.getContext().getDataSource() == null)
-			SqlBoxException.throwEX(null, "Dao create error, dataSource can not be null");
+			SqlBoxException.throwEX("Dao create error, dataSource can not be null");
 		this.sqlBox = sqlBox;
 	}
 
@@ -276,24 +277,27 @@ public class Dao {
 	}
 
 	/**
-	 * Insert or Update a Bean to Database
+	 * Insert a Bean to Database
 	 */
 	public Integer insert() {// NOSONAR
 		if (bean == null)
-			SqlBoxException.throwEX(null, "Dao doSave error, bean is null");
+			SqlBoxException.throwEX("Dao doSave error, bean is null");
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
 		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
 		for (Column col : sqlBox.buildRealColumns().values()) {
 			if (col.getGeneratedValue() != null) {// ID fields
-				sb.append(col.getColumnName()).append(",");
-				GeneratedValue value = col.getGeneratedValue();
-				IdGenerator idgen = this.getBox().getContext().getGeneratorFromCache(value.getGeneratorName());
-				Object id = idgen.getNextID(this.getBox().getContext().getDataSource());
-				setFieldRealValue(col, id);
-				parameters.add(id);
-				count++;
+				GeneratedValue gv = col.getGeneratedValue();
+				IdGenerator idgen = this.getBox().getContext().getGenerator(gv);
+				assureNotNull(idgen, "IdGenerator can not be null for column \"" + col.getColumnName() + "\"");
+				Object id = idgen.getNextID(this.getBox().getContext());
+				if (id != null) {
+					sb.append(col.getColumnName()).append(",");
+					setFieldRealValue(col, id);
+					parameters.add(id);
+					count++;
+				}
 			} else if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnName())) {// normal fields
 				Object value = getFieldRealValue(col);
 				if (value != null) {

@@ -15,11 +15,9 @@
 */
 package com.github.drinkjava2.jsqlbox.jpa;
 
-import java.sql.Connection;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.sql.DataSource;
-
-import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * Define a table ID generator, implements of JPA TableGenerator
@@ -92,24 +90,24 @@ public class TableGenerator implements IdGenerator {
 	 * Get the next Table Generator ID
 	 */
 	@Override
-	public Object getNextID(DataSource ds) {
+	public Object getNextID(SqlBoxContext ctx) {
+		JdbcTemplate jdbc = ctx.getJdbc();
 		if (lastValue == -1) {
-			int countOfRec = TinyJdbc.queryForInteger(ds, Connection.TRANSACTION_READ_COMMITTED,
-					"select count(*) from " + table + " where " + pkColumnName + "=?", pkColumnValue);// NOSONAR
+			int countOfRec = jdbc.queryForObject("select count(*) from " + table + " where " + pkColumnName + "=?",
+					Integer.class, new Object[] { pkColumnValue });
 			if (countOfRec == 0) {
-				TinyJdbc.execute(ds, Connection.TRANSACTION_READ_COMMITTED,
-						"insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
-						pkColumnValue, initialValue);
+				jdbc.update("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
+						new Object[] { pkColumnValue, initialValue });
 				lastValue = initialValue;
 				return lastValue;
 			} else {
-				int last = TinyJdbc.queryForInteger(ds, 2,
-						"select " + valueColumnName + " from " + table + " where " + pkColumnName + "=?",
-						pkColumnValue);// 70 or 99 or 100 or 101
+				int last = jdbc.queryForObject(
+						"select " + valueColumnName + " from " + table + " where " + pkColumnName + "=?", Integer.class,
+						new Object[] { pkColumnValue }); // 70 or 99 or 100 or 101
 				last = calculateBucketFirstID(last, allocationSize);// 101 or 101 or 101 or 151
-				TinyJdbc.execute(ds, 2,
-						"update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
-						calculateBucketFirstID(last + 1, allocationSize), pkColumnValue);// 151, 151, 151, 201
+				jdbc.update("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
+						new Object[] { calculateBucketFirstID(last + 1, allocationSize), pkColumnValue });// 151, 151,
+																											// 151, 201
 				lastValue = last;
 				return lastValue;
 			}
@@ -117,9 +115,8 @@ public class TableGenerator implements IdGenerator {
 			int last = lastValue;
 			int nextBucketFirstID = calculateBucketFirstID(last, allocationSize);
 			if (last + 1 >= nextBucketFirstID)
-				TinyJdbc.execute(ds, 2,
-						"update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
-						calculateBucketFirstID(last + 1, allocationSize), pkColumnValue);
+				jdbc.update("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
+						new Object[] { calculateBucketFirstID(last + 1, allocationSize), pkColumnValue });
 			lastValue = last + 1;
 			return lastValue;
 		}
@@ -129,6 +126,7 @@ public class TableGenerator implements IdGenerator {
 		return ((currentValue + allocationSize - 1) / allocationSize) * allocationSize + 1;
 	}
 
+	// Getter & Setters below
 	public String getName() {
 		return name;
 	}

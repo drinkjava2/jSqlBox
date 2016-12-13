@@ -28,7 +28,6 @@ import org.springframework.jdbc.core.RowMapper;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
 import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
 import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
-import com.github.drinkjava2.jsqlbox.jpa.TableGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -104,8 +103,8 @@ public class SqlBox {
 			realTable = this.getEntityClass().getSimpleName();
 		String resultTable = context.findRealTableName(realTable);
 		if (SqlBoxUtils.isEmptyStr(resultTable))
-			SqlBoxException.throwEX(null,
-					"SqlBox getRealTable error: " + this.getEntityClass() + ", table name:" + realTable);
+			SqlBoxException
+					.throwEX("SqlBox getRealTable error: " + this.getEntityClass() + ", table name:" + realTable);
 		return resultTable;
 	}
 
@@ -132,7 +131,7 @@ public class SqlBox {
 	 */
 	public Map<String, Column> buildRealColumns() {
 		if (this.entityClass == null)
-			SqlBoxException.throwEX(null, "SqlBox getRealColumns error, beanClass can not be null");
+			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
 		Map<String, Column> realColumns = new HashMap<>();
 
 		BeanInfo beanInfo = null;
@@ -209,11 +208,11 @@ public class SqlBox {
 			return;
 		}
 		if (generatorCount >= 2)
-			SqlBoxException.throwEX(null,
+			SqlBoxException.throwEX(
 					"SqlBox findAndSetPrimeKeys error: can not set prime key for entity which has many ID generators: "
 							+ entityClass + ", please set PrimeKey by setPimeKeys() method");
 		if (generatorCount == 0)
-			SqlBoxException.throwEX(null,
+			SqlBoxException.throwEX(
 					"SqlBox findAndSetPrimeKeys error: can not find prime key for entity class: " + entityClass);
 		if (generatorCol != null)
 			generatorCol.setPrimeKey(true);
@@ -242,12 +241,12 @@ public class SqlBox {
 			realColumnNameUnderline = realColumn.getColumnName();
 
 		if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
-			SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+			SqlBoxException.throwEX("SqlBox automaticFitColumnName error, column defination \"" + columnName
 					+ "\" does not match any table column in table " + realTable);
 
 		if (realColumnNameignoreCase != null && realColumnNameUnderline != null
 				&& !realColumnNameignoreCase.equals(realColumnNameUnderline))
-			SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+			SqlBoxException.throwEX("SqlBox automaticFitColumnName error, column defination \"" + columnName
 					+ "\" found mutiple columns in table " + realTable);
 		return realColumnNameignoreCase != null ? realColumnNameignoreCase : realColumnNameUnderline;
 	}
@@ -277,31 +276,15 @@ public class SqlBox {
 		return col;
 	}
 
-	public void configIdGenerator(String fieldID, GenerationType type) {
+	/**
+	 * Config a Generator for a field, see JPA
+	 */
+	public void configGeneratedValue(String fieldID, GenerationType type, String... generatorName) {
 		Column config = getOrBuildConfigColumn(fieldID);
-		config.setGeneratedValue(new GeneratedValue(type));
-	}
-
-	public void configGeneratedValue(String fieldID, GenerationType type, String name) {
-		Column config = getOrBuildConfigColumn(fieldID);
-		config.setGeneratedValue(new GeneratedValue(type, name));
-	}
-
-	public String configTableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
-			String valueColumnName, int initialValue, int allocationSize) {
-		TableGenerator generator = (TableGenerator) this.getContext().getGeneratorFromCache(name);
-		if (generator == null) {
-			generator = new TableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName, initialValue,
-					allocationSize);
-			this.getContext().putGeneratorToCache(name, generator);
-		} else {
-			if (!generator.ifEqual(name, table, pkColumnName, pkColumnValue, valueColumnName, initialValue,
-					allocationSize))
-				SqlBoxException.throwEX(null,
-						"SqlBox configTableGenerator error: duplicated TableGenerator name but different defines, name: "
-								+ name);
-		}
-		return name;
+		if (generatorName.length == 0)
+			config.setGeneratedValue(new GeneratedValue(type));
+		else
+			config.setGeneratedValue(new GeneratedValue(type, generatorName[0]));
 	}
 
 	// ========Config methods end==============

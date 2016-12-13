@@ -24,7 +24,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * 
- * This class is copied from javax.servlet.jsp.jstl.sql package (Yong said)
+ * This class is copied from javax.servlet.jsp.jstl.sql package and made some tiny changes
  * 
  * <p>
  * Supports the creation of a javax.servlet.jsp.jstl.sql.Result object from a source java.sql.ResultSet object. A Result
@@ -34,8 +34,9 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  * Note that these methods hide any SQLExceptions that are caused and return null - to work around that use
  * org.apache.taglibs.standard.tag.common.sql.ResultImpl directly.
  *
- * @author Justyna Horwat
- * @author Yong Zhu (in jSQLBox project)
+ *
+ * @author Yong Zhu
+ * @since 1.0.0
  */
 public class ResultSupport {
 

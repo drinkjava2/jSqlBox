@@ -45,9 +45,25 @@ public class SqlBoxException extends RuntimeException {
 	}
 
 	/**
+	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
+	 */
+	public static Object throwEX(String errorMsg) {
+		return throwEX(null, errorMsg);
+	}
+
+	/**
 	 * Eat exception to avoid SONAR warning
 	 */
 	public static void eatException(Exception e) {
 		// do nothing here
 	}
+
+	/**
+	 * If is a null object, throw a SqlBoxException
+	 */
+	public static void assureNotNull(Object obj, String... optionMessages) {
+		if (obj == null)
+			throw new NullPointerException(optionMessages.length == 0 ? "" : optionMessages[0]);
+	}
+
 }

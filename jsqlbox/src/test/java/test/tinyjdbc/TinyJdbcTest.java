@@ -2,8 +2,6 @@ package test.tinyjdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
-import java.sql.Connection;
-
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -47,7 +45,7 @@ public class TinyJdbcTest {
 				", ", u.age(), ")", empty("10"), //
 				SqlHelper.questionMarks());
 		DataSource ds = u.dao().getContext().getDataSource();
-		TinyJdbc.execute(ds, Connection.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");
+		TinyJdbc.execute(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");
 		Assert.assertEquals(20, (int) TinyJdbc.queryForInteger(ds, 2, "select age from users where age =?", "20"));
 	}
 

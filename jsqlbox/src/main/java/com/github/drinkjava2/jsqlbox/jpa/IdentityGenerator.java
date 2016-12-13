@@ -18,17 +18,18 @@ package com.github.drinkjava2.jsqlbox.jpa;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Interface for all ID generators
+ * Define a table ID generator, implements of JPA TableGenerator
  * 
  * @author Yong Zhu
  * @version 1.0.0
- * @since 1.0
+ * @since 1.0.0
  */
+public class IdentityGenerator implements IdGenerator {
+	public static final IdentityGenerator INSTANCE = new IdentityGenerator();
 
-public interface IdGenerator {// NOSONAR
-	/**
-	 * Return next id
-	 */
-	public Object getNextID(SqlBoxContext ctx);
+	@Override
+	public Object getNextID(SqlBoxContext ctx) {
+		return null;
+	}
 
 }

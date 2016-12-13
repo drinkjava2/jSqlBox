@@ -32,8 +32,7 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
  * A tiny Jdbc tool to access database use separated transaction not related to current Spring transaction<br/>
- * The reason I wrote this class is I need a tool to get database meta data and create TableGenerator ID through a
- * separated transaction, usually there is no need to use TinyJdbc in project.
+ * Usually there is no need to use TinyJdbc in project.
  * 
  *
  * @author Yong Zhu
@@ -42,6 +41,12 @@ import com.github.drinkjava2.jsqlbox.jpa.Column;
  * @since 1.0.0
  */
 public class TinyJdbc {
+	public static final int TRANSACTION_NONE = Connection.TRANSACTION_NONE;
+	public static final int TRANSACTION_READ_COMMITTED = Connection.TRANSACTION_READ_COMMITTED;
+	public static final int TRANSACTION_READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;
+	public static final int TRANSACTION_REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;
+	public static final int TRANSACTION_SERIALIZABLE = Connection.TRANSACTION_SERIALIZABLE;
+	public static final int TRANSACTION_NOT_OPEN_NEW = -1;
 
 	private TinyJdbc() {
 		// hide default constructor
@@ -56,7 +61,7 @@ public class TinyJdbc {
 				return 0;
 			return Integer.parseInt("" + s);
 		} else
-			SqlBoxException.throwEX(null, "TinyJdbc queryForObject error: null or multiple lines found for sql:" + sql);
+			SqlBoxException.throwEX("TinyJdbc queryForObject error: null or multiple lines found for sql:" + sql);
 		return null;
 	}
 
@@ -66,7 +71,7 @@ public class TinyJdbc {
 			Map<?, ?> row = rst.getRows()[0];
 			return row.get(row.keySet().iterator().next());
 		} else
-			SqlBoxException.throwEX(null, "TinyJdbc queryForObject error: null or multiple lines found for sql:" + sql);
+			SqlBoxException.throwEX("TinyJdbc queryForObject error: null or multiple lines found for sql:" + sql);
 		return null;
 	}
 
@@ -80,20 +85,23 @@ public class TinyJdbc {
 		PreparedStatement pst = null;
 		try {
 			con = ds.getConnection();
-			con.setTransactionIsolation(transactionIso);
-			con.setAutoCommit(false);
+			if (transactionIso != -1)
+				con.setTransactionIsolation(transactionIso);
+			if (transactionIso != -1)
+				con.setAutoCommit(false);
 			int i = 1;
 			pst = con.prepareStatement(sql);// NOSONAR
 			for (Object obj : args)
 				pst.setObject(i++, obj);
 			rs = pst.executeQuery();
 			TinyResult r = ResultSupport.toResult(rs);
-			con.commit();
+			if (transactionIso != -1)
+				con.commit();
 			return r;
 		} catch (SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
 			try {
-				if (con != null)
+				if (con != null && transactionIso != -1)
 					con.rollback();
 			} catch (SQLException e1) {
 				SqlBoxException.throwEX(e1, e1.getMessage());
@@ -132,19 +140,22 @@ public class TinyJdbc {
 		PreparedStatement pst = null;
 		try {
 			con = ds.getConnection();
-			con.setTransactionIsolation(transactionIso);
-			con.setAutoCommit(false);
+			if (transactionIso != -1)
+				con.setTransactionIsolation(transactionIso);
+			if (transactionIso != -1)
+				con.setAutoCommit(false);
 			int i = 1;
 			pst = con.prepareStatement(sql);// NOSONAR
 			for (Object obj : args)
 				pst.setObject(i++, obj);
 			int count = pst.executeUpdate();
-			con.commit();
+			if (transactionIso != -1)
+				con.commit();
 			return count;
 		} catch (SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
 			try {
-				if (con != null)
+				if (con != null && transactionIso != -1)
 					con.rollback();
 			} catch (SQLException e1) {
 				SqlBoxException.throwEX(e1, e1.getMessage());
@@ -176,19 +187,22 @@ public class TinyJdbc {
 		PreparedStatement pst = null;
 		try {
 			con = ds.getConnection();
-			con.setTransactionIsolation(transactionIso);
-			con.setAutoCommit(false);
+			if (transactionIso != -1)
+				con.setTransactionIsolation(transactionIso);
+			if (transactionIso != -1)
+				con.setAutoCommit(false);
 			pst = con.prepareStatement(sql);// NOSONAR
 			int i = 1;
 			for (Object obj : args)
 				pst.setObject(i++, obj);
 			boolean bl = pst.execute();
-			con.commit();
+			if (transactionIso != -1)
+				con.commit();
 			return bl;
 		} catch (SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
 			try {
-				if (con != null)
+				if (con != null && transactionIso != -1)
 					con.rollback();
 			} catch (SQLException e1) {
 				SqlBoxException.throwEX(e1, e1.getMessage());
@@ -220,8 +234,10 @@ public class TinyJdbc {
 		PreparedStatement pst = null;
 		try {
 			con = ds.getConnection();
-			con.setTransactionIsolation(transactionIso);
-			con.setAutoCommit(false);
+			if (transactionIso != -1)
+				con.setTransactionIsolation(transactionIso);
+			if (transactionIso != -1)
+				con.setAutoCommit(false);
 
 			pst = con.prepareStatement(sql);// NOSONAR
 
@@ -232,12 +248,13 @@ public class TinyJdbc {
 				pst.addBatch();
 			}
 			int[] bl = pst.executeBatch();
-			con.commit();
+			if (transactionIso != -1)
+				con.commit();
 			return bl;
 		} catch (SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
 			try {
-				if (con != null)
+				if (con != null && transactionIso != -1)
 					con.rollback();
 			} catch (SQLException e1) {
 				SqlBoxException.throwEX(e1, e1.getMessage());
