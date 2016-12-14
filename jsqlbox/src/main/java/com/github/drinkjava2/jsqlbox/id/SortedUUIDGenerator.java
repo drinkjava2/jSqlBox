@@ -13,22 +13,29 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.jpa;
+package com.github.drinkjava2.jsqlbox.id;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Interface for all ID generators
+ * Generate a SortedUUID
  * 
  * @author Yong Zhu
  * @version 1.0.0
- * @since 1.0
+ * @since 1.0.0
  */
+public class SortedUUIDGenerator implements IdGenerator {
 
-public interface IdGenerator {// NOSONAR
+	@Override
+	public Object getNextID(SqlBoxContext ctx) {
+		return getSortedUUID();
+	}
+
 	/**
-	 * Return next id
+	 * Get a sorted UUID
 	 */
-	public Object getNextID(SqlBoxContext ctx);
+	public static String getSortedUUID() {
+		return null;
+	}
 
 }

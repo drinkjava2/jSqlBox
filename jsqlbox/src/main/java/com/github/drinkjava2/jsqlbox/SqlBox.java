@@ -25,9 +25,9 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 
+import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
+import com.github.drinkjava2.jsqlbox.id.GenerationType;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
-import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.

@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
+import com.github.drinkjava2.jsqlbox.id.GenerationType;
 
 import test.config.TestPrepare;
 import test.config.po.User;

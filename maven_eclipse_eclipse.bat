@@ -1,1 +1,2 @@
-mvn eclipse:eclipse
+call mvn eclipse:eclipse
+pause

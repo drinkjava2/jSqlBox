@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.jpa;
+package com.github.drinkjava2.jsqlbox.id;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 

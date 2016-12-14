@@ -22,12 +22,12 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
-import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
-import com.github.drinkjava2.jsqlbox.jpa.IdentityGenerator;
-import com.github.drinkjava2.jsqlbox.jpa.SequenceGenerator;
-import com.github.drinkjava2.jsqlbox.jpa.TableGenerator;
+import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
+import com.github.drinkjava2.jsqlbox.id.GenerationType;
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
+import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
+import com.github.drinkjava2.jsqlbox.id.SequenceGenerator;
+import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;

@@ -15,6 +15,8 @@
 */
 package com.github.drinkjava2.jsqlbox.jpa;
 
+import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
+
 /**
  * Column define, similar to JPA but added some fields
  * 

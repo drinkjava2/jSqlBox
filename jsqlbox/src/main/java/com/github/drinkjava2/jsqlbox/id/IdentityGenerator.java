@@ -13,12 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.jpa;
+package com.github.drinkjava2.jsqlbox.id;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Define a table ID generator, implements of JPA TableGenerator
+ * Define a Identity generator, implements of JPA
  * 
  * @author Yong Zhu
  * @version 1.0.0

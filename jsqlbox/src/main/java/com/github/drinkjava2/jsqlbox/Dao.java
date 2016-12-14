@@ -24,9 +24,10 @@ import java.util.List;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.jpa.Column;
-import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
+
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
 
 /**

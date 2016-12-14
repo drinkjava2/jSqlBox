@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlbox.jpa;
+package com.github.drinkjava2.jsqlbox.id;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
