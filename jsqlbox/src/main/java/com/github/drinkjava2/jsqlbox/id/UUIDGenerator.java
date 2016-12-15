@@ -20,7 +20,7 @@ import java.util.UUID;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Get a base16 32 characters standard JDK UUID, format: bca5414e9b1b4bdfa257125e05428b92
+ * Generate a JDK 32 letters random UUID based on Base16 encoding, format: bca5414e9b1b4bdfa257125e05428b92
  * 
  * @author Yong Zhu
  * @version 1.0.0
@@ -31,6 +31,10 @@ public class UUIDGenerator implements IdGenerator {
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
 		return UUID.randomUUID().toString().replaceAll("-", "");
+	}
+
+	public static void main(String[] args) {
+		System.out.println(UUID.randomUUID().toString().replaceAll("-", ""));
 	}
 
 }
