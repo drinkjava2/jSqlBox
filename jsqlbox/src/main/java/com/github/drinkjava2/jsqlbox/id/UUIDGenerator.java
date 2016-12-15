@@ -20,7 +20,7 @@ import java.util.UUID;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Generate a JDK 32 letters random UUID based on Base16 encoding, format: bca5414e9b1b4bdfa257125e05428b92
+ * Generate a JDK 32 letters random UUID based on Base16 encoding, example: bca5414e9b1b4bdfa257125e05428b92
  * 
  * @author Yong Zhu
  * @version 1.0.0

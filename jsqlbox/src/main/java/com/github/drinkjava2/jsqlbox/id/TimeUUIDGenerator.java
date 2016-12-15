@@ -21,7 +21,7 @@ import java.util.Random;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Generate 32 letters UUID based on Base58 encoding, format: HdNmpQHeGLy8eozSSq2p1B
+ * Generate 32 letters UUID based on radix 36 encoding, start with time stamp, format: 0012345HdNmpQHeGLy8eozSSq2p1B
  * 
  * @author Yong Zhu
  * @version 1.0.0
@@ -45,8 +45,8 @@ public class TimeUUIDGenerator extends ShortUUIDGenerator {
 		long oneyear = 365l * 24 * 60 * 60 * 1000 * 50;
 		for (int i = 1; i <= 100; i++) {
 			BigInteger b = new BigInteger("" + oneyear * i);
-			String s=b.toString(36);
-			System.out.println(s.length()); 
+			String s = b.toString(36);
+			System.out.println(s);
 		}
 	}
 }

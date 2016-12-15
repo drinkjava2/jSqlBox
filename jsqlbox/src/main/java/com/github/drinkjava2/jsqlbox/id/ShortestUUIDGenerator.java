@@ -15,36 +15,38 @@
 */
 package com.github.drinkjava2.jsqlbox.id;
 
-import java.math.BigInteger;
-import java.util.Random;
-import java.util.UUID;
+import java.security.SecureRandom;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Compress JDK UUID to 25 letters based on radix 36, use 0-9 a-z characters, example: pbicz3grgu0zk3ipe1yur03h7
+ * Generate length 12 UUID String based on radix 36, use 0-9 a-z characters, example: mrt227os89et <br/>
+ * 12 length is not strong enough but it's OK for non-critical applications.
  * 
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
-public class ShortUUIDGenerator implements IdGenerator {
+public class ShortestUUIDGenerator implements IdGenerator {
 
-	private static final Random random = new Random();
+	private static final SecureRandom random = new SecureRandom();
 	private static final char[] ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		return getRadix36UUID();
+		return getShortestUUID();
 	}
 
-	private static String getRadix36UUID() {
-		String uuidHex = UUID.randomUUID().toString().replaceAll("-", "");
-		BigInteger b = new BigInteger(uuidHex, 16);
-		String s = b.toString(36);
-		while (s.length() < 25)
-			s = s + ALPHABET[random.nextInt(ALPHABET.length)];// NOSONAR
-		return s;
+	private static String getShortestUUID() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 12; i++) {
+			sb.append(ALPHABET[random.nextInt(32)]);
+		}
+		return sb.toString();
+	}
+
+	public static void main(String[] args) {
+		System.out.println(getShortestUUID());
 	}
 
 }
