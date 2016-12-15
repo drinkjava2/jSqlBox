@@ -33,8 +33,4 @@ public class UUIDGenerator implements IdGenerator {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}
 
-	public static void main(String[] args) {
-		System.out.println(UUID.randomUUID().toString().replaceAll("-", ""));
-	}
-
 }

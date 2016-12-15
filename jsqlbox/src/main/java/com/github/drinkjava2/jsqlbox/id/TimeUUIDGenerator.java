@@ -15,7 +15,8 @@
 */
 package com.github.drinkjava2.jsqlbox.id;
 
-import java.security.SecureRandom;
+import java.math.BigInteger;
+import java.util.Random;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
@@ -26,40 +27,26 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class TimeUUIDGenerator implements IdGenerator {
-	private static final SecureRandom random = new SecureRandom();
-	private static final char[] Base58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-			.toCharArray();
+public class TimeUUIDGenerator extends ShortUUIDGenerator {
+	private static final Random random = new Random();
+	private static final char[] ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		return getTimeUUID();
+		return null;
 	}
 
-	/**
-	 * Get random base58 IDs by give length
-	 */
-	private static String randomBase58ID(int length) {
-		char[] cs = new char[length];
-		for (int i = 0; i < cs.length; i++) {
-			cs[i] = Base58_ALPHABET[random.nextInt(Base58_ALPHABET.length)];
-		}
-		return new String(cs);
-	}
+	private static String getTimeUUID() {
 
-	/**
-	 * Get a sorted UUID
-	 */
-	public static String getTimeUUID() {
-		return randomBase58ID(16);
+		return null;
 	}
 
 	public static void main(String[] args) {
-		String s;
-		for (int i = 0; i < 1000; i++) {
-			s = getTimeUUID();
-			System.out.println(s);
+		long oneyear = 365l * 24 * 60 * 60 * 1000 * 50;
+		for (int i = 1; i <= 100; i++) {
+			BigInteger b = new BigInteger("" + oneyear * i);
+			String s=b.toString(36);
+			System.out.println(s.length()); 
 		}
 	}
-
 }
