@@ -13,7 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.jpa;
+package com.github.drinkjava2.jsqlbox;
+
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 
 /**
  * Column define, similar to JPA but added some fields
@@ -23,7 +25,7 @@ package com.github.drinkjava2.jsqlbox.jpa;
  * @since 1.0
  */
 public class Column {
-	private String name = "";
+	// String name not used
 	private boolean unique = false;
 	private boolean nullable = true;
 	private boolean insertable = true;
@@ -36,17 +38,22 @@ public class Column {
 	private String columnName = "";
 	private boolean primeKey = false;
 	private String foreignKey = "";
+
 	private Class<?> propertyType;
 	private String propertyTypeName;
 	private String readMethodName;
 	private String writeMethodName;
+	private IdGenerator idGenerator;
+	// Prime key generate strategy value
 
-	public String getName() {
-		return name;
+	private String fieldID = "";
+
+	public String getFieldID() {
+		return fieldID;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFieldID(String fieldID) {
+		this.fieldID = fieldID;
 	}
 
 	public boolean isUnique() {
@@ -159,6 +166,14 @@ public class Column {
 
 	public void setWriteMethodName(String writeMethodName) {
 		this.writeMethodName = writeMethodName;
+	}
+
+	public IdGenerator getIdGenerator() {
+		return idGenerator;
+	}
+
+	public void setIdGenerator(IdGenerator idGenerator) {
+		this.idGenerator = idGenerator;
 	}
 
 }

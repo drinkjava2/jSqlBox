@@ -1,20 +1,30 @@
+/**
+ * Copyright (C) 2016 Yong Zhu.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 
-import com.github.drinkjava2.jsqlbox.jpa.Column;
-import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 /**
  * @author Yong Zhu
@@ -23,11 +33,10 @@ import com.github.drinkjava2.jsqlbox.jpa.IdGenerator;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
-
-	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
-
 	// print SQL to console or log depends logging.properties
 	private boolean showSql = false;
+
+	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
 
 	private static String sqlBoxConfigClass = "SqlBoxConfig";
 	private static String getSqlBoxContextMethod = "getSqlBoxContext";
@@ -37,11 +46,7 @@ public class SqlBoxContext {
 	private JdbcTemplate jdbc = new JdbcTemplate();
 	private DataSource dataSource = null;
 
-	private ConcurrentHashMap<String, Map<String, Column>> tableMetaDataCache = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, String> databaseTableNameCache = new ConcurrentHashMap<>();
-
-	// ID Generator singleton cache
-	private HashMap<String, IdGenerator> generatorCache = new HashMap<>();
+	private TinyDbMetaData metaData;
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -52,31 +57,11 @@ public class SqlBoxContext {
 
 	public SqlBoxContext(DataSource dataSource) {
 		this.dataSource = dataSource;
-		if (dataSource != null)
+		if (dataSource != null) {
 			this.jdbc.setDataSource(dataSource);
-	}
-
-	public void close() {
-		if (this.getDataSource() != null)
-			this.setDataSource(null);
-	}
-
-	public boolean existGeneratorInCache(String name) {
-		synchronized (generatorCache) {
-			return generatorCache.get(name) != null;
+			refreshMetaData();
 		}
-	}
 
-	public void putGeneratorToCache(String name, IdGenerator generator) {
-		synchronized (generatorCache) {
-			generatorCache.put(name, generator);
-		}
-	}
-
-	public IdGenerator getGeneratorFromCache(String name) {
-		synchronized (generatorCache) {
-			return generatorCache.get(name);
-		}
 	}
 
 	/**
@@ -98,14 +83,14 @@ public class SqlBoxContext {
 	 * Note: a config class SqlBoxConfig.java is needed in class root folder
 	 */
 	public static SqlBoxContext getDefaultSqlBoxContext() {
-		final String errorinfo = "jSqlBox initialization error: class or method not found:";
+		final String errorinfo = "SqlBoxContext getDefaultSqlBoxContext error: ";
 		SqlBoxContext ctx = null;
 		try {
 			Class<?> configClass = Class.forName(sqlBoxConfigClass);
 			Method method = configClass.getMethod(getSqlBoxContextMethod, new Class[] {});
 			ctx = (SqlBoxContext) method.invoke(configClass, new Object[] {});
 			if (ctx == null)
-				SqlBoxException.throwEX(null, errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
+				SqlBoxException.throwEX(errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
 		} catch (Exception e1) {
 			SqlBoxException.throwEX(e1, errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
 		} catch (Error error) {// NOSONAR
@@ -129,7 +114,7 @@ public class SqlBoxContext {
 	public SqlBox findAndBuildSqlBox(Class<?> beanOrSqlBoxClass) {
 		Class<?> boxClass = null;
 		if (beanOrSqlBoxClass == null) {
-			SqlBoxException.throwEX(null, "SqlBoxContext findAndBuildSqlBox error! Bean Or SqlBox Class not set");
+			SqlBoxException.throwEX("SqlBoxContext findAndBuildSqlBox error! Bean Or SqlBox Class not set");
 			return null;
 		}
 		if (SqlBox.class.isAssignableFrom(beanOrSqlBoxClass))
@@ -142,12 +127,12 @@ public class SqlBoxContext {
 		SqlBox box = null;
 		if (boxClass == null) {
 			box = new SqlBox(this);
-			box.setBeanClass(beanOrSqlBoxClass);
+			box.setEntityClass(beanOrSqlBoxClass);
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
-				if (box.getBeanClass() == null)
-					box.setBeanClass(beanOrSqlBoxClass);
+				if (box.getEntityClass() == null)
+					box.setEntityClass(beanOrSqlBoxClass);
 				box.setContext(this);
 			} catch (Exception e) {
 				SqlBoxException.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
@@ -156,62 +141,30 @@ public class SqlBoxContext {
 		return box;
 	}
 
-	public boolean existTable(String tablename) {
-		return tableMetaDataCache.get(tablename) != null;
+	/**
+	 * Find real table name from database meta data
+	 */
+	public String findRealTableName(String tableName) {
+		String realTableName;
+		TinyDbMetaData meta = this.getMetaData();
+		realTableName = meta.getTableNames().get(tableName.toLowerCase());
+		if (!SqlBoxUtils.isEmptyStr(realTableName))
+			return realTableName;
+		realTableName = meta.getTableNames().get(tableName.toLowerCase() + 's');
+		if (!SqlBoxUtils.isEmptyStr(realTableName))
+			return realTableName;
+		return null;
 	}
 
-	/**
-	 * Cache table MetaData in SqlBoxContext for future use, use lower case column name as key
-	 */
-	public String cacheTableStructure(String tableName) {
-		String realTableName = null;
-		DataSource ds = this.getDataSource();
-		ResultSet rs = null;
-		Connection con = DataSourceUtils.getConnection(ds);// NOSONAR
-		try {
-			rs = con.getMetaData().getTables(null, null, null, new String[] { "TABLE", "VIEW" });
-			while (rs.next())
-				databaseTableNameCache.put(rs.getString("TABLE_NAME").toLowerCase(), rs.getString("TABLE_NAME"));
-			realTableName = databaseTableNameCache.get(tableName.toLowerCase());
-			if (SqlBoxUtils.isEmptyStr(realTableName))
-				SqlBoxException.throwEX(null,
-						"SqlBoxContext cacheTableStructure error, table " + tableName + " does not exist");
-			rs.close();
-			rs = con.getMetaData().getColumns(null, null, realTableName, null);
-			if (rs == null)
-				SqlBoxException.throwEX(null,
-						"SqlBoxContext cacheTableStructure error, table " + tableName + " does not exist");
-			Map<String, Column> columns = new HashMap<>();
-			while (rs != null && rs.next()) {
-				Column col = new Column();
-				col.setColumnName(rs.getString("COLUMN_NAME"));
-				col.setPropertyTypeName(rs.getString("TYPE_NAME"));
-				columns.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
-			}
-			tableMetaDataCache.put(realTableName, columns);
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SQLHelper exec error");
-		} finally {
-			if (rs != null)
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					SqlBoxException.throwEX(e, "SqlBoxContext cacheTableStructure error, failed to close ResultSet");
-				} finally {
-					DataSourceUtils.releaseConnection(con, ds);
-				}
-			else
-				DataSourceUtils.releaseConnection(con, ds);
-		}
-		return realTableName;
+	public DatabaseType getDatabaseType() {
+		return this.getMetaData().getDatabaseType();
+	}
+
+	public void refreshMetaData() {
+		this.metaData = TinyJdbc.getMetaData(dataSource);
 	}
 
 	// ================== getter & setters below============
-
-	public Map<String, Column> getTableMetaData(String tableName) {
-		return tableMetaDataCache.get(tableName);
-	}
-
 	public DataSource getDataSource() {
 		return dataSource;
 	}
@@ -219,6 +172,7 @@ public class SqlBoxContext {
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 		this.jdbc.setDataSource(dataSource);
+		refreshMetaData();
 	}
 
 	public boolean isShowSql() {
@@ -235,6 +189,14 @@ public class SqlBoxContext {
 
 	public void setJdbc(JdbcTemplate jdbc) {
 		this.jdbc = jdbc;
+	}
+
+	public TinyDbMetaData getMetaData() {
+		return metaData;
+	}
+
+	public void setMetaData(TinyDbMetaData metaData) {
+		this.metaData = metaData;
 	}
 
 }

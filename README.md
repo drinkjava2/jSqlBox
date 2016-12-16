@@ -69,16 +69,14 @@ Example 1 - Hello word (入门示例)
 		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
 		ds.setDriverClass("com.mysql.jdbc.Driver"); 
 
-		SqlBoxContext ctx = new SqlBoxContext(ds);//生成SqlBoxContext实例
+		SqlBoxContext ctx = new SqlBoxContext(ds);//生成SqlBoxContext上下文实例
 		User u = ctx.create(User.class); //根据类名创建PO实例
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.dao().save(); //保存到数据库
-	 
-	}
- 
+		u.dao().save(); //保存到数据库 
+	} 
 ```
 
 Example 2 - Use IOC tool like Spring or jBeanBox to inject Datasouce instance 
@@ -93,11 +91,10 @@ Example 2 - Use IOC tool like Spring or jBeanBox to inject Datasouce instance
 		u.setAge(10);
 		u.dao().save(); 
 	 
-	}
- 
+	} 
 ```
 
-Example 3 - Use default SqlBoxContext (利用缺省上下文实例简化编程，适用于单数据源的简单项目)
+Example 3 - Use default SqlBoxContext (利用缺省上下文简化编程)
 ```
 	public static void main(String[] args) {
 		SqlBoxContext.DEFAULT_SQLBOX_CONTEXT.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));

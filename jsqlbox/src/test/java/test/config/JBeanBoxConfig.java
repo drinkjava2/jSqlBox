@@ -1,5 +1,6 @@
 package test.config;
 
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,11 +21,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @since 1.0.0
  */
 public class JBeanBoxConfig {
-	// jSqlBox & jBeanBox initialize
-	public static void initialize() {
-		BeanBox.defaultContext.close();
-		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
-	}
 
 	// Data source pool setting
 	public static class C3P0Box extends BeanBox {
@@ -32,15 +28,15 @@ public class JBeanBoxConfig {
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user
 			setProperty("password", "root888");// set to your password
-			setProperty("minPoolSize", 4);
-			setProperty("maxPoolSize", 30);
+			setProperty("minPoolSize", 3);
+			setProperty("maxPoolSize", 10);
 			setProperty("CheckoutTimeout", 5000);
+			this.setPreDestory("close");// Close c3p0 DataSource pool if jBeanBox context close
 		}
-
 	}
 
 	// MySql connection URL
-	static class MySqlDataSourceBox extends C3P0Box {
+	public static class MySqlDataSourceBox extends C3P0Box {
 		{
 			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClass", "com.mysql.jdbc.Driver");
@@ -48,10 +44,18 @@ public class JBeanBoxConfig {
 	}
 
 	// Oracle connection URL
-	static class OracleDataSource extends C3P0Box {
+	public static class OracleDataSourceBox extends C3P0Box {
 		{
 			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
 			setProperty("driverClass", "oracle.jdbc.OracleDriver");
+		}
+	}
+
+	// MsSql Server connection URL
+	public static class MsSqlServerDataSourceBox extends C3P0Box {
+		{
+			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
+			setProperty("driverClass", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 		}
 	}
 
@@ -87,6 +91,18 @@ public class JBeanBoxConfig {
 		{
 			setConstructor(JdbcTemplate.class, DataSourceBox.class);
 		}
+	}
+
+	public static Method getDeclaredMethod(Object object, String methodName, Class<?>... parameterTypes) {
+		Method method = null;
+		for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
+			try {
+				method = clazz.getDeclaredMethod(methodName, parameterTypes);
+				return method;
+			} catch (Exception e) {
+			}
+		}
+		return null;
 	}
 
 }

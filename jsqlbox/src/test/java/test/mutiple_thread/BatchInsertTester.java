@@ -2,7 +2,7 @@ package test.mutiple_thread;
 
 import com.github.drinkjava2.BeanBox;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.jdbc.BatchInsertTest;
 
 public class BatchInsertTester {
@@ -15,7 +15,7 @@ public class BatchInsertTester {
 	}
 
 	public static void main(String[] args) {// jUnit cann't do multiple thread test
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 		MultiThread m = new MultiThread();
 		new Thread(m).start();
 		new Thread(m).start();

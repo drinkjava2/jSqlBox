@@ -4,6 +4,7 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import java.beans.PropertyVetoException;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +13,9 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.JBeanBoxConfig.CtxBox;
+import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.po.User;
 
 /**
@@ -28,7 +30,12 @@ public class ContextTest {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	@Test
@@ -36,22 +43,23 @@ public class ContextTest {
 		ComboPooledDataSource ds = new ComboPooledDataSource();// c3p0
 		ds.setUser("root");
 		ds.setPassword("root888");
-		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
+		ds.setJdbcUrl((String) new DataSourceBox().getProperty("jdbcUrl"));
 		try {
-			ds.setDriverClass("com.mysql.jdbc.Driver");
+			ds.setDriverClass((String) new DataSourceBox().getProperty("driverClass"));
 		} catch (PropertyVetoException e) {
 			e.printStackTrace();
 		}
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		User u = ctx.createBean(User.class);
+		// Can not use User u=new User() here because default global SqlBoxContext not configured
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.dao().save();
-		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
-				" where ", u.UserName(), "=", q("User1")));
+		u.dao().insert();
+		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+				" where ", u.userName(), "=", q("User1")));
 	}
 
 	@Test
@@ -62,17 +70,17 @@ public class ContextTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.dao().save();
-		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.PhoneNumber(), " from ", u.Table(),
-				" where ", u.UserName(), "=", q("User1")));
+		u.dao().insert();
+		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+				" where ", u.userName(), "=", q("User1")));
 	}
 
 	public static void main(String[] args) {
 		ContextTest t = new ContextTest();
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 		t.insertUser1();
-//		InitializeDatabase.dropAndRecreateTables();
-//		t.insertUser2();
+		// InitializeDatabase.dropAndRecreateTables();
+		// t.insertUser2();
 	}
 
 }

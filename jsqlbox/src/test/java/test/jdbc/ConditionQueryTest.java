@@ -10,31 +10,36 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.po.User;
 
 public class ConditionQueryTest {
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setAge(10);
-		u.dao().save();
+		u.dao().insert();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {
 		User u = SqlBox.createBean(User.class);
-		String sql = "Select count(*) from " + u.Table() + " where ";
+		String sql = "Select count(*) from " + u.table() + " where ";
 		if (condition == 1 || condition == 3)
-			sql = sql + u.UserName() + "=" + q(parameter) + " and " + u.Address() + "=" + q("Address1");
+			sql = sql + u.userName() + "=" + q(parameter) + " and " + u.address() + "=" + q("Address1");
 
 		if (condition == 2)
-			sql = sql + u.UserName() + "=" + q(parameter);
+			sql = sql + u.userName() + "=" + q(parameter);
 
 		if (condition == 3)
-			sql = sql + " or " + u.Age() + "=" + q(parameter);
+			sql = sql + " or " + u.age() + "=" + q(parameter);
 
 		return Dao.dao().queryForInteger(sql);
 	}

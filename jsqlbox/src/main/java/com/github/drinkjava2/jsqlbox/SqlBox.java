@@ -19,17 +19,13 @@ package com.github.drinkjava2.jsqlbox;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.github.drinkjava2.jsqlbox.jpa.Column;
-import com.github.drinkjava2.jsqlbox.jpa.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.jpa.GenerationType;
-import com.github.drinkjava2.jsqlbox.jpa.TableGenerator;
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -42,16 +38,13 @@ import com.github.drinkjava2.jsqlbox.jpa.TableGenerator;
 public class SqlBox {
 
 	// The entity bean class
-	private Class<?> beanClass;
+	private Class<?> entityClass;
 
 	// Configuration Columns, set it before entity bean be created
 	private Map<String, Column> configColumns = new HashMap<>();
 
 	// Configuration Table Name, set it before entity bean be created
 	private String configTable;
-
-	// Prime key generate strategy value
-	private GeneratedValue generatedValue;
 
 	private SqlBoxContext context;
 
@@ -74,11 +67,11 @@ public class SqlBox {
 	public <T> T createBean() {
 		Object bean = null;
 		try {
-			bean = this.getBeanClass().newInstance();
+			bean = this.getEntityClass().newInstance();
 			this.beanInitialize(bean);
 			Dao dao = new Dao(this);
 			dao.setBean(bean);
-			Method m = this.getBeanClass().getMethod("putDao", new Class[] { Dao.class });
+			Method m = this.getEntityClass().getMethod("putDao", new Class[] { Dao.class });
 			m.invoke(bean, new Object[] { dao });
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext create error");
@@ -91,7 +84,7 @@ public class SqlBox {
 	 */
 	public void beanInitialize(Object bean) {
 		try {
-			Method m = this.getBeanClass().getMethod("initialize", new Class[] { null });
+			Method m = this.getEntityClass().getMethod("initialize", new Class[] { null });
 			if (m != null)
 				m.invoke(bean, new Object[] {});
 		} catch (Exception e) {
@@ -103,25 +96,26 @@ public class SqlBox {
 	 * Get real database table name
 	 */
 	public String getRealTable() {
-		String table = null;
-		if (!SqlBoxUtils.isEmptyStr(configTable))
-			table = configTable;
-		if (SqlBoxUtils.isEmptyStr(table))
-			table = SqlBoxUtils.getStaticStringField(this.beanClass, "Table");
-		if (!context.existTable(table))
-			table = context.cacheTableStructure(table);
-		return table;
+		String realTable = configTable;
+		if (SqlBoxUtils.isEmptyStr(realTable))
+			realTable = this.getEntityClass().getSimpleName();
+		String resultTable = context.findRealTableName(realTable);
+		if (SqlBoxUtils.isEmptyStr(resultTable))
+			SqlBoxException
+					.throwEX("SqlBox getRealTable error: " + this.getEntityClass() + ", table name:" + realTable);
+		return resultTable;
 	}
 
-	private boolean isGoodFieldID(String fieldID) {
+	/**
+	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
+	 */
+	private boolean isLegalFieldID(String fieldID) {
+		if (SqlBoxUtils.isEmptyStr(fieldID))
+			return false;
 		try {
 			if (SqlBoxUtils.isCapitalizedString(fieldID))
 				return false;
-			String capitalCase = SqlBoxUtils.toFirstLetterUpperCase(fieldID);
-			Field field = beanClass.getField(capitalCase);
-			if (field == null)
-				return false;
-			Method method = this.beanClass.getMethod(capitalCase, new Class[] {});
+			Method method = this.entityClass.getMethod(fieldID, new Class[] {});
 			if (method == null)
 				return false;
 		} catch (Exception e) { // NOSONAR
@@ -133,43 +127,93 @@ public class SqlBox {
 	/**
 	 * Return real Columns match to table meta data
 	 */
-	public Map<String, Column> getRealColumns() {
-		if (this.beanClass == null)
-			SqlBoxException.throwEX(null, "SqlBox getRealColumns error, beanClass can not be null");
+	public Map<String, Column> buildRealColumns() {
+		if (this.entityClass == null)
+			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
 		Map<String, Column> realColumns = new HashMap<>();
 
 		BeanInfo beanInfo = null;
 		PropertyDescriptor[] pds = null;
 		try {
-			beanInfo = Introspector.getBeanInfo(this.getBeanClass());
+			beanInfo = Introspector.getBeanInfo(this.getEntityClass());
 			pds = beanInfo.getPropertyDescriptors();
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBox buildDefaultConfig error");
 		}
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
-			if (isGoodFieldID(fieldID)) {
-				if (!SqlBoxUtils.isEmptyStr(fieldID)) {// NOSONAR
-					Column column = new Column();
-					column.setName(fieldID);
-					if ("id".equals(fieldID))// NOSONAR
-						column.setPrimeKey(true);
-					column.setColumnName(fieldID);
-					column.setPropertyType(pd.getPropertyType());
-					column.setReadMethodName(pd.getReadMethod().getName());
-					column.setWriteMethodName(pd.getWriteMethod().getName());
-					useConfigToOverrideDefaultValue(fieldID, column);
-					realColumns.put(fieldID, column);
-				}
+			if (isLegalFieldID(fieldID)) {
+				Column realCol = new Column();
+				realCol.setFieldID(fieldID);
+				realCol.setColumnName(this.getRealColumnName(fieldID));
+				realCol.setPropertyType(pd.getPropertyType());
+				realCol.setReadMethodName(pd.getReadMethod().getName());
+				realCol.setWriteMethodName(pd.getWriteMethod().getName());
+				useConfigOverrideDefault(fieldID, realCol);
+				realColumns.put(fieldID, realCol);
 			}
 		}
+		findAndSetPrimeKeys(this.getEntityClass(), realColumns);
 		return realColumns;
 	}
 
-	private void useConfigToOverrideDefaultValue(String fieldID, Column column) {
-		Column config = this.configColumns.get(fieldID);
-		if (config != null && !SqlBoxUtils.isEmptyStr(config.getColumnName()))
-			column.setColumnName(config.getColumnName());
+	/**
+	 * Use config values to override default runtime values
+	 */
+	private void useConfigOverrideDefault(String fieldID, Column column) {
+		Column configColumn = configColumns.get(fieldID);
+		if (configColumn != null) {
+			if (!SqlBoxUtils.isEmptyStr(configColumn.getColumnName()))
+				column.setColumnName(configColumn.getColumnName());
+			column.setPrimeKey(configColumn.isPrimeKey());
+			column.setIdGenerator(configColumn.getIdGenerator());
+		}
+	}
+
+	/**
+	 * Manually set Prime Keys
+	 */
+	public void setPrimeKeys(String... fieldIDs) {
+		for (String fieldID : fieldIDs) {
+			Column col = this.getOrBuildConfigColumn(fieldID);
+			col.setPrimeKey(true);
+		}
+	}
+
+	/**
+	 * Find and set Prime Keys automatically, rule:<br/>
+	 * 1) check if already has PKey set by setPrimeKeys(someid1,someid2...), if found, exit <br/>
+	 * 2) find field named "id", put it to primeKeys <br/>
+	 * 3) if 1 and 2 not found, find a field which set IdGenertorValue, if found more than 2 throw an exception <br/>
+	 */
+	private static void findAndSetPrimeKeys(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
+		Column idCol = null;
+		Column generatorCol = null;
+		int generatorCount = 0;
+		for (String fieldID : realColumns.keySet()) {// NOSONAR
+			Column col = realColumns.get(fieldID);
+			if (col.isPrimeKey())
+				return;
+			if ("id".equals(fieldID))
+				idCol = col;
+			if (col.getIdGenerator() != null) {
+				generatorCount++;
+				generatorCol = col;
+			}
+		}
+		if (idCol != null) {
+			idCol.setPrimeKey(true);
+			return;
+		}
+		if (generatorCount >= 2)
+			SqlBoxException.throwEX(
+					"SqlBox findAndSetPrimeKeys error: can not set prime key for entity which has many ID generators: "
+							+ entityClass + ", please set PrimeKey by setPimeKeys() method");
+		if (generatorCount == 0)
+			SqlBoxException.throwEX(
+					"SqlBox findAndSetPrimeKeys error: can not find prime key for entity class: " + entityClass);
+		if (generatorCol != null)
+			generatorCol.setPrimeKey(true);
 	}
 
 	/**
@@ -177,33 +221,30 @@ public class SqlBox {
 	 * userName field will find userName or username or USERNAME or USER_NAME, but only allowed 1
 	 */
 	public String getRealColumnName(String fieldID) {// NOSONAR
-		String columnName = null;
-		Column col = this.configColumns.get(fieldID);
-		if (col != null)
-			columnName = col.getColumnName();
+		Column col = getOrBuildConfigColumn(fieldID);
+		String columnName = col.getColumnName();
 		if (columnName == null || columnName.length() == 0)
 			columnName = fieldID;
 		String realTable = getRealTable();
-
-		Map<String, Column> dbMetaData = context.getTableMetaData(realTable);
+		Map<String, Column> oneTableMap = context.getMetaData().getOneTable(realTable.toLowerCase());
 
 		String realColumnNameignoreCase = null;
-		Column realColumn = dbMetaData.get(columnName.toLowerCase());
+		Column realColumn = oneTableMap.get(columnName.toLowerCase());
 		if (realColumn != null)
 			realColumnNameignoreCase = realColumn.getColumnName();
 
 		String realColumnNameUnderline = null;
-		realColumn = dbMetaData.get(SqlBoxUtils.camelToLowerCaseUnderline(columnName));
+		realColumn = oneTableMap.get(SqlBoxUtils.camelToLowerCaseUnderline(columnName));
 		if (realColumn != null)
 			realColumnNameUnderline = realColumn.getColumnName();
 
 		if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
-			SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+			SqlBoxException.throwEX("SqlBox automaticFitColumnName error, column defination \"" + columnName
 					+ "\" does not match any table column in table " + realTable);
 
 		if (realColumnNameignoreCase != null && realColumnNameUnderline != null
 				&& !realColumnNameignoreCase.equals(realColumnNameUnderline))
-			SqlBoxException.throwEX(null, "SqlBox automaticFitColumnName error, column defination \"" + columnName
+			SqlBoxException.throwEX("SqlBox automaticFitColumnName error, column defination \"" + columnName
 					+ "\" found mutiple columns in table " + realTable);
 		return realColumnNameignoreCase != null ? realColumnNameignoreCase : realColumnNameUnderline;
 	}
@@ -215,49 +256,46 @@ public class SqlBox {
 		return new SqlBoxRowMapper(this);
 	}
 
-	// ========Config methods begin==============
+	public Column getOrBuildConfigColumn(String fieldID) {
+		Column col = this.getConfigColumns().get(fieldID);
+		if (col == null) {
+			col = new Column();
+			this.getConfigColumns().put(fieldID, col);
+		}
+		return col;
+	}
 
+	// ========Config methods begin==============
+	/**
+	 * Config table name
+	 */
 	public void configTable(String table) {
 		configTable = table;
 	}
 
+	/**
+	 * Config column name
+	 */
 	public void configColumnName(String fieldID, String columnName) {
-		Column col = getConfigColumns().get(fieldID);
-		if (col == null) {
-			col = new Column();
-			getConfigColumns().put(fieldID, col);
-		}
-		col.setColumnName(columnName);
-
+		getOrBuildConfigColumn(fieldID).setColumnName(columnName);
 	}
 
-	public void configIdGenerator(GenerationType type) {
-		this.setGeneratedValue(new GeneratedValue(type));
-	}
-
-	public void configIdGenerator(GenerationType type, String name) {
-		this.setGeneratedValue(new GeneratedValue(type, name));
-	}
-
-	public String configTableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
-			String valueColumnName, int initialValue, int allocationSize) {
-		if (!this.getContext().existGeneratorInCache(name)) {
-			TableGenerator generator = new TableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName,
-					initialValue, allocationSize);
-			this.getContext().putGeneratorToCache(name, generator);
-		}
-		return name;
+	/**
+	 * Config column name
+	 */
+	public void configColumnIdGenerator(String fieldID, IdGenerator idGenerator) {
+		getOrBuildConfigColumn(fieldID).setIdGenerator(idGenerator);
 	}
 
 	// ========Config methods end==============
 
 	// ========getter & setters below==============
-	public Class<?> getBeanClass() {
-		return beanClass;
+	public Class<?> getEntityClass() {
+		return entityClass;
 	}
 
-	public void setBeanClass(Class<?> beanClass) {
-		this.beanClass = beanClass;
+	public void setEntityClass(Class<?> entityClass) {
+		this.entityClass = entityClass;
 	}
 
 	public Map<String, Column> getConfigColumns() {
@@ -274,14 +312,6 @@ public class SqlBox {
 
 	public void setConfigTable(String configTable) {
 		this.configTable = configTable;
-	}
-
-	public GeneratedValue getGeneratedValue() {
-		return generatedValue;
-	}
-
-	public void setGeneratedValue(GeneratedValue generatedValue) {
-		this.generatedValue = generatedValue;
 	}
 
 	public SqlBoxContext getContext() {

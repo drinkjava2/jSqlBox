@@ -13,19 +13,23 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.github.drinkjava2.jsqlbox.jpa;
+package com.github.drinkjava2.jsqlbox.id;
+
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Interface for all ID generators
+ * Define a Identity generator, implements of JPA
  * 
  * @author Yong Zhu
  * @version 1.0.0
- * @since 1.0
+ * @since 1.0.0
  */
-public interface IdGenerator {
-	/**
-	 * Return next id
-	 */
-	public Object getNextID();
+public class IdentityGenerator implements IdGenerator {
+	public static final IdentityGenerator INSTANCE = new IdentityGenerator();
+
+	@Override
+	public Object getNextID(SqlBoxContext ctx) {
+		return null;
+	}
 
 }

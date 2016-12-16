@@ -1,5 +1,6 @@
 package test.crud_method;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,21 +8,26 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
-import test.config.InitializeDatabase;
+import test.config.TestPrepare;
 import test.config.po.User;
 
 public class RuntimeChangeConfig {
 
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	@Test
 	public void normal() {
 		User u = SqlBox.createBean(User.class);
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(1, (int) Dao.dao().queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users2"));
 	}
@@ -29,9 +35,9 @@ public class RuntimeChangeConfig {
 	@Test
 	public void changeTable() {
 		User u = SqlBox.createBean(User.class);
-		u.dao().configTable("users2");
+		u.dao().getBox().configTable("users2");
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users"));
 		Assert.assertEquals(1, (int) Dao.dao().queryForInteger("select count(*) from users2"));
 	}
@@ -39,21 +45,21 @@ public class RuntimeChangeConfig {
 	@Test
 	public void changeColumnName() {
 		User u = SqlBox.createBean(User.class);
-		u.dao().configColumnName(User.UserName, u.Address());
+		u.dao().getBox().configColumnName("userName", u.address());
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(1,
-				(int) Dao.dao().queryForInteger("select count(*) from users where ", u.Address(), "='Sam'"));
+				(int) Dao.dao().queryForInteger("select count(*) from users where ", u.address(), "='Sam'"));
 	}
 
 	@Test
 	public void changeTableAndColumnName() {
 		User u = SqlBox.createBean(User.class);
-		u.dao().configTable("users2");
-		u.dao().configColumnName(User.UserName, u.Address());
+		u.dao().getBox().configTable("users2");
+		u.dao().getBox().configColumnName("userName", u.address());
 		u.setUserName("Sam");
-		u.dao().save();
+		u.dao().insert();
 		Assert.assertEquals(1,
-				(int) Dao.dao().queryForInteger("select count(*) from users2 where ", u.Address(), "='Sam'"));
+				(int) Dao.dao().queryForInteger("select count(*) from users2 where ", u.address(), "='Sam'"));
 	}
 }

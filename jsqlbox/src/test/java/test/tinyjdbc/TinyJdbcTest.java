@@ -1,8 +1,8 @@
-package test.transaction;
+package test.tinyjdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
-import java.lang.reflect.InvocationTargetException;
+import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -11,20 +11,21 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 import test.config.TestPrepare;
 import test.config.po.User;
 
 /**
- * This is to test use Spring's Declarative Transaction but use jBeanBox replaced Spring's IOC/AOP core. <br/>
- * More detail please see jBeanBox project
+ * This is to test TinyJDBC use its own Transaction not related to Spring<br/>
+ * An exception will causer Spring rollback but will not affect TinyJDBC
  *
  * @author Yong Zhu
  *
  * @version 1.0.0
  * @since 1.0.0
  */
-public class JBeanBoxTransactionTest {
+public class TinyJdbcTest {
 	@Before
 	public void setup() {
 		TestPrepare.dropAndRecreateTables();
@@ -35,6 +36,7 @@ public class JBeanBoxTransactionTest {
 		TestPrepare.closeBeanBoxContext();
 	}
 
+	@Test
 	public void tx_InsertUser1() {
 		User u = new User();
 		u.dao().execute("insert into ", u.table(), //
@@ -42,38 +44,28 @@ public class JBeanBoxTransactionTest {
 				", ", u.address(), empty("address1"), //
 				", ", u.age(), ")", empty("10"), //
 				SqlHelper.questionMarks());
+		DataSource ds = u.dao().getContext().getDataSource();
+		TinyJdbc.execute(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");
+		Assert.assertEquals(20, (int) TinyJdbc.queryForInteger(ds, 2, "select age from users where age =?", "20"));
 	}
 
 	public void tx_InsertUser2() {
-		User u = new User();
-		u.dao().execute("insert into ", u.table(), //
-				" (", u.userName(), empty("user2"), //
-				", ", u.address(), empty("address2"), //
-				", ", u.age(), ")", empty("20"), //
-				SqlHelper.questionMarks());
+		System.out.println(1 / 0);// throw a runtime exception
 	}
 
 	public void tx_doInsert() {
-		User u = new User();
 		tx_InsertUser1();
-		int i = u.dao().queryForInteger("select count(*) from ", u.table());
-		Assert.assertEquals(1, i);
-		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();
 	}
 
 	@Test
 	public void doTest() {
-		User u = new User();
-		JBeanBoxTransactionTest tester = BeanBox.getBean(JBeanBoxTransactionTest.class);
+		TinyJdbcTest tester = BeanBox.getBean(TinyJdbcTest.class);
 		boolean foundException = false;
 		try {
 			tester.tx_doInsert();
 		} catch (Exception e) {
 			foundException = true;
-			Assert.assertEquals(InvocationTargetException.class.getName(), e.getClass().getName());
-			int i = u.dao().queryForInteger("select count(*) from users");
-			Assert.assertEquals(0, i);
 		}
 		Assert.assertEquals(foundException, true);
 	}

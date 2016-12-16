@@ -6,6 +6,7 @@ import java.beans.PropertyVetoException;
 
 import javax.sql.DataSource;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.po.User;
 import test.transaction.SpringTransactionTest;
 
@@ -29,40 +31,36 @@ import test.transaction.SpringTransactionTest;
 @EnableTransactionManagement
 @Configuration
 public class SpringConfig {
-
 	@Before
 	public void setup() {
-		InitializeDatabase.dropAndRecreateTables();
+		TestPrepare.dropAndRecreateTables();
 	}
 
-	@Test
-	public void doConfigTest() {
-		AnnotationConfigApplicationContext springCtx = new AnnotationConfigApplicationContext(SpringConfig.class);
-		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
-		User u = sc.createBean(User.class);
-		u.setUserName("Spring");
-		u.dao().save();
-		Assert.assertEquals("Spring", u.dao().queryForString(
-				"select " + u.UserName() + " from " + u.Table() + " where " + u.UserName() + "=" + q("Spring")));
-		springCtx.close();
+	@After
+	public void cleanUp() {
+		TestPrepare.closeBeanBoxContext();
 	}
 
 	@Bean
 	public ComboPooledDataSource C3P0Bean() {
 		ComboPooledDataSource ds = new ComboPooledDataSource();
-		ds.setUser("root");// set to your user name
-		ds.setPassword("root888");// set to your password
+		ds.setUser("root");// change to set your user name
+		ds.setPassword("root888");// change to set your password
 		ds.setMaxPoolSize(30);
 		ds.setCheckoutTimeout(5000);
 		return ds;
 	}
 
+	/**
+	 * Here I copied jdbcURL, driverClass, username, password settings from jBeainBoxConfig, buy you can change to your
+	 * database settings
+	 */
 	@Bean
 	public DataSource MySqlDataSourceBean() {
 		ComboPooledDataSource ds = C3P0Bean();
-		ds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
+		ds.setJdbcUrl((String) new DataSourceBox().getProperty("jdbcUrl"));// change to set your jdbcURL
 		try {
-			ds.setDriverClass("com.mysql.jdbc.Driver");
+			ds.setDriverClass((String) new DataSourceBox().getProperty("driverClass"));// set your driverClass
 		} catch (PropertyVetoException e) {
 			e.printStackTrace();
 		}
@@ -86,4 +84,17 @@ public class SpringConfig {
 		return new SpringTransactionTest();
 	}
 
+	@Test
+	public void doConfigTest() {
+		AnnotationConfigApplicationContext springCtx = new AnnotationConfigApplicationContext(SpringConfig.class);
+		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
+		User u = sc.createBean(User.class);
+		// Can not use User u=new User() here because default global SqlBoxContext not configured
+		u.dao().execute("delete from " + u.table());
+		u.setUserName("Spring");
+		u.dao().insert();
+		Assert.assertEquals("Spring", u.dao().queryForString(
+				"select " + u.userName() + " from " + u.table() + " where " + u.userName() + "=" + q("Spring")));
+		springCtx.close();
+	}
 }
