@@ -16,7 +16,6 @@
 package com.github.drinkjava2.jsqlbox.id;
 
 import java.math.BigInteger;
-import java.util.Random;
 import java.util.UUID;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -28,22 +27,19 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class ShortUUIDGenerator implements IdGenerator {
-
-	private static final Random random = new Random();
-	private static final char[] ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
+public class UUID25Generator implements IdGenerator {
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		return getRadix36UUID();
+		return get25LettersRadix36UUID();
 	}
 
-	private static String getRadix36UUID() {
+	private static String get25LettersRadix36UUID() {
 		String uuidHex = UUID.randomUUID().toString().replaceAll("-", "");
 		BigInteger b = new BigInteger(uuidHex, 16);
 		String s = b.toString(36);
 		while (s.length() < 25)
-			s = s + ALPHABET[random.nextInt(ALPHABET.length)];// NOSONAR
+			s = s + "0";// NOSONAR
 		return s;
 	}
 

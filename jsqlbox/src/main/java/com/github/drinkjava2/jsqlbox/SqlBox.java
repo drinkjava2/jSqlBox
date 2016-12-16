@@ -25,9 +25,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.id.GenerationType;
-import com.github.drinkjava2.jsqlbox.jpa.Column;
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -145,14 +143,14 @@ public class SqlBox {
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
 			if (isLegalFieldID(fieldID)) {
-				Column column = new Column();
-				column.setFieldID(fieldID);
-				column.setColumnName(this.getRealColumnName(fieldID));
-				column.setPropertyType(pd.getPropertyType());
-				column.setReadMethodName(pd.getReadMethod().getName());
-				column.setWriteMethodName(pd.getWriteMethod().getName());
-				useConfigOverrideDefault(fieldID, column);
-				realColumns.put(fieldID, column);
+				Column realCol = new Column();
+				realCol.setFieldID(fieldID);
+				realCol.setColumnName(this.getRealColumnName(fieldID));
+				realCol.setPropertyType(pd.getPropertyType());
+				realCol.setReadMethodName(pd.getReadMethod().getName());
+				realCol.setWriteMethodName(pd.getWriteMethod().getName());
+				useConfigOverrideDefault(fieldID, realCol);
+				realColumns.put(fieldID, realCol);
 			}
 		}
 		findAndSetPrimeKeys(this.getEntityClass(), realColumns);
@@ -167,8 +165,8 @@ public class SqlBox {
 		if (configColumn != null) {
 			if (!SqlBoxUtils.isEmptyStr(configColumn.getColumnName()))
 				column.setColumnName(configColumn.getColumnName());
-			column.setGeneratedValue(configColumn.getGeneratedValue());
 			column.setPrimeKey(configColumn.isPrimeKey());
+			column.setIdGenerator(configColumn.getIdGenerator());
 		}
 	}
 
@@ -198,7 +196,7 @@ public class SqlBox {
 				return;
 			if ("id".equals(fieldID))
 				idCol = col;
-			if (col.getGeneratedValue() != null) {
+			if (col.getIdGenerator() != null) {
 				generatorCount++;
 				generatorCol = col;
 			}
@@ -258,15 +256,6 @@ public class SqlBox {
 		return new SqlBoxRowMapper(this);
 	}
 
-	// ========Config methods begin==============
-	public void configTable(String table) {
-		configTable = table;
-	}
-
-	public void configColumnName(String fieldID, String columnName) {
-		getOrBuildConfigColumn(fieldID).setColumnName(columnName);
-	}
-
 	public Column getOrBuildConfigColumn(String fieldID) {
 		Column col = this.getConfigColumns().get(fieldID);
 		if (col == null) {
@@ -276,15 +265,26 @@ public class SqlBox {
 		return col;
 	}
 
+	// ========Config methods begin==============
 	/**
-	 * Config a Generator for a field, see JPA
+	 * Config table name
 	 */
-	public void configGeneratedValue(String fieldID, GenerationType type, String... generatorName) {
-		Column config = getOrBuildConfigColumn(fieldID);
-		if (generatorName.length == 0)
-			config.setGeneratedValue(new GeneratedValue(type));
-		else
-			config.setGeneratedValue(new GeneratedValue(type, generatorName[0]));
+	public void configTable(String table) {
+		configTable = table;
+	}
+
+	/**
+	 * Config column name
+	 */
+	public void configColumnName(String fieldID, String columnName) {
+		getOrBuildConfigColumn(fieldID).setColumnName(columnName);
+	}
+
+	/**
+	 * Config column name
+	 */
+	public void configColumnIdGenerator(String fieldID, IdGenerator idGenerator) {
+		getOrBuildConfigColumn(fieldID).setIdGenerator(idGenerator);
 	}
 
 	// ========Config methods end==============

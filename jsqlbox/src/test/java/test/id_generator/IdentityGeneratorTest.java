@@ -5,7 +5,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.id.GenerationType;
+import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
+import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -25,7 +27,7 @@ public class IdentityGeneratorTest {
 	@Test
 	public void insertUser() {
 		User u = new User();
-		u.dao().getBox().configGeneratedValue("id", GenerationType.IDENTITY);
+		u.dao().getBox().configColumnIdGenerator("id", (IdGenerator) new BeanBox(IdentityGenerator.class).getBean());
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.dao().insert();

@@ -22,12 +22,6 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.id.GenerationType;
-import com.github.drinkjava2.jsqlbox.id.IdGenerator;
-import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
-import com.github.drinkjava2.jsqlbox.id.SequenceGenerator;
-import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
@@ -54,9 +48,6 @@ public class SqlBoxContext {
 
 	private TinyDbMetaData metaData;
 
-	// ID Generator singleton cache
-	private HashMap<String, IdGenerator> generatorCache = new HashMap<>();
-
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
 		protected HashMap<Object, Object> initialValue() {
@@ -71,38 +62,6 @@ public class SqlBoxContext {
 			refreshMetaData();
 		}
 
-	}
-
-	public boolean existGeneratorInCache(String name) {
-		synchronized (generatorCache) {
-			return generatorCache.get(name) != null;
-		}
-	}
-
-	public void putGeneratorToCache(String name, IdGenerator generator) {
-		synchronized (generatorCache) {
-			generatorCache.put(name, generator);
-		}
-	}
-
-	/**
-	 * Get Generator by given GeneratedValue
-	 */
-	public IdGenerator getGenerator(GeneratedValue value) {
-		if (value.getGenerationType() == GenerationType.TABLE || value.getGenerationType() == GenerationType.SEQUENCE)
-			return getGeneratorFromCache(value.getGeneratorName());
-		if (value.getGenerationType() == GenerationType.IDENTITY)
-			return IdentityGenerator.INSTANCE;
-		return null;
-	}
-
-	/**
-	 * Get Generator from generator cache stored in SqlBoxContext
-	 */
-	public IdGenerator getGeneratorFromCache(String name) {
-		synchronized (generatorCache) {
-			return generatorCache.get(name);
-		}
 	}
 
 	/**
@@ -203,41 +162,6 @@ public class SqlBoxContext {
 
 	public void refreshMetaData() {
 		this.metaData = TinyJdbc.getMetaData(dataSource);
-	}
-
-	/**
-	 * Define or find in cache a TableGenerator, see JPA
-	 */
-	public String tableGenerator(String name, String table, String pkColumnName, String pkColumnValue,
-			String valueColumnName, int initialValue, int allocationSize) {
-		TableGenerator generator = (TableGenerator) getGeneratorFromCache(name);
-		if (generator == null) {
-			generator = new TableGenerator(name, table, pkColumnName, pkColumnValue, valueColumnName, initialValue,
-					allocationSize);
-			putGeneratorToCache(name, generator);
-		} else {
-			if (!generator.ifEqual(name, table, pkColumnName, pkColumnValue, valueColumnName, initialValue,
-					allocationSize))
-				SqlBoxException
-						.throwEX("SqlBox tableGenerator error: duplicated name but different defines, name: " + name);
-		}
-		return name;
-	}
-
-	/**
-	 * Define or find in cache a SequenceGenerator (for Oracle only) , see JPA
-	 */
-	public String sequenceGenerator(String name, String sequenceName) {
-		SequenceGenerator generator = (SequenceGenerator) getGeneratorFromCache(name);
-		if (generator == null) {
-			generator = new SequenceGenerator(name, sequenceName);
-			putGeneratorToCache(name, generator);
-		} else {
-			if (!generator.ifEqual(name, sequenceName))
-				SqlBoxException.throwEX(
-						"SqlBox sequenceGenerator error: duplicated name but different defines, name: " + name);
-		}
-		return name;
 	}
 
 	// ================== getter & setters below============

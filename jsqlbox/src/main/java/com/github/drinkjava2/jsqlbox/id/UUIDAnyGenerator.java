@@ -15,38 +15,56 @@
 */
 package com.github.drinkjava2.jsqlbox.id;
 
-import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Generate 32 letters UUID based on radix 36 encoding, start with time stamp, format: 0012345HdNmpQHeGLy8eozSSq2p1B
+ * Generate any length UUID String based on radix 36, use 0-9 a-z characters <br/>
+ * Default length is 20;
  * 
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
-public class TimeUUIDGenerator extends ShortUUIDGenerator {
-	private static final Random random = new Random();
+public class UUIDAnyGenerator implements IdGenerator {
+
+	private static final SecureRandom random = new SecureRandom();
 	private static final char[] ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
+
+	private Integer length = 20;
+
+	public UUIDAnyGenerator() {
+		// default UUID
+	}
+
+	/**
+	 * Build a give length UUID Generator
+	 */
+	public UUIDAnyGenerator(Integer length) {
+		this.length = length;
+	}
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		return null;
+		return getAnyLengthRadix36UUID(length);
 	}
 
-	private static String getTimeUUID() {
-
-		return null;
-	}
-
-	public static void main(String[] args) {
-		long oneyear = 365l * 24 * 60 * 60 * 1000 * 50;
-		for (int i = 1; i <= 100; i++) {
-			BigInteger b = new BigInteger("" + oneyear * i);
-			String s = b.toString(36);
-			System.out.println(s);
+	protected static String getAnyLengthRadix36UUID(Integer length) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < length; i++) {
+			sb.append(ALPHABET[random.nextInt(32)]);
 		}
+		return sb.toString();
 	}
+
+	// getter & setter
+	public Integer getLength() {
+		return length;
+	}
+
+	public void setLength(Integer length) {
+		this.length = length;
+	}
+
 }

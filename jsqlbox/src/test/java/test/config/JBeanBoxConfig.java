@@ -60,7 +60,7 @@ public class JBeanBoxConfig {
 	}
 
 	// Data source pool setting
-	public static class DataSourceBox extends OracleDataSourceBox {
+	public static class DataSourceBox extends MySqlDataSourceBox {
 	}
 
 	// CtxBox is a SqlBoxContent singleton

@@ -24,12 +24,6 @@ import java.util.List;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.drinkjava2.jsqlbox.id.GeneratedValue;
-import com.github.drinkjava2.jsqlbox.id.IdGenerator;
-import com.github.drinkjava2.jsqlbox.jpa.Column;
-
-import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
-
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
  * 
@@ -288,11 +282,9 @@ public class Dao {
 		int count = 0;
 		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
 		for (Column col : sqlBox.buildRealColumns().values()) {
-			if (col.getGeneratedValue() != null) {// ID fields
-				GeneratedValue gv = col.getGeneratedValue();
-				IdGenerator idgen = this.getBox().getContext().getGenerator(gv);
-				assureNotNull(idgen, "IdGenerator can not be null for column \"" + col.getColumnName() + "\"");
-				Object id = idgen.getNextID(this.getBox().getContext());
+
+			if (col.getIdGenerator() != null) {// ID fields
+				Object id = col.getIdGenerator().getNextID(this.getBox().getContext());
 				if (id != null) {
 					sb.append(col.getColumnName()).append(",");
 					setFieldRealValue(col, id);

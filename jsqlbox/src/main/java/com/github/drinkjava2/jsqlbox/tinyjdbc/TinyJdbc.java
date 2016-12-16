@@ -27,8 +27,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.github.drinkjava2.jsqlbox.Column;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.jpa.Column;
 
 /**
  * A tiny Jdbc tool to access database use separated transaction not related to current Spring transaction<br/>

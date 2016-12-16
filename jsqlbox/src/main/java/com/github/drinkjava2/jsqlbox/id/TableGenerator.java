@@ -20,17 +20,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Define a table ID generator, implements of JPA TableGenerator
+ * Define a table ID generator, simlar like JPA TableGenerator but delete name field
  * 
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
 public class TableGenerator implements IdGenerator {
-	/**
-	 * (Required) A unique generator name that can be referenced by one or more classes to be the generator
-	 */
-	private String name = "";
 
 	/**
 	 * Name of table that stores the generated id values. Defaults to a name chosen by persistence provider.
@@ -56,34 +52,30 @@ public class TableGenerator implements IdGenerator {
 	/**
 	 * The initial value to be used to initialize the column that stores the last value generated.
 	 */
-	private int initialValue = 0;
+	private Integer initialValue = 0;
 
 	/**
 	 * The amount to increment by when allocating id numbers from the generator.
 	 */
-	private int allocationSize = 50;
+	private Integer allocationSize = 50;
 
 	/**
 	 * Last ID Value
 	 */
-	private int lastValue = -1;
+	private Integer lastValue = -1;
 
-	public TableGenerator(String name, String table, String pkColumnName, String pkColumnValue, String valueColumnName,
-			int initialValue, int allocationSize) {
-		this.name = name;
+	public TableGenerator() {
+		// Default constructor
+	}
+
+	public TableGenerator(String table, String pkColumnName, String pkColumnValue, String valueColumnName,
+			Integer initialValue, Integer allocationSize) {
 		this.table = table;
 		this.pkColumnName = pkColumnName;
 		this.valueColumnName = valueColumnName;
 		this.pkColumnValue = pkColumnValue;
 		this.initialValue = initialValue;
 		this.allocationSize = allocationSize;
-	}
-
-	public boolean ifEqual(String name, String table, String pkColumnName, String pkColumnValue, String valueColumnName,
-			int initialValue, int allocationSize) {
-		return this.name.equals(name) && this.table.equals(table) && this.pkColumnName.equals(pkColumnName)// NOSONAR
-				&& this.valueColumnName.equals(valueColumnName) && this.pkColumnValue.equals(pkColumnValue)
-				&& this.initialValue == initialValue && this.allocationSize == allocationSize;
 	}
 
 	/**
@@ -122,17 +114,8 @@ public class TableGenerator implements IdGenerator {
 		}
 	}
 
-	private static int calculateBucketFirstID(int currentValue, int allocationSize) {
+	private static int calculateBucketFirstID(Integer currentValue, Integer allocationSize) {
 		return ((currentValue + allocationSize - 1) / allocationSize) * allocationSize + 1;
-	}
-
-	// Getter & Setters below
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getTable() {
@@ -167,28 +150,28 @@ public class TableGenerator implements IdGenerator {
 		this.valueColumnName = valueColumnName;
 	}
 
-	public int getInitialValue() {
-		return initialValue;
-	}
-
-	public void setInitialValue(int initialValue) {
-		this.initialValue = initialValue;
-	}
-
-	public int getAllocationSize() {
+	public Integer getAllocationSize() {
 		return allocationSize;
 	}
 
-	public void setAllocationSize(int allocationSize) {
+	public void setAllocationSize(Integer allocationSize) {
 		this.allocationSize = allocationSize;
 	}
 
-	public int getLastValue() {
+	public Integer getLastValue() {
 		return lastValue;
 	}
 
-	public void setLastValue(int lastValue) {
+	public void setLastValue(Integer lastValue) {
 		this.lastValue = lastValue;
+	}
+
+	public Integer getInitialValue() {
+		return initialValue;
+	}
+
+	public void setInitialValue(Integer initialValue) {
+		this.initialValue = initialValue;
 	}
 
 }
