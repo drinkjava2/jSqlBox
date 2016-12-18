@@ -8,13 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.config.TestPrepare;
 import test.config.po.User;
 
-public class InsertTest {
+public class InsertEntityTest {
 
 	@Before
 	public void setup() {
@@ -27,7 +26,7 @@ public class InsertTest {
 	}
 
 	@Test
-	public void insertUser1() {
+	public void insertUserA() {
 		User u = new User();
 		u.setUserName("User1");
 		u.setAddress("Address1");
@@ -38,7 +37,7 @@ public class InsertTest {
 	}
 
 	@Test
-	public void insertUser2() {
+	public void insertUserB() {
 		User u = SqlBox.createBean(User.class);
 		u.setUserName("User2");
 		u.setAddress("Address2");
@@ -50,33 +49,14 @@ public class InsertTest {
 
 	@Test
 	public void tx_insertUsers() {
-		insertUser1();
-		insertUser2();
+		insertUserA();
+		insertUserB();
 	}
 
 	@Test
 	public void insertUsersWithinTransaction() {
-		InsertTest t = BeanBox.getBean(InsertTest.class); // get Proxy bean
+		InsertEntityTest t = BeanBox.getBean(InsertEntityTest.class); // get Proxy bean
 		t.tx_insertUsers(); // use Spring Declarative Transaction
 	}
 
-	@Test
-	public void insertUser() {
-		User u = new User();
-		u.setUserName("User1");
-		u.setAddress("Address1");
-		u.setPhoneNumber("111");
-		u.dao().insert();
-	}
-
-	public static void main(String[] args) {
-		TestPrepare.dropAndRecreateTables();
-		for (int i = 0; i < 100000; i++) {
-			System.out.print(i + "=");
-			InsertTest t = new InsertTest();
-			t.insertUser();
-			System.out.println(Dao.dao().queryForInteger("select count(*) from users"));
-		}
-
-	}
 }

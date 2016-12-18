@@ -1,6 +1,7 @@
 package test.crud_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -9,7 +10,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlHelper;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -24,12 +24,12 @@ public class QueryEntityTest {
 				" (", u.userName(), empty("user1"), //
 				", ", u.address(), empty("address1"), //
 				", ", u.age(), ")", empty("1"), //
-				SqlHelper.questionMarks());
+				questionMarks());
 		u.dao().execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user2"), //
 				", ", u.address(), empty("address2"), //
 				", ", u.age(), ")", empty("2"), //
-				SqlHelper.questionMarks());
+				questionMarks());
 		u.setUserName("user3");
 		u.setAddress("address3");
 		u.setAge(3);
@@ -44,7 +44,7 @@ public class QueryEntityTest {
 
 	@Test
 	public void queryUser() {
-		// Assert.assertEquals(2, (int) Dao.dao.queryForInteger("select count(*) from ", User.Table));
+		// Assert.assertEquals(2, (int) Dao.dao.queryForInteger("select count(*) from ", u.Table));
 		// User user = (User) Dao.dao.queryEntity(User.class, "select b.username as UNAME from users b").get(0);
 		// if (user == null) {// TODO need think about next step
 		// }

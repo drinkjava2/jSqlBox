@@ -16,12 +16,15 @@
 
 package com.github.drinkjava2.jsqlbox;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.jdbc.core.RowMapper;
 
@@ -167,6 +170,7 @@ public class SqlBox {
 				column.setColumnName(configColumn.getColumnName());
 			column.setPrimeKey(configColumn.isPrimeKey());
 			column.setIdGenerator(configColumn.getIdGenerator());
+			column.setPrimeKey(configColumn.isPrimeKey());
 		}
 	}
 
@@ -188,32 +192,20 @@ public class SqlBox {
 	 */
 	private static void findAndSetPrimeKeys(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
 		Column idCol = null;
-		Column generatorCol = null;
-		int generatorCount = 0;
-		for (String fieldID : realColumns.keySet()) {// NOSONAR
-			Column col = realColumns.get(fieldID);
-			if (col.isPrimeKey())
-				return;
-			if ("id".equals(fieldID))
-				idCol = col;
-			if (col.getIdGenerator() != null) {
-				generatorCount++;
-				generatorCol = col;
+		boolean foundPrimeKey = false;
+		for (Entry<String, Column> cols : realColumns.entrySet()) {
+			if ("id".equals(cols.getKey()))
+				idCol = cols.getValue();
+			if (cols.getValue().isPrimeKey()) {
+				foundPrimeKey = true;
+				break;
 			}
 		}
-		if (idCol != null) {
-			idCol.setPrimeKey(true);
-			return;
-		}
-		if (generatorCount >= 2)
-			SqlBoxException.throwEX(
-					"SqlBox findAndSetPrimeKeys error: can not set prime key for entity which has many ID generators: "
-							+ entityClass + ", please set PrimeKey by setPimeKeys() method");
-		if (generatorCount == 0)
-			SqlBoxException.throwEX(
-					"SqlBox findAndSetPrimeKeys error: can not find prime key for entity class: " + entityClass);
-		if (generatorCol != null)
-			generatorCol.setPrimeKey(true);
+		if (!foundPrimeKey)
+			if (idCol != null)
+				idCol.setPrimeKey(true);
+			else
+				throwEX("SqlBox findAndSetPrimeKeys error, no prime key set for entity class " + entityClass);
 	}
 
 	/**
@@ -274,6 +266,16 @@ public class SqlBox {
 	}
 
 	/**
+	 * Config prime keys
+	 */
+	public void configPrimeKeys(String... fieldIDs) {
+		for (Entry<String, Column> entry : getConfigColumns().entrySet())
+			entry.getValue().setPrimeKey(false);
+		for (String fieldID : fieldIDs)
+			getOrBuildConfigColumn(fieldID).setPrimeKey(true);
+	}
+
+	/**
 	 * Config column name
 	 */
 	public void configColumnName(String fieldID, String columnName) {
@@ -283,7 +285,7 @@ public class SqlBox {
 	/**
 	 * Config column name
 	 */
-	public void configColumnIdGenerator(String fieldID, IdGenerator idGenerator) {
+	public void configIdGenerator(String fieldID, IdGenerator idGenerator) {
 		getOrBuildConfigColumn(fieldID).setIdGenerator(idGenerator);
 	}
 
@@ -304,14 +306,6 @@ public class SqlBox {
 
 	public void setConfigColumns(Map<String, Column> columns) {
 		this.configColumns = columns;
-	}
-
-	public String getConfigTable() {
-		return configTable;
-	}
-
-	public void setConfigTable(String configTable) {
-		this.configTable = configTable;
 	}
 
 	public SqlBoxContext getContext() {

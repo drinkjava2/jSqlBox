@@ -146,7 +146,7 @@ public class SqlBoxContext {
 	 */
 	public String findRealTableName(String tableName) {
 		String realTableName;
-		TinyDbMetaData meta = this.getMetaData();
+		TinyDbMetaData meta = this.getMetaData(); 
 		realTableName = meta.getTableNames().get(tableName.toLowerCase());
 		if (!SqlBoxUtils.isEmptyStr(realTableName))
 			return realTableName;

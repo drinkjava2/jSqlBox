@@ -18,18 +18,20 @@ package com.github.drinkjava2.jsqlbox.id;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Define a Identity generator, implements of JPA
+ * Define an Identity type generator, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
+ * 
  * 
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
 public class IdentityGenerator implements IdGenerator {
+	public static final String IDENTITY_TYPE = "THIS_IS_AN_IDENTITY_TYPE_GENERATOR";
 	public static final IdentityGenerator INSTANCE = new IdentityGenerator();
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		return null;
+		return IDENTITY_TYPE;
 	}
 
 }

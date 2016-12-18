@@ -52,7 +52,7 @@ public class SortedUUIDGeneratorTest {
 		User u = new User();
 		u.dao().executeQuiet("drop table t");
 		u.dao().executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-		u.dao().getBox().configColumnIdGenerator("userName", (IdGenerator) BeanBox.getBean(SortedUUIDBox.class));
+		u.box().configIdGenerator("userName", (IdGenerator) BeanBox.getBean(SortedUUIDBox.class));
 		for (int i = 0; i < 60; i++)
 			u.dao().insert();
 		Assert.assertEquals(60, (int) u.dao().queryForInteger("select count(*) from ", u.table()));
@@ -65,7 +65,7 @@ public class SortedUUIDGeneratorTest {
 		User u = new User();
 		u.dao().executeQuiet("drop table T");
 		u.dao().executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
-		u.dao().getBox().configColumnIdGenerator("userName", (IdGenerator) BeanBox.getBean(SortedUUIDBox.class));
+		u.box().configIdGenerator("userName", (IdGenerator) BeanBox.getBean(SortedUUIDBox.class));
 		for (int i = 0; i < 60; i++)
 			u.dao().insert();
 		Assert.assertEquals(60, (int) u.dao().queryForInteger("select count(*) from ", u.table()));

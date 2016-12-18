@@ -1,4 +1,6 @@
-package test.id_generator;
+package test.crud_method;
+
+import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -12,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 import test.config.TestPrepare;
 import test.config.po.User;
 
-public class IdentityGeneratorTest {
+public class UpdateEntityTest {
 
 	@Before
 	public void setup() {
@@ -25,14 +27,19 @@ public class IdentityGeneratorTest {
 	}
 
 	@Test
-	public void insertUser() {
+	public void updateUser() {
 		User u = new User();
 		u.box().configIdGenerator("id", (IdGenerator) new BeanBox(IdentityGenerator.class).getBean());
 		u.setUserName("User1");
-		for (int i = 0; i < 10; i++) {
-			u.dao().insert();
-		}
-		Assert.assertEquals(10, (int) u.dao().queryForInteger("select count(*) from ", u.table()));
+		u.setAddress("Address1");
+		u.setPhoneNumber("111");
+		u.dao().insert();
+		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+				" where ", u.id(), "=", q(u.getId())));
+		u.setPhoneNumber("333");
+		u.dao().update();
+		Assert.assertEquals(333, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+				" where ", u.id(), "=", q(u.getId())));
 	}
 
 }

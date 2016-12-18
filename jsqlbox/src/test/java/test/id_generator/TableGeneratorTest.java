@@ -39,7 +39,7 @@ public class TableGeneratorTest {
 		User u = new User();
 		u.dao().executeQuiet("drop table t");
 		u.dao().executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-		u.dao().getBox().configColumnIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
+		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.dao().insert();
@@ -53,7 +53,7 @@ public class TableGeneratorTest {
 		User u = new User();
 		u.dao().executeQuiet("drop table T");
 		u.dao().executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
-		u.dao().getBox().configColumnIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
+		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.dao().insert();

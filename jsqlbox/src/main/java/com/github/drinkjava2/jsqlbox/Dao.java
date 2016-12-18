@@ -15,14 +15,24 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
+import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
+
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import com.github.drinkjava2.ReflectionUtils;
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
+import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -43,20 +53,20 @@ public class Dao {
 
 	public Dao(SqlBoxContext ctx) {
 		if (ctx == null)
-			SqlBoxException.throwEX("Dao create error, SqlBoxContext  can not be null");
+			throwEX("Dao create error, SqlBoxContext  can not be null");
 		else if (ctx.getDataSource() == null)
-			SqlBoxException.throwEX("Dao create error,  dataSource can not be null");
+			throwEX("Dao create error,  dataSource can not be null");
 		SqlBox sb = new SqlBox(ctx);
 		this.sqlBox = sb;
 	}
 
 	public Dao(SqlBox sqlBox) {
 		if (sqlBox == null)
-			SqlBoxException.throwEX("Dao create error, sqlBox can not be null");
+			throwEX("Dao create error, sqlBox can not be null");
 		else if (sqlBox.getContext() == null)
-			SqlBoxException.throwEX("Dao create error, sqlBoxContext can not be null");
+			throwEX("Dao create error, sqlBoxContext can not be null");
 		else if (sqlBox.getContext().getDataSource() == null)
-			SqlBoxException.throwEX("Dao create error, dataSource can not be null");
+			throwEX("Dao create error, dataSource can not be null");
 		this.sqlBox = sqlBox;
 	}
 
@@ -75,7 +85,7 @@ public class Dao {
 			Method m = bean.getClass().getMethod("putDao", new Class[] { Dao.class });
 			m.invoke(bean, new Object[] { d });
 		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
+			throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
 		}
 		return d;
 	}
@@ -135,6 +145,26 @@ public class Dao {
 	 * 
 	 */
 	public Integer execute(String... sql) {
+		try {
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			logSql(sp);
+			if (sp.getParameters().length != 0)
+				return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
+			else {
+				getJdbc().execute(sp.getSql());
+				return -1;
+			}
+		} finally {
+			SqlHelper.clearLastSQL();
+		}
+	}
+
+	/**
+	 * Execute sql and return how many record be affected, sql be translated to prepared statement<br/>
+	 * Return -1 if no parameters sql executed<br/>
+	 * 
+	 */
+	public Integer executeInsert(String... sql) {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
@@ -272,25 +302,40 @@ public class Dao {
 	}
 
 	/**
+	 * Get last auto increase id, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
+	 */
+	public Object getLastAutoIncreaseIdentity(Column col) {
+		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + sqlBox.getRealTable();
+		return this.getJdbc().queryForObject(sql, col.getPropertyType());
+	}
+
+	/**
 	 * Insert a Bean to Database
 	 */
-	public Integer insert() {// NOSONAR
+	public void insert() {// NOSONAR
 		if (bean == null)
-			SqlBoxException.throwEX("Dao doSave error, bean is null");
+			throwEX("Dao doSave error, bean is null");
+		// generatedValues to record all generated values like UUID, sequence
+		Map<Column, Object> generatedValues = new HashMap<>();
+
+		// start to spell sql
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
 		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
 		for (Column col : sqlBox.buildRealColumns().values()) {
-
-			if (col.getIdGenerator() != null) {// ID fields
-				Object id = col.getIdGenerator().getNextID(this.getBox().getContext());
-				if (id != null) {
+			IdGenerator idGen = col.getIdGenerator();
+			if (idGen != null) {
+				Object idValue = idGen.getNextID(this.getBox().getContext());
+				assureNotNull(idValue, "Dao insert error, ID can not be null, column=" + col.getColumnName());
+				// if is an Identity type, no need insert this field in sql
+				if (!IdentityGenerator.IDENTITY_TYPE.equals(idValue)) {
 					sb.append(col.getColumnName()).append(",");
-					setFieldRealValue(col, id);
-					parameters.add(id);
+					setFieldRealValue(col, idValue);
+					parameters.add(idValue);
 					count++;
 				}
+				generatedValues.put(col, idValue);
 			} else if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnName())) {// normal fields
 				Object value = getFieldRealValue(col);
 				if (value != null) {
@@ -306,26 +351,98 @@ public class Dao {
 				}
 			}
 		}
+		// delete the last ","
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
 		if (this.getBox().getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
-		return getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 
+		// here you go
+		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
+		if (result != 1)
+			throwEX("Dao insert error, no record be inserted, sql=" + sb.toString());
+
+		// if success, set id values to bean
+		for (Entry<Column, Object> entry : generatedValues.entrySet()) {
+			Column col = entry.getKey();
+			Object idValue = entry.getValue();
+			// if is Identity type, need read auto generated max id from database
+			if (IdentityGenerator.IDENTITY_TYPE.equals(idValue))
+				idValue = getLastAutoIncreaseIdentity(col);
+			setFieldRealValue(col, idValue);
+		}
 	}
 
 	/**
-	 * Get Field value by it's column defination
+	 * Update a Bean in Database
+	 */
+	public void update() {// NOSONAR
+		if (bean == null)
+			throwEX("Dao update error, bean is null");
+
+		List<Column> idColumns = new ArrayList<>();
+		// cache id columns
+		Map<String, Column> realColumns = sqlBox.buildRealColumns();
+
+		for (Entry<String, Column> entry : realColumns.entrySet()) {
+			Column col = entry.getValue();
+			if (col.isPrimeKey()) {
+				Object idValue = getFieldRealValue(col);
+				assureNotNull(idValue, "Dao update error, ID can not be null, column=" + col.getColumnName());
+				col.setPropertyValue(idValue);
+				idColumns.add(col);
+			}
+		}
+		if (idColumns.isEmpty())
+			throwEX("Dao update error, no prime key set for class " + this.sqlBox.getEntityClass());
+
+		// start to spell sql
+		StringBuilder sb = new StringBuilder();
+		List<Object> parameters = new ArrayList<>();
+		sb.append("update ").append(sqlBox.getRealTable()).append(" set ");
+
+		// set values
+		for (Column col : realColumns.values()) {
+			if (col.getIdGenerator() == null) {
+				Object value = getFieldRealValue(col);
+				sb.append(col.getColumnName()).append("=?, ");
+				if (Boolean.class.isInstance(value)) {// NOSONAR
+					if (((Boolean) value).equals(true))// NOSONAR
+						value = 1;
+					else
+						value = 0;
+				}
+				parameters.add(value);
+			}
+		}
+
+		// delete the last ","
+		sb.setLength(sb.length() - 2);
+		sb.append(" where ");
+		for (Column col : idColumns) {
+			sb.append(col.getColumnName()).append("=").append(col.getPropertyValue()).append(" and ");
+		}
+		sb.setLength(sb.length() - 4);
+
+		if (this.getBox().getContext().isShowSql())
+			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+
+		// here you go
+		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
+		if (result != 1)
+			throwEX("Dao insert error, no record be updated, sql=" + sb.toString());
+	}
+
+	/**
+	 * Get Field value by it's column definition
 	 */
 	private Object getFieldRealValue(Column col) {
-		String methodName = col.getReadMethodName();
-		Method m;
 		try {
-			m = bean.getClass().getDeclaredMethod(methodName, new Class[] {});// NOSONAR
+			Method m = ReflectionUtils.getDeclaredMethod(this.bean, col.getReadMethodName(), new Class[] {});
 			return m.invoke(this.bean, new Object[] {});
-		} catch (Exception e1) {
-			return SqlBoxException.throwEX(e1,
-					"Dao getFieldRealValue error, method " + methodName + " invoke error in class " + bean);
+		} catch (Exception e) {
+			return throwEX(e, "Dao getFieldRealValue error, method " + col.getReadMethodName()
+					+ " invoke error in class " + bean);
 		}
 	}
 
@@ -333,30 +450,28 @@ public class Dao {
 	 * Set Field value by it's column defination
 	 */
 	private void setFieldRealValue(Column col, Object value) {
-		String methodName = col.getWriteMethodName();
-		Method m;
 		try {
-			m = bean.getClass().getDeclaredMethod(methodName, new Class[] { col.getPropertyType() });// NOSONAR
+			Method m = ReflectionUtils.getDeclaredMethod(this.bean, col.getWriteMethodName(),
+					new Class[] { col.getPropertyType() });
 			m.invoke(this.bean, new Object[] { value });
-		} catch (Exception e1) {
-			SqlBoxException.throwEX(e1, "Dao save error, method " + methodName + " invoke error in class " + bean);
+		} catch (Exception e) {
+			throwEX(e, "Dao setFieldRealValue error, method " + col.getWriteMethodName() + " invoke error in class "
+					+ bean);
 		}
 	}
 
-	// ========Dao query/crud methods end=======
-
-	// =============identical methods copied from SqlBox or SqlBoxContext==========
+	/**
+	 * get field's database real column name
+	 */
 	public String getColumnName() {
 		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
 		String realMethodName = "getColumnName".equals(method1)
 				? Thread.currentThread().getStackTrace()[2].getMethodName() : method1;
 		return this.getBox().getRealColumnName(realMethodName);
 	}
+	// ========Dao query/crud methods end=======
 
-	public String getTable() {
-		return this.getBox().getRealTable();
-	}
-
+	// =============identical methods copied from SqlBox or SqlBoxContext==========
 	public void refreshMetaData() {
 		this.getContext().refreshMetaData();
 	}

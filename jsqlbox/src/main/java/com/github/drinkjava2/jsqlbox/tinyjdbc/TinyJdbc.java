@@ -32,7 +32,8 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * A tiny Jdbc tool to access database use separated transaction not related to current Spring transaction<br/>
- * Usually there is no need to use TinyJdbc in project.
+ * Usually there is no need to use TinyJdbc in project.<br/>
+ * Can use DBUtils for this purpose but I think DBUtils is still too big.
  * 
  *
  * @author Yong Zhu
@@ -321,6 +322,16 @@ public class TinyJdbc {
 				Map<String, Column> oneTable = new HashMap<>();
 				while (rs.next()) {// NOSONAR
 					Column col = new Column();
+					// String dbObjectCatalog rs.getString(1)
+					// String dbObjectSchema rs.getString(2)
+					// String dbObjectName rs.getString(3)
+					// String dbColumnName rs.getString(4)
+					// String dbColumnTypeName = rs.getString(6)
+					// int dbColumnSize rs.getInt(7)
+					// int dbDecimalDigits rs.getInt(9)
+					// String dbColumnDefault rs.getString(13)
+					// int dbOrdinalPosition rs.getInt(17)
+					// String dbColumnIsNullable rs.getString(18)
 					col.setColumnName(rs.getString("COLUMN_NAME"));
 					col.setPropertyTypeName(rs.getString("TYPE_NAME"));
 					col.setLength(rs.getInt("COLUMN_SIZE"));

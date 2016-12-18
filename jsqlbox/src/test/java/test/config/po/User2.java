@@ -5,5 +5,7 @@ package test.config.po;
  *
  */
 public class User2 extends User {
-	public static final String Table = "users2";
+	{
+		this.box().configTable("users2");
+	}
 }

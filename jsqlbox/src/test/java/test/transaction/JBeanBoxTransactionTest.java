@@ -1,6 +1,7 @@
 package test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -10,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlHelper;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -41,7 +41,7 @@ public class JBeanBoxTransactionTest {
 				" (", u.userName(), empty("user1"), //
 				", ", u.address(), empty("address1"), //
 				", ", u.age(), ")", empty("10"), //
-				SqlHelper.questionMarks());
+				questionMarks());
 	}
 
 	public void tx_InsertUser2() {
@@ -50,7 +50,7 @@ public class JBeanBoxTransactionTest {
 				" (", u.userName(), empty("user2"), //
 				", ", u.address(), empty("address2"), //
 				", ", u.age(), ")", empty("20"), //
-				SqlHelper.questionMarks());
+				questionMarks());
 	}
 
 	public void tx_doInsert() {

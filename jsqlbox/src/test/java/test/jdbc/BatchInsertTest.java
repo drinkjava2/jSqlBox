@@ -1,6 +1,7 @@
 package test.jdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -10,7 +11,6 @@ import org.junit.Test;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlHelper;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -30,7 +30,7 @@ public class BatchInsertTest {
 		User u = SqlBox.createBean(User.class);
 		for (int i = 0; i < 1000; i++)
 			Dao.dao().cacheSQL("insert into ", u.table(), " (", u.userName(), empty("user" + i), ",", u.age(),
-					empty("70"), ") ", SqlHelper.questionMarks());
+					empty("70"), ") ", questionMarks());
 		Dao.dao().executeCachedSQLs();
 	}
 

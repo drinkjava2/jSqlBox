@@ -32,7 +32,12 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class SortedUUIDGenerator implements IdGenerator {
 
 	private TableGenerator tableGenerator;
+
 	private UUIDAnyGenerator uuidAnyGenerator;
+
+	/**
+	 * If fixTotalLength>0, will fix total length and put "1" at beginning
+	 */
 	private Integer fixTotalLength = 0;
 
 	public SortedUUIDGenerator(TableGenerator tableGenerator, UUIDAnyGenerator uuidAnyGenerator,

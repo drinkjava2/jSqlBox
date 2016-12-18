@@ -1,6 +1,7 @@
 package test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -11,10 +12,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import test.config.TestPrepare;
 import test.config.SpringConfig;
+import test.config.TestPrepare;
 import test.config.po.User;
 
 /**
@@ -49,7 +49,7 @@ public class SpringTransactionTest {
 				" (", u.userName(), empty("user1"), //
 				", ", u.address(), empty("address1"), //
 				", ", u.age(), ")", empty("10"), //
-				SqlHelper.questionMarks());
+				questionMarks());
 	}
 
 	public void tx_InsertUser2() {
@@ -58,7 +58,7 @@ public class SpringTransactionTest {
 				" (", u.userName(), empty("user2"), //
 				", ", u.address(), empty("address2"), //
 				", ", u.age(), ")", empty("20"), //
-				SqlHelper.questionMarks());
+				questionMarks());
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)

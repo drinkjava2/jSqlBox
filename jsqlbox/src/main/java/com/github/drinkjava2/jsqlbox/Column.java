@@ -41,10 +41,10 @@ public class Column {
 
 	private Class<?> propertyType;
 	private String propertyTypeName;
+	private Object propertyValue;
 	private String readMethodName;
 	private String writeMethodName;
 	private IdGenerator idGenerator;
-	// Prime key generate strategy value
 
 	private String fieldID = "";
 
@@ -174,6 +174,14 @@ public class Column {
 
 	public void setIdGenerator(IdGenerator idGenerator) {
 		this.idGenerator = idGenerator;
+	}
+
+	public Object getPropertyValue() {
+		return propertyValue;
+	}
+
+	public void setPropertyValue(Object propertyValue) {
+		this.propertyValue = propertyValue;
 	}
 
 }

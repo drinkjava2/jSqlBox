@@ -45,7 +45,7 @@ public class SequenceGeneratorTest {
 		if (Dao.dao().getDatabaseType() != DatabaseType.ORACLE)
 			return;
 		User u = new User();
-		u.dao().getBox().configColumnIdGenerator("age", (IdGenerator) BeanBox.getBean(SequenceGeneratorBox.class));
+		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(SequenceGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.dao().insert();
