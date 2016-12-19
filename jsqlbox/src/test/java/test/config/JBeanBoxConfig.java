@@ -1,6 +1,5 @@
 package test.config;
 
-import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -91,18 +90,6 @@ public class JBeanBoxConfig {
 		{
 			setConstructor(JdbcTemplate.class, DataSourceBox.class);
 		}
-	}
-
-	public static Method getDeclaredMethod(Object object, String methodName, Class<?>... parameterTypes) {
-		Method method = null;
-		for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
-			try {
-				method = clazz.getDeclaredMethod(methodName, parameterTypes);
-				return method;
-			} catch (Exception e) {
-			}
-		}
-		return null;
 	}
 
 }

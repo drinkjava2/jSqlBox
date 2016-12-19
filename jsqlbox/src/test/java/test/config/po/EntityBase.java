@@ -8,7 +8,7 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
  * 
  */
 public class EntityBase {
-	// ==== have to copy below Dao methods in each entity class:=====
+	// ==== have to copy below methods in each entity class:=====
 	private Dao dao;
 
 	public void putDao(Dao dao) {
@@ -25,6 +25,18 @@ public class EntityBase {
 
 	public SqlBox box() {
 		return dao().getBox();
+	}
+
+	public void insert() {
+		this.dao().insert();
+	}
+
+	public void update() {
+		this.dao().update();
+	}
+
+	public void delete() {
+		this.dao().update();
 	}
 
 }

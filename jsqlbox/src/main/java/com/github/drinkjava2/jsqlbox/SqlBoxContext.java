@@ -15,6 +15,8 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
@@ -22,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.github.drinkjava2.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
@@ -87,7 +90,7 @@ public class SqlBoxContext {
 		SqlBoxContext ctx = null;
 		try {
 			Class<?> configClass = Class.forName(sqlBoxConfigClass);
-			Method method = configClass.getMethod(getSqlBoxContextMethod, new Class[] {});
+			Method method = ReflectionUtils.getDeclaredMethod(configClass, getSqlBoxContextMethod, new Class[] {});
 			ctx = (SqlBoxContext) method.invoke(configClass, new Object[] {});
 			if (ctx == null)
 				SqlBoxException.throwEX(errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
@@ -101,38 +104,57 @@ public class SqlBoxContext {
 	}
 
 	/**
+	 * Load method
+	 */
+	public <T> T load(Class<?> entityOrBoxClass, Object objectID) {
+		T bean = (T) createBean(entityOrBoxClass);
+		Dao dao = null;
+		try {
+			Method m = ReflectionUtils.getDeclaredMethod(bean, "dao", new Class[] {});
+			dao = (Dao) m.invoke(bean, new Object[] {});
+		} catch (Exception e) {
+			throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
+		}
+		if (dao == null)
+			throwEX("Dao getDao error for bean \"" + bean + "\", no putDao method found");
+		else
+			dao.load(objectID);
+		return bean;
+	}
+
+	/**
 	 * Create an entity instance
 	 */
-	public <T> T createBean(Class<?> beanOrSqlBoxClass) {
-		SqlBox box = findAndBuildSqlBox(beanOrSqlBoxClass);
+	public <T> T createBean(Class<?> entityOrBoxClass) {
+		SqlBox box = findAndBuildSqlBox(entityOrBoxClass);
 		return (T) box.createBean();
 	}
 
 	/**
 	 * Find and create a SqlBox instance according bean class or SqlBox Class
 	 */
-	public SqlBox findAndBuildSqlBox(Class<?> beanOrSqlBoxClass) {
+	public SqlBox findAndBuildSqlBox(Class<?> entityOrBoxClass) {
 		Class<?> boxClass = null;
-		if (beanOrSqlBoxClass == null) {
+		if (entityOrBoxClass == null) {
 			SqlBoxException.throwEX("SqlBoxContext findAndBuildSqlBox error! Bean Or SqlBox Class not set");
 			return null;
 		}
-		if (SqlBox.class.isAssignableFrom(beanOrSqlBoxClass))
-			boxClass = beanOrSqlBoxClass;
+		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
+			boxClass = entityOrBoxClass;
 		if (boxClass == null)
-			boxClass = SqlBoxUtils.checkSqlBoxClassExist(beanOrSqlBoxClass.getName() + SQLBOX_IDENTITY);
+			boxClass = SqlBoxUtils.checkSqlBoxClassExist(entityOrBoxClass.getName() + SQLBOX_IDENTITY);
 		if (boxClass == null)
 			boxClass = SqlBoxUtils.checkSqlBoxClassExist(
-					beanOrSqlBoxClass.getName() + "$" + beanOrSqlBoxClass.getSimpleName() + SQLBOX_IDENTITY);
+					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + SQLBOX_IDENTITY);
 		SqlBox box = null;
 		if (boxClass == null) {
 			box = new SqlBox(this);
-			box.setEntityClass(beanOrSqlBoxClass);
+			box.setEntityClass(entityOrBoxClass);
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
 				if (box.getEntityClass() == null)
-					box.setEntityClass(beanOrSqlBoxClass);
+					box.setEntityClass(entityOrBoxClass);
 				box.setContext(this);
 			} catch (Exception e) {
 				SqlBoxException.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
@@ -146,7 +168,7 @@ public class SqlBoxContext {
 	 */
 	public String findRealTableName(String tableName) {
 		String realTableName;
-		TinyDbMetaData meta = this.getMetaData(); 
+		TinyDbMetaData meta = this.getMetaData();
 		realTableName = meta.getTableNames().get(tableName.toLowerCase());
 		if (!SqlBoxUtils.isEmptyStr(realTableName))
 			return realTableName;

@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.config.TestPrepare;
@@ -27,9 +26,9 @@ public class RuntimeChangeConfig {
 	public void normal() {
 		User u = SqlBox.createBean(User.class);
 		u.setUserName("Sam");
-		u.dao().insert();
-		Assert.assertEquals(1, (int) Dao.dao().queryForInteger("select count(*) from users"));
-		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users2"));
+		u.insert();
+		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from users"));
+		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users2"));
 	}
 
 	@Test
@@ -37,9 +36,9 @@ public class RuntimeChangeConfig {
 		User u = SqlBox.createBean(User.class);
 		u.box().configTable("users2");
 		u.setUserName("Sam");
-		u.dao().insert();
-		Assert.assertEquals(0, (int) Dao.dao().queryForInteger("select count(*) from users"));
-		Assert.assertEquals(1, (int) Dao.dao().queryForInteger("select count(*) from users2"));
+		u.insert();
+		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users"));
+		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from users2"));
 	}
 
 	@Test
@@ -47,9 +46,9 @@ public class RuntimeChangeConfig {
 		User u = SqlBox.createBean(User.class);
 		u.box().configColumnName("userName", u.address());
 		u.setUserName("Sam");
-		u.dao().insert();
+		u.insert();
 		Assert.assertEquals(1,
-				(int) Dao.dao().queryForInteger("select count(*) from users where ", u.address(), "='Sam'"));
+				(int) SqlBox.queryForInteger("select count(*) from users where ", u.address(), "='Sam'"));
 	}
 
 	@Test
@@ -58,8 +57,8 @@ public class RuntimeChangeConfig {
 		u.box().configTable("users2");
 		u.box().configColumnName("userName", u.address());
 		u.setUserName("Sam");
-		u.dao().insert();
+		u.insert();
 		Assert.assertEquals(1,
-				(int) Dao.dao().queryForInteger("select count(*) from users2 where ", u.address(), "='Sam'"));
+				(int) SqlBox.queryForInteger("select count(*) from users2 where ", u.address(), "='Sam'"));
 	}
 }

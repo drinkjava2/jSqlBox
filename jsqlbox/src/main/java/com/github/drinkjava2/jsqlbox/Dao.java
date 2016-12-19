@@ -33,6 +33,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.github.drinkjava2.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -49,7 +50,7 @@ public class Dao {
 
 	// In future version may delete JDBCTemplate and only use pure JDBC
 
-	private Object bean; // Entity Bean Instance
+	private Object entityBean; // Entity Bean Instance
 
 	public Dao(SqlBoxContext ctx) {
 		if (ctx == null)
@@ -80,9 +81,9 @@ public class Dao {
 		SqlBox box = ctx.findAndBuildSqlBox(bean.getClass());
 		box.beanInitialize(bean);
 		Dao d = new Dao(box);
-		d.setBean(bean);
+		d.setEntityBean(bean);
 		try {
-			Method m = bean.getClass().getMethod("putDao", new Class[] { Dao.class });
+			Method m = ReflectionUtils.getDeclaredMethod(bean, "putDao", new Class[] { Dao.class });
 			m.invoke(bean, new Object[] { d });
 		} catch (Exception e) {
 			throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
@@ -304,7 +305,7 @@ public class Dao {
 	/**
 	 * Get last auto increase id, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
 	 */
-	public Object getLastAutoIncreaseIdentity(Column col) {
+	private Object getLastAutoIncreaseIdentity(Column col) {
 		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + sqlBox.getRealTable();
 		return this.getJdbc().queryForObject(sql, col.getPropertyType());
 	}
@@ -313,7 +314,7 @@ public class Dao {
 	 * Insert a Bean to Database
 	 */
 	public void insert() {// NOSONAR
-		if (bean == null)
+		if (entityBean == null)
 			throwEX("Dao doSave error, bean is null");
 		// generatedValues to record all generated values like UUID, sequence
 		Map<Column, Object> generatedValues = new HashMap<>();
@@ -336,7 +337,7 @@ public class Dao {
 					count++;
 				}
 				generatedValues.put(col, idValue);
-			} else if (!col.isPrimeKey() && !SqlBoxUtils.isEmptyStr(col.getColumnName())) {// normal fields
+			} else if (!col.isObjectID() && !SqlBoxUtils.isEmptyStr(col.getColumnName())) {// normal fields
 				Object value = getFieldRealValue(col);
 				if (value != null) {
 					sb.append(col.getColumnName()).append(",");
@@ -377,7 +378,7 @@ public class Dao {
 	 * Update a Bean in Database
 	 */
 	public void update() {// NOSONAR
-		if (bean == null)
+		if (entityBean == null)
 			throwEX("Dao update error, bean is null");
 
 		List<Column> idColumns = new ArrayList<>();
@@ -386,7 +387,7 @@ public class Dao {
 
 		for (Entry<String, Column> entry : realColumns.entrySet()) {
 			Column col = entry.getValue();
-			if (col.isPrimeKey()) {
+			if (col.isObjectID()) {
 				Object idValue = getFieldRealValue(col);
 				assureNotNull(idValue, "Dao update error, ID can not be null, column=" + col.getColumnName());
 				col.setPropertyValue(idValue);
@@ -432,17 +433,34 @@ public class Dao {
 		if (result != 1)
 			throwEX("Dao insert error, no record be updated, sql=" + sb.toString());
 	}
+	
+	/**
+	 * @param objectID
+	 * @return
+	 */
+	public void delete( ) {
+		 
+	}
+
+	
+
+	/**
+	 * Load a entity from Database by its ID
+	 */
+	public <T> T load(Object objectID) {
+		return null;
+	}
 
 	/**
 	 * Get Field value by it's column definition
 	 */
 	private Object getFieldRealValue(Column col) {
 		try {
-			Method m = ReflectionUtils.getDeclaredMethod(this.bean, col.getReadMethodName(), new Class[] {});
-			return m.invoke(this.bean, new Object[] {});
+			Method m = ReflectionUtils.getDeclaredMethod(this.entityBean, col.getReadMethodName(), new Class[] {});
+			return m.invoke(this.entityBean, new Object[] {});
 		} catch (Exception e) {
 			return throwEX(e, "Dao getFieldRealValue error, method " + col.getReadMethodName()
-					+ " invoke error in class " + bean);
+					+ " invoke error in class " + entityBean);
 		}
 	}
 
@@ -451,12 +469,12 @@ public class Dao {
 	 */
 	private void setFieldRealValue(Column col, Object value) {
 		try {
-			Method m = ReflectionUtils.getDeclaredMethod(this.bean, col.getWriteMethodName(),
+			Method m = ReflectionUtils.getDeclaredMethod(this.entityBean, col.getWriteMethodName(),
 					new Class[] { col.getPropertyType() });
-			m.invoke(this.bean, new Object[] { value });
+			m.invoke(this.entityBean, new Object[] { value });
 		} catch (Exception e) {
 			throwEX(e, "Dao setFieldRealValue error, method " + col.getWriteMethodName() + " invoke error in class "
-					+ bean);
+					+ entityBean);
 		}
 	}
 
@@ -478,19 +496,26 @@ public class Dao {
 
 	// =============Misc methods end==========
 
+	/**
+	 * Load a entity from Database by its ID, use default global context
+	 */
+	public static <T> T load(Class entityOrBoxClass, Object objectID) {
+		return SqlBoxContext.getDefaultSqlBoxContext().load(entityOrBoxClass, objectID);
+	}
+
 	// ================ Getters & Setters===============
 	/**
 	 * Return Bean instance which related to this dao
 	 */
-	public Object getBean() {
-		return bean;
+	public Object getEntityBean() {
+		return entityBean;
 	}
 
 	/**
 	 * Set a Bean instance related to this dao
 	 */
-	public void setBean(Object bean) {
-		this.bean = bean;
+	public void setEntityBean(Object bean) {
+		this.entityBean = bean;
 	}
 
 	/**
@@ -512,7 +537,7 @@ public class Dao {
 		return sqlBox.getContext();
 	}
 
-	public Object getDatabaseType() {
+	public DatabaseType getDatabaseType() {
 		return sqlBox.getContext().getDatabaseType();
 	}
 

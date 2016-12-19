@@ -26,9 +26,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.github.drinkjava2.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -73,8 +76,8 @@ public class SqlBox {
 			bean = this.getEntityClass().newInstance();
 			this.beanInitialize(bean);
 			Dao dao = new Dao(this);
-			dao.setBean(bean);
-			Method m = this.getEntityClass().getMethod("putDao", new Class[] { Dao.class });
+			dao.setEntityBean(bean);
+			Method m = ReflectionUtils.getDeclaredMethod(this.getEntityClass(), "putDao", new Class[] { Dao.class });
 			m.invoke(bean, new Object[] { dao });
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext create error");
@@ -87,7 +90,7 @@ public class SqlBox {
 	 */
 	public void beanInitialize(Object bean) {
 		try {
-			Method m = this.getEntityClass().getMethod("initialize", new Class[] { null });
+			Method m = ReflectionUtils.getDeclaredMethod(getEntityClass(), "initialize", new Class[] { null });
 			if (m != null)
 				m.invoke(bean, new Object[] {});
 		} catch (Exception e) {
@@ -118,7 +121,7 @@ public class SqlBox {
 		try {
 			if (SqlBoxUtils.isCapitalizedString(fieldID))
 				return false;
-			Method method = this.entityClass.getMethod(fieldID, new Class[] {});
+			Method method = ReflectionUtils.getDeclaredMethod(entityClass, fieldID, new Class[] {});
 			if (method == null)
 				return false;
 		} catch (Exception e) { // NOSONAR
@@ -168,9 +171,9 @@ public class SqlBox {
 		if (configColumn != null) {
 			if (!SqlBoxUtils.isEmptyStr(configColumn.getColumnName()))
 				column.setColumnName(configColumn.getColumnName());
-			column.setPrimeKey(configColumn.isPrimeKey());
+			column.setPrimeKey(configColumn.isObjectID());
 			column.setIdGenerator(configColumn.getIdGenerator());
-			column.setPrimeKey(configColumn.isPrimeKey());
+			column.setPrimeKey(configColumn.isObjectID());
 		}
 	}
 
@@ -190,13 +193,13 @@ public class SqlBox {
 	 * 2) find field named "id", put it to primeKeys <br/>
 	 * 3) if 1 and 2 not found, find a field which set IdGenertorValue, if found more than 2 throw an exception <br/>
 	 */
-	private static void findAndSetPrimeKeys(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
+	private void findAndSetPrimeKeys(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
 		Column idCol = null;
 		boolean foundPrimeKey = false;
 		for (Entry<String, Column> cols : realColumns.entrySet()) {
 			if ("id".equals(cols.getKey()))
 				idCol = cols.getValue();
-			if (cols.getValue().isPrimeKey()) {
+			if (cols.getValue().isObjectID()) {
 				foundPrimeKey = true;
 				break;
 			}
@@ -290,6 +293,58 @@ public class SqlBox {
 	}
 
 	// ========Config methods end==============
+
+	// == shortcut methods, just put some common used public static method here======
+
+	public static Integer queryForInteger(String... sql) {
+		return Dao.dao().queryForInteger(sql);
+	}
+
+	public static String queryForString(String... sql) {
+		return Dao.dao().queryForString(sql);
+	}
+
+	public static <T> T queryForObject(Class<?> clazz, String... sql) {
+		return Dao.dao().queryForObject(clazz, sql);
+	}
+
+	public static void cacheSQL(String... sql) {
+		Dao.dao().cacheSQL(sql);
+	}
+
+	public static Integer execute(String... sql) {
+		return Dao.dao().execute(sql);
+	}
+
+	public static Integer executeInsert(String... sql) {
+		return Dao.dao().executeInsert(sql);
+	}
+
+	public static Integer executeQuiet(String... sql) {
+		return Dao.dao().executeQuiet(sql);
+	}
+
+	public static void executeCachedSQLs() {
+		Dao.dao().executeCachedSQLs();
+	}
+
+	public static JdbcTemplate getDefaultJdbc() {
+		return Dao.dao().getJdbc();
+	}
+
+	public static SqlBoxContext getDefaultContext() {
+		return Dao.dao().getContext();
+	}
+
+	public static DatabaseType getDefaultDatabaseType() {
+		return Dao.dao().getDatabaseType();
+	}
+
+	public static void refreshMetaData() {
+		Dao.dao().refreshMetaData();
+	}
+
+	// == shortcut methods end=======================================================
 
 	// ========getter & setters below==============
 	public Class<?> getEntityClass() {

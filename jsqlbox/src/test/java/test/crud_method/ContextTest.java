@@ -10,12 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.TestPrepare;
 import test.config.JBeanBoxConfig.CtxBox;
 import test.config.JBeanBoxConfig.DataSourceBox;
+import test.config.TestPrepare;
 import test.config.po.User;
 
 /**
@@ -57,8 +58,8 @@ public class ContextTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.dao().insert();
-		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		u.insert();
+		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User1")));
 	}
 
@@ -70,8 +71,8 @@ public class ContextTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.dao().insert();
-		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		u.insert();
+		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User1")));
 	}
 

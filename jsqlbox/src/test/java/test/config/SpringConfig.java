@@ -17,6 +17,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -90,10 +91,10 @@ public class SpringConfig {
 		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
 		User u = sc.createBean(User.class);
 		// Can not use User u=new User() here because default global SqlBoxContext not configured
-		u.dao().execute("delete from " + u.table());
+		SqlBox.execute("delete from " + u.table());
 		u.setUserName("Spring");
-		u.dao().insert();
-		Assert.assertEquals("Spring", u.dao().queryForString(
+		u.insert();
+		Assert.assertEquals("Spring", SqlBox.queryForString(
 				"select " + u.userName() + " from " + u.table() + " where " + u.userName() + "=" + q("Spring")));
 		springCtx.close();
 	}

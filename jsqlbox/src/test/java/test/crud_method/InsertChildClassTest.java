@@ -7,11 +7,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jsqlbox.SqlBox;
+
 import test.config.TestPrepare;
 import test.config.po.User;
 import test.config.po.User2;
 
-public class InsertChildEntityTest {
+public class InsertChildClassTest {
 
 	@Before
 	public void setup() {
@@ -29,8 +31,8 @@ public class InsertChildEntityTest {
 		u.setUserName("User2");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
-		u.dao().insert();
-		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		u.insert();
+		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User2")));
 	}
 
@@ -44,13 +46,13 @@ public class InsertChildEntityTest {
 	public void insertU2() {
 		U2 u = new U2();
 		u.setPhoneNumber("111");
-		u.dao().insert();
-		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		u.insert();
+		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.phoneNumber(), "=", q("111")));
 		u.box().configTable("users");
 		u.setPhoneNumber("222");
-		u.dao().insert();
-		Assert.assertEquals(222, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		u.insert();
+		Assert.assertEquals(222, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.phoneNumber(), "=", q("222")));
 	}
 }

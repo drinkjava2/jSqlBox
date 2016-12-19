@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.config.TestPrepare;
@@ -21,7 +20,7 @@ public class ConditionQueryTest {
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setAge(10);
-		u.dao().insert();
+		u.insert();
 	}
 
 	@After
@@ -41,7 +40,7 @@ public class ConditionQueryTest {
 		if (condition == 3)
 			sql = sql + " or " + u.age() + "=" + q(parameter);
 
-		return Dao.dao().queryForInteger(sql);
+		return SqlBox.queryForInteger(sql);
 	}
 
 	@Test

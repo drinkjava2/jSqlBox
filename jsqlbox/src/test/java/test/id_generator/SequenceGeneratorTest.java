@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.SequenceGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
@@ -42,14 +42,14 @@ public class SequenceGeneratorTest {
 
 	@Test
 	public void insertUser() {
-		if (Dao.dao().getDatabaseType() != DatabaseType.ORACLE)
+		if (SqlBox.getDefaultDatabaseType() != DatabaseType.ORACLE)
 			return;
 		User u = new User();
 		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(SequenceGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
-			u.dao().insert();
-		Assert.assertEquals(60, (int) u.dao().queryForInteger("select count(*) from ", u.table(), " where age>0"));
+			u.insert();
+		Assert.assertEquals(60, (int) SqlBox.queryForInteger("select count(*) from ", u.table(), " where age>0"));
 	}
 
 }

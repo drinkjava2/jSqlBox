@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import test.config.TestPrepare;
 import test.config.po.User;
 
-public class InsertEntityTest {
+public class InsertTest {
 
 	@Before
 	public void setup() {
@@ -31,8 +31,8 @@ public class InsertEntityTest {
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
-		u.dao().insert();
-		Assert.assertEquals(111, (int) u.dao().queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		u.insert();
+		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User1")));
 	}
 
@@ -42,8 +42,8 @@ public class InsertEntityTest {
 		u.setUserName("User2");
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");
-		u.dao().insert();
-		Assert.assertEquals("222", u.dao().queryForString("select ", u.phoneNumber(), " from ", u.table(), " where ",
+		u.insert();
+		Assert.assertEquals("222", SqlBox.queryForString("select ", u.phoneNumber(), " from ", u.table(), " where ",
 				u.userName(), "=" + q("User2")));
 	}
 
@@ -55,7 +55,7 @@ public class InsertEntityTest {
 
 	@Test
 	public void insertUsersWithinTransaction() {
-		InsertEntityTest t = BeanBox.getBean(InsertEntityTest.class); // get Proxy bean
+		InsertTest t = BeanBox.getBean(InsertTest.class); // get Proxy bean
 		t.tx_insertUsers(); // use Spring Declarative Transaction
 	}
 

@@ -1,14 +1,14 @@
-package test.crud_method;
+package test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
+import static test.config.po.DB.db;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.config.TestPrepare;
@@ -20,12 +20,12 @@ public class QueryEntityTest {
 	public void setup() {
 		TestPrepare.dropAndRecreateTables();
 		User u = SqlBox.createBean(User.class);
-		u.dao().execute("insert into ", u.table(), //
+		SqlBox.execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user1"), //
 				", ", u.address(), empty("address1"), //
 				", ", u.age(), ")", empty("1"), //
 				questionMarks());
-		u.dao().execute("insert into ", u.table(), //
+		SqlBox.execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user2"), //
 				", ", u.address(), empty("address2"), //
 				", ", u.age(), ")", empty("2"), //
@@ -33,8 +33,8 @@ public class QueryEntityTest {
 		u.setUserName("user3");
 		u.setAddress("address3");
 		u.setAge(3);
-		u.dao().insert();
-		Assert.assertEquals(3, (int) Dao.dao().queryForInteger("select count(*) from ", u.table()));
+		u.insert();
+		Assert.assertEquals(3, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
 	}
 
 	@After
@@ -44,10 +44,8 @@ public class QueryEntityTest {
 
 	@Test
 	public void queryUser() {
-		// Assert.assertEquals(2, (int) Dao.dao.queryForInteger("select count(*) from ", u.Table));
-		// User user = (User) Dao.dao.queryEntity(User.class, "select b.username as UNAME from users b").get(0);
-		// if (user == null) {// TODO need think about next step
-		// }
+		//Assert.assertEquals(2, (int) SqlBox.queryForInteger("select count(*) from ", db.user.table()));
+		// "select b.username as UNAME from users b"
 	}
 
 	public static void main(String[] args) {

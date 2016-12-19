@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
@@ -34,30 +34,30 @@ public class TableGeneratorTest {
 
 	@Test
 	public void insertUserInMysql() {
-		if (Dao.dao().getDatabaseType() != DatabaseType.MYSQL)
+		if (SqlBox.getDefaultDatabaseType() != DatabaseType.MYSQL)
 			return;
 		User u = new User();
-		u.dao().executeQuiet("drop table t");
-		u.dao().executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+		SqlBox.executeQuiet("drop table t");
+		SqlBox.executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
-			u.dao().insert();
-		Assert.assertEquals(60, (int) u.dao().queryForInteger("select count(*) from ", u.table()));
+			u.insert();
+		Assert.assertEquals(60, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
 	}
 
 	@Test
 	public void insertUserInOracle() {
-		if (Dao.dao().getDatabaseType() != DatabaseType.ORACLE)
+		if (SqlBox.getDefaultDatabaseType()  != DatabaseType.ORACLE)
 			return;
 		User u = new User();
-		u.dao().executeQuiet("drop table T");
-		u.dao().executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
+		SqlBox.executeQuiet("drop table T");
+		SqlBox.executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
 		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
-			u.dao().insert();
-		Assert.assertEquals(60, (int) u.dao().queryForInteger("select count(*) from ", u.table()));
+			u.insert();
+		Assert.assertEquals(60, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
 	}
 
 }

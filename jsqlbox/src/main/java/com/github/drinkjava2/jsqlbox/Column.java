@@ -36,8 +36,9 @@ public class Column {
 	private int scale = 0;
 	// below fields are for JSQLBox
 	private String columnName = "";
-	private boolean primeKey = false;
-	private String foreignKey = "";
+
+	// objectID is used for object identity, is different to database primeKey
+	private boolean objectID = false;
 
 	private Class<?> propertyType;
 	private String propertyTypeName;
@@ -120,20 +121,12 @@ public class Column {
 		this.scale = scale;
 	}
 
-	public boolean isPrimeKey() {
-		return primeKey;
+	public boolean isObjectID() {
+		return objectID;
 	}
 
-	public void setPrimeKey(boolean primeKey) {
-		this.primeKey = primeKey;
-	}
-
-	public String getForeignKey() {
-		return foreignKey;
-	}
-
-	public void setForeignKey(String foreignKey) {
-		this.foreignKey = foreignKey;
+	public void setPrimeKey(boolean objectID) {
+		this.objectID = objectID;
 	}
 
 	public Class<?> getPropertyType() {
