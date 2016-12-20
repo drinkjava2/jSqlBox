@@ -15,7 +15,7 @@ import test.config.TestPrepare;
 import test.config.po.User;
 
 /**
- * For this test, I made 2 sequence in Oracle, SEQ_1 is for "id" , SEQ_2 is for "age"
+ * For this test, I made 2 sequences in Oracle, SEQ_1 is for "id" , SEQ_2 is for "age"
  *
  * @author Yong Zhu
  *

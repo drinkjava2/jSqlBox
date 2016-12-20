@@ -7,10 +7,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.id.IdGenerator;
-import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
+import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -30,7 +28,7 @@ public class UpdateTest {
 	@Test
 	public void updateUser() {
 		User u = new User();
-		u.box().configIdGenerator("id", (IdGenerator) new BeanBox(IdentityGenerator.class).getBean());
+		u.box().configIdGenerator("id", AutoGenerator.INSTANCE);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");

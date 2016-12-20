@@ -29,8 +29,10 @@ import java.util.Map.Entry;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.ReflectionUtils;
+import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -135,8 +137,10 @@ public class SqlBox {
 	public Map<String, Column> buildRealColumns() {
 		if (this.entityClass == null)
 			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
+		String realTableName = this.getRealTable();
+		TinyDbMetaData meta = this.getContext().getMetaData();
+		Map<String, Column> oneTable = meta.getOneTable(realTableName.toLowerCase());
 		Map<String, Column> realColumns = new HashMap<>();
-
 		BeanInfo beanInfo = null;
 		PropertyDescriptor[] pds = null;
 		try {
@@ -156,9 +160,12 @@ public class SqlBox {
 				realCol.setWriteMethodName(pd.getWriteMethod().getName());
 				useConfigOverrideDefault(fieldID, realCol);
 				realColumns.put(fieldID, realCol);
+				Column metaDataCol = oneTable.get(fieldID.toLowerCase());
+				if (metaDataCol != null)
+					realCol.setAutoIncreament(metaDataCol.getAutoIncreament());
 			}
 		}
-		findAndSetEntityIDs(this.getEntityClass(), realColumns);
+		findAndSetEntityID(this.getEntityClass(), realColumns);
 		return realColumns;
 	}
 
@@ -170,34 +177,49 @@ public class SqlBox {
 		if (configColumn != null) {
 			if (!SqlBoxUtils.isEmptyStr(configColumn.getColumnName()))
 				column.setColumnName(configColumn.getColumnName());
-			column.setEntityID(configColumn.isEntityID());
+			column.setEntityID(configColumn.getEntityID());
 			column.setIdGenerator(configColumn.getIdGenerator());
-			column.setEntityID(configColumn.isEntityID());
+			column.setEntityID(configColumn.getEntityID());
 		}
 	}
 
 	/**
 	 * Find and set Object IDs automatically, rule:<br/>
-	 * 1) check if already has entityID set by setEntityIDs(someid1,someid2...), if found, exit <br/>
-	 * 2) find field named "id", set it as entityID <br/>
-	 * 3) if 1 and 2 not found, find a field which set IdGenertorValue, if found more than 2 throw an exception <br/>
+	 * 
+	 * Find how many entityID <br/>
+	 * Found lots? return <br/>
+	 * only found 1? if no generator, set to auto type <br/>
+	 * Not found? look for id field found? set as EntityID if no generator, set to auto type <br/>
+	 * No found throw ex <br/>
 	 */
-	private void findAndSetEntityIDs(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
-		Column idCol = null;
-		boolean foundEntityID = false;
+	private void findAndSetEntityID(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
+		Column idColumn = null;
+		Column entityColumn = null;
 		for (Entry<String, Column> cols : realColumns.entrySet()) {
-			if ("id".equals(cols.getKey()))
-				idCol = cols.getValue();
-			if (cols.getValue().isEntityID()) {
-				foundEntityID = true;
-				break;
+			if (cols.getValue().getEntityID())
+				if (entityColumn != null)
+					return;
+				else
+					entityColumn = cols.getValue();
+			if ("id".equals(cols.getValue().getFieldID()))
+				idColumn = cols.getValue();
+		}
+
+		if (idColumn == null) {
+			if (entityColumn == null)
+				throwEX("SqlBox findAndSetEntityID error, no entityID set for entity class " + entityClass);
+			else
+				return;
+		} else {
+			if (entityColumn != null && !entityColumn.getFieldID().equals(idColumn.getFieldID()))
+				return;
+			else {
+				idColumn.setEntityID(true);
+				if (idColumn.getIdGenerator() == null)// entityColumn=null or entityColumn=idColumn
+					idColumn.setIdGenerator(AutoGenerator.INSTANCE);
 			}
 		}
-		if (!foundEntityID)
-			if (idCol != null)
-				idCol.setEntityID(true);
-			else
-				throwEX("SqlBox findAndSetEntityIDs error, no entityIDs set for entity class " + entityClass);
+		return;
 	}
 
 	/**
@@ -270,8 +292,8 @@ public class SqlBox {
 	/**
 	 * Config column name
 	 */
-	public void configIdGenerator(String fieldID, IdGenerator idGenerator) {
-		getOrBuildConfigColumn(fieldID).setIdGenerator(idGenerator);
+	public <T> void configIdGenerator(String fieldID, T idGenerator) {
+		getOrBuildConfigColumn(fieldID).setIdGenerator((IdGenerator) idGenerator);
 	}
 
 	// ========Config methods end==============

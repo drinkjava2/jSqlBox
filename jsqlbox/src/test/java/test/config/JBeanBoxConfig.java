@@ -22,6 +22,10 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 public class JBeanBoxConfig {
 
 	// Data source pool setting
+	public static class DataSourceBox extends MySqlDataSourceBox {
+	}
+
+	// Data source pool setting
 	public static class C3P0Box extends BeanBox {
 		{
 			setClassOrValue(ComboPooledDataSource.class);
@@ -56,10 +60,6 @@ public class JBeanBoxConfig {
 			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
 			setProperty("driverClass", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 		}
-	}
-
-	// Data source pool setting
-	public static class DataSourceBox extends MySqlDataSourceBox {
 	}
 
 	// CtxBox is a SqlBoxContent singleton

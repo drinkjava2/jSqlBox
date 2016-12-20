@@ -3,7 +3,7 @@ package com.github.drinkjava2.jsqlbox.id;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Define a Sequence type ID generator, supported by Oracle、PostgreSQL、DB2
+ * Define a Sequence type ID generator, supported by Oracle, postgreSQL, DB2
  * 
  * 
  * @author Yong Zhu

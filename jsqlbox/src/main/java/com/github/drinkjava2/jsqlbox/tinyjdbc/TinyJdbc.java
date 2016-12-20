@@ -291,8 +291,8 @@ public class TinyJdbc {
 			DatabaseMetaData meta = con.getMetaData();
 			TinyDbMetaData tiny = new TinyDbMetaData();
 			tiny.setJdbcDriverName(meta.getDriverName());
-
-			if (DatabaseType.getDatabaseType(meta.getDriverName()) == DatabaseType.ORACLE) {
+			DatabaseType dbType = DatabaseType.getDatabaseType(meta.getDriverName());
+			if (dbType == DatabaseType.ORACLE) {
 				pst = con.prepareStatement("SELECT TABLE_NAME FROM USER_TABLES");// NOSONAR
 				rs = pst.executeQuery();
 				TinyResult tinyRs = ResultSupport.toResult(rs);
@@ -300,7 +300,7 @@ public class TinyJdbc {
 					tiny.getTableNames().put(((String) tablename).toLowerCase(), (String) tablename);
 				rs.close();
 				pst.close();
-			} else if (DatabaseType.getDatabaseType(meta.getDriverName()) == DatabaseType.MS_SQLSERVER) {
+			} else if (dbType == DatabaseType.MS_SQLSERVER) {
 				pst = con.prepareStatement("select name from sysobjects where xtype='U'");
 				rs = pst.executeQuery();
 				TinyResult tinyRs = ResultSupport.toResult(rs);
@@ -322,21 +322,51 @@ public class TinyJdbc {
 				Map<String, Column> oneTable = new HashMap<>();
 				while (rs.next()) {// NOSONAR
 					Column col = new Column();
-					// String dbObjectCatalog rs.getString(1)
-					// String dbObjectSchema rs.getString(2)
-					// String dbObjectName rs.getString(3)
-					// String dbColumnName rs.getString(4)
-					// String dbColumnTypeName = rs.getString(6)
-					// int dbColumnSize rs.getInt(7)
-					// int dbDecimalDigits rs.getInt(9)
-					// String dbColumnDefault rs.getString(13)
-					// int dbOrdinalPosition rs.getInt(17)
-					// String dbColumnIsNullable rs.getString(18)
+
+					// System.out.println("COLUMN_NAME=" + rs.getString("COLUMN_NAME"));
+					// System.out.println("SOURCE_DATA_TYPE=" + rs.getString("SOURCE_DATA_TYPE"));
+					// System.out.println("IS_AUTOINCREMENT=" + rs.getString("IS_AUTOINCREMENT"));
+
+					/**
+					 * For MySQL:<br/>
+					 * TABLE_CAT String => 表类别（可为 null） <br/>
+					 * TABLE_SCHEM String => 表模式（可为 null） <br/>
+					 * TABLE_NAME String => 表名称 <br/>
+					 * COLUMN_NAME String => 列名称 <br/>
+					 * DATA_TYPE int => 来自 java.sql.Types 的 SQL 类型 <br/>
+					 * TYPE_NAME String => 数据源依赖的类型名称，对于 UDT，该类型名称是完全限定的 <br/>
+					 * COLUMN_SIZE int => 列的大小。 <br/>
+					 * BUFFER_LENGTH 未被使用。 <br/>
+					 * DECIMAL_DIGITS int => 小数部分的位数。对于 DECIMAL_DIGITS 不适用的数据类型，则返回 Null。 <br/>
+					 * NUM_PREC_RADIX int => 基数（通常为 10 或 2） <br/>
+					 * NULLABLE int => 是否允许使用 NULL。 <br/>
+					 * columnNoNulls - 可能不允许使用 NULL 值 <br/>
+					 * columnNullable - 明确允许使用 NULL 值 <br/>
+					 * columnNullableUnknown - 不知道是否可使用 null <br/>
+					 * REMARKS String => 描述列的注释（可为 null） <br/>
+					 * COLUMN_DEF String => 该列的默认值，当值在单引号内时应被解释为一个字符串（可为 null） <br/>
+					 * SQL_DATA_TYPE int => 未使用 <br/>
+					 * SQL_DATETIME_SUB int => 未使用 <br/>
+					 * CHAR_OCTET_LENGTH int => 对于 char 类型，该长度是列中的最大字节数 <br/>
+					 * ORDINAL_POSITION int => 表中的列的索引（从 1 开始） <br/>
+					 * IS_NULLABLE String => ISO 规则用于确定列是否包括 null。 YES --- 如果参数可以包 NO --- 如果参数不可以 空字符串 - 如果不知道是否可以<br/>
+					 * SCOPE_CATLOG String => 表的类别，它是引用属性的作用域（如果 DATA_TYPE 不是 REF，则为 null） <br/>
+					 * SCOPE_SCHEMA String => 表的模式，它是引用属性的作用域（如果 DATA_TYPE 不是 REF，则为 null） <br/>
+					 * SCOPE_TABLE String => 表名称，它是引用属性的作用域（如果 DATA_TYPE 不是 REF，则为 null） <br/>
+					 * SOURCE_DATA_TYPE short => 不同类型或用户生成 Ref 类型、来自 java.sql.Types 的 SQL 类型的源类型（如果 DATA_TYPE <br/>
+					 * 不是 DISTINCT 或用户生成的 REF，则为 null） <br/>
+					 * IS_AUTOINCREMENT String => 指示此列是否自动增加 YES --- 如果该列自动增加 NO --- 空 如果不能确定该列是否是自动增加参数 <br/>
+					 * COLUMN_SIZE 列表示给定列的指定列大小。对于数值数据，这是最大精度。对于字符数据，这是字符长度。对于日期时间数据类型，这是 String
+					 * 表示形式的字符长度（假定允许的最大小数秒组件的精度）。对于二进制数据，这是字节长度。对于 ROWID 数据类型，这是字节长度。对于列大小不适用的数据类型，则返回 Null。 <br/>
+					 * 
+					 */
 					col.setColumnName(rs.getString("COLUMN_NAME"));
 					col.setPropertyTypeName(rs.getString("TYPE_NAME"));
 					col.setLength(rs.getInt("COLUMN_SIZE"));
 					col.setNullable(rs.getInt("NULLABLE") > 0);
 					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
+					if (dbType == DatabaseType.MYSQL)// NOSONAR
+						col.setAutoIncreament(rs.getBoolean("IS_AUTOINCREMENT"));
 					oneTable.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
 				}
 				tiny.getTables().put(realTableName.toLowerCase(), oneTable);

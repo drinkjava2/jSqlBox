@@ -25,12 +25,12 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class IdentityGenerator implements IdGenerator {
-	public static final IdentityGenerator INSTANCE = new IdentityGenerator();
+public class AssignedGenerator implements IdGenerator {
+	public static final AssignedGenerator INSTANCE = new AssignedGenerator();
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		// id is created by database, not me
+		// id is created by you, not me
 		return null;
 	}
 

@@ -36,17 +36,15 @@ public class Column {
 	private int scale = 0;
 	// below fields are for JSQLBox
 	private String columnName = "";
-
 	// entityID is used for object identity, is different to database primeKey
-	private boolean entityID = false;
-
+	private Boolean entityID = false;
+	private Boolean autoIncreament = false;
 	private Class<?> propertyType;
 	private String propertyTypeName;
 	private Object propertyValue;
 	private String readMethodName;
 	private String writeMethodName;
 	private IdGenerator idGenerator;
-
 	private String fieldID = "";
 
 	public String getFieldID() {
@@ -121,14 +119,6 @@ public class Column {
 		this.scale = scale;
 	}
 
-	public boolean isEntityID() {
-		return entityID;
-	}
-
-	public void setEntityID(boolean entityID) {
-		this.entityID = entityID;
-	}
-
 	public Class<?> getPropertyType() {
 		return propertyType;
 	}
@@ -177,4 +167,41 @@ public class Column {
 		this.propertyValue = propertyValue;
 	}
 
+	public Boolean getAutoIncreament() {
+		return autoIncreament;
+	}
+
+	public void setAutoIncreament(Boolean autoIncreament) {
+		this.autoIncreament = autoIncreament;
+	}
+
+	public Boolean getEntityID() {
+		return entityID;
+	}
+
+	public void setEntityID(Boolean entityID) {
+		this.entityID = entityID;
+	}
+
+	public String debugInfo() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("unique=" + unique).append("\r\n");
+		sb.append("nullable=" + nullable).append("\r\n");
+		sb.append("insertable=" + insertable).append("\r\n");
+		sb.append("updatable=" + updatable).append("\r\n");
+		sb.append("length=" + length).append("\r\n");
+		sb.append("precision=" + precision).append("\r\n");
+		sb.append("scale=" + scale).append("\r\n");
+		sb.append("columnName =" + columnName).append("\r\n");
+		sb.append("entityID=" + entityID).append("\r\n");
+		sb.append("autoIncreament=" + autoIncreament).append("\r\n");
+		sb.append("propertyType=" + propertyType).append("\r\n");
+		sb.append("propertyTypeName=" + propertyTypeName).append("\r\n");
+		sb.append("propertyValue=" + propertyValue).append("\r\n");
+		sb.append("readMethodName=" + readMethodName).append("\r\n");
+		sb.append("writeMethodName=" + writeMethodName).append("\r\n");
+		sb.append("idGenerator=" + idGenerator).append("\r\n");
+		sb.append("fieldID=" + fieldID).append("\r\n");
+		return sb.toString();
+	}
 }

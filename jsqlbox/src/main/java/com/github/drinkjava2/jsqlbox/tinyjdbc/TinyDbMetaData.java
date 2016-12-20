@@ -31,6 +31,12 @@ import com.github.drinkjava2.jsqlbox.Column;
 public class TinyDbMetaData {
 	String jdbcDriverName;
 	Map<String, String> tableNames = new HashMap<>();
+
+	/**
+	 * Store whole database meta data in tables <br/>
+	 * for tables, key is lower case real table name <br/>
+	 * for map, key is lower case real column name
+	 */
 	Map<String, Map<String, Column>> tables = new HashMap<>();
 
 	public boolean existTable(String tableName) {

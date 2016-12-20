@@ -17,8 +17,12 @@ package com.github.drinkjava2.jsqlbox;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
+import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MS_SQLSERVER;
+import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MYSQL;
+import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.ORACLE;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +35,8 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.ReflectionUtils;
+import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
+import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
@@ -312,14 +318,15 @@ public class Dao {
 	}
 
 	/**
-	 * Insert a Bean to Database
+	 * Insert a entity bean to Database
 	 */
 	public void insert() {// NOSONAR
 		if (entityBean == null)
 			throwEX("Dao doSave error, bean is null");
 
 		// generatedValues to record all generated values like UUID, sequence
-		Map<Column, Object> generatedValues = new HashMap<>();
+		Map<Column, Object> idGeneratorCache = new HashMap<>();
+		DatabaseType dbType = this.getDatabaseType();
 
 		// start to spell sql
 		StringBuilder sb = new StringBuilder();
@@ -330,17 +337,27 @@ public class Dao {
 		Map<String, Column> realColumns = sqlBox.buildRealColumns();
 		for (Column col : realColumns.values()) {
 			IdGenerator idGen = col.getIdGenerator();
-			if (idGen != null) {
+			if (idGen != null && !(idGen instanceof AssignedGenerator)) {
 				Object idValue = idGen.getNextID(this.getBox().getContext());
-				assureNotNull(idValue, "Dao insert error, ID can not be null, column=" + col.getColumnName());
-				// if is an Identity type, no need insert this field in sql
-				if (!IdentityGenerator.IDENTITY_TYPE.equals(idValue)) {
+				if (idGen instanceof IdentityGenerator) {
+					if (dbType == ORACLE)// NOSONAR
+						throwEX("Dao insert error, IdentityGenerator type should not set to ORACLE");
+				} else if (idGen instanceof AutoGenerator) {
+
+					if (dbType == MYSQL || dbType == MS_SQLSERVER) {// NOSONAR
+						if (!col.getAutoIncreament())
+							throwEX("Dao insert error, AutoGenerator type should set on indentity type field");
+					} else {// ORACLE
+
+					}
+				} else {// for other IDgenerator like sequence, table, UUID...
+					assureNotNull(idValue, "Dao insert error, ID can not be null, column=" + col.getColumnName());
 					sb.append(col.getColumnName()).append(",");
 					setFieldRealValue(col, idValue);
 					parameters.add(idValue);
 					count++;
 				}
-				generatedValues.put(col, idValue);
+				idGeneratorCache.put(col, idValue);
 			} else if (!SqlBoxUtils.isEmptyStr(col.getColumnName())) {// normal fields
 				Object value = SqlBoxUtils.getFieldRealValue(this.entityBean, col);
 				if (value != null) {
@@ -368,11 +385,11 @@ public class Dao {
 			throwEX("Dao insert error, no record be inserted, sql=" + sb.toString());
 
 		// if success, set id values to bean
-		for (Entry<Column, Object> entry : generatedValues.entrySet()) {
+		for (Entry<Column, Object> entry : idGeneratorCache.entrySet()) {
 			Column col = entry.getKey();
 			Object idValue = entry.getValue();
 			// Identity need read max id from database
-			if (IdentityGenerator.IDENTITY_TYPE.equals(idValue))
+			if (col.getIdGenerator() instanceof IdentityGenerator || col.getIdGenerator() instanceof AutoGenerator)
 				idValue = getLastAutoIncreaseIdentity(col);
 			setFieldRealValue(col, idValue);
 		}
@@ -396,7 +413,7 @@ public class Dao {
 
 		// set values
 		for (Column col : realColumns.values()) {
-			if (!col.isEntityID() && col.getIdGenerator() == null) {
+			if (!col.getEntityID() && col.getIdGenerator() == null) {
 				Object value = SqlBoxUtils.getFieldRealValue(this.entityBean, col);
 				sb.append(col.getColumnName()).append("=?, ");
 				if (Boolean.class.isInstance(value)) {// NOSONAR
@@ -432,7 +449,7 @@ public class Dao {
 		List<Column> idColumns = new ArrayList<>();
 		for (Entry<String, Column> entry : realColumns.entrySet()) {
 			Column col = entry.getValue();
-			if (col.isEntityID()) {
+			if (col.getEntityID()) {
 				Object idValue = SqlBoxUtils.getFieldRealValue(this.entityBean, col);
 				assureNotNull(idValue, "Dao update error, ID can not be null, column=" + col.getColumnName());
 				col.setPropertyValue(idValue);
@@ -448,7 +465,7 @@ public class Dao {
 		List<Column> idColumns = new ArrayList<>();
 		for (Entry<String, Column> entry : realColumns.entrySet()) {
 			Column col = entry.getValue();
-			if (col.isEntityID()) {
+			if (col.getEntityID()) {
 				idColumns.add(col);
 			}
 		}
@@ -467,7 +484,7 @@ public class Dao {
 	 * @return
 	 */
 	public void delete() {
-//TODO
+		// TODO
 	}
 
 	/**
@@ -543,7 +560,12 @@ public class Dao {
 		try {
 			Method m = ReflectionUtils.getDeclaredMethod(this.entityBean, col.getWriteMethodName(),
 					new Class[] { col.getPropertyType() });
-			m.invoke(this.entityBean, new Object[] { value });
+
+			if (value != null && value instanceof BigDecimal && col.getPropertyType().isAssignableFrom(Integer.class)) {
+				Integer valueForInvoke = Integer.parseInt("" + value);
+				m.invoke(this.entityBean, new Object[] { valueForInvoke });
+			} else
+				m.invoke(this.entityBean, new Object[] { value });
 		} catch (Exception e) {
 			throwEX(e, "Dao setFieldRealValue error, method " + col.getWriteMethodName() + " invoke error in class "
 					+ entityBean);

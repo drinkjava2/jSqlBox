@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
@@ -30,7 +29,7 @@ public class UUIDGeneratorTest {
 	@Test
 	public void testUUID() {
 		User u = new User();
-		u.box().configIdGenerator("userName", (IdGenerator) BeanBox.getBean(UUIDGenerator.class));
+		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDGenerator.class));
 		u.insert();
 		String username = SqlBox.queryForString("select ", u.userName(), " from ", u.table());
 		Assert.assertEquals(32, username.length());
@@ -42,7 +41,7 @@ public class UUIDGeneratorTest {
 	@Test
 	public void testUUID25() {
 		User u = new User();
-		u.box().configIdGenerator("userName", (IdGenerator) BeanBox.getBean(UUID25Generator.class));
+		u.box().configIdGenerator("userName", BeanBox.getBean(UUID25Generator.class));
 		u.insert();
 		String username = SqlBox.queryForString("select ", u.userName(), " from ", u.table());
 		Assert.assertEquals(25, username.length());
@@ -60,7 +59,7 @@ public class UUIDGeneratorTest {
 	@Test
 	public void testUUIDAny() {
 		User u = new User();
-		u.box().configIdGenerator("userName", (IdGenerator) BeanBox.getBean(UUIDAnyGeneratorBox.class));
+		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDAnyGeneratorBox.class));
 		u.insert();
 		String username = SqlBox.queryForString("select ", u.userName(), " from ", u.table());
 		Assert.assertEquals(45, username.length());

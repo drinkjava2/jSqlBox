@@ -34,6 +34,7 @@ public class InsertTest {
 		u.insert();
 		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User1")));
+		Assert.assertTrue(u.getId() > 0);
 	}
 
 	@Test
@@ -45,6 +46,7 @@ public class InsertTest {
 		u.insert();
 		Assert.assertEquals("222", SqlBox.queryForString("select ", u.phoneNumber(), " from ", u.table(), " where ",
 				u.userName(), "=" + q("User2")));
+		Assert.assertTrue(u.getId() > 0);
 	}
 
 	@Test
