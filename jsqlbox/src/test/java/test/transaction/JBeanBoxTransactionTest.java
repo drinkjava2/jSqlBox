@@ -14,7 +14,6 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.config.TestPrepare;
-import test.config.po.DB;
 import test.config.po.User;
 
 /**
@@ -56,8 +55,9 @@ public class JBeanBoxTransactionTest {
 	}
 
 	public void tx_doInsert() {
+		User u = new User();
 		tx_InsertUser1();
-		int i = SqlBox.queryForInteger("select count(*) from ", DB.db.user.table());
+		int i = SqlBox.queryForInteger("select count(*) from ", u.table());
 		Assert.assertEquals(1, i);
 		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();

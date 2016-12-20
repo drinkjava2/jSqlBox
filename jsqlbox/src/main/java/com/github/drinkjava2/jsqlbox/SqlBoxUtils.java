@@ -15,10 +15,15 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.github.drinkjava2.ReflectionUtils;
 
 /**
  * @author Yong Zhu
@@ -145,6 +150,35 @@ public class SqlBoxUtils {
 	 */
 	public static String getHex32UUID() {
 		return UUID.randomUUID().toString().replace("-", "").toUpperCase();
+	}
+
+	/**
+	 * Get Field value by it's column definition
+	 */
+	public static Object getFieldRealValue(Object entityBean, Column col) {
+		try {
+			Method m = ReflectionUtils.getDeclaredMethod(entityBean, col.getReadMethodName(), new Class[] {});
+			return m.invoke(entityBean, new Object[] {});
+		} catch (Exception e) {
+			return throwEX(e, "SqlBoxUtils getFieldRealValue error, method " + col.getReadMethodName()
+					+ " invoke error for entity: " + entityBean);
+		}
+	}
+
+	/**
+	 * Get Dao property from an entity bean
+	 */
+	public static Dao getDao(Object entityBean) {
+		Dao dao = null;
+		try {
+			Method m = ReflectionUtils.getDeclaredMethod(entityBean, "dao", new Class[] {});
+			dao = (Dao) m.invoke(entityBean, new Object[] {});
+		} catch (Exception e) {
+			throwEX(e, "SqlBoxContext load error for bean \"" + entityBean + "\", no dao method found");
+		}
+		if (dao == null)
+			throwEX("SqlBoxContext load error for bean \"" + entityBean + "\", no dao method found");
+		return dao;
 	}
 
 }

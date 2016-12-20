@@ -89,7 +89,7 @@ public class SpringConfig {
 	public void doConfigTest() {
 		AnnotationConfigApplicationContext springCtx = new AnnotationConfigApplicationContext(SpringConfig.class);
 		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
-		User u = sc.createBean(User.class);
+		User u = sc.createEntity(User.class);
 		// Can not use User u=new User() here because default global SqlBoxContext not configured
 		SqlBox.execute("delete from " + u.table());
 		u.setUserName("Spring");

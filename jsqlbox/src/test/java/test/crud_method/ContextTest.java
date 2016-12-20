@@ -52,7 +52,7 @@ public class ContextTest {
 		}
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		User u = ctx.createBean(User.class);
+		User u = ctx.createEntity(User.class);
 		// Can not use User u=new User() here because default global SqlBoxContext not configured
 		u.setUserName("User1");
 		u.setAddress("Address1");
@@ -66,7 +66,7 @@ public class ContextTest {
 	@Test
 	public void insertUser2() {
 		SqlBoxContext ctx = BeanBox.getBean(CtxBox.class);
-		User u = ctx.createBean(User.class);
+		User u = ctx.createEntity(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");

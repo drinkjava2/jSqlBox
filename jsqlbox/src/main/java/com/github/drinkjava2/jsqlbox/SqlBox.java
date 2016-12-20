@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import com.github.drinkjava2.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
@@ -64,13 +63,13 @@ public class SqlBox {
 
 	public static <T> T createBean(Class<?> beanOrSqlBoxClass) {
 		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
-		return ctx.createBean(beanOrSqlBoxClass);
+		return ctx.createEntity(beanOrSqlBoxClass);
 	}
 
 	/**
-	 * Create entity bean
+	 * Create entity instance
 	 */
-	public <T> T createBean() {
+	public <T> T createEntity() {
 		Object bean = null;
 		try {
 			bean = this.getEntityClass().newInstance();
@@ -159,7 +158,7 @@ public class SqlBox {
 				realColumns.put(fieldID, realCol);
 			}
 		}
-		findAndSetPrimeKeys(this.getEntityClass(), realColumns);
+		findAndSetEntityIDs(this.getEntityClass(), realColumns);
 		return realColumns;
 	}
 
@@ -171,44 +170,34 @@ public class SqlBox {
 		if (configColumn != null) {
 			if (!SqlBoxUtils.isEmptyStr(configColumn.getColumnName()))
 				column.setColumnName(configColumn.getColumnName());
-			column.setPrimeKey(configColumn.isObjectID());
+			column.setEntityID(configColumn.isEntityID());
 			column.setIdGenerator(configColumn.getIdGenerator());
-			column.setPrimeKey(configColumn.isObjectID());
+			column.setEntityID(configColumn.isEntityID());
 		}
 	}
 
 	/**
-	 * Manually set Prime Keys
-	 */
-	public void setPrimeKeys(String... fieldIDs) {
-		for (String fieldID : fieldIDs) {
-			Column col = this.getOrBuildConfigColumn(fieldID);
-			col.setPrimeKey(true);
-		}
-	}
-
-	/**
-	 * Find and set Prime Keys automatically, rule:<br/>
-	 * 1) check if already has PKey set by setPrimeKeys(someid1,someid2...), if found, exit <br/>
-	 * 2) find field named "id", put it to primeKeys <br/>
+	 * Find and set Object IDs automatically, rule:<br/>
+	 * 1) check if already has entityID set by setEntityIDs(someid1,someid2...), if found, exit <br/>
+	 * 2) find field named "id", set it as entityID <br/>
 	 * 3) if 1 and 2 not found, find a field which set IdGenertorValue, if found more than 2 throw an exception <br/>
 	 */
-	private void findAndSetPrimeKeys(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
+	private void findAndSetEntityIDs(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
 		Column idCol = null;
-		boolean foundPrimeKey = false;
+		boolean foundEntityID = false;
 		for (Entry<String, Column> cols : realColumns.entrySet()) {
 			if ("id".equals(cols.getKey()))
 				idCol = cols.getValue();
-			if (cols.getValue().isObjectID()) {
-				foundPrimeKey = true;
+			if (cols.getValue().isEntityID()) {
+				foundEntityID = true;
 				break;
 			}
 		}
-		if (!foundPrimeKey)
+		if (!foundEntityID)
 			if (idCol != null)
-				idCol.setPrimeKey(true);
+				idCol.setEntityID(true);
 			else
-				throwEX("SqlBox findAndSetPrimeKeys error, no prime key set for entity class " + entityClass);
+				throwEX("SqlBox findAndSetEntityIDs error, no entityIDs set for entity class " + entityClass);
 	}
 
 	/**
@@ -244,13 +233,6 @@ public class SqlBox {
 		return realColumnNameignoreCase != null ? realColumnNameignoreCase : realColumnNameUnderline;
 	}
 
-	/**
-	 * Get RowMapper
-	 */
-	protected RowMapper<Object> getRowMapper() {
-		return new SqlBoxRowMapper(this);
-	}
-
 	public Column getOrBuildConfigColumn(String fieldID) {
 		Column col = this.getConfigColumns().get(fieldID);
 		if (col == null) {
@@ -269,13 +251,13 @@ public class SqlBox {
 	}
 
 	/**
-	 * Config prime keys
+	 * Clean old entityID setting, set with given entityIDs
 	 */
-	public void configPrimeKeys(String... fieldIDs) {
+	public void configEntityIDs(String... entityIDs) {
 		for (Entry<String, Column> entry : getConfigColumns().entrySet())
-			entry.getValue().setPrimeKey(false);
-		for (String fieldID : fieldIDs)
-			getOrBuildConfigColumn(fieldID).setPrimeKey(true);
+			entry.getValue().setEntityID(false);
+		for (String fieldID : entityIDs)
+			getOrBuildConfigColumn(fieldID).setEntityID(true);
 	}
 
 	/**
@@ -294,7 +276,7 @@ public class SqlBox {
 
 	// ========Config methods end==============
 
-	// == shortcut methods, just put some common used public static method here======
+	// == shortcut methods, just copy some common used Dao public static method here======
 
 	public static Integer queryForInteger(String... sql) {
 		return Dao.dao().queryForInteger(sql);
@@ -344,6 +326,9 @@ public class SqlBox {
 		Dao.dao().refreshMetaData();
 	}
 
+	public static <T> T load(Class<?> entityOrBoxClass, Object entityID) {
+		return SqlBoxContext.getDefaultSqlBoxContext().load(entityOrBoxClass, entityID);
+	}
 	// == shortcut methods end=======================================================
 
 	// ========getter & setters below==============

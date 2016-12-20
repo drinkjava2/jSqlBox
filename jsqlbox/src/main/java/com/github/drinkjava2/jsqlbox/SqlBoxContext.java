@@ -15,8 +15,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
@@ -104,30 +102,20 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Load method
+	 * Load entity from DB
 	 */
-	public <T> T load(Class<?> entityOrBoxClass, Object objectID) {
-		T bean = (T) createBean(entityOrBoxClass);
-		Dao dao = null;
-		try {
-			Method m = ReflectionUtils.getDeclaredMethod(bean, "dao", new Class[] {});
-			dao = (Dao) m.invoke(bean, new Object[] {});
-		} catch (Exception e) {
-			throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
-		}
-		if (dao == null)
-			throwEX("Dao getDao error for bean \"" + bean + "\", no putDao method found");
-		else
-			dao.load(objectID);
-		return bean;
+	public <T> T load(Class<?> entityOrBoxClass, Object entityID) {
+		T bean = (T) createEntity(entityOrBoxClass);
+		Dao dao = SqlBoxUtils.getDao(bean);
+		return dao.load(entityID);
 	}
 
 	/**
 	 * Create an entity instance
 	 */
-	public <T> T createBean(Class<?> entityOrBoxClass) {
+	public <T> T createEntity(Class<?> entityOrBoxClass) {
 		SqlBox box = findAndBuildSqlBox(entityOrBoxClass);
-		return (T) box.createBean();
+		return (T) box.createEntity();
 	}
 
 	/**

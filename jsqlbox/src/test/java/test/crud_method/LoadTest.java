@@ -1,6 +1,7 @@
 package test.crud_method;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -8,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
@@ -29,16 +29,44 @@ public class LoadTest {
 	}
 
 	@Test
-	public void loadUser() {
+	public void loadSingleID() {
 		User u = new User();
-		u.box().configIdGenerator("id", (IdGenerator)   BeanBox.getBean(IdentityGenerator.class));
+		u.box().configIdGenerator("id", (IdGenerator) BeanBox.getBean(IdentityGenerator.class));
 		u.setUserName("User1");
 		u.setAddress("Address1");
-		u.setPhoneNumber("111");
 		u.insert();
-		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
-				" where ", u.id(), "=", q(u.getId())));
-		User u2= Dao.load(User.class, u.getId()); 
+		Assert.assertTrue(SqlBox.queryForInteger("select ", u.id(), " from ", u.table()) > 0);
+		User u2 = SqlBox.load(User.class, u.getId());
+		Assert.assertEquals("Address1", u2.getAddress());
+	}
+
+	@Test
+	public void loadCompositeID() {
+		User u = new User();
+		u.box().configIdGenerator("id", (IdGenerator) BeanBox.getBean(IdentityGenerator.class));
+		u.box().configEntityIDs("userName", "address");
+		u.setUserName("User1");
+		u.setAddress("Address1");
+		u.insert();
+		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		User u2 = SqlBox.load(User.class, u.dao().getEntityID());
+		Assert.assertEquals("Address1", u2.getAddress());
+	}
+
+	@Test
+	public void loadCompositeIDbyMap() {
+		User u = new User();
+		u.box().configIdGenerator("id", (IdGenerator) BeanBox.getBean(IdentityGenerator.class));
+		u.box().configEntityIDs("userName", "address");
+		u.setUserName("User1");
+		u.setAddress("Address1");
+		u.insert();
+		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Map<String, Object> entityID = new HashMap<>();
+		entityID.put("userName", "User1");
+		entityID.put("address", "Address1");
+		User u2 = SqlBox.load(User.class, entityID);
+		Assert.assertEquals("Address1", u2.getAddress());
 	}
 
 }

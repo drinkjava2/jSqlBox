@@ -37,8 +37,8 @@ public class Column {
 	// below fields are for JSQLBox
 	private String columnName = "";
 
-	// objectID is used for object identity, is different to database primeKey
-	private boolean objectID = false;
+	// entityID is used for object identity, is different to database primeKey
+	private boolean entityID = false;
 
 	private Class<?> propertyType;
 	private String propertyTypeName;
@@ -121,12 +121,12 @@ public class Column {
 		this.scale = scale;
 	}
 
-	public boolean isObjectID() {
-		return objectID;
+	public boolean isEntityID() {
+		return entityID;
 	}
 
-	public void setPrimeKey(boolean objectID) {
-		this.objectID = objectID;
+	public void setEntityID(boolean entityID) {
+		this.entityID = entityID;
 	}
 
 	public Class<?> getPropertyType() {

@@ -2,7 +2,6 @@ package test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
-import static test.config.po.DB.db;
 
 import org.junit.After;
 import org.junit.Assert;
