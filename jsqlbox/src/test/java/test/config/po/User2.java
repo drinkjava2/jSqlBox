@@ -1,11 +1,13 @@
 package test.config.po;
 
 /**
- * This file should automatically created by a code generator robot
+ * Default entity table name equal entity class name, so User2 will use "user2" database table
+ * 
+ * 
+ * @author Yong Zhu
  *
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class User2 extends User {
-	{
-		this.box().configTable("users2");
-	}
 }

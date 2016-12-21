@@ -20,6 +20,11 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +35,7 @@ import com.github.drinkjava2.ReflectionUtils;
  * @version 1.0.0
  * @since 1.0.0
  */
+@SuppressWarnings("unchecked")
 public class SqlBoxUtils {
 	// Use standard JDK logger
 
@@ -181,4 +187,38 @@ public class SqlBoxUtils {
 		return dao;
 	}
 
+	/**
+	 * Extract EntityID Values from realColumns
+	 */
+ 	public static Map<String, Object> extractEntityIDValues(Object entityID, Map<String, Column> realColumns) {
+		Map<String, Object> idvalues = new HashMap<>();
+		if (entityID instanceof Map) {
+			for (Entry<String, Object> entry : ((Map<String, Object>) entityID).entrySet())
+				idvalues.put(entry.getKey(), entry.getValue());
+		} else if (entityID instanceof List) {
+			idvalues = new HashMap<>();
+			for (Column col : (List<Column>) entityID)
+				idvalues.put(col.getFieldID(), col.getPropertyValue());
+		} else {
+			List<Column> idCols = extractIdColumnsOnly(realColumns);
+			if (idCols == null || idCols.size() != 1)
+				throwEX("Dao load error, id column is not 1, entityID:" + entityID);
+			else
+				idvalues.put(idCols.get(0).getFieldID(), entityID);
+		}
+		return idvalues;
+	}
+
+	private static List<Column> extractIdColumnsOnly(Map<String, Column> realColumns) {
+		List<Column> idColumns = new ArrayList<>();
+		for (Entry<String, Column> entry : realColumns.entrySet()) {
+			Column col = entry.getValue();
+			if (col.getEntityID()) {
+				idColumns.add(col);
+			}
+		}
+		if (idColumns.isEmpty())
+			throwEX("Dao update error, no entityID set for class ");
+		return idColumns;
+	}
 }

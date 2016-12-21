@@ -1,47 +1,26 @@
 package test.config.po;
 
+import com.github.drinkjava2.jsqlbox.EntityBase;
+
 /**
- * This entity class should automatically created by a code generator tool
+ * Entity class is not a POJO, extends from EntityBase class or it's child class<br/>
+ * But for some reason if can't extend from EntityBase, can copy all method in EntityBase into entity class<br/>
  * 
+ * Default database table equal to entity class(s) name, in this example it will use "users" as table name
+ * 
+ * @author Yong Zhu
+ *
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class User extends EntityBase {
 	private Integer id;
-
-	public String id() {
-		return dao().getColumnName();
-	}
-
 	private String userName;
-
-	public String userName() {
-		return dao().getColumnName();
-	}
-
 	private String phoneNumber;
-
-	public String phoneNumber() {
-		return dao().getColumnName();
-	}
-
 	private String address;
-
-	public String address() {
-		return dao().getColumnName();
-	}
-
 	private Integer age;
-
-	public String age() {
-		return dao().getColumnName();
-	}
-
 	private Boolean alive;
 
-	public String alive() {
-		return dao().getColumnName();
-	}
-
-	// getter & setters
 	public Boolean getAlive() {
 		return alive;
 	}
@@ -90,4 +69,28 @@ public class User extends EntityBase {
 		this.age = age;
 	}
 
+	// Below method are for JDBC friendly use, it's not compulsory but recommended to add below methods
+	public String id() {
+		return dao().getColumnName();
+	}
+
+	public String userName() {
+		return dao().getColumnName();
+	}
+
+	public String phoneNumber() {
+		return dao().getColumnName();
+	}
+
+	public String address() {
+		return dao().getColumnName();
+	}
+
+	public String age() {
+		return dao().getColumnName();
+	}
+
+	public String alive() {
+		return dao().getColumnName();
+	}
 }

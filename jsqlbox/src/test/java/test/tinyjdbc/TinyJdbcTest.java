@@ -59,7 +59,7 @@ public class TinyJdbcTest {
 		tx_InsertUser2();
 	}
 
-	@Test
+	//@Test
 	public void doTest() {
 		TinyJdbcTest tester = BeanBox.getBean(TinyJdbcTest.class);
 		boolean foundException = false;

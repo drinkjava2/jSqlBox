@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -52,7 +53,7 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Dao {
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
-	private SqlBox sqlBox;
+	private SqlBox box;
 
 	// In future version may delete JDBCTemplate and only use pure JDBC
 
@@ -64,7 +65,7 @@ public class Dao {
 		else if (ctx.getDataSource() == null)
 			throwEX("Dao create error,  dataSource can not be null");
 		SqlBox sb = new SqlBox(ctx);
-		this.sqlBox = sb;
+		this.box = sb;
 	}
 
 	public Dao(SqlBox sqlBox) {
@@ -74,7 +75,7 @@ public class Dao {
 			throwEX("Dao create error, sqlBoxContext can not be null");
 		else if (sqlBox.getContext().getDataSource() == null)
 			throwEX("Dao create error, dataSource can not be null");
-		this.sqlBox = sqlBox;
+		this.box = sqlBox;
 	}
 
 	/**
@@ -128,8 +129,14 @@ public class Dao {
 			logSql(sp);
 			if (sp.getParameters().length != 0)
 				return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
-			else
-				return (T) getJdbc().queryForObject(sp.getSql(), clazz);
+			else {
+				try {
+					return (T) getJdbc().queryForObject(sp.getSql(), clazz);
+				} catch (EmptyResultDataAccessException e) {
+					SqlBoxException.eatException(e);
+					return null;
+				}
+			}
 		} finally {
 			SqlHelper.clearLastSQL();
 		}
@@ -241,8 +248,8 @@ public class Dao {
 	 * Query and return entity list by sql
 	 */
 	public <T> List<T> queryEntity(Class<?> beanOrSqlBoxClass, String... sql) {
-		SqlBox box = this.getBox().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
-		return this.queryEntity(box, sql);
+		SqlBox sqlbox = this.getBox().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
+		return this.queryEntity(sqlbox, sql);
 	}
 
 	/**
@@ -313,7 +320,7 @@ public class Dao {
 	 * Get last auto increase id, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
 	 */
 	private Object getLastAutoIncreaseIdentity(Column col) {
-		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + sqlBox.getRealTable();
+		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + box.getRealTable();
 		return this.getJdbc().queryForObject(sql, col.getPropertyType());
 	}
 
@@ -332,9 +339,9 @@ public class Dao {
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
-		sb.append("insert into ").append(sqlBox.getRealTable()).append(" ( ");
+		sb.append("insert into ").append(box.getRealTable()).append(" ( ");
 
-		Map<String, Column> realColumns = sqlBox.buildRealColumns();
+		Map<String, Column> realColumns = box.buildRealColumns();
 		for (Column col : realColumns.values()) {
 			IdGenerator idGen = col.getIdGenerator();
 			if (idGen != null && !(idGen instanceof AssignedGenerator)) {
@@ -402,14 +409,14 @@ public class Dao {
 		if (entityBean == null)
 			throwEX("Dao update error, bean is null");
 
-		Map<String, Column> realColumns = sqlBox.buildRealColumns();
+		Map<String, Column> realColumns = box.buildRealColumns();
 
 		List<Column> idColumns = extractIdColumnsWithValue(realColumns);
 
 		// start to spell sql
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
-		sb.append("update ").append(sqlBox.getRealTable()).append(" set ");
+		sb.append("update ").append(box.getRealTable()).append(" set ");
 
 		// set values
 		for (Column col : realColumns.values()) {
@@ -429,7 +436,7 @@ public class Dao {
 		// delete the last ","
 		sb.setLength(sb.length() - 2);
 
-		sb.append(" where ");
+		sb.append("  where ");
 		for (Column col : idColumns) {
 			sb.append(col.getColumnName()).append("=").append(col.getPropertyValue()).append(" and ");
 		}
@@ -444,69 +451,12 @@ public class Dao {
 			throwEX("Dao insert error, no record be updated, sql=" + sb.toString());
 	}
 
-	private List<Column> extractIdColumnsWithValue(Map<String, Column> realColumns) {
-		// cache id columns
-		List<Column> idColumns = new ArrayList<>();
-		for (Entry<String, Column> entry : realColumns.entrySet()) {
-			Column col = entry.getValue();
-			if (col.getEntityID()) {
-				Object idValue = SqlBoxUtils.getFieldRealValue(this.entityBean, col);
-				assureNotNull(idValue, "Dao update error, ID can not be null, column=" + col.getColumnName());
-				col.setPropertyValue(idValue);
-				idColumns.add(col);
-			}
-		}
-		if (idColumns.isEmpty())
-			throwEX("Dao update error, no entityID set for class " + this.sqlBox.getEntityClass());
-		return idColumns;
-	}
-
-	private List<Column> extractIdColumnsOnly(Map<String, Column> realColumns) {
-		List<Column> idColumns = new ArrayList<>();
-		for (Entry<String, Column> entry : realColumns.entrySet()) {
-			Column col = entry.getValue();
-			if (col.getEntityID()) {
-				idColumns.add(col);
-			}
-		}
-		if (idColumns.isEmpty())
-			throwEX("Dao update error, no entityID set for class " + this.sqlBox.getEntityClass());
-		return idColumns;
-	}
-
-	public List<Column> getEntityID() {
-		Map<String, Column> realColumns = sqlBox.buildRealColumns();
-		return extractIdColumnsWithValue(realColumns);
-	}
-
-	/**
-	 * @param entityID
-	 * @return
-	 */
-	public void delete() {
-		// TODO
-	}
-
 	/**
 	 * Load a entity from Database by its ID
 	 */
-	public <T> T load(Object entityID) {// NOSONAR
-		Map<String, Column> realColumns = sqlBox.buildRealColumns();
-		Map<String, Object> idvalues = new HashMap<>();
-		if (entityID instanceof Map) {
-			for (Entry<String, Object> entry : ((Map<String, Object>) entityID).entrySet())
-				idvalues.put(entry.getKey(), entry.getValue());
-		} else if (entityID instanceof List) {
-			idvalues = new HashMap<>();
-			for (Column col : (List<Column>) entityID)
-				idvalues.put(col.getFieldID(), col.getPropertyValue());
-		} else {
-			List<Column> idCols = extractIdColumnsOnly(realColumns);
-			if (idCols == null || idCols.size() != 1)
-				throwEX("Dao load error, id column is not 1, entityID:" + entityID);
-			else
-				idvalues.put(idCols.get(0).getFieldID(), entityID);
-		}
+	protected <T> T load(Object entityID) {// NOSONAR
+		Map<String, Column> realColumns = box.buildRealColumns();
+		Map<String, Object> idvalues = SqlBoxUtils.extractEntityIDValues(entityID, realColumns);
 
 		// start to spell sql
 		StringBuilder sb = new StringBuilder("select ");
@@ -518,7 +468,7 @@ public class Dao {
 		}
 
 		sb.setLength(sb.length() - 2);// delete the last ","
-		sb.append(" from ").append(this.sqlBox.getRealTable()).append(" where ");
+		sb.append(" from ").append(this.box.getRealTable()).append(" where ");
 
 		for (Entry<String, Object> entry : idvalues.entrySet()) {
 			sb.append(entry.getKey()).append("=").append("? and ");
@@ -541,15 +491,74 @@ public class Dao {
 	}
 
 	/**
+	 * @param entityID
+	 * @return
+	 */
+	public void delete() {
+		Map<String, Column> realColumns = box.buildRealColumns();
+		List<Column> entityID = extractIdColumnsWithValue(realColumns);
+		Map<String, Object> idvalues = SqlBoxUtils.extractEntityIDValues(entityID, realColumns);
+
+		// start to spell sql
+		StringBuilder sb = new StringBuilder("delete ");
+		List<Object> parameters = new ArrayList<>();
+		sb.append(" from ").append(this.box.getRealTable()).append(" where ");
+
+		for (Entry<String, Object> entry : idvalues.entrySet()) {
+			sb.append(entry.getKey()).append("=").append("? and ");
+			parameters.add(entry.getValue());
+		}
+		sb.setLength(sb.length() - 5);// delete the last " and "
+
+		if (this.getBox().getContext().isShowSql())
+			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+		int result = this.getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
+		if (result != 1)
+			throwEX("Dao delete error, no record delete for entityID:" + entityID);
+		deleteEntityID(realColumns, idvalues);
+	}
+
+	private List<Column> extractIdColumnsWithValue(Map<String, Column> realColumns) {
+		// cache id columns
+		List<Column> idColumns = new ArrayList<>();
+		for (Entry<String, Column> entry : realColumns.entrySet()) {
+			Column col = entry.getValue();
+			if (col.getEntityID()) {
+				Object idValue = SqlBoxUtils.getFieldRealValue(this.entityBean, col);
+				assureNotNull(idValue, "Dao update error, ID can not be null, column=" + col.getColumnName());
+				col.setPropertyValue(idValue);
+				idColumns.add(col);
+			}
+		}
+		if (idColumns.isEmpty())
+			throwEX("Dao update error, no entityID set for class " + this.box.getEntityClass());
+		return idColumns;
+	}
+
+	public List<Column> getEntityID() {
+		Map<String, Column> realColumns = box.buildRealColumns();
+		return extractIdColumnsWithValue(realColumns);
+	}
+
+	/**
 	 * Write one row value to entity
 	 */
 	private void writeValuesToEntity(Map<String, Column> realColumns, Map<String, Object> row) {
 		for (Entry<String, Column> entry : realColumns.entrySet()) {
 			Column col = entry.getValue();
-			String realColumnName = col.getColumnName();
-			if (row.containsKey(realColumnName)) {
-				setFieldRealValue(col, row.get(realColumnName));
-			}
+			if (row.containsKey(col.getFieldID()))
+				setFieldRealValue(col, row.get(col.getFieldID()));
+		}
+	}
+
+	/**
+	 * Delete entityID from entity
+	 */
+	private void deleteEntityID(Map<String, Column> realColumns, Map<String, Object> idvalues) {
+		for (Entry<String, Column> entry : realColumns.entrySet()) {
+			Column col = entry.getValue();
+			if (idvalues.containsKey(col.getFieldID()))
+				setFieldRealValue(col, null);
 		}
 	}
 
@@ -563,6 +572,11 @@ public class Dao {
 
 			if (value != null && value instanceof BigDecimal && col.getPropertyType().isAssignableFrom(Integer.class)) {
 				Integer valueForInvoke = Integer.parseInt("" + value);
+				m.invoke(this.entityBean, new Object[] { valueForInvoke });
+			} else if (value != null && col.getPropertyType().isAssignableFrom(Boolean.class)) {
+				Boolean valueForInvoke = true;
+				if ("0".equals(value) || "".equals(value))
+					valueForInvoke = false;
 				m.invoke(this.entityBean, new Object[] { valueForInvoke });
 			} else
 				m.invoke(this.entityBean, new Object[] { value });
@@ -617,19 +631,19 @@ public class Dao {
 	}
 
 	public SqlBox getBox() {
-		return sqlBox;
+		return box;
 	}
 
 	public SqlBoxContext getContext() {
-		return sqlBox.getContext();
+		return box.getContext();
 	}
 
 	public DatabaseType getDatabaseType() {
-		return sqlBox.getContext().getDatabaseType();
+		return box.getContext().getDatabaseType();
 	}
 
 	public Dao setSqlBox(SqlBox sqlBox) {
-		this.sqlBox = sqlBox;
+		this.box = sqlBox;
 		return this;
 	}
 

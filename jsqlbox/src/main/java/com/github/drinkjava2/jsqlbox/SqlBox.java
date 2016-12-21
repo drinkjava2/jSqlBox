@@ -117,17 +117,16 @@ public class SqlBox {
 	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
 	 */
 	private boolean isLegalFieldID(String fieldID) {
+		if ("class".equals(fieldID))
+			return false;
 		if (SqlBoxUtils.isEmptyStr(fieldID))
 			return false;
-		try {
-			if (SqlBoxUtils.isCapitalizedString(fieldID))
-				return false;
-			Method method = ReflectionUtils.getDeclaredMethod(entityClass, fieldID, new Class[] {});
-			if (method == null)
-				return false;
-		} catch (Exception e) { // NOSONAR
+		if (SqlBoxUtils.isCapitalizedString(fieldID))
 			return false;
-		}
+		/**
+		 * try { Method method = ReflectionUtils.getDeclaredMethod(entityClass, fieldID, new Class[] {}); if (method ==
+		 * null) return false; } catch (Exception e) { return false; }
+		 */
 		return true;
 	}
 
@@ -151,7 +150,7 @@ public class SqlBox {
 		}
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
-			if (isLegalFieldID(fieldID)) {
+			if (isLegalFieldID(fieldID)) { 
 				Column realCol = new Column();
 				realCol.setFieldID(fieldID);
 				realCol.setColumnName(this.getRealColumnName(fieldID));

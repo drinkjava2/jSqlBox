@@ -1,14 +1,15 @@
-package test.config.po;
+package com.github.drinkjava2.jsqlbox;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 /**
- * This entity class should automatically created by a code generator tool
+ * Each entity bean class should extends from EntityBase class <br/>
+ * But for some reason if don't want extends from EntityBase class, just copy all fields and methods in EntityBase class
+ * to your entity bean class
  * 
  */
 public class EntityBase {
-	// ==== have to copy below methods in each entity class:=====
 	private Dao dao;
 
 	public void putDao(Dao dao) {
@@ -36,7 +37,7 @@ public class EntityBase {
 	}
 
 	public void delete() {
-		this.dao().update();
+		this.dao().delete();
 	}
 
 }

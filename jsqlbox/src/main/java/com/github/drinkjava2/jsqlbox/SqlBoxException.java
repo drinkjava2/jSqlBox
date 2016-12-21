@@ -15,6 +15,9 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * @author Yong Zhu
  * @version 1.0.0
@@ -37,10 +40,13 @@ public class SqlBoxException extends RuntimeException {
 	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
 	public static Object throwEX(Exception e, String errorMsg) {
-		if (e != null)
-			log.error(errorMsg + "\r\n" + e.getMessage());
-		else
-			log.error(errorMsg);
+		log.error(errorMsg);
+		if (e != null) {
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw, true));
+			String stackTrace = sw.toString();
+			log.error(stackTrace);
+		}
 		throw new SqlBoxException(errorMsg);
 	}
 
@@ -48,6 +54,7 @@ public class SqlBoxException extends RuntimeException {
 	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
 	public static Object throwEX(String errorMsg) {
+		log.error(errorMsg);
 		return throwEX(null, errorMsg);
 	}
 

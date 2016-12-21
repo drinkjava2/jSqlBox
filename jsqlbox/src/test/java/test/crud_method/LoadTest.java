@@ -15,6 +15,14 @@ import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import test.config.TestPrepare;
 import test.config.po.User;
 
+/**
+ * This is for test load method, and test composite Entiity ID
+ *
+ * @author Yong Zhu
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class LoadTest {
 
 	@Before
@@ -38,6 +46,11 @@ public class LoadTest {
 		Assert.assertTrue(u.getId() > 0);
 		User u2 = SqlBox.load(User.class, u.getId());
 		Assert.assertEquals("Address1", u2.getAddress());
+		u2.delete();
+		Assert.assertEquals("Address1", u2.getAddress());
+		Assert.assertNull(u2.getId());
+		Assert.assertNull(SqlBox.queryForString("select ", u.id(), " from ", u.table()));
+		Assert.assertTrue(SqlBox.queryForInteger("select count(*)   from ", u.table()) == 0);
 	}
 
 	@Test
