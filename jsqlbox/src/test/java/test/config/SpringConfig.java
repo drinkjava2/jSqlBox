@@ -22,6 +22,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
+import test.config.po.DB;
 import test.config.po.User;
 import test.transaction.SpringTransactionTest;
 
@@ -70,7 +71,7 @@ public class SpringConfig {
 
 	@Bean(name = "sqlBoxCtxBean") // This is not good
 	public SqlBoxContext sqlBoxCtxBean() {
-		return new SqlBoxContext(MySqlDataSourceBean());
+		return new SqlBoxContext(MySqlDataSourceBean(), DB.class);
 	}
 
 	@Bean

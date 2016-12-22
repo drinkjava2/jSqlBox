@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.SortedUUIDGenerator;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
@@ -41,7 +40,7 @@ public class SortedUUIDGeneratorTest {
 
 	public static class SortedUUIDBox extends BeanBox {
 		{
-			this.setConstructor(SortedUUIDGenerator.class, TableGeneratorBox.class, UUIDAnyGeneratorBox.class,29);
+			this.setConstructor(SortedUUIDGenerator.class, TableGeneratorBox.class, UUIDAnyGeneratorBox.class, 29);
 		}
 	}
 
@@ -52,7 +51,7 @@ public class SortedUUIDGeneratorTest {
 		User u = new User();
 		SqlBox.executeQuiet("drop table t");
 		SqlBox.executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-		u.box().configIdGenerator("userName", (IdGenerator) BeanBox.getBean(SortedUUIDBox.class));
+		u.box().configIdGenerator("userName", BeanBox.getBean(SortedUUIDBox.class));
 		for (int i = 0; i < 60; i++)
 			u.insert();
 		Assert.assertEquals(60, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
@@ -60,12 +59,12 @@ public class SortedUUIDGeneratorTest {
 
 	@Test
 	public void insertUserInOracle() {
-		if (SqlBox.getDefaultDatabaseType()  != DatabaseType.ORACLE)
+		if (SqlBox.getDefaultDatabaseType() != DatabaseType.ORACLE)
 			return;
 		User u = new User();
 		SqlBox.executeQuiet("drop table T");
 		SqlBox.executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
-		u.box().configIdGenerator("userName", (IdGenerator) BeanBox.getBean(SortedUUIDBox.class));
+		u.box().configIdGenerator("userName", BeanBox.getBean(SortedUUIDBox.class));
 		for (int i = 0; i < 60; i++)
 			u.insert();
 		Assert.assertEquals(60, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));

@@ -1,0 +1,3 @@
+add enable field for column
+1st cache & dirty check
+2nd cache

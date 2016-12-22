@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
@@ -39,7 +38,7 @@ public class TableGeneratorTest {
 		User u = new User();
 		SqlBox.executeQuiet("drop table t");
 		SqlBox.executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
+		u.box().configIdGenerator("age", BeanBox.getBean(TableGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.insert();
@@ -48,12 +47,12 @@ public class TableGeneratorTest {
 
 	@Test
 	public void insertUserInOracle() {
-		if (SqlBox.getDefaultDatabaseType()  != DatabaseType.ORACLE)
+		if (SqlBox.getDefaultDatabaseType() != DatabaseType.ORACLE)
 			return;
 		User u = new User();
 		SqlBox.executeQuiet("drop table T");
 		SqlBox.executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
-		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(TableGeneratorBox.class));
+		u.box().configIdGenerator("age", BeanBox.getBean(TableGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.insert();

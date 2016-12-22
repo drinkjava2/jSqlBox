@@ -1,5 +1,7 @@
 package test.config;
 
+import javax.sql.DataSource;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,7 +10,9 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
+import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.JBeanBoxConfig.TxInterceptorBox;
+import test.config.po.DB;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -22,7 +26,8 @@ public class TestPrepare {
 	public static void dropAndRecreateTables() {
 		BeanBox.defaultContext.close();
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
-		SqlBoxContext.configDefaultContext(SqlBoxConfig.class.getName(), "getSqlBoxContext");
+		SqlBoxContext.defaultSqlBoxContext.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
+		SqlBoxContext.defaultSqlBoxContext.setDbClass(DB.class);
 
 		if (SqlBox.getDefaultDatabaseType() == DatabaseType.ORACLE) {
 			SqlBox.executeQuiet("DROP TRIGGER TGR_2");

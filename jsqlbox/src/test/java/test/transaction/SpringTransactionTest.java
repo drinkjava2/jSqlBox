@@ -75,9 +75,7 @@ public class SpringTransactionTest {
 	@Test
 	public void doTest() {
 		AnnotationConfigApplicationContext springCTX = new AnnotationConfigApplicationContext(SpringConfig.class);
-		SqlBoxContext sc = springCTX.getBean("sqlBoxCtxBean", SqlBoxContext.class);
-		defaultSqlBoxContext = sc;
-		SqlBoxContext.configDefaultContext(SpringTransactionTest.class.getName(), "getDefaultCTX");
+		springCTX.getBean("sqlBoxCtxBean", SqlBoxContext.class);
 		SpringTransactionTest tester = springCTX.getBean(SpringTransactionTest.class);
 		boolean foundException = false;
 		try {

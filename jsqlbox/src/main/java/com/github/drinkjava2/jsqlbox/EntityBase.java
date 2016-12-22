@@ -23,6 +23,10 @@ public class EntityBase {
 	public String table() {
 		return box().getRealTable();
 	}
+	
+	public String star() {
+		return box().getStar();
+	}
 
 	public SqlBox box() {
 		return dao().getBox();

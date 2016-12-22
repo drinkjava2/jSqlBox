@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.SequenceGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
@@ -45,7 +44,7 @@ public class SequenceGeneratorTest {
 		if (SqlBox.getDefaultDatabaseType() != DatabaseType.ORACLE)
 			return;
 		User u = new User();
-		u.box().configIdGenerator("age", (IdGenerator) BeanBox.getBean(SequenceGeneratorBox.class));
+		u.box().configIdGenerator("age", BeanBox.getBean(SequenceGeneratorBox.class));
 		u.setUserName("User1");
 		for (int i = 0; i < 60; i++)
 			u.insert();

@@ -10,6 +10,8 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import test.config.po.DB;
+
 /**
  * This is jBeanBox configuration file, equal to XML in Spring <br/>
  * About jBeanBox project can google it
@@ -63,9 +65,9 @@ public class JBeanBoxConfig {
 	}
 
 	// CtxBox is a SqlBoxContent singleton
-	public static class CtxBox extends BeanBox {
+	public static class DefaultSqlBoxContextBox extends BeanBox {
 		{
-			this.setConstructor(SqlBoxContext.class, DataSourceBox.class);
+			this.setConstructor(SqlBoxContext.class, DataSourceBox.class, DB.class);
 		}
 	}
 

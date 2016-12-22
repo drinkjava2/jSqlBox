@@ -23,6 +23,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -64,8 +65,7 @@ public class SqlBox {
 	}
 
 	public static <T> T createBean(Class<?> beanOrSqlBoxClass) {
-		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
-		return ctx.createEntity(beanOrSqlBoxClass);
+		return SqlBoxContext.defaultSqlBoxContext.createEntity(beanOrSqlBoxClass);
 	}
 
 	/**
@@ -114,6 +114,13 @@ public class SqlBox {
 	}
 
 	/**
+	 * Return a * for sql
+	 */
+	public String getStar() {
+		return "*";// NOSONAR
+	}
+
+	/**
 	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
 	 */
 	private boolean isLegalFieldID(String fieldID) {
@@ -150,7 +157,7 @@ public class SqlBox {
 		}
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
-			if (isLegalFieldID(fieldID)) { 
+			if (isLegalFieldID(fieldID)) {
 				Column realCol = new Column();
 				realCol.setFieldID(fieldID);
 				realCol.setColumnName(this.getRealColumnName(fieldID));
@@ -348,7 +355,11 @@ public class SqlBox {
 	}
 
 	public static <T> T load(Class<?> entityOrBoxClass, Object entityID) {
-		return SqlBoxContext.getDefaultSqlBoxContext().load(entityOrBoxClass, entityID);
+		return SqlBoxContext.defaultSqlBoxContext.load(entityOrBoxClass, entityID);
+	}
+
+	public static <T> List<T> queryForList(String... sql) {
+		return SqlBoxContext.defaultSqlBoxContext.queryForList(sql);
 	}
 	// == shortcut methods end=======================================================
 

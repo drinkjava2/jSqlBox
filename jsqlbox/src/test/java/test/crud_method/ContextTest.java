@@ -14,9 +14,10 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.JBeanBoxConfig.CtxBox;
+import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
 import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.TestPrepare;
+import test.config.po.DB;
 import test.config.po.User;
 
 /**
@@ -51,7 +52,7 @@ public class ContextTest {
 			e.printStackTrace();
 		}
 
-		SqlBoxContext ctx = new SqlBoxContext(ds);
+		SqlBoxContext ctx = new SqlBoxContext(ds, DB.class);
 		User u = ctx.createEntity(User.class);
 		// Can not use User u=new User() here because default global SqlBoxContext not configured
 		u.setUserName("User1");
@@ -65,7 +66,7 @@ public class ContextTest {
 
 	@Test
 	public void insertUser2() {
-		SqlBoxContext ctx = BeanBox.getBean(CtxBox.class);
+		SqlBoxContext ctx = BeanBox.getBean(DefaultSqlBoxContextBox.class);
 		User u = ctx.createEntity(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");

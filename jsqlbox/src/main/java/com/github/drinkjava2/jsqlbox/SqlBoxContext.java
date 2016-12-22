@@ -15,8 +15,11 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -34,13 +37,12 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
+	public static final SqlBoxContext defaultSqlBoxContext = new SqlBoxContext();
+
 	// print SQL to console or log depends logging.properties
 	private boolean showSql = false;
 
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
-
-	private static String sqlBoxConfigClass = "SqlBoxConfig";
-	private static String getSqlBoxContextMethod = "getSqlBoxContext";
 
 	public static final String SQLBOX_IDENTITY = "BOX";
 
@@ -49,6 +51,8 @@ public class SqlBoxContext {
 
 	private TinyDbMetaData metaData;
 
+	private Class<?> dbClass;
+
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
 		protected HashMap<Object, Object> initialValue() {
@@ -56,58 +60,53 @@ public class SqlBoxContext {
 		}
 	};
 
-	public SqlBoxContext(DataSource dataSource) {
+	public SqlBoxContext() {
+		// Default constructor
+	}
+
+	public SqlBoxContext(DataSource dataSource, Class<?> dbClass) {
 		this.dataSource = dataSource;
+		this.dbClass = dbClass;
 		if (dataSource != null) {
 			this.jdbc.setDataSource(dataSource);
 			refreshMetaData();
 		}
-
 	}
 
 	/**
-	 * Config a global invoke method, used to get a default SqlBoxContext for global use<br/>
-	 * The default method is: public static SqlBoxContext getSqlBoxContext() in SqlBoxConfig class
-	 */
-	public static void configDefaultContext(String configClassName, String invokeMethodName) {
-		sqlBoxConfigClass = configClassName;
-		getSqlBoxContextMethod = invokeMethodName;
-	}
-
-	public static void resetDefaultContext() {
-		sqlBoxConfigClass = "SqlBoxConfig";
-		getSqlBoxContextMethod = "getSqlBoxContext";
-	}
-
-	/**
-	 * Return a default global SqlBoxContext <br/>
-	 * Note: a config class SqlBoxConfig.java is needed in class root folder
-	 */
-	public static SqlBoxContext getDefaultSqlBoxContext() {
-		final String errorinfo = "SqlBoxContext getDefaultSqlBoxContext error: ";
-		SqlBoxContext ctx = null;
-		try {
-			Class<?> configClass = Class.forName(sqlBoxConfigClass);
-			Method method = ReflectionUtils.getDeclaredMethod(configClass, getSqlBoxContextMethod, new Class[] {});
-			ctx = (SqlBoxContext) method.invoke(configClass, new Object[] {});
-			if (ctx == null)
-				SqlBoxException.throwEX(errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
-		} catch (Exception e1) {
-			SqlBoxException.throwEX(e1, errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
-		} catch (Error error) {// NOSONAR
-			log.error(errorinfo + sqlBoxConfigClass + "." + getSqlBoxContextMethod + "()");
-			throw error;
-		}
-		return ctx;
-	}
-
-	/**
-	 * Load entity from DB
+	 * Load entity from database
 	 */
 	public <T> T load(Class<?> entityOrBoxClass, Object entityID) {
 		T bean = (T) createEntity(entityOrBoxClass);
 		Dao dao = SqlBoxUtils.getDao(bean);
 		return dao.load(entityID);
+	}
+
+	/**
+	 * Query for a DB type List
+	 */
+	public <T> List<T> queryForList(String... sql) {
+		List<T> result = new ArrayList<>();
+		try {
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			logSql(sp);
+			List<Map<String, Object>> lst;
+			if (sp.getParameters().length == 0)
+				lst = getJdbc().queryForList(sp.getSql());
+			else
+				lst = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+			Field field = ReflectionUtils.getDeclaredField(dbClass, "map");
+			for (Map<String, Object> map : lst) {
+				Object db = dbClass.newInstance();
+				field.set(db, map);
+				result.add((T) db);
+			}
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SqlBoxContext queryForList, sql=" + sql);
+		} finally {
+			SqlHelper.clearLastSQL();
+		}
+		return result;
 	}
 
 	/**
@@ -174,6 +173,29 @@ public class SqlBoxContext {
 		this.metaData = TinyJdbc.getMetaData(dataSource);
 	}
 
+	/**
+	 * Print SQL and parameters to console, usually used for debug <br/>
+	 * Use context.setShowSql to control, Default showSql is "false"
+	 */
+	private void logSql(SqlAndParameters sp) {
+		// check if allowed print SQL
+		if (!this.isShowSql())
+			return;
+		StringBuilder sb = new StringBuilder(sp.getSql());
+		Object[] args = sp.getParameters();
+		if (args.length > 0) {
+			sb.append("\r\nParameters: ");
+			for (int i = 0; i < args.length; i++) {
+				sb.append("" + args[i]);
+				if (i != args.length - 1)
+					sb.append(",");
+				else
+					sb.append("\r\n");
+			}
+		}
+		log.info(sb.toString());
+	}
+
 	// ================== getter & setters below============
 	public DataSource getDataSource() {
 		return dataSource;
@@ -207,6 +229,14 @@ public class SqlBoxContext {
 
 	public void setMetaData(TinyDbMetaData metaData) {
 		this.metaData = metaData;
+	}
+
+	public Class<?> getDbClass() {
+		return dbClass;
+	}
+
+	public void setDbClass(Class<?> dbClass) {
+		this.dbClass = dbClass;
 	}
 
 }

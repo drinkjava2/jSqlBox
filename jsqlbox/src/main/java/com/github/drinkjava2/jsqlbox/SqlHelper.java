@@ -110,11 +110,11 @@ public class SqlHelper {
 	/**
 	 * Cache parameters in thread local and return a question mark "?" string
 	 */
-	public static String q(Object... obj) {
+	public static String q(Object... parameters) {
 		StringBuilder result = new StringBuilder("");
-		for (int i = 0; i < obj.length; i++) {
-			sqlCache.get().add("" + obj[i]);
-			if (i != obj.length - 1)
+		for (int i = 0; i < parameters.length; i++) {
+			sqlCache.get().add("" + parameters[i]);
+			if (i != parameters.length - 1)
 				result.append("?,");
 			else
 				result.append("?");
@@ -129,6 +129,20 @@ public class SqlHelper {
 		for (Object o : parameters)
 			sqlCache.get().add("" + o);
 		return "";
+	}
+
+	/**
+	 * Link parameters together only but do not cache it
+	 */
+	public static String link(Object... parameters) {
+		StringBuilder result = new StringBuilder("");
+		for (int i = 0; i < parameters.length; i++) {
+			if (i != parameters.length - 1)
+				result.append("" + parameters[i] + ",");
+			else
+				result.append("" + parameters[i]);
+		}
+		return result.toString();
 	}
 
 	/**

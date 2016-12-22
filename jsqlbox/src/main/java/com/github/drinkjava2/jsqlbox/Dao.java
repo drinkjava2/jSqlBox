@@ -50,7 +50,7 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
  * @since 1.0.0
  */
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "unchecked" })
 public class Dao {
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
 	private SqlBox box;
@@ -84,8 +84,7 @@ public class Dao {
 	public static Dao getDao(Object bean, Dao dao) {
 		if (dao != null)
 			return dao;
-		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
-		SqlBox box = ctx.findAndBuildSqlBox(bean.getClass());
+		SqlBox box = SqlBoxContext.defaultSqlBoxContext.findAndBuildSqlBox(bean.getClass());
 		box.beanInitialize(bean);
 		Dao d = new Dao(box);
 		d.setEntityBean(bean);
@@ -101,9 +100,8 @@ public class Dao {
 	/**
 	 * Get default Dao
 	 */
-	public static Dao dao() {
-		SqlBoxContext ctx = SqlBoxContext.getDefaultSqlBoxContext();
-		SqlBox box = new SqlBox(ctx);
+	public static Dao dao() { 
+		SqlBox box = new SqlBox(SqlBoxContext.defaultSqlBoxContext);
 		return new Dao(box);
 	}
 
@@ -237,36 +235,6 @@ public class Dao {
 	// ========JdbcTemplate wrap methods End============
 
 	// ========Dao query/crud methods begin=======
-	/**
-	 * Query and return entity list by sql
-	 */
-	public List queryEntity(String... sql) {
-		return this.queryEntity(this.getBox(), sql);
-	}
-
-	/**
-	 * Query and return entity list by sql
-	 */
-	public <T> List<T> queryEntity(Class<?> beanOrSqlBoxClass, String... sql) {
-		SqlBox sqlbox = this.getBox().getContext().findAndBuildSqlBox(beanOrSqlBoxClass);
-		return this.queryEntity(sqlbox, sql);
-	}
-
-	/**
-	 * Query and return entity list by SqlBox and sql
-	 */
-	private List queryEntity(SqlBox sqlBox, String... sql) {
-		if (sqlBox == null)
-			throw new SqlBoxException("Dao queryEntity error: sqlBox is null");
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			// TODO
-			return null;
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
-	}
 
 	/**
 	 * Print SQL and parameters to console, usually used for debug <br/>
