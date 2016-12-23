@@ -3,9 +3,7 @@ package test.transaction;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,21 +26,6 @@ import test.config.po.User;
  */
 @Transactional(propagation = Propagation.REQUIRED)
 public class SpringTransactionTest {
-	private static SqlBoxContext defaultSqlBoxContext = null;
-
-	public static SqlBoxContext getDefaultCTX() {
-		return defaultSqlBoxContext;
-	}
-
-	@Before
-	public void setup() {
-		TestPrepare.dropAndRecreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
-	}
 
 	public void tx_InsertUser1() {
 		User u = new User();
@@ -74,8 +57,11 @@ public class SpringTransactionTest {
 
 	@Test
 	public void doTest() {
+		TestPrepare.dropAndRecreateTables();
+		TestPrepare.closeDefaultContexts();
+
 		AnnotationConfigApplicationContext springCTX = new AnnotationConfigApplicationContext(SpringConfig.class);
-		springCTX.getBean("sqlBoxCtxBean", SqlBoxContext.class);
+		SqlBoxContext.setDefaultSqlBoxContext(springCTX.getBean(SqlBoxContext.class));
 		SpringTransactionTest tester = springCTX.getBean(SpringTransactionTest.class);
 		boolean foundException = false;
 		try {
@@ -87,6 +73,8 @@ public class SpringTransactionTest {
 			Assert.assertEquals(0, i);
 		}
 		Assert.assertEquals(foundException, true);
+
+		SqlBoxContext.defaultSqlBoxContext().close();
 		springCTX.close();
 	}
 

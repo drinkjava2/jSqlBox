@@ -2,6 +2,8 @@ package test.config;
 
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -23,8 +25,17 @@ import test.config.po.DB;
  */
 public class JBeanBoxConfig {
 
+	public static class DefaultSqlBoxContextBox extends BeanBox {
+		public SqlBoxContext create() {
+			SqlBoxContext ctx = new SqlBoxContext();
+			ctx.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
+			ctx.setDbClass(DB.class);
+			return ctx;
+		}
+	}
+
 	// Data source pool setting
-	public static class DataSourceBox extends MySqlDataSourceBox {
+	public static class DataSourceBox extends OracleDataSourceBox {
 	}
 
 	// Data source pool setting
@@ -33,8 +44,8 @@ public class JBeanBoxConfig {
 			setClassOrValue(ComboPooledDataSource.class);
 			setProperty("user", "root");// set to your user
 			setProperty("password", "root888");// set to your password
-			setProperty("minPoolSize", 3);
-			setProperty("maxPoolSize", 10);
+			setProperty("minPoolSize", 1);
+			setProperty("maxPoolSize", 3);
 			setProperty("CheckoutTimeout", 5000);
 			this.setPreDestory("close");// Close c3p0 DataSource pool if jBeanBox context close
 		}
@@ -61,13 +72,6 @@ public class JBeanBoxConfig {
 		{
 			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
 			setProperty("driverClass", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		}
-	}
-
-	// CtxBox is a SqlBoxContent singleton
-	public static class DefaultSqlBoxContextBox extends BeanBox {
-		{
-			this.setConstructor(SqlBoxContext.class, DataSourceBox.class, DB.class);
 		}
 	}
 

@@ -1,7 +1,5 @@
 package test.config;
 
-import javax.sql.DataSource;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,9 +8,8 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
-import test.config.JBeanBoxConfig.DataSourceBox;
+import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
 import test.config.JBeanBoxConfig.TxInterceptorBox;
-import test.config.po.DB;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -24,10 +21,10 @@ public class TestPrepare {
 	 * Drop and rebuild all tables
 	 */
 	public static void dropAndRecreateTables() {
+		System.out.println("Drop and re-create all tables for a new test ...");
 		BeanBox.defaultContext.close();
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
-		SqlBoxContext.defaultSqlBoxContext.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
-		SqlBoxContext.defaultSqlBoxContext.setDbClass(DB.class);
+		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 
 		if (SqlBox.getDefaultDatabaseType() == DatabaseType.ORACLE) {
 			SqlBox.executeQuiet("DROP TRIGGER TGR_2");
@@ -82,15 +79,15 @@ public class TestPrepare {
 			SqlBox.execute(
 					"CREATE TRIGGER TGR_2 BEFORE INSERT ON USERS2 FOR EACH ROW BEGIN SELECT SEQ_2.NEXTVAL INTO:NEW.ID FROM DUAL; END;");
 		}
-
 		SqlBox.refreshMetaData();
 	}
 
 	/**
 	 * Close BeanBox Context, c3p0 close method will be called before context be closed
 	 */
-	public static void closeBeanBoxContext() {
+	public static void closeDefaultContexts() {
 		BeanBox.defaultContext.close();
+		SqlBoxContext.defaultSqlBoxContext().close();
 	}
 
 	@Test
@@ -98,7 +95,7 @@ public class TestPrepare {
 		dropAndRecreateTables();
 		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users2"));
-		closeBeanBoxContext();
+		closeDefaultContexts();
 	}
 
 }

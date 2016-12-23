@@ -24,7 +24,7 @@ public class InsertTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	@Test
@@ -79,20 +79,23 @@ public class InsertTest {
 		t.tx_insertUsers(); // use Spring Declarative Transaction
 	}
 
-	public static void main(String[] args) {
-		TestPrepare.dropAndRecreateTables();
-		long oldtime = System.currentTimeMillis();
+	/**
+	 * Test jSqlBox its self, because it used lots reflection
+	 */
+	@Test
+	public void speedTest() {
+		long oldTime = System.currentTimeMillis();
 		for (int i = 0; i < 10000; i++) {
-			SqlBoxContext ctx = SqlBoxContext.defaultSqlBoxContext;
-			User u = new User();// SqlBox.createBean(User.class);
+			SqlBoxContext.defaultSqlBoxContext();
+			User u = SqlBox.createBean(User.class);
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
-			Dao d = u.dao();
-			if (d == null)
-				System.out.println("null");
+			u.dao();
+			u.box().buildRealColumns();
 		}
 		long newTime = System.currentTimeMillis();
-		System.out.println("Time used=" + (newTime - oldtime));
+		System.out.println("Time used for 10000 times:" + (newTime - oldTime) + "ms");
+		Assert.assertTrue((newTime - oldTime) < 1000);
 	}
 }

@@ -22,14 +22,16 @@ public class BatchInsertTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	public void tx_BatchInsertDemo() {
 		User u = SqlBox.createBean(User.class);
 		for (int i = 0; i < 1000; i++)
-			SqlBox.cacheSQL("insert into ", u.table(), " (", u.userName(), empty("user" + i), ",", u.age(),
-					empty("70"), ") ", questionMarks());
+			SqlBox.cacheSQL("insert into ", u.table(), " (", //
+					u.userName(), empty("user" + i), ",", //
+					u.age(), empty("70"), //
+					") ", questionMarks());
 		SqlBox.executeCachedSQLs();
 	}
 

@@ -65,7 +65,7 @@ public class SqlBox {
 	}
 
 	public static <T> T createBean(Class<?> beanOrSqlBoxClass) {
-		return SqlBoxContext.defaultSqlBoxContext.createEntity(beanOrSqlBoxClass);
+		return SqlBoxContext.defaultSqlBoxContext().createEntity(beanOrSqlBoxClass);
 	}
 
 	/**
@@ -355,11 +355,11 @@ public class SqlBox {
 	}
 
 	public static <T> T load(Class<?> entityOrBoxClass, Object entityID) {
-		return SqlBoxContext.defaultSqlBoxContext.load(entityOrBoxClass, entityID);
+		return SqlBoxContext.defaultSqlBoxContext().load(entityOrBoxClass, entityID);
 	}
 
 	public static <T> List<T> queryForList(String... sql) {
-		return SqlBoxContext.defaultSqlBoxContext.queryForList(sql);
+		return SqlBoxContext.defaultSqlBoxContext().queryForList(sql);
 	}
 	// == shortcut methods end=======================================================
 

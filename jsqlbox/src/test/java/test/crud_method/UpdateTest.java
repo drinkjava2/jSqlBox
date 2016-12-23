@@ -22,7 +22,7 @@ public class UpdateTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	@Test

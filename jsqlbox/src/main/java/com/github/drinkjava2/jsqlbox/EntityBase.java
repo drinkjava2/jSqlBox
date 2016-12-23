@@ -1,8 +1,5 @@
 package com.github.drinkjava2.jsqlbox;
 
-import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.SqlBox;
-
 /**
  * Each entity bean class should extends from EntityBase class <br/>
  * But for some reason if don't want extends from EntityBase class, just copy all fields and methods in EntityBase class
@@ -10,6 +7,7 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
  * 
  */
 public class EntityBase {
+
 	private Dao dao;
 
 	public void putDao(Dao dao) {
@@ -23,7 +21,7 @@ public class EntityBase {
 	public String table() {
 		return box().getRealTable();
 	}
-	
+
 	public String star() {
 		return box().getStar();
 	}

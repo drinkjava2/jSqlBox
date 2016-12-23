@@ -37,7 +37,7 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext {
-	public static final SqlBoxContext defaultSqlBoxContext = new SqlBoxContext();
+	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
 	private boolean showSql = false;
@@ -64,6 +64,9 @@ public class SqlBoxContext {
 		// Default constructor
 	}
 
+	/**
+	 * Create a SqlBoxContext and register dataSoruce & DB class
+	 */
 	public SqlBoxContext(DataSource dataSource, Class<?> dbClass) {
 		this.dataSource = dataSource;
 		this.dbClass = dbClass;
@@ -71,6 +74,27 @@ public class SqlBoxContext {
 			this.jdbc.setDataSource(dataSource);
 			refreshMetaData();
 		}
+	}
+
+	public static SqlBoxContext defaultSqlBoxContext() {
+		if (defaultSqlBoxContext == null)
+			defaultSqlBoxContext = new SqlBoxContext();
+		return defaultSqlBoxContext;
+
+	}
+
+	public static <T> void setDefaultSqlBoxContext(T sqlBoxContext) {
+		defaultSqlBoxContext = (SqlBoxContext) sqlBoxContext;
+	}
+
+	/**
+	 * Release resources (DataSource handle), usually no need call this method except use multiple SqlBoxContext
+	 */
+	public void close() {
+		this.dataSource = null;
+		this.dbClass = null;
+		this.metaData = null;
+		this.showSql = false;
 	}
 
 	/**
@@ -144,7 +168,8 @@ public class SqlBoxContext {
 					box.setEntityClass(entityOrBoxClass);
 				box.setContext(this);
 			} catch (Exception e) {
-				SqlBoxException.throwEX(e, "SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance");
+				SqlBoxException.throwEX(e,
+						"SqlBoxContext findAndBuildSqlBox error! Can not create SqlBox instance: " + entityOrBoxClass);
 			}
 		}
 		return box;
@@ -201,6 +226,9 @@ public class SqlBoxContext {
 		return dataSource;
 	}
 
+	/**
+	 * Set DataSource for SqlBoxContext
+	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 		this.jdbc.setDataSource(dataSource);

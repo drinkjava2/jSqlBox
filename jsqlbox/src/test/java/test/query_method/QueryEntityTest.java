@@ -33,7 +33,7 @@ public class QueryEntityTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	@Test

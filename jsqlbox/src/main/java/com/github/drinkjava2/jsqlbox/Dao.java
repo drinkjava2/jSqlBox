@@ -84,7 +84,7 @@ public class Dao {
 	public static Dao getDao(Object bean, Dao dao) {
 		if (dao != null)
 			return dao;
-		SqlBox box = SqlBoxContext.defaultSqlBoxContext.findAndBuildSqlBox(bean.getClass());
+		SqlBox box = SqlBoxContext.defaultSqlBoxContext().findAndBuildSqlBox(bean.getClass());
 		box.beanInitialize(bean);
 		Dao d = new Dao(box);
 		d.setEntityBean(bean);
@@ -101,7 +101,7 @@ public class Dao {
 	 * Get default Dao
 	 */
 	public static Dao dao() { 
-		SqlBox box = new SqlBox(SqlBoxContext.defaultSqlBoxContext);
+		SqlBox box = new SqlBox(SqlBoxContext.defaultSqlBoxContext());
 		return new Dao(box);
 	}
 

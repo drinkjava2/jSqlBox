@@ -20,7 +20,7 @@ public class AutoGeneratorTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	@Test

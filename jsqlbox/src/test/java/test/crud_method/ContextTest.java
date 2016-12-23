@@ -4,6 +4,8 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import java.beans.PropertyVetoException;
 
+import javax.sql.DataSource;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,7 +16,6 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
 import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.TestPrepare;
 import test.config.po.DB;
@@ -37,7 +38,7 @@ public class ContextTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	@Test
@@ -64,9 +65,19 @@ public class ContextTest {
 				" where ", u.userName(), "=", q("User1")));
 	}
 
+	// CtxBox is a SqlBoxContent singleton
+	public static class AnotherSqlBoxContextBox extends BeanBox {
+		public SqlBoxContext create() {
+			SqlBoxContext ctx = new SqlBoxContext();
+			ctx.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
+			ctx.setDbClass(DB.class);
+			return ctx;
+		}
+	}
+
 	@Test
 	public void insertUser2() {
-		SqlBoxContext ctx = BeanBox.getBean(DefaultSqlBoxContextBox.class);
+		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);
 		User u = ctx.createEntity(User.class);
 		u.setUserName("User1");
 		u.setAddress("Address1");

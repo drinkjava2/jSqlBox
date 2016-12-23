@@ -30,7 +30,7 @@ public class SequenceGeneratorTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	public static class SequenceGeneratorBox extends BeanBox {

@@ -33,7 +33,7 @@ public class JBeanBoxTransactionTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	public void tx_InsertUser1() {

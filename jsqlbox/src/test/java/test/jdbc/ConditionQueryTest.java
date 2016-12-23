@@ -16,7 +16,7 @@ public class ConditionQueryTest {
 	@Before
 	public void setup() {
 		TestPrepare.dropAndRecreateTables();
-		User u = SqlBox.createBean(User.class);
+		User u = new User(); // use default SqlBoxContext
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setAge(10);
@@ -25,7 +25,7 @@ public class ConditionQueryTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {
@@ -50,10 +50,4 @@ public class ConditionQueryTest {
 		Assert.assertEquals(1, conditionQuery(3, 10));
 		Assert.assertEquals(0, conditionQuery(3, 20));
 	}
-
-	@After
-	public void cleanup() {
-
-	}
-
 }

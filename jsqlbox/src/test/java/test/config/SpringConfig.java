@@ -40,7 +40,7 @@ public class SpringConfig {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	@Bean
@@ -69,7 +69,7 @@ public class SpringConfig {
 		return ds;
 	}
 
-	@Bean(name = "sqlBoxCtxBean") // This is not good
+	@Bean // This is not good
 	public SqlBoxContext sqlBoxCtxBean() {
 		return new SqlBoxContext(MySqlDataSourceBean(), DB.class);
 	}

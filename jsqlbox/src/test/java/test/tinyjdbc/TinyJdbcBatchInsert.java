@@ -33,7 +33,7 @@ public class TinyJdbcBatchInsert {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	@Test

@@ -22,7 +22,7 @@ public class TableGeneratorTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeBeanBoxContext();
+		TestPrepare.closeDefaultContexts();
 	}
 
 	public static class TableGeneratorBox extends BeanBox {

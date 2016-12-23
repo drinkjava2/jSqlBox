@@ -1,5 +1,7 @@
 package test.config.po;
 
+import java.io.Serializable;
+
 import com.github.drinkjava2.jsqlbox.EntityBase;
 
 /**
@@ -13,7 +15,8 @@ import com.github.drinkjava2.jsqlbox.EntityBase;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class User extends EntityBase {
+public class User extends EntityBase implements Serializable {
+	private static final long serialVersionUID = 7547093565698490399L;
 	private Integer id;
 	private String userName;
 	private String phoneNumber;
@@ -93,4 +96,5 @@ public class User extends EntityBase {
 	public String alive() {
 		return dao().getColumnName();
 	}
+
 }

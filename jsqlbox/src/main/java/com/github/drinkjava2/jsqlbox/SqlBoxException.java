@@ -40,13 +40,13 @@ public class SqlBoxException extends RuntimeException {
 	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
 	public static Object throwEX(Exception e, String errorMsg) {
-		log.error(errorMsg);
 		if (e != null) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw, true));
 			String stackTrace = sw.toString();
 			log.error(stackTrace);
-		}
+		} else
+			log.error(errorMsg);
 		throw new SqlBoxException(errorMsg);
 	}
 
@@ -54,7 +54,6 @@ public class SqlBoxException extends RuntimeException {
 	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
 	 */
 	public static Object throwEX(String errorMsg) {
-		log.error(errorMsg);
 		return throwEX(null, errorMsg);
 	}
 
