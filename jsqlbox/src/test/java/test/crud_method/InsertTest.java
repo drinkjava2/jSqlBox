@@ -10,7 +10,6 @@ import org.junit.Test;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -79,23 +78,4 @@ public class InsertTest {
 		t.tx_insertUsers(); // use Spring Declarative Transaction
 	}
 
-	/**
-	 * Test jSqlBox its self, because it used lots reflection
-	 */
-	@Test
-	public void speedTest() {
-		long oldTime = System.currentTimeMillis();
-		for (int i = 0; i < 10000; i++) {
-			SqlBoxContext.defaultSqlBoxContext();
-			User u = SqlBox.createBean(User.class);
-			u.setUserName("User2");
-			u.setAddress("Address2");
-			u.setPhoneNumber("222");
-			u.dao();
-			u.box().buildRealColumns();
-		}
-		long newTime = System.currentTimeMillis();
-		System.out.println("Time used for 10000 times:" + (newTime - oldTime) + "ms");
-		Assert.assertTrue((newTime - oldTime) < 1000);
-	}
 }

@@ -100,7 +100,7 @@ public class Dao {
 	/**
 	 * Get default Dao
 	 */
-	public static Dao dao() { 
+	public static Dao dao() {
 		SqlBox box = new SqlBox(SqlBoxContext.defaultSqlBoxContext());
 		return new Dao(box);
 	}
@@ -561,7 +561,7 @@ public class Dao {
 		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
 		String realMethodName = "getColumnName".equals(method1)
 				? Thread.currentThread().getStackTrace()[2].getMethodName() : method1;
-		return this.getBox().getRealColumnName(realMethodName);
+		return this.getBox().getRealColumnName(null, realMethodName);
 	}
 	// ========Dao query/crud methods end=======
 

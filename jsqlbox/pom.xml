@@ -73,14 +73,15 @@
    </repositories>
 
  <dependencies>   
-     <!-- jSqlBox depends on jBeanBox because jBeanBox has wrapped CGLIB & ASM lib inside of its own naming space, it will not cause jar conflict if -->
+     <!-- jSqlBox depends on jBeanBox because it included CGLIB & ASM libs in its own naming space, this project need a CGLIB to create proxy entity-->
+     <!-- And also I need jSqlBox to configure some beans to do unit test because it's more convenient than Spring  -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jbeanbox</artifactId>
         <version>2.4.2-SNAPSHOT</version>
     </dependency>
 
-	<!-- jSqlBox depends on Spring Transaction, I hope in future can find replacement, but not right now -->
+	<!-- jSqlBox depends on Spring Transaction, I hope in future can find replacement, but not right now  -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
@@ -94,9 +95,9 @@
         <version>${spring.version}.RELEASE</version>
     </dependency>
    
-    <!-- =============================================================================================================================================== -->
-    <!-- Below libs are for unit test only, jSqlBox has no dependency on them, scope set to "test", these libs will not be deployed to Maven Centre Lib -->
-    <!-- =============================================================================================================================================== --> 
+    <!-- ============================================================================================================== -->
+    <!-- Below libs are for unit test only, jSqlBox has no dependency on them, scope be set to "test" only              -->
+    <!-- ============================================================================================================== --> 
 	
     <dependency>  
       <groupId>log4j</groupId>  

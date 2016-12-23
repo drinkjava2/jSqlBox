@@ -56,6 +56,13 @@ public class SqlBox {
 
 	private SqlBoxContext context;
 
+	private static ThreadLocal<HashMap<String, Method>> methodExistCache = new ThreadLocal<HashMap<String, Method>>() {
+		@Override
+		protected HashMap<String, Method> initialValue() {
+			return new HashMap<>();
+		}
+	};
+
 	public SqlBox() {
 		// Default Constructor
 	}
@@ -68,6 +75,17 @@ public class SqlBox {
 		return SqlBoxContext.defaultSqlBoxContext().createEntity(beanOrSqlBoxClass);
 	}
 
+	public static Method getDeclaredMethodQuickly(Class<?> targetClass, String methodName, Class<?> parameterclazz) {
+		String key = new StringBuilder(targetClass.toString()).append("_").append(methodName).append("_")
+				.append(parameterclazz).toString();
+		HashMap<String, Method> map = methodExistCache.get();
+		if (map.containsKey(key))
+			return map.get(key);
+		Method method = ReflectionUtils.getDeclaredMethod(targetClass, methodName, new Class[] { parameterclazz });
+		map.put(key, method);
+		return method;
+	}
+
 	/**
 	 * Create entity instance
 	 */
@@ -78,8 +96,9 @@ public class SqlBox {
 			this.beanInitialize(bean);
 			Dao dao = new Dao(this);
 			dao.setEntityBean(bean);
-			Method m = ReflectionUtils.getDeclaredMethod(this.getEntityClass(), "putDao", new Class[] { Dao.class });
-			m.invoke(bean, new Object[] { dao });
+			Method m = getDeclaredMethodQuickly(this.getEntityClass(), "putDao", Dao.class);
+			if (m != null)
+				m.invoke(bean, new Object[] { dao });// 5ms
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext create error");
 		}
@@ -91,7 +110,7 @@ public class SqlBox {
 	 */
 	public void beanInitialize(Object bean) {
 		try {
-			Method m = ReflectionUtils.getDeclaredMethod(getEntityClass(), "initialize", new Class[] { null });
+			Method m = getDeclaredMethodQuickly(this.getEntityClass(), "initialize", null);
 			if (m != null)
 				m.invoke(bean, new Object[] {});
 		} catch (Exception e) {
@@ -155,12 +174,13 @@ public class SqlBox {
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBox buildDefaultConfig error");
 		}
+
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
 			if (isLegalFieldID(fieldID)) {
 				Column realCol = new Column();
 				realCol.setFieldID(fieldID);
-				realCol.setColumnName(this.getRealColumnName(fieldID));
+				realCol.setColumnName(this.getRealColumnName(realTableName, fieldID));// 3080ms cost for speed test
 				realCol.setPropertyType(pd.getPropertyType());
 				realCol.setReadMethodName(pd.getReadMethod().getName());
 				realCol.setWriteMethodName(pd.getWriteMethod().getName());
@@ -232,14 +252,16 @@ public class SqlBox {
 	 * Get real column name by fieldID <br/>
 	 * userName field will find userName or username or USERNAME or USER_NAME, but only allowed 1
 	 */
-	public String getRealColumnName(String fieldID) {// NOSONAR
+	public String getRealColumnName(String realTableName, String fieldID) {// NOSONAR
 		Column col = getOrBuildConfigColumn(fieldID);
 		String columnName = col.getColumnName();
 		if (columnName == null || columnName.length() == 0)
 			columnName = fieldID;
-		String realTable = getRealTable();
-		Map<String, Column> oneTableMap = context.getMetaData().getOneTable(realTable.toLowerCase());
 
+		String realTable = realTableName;
+		if (SqlBoxUtils.isEmptyStr(realTable))
+			realTable = this.getRealTable();
+		Map<String, Column> oneTableMap = context.getMetaData().getOneTable(realTable.toLowerCase());
 		String realColumnNameignoreCase = null;
 		Column realColumn = oneTableMap.get(columnName.toLowerCase());
 		if (realColumn != null)

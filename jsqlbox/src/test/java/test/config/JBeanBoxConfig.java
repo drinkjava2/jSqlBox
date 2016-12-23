@@ -15,8 +15,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import test.config.po.DB;
 
 /**
- * This is jBeanBox configuration file, equal to XML in Spring <br/>
- * About jBeanBox project can google it
+ * This is jBeanBox configuration classes, equal to XML in Spring <br/>
+ * About jBeanBox project can google it, it's a small IOC/AOP tool to replace Spring
  * 
  * @author Yong Zhu
  *
@@ -25,6 +25,11 @@ import test.config.po.DB;
  */
 public class JBeanBoxConfig {
 
+	/**
+	 * This is a SqlBoxContext setting, you can config as many as possible contexts in one project, but usually only the
+	 * defaultSqlBox context is common used
+	 * 
+	 */
 	public static class DefaultSqlBoxContextBox extends BeanBox {
 		public SqlBoxContext create() {
 			SqlBoxContext ctx = new SqlBoxContext();
@@ -34,8 +39,13 @@ public class JBeanBoxConfig {
 		}
 	}
 
-	// Data source pool setting
-	public static class DataSourceBox extends OracleDataSourceBox {
+	/**
+	 * ==============================================================================================<br/>
+	 * Data source setting, change "MySqlDataSourceBox" to "OracleDataSourceBoxdo" to test on Oracle <br/>
+	 * This project is already tested on Oracle 11g and Mysql5
+	 * ==============================================================================================<br/>
+	 */
+	public static class DataSourceBox extends MySqlDataSourceBox {
 	}
 
 	// Data source pool setting
