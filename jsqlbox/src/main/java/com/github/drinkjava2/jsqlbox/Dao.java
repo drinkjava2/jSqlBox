@@ -35,12 +35,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.drinkjava2.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
+import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -89,7 +89,7 @@ public class Dao {
 		Dao d = new Dao(box);
 		d.setEntityBean(bean);
 		try {
-			Method m = ReflectionUtils.getDeclaredMethod(bean, "putDao", new Class[] { Dao.class });
+			Method m = ReflectionUtils.findMethod(bean.getClass(), "putDao", new Class[] { Dao.class });
 			m.invoke(bean, new Object[] { d });
 		} catch (Exception e) {
 			throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
@@ -535,7 +535,7 @@ public class Dao {
 	 */
 	private void setFieldRealValue(Column col, Object value) {
 		try {
-			Method m = ReflectionUtils.getDeclaredMethod(this.entityBean, col.getWriteMethodName(),
+			Method m = ReflectionUtils.findMethod(this.entityBean.getClass(), col.getWriteMethodName(),
 					new Class[] { col.getPropertyType() });
 
 			if (value != null && value instanceof BigDecimal && col.getPropertyType().isAssignableFrom(Integer.class)) {

@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.ReflectionUtils;
+import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 /**
  * @author Yong Zhu
@@ -163,7 +163,7 @@ public class SqlBoxUtils {
 	 */
 	public static Object getFieldRealValue(Object entityBean, Column col) {
 		try {
-			Method m = ReflectionUtils.getDeclaredMethod(entityBean, col.getReadMethodName(), new Class[] {});
+			Method m = ReflectionUtils.findMethod(entityBean.getClass(), col.getReadMethodName(), new Class[] {});
 			return m.invoke(entityBean, new Object[] {});
 		} catch (Exception e) {
 			return throwEX(e, "SqlBoxUtils getFieldRealValue error, method " + col.getReadMethodName()
@@ -177,7 +177,7 @@ public class SqlBoxUtils {
 	public static Dao getDao(Object entityBean) {
 		Dao dao = null;
 		try {
-			Method m = ReflectionUtils.getDeclaredMethod(entityBean, "dao", new Class[] {});
+			Method m = ReflectionUtils.findMethod(entityBean.getClass(), "dao", new Class[] {});
 			dao = (Dao) m.invoke(entityBean, new Object[] {});
 		} catch (Exception e) {
 			throwEX(e, "SqlBoxContext load error for bean \"" + entityBean + "\", no dao method found");
@@ -190,13 +190,13 @@ public class SqlBoxUtils {
 	/**
 	 * Extract EntityID Values from realColumns
 	 */
- 	public static Map<String, Object> extractEntityIDValues(Object entityID, Map<String, Column> realColumns) {
+	public static Map<String, Object> extractEntityIDValues(Object entityID, Map<String, Column> realColumns) {
 		Map<String, Object> idvalues = new HashMap<>();
 		if (entityID instanceof Map) {
 			for (Entry<String, Object> entry : ((Map<String, Object>) entityID).entrySet())
 				idvalues.put(entry.getKey(), entry.getValue());
 		} else if (entityID instanceof List) {
-			idvalues = new HashMap<>();
+			idvalues = new HashMap<>(); 
 			for (Column col : (List<Column>) entityID)
 				idvalues.put(col.getFieldID(), col.getPropertyValue());
 		} else {

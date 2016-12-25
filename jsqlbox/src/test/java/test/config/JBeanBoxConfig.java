@@ -10,7 +10,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.po.DB;
 
@@ -42,46 +42,50 @@ public class JBeanBoxConfig {
 	/**
 	 * ==============================================================================================<br/>
 	 * Data source setting, change "MySqlDataSourceBox" to "OracleDataSourceBoxdo" to test on Oracle <br/>
-	 * This project is already tested on Oracle 11g and Mysql5
+	 * This project is already passed test on Oracle 11g and Mysql5
 	 * ==============================================================================================<br/>
 	 */
-	public static class DataSourceBox extends MySqlDataSourceBox {
+	public static class DataSourceBox extends OracleDataSourceBox {
 	}
 
-	// Data source pool setting
-	public static class C3P0Box extends BeanBox {
-		{
-			setClassOrValue(ComboPooledDataSource.class);
-			setProperty("user", "root");// set to your user
-			setProperty("password", "root888");// set to your password
-			setProperty("minPoolSize", 1);
-			setProperty("maxPoolSize", 3);
-			setProperty("CheckoutTimeout", 5000);
-			this.setPreDestory("close");// Close c3p0 DataSource pool if jBeanBox context close
+	// HikariCP DataSource pool is quicker than C3P0
+	public static class HikariCPBox extends BeanBox {
+		public HikariDataSource create() {
+			HikariDataSource ds = new HikariDataSource();
+			ds.addDataSourceProperty("cachePrepStmts", true);
+			ds.addDataSourceProperty("prepStmtCacheSize", 250);
+			ds.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+			ds.addDataSourceProperty("useServerPrepStmts", true);
+			ds.setUsername("root");
+			ds.setPassword("root888");// change to your PWD
+			ds.setMaximumPoolSize(10);
+			ds.setConnectionTimeout(5000);
+			this.setPreDestory("close");
+			return ds;
 		}
 	}
 
 	// MySql connection URL
-	public static class MySqlDataSourceBox extends C3P0Box {
+	public static class MySqlDataSourceBox extends HikariCPBox {
 		{
 			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
-			setProperty("driverClass", "com.mysql.jdbc.Driver");
+			setProperty("driverClassName", "com.mysql.jdbc.Driver");
 		}
 	}
 
 	// Oracle connection URL
-	public static class OracleDataSourceBox extends C3P0Box {
+	public static class OracleDataSourceBox extends HikariCPBox {
 		{
 			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
-			setProperty("driverClass", "oracle.jdbc.OracleDriver");
+			setProperty("driverClassName", "oracle.jdbc.OracleDriver");
 		}
 	}
 
-	// MsSql Server connection URL
-	public static class MsSqlServerDataSourceBox extends C3P0Box {
+	// MsSql Server connection URL, I haven't test MSSQL server
+	public static class MsSqlServerDataSourceBox extends HikariCPBox {
 		{
 			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
-			setProperty("driverClass", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			setProperty("driverClassName", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 		}
 	}
 

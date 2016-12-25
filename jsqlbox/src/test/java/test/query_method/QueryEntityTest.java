@@ -20,7 +20,7 @@ public class QueryEntityTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 		User u = new User();
 		for (int i = 0; i < 5; i++)
 			SqlBox.execute("insert into ", u.table(), //
@@ -33,7 +33,7 @@ public class QueryEntityTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 	@Test

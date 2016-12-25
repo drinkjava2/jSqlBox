@@ -57,8 +57,8 @@ public class SpringTransactionTest {
 
 	@Test
 	public void doTest() {
-		TestPrepare.dropAndRecreateTables();
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 
 		AnnotationConfigApplicationContext springCTX = new AnnotationConfigApplicationContext(SpringConfig.class);
 		SqlBoxContext.setDefaultSqlBoxContext(springCTX.getBean(SqlBoxContext.class));

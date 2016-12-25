@@ -2,8 +2,6 @@ package test.crud_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
-import java.beans.PropertyVetoException;
-
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -14,7 +12,7 @@ import org.junit.Test;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.TestPrepare;
@@ -33,29 +31,24 @@ public class ContextTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 	@Test
 	public void insertUser1() {
-		ComboPooledDataSource ds = new ComboPooledDataSource();// c3p0
-		ds.setUser("root");
+		HikariDataSource ds = new HikariDataSource();// c3p0
+		ds.setUsername("root");
 		ds.setPassword("root888");
 		ds.setJdbcUrl((String) new DataSourceBox().getProperty("jdbcUrl"));
-		try {
-			ds.setDriverClass((String) new DataSourceBox().getProperty("driverClass"));
-		} catch (PropertyVetoException e) {
-			e.printStackTrace();
-		}
-
+		ds.setDriverClassName((String) new DataSourceBox().getProperty("driverClassName"));
 		SqlBoxContext ctx = new SqlBoxContext(ds, DB.class);
 		User u = ctx.createEntity(User.class);
-		// Can not use User u=new User() here because default global SqlBoxContext not configured
+		// Can not use User u=new User() here because default SqlBoxContext not configured
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
@@ -90,10 +83,8 @@ public class ContextTest {
 
 	public static void main(String[] args) {
 		ContextTest t = new ContextTest();
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 		t.insertUser1();
-		// InitializeDatabase.dropAndRecreateTables();
-		// t.insertUser2();
 	}
 
 }

@@ -18,7 +18,7 @@ public class SortedUUIDGeneratorTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 	}
 
 	// @After

@@ -79,5 +79,9 @@ public class SqlBoxLogger {
 			throw new AssertionError(e.getMessage());
 		}
 	}
+	public static void main(String[] args) {
+		SqlBoxLogger log = getLog(SqlBoxLogger.class);
+		log.info("hello");
+	}
 
 }

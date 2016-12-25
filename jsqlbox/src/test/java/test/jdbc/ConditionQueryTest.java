@@ -15,7 +15,7 @@ import test.config.po.User;
 public class ConditionQueryTest {
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 		User u = new User(); // use default SqlBoxContext
 		u.setUserName("User1");
 		u.setAddress("Address1");
@@ -25,7 +25,7 @@ public class ConditionQueryTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {

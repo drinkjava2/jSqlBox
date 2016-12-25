@@ -17,12 +17,12 @@ import test.config.po.User;
 public class BatchInsertTest {
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 	public void tx_BatchInsertDemo() {
@@ -40,6 +40,16 @@ public class BatchInsertTest {
 		User u = SqlBox.createBean(User.class);
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();
+		Assert.assertEquals(1000, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+	}
+
+	public static void main(String[] args) {
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		User u = SqlBox.createBean(User.class);
+		long old = System.currentTimeMillis();
+		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
+		t.tx_BatchInsertDemo();
+		System.out.println(System.currentTimeMillis() - old);
 		Assert.assertEquals(1000, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
 	}
 

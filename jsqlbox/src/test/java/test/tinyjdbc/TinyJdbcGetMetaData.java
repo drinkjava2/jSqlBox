@@ -29,12 +29,12 @@ public class TinyJdbcGetMetaData {
 
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 	@Test

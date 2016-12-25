@@ -25,10 +25,10 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.drinkjava2.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
+import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 /**
  * @author Yong Zhu
@@ -119,7 +119,7 @@ public class SqlBoxContext {
 				lst = getJdbc().queryForList(sp.getSql());
 			else
 				lst = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-			Field field = ReflectionUtils.getDeclaredField(dbClass, "map");
+			Field field = ReflectionUtils.findField(dbClass, "map");
 			for (Map<String, Object> map : lst) {
 				Object db = dbClass.newInstance();
 				field.set(db, map);

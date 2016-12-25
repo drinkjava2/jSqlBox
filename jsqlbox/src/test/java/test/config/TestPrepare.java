@@ -20,12 +20,12 @@ public class TestPrepare {
 	/**
 	 * Drop and rebuild all tables
 	 */
-	public static void dropAndRecreateTables() {
-		System.out.println("Drop and re-create all tables for a new test ...");
+	public static void prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables() {
 		BeanBox.defaultContext.close();
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 
+		System.out.println("Drop and re-create all tables for a new test ...");
 		if (SqlBox.getDefaultDatabaseType() == DatabaseType.ORACLE) {
 			SqlBox.executeQuiet("DROP TRIGGER TGR_2");
 			SqlBox.executeQuiet("DROP SEQUENCE SEQ_2");
@@ -85,17 +85,17 @@ public class TestPrepare {
 	/**
 	 * Close BeanBox Context, c3p0 close method will be called before context be closed
 	 */
-	public static void closeDefaultContexts() {
+	public static void closeDatasource_CloseDefaultSqlBoxConetxt() {
 		BeanBox.defaultContext.close();
 		SqlBoxContext.defaultSqlBoxContext().close();
 	}
 
 	@Test
 	public void testCreateTables() {
-		dropAndRecreateTables();
+		prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users2"));
-		closeDefaultContexts();
+		closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 }

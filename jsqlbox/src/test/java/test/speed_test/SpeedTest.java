@@ -11,16 +11,16 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import test.config.TestPrepare;
 import test.config.po.User;
 
-public class speedTest {
+public class SpeedTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 	/**
@@ -35,12 +35,17 @@ public class speedTest {
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
-			u.box().buildRealColumns();
-			// u.insert();
+			 u.box().buildRealColumns();
+			//u.insert();
 		}
 		long newTime = System.currentTimeMillis();
 		System.out.println("Time used for 10000 times:" + (newTime - oldTime) + "ms");
 		Assert.assertTrue((newTime - oldTime) < 1000);
 	}
 
+	public static void main(String[] args) {
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		SpeedTest t = new SpeedTest();
+		t.doSpeedTest();
+	}
 }

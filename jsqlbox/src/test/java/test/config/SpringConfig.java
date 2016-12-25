@@ -2,8 +2,6 @@ package test.config;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
-import java.beans.PropertyVetoException;
-
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -19,7 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.po.DB;
@@ -35,21 +33,24 @@ import test.transaction.SpringTransactionTest;
 public class SpringConfig {
 	@Before
 	public void setup() {
-		TestPrepare.dropAndRecreateTables();
+		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDefaultContexts();
+		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
+	/**
+	 * DataSource pool setting, HikariDataSource is quicker than C3P0
+	 */
 	@Bean
-	public ComboPooledDataSource C3P0Bean() {
-		ComboPooledDataSource ds = new ComboPooledDataSource();
-		ds.setUser("root");// change to set your user name
+	public HikariDataSource HikariDataSourceBean() {
+		HikariDataSource ds = new HikariDataSource();
+		ds.setUsername("root");// change to set your user name
 		ds.setPassword("root888");// change to set your password
-		ds.setMaxPoolSize(30);
-		ds.setCheckoutTimeout(5000);
+		ds.setMaximumPoolSize(10);
+		ds.setConnectionTimeout(5000);
 		return ds;
 	}
 
@@ -59,13 +60,9 @@ public class SpringConfig {
 	 */
 	@Bean
 	public DataSource MySqlDataSourceBean() {
-		ComboPooledDataSource ds = C3P0Bean();
+		HikariDataSource ds = HikariDataSourceBean();
 		ds.setJdbcUrl((String) new DataSourceBox().getProperty("jdbcUrl"));// change to set your jdbcURL
-		try {
-			ds.setDriverClass((String) new DataSourceBox().getProperty("driverClass"));// set your driverClass
-		} catch (PropertyVetoException e) {
-			e.printStackTrace();
-		}
+		ds.setDriverClassName((String) new DataSourceBox().getProperty("driverClassName"));// set your driverClass
 		return ds;
 	}
 

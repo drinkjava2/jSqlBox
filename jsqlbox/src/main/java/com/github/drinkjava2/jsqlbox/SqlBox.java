@@ -29,11 +29,11 @@ import java.util.Map.Entry;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.drinkjava2.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
+import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -81,7 +81,7 @@ public class SqlBox {
 		HashMap<String, Method> map = methodExistCache.get();
 		if (map.containsKey(key))
 			return map.get(key);
-		Method method = ReflectionUtils.getDeclaredMethod(targetClass, methodName, new Class[] { parameterclazz });
+		Method method = ReflectionUtils.findMethod(targetClass, methodName, new Class[] { parameterclazz });
 		map.put(key, method);
 		return method;
 	}
