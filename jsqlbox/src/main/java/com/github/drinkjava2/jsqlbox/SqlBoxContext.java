@@ -40,7 +40,7 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private boolean showSql = false;
+	private boolean showSql = true;
 
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
 

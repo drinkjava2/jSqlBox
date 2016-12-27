@@ -55,8 +55,6 @@ public class Dao {
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
 	private SqlBox box;
 
-	// In future version may delete JDBCTemplate and only use pure JDBC
-
 	private Object entityBean; // Entity Bean Instance
 
 	public Dao(SqlBoxContext ctx) {
@@ -559,10 +557,19 @@ public class Dao {
 	 */
 	public String getColumnName() {
 		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
-		String realMethodName = "getColumnName".equals(method1)
-				? Thread.currentThread().getStackTrace()[2].getMethodName() : method1;
-		return this.getBox().getRealColumnName(null, realMethodName);
+		String fieldID = "getColumnName".equals(method1) ? Thread.currentThread().getStackTrace()[2].getMethodName()
+				: method1;
+		return this.getBox().getRealColumnName(null, fieldID);
 	}
+
+	/**
+	 * get field's fieldID
+	 */
+	public String getFieldID(String realColumnName) {
+		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
+		return "getColumnName".equals(method1) ? Thread.currentThread().getStackTrace()[2].getMethodName() : method1;
+	}
+
 	// ========Dao query/crud methods end=======
 
 	// =============identical methods copied from SqlBox or SqlBoxContext==========

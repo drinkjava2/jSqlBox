@@ -47,8 +47,8 @@ public class RuntimeChangeConfig {
 		u.box().configColumnName("userName", u.address());
 		u.setUserName("Sam");
 		u.insert();
-		Assert.assertEquals(1,
-				(int) SqlBox.queryForInteger("select count(*) from users where ", u.address(), "='Sam'"));
+		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.address(), " from ", u.table()));
+		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.userName(), " from ", u.table()));
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class RuntimeChangeConfig {
 		u.box().configColumnName("userName", u.address());
 		u.setUserName("Sam");
 		u.insert();
-		Assert.assertEquals(1,
-				(int) SqlBox.queryForInteger("select count(*) from users2 where ", u.address(), "='Sam'"));
+		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.address(), " from ", u.table()));
+		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.userName(), " from ", u.table()));
 	}
 }

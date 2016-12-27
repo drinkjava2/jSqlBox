@@ -311,7 +311,7 @@ public class SqlBox {
 	}
 
 	/**
-	 * Config column name
+	 * Config column name, if has cached field, use it, otherwise use
 	 */
 	public void configColumnName(String fieldID, String columnName) {
 		getOrBuildConfigColumn(fieldID).setColumnName(columnName);

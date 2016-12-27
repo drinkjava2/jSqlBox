@@ -45,7 +45,7 @@ public class JBeanBoxConfig {
 	 * This project is already passed test on Oracle 11g and Mysql5
 	 * ==============================================================================================<br/>
 	 */
-	public static class DataSourceBox extends OracleDataSourceBox {
+	public static class DataSourceBox extends MySqlDataSourceBox {
 	}
 
 	// HikariCP DataSource pool is quicker than C3P0
