@@ -74,27 +74,27 @@ public class User extends EntityBase implements Serializable {
 
 	// Below method are for JDBC friendly use, it's not compulsory but recommended to add below methods
 	public String id() {
-		return dao().getColumnName();
+		return box().getColumnName();
 	}
 
 	public String userName() {
-		return dao().getColumnName();
+		return box().getColumnName();
 	}
 
 	public String phoneNumber() {
-		return dao().getColumnName();
+		return box().getColumnName();
 	}
 
 	public String address() {
-		return dao().getColumnName();
+		return box().getColumnName();
 	}
 
 	public String age() {
-		return dao().getColumnName();
+		return box().getColumnName();
 	}
 
 	public String alive() {
-		return dao().getColumnName();
+		return box().getColumnName();
 	}
 
 }

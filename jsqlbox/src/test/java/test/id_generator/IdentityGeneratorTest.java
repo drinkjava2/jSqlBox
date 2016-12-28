@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.Box;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
@@ -51,7 +51,7 @@ public class IdentityGeneratorTest {
 
 	@Test
 	public void insertUserForMysql() {
-		if (Dao.dao().getDatabaseType() != DatabaseType.MYSQL)
+		if (Box.box().getDatabaseType() != DatabaseType.MYSQL)
 			return;
 		User u = new User();
 		u.box().configIdGenerator("id", IdentityGenerator.INSTANCE);

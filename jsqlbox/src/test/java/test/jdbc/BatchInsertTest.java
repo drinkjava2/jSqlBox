@@ -26,7 +26,7 @@ public class BatchInsertTest {
 	}
 
 	public void tx_BatchInsertDemo() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		for (int i = 0; i < 1000; i++)
 			SqlBox.cacheSQL("insert into ", u.table(), " (", //
 					u.userName(), empty("user" + i), ",", //
@@ -37,7 +37,7 @@ public class BatchInsertTest {
 
 	@Test
 	public void doTest() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();
 		Assert.assertEquals(1000, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
@@ -45,7 +45,7 @@ public class BatchInsertTest {
 
 	public static void main(String[] args) {
 		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		long old = System.currentTimeMillis();
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();

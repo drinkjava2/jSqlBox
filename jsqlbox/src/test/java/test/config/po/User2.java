@@ -1,7 +1,6 @@
 package test.config.po;
 
-import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Box;
 
 /**
  * This example shows if do not extend from EntityBase class, how to write the entity class
@@ -20,14 +19,14 @@ public class User2 {
 	// ==============================================================================================
 	// If entity class do not extends from EntityBase, need put below fields and method in each class
 	// ==============================================================================================
-	private Dao dao;
+	private Box box;
 
-	public void putDao(Dao dao) {
-		this.dao = dao;
+	public void pubBox(Box box) {
+		this.box = box;
 	}
 
-	public Dao dao() {
-		return Dao.getDao(this, dao);
+	public Box box() {
+		return Box.getBox(this, box);
 	}
 
 	public String table() {
@@ -38,20 +37,16 @@ public class User2 {
 		return box().getStar();
 	}
 
-	public SqlBox box() {
-		return dao().getBox();
-	}
-
 	public void insert() {
-		this.dao().insert();
+		this.box().insert();
 	}
 
 	public void update() {
-		this.dao().update();
+		this.box().update();
 	}
 
 	public void delete() {
-		this.dao().delete();
+		this.box().delete();
 	}
 
 	// ======================================================================================

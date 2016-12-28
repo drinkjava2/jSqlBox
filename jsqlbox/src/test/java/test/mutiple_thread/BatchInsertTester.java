@@ -26,7 +26,7 @@ public class BatchInsertTester {
 				l.add(u);
 			}
 			try {
-				Thread.sleep(6000);
+				Thread.sleep(6000);// NOSONAR
 			} catch (InterruptedException e) {
 			}
 			System.out.print("0");
@@ -36,7 +36,7 @@ public class BatchInsertTester {
 	public static void main(String[] args) {// jUnit cann't do multiple thread test
 		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(5000);// NOSONAR
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

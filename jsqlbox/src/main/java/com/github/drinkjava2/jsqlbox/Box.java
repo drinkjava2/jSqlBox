@@ -21,6 +21,10 @@ import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MS_SQLSERVER;
 import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MYSQL;
 import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.ORACLE;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -40,6 +44,7 @@ import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 /**
@@ -51,9 +56,19 @@ import com.github.drinkjava2.springsrc.ReflectionUtils;
  */
 
 @SuppressWarnings({ "unchecked" })
-public class Dao {
-	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
-	private SqlBox box;
+public class Box {
+	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Box.class);
+
+	// The entity bean class
+	private Class<?> entityClass;
+
+	// Configuration Columns, set it before entity bean be created
+	private Map<String, Column> configColumns = new HashMap<>();
+
+	// Configuration Table Name, set it before entity bean be created
+	private String configTable;
+
+	private SqlBoxContext context;
 
 	private static ThreadLocal<String> fieldIDCache = new ThreadLocal<String>() {
 		@Override
@@ -64,23 +79,16 @@ public class Dao {
 
 	private Object entityBean; // Entity Bean Instance
 
-	public Dao(SqlBoxContext ctx) {
-		if (ctx == null)
-			throwEX("Dao create error, SqlBoxContext  can not be null");
-		else if (ctx.getDataSource() == null)
-			throwEX("Dao create error,  dataSource can not be null");
-		SqlBox sb = new SqlBox(ctx);
-		this.box = sb;
+	public Box() {
+		// Default Constructor
 	}
 
-	public Dao(SqlBox sqlBox) {
-		if (sqlBox == null)
-			throwEX("Dao create error, sqlBox can not be null");
-		else if (sqlBox.getContext() == null)
-			throwEX("Dao create error, sqlBoxContext can not be null");
-		else if (sqlBox.getContext().getDataSource() == null)
-			throwEX("Dao create error, dataSource can not be null");
-		this.box = sqlBox;
+	public Box(SqlBoxContext ctx) {
+		if (ctx == null)
+			throwEX("Box create error, SqlBoxContext  can not be null");
+		else if (ctx.getDataSource() == null)
+			throwEX("Box create error,  dataSource can not be null");
+		this.context = ctx;
 	}
 
 	/**
@@ -91,30 +99,28 @@ public class Dao {
 	}
 
 	/**
-	 * Get default Dao
+	 * Get default Box
 	 */
-	public static Dao getDao(Object bean, Dao dao) {
-		if (dao != null)
-			return dao;
-		SqlBox box = SqlBoxContext.defaultSqlBoxContext().findAndBuildSqlBox(bean.getClass());
-		box.beanInitialize(bean);
-		Dao d = new Dao(box);
+	public static Box getBox(Object bean, Box box) {
+		if (box != null)
+			return box;
+		Box d = SqlBoxContext.defaultSqlBoxContext().findAndBuildSqlBox(bean.getClass());
+		d.beanInitialize(bean);
 		d.setEntityBean(bean);
 		try {
-			Method m = ReflectionUtils.findMethod(bean.getClass(), "putDao", new Class[] { Dao.class });
+			Method m = ReflectionUtils.findMethod(bean.getClass(), "putBox", new Class[] { Box.class });
 			m.invoke(bean, new Object[] { d });
 		} catch (Exception e) {
-			throwEX(e, "Dao getDao error for bean \"" + bean + "\", no putDao method found");
+			throwEX(e, "Box getBox error for bean \"" + bean + "\", no putBox method found");
 		}
 		return d;
 	}
 
 	/**
-	 * Get default Dao
+	 * Get default Box
 	 */
-	public static Dao dao() {
-		SqlBox box = new SqlBox(SqlBoxContext.defaultSqlBoxContext());
-		return new Dao(box);
+	public static Box box() {
+		return new Box(SqlBoxContext.defaultSqlBoxContext());
 	}
 
 	// ========JdbcTemplate wrap methods begin============
@@ -246,7 +252,7 @@ public class Dao {
 
 	// ========JdbcTemplate wrap methods End============
 
-	// ========Dao query/crud methods begin=======
+	// ========Box query/crud methods begin=======
 
 	/**
 	 * Print SQL and parameters to console, usually used for debug <br/>
@@ -254,7 +260,7 @@ public class Dao {
 	 */
 	private void logSql(SqlAndParameters sp) {
 		// check if allowed print SQL
-		if (!this.getBox().getContext().isShowSql())
+		if (!this.getContext().isShowSql())
 			return;
 		StringBuilder sb = new StringBuilder(sp.getSql());
 		Object[] args = sp.getParameters();
@@ -276,7 +282,7 @@ public class Dao {
 	 * Use context.setShowSql to control, Default showSql is "false"
 	 */
 	private void logCachedSQL(List<List<SqlAndParameters>> subSPlist) {
-		if (this.getBox().getContext().isShowSql()) {
+		if (this.getContext().isShowSql()) {
 			if (subSPlist != null) {
 				List<SqlAndParameters> l = subSPlist.get(0);
 				if (l != null) {
@@ -300,7 +306,7 @@ public class Dao {
 	 * Get last auto increase id, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
 	 */
 	private Object getLastAutoIncreaseIdentity(Column col) {
-		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + box.getRealTable();
+		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + getRealTable();
 		return this.getJdbc().queryForObject(sql, col.getPropertyType());
 	}
 
@@ -309,7 +315,7 @@ public class Dao {
 	 */
 	public void insert() {// NOSONAR
 		if (entityBean == null)
-			throwEX("Dao doSave error, bean is null");
+			throwEX("Box doSave error, bean is null");
 
 		// generatedValues to record all generated values like UUID, sequence
 		Map<Column, Object> idGeneratorCache = new HashMap<>();
@@ -319,26 +325,26 @@ public class Dao {
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
-		sb.append("insert into ").append(box.getRealTable()).append(" ( ");
+		sb.append("insert into ").append(getRealTable()).append(" ( ");
 
-		Map<String, Column> realColumns = box.buildRealColumns();
+		Map<String, Column> realColumns = buildRealColumns();
 		for (Column col : realColumns.values()) {
 			IdGenerator idGen = col.getIdGenerator();
 			if (idGen != null && !(idGen instanceof AssignedGenerator)) {
-				Object idValue = idGen.getNextID(this.getBox().getContext());
+				Object idValue = idGen.getNextID(this.getContext());
 				if (idGen instanceof IdentityGenerator) {
 					if (dbType == ORACLE)// NOSONAR
-						throwEX("Dao insert error, IdentityGenerator type should not set to ORACLE");
+						throwEX("Box insert error, IdentityGenerator type should not set to ORACLE");
 				} else if (idGen instanceof AutoGenerator) {
 
 					if (dbType == MYSQL || dbType == MS_SQLSERVER) {// NOSONAR
 						if (!col.getAutoIncreament())
-							throwEX("Dao insert error, AutoGenerator type should set on indentity type field");
+							throwEX("Box insert error, AutoGenerator type should set on indentity type field");
 					} else {// ORACLE
 
 					}
 				} else {// for other IDgenerator like sequence, table, UUID...
-					assureNotNull(idValue, "Dao insert error, ID can not be null, column=" + col.getColumnName());
+					assureNotNull(idValue, "Box insert error, ID can not be null, column=" + col.getColumnName());
 					sb.append(col.getColumnName()).append(",");
 					setFieldRealValue(col, idValue);
 					parameters.add(idValue);
@@ -363,13 +369,13 @@ public class Dao {
 		// delete the last ","
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
-		if (this.getBox().getContext().isShowSql())
+		if (this.getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 		if (result != 1)
-			throwEX("Dao insert error, no record be inserted, sql=" + sb.toString());
+			throwEX("Box insert error, no record be inserted, sql=" + sb.toString());
 
 		// if success, set id values to bean
 		for (Entry<Column, Object> entry : idGeneratorCache.entrySet()) {
@@ -387,16 +393,16 @@ public class Dao {
 	 */
 	public void update() {// NOSONAR
 		if (entityBean == null)
-			throwEX("Dao update error, bean is null");
+			throwEX("Box update error, bean is null");
 
-		Map<String, Column> realColumns = box.buildRealColumns();
+		Map<String, Column> realColumns = buildRealColumns();
 
 		List<Column> idColumns = extractIdColumnsWithValue(realColumns);
 
 		// start to spell sql
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
-		sb.append("update ").append(box.getRealTable()).append(" set ");
+		sb.append("update ").append(getRealTable()).append(" set ");
 
 		// set values
 		for (Column col : realColumns.values()) {
@@ -422,20 +428,20 @@ public class Dao {
 		}
 		sb.setLength(sb.length() - 4);
 
-		if (this.getBox().getContext().isShowSql())
+		if (this.getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 		if (result != 1)
-			throwEX("Dao insert error, no record be updated, sql=" + sb.toString());
+			throwEX("Box insert error, no record be updated, sql=" + sb.toString());
 	}
 
 	/**
 	 * Load a entity from Database by its ID
 	 */
 	protected <T> T load(Object entityID) {// NOSONAR
-		Map<String, Column> realColumns = box.buildRealColumns();
+		Map<String, Column> realColumns = buildRealColumns();
 		Map<String, Object> idvalues = SqlBoxUtils.extractEntityIDValues(entityID, realColumns);
 
 		// start to spell sql
@@ -448,7 +454,7 @@ public class Dao {
 		}
 
 		sb.setLength(sb.length() - 2);// delete the last ","
-		sb.append(" from ").append(this.box.getRealTable()).append(" where ");
+		sb.append(" from ").append(this.getRealTable()).append(" where ");
 
 		for (Entry<String, Object> entry : idvalues.entrySet()) {
 			sb.append(entry.getKey()).append("=").append("? and ");
@@ -456,15 +462,15 @@ public class Dao {
 		}
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
-		if (this.getBox().getContext().isShowSql())
+		if (this.getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		List<Map<String, Object>> rows = this.getJdbc().queryForList(sb.toString(),
 				parameters.toArray(new Object[parameters.size()]));
 		if (rows == null || rows.isEmpty())
-			throwEX("Dao load error, no record found for entityID:" + entityID);
+			throwEX("Box load error, no record found for entityID:" + entityID);
 		else if (rows.size() != 1)
-			throwEX("Dao load error, multiple record found for entityID:" + entityID);
+			throwEX("Box load error, multiple record found for entityID:" + entityID);
 		else
 			writeValuesToEntity(realColumns, rows.get(0));
 		return (T) this.getEntityBean();
@@ -475,14 +481,14 @@ public class Dao {
 	 * @return
 	 */
 	public void delete() {
-		Map<String, Column> realColumns = box.buildRealColumns();
+		Map<String, Column> realColumns = buildRealColumns();
 		List<Column> entityID = extractIdColumnsWithValue(realColumns);
 		Map<String, Object> idvalues = SqlBoxUtils.extractEntityIDValues(entityID, realColumns);
 
 		// start to spell sql
 		StringBuilder sb = new StringBuilder("delete ");
 		List<Object> parameters = new ArrayList<>();
-		sb.append(" from ").append(this.box.getRealTable()).append(" where ");
+		sb.append(" from ").append(this.getRealTable()).append(" where ");
 
 		for (Entry<String, Object> entry : idvalues.entrySet()) {
 			sb.append(entry.getKey()).append("=").append("? and ");
@@ -490,12 +496,39 @@ public class Dao {
 		}
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
-		if (this.getBox().getContext().isShowSql())
+		if (this.getContext().isShowSql())
 			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 		int result = this.getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 		if (result != 1)
-			throwEX("Dao delete error, no record delete for entityID:" + entityID);
+			throwEX("Box delete error, no record delete for entityID:" + entityID);
 		deleteEntityID(realColumns, idvalues);
+	}
+
+	/**
+	 * Query for a DB type List
+	 */
+	public <T> List<T> queryForList(Class<?> dbClass, String... sql) {
+		List<T> result = new ArrayList<>();
+		try {
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			logSql(sp);
+			List<Map<String, Object>> lst;
+			if (sp.getParameters().length == 0)
+				lst = getJdbc().queryForList(sp.getSql());
+			else
+				lst = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+			Field field = ReflectionUtils.findField(dbClass, "map");
+			for (Map<String, Object> map : lst) {
+				Object db = dbClass.newInstance();
+				field.set(db, map);
+				result.add((T) db);
+			}
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SqlBoxContext queryForList, sql=" + sql);
+		} finally {
+			SqlHelper.clearLastSQL();
+		}
+		return result;
 	}
 
 	private List<Column> extractIdColumnsWithValue(Map<String, Column> realColumns) {
@@ -505,18 +538,18 @@ public class Dao {
 			Column col = entry.getValue();
 			if (col.getEntityID()) {
 				Object idValue = SqlBoxUtils.getFieldRealValue(this.entityBean, col);
-				assureNotNull(idValue, "Dao update error, ID can not be null, column=" + col.getColumnName());
+				assureNotNull(idValue, "Box update error, ID can not be null, column=" + col.getColumnName());
 				col.setPropertyValue(idValue);
 				idColumns.add(col);
 			}
 		}
 		if (idColumns.isEmpty())
-			throwEX("Dao update error, no entityID set for class " + this.box.getEntityClass());
+			throwEX("Box update error, no entityID set for class " + this.getEntityClass());
 		return idColumns;
 	}
 
 	public List<Column> getEntityID() {
-		Map<String, Column> realColumns = box.buildRealColumns();
+		Map<String, Column> realColumns = buildRealColumns();
 		return extractIdColumnsWithValue(realColumns);
 	}
 
@@ -561,7 +594,7 @@ public class Dao {
 			} else
 				m.invoke(this.entityBean, new Object[] { value });
 		} catch (Exception e) {
-			throwEX(e, "Dao setFieldRealValue error, method " + col.getWriteMethodName() + " invoke error in class "
+			throwEX(e, "Box setFieldRealValue error, method " + col.getWriteMethodName() + " invoke error in class "
 					+ entityBean);
 		}
 	}
@@ -574,7 +607,7 @@ public class Dao {
 		String fieldID = "getColumnName".equals(method1) ? Thread.currentThread().getStackTrace()[2].getMethodName()
 				: method1;
 		getFieldIDCache().set(fieldID);
-		return this.getBox().getRealColumnName(null, fieldID);
+		return this.getRealColumnName(null, fieldID);
 	}
 
 	/**
@@ -583,12 +616,12 @@ public class Dao {
 	public String fieldID(String realColumnName) {
 		String fieldID = getFieldIDCache().get();
 		if (SqlBoxUtils.isEmptyStr(fieldID) || SqlBoxUtils.isEmptyStr(realColumnName)
-				|| !realColumnName.equals(this.getBox().getRealColumnName(null, fieldID)))
-			throwEX("Dao getFieldID error, can only be called with getFieldID(xx.xxFieldID()) format");
+				|| !realColumnName.equals(this.getRealColumnName(null, fieldID)))
+			throwEX("Box getFieldID error, can only be called with getFieldID(xx.xxFieldID()) format");
 		return fieldID;
 	}
 
-	// ========Dao query/crud methods end=======
+	// ========Box query/crud methods end=======
 
 	// =============identical methods copied from SqlBox or SqlBoxContext==========
 	public void refreshMetaData() {
@@ -599,14 +632,14 @@ public class Dao {
 
 	// ================ Getters & Setters===============
 	/**
-	 * Return Bean instance which related to this dao
+	 * Return Bean instance which related to this Box
 	 */
 	public Object getEntityBean() {
 		return entityBean;
 	}
 
 	/**
-	 * Set a Bean instance related to this dao
+	 * Set a Bean instance related to this Box
 	 */
 	public void setEntityBean(Object bean) {
 		this.entityBean = bean;
@@ -620,24 +653,285 @@ public class Dao {
 	 * @return JdbcTemplate
 	 */
 	public JdbcTemplate getJdbc() {
-		return this.getBox().getContext().getJdbc();
-	}
-
-	public SqlBox getBox() {
-		return box;
-	}
-
-	public SqlBoxContext getContext() {
-		return box.getContext();
+		return this.getContext().getJdbc();
 	}
 
 	public DatabaseType getDatabaseType() {
-		return box.getContext().getDatabaseType();
+		return getContext().getDatabaseType();
 	}
 
-	public Dao setSqlBox(SqlBox sqlBox) {
-		this.box = sqlBox;
-		return this;
+	// ==============================================================================================
+	// ==============================================================================================
+	// ==============================================================================================
+	// ==============================================================================================
+	// ==============================================================================================
+
+	/**
+	 * Create entity instance
+	 */
+	public <T> T createEntity() {
+		Object bean = null;
+		try {
+			bean = this.getEntityClass().newInstance();
+			this.beanInitialize(bean);
+			setEntityBean(bean);
+			Method m = SqlBoxUtils.getDeclaredMethodQuickly(this.getEntityClass(), "putBox", Box.class);
+			if (m != null)
+				m.invoke(bean, new Object[] { this });// 5ms
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SqlBoxContext create error");
+		}
+		return (T) bean;
+	}
+
+	/**
+	 * @param instance
+	 */
+	public void beanInitialize(Object bean) {
+		try {
+			Method m = SqlBoxUtils.getDeclaredMethodQuickly(this.getEntityClass(), "initialize", null);
+			if (m != null)
+				m.invoke(bean, new Object[] {});
+		} catch (Exception e) {
+			SqlBoxException.eatException(e);
+		}
+	}
+
+	/**
+	 * Get real database table name
+	 */
+	public String getRealTable() {
+		String realTable = configTable;
+		if (SqlBoxUtils.isEmptyStr(realTable)) {
+			realTable = this.getEntityClass().getSimpleName();
+			int locate = realTable.indexOf('$');// for inner class, get the real class name
+			if (locate > 0)
+				realTable = realTable.substring(locate, realTable.length());
+		}
+		String resultTable = context.findRealTableName(realTable);
+		if (SqlBoxUtils.isEmptyStr(resultTable))
+			SqlBoxException
+					.throwEX("SqlBox getRealTable error: " + this.getEntityClass() + ", table name:" + realTable);
+		return resultTable;
+	}
+
+	/**
+	 * Return a * for sql
+	 */
+	public String getStar() {
+		return "*";// NOSONAR
+	}
+
+	/**
+	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
+	 */
+	private boolean isLegalFieldID(String fieldID) {
+		if ("class".equals(fieldID))
+			return false;
+		if (SqlBoxUtils.isEmptyStr(fieldID))
+			return false;
+		if (SqlBoxUtils.isCapitalizedString(fieldID))
+			return false;
+		/**
+		 * try { Method method = ReflectionUtils.getDeclaredMethod(entityClass, fieldID, new Class[] {}); if (method ==
+		 * null) return false; } catch (Exception e) { return false; }
+		 */
+		return true;
+	}
+
+	/**
+	 * Return real Columns match to table meta data
+	 */
+	public Map<String, Column> buildRealColumns() {
+		if (this.entityClass == null)
+			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
+		String realTableName = this.getRealTable();
+		TinyDbMetaData meta = this.getContext().getMetaData();
+		Map<String, Column> oneTable = meta.getOneTable(realTableName.toLowerCase());
+		Map<String, Column> realColumns = new HashMap<>();
+		BeanInfo beanInfo = null;
+		PropertyDescriptor[] pds = null;
+		try {
+			beanInfo = Introspector.getBeanInfo(this.getEntityClass());
+			pds = beanInfo.getPropertyDescriptors();
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SqlBox buildDefaultConfig error");
+		}
+
+		for (PropertyDescriptor pd : pds) {
+			String fieldID = pd.getName();
+			if (isLegalFieldID(fieldID)) {
+				Column realCol = new Column();
+				realCol.setFieldID(fieldID);
+				realCol.setColumnName(this.getRealColumnName(realTableName, fieldID));// 3080ms cost for speed test
+				realCol.setPropertyType(pd.getPropertyType());
+				realCol.setReadMethodName(pd.getReadMethod().getName());
+				realCol.setWriteMethodName(pd.getWriteMethod().getName());
+				useConfigOverrideDefault(fieldID, realCol);
+				realColumns.put(fieldID, realCol);
+				Column metaDataCol = oneTable.get(fieldID.toLowerCase());
+				if (metaDataCol != null)
+					realCol.setAutoIncreament(metaDataCol.getAutoIncreament());
+			}
+		}
+		findAndSetEntityID(this.getEntityClass(), realColumns);
+		return realColumns;
+	}
+
+	/**
+	 * Use config values to override default runtime values
+	 */
+	private void useConfigOverrideDefault(String fieldID, Column column) {
+		Column configColumn = configColumns.get(fieldID);
+		if (configColumn != null) {
+			if (!SqlBoxUtils.isEmptyStr(configColumn.getColumnName()))
+				column.setColumnName(configColumn.getColumnName());
+			column.setEntityID(configColumn.getEntityID());
+			column.setIdGenerator(configColumn.getIdGenerator());
+			column.setEntityID(configColumn.getEntityID());
+		}
+	}
+
+	/**
+	 * Find and set Object IDs automatically, rule:<br/>
+	 * 
+	 * Find how many entityID <br/>
+	 * Found lots? return <br/>
+	 * only found 1? if no generator, set to auto type <br/>
+	 * Not found? look for id field found? set as EntityID if no generator, set to auto type <br/>
+	 * No found throw ex <br/>
+	 */
+	private void findAndSetEntityID(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
+		Column idColumn = null;
+		Column entityColumn = null;
+		for (Entry<String, Column> cols : realColumns.entrySet()) {
+			if (cols.getValue().getEntityID())
+				if (entityColumn != null)
+					return;
+				else
+					entityColumn = cols.getValue();
+			if ("id".equals(cols.getValue().getFieldID()))
+				idColumn = cols.getValue();
+		}
+
+		if (idColumn == null) {
+			if (entityColumn == null)
+				throwEX("SqlBox findAndSetEntityID error, no entityID set for entity class " + entityClass);
+			else
+				return;
+		} else {
+			if (entityColumn != null && !entityColumn.getFieldID().equals(idColumn.getFieldID()))
+				return;
+			else {
+				idColumn.setEntityID(true);
+				if (idColumn.getIdGenerator() == null)// entityColumn=null or entityColumn=idColumn
+					idColumn.setIdGenerator(AutoGenerator.INSTANCE);
+			}
+		}
+		return;
+	}
+
+	/**
+	 * Get real column name by fieldID <br/>
+	 * userName field will find userName or username or USERNAME or USER_NAME, but only allowed 1
+	 */
+	public String getRealColumnName(String realTableName, String fieldID) {// NOSONAR
+		Column col = getOrBuildConfigColumn(fieldID);
+		String columnName = col.getColumnName();
+		if (columnName == null || columnName.length() == 0)
+			columnName = fieldID;
+
+		String realTable = realTableName;
+		if (SqlBoxUtils.isEmptyStr(realTable))
+			realTable = this.getRealTable();
+		Map<String, Column> oneTableMap = context.getMetaData().getOneTable(realTable.toLowerCase());
+		String realColumnNameignoreCase = null;
+		Column realColumn = oneTableMap.get(columnName.toLowerCase());
+		if (realColumn != null)
+			realColumnNameignoreCase = realColumn.getColumnName();
+
+		String realColumnNameUnderline = null;
+		realColumn = oneTableMap.get(SqlBoxUtils.camelToLowerCaseUnderline(columnName));
+		if (realColumn != null)
+			realColumnNameUnderline = realColumn.getColumnName();
+
+		if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
+			SqlBoxException.throwEX("SqlBox automaticFitColumnName error, column defination \"" + columnName
+					+ "\" does not match any table column in table " + realTable);
+
+		if (realColumnNameignoreCase != null && realColumnNameUnderline != null
+				&& !realColumnNameignoreCase.equals(realColumnNameUnderline))
+			SqlBoxException.throwEX("SqlBox automaticFitColumnName error, column defination \"" + columnName
+					+ "\" found mutiple columns in table " + realTable);
+		return realColumnNameignoreCase != null ? realColumnNameignoreCase : realColumnNameUnderline;
+	}
+
+	public Column getOrBuildConfigColumn(String fieldID) {
+		Column col = this.getConfigColumns().get(fieldID);
+		if (col == null) {
+			col = new Column();
+			this.getConfigColumns().put(fieldID, col);
+		}
+		return col;
+	}
+
+	// ========Config methods begin==============
+	/**
+	 * Config table name
+	 */
+	public void configTable(String table) {
+		configTable = table;
+	}
+
+	/**
+	 * Clean old entityID setting, set with given entityIDs
+	 */
+	public void configEntityIDs(String... entityIDs) {
+		for (Entry<String, Column> entry : getConfigColumns().entrySet())
+			entry.getValue().setEntityID(false);
+		for (String fieldID : entityIDs)
+			getOrBuildConfigColumn(fieldID).setEntityID(true);
+	}
+
+	/**
+	 * Config column name, if has cached field, use it, otherwise use
+	 */
+	public void configColumnName(String fieldID, String columnName) {
+		getOrBuildConfigColumn(fieldID).setColumnName(columnName);
+	}
+
+	/**
+	 * Config column name
+	 */
+	public <T> void configIdGenerator(String fieldID, T idGenerator) {
+		getOrBuildConfigColumn(fieldID).setIdGenerator((IdGenerator) idGenerator);
+	}
+
+	// ========Config methods end==============
+
+	// ========getter & setters below==============
+	public Class<?> getEntityClass() {
+		return entityClass;
+	}
+
+	public void setEntityClass(Class<?> entityClass) {
+		this.entityClass = entityClass;
+	}
+
+	public Map<String, Column> getConfigColumns() {
+		return configColumns;
+	}
+
+	public void setConfigColumns(Map<String, Column> columns) {
+		this.configColumns = columns;
+	}
+
+	public SqlBoxContext getContext() {
+		return context;
+	}
+
+	public void setContext(SqlBoxContext context) {
+		this.context = context;
 	}
 
 }

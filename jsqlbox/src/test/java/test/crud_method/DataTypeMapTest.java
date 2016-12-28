@@ -48,9 +48,9 @@ public class DataTypeMapTest {
 				, "stringField", " VARCHAR(10)"//
 				, ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		SqlBox.refreshMetaData();
-		DataSample dataTypes = new DataSample();
-		dataTypes.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
-		dataTypes.insert();
+		DataSample dt = new DataSample();
+		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
+		dt.insert();
 		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from datasample"));
 		SqlBox.executeQuiet("drop table datasample");
 	}
@@ -76,9 +76,9 @@ public class DataTypeMapTest {
 				, "string_Field", " VARCHAR(10)"//
 				, ")");
 		SqlBox.refreshMetaData();
-		DataSample dataTypes = new DataSample();
-		dataTypes.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
-		dataTypes.insert();
+		DataSample dt = new DataSample();
+		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
+		dt.insert();
 		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from datasample"));
 		SqlBox.executeQuiet("drop table datasample");
 	}

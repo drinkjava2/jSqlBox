@@ -31,12 +31,12 @@ public class SpeedTest {
 		long oldTime = System.currentTimeMillis();
 		for (int i = 0; i < 10000; i++) {
 			SqlBoxContext.defaultSqlBoxContext();
-			User u = SqlBox.createBean(User.class);
+			User u = SqlBox.createEntity(User.class);
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
-			 u.box().buildRealColumns();
-			//u.insert();
+			u.box().buildRealColumns();
+			// u.insert();
 		}
 		long newTime = System.currentTimeMillis();
 		System.out.println("Time used for 10000 times:" + (newTime - oldTime) + "ms");

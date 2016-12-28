@@ -1,8 +1,8 @@
 package test.config.po;
 
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Box;
 
-public class UserBX extends SqlBox {
+public class UserBX extends Box {
 	{
 		// this.setBeanClass(User.class);
 		this.configTable("users");

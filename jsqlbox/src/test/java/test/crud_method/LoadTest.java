@@ -63,7 +63,7 @@ public class LoadTest {
 		u.insert();
 		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
 		Assert.assertTrue(u.getId() > 0);
-		User u2 = SqlBox.load(User.class, u.dao().getEntityID());
+		User u2 = SqlBox.load(User.class, u.box().getEntityID());
 		Assert.assertEquals("Address1", u2.getAddress());
 	}
 

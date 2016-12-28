@@ -41,6 +41,13 @@ public class SqlBoxUtils {
 
 	// To check if a class exist, if exist, cache it to avoid check again
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<>();
+	
+	private static ThreadLocal<HashMap<String, Method>> methodExistCache = new ThreadLocal<HashMap<String, Method>>() {
+		@Override
+		protected HashMap<String, Method> initialValue() {
+			return new HashMap<>();
+		}
+	};
 
 	private SqlBoxUtils() {
 	}
@@ -60,7 +67,7 @@ public class SqlBoxUtils {
 		if (i == null)
 			try {
 				Class<?> clazz = Class.forName(className);
-				if (SqlBox.class.isAssignableFrom((Class<?>) clazz)) {
+				if (Box.class.isAssignableFrom((Class<?>) clazz)) {
 					classExistCache.put(className, 1);
 					return clazz;
 				}
@@ -172,19 +179,19 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Get Dao property from an entity bean
+	 * Get Box property from an entity bean
 	 */
-	public static Dao getDao(Object entityBean) {
-		Dao dao = null;
+	public static Box getBox(Object entityBean) {
+		Box box = null;
 		try {
-			Method m = ReflectionUtils.findMethod(entityBean.getClass(), "dao", new Class[] {});
-			dao = (Dao) m.invoke(entityBean, new Object[] {});
+			Method m = ReflectionUtils.findMethod(entityBean.getClass(), "box", new Class[] {});
+			box = (Box) m.invoke(entityBean, new Object[] {});
 		} catch (Exception e) {
-			throwEX(e, "SqlBoxContext load error for bean \"" + entityBean + "\", no dao method found");
+			throwEX(e, "SqlBoxContext load error for bean \"" + entityBean + "\", no box method found");
 		}
-		if (dao == null)
-			throwEX("SqlBoxContext load error for bean \"" + entityBean + "\", no dao method found");
-		return dao;
+		if (box == null)
+			throwEX("SqlBoxContext load error for bean \"" + entityBean + "\", no box method found");
+		return box;
 	}
 
 	/**
@@ -196,13 +203,13 @@ public class SqlBoxUtils {
 			for (Entry<String, Object> entry : ((Map<String, Object>) entityID).entrySet())
 				idvalues.put(entry.getKey(), entry.getValue());
 		} else if (entityID instanceof List) {
-			idvalues = new HashMap<>(); 
+			idvalues = new HashMap<>();
 			for (Column col : (List<Column>) entityID)
 				idvalues.put(col.getFieldID(), col.getPropertyValue());
 		} else {
 			List<Column> idCols = extractIdColumnsOnly(realColumns);
 			if (idCols == null || idCols.size() != 1)
-				throwEX("Dao load error, id column is not 1, entityID:" + entityID);
+				throwEX("SqlBoxUtils extractEntityIDValues error, id column is not 1, entityID:" + entityID);
 			else
 				idvalues.put(idCols.get(0).getFieldID(), entityID);
 		}
@@ -218,7 +225,18 @@ public class SqlBoxUtils {
 			}
 		}
 		if (idColumns.isEmpty())
-			throwEX("Dao update error, no entityID set for class ");
+			throwEX("SqlBoxUtils extractIdColumnsOnly error, no entityID set for class ");
 		return idColumns;
+	}
+	
+	public static Method getDeclaredMethodQuickly(Class<?> targetClass, String methodName, Class<?> parameterclazz) {
+		String key = new StringBuilder(targetClass.toString()).append("_").append(methodName).append("_")
+				.append(parameterclazz).toString();
+		HashMap<String, Method> map = methodExistCache.get();
+		if (map.containsKey(key))
+			return map.get(key);
+		Method method = ReflectionUtils.findMethod(targetClass, methodName, new Class[] { parameterclazz });
+		map.put(key, method);
+		return method;
 	}
 }

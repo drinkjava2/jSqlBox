@@ -16,20 +16,20 @@ class ProxyBean implements MethodInterceptor {
 	@SuppressWarnings("unused")
 	private Class<?> beanClass;
 	private Boolean dirty = false;
-	private Dao dao;
+	private Box box;
 
-	public ProxyBean(Class<?> beanClass, Dao dao) {
+	public ProxyBean(Class<?> beanClass, Box box) {
 		this.beanClass = beanClass;
-		this.dao = dao;
+		this.box = box;
 	}
 
 	@Override
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy cgLibMethodProxy) throws Throwable {
 		String methodname = method.getName();
-		if ("dao".equals(methodname))
-			return dao;
+		if ("box".equals(methodname))
+			return box;
 		else if ("save".equals(methodname)) {
-			dao.insert();
+			box.insert();
 			return null;
 		}
 		if (!dirty && methodname.startsWith("set")) {

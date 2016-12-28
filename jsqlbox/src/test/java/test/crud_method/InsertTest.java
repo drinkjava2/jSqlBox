@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.Box;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 import test.config.TestPrepare;
@@ -43,7 +43,7 @@ public class InsertTest {
 
 	@Test
 	public void insertUserB() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		u.setUserName("User2");
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");
@@ -56,11 +56,11 @@ public class InsertTest {
 	@Test
 	public void insertUserC() {
 		for (int i = 0; i < 10000; i++) {
-			User u = SqlBox.createBean(User.class);
+			User u = SqlBox.createEntity(User.class);
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
-			Dao d = u.dao();
+			Box d = u.box();
 			if (d == null)
 				System.out.println("null");
 		}

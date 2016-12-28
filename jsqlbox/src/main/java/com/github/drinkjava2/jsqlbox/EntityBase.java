@@ -8,14 +8,14 @@ package com.github.drinkjava2.jsqlbox;
  */
 public class EntityBase {
 
-	private Dao dao;
+	private Box box;
 
-	public void putDao(Dao dao) {
-		this.dao = dao;
+	public void putBox(Box box) {
+		this.box = box;
 	}
 
-	public Dao dao() {
-		return Dao.getDao(this, dao);
+	public Box box() {
+		return Box.getBox(this, box);
 	}
 
 	public String table() {
@@ -26,24 +26,20 @@ public class EntityBase {
 		return box().getStar();
 	}
 
-	public SqlBox box() {
-		return dao().getBox();
-	}
-
 	public void insert() {
-		this.dao().insert();
+		this.box().insert();
 	}
 
 	public void update() {
-		this.dao().update();
+		this.box().update();
 	}
 
 	public void delete() {
-		this.dao().delete();
+		this.box().delete();
 	}
 
 	public String fieldID(String realColumnName) {
-		return this.dao().fieldID(realColumnName);
+		return this.box().fieldID(realColumnName);
 	}
 
 }

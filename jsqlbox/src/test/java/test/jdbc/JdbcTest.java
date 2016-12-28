@@ -31,7 +31,7 @@ public class JdbcTest {
 	 */
 	@Test
 	public void tx_jdbcTest() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		SqlBox.execute("insert into " + u.table() //
 				+ " (" + u.userName() + empty("user1")//
 				+ ", " + u.address() + empty("address1")//

@@ -15,6 +15,7 @@ public class RuntimeChangeConfig {
 	@Before
 	public void setup() {
 		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		SqlBox.getDefaultContext().setShowSql(true);
 	}
 
 	@After
@@ -24,7 +25,7 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void normal() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		u.setUserName("Sam");
 		u.insert();
 		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from users"));
@@ -33,7 +34,7 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void changeTable() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		u.box().configTable("users2");
 		u.setUserName("Sam");
 		u.insert();
@@ -43,7 +44,7 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void changeColumnName() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		u.box().configColumnName(u.fieldID(u.userName()), u.address());
 		u.box().configColumnName(u.fieldID(u.address()), u.phoneNumber());
 		u.setUserName("Sam");
@@ -58,12 +59,15 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void changeTableAndColumnName() {
-		User u = SqlBox.createBean(User.class);
+		User u = SqlBox.createEntity(User.class);
 		u.box().configTable("users2");
 		u.box().configColumnName("userName", u.address());
 		u.setUserName("Sam");
 		u.insert();
+		// below line, sql is "select Address from users2"
 		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.address(), " from ", u.table()));
+
+		// below line, sql is "select Address from users2"
 		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.userName(), " from ", u.table()));
 	}
 }

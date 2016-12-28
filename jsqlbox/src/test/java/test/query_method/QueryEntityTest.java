@@ -39,11 +39,11 @@ public class QueryEntityTest {
 	@Test
 	public void queryTest() {
 		User u = new User();
-		List<DB> list = SqlBox.queryForList("select ", u.star(), " from ", u.table());
+		List<DB> list = SqlBox.queryForList(DB.class, "select ", u.star(), " from ", u.table());
 		for (DB db : list) {
 			System.out.println(db.map);
 			System.out.println(db.user);
-		} 
+		}
 	}
 
 }
