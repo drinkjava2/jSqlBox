@@ -44,11 +44,16 @@ public class RuntimeChangeConfig {
 	@Test
 	public void changeColumnName() {
 		User u = SqlBox.createBean(User.class);
-		u.box().configColumnName("userName", u.address());
+		u.box().configColumnName(u.fieldID(u.userName()), u.address());
+		u.box().configColumnName(u.fieldID(u.address()), u.phoneNumber());
 		u.setUserName("Sam");
+		u.setPhoneNumber("111");
 		u.insert();
-		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.address(), " from ", u.table()));
+		// below line, sql is "select Address from users"
 		Assert.assertEquals("Sam", SqlBox.queryForString("select ", u.userName(), " from ", u.table()));
+
+		// below line sql is "select phoneNumber from users"
+		Assert.assertEquals("111", SqlBox.queryForString("select ", u.address(), " from ", u.table()));
 	}
 
 	@Test

@@ -42,8 +42,8 @@ public class QueryEntityTest {
 		List<DB> list = SqlBox.queryForList("select ", u.star(), " from ", u.table());
 		for (DB db : list) {
 			System.out.println(db.map);
-		}
-
+			System.out.println(db.user);
+		} 
 	}
 
 }

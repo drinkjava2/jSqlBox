@@ -30,7 +30,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  * @since 1.0.0
  */
 public class SortedUUIDGenerator implements IdGenerator {
-
 	private TableGenerator tableGenerator;
 
 	private UUIDAnyGenerator uuidAnyGenerator;

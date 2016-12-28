@@ -55,6 +55,13 @@ public class Dao {
 	private static final SqlBoxLogger log = SqlBoxLogger.getLog(Dao.class);
 	private SqlBox box;
 
+	private static ThreadLocal<String> fieldIDCache = new ThreadLocal<String>() {
+		@Override
+		protected String initialValue() {
+			return "";
+		}
+	};
+
 	private Object entityBean; // Entity Bean Instance
 
 	public Dao(SqlBoxContext ctx) {
@@ -74,6 +81,13 @@ public class Dao {
 		else if (sqlBox.getContext().getDataSource() == null)
 			throwEX("Dao create error, dataSource can not be null");
 		this.box = sqlBox;
+	}
+
+	/**
+	 * Get fieldIDCache
+	 */
+	public static ThreadLocal<String> getFieldIDCache() {
+		return fieldIDCache;
 	}
 
 	/**
@@ -559,15 +573,19 @@ public class Dao {
 		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
 		String fieldID = "getColumnName".equals(method1) ? Thread.currentThread().getStackTrace()[2].getMethodName()
 				: method1;
+		getFieldIDCache().set(fieldID);
 		return this.getBox().getRealColumnName(null, fieldID);
 	}
 
 	/**
 	 * get field's fieldID
 	 */
-	public String getFieldID(String realColumnName) {
-		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
-		return "getColumnName".equals(method1) ? Thread.currentThread().getStackTrace()[2].getMethodName() : method1;
+	public String fieldID(String realColumnName) {
+		String fieldID = getFieldIDCache().get();
+		if (SqlBoxUtils.isEmptyStr(fieldID) || SqlBoxUtils.isEmptyStr(realColumnName)
+				|| !realColumnName.equals(this.getBox().getRealColumnName(null, fieldID)))
+			throwEX("Dao getFieldID error, can only be called with getFieldID(xx.xxFieldID()) format");
+		return fieldID;
 	}
 
 	// ========Dao query/crud methods end=======

@@ -32,8 +32,11 @@ public class JdbcTest {
 	@Test
 	public void tx_jdbcTest() {
 		User u = SqlBox.createBean(User.class);
-		SqlBox.execute("insert into " + u.table() + " (" + u.userName() + empty("user1") + ", " + u.address()
-				+ empty("address1") + ", " + u.age() + empty("1") + ") values(?,?,?)");
+		SqlBox.execute("insert into " + u.table() //
+				+ " (" + u.userName() + empty("user1")//
+				+ ", " + u.address() + empty("address1")//
+				+ ", " + u.age() + empty("1")//
+				+ ") values(?,?,?)");
 
 		SqlBox.execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user2"), //
@@ -60,7 +63,7 @@ public class JdbcTest {
 				u.address(), " =?", empty("Nanjing"), //
 				" where ", u.age(), "=?", empty(3));
 
-		Assert.assertEquals(3, (int)SqlBox.queryForInteger("select count(*) from " + u.table()));
+		Assert.assertEquals(3, (int) SqlBox.queryForInteger("select count(*) from " + u.table()));
 	}
 
 	/**

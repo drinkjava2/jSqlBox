@@ -42,4 +42,8 @@ public class EntityBase {
 		this.dao().delete();
 	}
 
+	public String fieldID(String realColumnName) {
+		return this.dao().fieldID(realColumnName);
+	}
+
 }

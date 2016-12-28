@@ -28,6 +28,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 1.0.0
  */
 public class UUID25Generator implements IdGenerator {
+	public static final UUID25Generator INSTANCE = new UUID25Generator();
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {

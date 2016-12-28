@@ -123,8 +123,12 @@ public class SqlBox {
 	 */
 	public String getRealTable() {
 		String realTable = configTable;
-		if (SqlBoxUtils.isEmptyStr(realTable))
+		if (SqlBoxUtils.isEmptyStr(realTable)) {
 			realTable = this.getEntityClass().getSimpleName();
+			int locate = realTable.indexOf('$');// for inner class, get the real class name
+			if (locate > 0)
+				realTable = realTable.substring(locate, realTable.length());
+		}
 		String resultTable = context.findRealTableName(realTable);
 		if (SqlBoxUtils.isEmptyStr(resultTable))
 			SqlBoxException
