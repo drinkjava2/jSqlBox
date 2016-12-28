@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,12 +27,12 @@ public class DataTypeMapTest {
 		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
-//	@Test
+	@Test
 	public void insertForMysqlOnly() {
 		if (SqlBox.getDefaultDatabaseType() != DatabaseType.MYSQL)
 			return;
-		SqlBox.executeQuiet("drop table datatypes");
-		SqlBox.execute("create table datatypes ("//
+		SqlBox.executeQuiet("drop table datasample");
+		SqlBox.execute("create table datasample ("//
 				, "id", " varchar(32)", ","//
 				, "integerField", " int", ","//
 				, "longField", " BIGINT", ","//
@@ -47,38 +48,42 @@ public class DataTypeMapTest {
 				, "stringField", " VARCHAR(10)"//
 				, ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		SqlBox.refreshMetaData();
-		DataTypes dataTypes = new DataTypes();
+		DataSample dataTypes = new DataSample();
 		dataTypes.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
 		dataTypes.insert();
+		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from datasample"));
+		SqlBox.executeQuiet("drop table datasample");
 	}
 
 	@Test
 	public void insertForOracleOnly() {
 		if (SqlBox.getDefaultDatabaseType() != DatabaseType.ORACLE)
 			return;
-		SqlBox.executeQuiet("drop table datatypes");
-		SqlBox.execute("create table datatypes ("//
+		SqlBox.executeQuiet("drop table datasample");
+		SqlBox.execute("create table datasample ("//
 				, "id", " varchar(32)", ","//
-				, "integerField", " int", ","//
-				, "longField", " NUMERIC", ","//
-				, "shortField", " SMALLINT", ","//
-				, "floatField", " FLOAT", ","//
-				, "doubleField", " NUMERIC", ","//
-				, "bigDecimalField", " NUMERIC", ","//
-				, "byteField", " NUMERIC", ","//
-				, "booleanField", " NUMERIC", ","//
-				, "dateField", " DATE", ","//
-				, "timeField", " DATE", ","//
-				, "timestampField", " DATE", ","//
-				, "stringField", " VARCHAR(10)"//
+				, "integer_Field", " int", ","//
+				, "long_Field", " NUMERIC", ","//
+				, "short_Field", " SMALLINT", ","//
+				, "float_Field", " FLOAT", ","//
+				, "double_Field", " NUMERIC", ","//
+				, "big_Decimal_Field", " NUMERIC", ","//
+				, "byte_Field", " NUMERIC", ","//
+				, "boolean_Field", " NUMERIC", ","//
+				, "date_Field", " DATE", ","//
+				, "time_Field", " DATE", ","//
+				, "timestamp_Field", " DATE", ","//
+				, "string_Field", " VARCHAR(10)"//
 				, ")");
 		SqlBox.refreshMetaData();
-		DataTypes dataTypes = new DataTypes();
+		DataSample dataTypes = new DataSample();
 		dataTypes.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
 		dataTypes.insert();
+		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from datasample"));
+		SqlBox.executeQuiet("drop table datasample");
 	}
 
-	public static class DataTypes extends EntityBase {
+	public static class DataSample extends EntityBase {
 		private String id;
 		private Integer integerField = 1;
 		private Long longField = 2l;

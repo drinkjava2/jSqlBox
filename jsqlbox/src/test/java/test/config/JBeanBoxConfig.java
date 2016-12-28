@@ -58,9 +58,9 @@ public class JBeanBoxConfig {
 			ds.addDataSourceProperty("useServerPrepStmts", true);
 			ds.setUsername("root");
 			ds.setPassword("root888");// change to your PWD
-			ds.setMaximumPoolSize(10);
+			ds.setMaximumPoolSize(3);
 			ds.setConnectionTimeout(5000);
-			this.setPreDestory("close");
+			this.setPreDestory("close");// jBeanBox will close pool
 			return ds;
 		}
 	}
