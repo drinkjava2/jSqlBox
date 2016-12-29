@@ -41,7 +41,7 @@ public class SqlBoxUtils {
 
 	// To check if a class exist, if exist, cache it to avoid check again
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<>();
-	
+
 	private static ThreadLocal<HashMap<String, Method>> methodExistCache = new ThreadLocal<HashMap<String, Method>>() {
 		@Override
 		protected HashMap<String, Method> initialValue() {
@@ -179,22 +179,6 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Get Box property from an entity bean
-	 */
-	public static Box getBox(Object entityBean) {
-		Box box = null;
-		try {
-			Method m = ReflectionUtils.findMethod(entityBean.getClass(), "box", new Class[] {});
-			box = (Box) m.invoke(entityBean, new Object[] {});
-		} catch (Exception e) {
-			throwEX(e, "SqlBoxContext load error for bean \"" + entityBean + "\", no box method found");
-		}
-		if (box == null)
-			throwEX("SqlBoxContext load error for bean \"" + entityBean + "\", no box method found");
-		return box;
-	}
-
-	/**
 	 * Extract EntityID Values from realColumns
 	 */
 	public static Map<String, Object> extractEntityIDValues(Object entityID, Map<String, Column> realColumns) {
@@ -228,7 +212,7 @@ public class SqlBoxUtils {
 			throwEX("SqlBoxUtils extractIdColumnsOnly error, no entityID set for class ");
 		return idColumns;
 	}
-	
+
 	public static Method getDeclaredMethodQuickly(Class<?> targetClass, String methodName, Class<?> parameterclazz) {
 		String key = new StringBuilder(targetClass.toString()).append("_").append(methodName).append("_")
 				.append(parameterclazz).toString();

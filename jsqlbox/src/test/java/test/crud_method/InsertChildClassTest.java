@@ -25,8 +25,6 @@ public class InsertChildClassTest {
 	}
 
 	public static class U2 extends User {
-		private static final long serialVersionUID = 1014969353551282130L;
-
 		{
 			this.box().configTable("users2");
 		}

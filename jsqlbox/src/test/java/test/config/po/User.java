@@ -1,8 +1,6 @@
 package test.config.po;
 
-import java.io.Serializable;
-
-import com.github.drinkjava2.jsqlbox.EntityBase;
+import com.github.drinkjava2.jsqlbox.EntityInterface;
 
 /**
  * Entity class is not a POJO, extends from EntityBase class or it's child class<br/>
@@ -15,8 +13,7 @@ import com.github.drinkjava2.jsqlbox.EntityBase;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class User extends EntityBase implements Serializable {
-	private static final long serialVersionUID = 7547093565698490399L;
+public class User implements EntityInterface {
 	private Integer id;
 	private String userName;
 	private String phoneNumber;
@@ -72,7 +69,7 @@ public class User extends EntityBase implements Serializable {
 		this.age = age;
 	}
 
-	// Below method are for JDBC friendly use, it's not compulsory but recommended to add below methods
+	// Below method are friendly for JDBC, it's not compulsory but recommended to add
 	public String id() {
 		return box().getColumnName();
 	}

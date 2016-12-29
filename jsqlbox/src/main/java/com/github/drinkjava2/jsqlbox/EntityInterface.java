@@ -6,33 +6,33 @@ package com.github.drinkjava2.jsqlbox;
  * to your entity bean class
  * 
  */
-public class EntityBase {
+public interface EntityInterface {
 
-	public Box box() {
+	public default Box box() {
 		return Box.getBox(this);
 	}
 
-	public String table() {
+	public default String table() {
 		return box().getRealTable();
 	}
 
-	public String star() {
+	public default String star() {
 		return box().getStar();
 	}
 
-	public void insert() {
+	public default void insert() {
 		this.box().insert();
 	}
 
-	public void update() {
+	public default void update() {
 		this.box().update();
 	}
 
-	public void delete() {
+	public default void delete() {
 		this.box().delete();
 	}
 
-	public String fieldID(String realColumnName) {
+	public default String fieldID(String realColumnName) {
 		return this.box().fieldID(realColumnName);
 	}
 

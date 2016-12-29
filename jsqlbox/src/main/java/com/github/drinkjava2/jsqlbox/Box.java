@@ -77,6 +77,13 @@ public class Box {
 		}
 	};
 
+	private static ThreadLocal<Map<String, Box>> boxCache = new ThreadLocal<Map<String, Box>>() {
+		@Override
+		protected Map<String, Box> initialValue() {
+			return new HashMap<>();
+		}
+	};
+
 	private Object entityBean; // Entity Bean Instance
 
 	public Box() {
@@ -92,28 +99,40 @@ public class Box {
 	}
 
 	/**
-	 * Get fieldIDCache
+	 * Get fieldIDCache from ThreadLocal
 	 */
 	public static ThreadLocal<String> getFieldIDCache() {
 		return fieldIDCache;
 	}
 
 	/**
-	 * Get default Box
+	 * Put a box instance into thread local cache for a bean
 	 */
-	public static Box getBox(Object bean, Box box) {
-		if (box != null)
-			return box;
-		Box d = SqlBoxContext.defaultSqlBoxContext().findAndBuildSqlBox(bean.getClass());
-		d.beanInitialize(bean);
-		d.setEntityBean(bean);
-		try {
-			Method m = ReflectionUtils.findMethod(bean.getClass(), "putBox", new Class[] { Box.class });
-			m.invoke(bean, new Object[] { d });
-		} catch (Exception e) {
-			throwEX(e, "Box getBox error for bean \"" + bean + "\", no putBox method found");
+	public static void putBox(Object bean, Box box) {
+		if (bean == null)
+			throwEX("Box putBox error, entityBean can not be null");
+		else
+			boxCache.get().put(bean.toString(), box);
+	}
+
+	/**
+	 * Get a box instance from thread local cache for a bean
+	 */
+	public static Box getBox(Object bean) {
+		Map<String, Box> boxCached = boxCache.get();
+		Box box = null;
+		if (bean == null)
+			throwEX("Box putBox error, entityBean can not be null");
+		else {
+			box = boxCached.get(bean.toString());
+			if (box != null)
+				return box;
+			box = SqlBoxContext.defaultSqlBoxContext().findAndBuildSqlBox(bean.getClass());
+			box.beanInitialize(bean);
+			box.setEntityBean(bean);
+			boxCached.put(bean.toString(), box);
 		}
-		return d;
+		return box;
 	}
 
 	/**
@@ -675,9 +694,6 @@ public class Box {
 			bean = this.getEntityClass().newInstance();
 			this.beanInitialize(bean);
 			setEntityBean(bean);
-			Method m = SqlBoxUtils.getDeclaredMethodQuickly(this.getEntityClass(), "putBox", Box.class);
-			if (m != null)
-				m.invoke(bean, new Object[] { this });// 5ms
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext create error");
 		}

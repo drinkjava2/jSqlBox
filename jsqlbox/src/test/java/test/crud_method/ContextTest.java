@@ -69,9 +69,11 @@ public class ContextTest {
 	}
 
 	@Test
-	public void insertUser2() {
+	public void insertFromAntoherContext() {
 		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);
 		User u = ctx.createEntity(User.class);
+		System.out.println(SqlBox.getDefaultContext());
+		System.out.println(u.box().getContext());// TODO fix this bug
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");

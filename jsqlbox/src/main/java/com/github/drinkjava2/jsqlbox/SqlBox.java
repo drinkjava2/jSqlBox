@@ -87,7 +87,7 @@ public class SqlBox {
 
 	public static <T> T load(Class<?> entityOrBoxClass, Object entityID) {
 		T bean = (T) SqlBoxContext.defaultSqlBoxContext().createEntity(entityOrBoxClass);
-		Box box = SqlBoxUtils.getBox(bean);
+		Box box = Box.getBox(bean);
 		return box.load(entityID);
 	}
 
