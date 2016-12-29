@@ -16,9 +16,9 @@ class ProxyBean implements MethodInterceptor {
 	@SuppressWarnings("unused")
 	private Class<?> beanClass;
 	private Boolean dirty = false;
-	private Box box;
+	private SqlBox box;
 
-	public ProxyBean(Class<?> beanClass, Box box) {
+	public ProxyBean(Class<?> beanClass, SqlBox box) {
 		this.beanClass = beanClass;
 		this.box = box;
 	}

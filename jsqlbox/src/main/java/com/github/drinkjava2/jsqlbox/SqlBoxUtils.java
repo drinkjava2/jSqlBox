@@ -67,7 +67,7 @@ public class SqlBoxUtils {
 		if (i == null)
 			try {
 				Class<?> clazz = Class.forName(className);
-				if (Box.class.isAssignableFrom((Class<?>) clazz)) {
+				if (SqlBox.class.isAssignableFrom((Class<?>) clazz)) {
 					classExistCache.put(className, 1);
 					return clazz;
 				}
@@ -182,11 +182,10 @@ public class SqlBoxUtils {
 	 * Extract EntityID Values from realColumns
 	 */
 	public static Map<String, Object> extractEntityIDValues(Object entityID, Map<String, Column> realColumns) {
+		if (entityID instanceof Map)
+			return (Map<String, Object>) entityID;
 		Map<String, Object> idvalues = new HashMap<>();
-		if (entityID instanceof Map) {
-			for (Entry<String, Object> entry : ((Map<String, Object>) entityID).entrySet())
-				idvalues.put(entry.getKey(), entry.getValue());
-		} else if (entityID instanceof List) {
+		if (entityID instanceof List) {
 			idvalues = new HashMap<>();
 			for (Column col : (List<Column>) entityID)
 				idvalues.put(col.getFieldID(), col.getPropertyValue());

@@ -15,7 +15,10 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
+
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -37,7 +40,7 @@ public class SqlBoxContext {
 	// print SQL to console or log depends logging.properties
 	private boolean showSql = false;
 
-	public static final String SQLBOX_IDENTITY = "BOX";
+	public static final String SQLBOX_IDENTITY = "BX";
 
 	private JdbcTemplate jdbc = new JdbcTemplate();
 	private DataSource dataSource = null;
@@ -45,6 +48,13 @@ public class SqlBoxContext {
 	private TinyDbMetaData metaData;
 
 	private Class<?> dbClass;
+
+	protected static ThreadLocal<Map<Object, SqlBox>> boxCache = new ThreadLocal<Map<Object, SqlBox>>() {
+		@Override
+		protected Map<Object, SqlBox> initialValue() {
+			return new HashMap<>();
+		}
+	};
 
 	public static final ThreadLocal<HashMap<Object, Object>> classExistCache = new ThreadLocal<HashMap<Object, Object>>() {
 		@Override
@@ -69,11 +79,34 @@ public class SqlBoxContext {
 		}
 	}
 
-	public static SqlBoxContext defaultSqlBoxContext() {
+	public static SqlBoxContext getDefaultSqlBoxContext() {
 		if (defaultSqlBoxContext == null)
 			defaultSqlBoxContext = new SqlBoxContext();
 		return defaultSqlBoxContext;
 
+	}
+
+	/**
+	 * Put a box instance into thread local cache for a bean
+	 */
+	public static void bind(Object bean, SqlBox box) {
+		if (bean == null)
+			throwEX("SqlBoxContext putBox error, entityBean can not be null");
+		else {
+			box.setEntityBean(bean);
+			box.setEntityClass(bean.getClass());
+			boxCache.get().put(bean, box);
+		}
+	}
+
+	/**
+	 * Get a box instance from thread local cache for a bean
+	 */
+	public static SqlBox getBindedBox(Object bean) {
+		if (bean == null)
+			return (SqlBox) throwEX("SqlBoxContext putBox error, entityBean can not be null");
+		else
+			return boxCache.get().get(bean);
 	}
 
 	public static <T> void setDefaultSqlBoxContext(T sqlBoxContext) {
@@ -94,33 +127,34 @@ public class SqlBoxContext {
 	 * Create an entity instance
 	 */
 	public <T> T createEntity(Class<?> entityOrBoxClass) {
-		Box box = findAndBuildSqlBox(entityOrBoxClass);
-		return (T) box.createEntity();
+		SqlBox box = findAndBuildSqlBox(entityOrBoxClass);
+		T bean = (T) box.createEntity();
+		return bean;
 	}
 
 	/**
 	 * Find and create a SqlBox instance according bean class or SqlBox Class
 	 */
-	public Box findAndBuildSqlBox(Class<?> entityOrBoxClass) {
+	public SqlBox findAndBuildSqlBox(Class<?> entityOrBoxClass) {
 		Class<?> boxClass = null;
 		if (entityOrBoxClass == null) {
 			SqlBoxException.throwEX("SqlBoxContext findAndBuildSqlBox error! Bean Or SqlBox Class not set");
 			return null;
 		}
-		if (Box.class.isAssignableFrom(entityOrBoxClass))
+		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
 			boxClass = SqlBoxUtils.checkSqlBoxClassExist(entityOrBoxClass.getName() + SQLBOX_IDENTITY);
 		if (boxClass == null)
 			boxClass = SqlBoxUtils.checkSqlBoxClassExist(
 					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + SQLBOX_IDENTITY);
-		Box box = null;
+		SqlBox box = null;
 		if (boxClass == null) {
-			box = new Box(this);
+			box = new SqlBox(this);
 			box.setEntityClass(entityOrBoxClass);
 		} else {
 			try {
-				box = (Box) boxClass.newInstance();
+				box = (SqlBox) boxClass.newInstance();
 				if (box.getEntityClass() == null)
 					box.setEntityClass(entityOrBoxClass);
 				box.setContext(this);

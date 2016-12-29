@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -26,31 +26,31 @@ public class BatchInsertTest {
 	}
 
 	public void tx_BatchInsertDemo() {
-		User u = SqlBox.createEntity(User.class);
+		User u = Dao.createEntity(User.class);
 		for (int i = 0; i < 1000; i++)
-			SqlBox.cacheSQL("insert into ", u.table(), " (", //
+			Dao.cacheSQL("insert into ", u.table(), " (", //
 					u.userName(), empty("user" + i), ",", //
 					u.age(), empty("70"), //
 					") ", questionMarks());
-		SqlBox.executeCachedSQLs();
+		Dao.executeCachedSQLs();
 	}
 
 	@Test
 	public void doTest() {
-		User u = SqlBox.createEntity(User.class);
+		User u = Dao.createEntity(User.class);
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();
-		Assert.assertEquals(1000, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(1000, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 
 	public static void main(String[] args) {
 		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
-		User u = SqlBox.createEntity(User.class);
+		User u = Dao.createEntity(User.class);
 		long old = System.currentTimeMillis();
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);
 		t.tx_BatchInsertDemo();
 		System.out.println(System.currentTimeMillis() - old);
-		Assert.assertEquals(1000, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(1000, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 
 }

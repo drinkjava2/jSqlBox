@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -38,7 +38,7 @@ public class JBeanBoxTransactionTest {
 
 	public void tx_InsertUser1() {
 		User u = new User();
-		SqlBox.execute("insert into ", u.table(), //
+		Dao.execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user1"), //
 				", ", u.address(), empty("address1"), //
 				", ", u.age(), ")", empty("10"), //
@@ -47,7 +47,7 @@ public class JBeanBoxTransactionTest {
 
 	public void tx_InsertUser2() {
 		User u = new User();
-		SqlBox.execute("insert into ", u.table(), //
+		Dao.execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user2"), //
 				", ", u.address(), empty("address2"), //
 				", ", u.age(), ")", empty("20"), //
@@ -57,7 +57,7 @@ public class JBeanBoxTransactionTest {
 	public void tx_doInsert() {
 		User u = new User();
 		tx_InsertUser1();
-		int i = SqlBox.queryForInteger("select count(*) from ", u.table());
+		int i = Dao.queryForInteger("select count(*) from ", u.table());
 		Assert.assertEquals(1, i);
 		System.out.println(i / 0);// throw a runtime exception
 		tx_InsertUser2();
@@ -72,7 +72,7 @@ public class JBeanBoxTransactionTest {
 		} catch (Exception e) {
 			foundException = true;
 			Assert.assertEquals(InvocationTargetException.class.getName(), e.getClass().getName());
-			int i = SqlBox.queryForInteger("select count(*) from users");
+			int i = Dao.queryForInteger("select count(*) from users");
 			Assert.assertEquals(0, i);
 		}
 		Assert.assertEquals(foundException, true);

@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
 import test.config.TestPrepare;
@@ -30,7 +30,7 @@ public class AutoGeneratorTest {
 		for (int i = 0; i < 10; i++) {
 			u.insert();
 		}
-		Assert.assertEquals(10, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(10, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		Assert.assertTrue(u.getId() > 0);
 	}
 
@@ -42,7 +42,7 @@ public class AutoGeneratorTest {
 		for (int i = 0; i < 10; i++) {
 			u.insert();
 		}
-		Assert.assertEquals(10, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(10, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		Assert.assertTrue(u.getId() > 0);
 	}
 

@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -39,23 +40,30 @@ public class ContextTest {
 		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
+	/**
+	 * Demo how to create context and use it
+	 */
 	@Test
 	public void insertUser1() {
-		HikariDataSource ds = new HikariDataSource();// c3p0
+		HikariDataSource ds = new HikariDataSource();// Datasource setting
 		ds.setUsername("root");
 		ds.setPassword("root888");
 		ds.setJdbcUrl((String) new DataSourceBox().getProperty("jdbcUrl"));
 		ds.setDriverClassName((String) new DataSourceBox().getProperty("driverClassName"));
-		SqlBoxContext ctx = new SqlBoxContext(ds, DB.class);
+
+		SqlBoxContext ctx = new SqlBoxContext(ds, DB.class);// create a new context
+
 		User u = ctx.createEntity(User.class);
-		// Can not use User u=new User() here because default SqlBoxContext not configured
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
+
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
 		u.insert();
-		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User1")));
+		ds.close();
 	}
 
 	// CtxBox is a SqlBoxContent singleton
@@ -68,25 +76,50 @@ public class ContextTest {
 		}
 	}
 
+	/**
+	 * Demo how to use IOC tool like BeanBox to create a context
+	 */
 	@Test
 	public void insertFromAntoherContext() {
 		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);
 		User u = ctx.createEntity(User.class);
-		System.out.println(SqlBox.getDefaultContext());
-		System.out.println(u.box().getContext());// TODO fix this bug
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
 		u.insert();
-		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User1")));
 	}
 
-	public static void main(String[] args) {
-		ContextTest t = new ContextTest();
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
-		t.insertUser1();
+	/**
+	 * Test dynamic bind context at runtime, first on board, then buy ticket
+	 */
+	@Test
+	public void dynamicBindContext() {
+		Dao.getDefaultContext().setShowSql(true);
+		User u = new User();
+		u.setUserName("User1");
+
+		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);
+		SqlBox box = new SqlBox(ctx);
+		box.configTable("Users2");
+		box.configColumnName("userName", "address");
+		SqlBoxContext.bind(u, box);
+		u.insert();
+		Assert.assertEquals("User1", Dao.queryForString("select ", u.address(), " from ", u.table(), " where ",
+				u.userName(), "=", q("User1")));
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
+
+		SqlBox box2 = ctx.findAndBuildSqlBox(User.class);
+		box2.configColumnName("userName", "address");
+		SqlBoxContext.bind(u, box2);
+		u.insert();
+		Dao.getDefaultContext().setShowSql(true);
+		Assert.assertEquals("User1", Dao.queryForString("select ", u.address(), " from ", u.table(), " where ",
+				u.userName(), "=", q("User1")));
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
 	}
 
 }

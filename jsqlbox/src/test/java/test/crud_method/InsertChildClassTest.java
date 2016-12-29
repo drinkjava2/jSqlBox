@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -35,12 +35,12 @@ public class InsertChildClassTest {
 		U2 u = new U2();
 		u.setPhoneNumber("111");
 		u.insert();
-		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", "users2", " where ",
-				u.phoneNumber(), "=", q("111")));
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+				" where ", u.phoneNumber(), "=", q("111")));
 		u.box().configTable("users");
 		u.setPhoneNumber("222");
 		u.insert();
-		Assert.assertEquals(222, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", "users", " where ",
-				u.phoneNumber(), "=", q("222")));
+		Assert.assertEquals(222, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+				" where ", u.phoneNumber(), "=", q("222")));
 	}
 }

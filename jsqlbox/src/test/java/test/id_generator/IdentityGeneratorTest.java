@@ -5,8 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.Box;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
@@ -33,7 +33,7 @@ public class IdentityGeneratorTest {
 		for (int i = 0; i < 10; i++) {
 			u.insert();
 		}
-		Assert.assertEquals(10, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(10, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		Assert.assertTrue(u.getId() > 0);
 	}
 
@@ -45,13 +45,13 @@ public class IdentityGeneratorTest {
 		for (int i = 0; i < 10; i++) {
 			u.insert();
 		}
-		Assert.assertEquals(10, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(10, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		Assert.assertTrue(u.getId() > 0);
 	}
 
 	@Test
 	public void insertUserForMysql() {
-		if (Box.box().getDatabaseType() != DatabaseType.MYSQL)
+		if (SqlBox.box().getDatabaseType() != DatabaseType.MYSQL)
 			return;
 		User u = new User();
 		u.box().configIdGenerator("id", IdentityGenerator.INSTANCE);
@@ -59,7 +59,7 @@ public class IdentityGeneratorTest {
 		for (int i = 0; i < 10; i++) {
 			u.insert();
 		}
-		Assert.assertEquals(10, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(10, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		Assert.assertTrue(u.getId() > 0);
 	}
 

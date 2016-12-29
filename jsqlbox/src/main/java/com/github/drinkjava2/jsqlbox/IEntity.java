@@ -6,10 +6,10 @@ package com.github.drinkjava2.jsqlbox;
  * to your entity bean class
  * 
  */
-public interface EntityInterface {
+public interface IEntity {
 
-	public default Box box() {
-		return Box.getBox(this);
+	public default SqlBox box() {
+		return SqlBox.getBox(this);
 	}
 
 	public default String table() {

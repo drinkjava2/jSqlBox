@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -25,11 +25,11 @@ public class ConditionQueryTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		//TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {
-		User u = SqlBox.createEntity(User.class);
+		User u = Dao.createEntity(User.class);
 		String sql = "Select count(*) from " + u.table() + " where ";
 		if (condition == 1 || condition == 3)
 			sql = sql + u.userName() + "=" + q(parameter) + " and " + u.address() + "=" + q("Address1");
@@ -40,7 +40,7 @@ public class ConditionQueryTest {
 		if (condition == 3)
 			sql = sql + " or " + u.age() + "=" + q(parameter);
 
-		return SqlBox.queryForInteger(sql);
+		return Dao.queryForInteger(sql);
 	}
 
 	@Test

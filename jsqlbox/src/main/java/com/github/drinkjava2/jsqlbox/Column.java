@@ -202,6 +202,7 @@ public class Column {
 		sb.append("writeMethodName=" + writeMethodName).append("\r\n");
 		sb.append("idGenerator=" + idGenerator).append("\r\n");
 		sb.append("fieldID=" + fieldID).append("\r\n");
+		sb.append("\r\n");
 		return sb.toString();
 	}
 }

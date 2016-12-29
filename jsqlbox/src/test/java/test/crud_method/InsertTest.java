@@ -8,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.Box;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -34,21 +34,21 @@ public class InsertTest {
 		u.setPhoneNumber("111");
 		u.setAlive(true);
 		u.insert();
-		Assert.assertEquals(111, (int) SqlBox.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
 				" where ", u.userName(), "=", q("User1")));
 		Assert.assertTrue(u.getId() > 0);
-		User u2 = SqlBox.load(User.class, u.getId());
+		User u2 = Dao.load(User.class, u.getId());
 		Assert.assertTrue(u2.getAlive());
 	}
 
 	@Test
 	public void insertUserB() {
-		User u = SqlBox.createEntity(User.class);
+		User u = Dao.createEntity(User.class);
 		u.setUserName("User2");
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");
 		u.insert();
-		Assert.assertEquals("222", SqlBox.queryForString("select ", u.phoneNumber(), " from ", u.table(), " where ",
+		Assert.assertEquals("222", Dao.queryForString("select ", u.phoneNumber(), " from ", u.table(), " where ",
 				u.userName(), "=" + q("User2")));
 		Assert.assertTrue(u.getId() > 0);
 	}
@@ -56,11 +56,11 @@ public class InsertTest {
 	@Test
 	public void insertUserC() {
 		for (int i = 0; i < 10000; i++) {
-			User u = SqlBox.createEntity(User.class);
+			User u = Dao.createEntity(User.class);
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
-			Box d = u.box();
+			SqlBox d = u.box();
 			if (d == null)
 				System.out.println("null");
 		}

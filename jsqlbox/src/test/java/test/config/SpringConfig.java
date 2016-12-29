@@ -15,7 +15,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -89,10 +89,10 @@ public class SpringConfig {
 		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
 		User u = sc.createEntity(User.class);
 		// Can not use User u=new User() here because default global SqlBoxContext not configured
-		SqlBox.execute("delete from " + u.table());
+		Dao.execute("delete from " + u.table());
 		u.setUserName("Spring");
 		u.insert();
-		Assert.assertEquals("Spring", SqlBox.queryForString(
+		Assert.assertEquals("Spring", Dao.queryForString(
 				"select " + u.userName() + " from " + u.table() + " where " + u.userName() + "=" + q("Spring")));
 		springCtx.close();
 	}

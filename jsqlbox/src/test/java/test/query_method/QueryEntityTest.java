@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
 import test.config.po.DB;
@@ -23,12 +23,12 @@ public class QueryEntityTest {
 		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 		User u = new User();
 		for (int i = 0; i < 5; i++)
-			SqlBox.execute("insert into ", u.table(), //
+			Dao.execute("insert into ", u.table(), //
 					" (", u.userName(), empty("user1"), //
 					", ", u.address(), empty("address1"), //
 					", ", u.age(), ")", empty("1"), //
 					questionMarks());
-		Assert.assertEquals(5, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(5, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 
 	@After
@@ -39,7 +39,7 @@ public class QueryEntityTest {
 	@Test
 	public void queryTest() {
 		User u = new User();
-		List<DB> list = SqlBox.queryForList(DB.class, "select ", u.star(), " from ", u.table());
+		List<DB> list = Dao.queryForList(DB.class, "select ", u.star(), " from ", u.table());
 		for (DB db : list) {
 			System.out.println(db.map);
 			System.out.println(db.user);

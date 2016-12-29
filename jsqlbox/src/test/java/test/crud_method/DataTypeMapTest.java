@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.EntityBase;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
@@ -29,10 +29,10 @@ public class DataTypeMapTest {
 
 	@Test
 	public void insertForMysqlOnly() {
-		if (SqlBox.getDefaultDatabaseType() != DatabaseType.MYSQL)
+		if (Dao.getDefaultDatabaseType() != DatabaseType.MYSQL)
 			return;
-		SqlBox.executeQuiet("drop table datasample");
-		SqlBox.execute("create table datasample ("//
+		Dao.executeQuiet("drop table datasample");
+		Dao.execute("create table datasample ("//
 				, "id", " varchar(32)", ","//
 				, "integerField", " int", ","//
 				, "longField", " BIGINT", ","//
@@ -47,20 +47,20 @@ public class DataTypeMapTest {
 				, "timestampField", " TIMESTAMP", ","//
 				, "stringField", " VARCHAR(10)"//
 				, ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-		SqlBox.refreshMetaData();
+		Dao.refreshMetaData();
 		DataSample dt = new DataSample();
 		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
 		dt.insert();
-		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from datasample"));
-		SqlBox.executeQuiet("drop table datasample");
+		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from datasample"));
+		Dao.executeQuiet("drop table datasample");
 	}
 
 	@Test
 	public void insertForOracleOnly() {
-		if (SqlBox.getDefaultDatabaseType() != DatabaseType.ORACLE)
+		if (Dao.getDefaultDatabaseType() != DatabaseType.ORACLE)
 			return;
-		SqlBox.executeQuiet("drop table datasample");
-		SqlBox.execute("create table datasample ("//
+		Dao.executeQuiet("drop table datasample");
+		Dao.execute("create table datasample ("//
 				, "id", " varchar(32)", ","//
 				, "integer_Field", " int", ","//
 				, "long_Field", " NUMERIC", ","//
@@ -75,12 +75,12 @@ public class DataTypeMapTest {
 				, "timestamp_Field", " DATE", ","//
 				, "string_Field", " VARCHAR(10)"//
 				, ")");
-		SqlBox.refreshMetaData();
+		Dao.refreshMetaData();
 		DataSample dt = new DataSample();
 		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
 		dt.insert();
-		Assert.assertEquals(1, (int) SqlBox.queryForInteger("select count(*) from datasample"));
-		SqlBox.executeQuiet("drop table datasample");
+		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from datasample"));
+		Dao.executeQuiet("drop table datasample");
 	}
 
 	public static class DataSample extends EntityBase {

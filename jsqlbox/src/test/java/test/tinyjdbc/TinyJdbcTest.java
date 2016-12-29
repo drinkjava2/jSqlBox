@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 import test.config.TestPrepare;
@@ -40,12 +40,12 @@ public class TinyJdbcTest {
 	@Test
 	public void tx_InsertUser1() {
 		User u = new User();
-		SqlBox.execute("insert into ", u.table(), //
+		Dao.execute("insert into ", u.table(), //
 				" (", u.userName(), empty("user1"), //
 				", ", u.address(), empty("address1"), //
 				", ", u.age(), ")", empty("10"), //
 				questionMarks());
-		DataSource ds = SqlBox.getDefaultContext().getDataSource();
+		DataSource ds = Dao.getDefaultContext().getDataSource();
 		TinyJdbc.execute(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");
 		Assert.assertEquals(20, (int) TinyJdbc.queryForInteger(ds, 2, "select age from users where age =?", "20"));
 	}

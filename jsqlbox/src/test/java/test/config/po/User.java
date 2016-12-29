@@ -1,10 +1,9 @@
 package test.config.po;
 
-import com.github.drinkjava2.jsqlbox.EntityInterface;
+import com.github.drinkjava2.jsqlbox.IEntity;
 
 /**
- * Entity class is not a POJO, extends from EntityBase class or it's child class<br/>
- * But for some reason if can't extend from EntityBase, can copy all method in EntityBase into entity class<br/>
+ * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
  * 
  * Default database table equal to entity class(s) name, in this example it will use "users" as table name
  * 
@@ -13,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.EntityInterface;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class User implements EntityInterface {
+public class User implements IEntity { 
 	private Integer id;
 	private String userName;
 	private String phoneNumber;
@@ -69,7 +68,7 @@ public class User implements EntityInterface {
 		this.age = age;
 	}
 
-	// Below method are friendly for JDBC, it's not compulsory but recommended to add
+	// Below method are friendly for JDBC, it's not compulsory but recommended to have
 	public String id() {
 		return box().getColumnName();
 	}

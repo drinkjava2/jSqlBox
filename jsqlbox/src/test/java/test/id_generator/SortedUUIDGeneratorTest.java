@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.SortedUUIDGenerator;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
@@ -46,28 +46,28 @@ public class SortedUUIDGeneratorTest {
 
 	@Test
 	public void insertUserInMysql() {
-		if (SqlBox.getDefaultDatabaseType() != DatabaseType.MYSQL)
+		if (Dao.getDefaultDatabaseType() != DatabaseType.MYSQL)
 			return;
 		User u = new User();
-		SqlBox.executeQuiet("drop table t");
-		SqlBox.executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+		Dao.executeQuiet("drop table t");
+		Dao.executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 		u.box().configIdGenerator("userName", BeanBox.getBean(SortedUUIDBox.class));
 		for (int i = 0; i < 60; i++)
 			u.insert();
-		Assert.assertEquals(60, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(60, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 
 	@Test
 	public void insertUserInOracle() {
-		if (SqlBox.getDefaultDatabaseType() != DatabaseType.ORACLE)
+		if (Dao.getDefaultDatabaseType() != DatabaseType.ORACLE)
 			return;
 		User u = new User();
-		SqlBox.executeQuiet("drop table T");
-		SqlBox.executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
+		Dao.executeQuiet("drop table T");
+		Dao.executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
 		u.box().configIdGenerator("userName", BeanBox.getBean(SortedUUIDBox.class));
 		for (int i = 0; i < 60; i++)
 			u.insert();
-		Assert.assertEquals(60, (int) SqlBox.queryForInteger("select count(*) from ", u.table()));
+		Assert.assertEquals(60, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 
 }

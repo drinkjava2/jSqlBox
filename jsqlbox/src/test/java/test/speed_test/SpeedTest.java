@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.config.TestPrepare;
@@ -30,8 +30,8 @@ public class SpeedTest {
 	public void doSpeedTest() {
 		long oldTime = System.currentTimeMillis();
 		for (int i = 0; i < 10000; i++) {
-			SqlBoxContext.defaultSqlBoxContext();
-			User u = SqlBox.createEntity(User.class);
+			SqlBoxContext.getDefaultSqlBoxContext();
+			User u = Dao.createEntity(User.class);
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");

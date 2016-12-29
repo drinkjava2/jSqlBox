@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
@@ -39,7 +39,7 @@ public class TinyJdbcGetMetaData {
 
 	@Test
 	public void getMysqlMetadata() {
-		DatabaseType type = SqlBox.getDefaultDatabaseType();
+		DatabaseType type = Dao.getDefaultDatabaseType();
 		DataSource ds = null;
 		if (type == DatabaseType.MYSQL)
 			ds = BeanBox.getBean(MySqlDataSourceBox.class);

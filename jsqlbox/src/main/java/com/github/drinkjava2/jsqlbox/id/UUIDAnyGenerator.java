@@ -35,7 +35,7 @@ public class UUIDAnyGenerator implements IdGenerator {
 	private Integer length = 20;
 
 	public UUIDAnyGenerator() {
-		// default UUID
+		// default constructor
 	}
 
 	/**

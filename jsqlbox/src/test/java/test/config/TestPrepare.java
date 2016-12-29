@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
@@ -26,60 +26,60 @@ public class TestPrepare {
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 
 		System.out.println("Drop and re-create all tables for a new test ...");
-		if (SqlBox.getDefaultDatabaseType() == DatabaseType.ORACLE) {
-			SqlBox.executeQuiet("DROP TRIGGER TGR_2");
-			SqlBox.executeQuiet("DROP SEQUENCE SEQ_2");
-			SqlBox.executeQuiet("DROP TRIGGER TGR_1");
-			SqlBox.executeQuiet("DROP SEQUENCE SEQ_1");
+		if (Dao.getDefaultDatabaseType() == DatabaseType.ORACLE) {
+			Dao.executeQuiet("DROP TRIGGER TGR_2");
+			Dao.executeQuiet("DROP SEQUENCE SEQ_2");
+			Dao.executeQuiet("DROP TRIGGER TGR_1");
+			Dao.executeQuiet("DROP SEQUENCE SEQ_1");
 		}
-		SqlBox.executeQuiet("drop table users");
-		SqlBox.executeQuiet("drop table users2");
+		Dao.executeQuiet("drop table users");
+		Dao.executeQuiet("drop table users2");
 
-		if (SqlBox.getDefaultDatabaseType() == DatabaseType.MYSQL) {
-			SqlBox.execute("create table users ", //
+		if (Dao.getDefaultDatabaseType() == DatabaseType.MYSQL) {
+			Dao.execute("create table users ", //
 					"(id integer auto_increment ,", //
 					"constraint const1 primary key (ID),", //
 					"username Varchar (50) ,", //
-					"PhoneNumber Varchar (50) ,", //
+					"Phone_Number Varchar (50) ,", //
 					"Address Varchar (50) ,", //
 					"Alive Boolean, ", //
 					"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-			SqlBox.execute("create table users2", //
+			Dao.execute("create table users2", //
 					"(id integer auto_increment ,", //
 					"constraint const2 primary key (ID),", //
-					"UserName Varchar (50) ,", //
-					"PhoneNumber Varchar (50) ,", //
+					"username Varchar (50) ,", //
+					"Phone_Number Varchar (50) ,", //
 					"Address Varchar (50) ,", //
 					"Alive Boolean, ", //
 					"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		}
 
-		if (SqlBox.getDefaultDatabaseType() == DatabaseType.ORACLE) {
-			SqlBox.execute("CREATE TABLE USERS", //
+		if (Dao.getDefaultDatabaseType() == DatabaseType.ORACLE) {
+			Dao.execute("CREATE TABLE USERS", //
 					"(ID INTEGER,", //
 					"USERNAME VARCHAR (50) ,", //
-					"PHONENUMBER VARCHAR (50) ,", //
+					"PHONE_NUMBER VARCHAR (50) ,", //
 					"ADDRESS VARCHAR (50) ,", //
 					"ALIVE INTEGER, ", //
 					"AGE INTEGER)");
-			SqlBox.execute("CREATE TABLE USERS2", //
+			Dao.execute("CREATE TABLE USERS2", //
 					"(ID INTEGER,", //
 					"USERNAME VARCHAR (50) ,", //
-					"PHONENUMBER VARCHAR (50) ,", //
+					"PHONE_NUMBER VARCHAR (50) ,", //
 					"ADDRESS VARCHAR (50) ,", //
 					"ALIVE INTEGER, ", //
 					"AGE INTEGER)");
-			SqlBox.execute(
+			Dao.execute(
 					"CREATE SEQUENCE SEQ_1 MINVALUE 1 MAXVALUE 99999999 START WITH 1 INCREMENT BY 1 NOCYCLE CACHE 10");
-			SqlBox.execute(
+			Dao.execute(
 					"CREATE TRIGGER TGR_1 BEFORE INSERT ON USERS FOR EACH ROW BEGIN SELECT SEQ_1.NEXTVAL INTO:NEW.ID FROM DUAL; END;");
-			SqlBox.execute(
+			Dao.execute(
 					"CREATE SEQUENCE SEQ_2 MINVALUE 1 MAXVALUE 99999999 START WITH 1 INCREMENT BY 1 NOCYCLE CACHE 10");
-			SqlBox.execute(
+			Dao.execute(
 					"CREATE TRIGGER TGR_2 BEFORE INSERT ON USERS2 FOR EACH ROW BEGIN SELECT SEQ_2.NEXTVAL INTO:NEW.ID FROM DUAL; END;");
 		}
-		SqlBox.refreshMetaData();
+		Dao.refreshMetaData();
 	}
 
 	/**
@@ -87,14 +87,14 @@ public class TestPrepare {
 	 */
 	public static void closeDatasource_CloseDefaultSqlBoxConetxt() {
 		BeanBox.defaultContext.close();// This will close HikariDataSource because preDestroy method set to "Close"
-		SqlBoxContext.defaultSqlBoxContext().close();
+		SqlBoxContext.getDefaultSqlBoxContext().close();
 	}
 
 	@Test
 	public void testCreateTables() {
 		prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
-		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users"));
-		Assert.assertEquals(0, (int) SqlBox.queryForInteger("select count(*) from users2"));
+		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
+		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
 		closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
