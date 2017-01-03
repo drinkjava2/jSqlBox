@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -29,18 +30,18 @@ public class SpeedTest {
 	@Test
 	public void doSpeedTest() {
 		long oldTime = System.currentTimeMillis();
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			SqlBoxContext.getDefaultSqlBoxContext();
 			User u = Dao.createEntity(User.class);
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
-			u.box().buildRealColumns();
-			// u.insert();
+			u.insert();
 		}
 		long newTime = System.currentTimeMillis();
-		System.out.println("Time used for 10000 times:" + (newTime - oldTime) + "ms");
-		Assert.assertTrue((newTime - oldTime) < 1000);
+		System.out.println("Time used for 1000 times:" + (newTime - oldTime) + "ms");
+		if (Dao.getDefaultDatabaseType() == DatabaseType.H2DATABASE)
+			Assert.assertTrue((newTime - oldTime) < 1000);
 	}
 
 	public static void main(String[] args) {

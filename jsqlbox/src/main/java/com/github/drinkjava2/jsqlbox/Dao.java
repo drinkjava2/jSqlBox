@@ -38,51 +38,51 @@ public class Dao {
 
 	// == shortcut methods, just copy some common public static method here======
 	public static Integer queryForInteger(String... sql) {
-		return SqlBox.box().queryForInteger(sql);
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForInteger(sql);
 	}
 
 	public static String queryForString(String... sql) {
-		return SqlBox.box().queryForString(sql);
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForString(sql);
 	}
 
 	public static <T> T queryForObject(Class<?> clazz, String... sql) {
-		return SqlBox.box().queryForObject(clazz, sql);
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForObject(clazz, sql);
 	}
 
 	public static void cacheSQL(String... sql) {
-		SqlBox.box().cacheSQL(sql);
+		SqlBoxContext.getDefaultSqlBoxContext().cacheSQL(sql);
 	}
 
 	public static Integer execute(String... sql) {
-		return SqlBox.box().execute(sql);
+		return SqlBoxContext.getDefaultSqlBoxContext().execute(sql);
 	}
 
 	public static Integer executeInsert(String... sql) {
-		return SqlBox.box().executeInsert(sql);
+		return SqlBoxContext.getDefaultSqlBoxContext().executeInsert(sql);
 	}
 
 	public static Integer executeQuiet(String... sql) {
-		return SqlBox.box().executeQuiet(sql);
+		return SqlBoxContext.getDefaultSqlBoxContext().executeQuiet(sql);
 	}
 
 	public static void executeCachedSQLs() {
-		SqlBox.box().executeCachedSQLs();
+		SqlBoxContext.getDefaultSqlBoxContext().executeCachedSQLs();
 	}
 
 	public static JdbcTemplate getDefaultJdbc() {
-		return SqlBox.box().getJdbc();
+		return SqlBoxContext.getDefaultSqlBoxContext().getJdbc();
 	}
 
 	public static SqlBoxContext getDefaultContext() {
-		return SqlBox.box().getContext();
+		return SqlBoxContext.getDefaultSqlBoxContext();
 	}
 
 	public static DatabaseType getDefaultDatabaseType() {
-		return SqlBox.box().getDatabaseType();
+		return SqlBoxContext.getDefaultSqlBoxContext().getDatabaseType();
 	}
 
 	public static void refreshMetaData() {
-		SqlBox.box().refreshMetaData();
+		SqlBoxContext.getDefaultSqlBoxContext().refreshMetaData();
 	}
 
 	public static <T> T load(Class<?> entityOrBoxClass, Object entityID) {
@@ -92,7 +92,7 @@ public class Dao {
 	}
 
 	public static <T> List<T> queryForList(Class<?> dbClass, String... sql) {
-		return SqlBox.box().queryForList(dbClass, sql);
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForList(dbClass, sql);
 	}
 
 	public static <T> T createEntity(Class<?> beanOrSqlBoxClass) {

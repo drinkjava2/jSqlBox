@@ -35,6 +35,26 @@ public class TestPrepare {
 		Dao.executeQuiet("drop table users");
 		Dao.executeQuiet("drop table users2");
 
+		if (Dao.getDefaultDatabaseType() == DatabaseType.H2DATABASE) {
+			Dao.execute("create table users ", //
+					"(id integer auto_increment ,", //
+					"constraint const1 primary key (ID),", //
+					"username Varchar (50) ,", //
+					"Phone_Number Varchar (50) ,", //
+					"Address Varchar (50) ,", //
+					"Alive Boolean, ", //
+					"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+			Dao.execute("create table users2", //
+					"(id integer auto_increment ,", //
+					"constraint const2 primary key (ID),", //
+					"username Varchar (50) ,", //
+					"Phone_Number Varchar (50) ,", //
+					"Address Varchar (50) ,", //
+					"Alive Boolean, ", //
+					"Age Integer ) ");
+		}
+
 		if (Dao.getDefaultDatabaseType() == DatabaseType.MYSQL) {
 			Dao.execute("create table users ", //
 					"(id integer auto_increment ,", //
@@ -98,4 +118,10 @@ public class TestPrepare {
 		closeDatasource_CloseDefaultSqlBoxConetxt();
 	}
 
+	public static void main(String[] args) {
+		prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
+		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
+		closeDatasource_CloseDefaultSqlBoxConetxt();
+	}
 }

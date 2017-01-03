@@ -24,19 +24,14 @@ import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.ORACLE;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
@@ -57,7 +52,6 @@ import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 @SuppressWarnings({ "unchecked" })
 public class SqlBox {
-	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBox.class);
 
 	// The entity bean class
 	private Class<?> entityClass;
@@ -113,194 +107,61 @@ public class SqlBox {
 	/**
 	 * Get default Box
 	 */
-	public static SqlBox box() {
+	public static SqlBox defaultBox() {
 		return new SqlBox(SqlBoxContext.getDefaultSqlBoxContext());
 	}
 
-	// ========JdbcTemplate wrap methods begin============
-	// Only wrap some common used JdbcTemplate methods
-	public Integer queryForInteger(String... sql) {
-		return this.queryForObject(Integer.class, sql);
+	// ========Config methods end==============
+	
+	// ========Box query/crud methods end=======
+	
+	
+	/**
+	 * Return Bean instance which related to this Box
+	 */
+	public Object getEntityBean() {
+		return entityBean;
 	}
 
 	/**
-	 * Return String type query result, sql be translated to prepared statement
+	 * Set a Bean instance related to this Box
 	 */
-	public String queryForString(String... sql) {
-		return this.queryForObject(String.class, sql);
+	public void setEntityBean(Object bean) {
+		this.entityBean = bean;
 	}
 
-	/**
-	 * Return Object type query result, sql be translated to prepared statement
-	 */
-	public <T> T queryForObject(Class<?> clazz, String... sql) {
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			if (sp.getParameters().length != 0)
-				return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
-			else {
-				try {
-					return (T) getJdbc().queryForObject(sp.getSql(), clazz);
-				} catch (EmptyResultDataAccessException e) {
-					SqlBoxException.eatException(e);
-					return null;
-				}
-			}
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
+	// ========getter & setters below==============
+	public Class<?> getEntityClass() {
+		return entityClass;
 	}
 
-	/**
-	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
-	 * 
-	 * @param sql
-	 */
-	public void cacheSQL(String... sql) {
-		SqlHelper.cacheSQL(sql);
+	public void setEntityClass(Class<?> entityClass) {
+		this.entityClass = entityClass;
 	}
 
-	// ========JdbcTemplate wrap methods End============
-
-	/**
-	 * Execute sql and return how many record be affected, sql be translated to prepared statement<br/>
-	 * Return -1 if no parameters sql executed<br/>
-	 * 
-	 */
-	public Integer execute(String... sql) {
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			if (sp.getParameters().length != 0)
-				return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
-			else {
-				getJdbc().execute(sp.getSql());
-				return -1;
-			}
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
+	public Map<String, Column> getConfigColumns() {
+		return configColumns;
 	}
 
-	/**
-	 * Execute sql and return how many record be affected, sql be translated to prepared statement<br/>
-	 * Return -1 if no parameters sql executed<br/>
-	 * 
-	 */
-	public Integer executeInsert(String... sql) {
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			if (sp.getParameters().length != 0)
-				return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
-			else {
-				getJdbc().execute(sp.getSql());
-				return -1;
-			}
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
+	public void setConfigColumns(Map<String, Column> columns) {
+		this.configColumns = columns;
 	}
 
-	/**
-	 * Execute sql without exception threw, return -1 if no parameters sql executed, return -2 if exception found
-	 */
-	public Integer executeQuiet(String... sql) {
-		try {
-			return execute(sql);
-		} catch (Exception e) {
-			SqlBoxException.eatException(e);
-			return -2;
-		}
+	public SqlBoxContext getContext() {
+		return context;
 	}
 
-	/**
-	 * Transfer cached SQLs to Prepared Statement and batch execute these SQLs
-	 */
-	public void executeCachedSQLs() {
-		try {
-			List<List<SqlAndParameters>> subSPlist = SqlHelper.getSQLandParameterSubList();
-			logCachedSQL(subSPlist);
-			for (final List<SqlAndParameters> splist : subSPlist) {
-				getJdbc().batchUpdate(SqlHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						SqlAndParameters sp = splist.get(i);
-						int index = 1;
-						for (Object parameter : sp.getParameters()) {
-							ps.setObject(index++, parameter);
-						}
-					}
-
-					@Override
-					public int getBatchSize() {
-						return splist.size();
-					}
-				});
-			}
-		} finally {
-			SqlHelper.clearBatchSQLs();
-		}
+	public void setContext(SqlBoxContext context) {
+		this.context = context;
 	}
 
-	// ========JdbcTemplate wrap methods End============
-
-	// ========Box query/crud methods begin=======
-
-	/**
-	 * Print SQL and parameters to console, usually used for debug <br/>
-	 * Use context.setShowSql to control, Default showSql is "false"
-	 */
-	private void logSql(SqlAndParameters sp) {
-		// check if allowed print SQL
-		if (!this.getContext().isShowSql())
-			return;
-		StringBuilder sb = new StringBuilder(sp.getSql());
-		Object[] args = sp.getParameters();
-		if (args.length > 0) {
-			sb.append("\r\nParameters: ");
-			for (int i = 0; i < args.length; i++) {
-				sb.append("" + args[i]);
-				if (i != args.length - 1)
-					sb.append(",");
-				else
-					sb.append("\r\n");
-			}
-		}
-		log.info(sb.toString());
-	}
-
-	/**
-	 * Print Cached SQL and parameters, usually used for debug <br/>
-	 * Use context.setShowSql to control, Default showSql is "false"
-	 */
-	private void logCachedSQL(List<List<SqlAndParameters>> subSPlist) {
-		if (this.getContext().isShowSql()) {
-			if (subSPlist != null) {
-				List<SqlAndParameters> l = subSPlist.get(0);
-				if (l != null) {
-					SqlAndParameters sp = l.get(0);
-					log.info("First Cached SQL:");
-					logSql(sp);
-				}
-			}
-			if (subSPlist != null) {
-				List<SqlAndParameters> l = subSPlist.get(subSPlist.size() - 1);
-				if (l != null) {
-					SqlAndParameters sp = l.get(l.size() - 1);
-					log.info("Last Cached SQL:");
-					logSql(sp);
-				}
-			}
-		}
-	}
+	// ========================Box query/crud methods begin============================
 
 	/**
 	 * Get last auto increase id, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
 	 */
 	private Object getLastAutoIncreaseIdentity(Column col) {
-		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + getRealTable();
+		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + table();
 		return this.getJdbc().queryForObject(sql, col.getPropertyType());
 	}
 
@@ -319,7 +180,7 @@ public class SqlBox {
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
-		sb.append("insert into ").append(getRealTable()).append(" ( ");
+		sb.append("insert into ").append(table()).append(" ( ");
 
 		Map<String, Column> realColumns = buildRealColumns();
 		for (Column col : realColumns.values()) {
@@ -330,10 +191,10 @@ public class SqlBox {
 					if (dbType == ORACLE)// NOSONAR
 						throwEX("Box insert error, IdentityGenerator type should not set to ORACLE");
 				} else if (idGen instanceof AutoGenerator) {
-
 					if (dbType == MYSQL || dbType == MS_SQLSERVER) {// NOSONAR
 						if (!col.getAutoIncreament())
-							throwEX("Box insert error, AutoGenerator type should set on indentity type field");
+							throwEX("Box insert error, AutoGenerator type should set on indentity type field for table \""
+									+ this.table() + "\"");
 					} else {// ORACLE
 
 					}
@@ -363,8 +224,8 @@ public class SqlBox {
 		// delete the last ","
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
-		if (this.getContext().isShowSql())
-			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+		if (getContext().isShowSql())
+			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
@@ -396,7 +257,7 @@ public class SqlBox {
 		// start to spell sql
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
-		sb.append("update ").append(getRealTable()).append(" set ");
+		sb.append("update ").append(table()).append(" set ");
 
 		// set values
 		for (Column col : realColumns.values()) {
@@ -418,12 +279,13 @@ public class SqlBox {
 
 		sb.append("  where ");
 		for (Column col : idColumns) {
-			sb.append(col.getColumnName()).append("=").append(col.getPropertyValue()).append(" and ");
+			sb.append(col.getColumnName()).append("=?").append(" and ");
+			parameters.add(col.getPropertyValue());
 		}
 		sb.setLength(sb.length() - 4);
 
 		if (this.getContext().isShowSql())
-			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
@@ -448,7 +310,7 @@ public class SqlBox {
 		}
 
 		sb.setLength(sb.length() - 2);// delete the last ","
-		sb.append(" from ").append(this.getRealTable()).append(" where ");
+		sb.append(" from ").append(this.table()).append(" where ");
 
 		for (Entry<String, Object> entry : idvalues.entrySet()) {
 			sb.append(entry.getKey()).append("=").append("? and ");
@@ -457,7 +319,7 @@ public class SqlBox {
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
 		if (this.getContext().isShowSql())
-			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		List<Map<String, Object>> rows = this.getJdbc().queryForList(sb.toString(),
 				parameters.toArray(new Object[parameters.size()]));
@@ -482,7 +344,7 @@ public class SqlBox {
 		// start to spell sql
 		StringBuilder sb = new StringBuilder("delete ");
 		List<Object> parameters = new ArrayList<>();
-		sb.append(" from ").append(this.getRealTable()).append(" where ");
+		sb.append(" from ").append(this.table()).append(" where ");
 
 		for (Entry<String, Object> entry : idvalues.entrySet()) {
 			sb.append(entry.getKey()).append("=").append("? and ");
@@ -491,38 +353,11 @@ public class SqlBox {
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
 		if (this.getContext().isShowSql())
-			logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 		int result = this.getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 		if (result != 1)
 			throwEX("Box delete error, no record delete for entityID:" + entityID);
 		deleteEntityID(realColumns, idvalues);
-	}
-
-	/**
-	 * Query for a DB type List
-	 */
-	public <T> List<T> queryForList(Class<?> dbClass, String... sql) {
-		List<T> result = new ArrayList<>();
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			List<Map<String, Object>> lst;
-			if (sp.getParameters().length == 0)
-				lst = getJdbc().queryForList(sp.getSql());
-			else
-				lst = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-			Field field = ReflectionUtils.findField(dbClass, "map");
-			for (Map<String, Object> map : lst) {
-				Object db = dbClass.newInstance();
-				field.set(db, map);
-				result.add((T) db);
-			}
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SqlBoxContext queryForList, sql=" + sql);
-		} finally {
-			SqlHelper.clearLastSQL();
-		}
-		return result;
 	}
 
 	private List<Column> extractIdColumnsWithValue(Map<String, Column> realColumns) {
@@ -558,11 +393,6 @@ public class SqlBox {
 			throwEX("Box update error, no entityID set for class " + this.getEntityClass());
 		return result;
 	}
-
-	// public List<Column> getEntityID() {
-	// Map<String, Column> realColumns = buildRealColumns();
-	// return extractIdColumnsWithValue(realColumns);
-	// }
 
 	/**
 	 * Write one row value to entity
@@ -634,28 +464,7 @@ public class SqlBox {
 
 	// ========Box query/crud methods end=======
 
-	// =============identical methods copied from SqlBox or SqlBoxContext==========
-	public void refreshMetaData() {
-		this.getContext().refreshMetaData();
-	}
-
-	// =============Misc methods end==========
-
-	// ================ Getters & Setters===============
-	/**
-	 * Return Bean instance which related to this Box
-	 */
-	public Object getEntityBean() {
-		return entityBean;
-	}
-
-	/**
-	 * Set a Bean instance related to this Box
-	 */
-	public void setEntityBean(Object bean) {
-		this.entityBean = bean;
-	}
-
+ 
 	/**
 	 * Return a JdbcTemplate instance<br/>
 	 * It's not recommended to use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
@@ -671,12 +480,7 @@ public class SqlBox {
 		return getContext().getDatabaseType();
 	}
 
-	// ==============================================================================================
-	// ==============================================================================================
-	// ==============================================================================================
-	// ==============================================================================================
-	// ==============================================================================================
-
+  
 	/**
 	 * Create entity instance
 	 */
@@ -684,17 +488,19 @@ public class SqlBox {
 		Object bean = null;
 		try {
 			bean = this.getEntityClass().newInstance();
-			initializeBox(bean, this);
+			SqlBox box = SqlBox.getBox(bean);
+			if (box == null)
+				initializeBox(bean, this);
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext create error");
 		}
 		return (T) bean;
 	}
 
-	private static void initializeBox(Object bean, SqlBox box) {
+	public static void initializeBox(Object bean, SqlBox box) {
 		box.beanInitialize(bean);
 		box.setEntityBean(bean);
-		SqlBoxContext.bind(bean, box);
+		box.getContext().bind(bean, box);
 	}
 
 	/**
@@ -713,7 +519,7 @@ public class SqlBox {
 	/**
 	 * Get real database table name
 	 */
-	public String getRealTable() {
+	public String table() {
 		String realTable = configTable;
 		if (SqlBoxUtils.isEmptyStr(realTable)) {
 			realTable = this.getEntityClass().getSimpleName();
@@ -758,7 +564,7 @@ public class SqlBox {
 	public Map<String, Column> buildRealColumns() {
 		if (this.entityClass == null)
 			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
-		String realTableName = this.getRealTable();
+		String realTableName = this.table();
 		TinyDbMetaData meta = this.getContext().getMetaData();
 		Map<String, Column> oneTable = meta.getOneTable(realTableName.toLowerCase());
 		Map<String, Column> realColumns = new HashMap<>();
@@ -829,7 +635,7 @@ public class SqlBox {
 
 		if (idColumn == null) {
 			if (entityColumn == null)
-				throwEX("SqlBox findAndSetEntityID error, no entityID set for entity class " + entityClass);
+				throwEX("SqlBox findAndSetEntityID error, no entityID set for entity " + entityClass);
 			else
 				return;
 		} else {
@@ -856,7 +662,7 @@ public class SqlBox {
 
 		String realTable = realTableName;
 		if (SqlBoxUtils.isEmptyStr(realTable))
-			realTable = this.getRealTable();
+			realTable = this.table();
 		Map<String, Column> oneTableMap = context.getMetaData().getOneTable(realTable.toLowerCase());
 		String realColumnNameignoreCase = null;
 		Column realColumn = oneTableMap.get(columnName.toLowerCase());
@@ -922,35 +728,10 @@ public class SqlBox {
 
 	// ========Config methods end==============
 
-	// ========getter & setters below==============
-	public Class<?> getEntityClass() {
-		return entityClass;
-	}
-
-	public void setEntityClass(Class<?> entityClass) {
-		this.entityClass = entityClass;
-	}
-
-	public Map<String, Column> getConfigColumns() {
-		return configColumns;
-	}
-
-	public void setConfigColumns(Map<String, Column> columns) {
-		this.configColumns = columns;
-	}
-
-	public SqlBoxContext getContext() {
-		return context;
-	}
-
-	public void setContext(SqlBoxContext context) {
-		this.context = context;
-	}
-
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("table=" + this.configTable).append("\r\n");
-		sb.append("getRealTable=" + this.getRealTable()).append("\r\n");
+		sb.append("getRealTable=" + this.table()).append("\r\n");
 		sb.append("entityBean=" + this.entityBean).append("\r\n");
 		sb.append("entityClass=" + this.entityClass).append("\r\n");
 

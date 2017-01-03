@@ -1,5 +1,8 @@
 package test;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -9,7 +12,8 @@ import test.config.po.User;
 
 public class HelloWorld {
 
-	public static void main(String[] args) {
+	@Test
+	public void doTest() {
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 		Dao.execute("delete from users");
 		Dao.execute("delete from users2");
@@ -17,13 +21,13 @@ public class HelloWorld {
 		User u = new User();// default use users database table
 		u.setUserName("James");
 		u.insert();
-		System.out.println(Dao.queryForString("select ", u.userName(), " from ", u.table()));// print James
+		Assert.assertEquals("James", Dao.queryForString("select ", u.userName(), " from ", u.table()));
 
 		u.box().configTable("users2");// to use users2 database table
 		u.box().configColumnName("userName", u.address()); // to map userName field to address column
 		u.setUserName("Tom");
 		u.insert();
-		System.out.println(Dao.queryForString("select ", u.address(), " from ", u.table()));// print Tom
+		Assert.assertEquals("Tom", Dao.queryForString("select ", u.address(), " from ", u.table()));
 
 	}
 }

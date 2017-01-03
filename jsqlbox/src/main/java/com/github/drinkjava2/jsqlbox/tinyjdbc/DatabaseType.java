@@ -22,14 +22,16 @@ package com.github.drinkjava2.jsqlbox.tinyjdbc;
  */
 
 public enum DatabaseType {
-	MYSQL, ORACLE, MS_SQLSERVER, DB2, INFORMIX, SYBASE;
+	MYSQL, ORACLE, H2DATABASE, MS_SQLSERVER, DB2, INFORMIX, SYBASE;
 
-	public static DatabaseType getDatabaseType(String jdbcDriverName) {// NOSONAR
+	public static DatabaseType getDatabaseType(String jdbcDriverName) {// NOSONAR 
 		String drv = jdbcDriverName.toUpperCase();
 		if (drv.contains("MYSQL"))
 			return DatabaseType.MYSQL;
 		else if (drv.contains("ORACLE"))
 			return DatabaseType.ORACLE;
+		else if (drv.contains("H2 "))
+			return DatabaseType.H2DATABASE;
 		else if (drv.contains("SQL") && drv.contains("SERVER"))
 			return DatabaseType.MS_SQLSERVER;
 		else if (drv.contains("DB2"))

@@ -49,9 +49,8 @@ public class SpringTransactionTest {
 	public void tx_doInsert() {
 		User u = new User();
 		tx_InsertUser1();
-		int i = Dao.queryForInteger("select count(*) from ", u.table());
-		Assert.assertEquals(1, i);
-		System.out.println(i / 0);// throw a runtime exception
+		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
+		System.out.println(1 / 0);// throw a runtime exception
 		tx_InsertUser2();
 	}
 
@@ -69,8 +68,7 @@ public class SpringTransactionTest {
 		} catch (Exception e) {
 			foundException = true;
 			User u = new User();
-			int i = Dao.queryForInteger("select count(*) from ", u.table());
-			Assert.assertEquals(0, i);
+			Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		}
 		Assert.assertEquals(foundException, true);
 

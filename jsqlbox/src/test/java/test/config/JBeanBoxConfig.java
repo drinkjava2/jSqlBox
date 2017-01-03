@@ -26,8 +26,8 @@ import test.config.po.DB;
 public class JBeanBoxConfig {
 
 	/**
-	 * This is a SqlBoxContext setting, you can config as many as possible contexts in one project, but usually only the
-	 * defaultSqlBox context is common used
+	 * This is a SqlBoxContext setting, you can set up as many as possible contexts in one project, but for most
+	 * projects usually only use one defaultSqlBox context
 	 * 
 	 */
 	public static class DefaultSqlBoxContextBox extends BeanBox {
@@ -40,28 +40,21 @@ public class JBeanBoxConfig {
 	}
 
 	/**
-	 * ==============================================================================================<br/>
-	 * Data source setting, change "MySqlDataSourceBox" to "OracleDataSourceBoxdo" to test on Oracle <br/>
-	 * This project is already passed test on Oracle 11g and Mysql5
-	 * ==============================================================================================<br/>
+	 * ==================================================================================================<br/>
+	 * Data source setting, change below line "H2DataSourceBox" to test on different databases <br/>
+	 * This project is already tested on H2 memory database & MySql5 and Oracle11g
+	 * ==================================================================================================<br/>
 	 */
-	public static class DataSourceBox extends OracleDataSourceBox {
+	public static class DataSourceBox extends MySqlDataSourceBox {
 	}
 
-	// HikariCP DataSource pool is quicker than C3P0
-	public static class HikariCPBox extends BeanBox {
-		public HikariDataSource create() {
-			HikariDataSource ds = new HikariDataSource();
-			ds.addDataSourceProperty("cachePrepStmts", true);
-			ds.addDataSourceProperty("prepStmtCacheSize", 250);
-			ds.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
-			ds.addDataSourceProperty("useServerPrepStmts", true);
-			ds.setUsername("root");
-			ds.setPassword("root888");// change to your PWD
-			ds.setMaximumPoolSize(3);
-			ds.setConnectionTimeout(5000);
-			this.setPreDestory("close");// jBeanBox will close pool
-			return ds;
+	// H2Database memory database connection URL
+	public static class H2DataSourceBox extends HikariCPBox {
+		{
+			setProperty("jdbcUrl", "jdbc:h2:~/test");
+			setProperty("driverClassName", "org.h2.Driver");
+			setProperty("username", "sa");
+			setProperty("password", "");
 		}
 	}
 
@@ -70,6 +63,8 @@ public class JBeanBoxConfig {
 		{
 			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClassName", "com.mysql.jdbc.Driver");
+			setProperty("username", "root");
+			setProperty("password", "root888");
 		}
 	}
 
@@ -78,6 +73,8 @@ public class JBeanBoxConfig {
 		{
 			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
 			setProperty("driverClassName", "oracle.jdbc.OracleDriver");
+			setProperty("username", "root");
+			setProperty("password", "root888");
 		}
 	}
 
@@ -86,6 +83,23 @@ public class JBeanBoxConfig {
 		{
 			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
 			setProperty("driverClassName", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			setProperty("username", "sa");
+			setProperty("password", "");
+		}
+	}
+
+	// HikariCP is a DataSource pool much quicker than C3P0
+	public static class HikariCPBox extends BeanBox {
+		public HikariDataSource create() {
+			HikariDataSource ds = new HikariDataSource();
+			ds.addDataSourceProperty("cachePrepStmts", true);
+			ds.addDataSourceProperty("prepStmtCacheSize", 250);
+			ds.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+			ds.addDataSourceProperty("useServerPrepStmts", true);
+			ds.setMaximumPoolSize(3);
+			ds.setConnectionTimeout(5000);
+			this.setPreDestory("close");// jBeanBox will close pool
+			return ds;
 		}
 	}
 

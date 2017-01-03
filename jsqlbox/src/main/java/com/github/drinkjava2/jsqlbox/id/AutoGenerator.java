@@ -18,8 +18,7 @@ package com.github.drinkjava2.jsqlbox.id;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Define an Identity type generator, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
- * 
+ * AutoGenerator will depends database's id generator mechanism like MySql's Identity, Oracle's Sequence...
  * 
  * @author Yong Zhu
  * @version 1.0.0

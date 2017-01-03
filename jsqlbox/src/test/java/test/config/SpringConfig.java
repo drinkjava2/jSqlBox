@@ -2,8 +2,6 @@ package test.config;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
-import javax.sql.DataSource;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -42,39 +40,31 @@ public class SpringConfig {
 	}
 
 	/**
-	 * DataSource pool setting, HikariDataSource is quicker than C3P0
+	 * Here I copied jdbcURL, driverClass, username, password settings from jBeainBoxConfig, buy you can change to your
+	 * database settings
 	 */
 	@Bean
 	public HikariDataSource HikariDataSourceBean() {
 		HikariDataSource ds = new HikariDataSource();
-		ds.setUsername("root");// change to set your user name
-		ds.setPassword("root888");// change to set your password
+		DataSourceBox dsSetting = new DataSourceBox();
+		ds.setUsername((String) dsSetting.getProperty("username"));
+		ds.setPassword((String) dsSetting.getProperty("password"));
+		ds.setJdbcUrl((String) dsSetting.getProperty("jdbcUrl"));
+		ds.setDriverClassName((String) dsSetting.getProperty("driverClassName"));
 		ds.setMaximumPoolSize(10);
 		ds.setConnectionTimeout(5000);
 		return ds;
 	}
 
-	/**
-	 * Here I copied jdbcURL, driverClass, username, password settings from jBeainBoxConfig, buy you can change to your
-	 * database settings
-	 */
-	@Bean
-	public DataSource MySqlDataSourceBean() {
-		HikariDataSource ds = HikariDataSourceBean();
-		ds.setJdbcUrl((String) new DataSourceBox().getProperty("jdbcUrl"));// change to set your jdbcURL
-		ds.setDriverClassName((String) new DataSourceBox().getProperty("driverClassName"));// set your driverClass
-		return ds;
-	}
-
 	@Bean // This is not good
 	public SqlBoxContext sqlBoxCtxBean() {
-		return new SqlBoxContext(MySqlDataSourceBean(), DB.class);
+		return new SqlBoxContext(HikariDataSourceBean(), DB.class);
 	}
 
 	@Bean
 	public PlatformTransactionManager transactionManager() {
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
-		transactionManager.setDataSource(MySqlDataSourceBean());
+		transactionManager.setDataSource(HikariDataSourceBean());
 		return transactionManager;
 	}
 

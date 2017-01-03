@@ -15,7 +15,7 @@ public class EntityBase implements IEntity {
 
 	@Override
 	public String table() {
-		return box().getRealTable();
+		return box().table();
 	}
 
 	@Override

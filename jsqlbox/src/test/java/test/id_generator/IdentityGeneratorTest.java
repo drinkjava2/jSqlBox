@@ -51,7 +51,7 @@ public class IdentityGeneratorTest {
 
 	@Test
 	public void insertUserForMysql() {
-		if (SqlBox.box().getDatabaseType() != DatabaseType.MYSQL)
+		if (SqlBox.defaultBox().getDatabaseType() != DatabaseType.MYSQL)
 			return;
 		User u = new User();
 		u.box().configIdGenerator("id", IdentityGenerator.INSTANCE);

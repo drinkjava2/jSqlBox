@@ -94,10 +94,14 @@
         <artifactId>spring-jdbc</artifactId>
         <version>${spring.version}.RELEASE</version>
     </dependency>
-   
+
+    <!-- ============================================================================================================== -->   
     <!-- ============================================================================================================== -->
     <!-- Below libs are for unit test only, jSqlBox has no dependency on them, scope be set to "test" only              -->
+    <!-- jSqlBox unit test based on H2-Database, and also passed the MySql5, Oracle11g database test              -->    
     <!-- ============================================================================================================== --> 
+    <!-- ============================================================================================================== -->
+        
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -125,7 +129,7 @@
       <version>1.7.22</version>
       <scope>test</scope> 
     </dependency>
-      
+       
    <dependency>
      <groupId>com.zaxxer</groupId>
      <artifactId>HikariCP</artifactId>
@@ -138,13 +142,20 @@
         <version>2.4.9</version>
     </dependency>
 
-    <dependency>
+    <!--dependency>
         <groupId>c3p0</groupId>
         <artifactId>c3p0</artifactId>
         <version>0.9.1.2</version>
         <scope>test</scope>
+    </dependency-->
+    
+    <!-- H2Database memory database for unit test -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.193</version>
     </dependency>
-
+    
     <!-- Mysql Database driver for unit test--> 
     <dependency>
         <groupId>mysql</groupId>

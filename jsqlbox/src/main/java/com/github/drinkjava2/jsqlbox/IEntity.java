@@ -11,9 +11,9 @@ public interface IEntity {
 	public default SqlBox box() {
 		return SqlBox.getBox(this);
 	}
-
+ 
 	public default String table() {
-		return box().getRealTable();
+		return box().table();
 	}
 
 	public default String star() {
