@@ -20,7 +20,7 @@ public class EntityBase implements IEntity {
 
 	@Override
 	public String star() {
-		return box().getStar();
+		return box().star();
 	}
 
 	@Override

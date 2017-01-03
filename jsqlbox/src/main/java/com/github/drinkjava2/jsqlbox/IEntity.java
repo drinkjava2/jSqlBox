@@ -17,7 +17,7 @@ public interface IEntity {
 	}
 
 	public default String star() {
-		return box().getStar();
+		return box().star();
 	}
 
 	public default void insert() {

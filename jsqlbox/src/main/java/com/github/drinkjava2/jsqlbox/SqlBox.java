@@ -62,6 +62,9 @@ public class SqlBox {
 	// Configuration Table Name
 	private String configTable;
 
+	// Configuration Table Alias Name
+	private String configTableAlias;
+
 	private SqlBoxContext context;
 
 	private static ThreadLocal<String> fieldIDCache = new ThreadLocal<String>() {
@@ -71,7 +74,8 @@ public class SqlBox {
 		}
 	};
 
-	private Object entityBean; // Entity Bean Instance
+	// Entity Bean Instance
+	private Object entityBean;
 
 	public SqlBox() {
 		// Default Constructor
@@ -100,7 +104,7 @@ public class SqlBox {
 		if (box != null)
 			return box;
 		box = SqlBoxContext.getDefaultSqlBoxContext().findAndBuildSqlBox(bean.getClass());
-		initializeBox(bean, box);
+		SqlBoxContext.bindBoxToBean(bean, box);
 		return box;
 	}
 
@@ -111,11 +115,6 @@ public class SqlBox {
 		return new SqlBox(SqlBoxContext.getDefaultSqlBoxContext());
 	}
 
-	// ========Config methods end==============
-	
-	// ========Box query/crud methods end=======
-	
-	
 	/**
 	 * Return Bean instance which related to this Box
 	 */
@@ -155,7 +154,9 @@ public class SqlBox {
 		this.context = context;
 	}
 
-	// ========================Box query/crud methods begin============================
+	public String getTableAlias() {
+		return configTableAlias;
+	}
 
 	/**
 	 * Get last auto increase id, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
@@ -174,7 +175,7 @@ public class SqlBox {
 
 		// generatedValues to record all generated values like UUID, sequence
 		Map<Column, Object> idGeneratorCache = new HashMap<>();
-		DatabaseType dbType = this.getDatabaseType();
+		DatabaseType dbType = this.getContext().getDatabaseType();
 
 		// start to spell sql
 		StringBuilder sb = new StringBuilder();
@@ -462,58 +463,11 @@ public class SqlBox {
 		return fieldID;
 	}
 
-	// ========Box query/crud methods end=======
-
- 
 	/**
-	 * Return a JdbcTemplate instance<br/>
-	 * It's not recommended to use JdbcTemplate directly unless very necessary, JdbcTemplate may be deprecated or
-	 * replaced by pure JDBC in future version
-	 * 
-	 * @return JdbcTemplate
+	 * Return a JdbcTemplate instance related to current context<br/>
 	 */
 	public JdbcTemplate getJdbc() {
 		return this.getContext().getJdbc();
-	}
-
-	public DatabaseType getDatabaseType() {
-		return getContext().getDatabaseType();
-	}
-
-  
-	/**
-	 * Create entity instance
-	 */
-	public <T> T createEntity() {
-		Object bean = null;
-		try {
-			bean = this.getEntityClass().newInstance();
-			SqlBox box = SqlBox.getBox(bean);
-			if (box == null)
-				initializeBox(bean, this);
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SqlBoxContext create error");
-		}
-		return (T) bean;
-	}
-
-	public static void initializeBox(Object bean, SqlBox box) {
-		box.beanInitialize(bean);
-		box.setEntityBean(bean);
-		box.getContext().bind(bean, box);
-	}
-
-	/**
-	 * @param instance
-	 */
-	public void beanInitialize(Object bean) {
-		try {
-			Method m = SqlBoxUtils.getDeclaredMethodQuickly(this.getEntityClass(), "initialize", null);
-			if (m != null)
-				m.invoke(bean, new Object[] {});
-		} catch (Exception e) {
-			SqlBoxException.eatException(e);
-		}
 	}
 
 	/**
@@ -537,7 +491,7 @@ public class SqlBox {
 	/**
 	 * Return a * for sql
 	 */
-	public String getStar() {
+	public String star() {
 		return "*";// NOSONAR
 	}
 
@@ -700,6 +654,13 @@ public class SqlBox {
 	 */
 	public void configTable(String table) {
 		configTable = table;
+	}
+
+	/**
+	 * Config table name
+	 */
+	public void configTableAlias(String tableAlias) {
+		configTableAlias = tableAlias;
 	}
 
 	/**

@@ -189,7 +189,7 @@ public class SqlBoxContext {
 		if (box != null)
 			return box;
 		box = findAndBuildSqlBox(bean.getClass());
-		SqlBox.initializeBox(bean, box);
+		SqlBoxContext.bindBoxToBean(bean, box);
 		return box;
 	}
 
@@ -198,7 +198,22 @@ public class SqlBoxContext {
 	 */
 	public <T> T createEntity(Class<?> entityOrBoxClass) {
 		SqlBox box = findAndBuildSqlBox(entityOrBoxClass);
-		return (T) box.createEntity();
+		Object bean = null;
+		try {
+			bean = box.getEntityClass().newInstance();
+			SqlBox box2 = SqlBox.getBox(bean);
+			if (box2 == null)
+				bindBoxToBean(bean, box);
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SqlBoxContext create error");
+		}
+		return (T) bean;
+
+	}
+
+	public static void bindBoxToBean(Object bean, SqlBox box) {
+		box.setEntityBean(bean);
+		box.getContext().bind(bean, box);
 	}
 
 	/**

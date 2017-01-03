@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 /**
- * jSQLBox is a macro scale persistence tool for Java 7 and above.
+ * In this class just copied some common DB access methods from default SqlBoxContext
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
