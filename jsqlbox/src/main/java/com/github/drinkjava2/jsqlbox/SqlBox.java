@@ -17,7 +17,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
-import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MS_SQLSERVER;
+import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MSSQLSERVER;
 import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MYSQL;
 import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.ORACLE;
 
@@ -146,7 +146,7 @@ public class SqlBox {
 		this.configColumns = columns;
 	}
 
-	public SqlBoxContext getContext() {
+	public SqlBoxContext getSqlBoxContext() {
 		return context;
 	}
 
@@ -175,7 +175,7 @@ public class SqlBox {
 
 		// generatedValues to record all generated values like UUID, sequence
 		Map<Column, Object> idGeneratorCache = new HashMap<>();
-		DatabaseType dbType = this.getContext().getDatabaseType();
+		DatabaseType dbType = this.getSqlBoxContext().getDatabaseType();
 
 		// start to spell sql
 		StringBuilder sb = new StringBuilder();
@@ -187,12 +187,12 @@ public class SqlBox {
 		for (Column col : realColumns.values()) {
 			IdGenerator idGen = col.getIdGenerator();
 			if (idGen != null && !(idGen instanceof AssignedGenerator)) {
-				Object idValue = idGen.getNextID(this.getContext());
+				Object idValue = idGen.getNextID(this.getSqlBoxContext());
 				if (idGen instanceof IdentityGenerator) {
 					if (dbType == ORACLE)// NOSONAR
 						throwEX("Box insert error, IdentityGenerator type should not set to ORACLE");
 				} else if (idGen instanceof AutoGenerator) {
-					if (dbType == MYSQL || dbType == MS_SQLSERVER) {// NOSONAR
+					if (dbType == MYSQL || dbType == MSSQLSERVER) {// NOSONAR
 						if (!col.getAutoIncreament())
 							throwEX("Box insert error, AutoGenerator type should set on indentity type field for table \""
 									+ this.table() + "\"");
@@ -225,8 +225,8 @@ public class SqlBox {
 		// delete the last ","
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
-		if (getContext().isShowSql())
-			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+		if (getSqlBoxContext().isShowSql())
+			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
@@ -285,8 +285,8 @@ public class SqlBox {
 		}
 		sb.setLength(sb.length() - 4);
 
-		if (this.getContext().isShowSql())
-			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+		if (this.getSqlBoxContext().isShowSql())
+			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
@@ -319,8 +319,8 @@ public class SqlBox {
 		}
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
-		if (this.getContext().isShowSql())
-			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+		if (this.getSqlBoxContext().isShowSql())
+			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		List<Map<String, Object>> rows = this.getJdbc().queryForList(sb.toString(),
 				parameters.toArray(new Object[parameters.size()]));
@@ -353,8 +353,8 @@ public class SqlBox {
 		}
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
-		if (this.getContext().isShowSql())
-			getContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+		if (this.getSqlBoxContext().isShowSql())
+			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 		int result = this.getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 		if (result != 1)
 			throwEX("Box delete error, no record delete for entityID:" + entityID);
@@ -467,7 +467,7 @@ public class SqlBox {
 	 * Return a JdbcTemplate instance related to current context<br/>
 	 */
 	public JdbcTemplate getJdbc() {
-		return this.getContext().getJdbc();
+		return this.getSqlBoxContext().getJdbc();
 	}
 
 	/**
@@ -519,7 +519,7 @@ public class SqlBox {
 		if (this.entityClass == null)
 			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
 		String realTableName = this.table();
-		TinyDbMetaData meta = this.getContext().getMetaData();
+		TinyDbMetaData meta = this.getSqlBoxContext().getMetaData();
 		Map<String, Column> oneTable = meta.getOneTable(realTableName.toLowerCase());
 		Map<String, Column> realColumns = new HashMap<>();
 		BeanInfo beanInfo = null;

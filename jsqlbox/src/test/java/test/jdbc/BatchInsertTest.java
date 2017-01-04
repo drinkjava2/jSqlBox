@@ -17,12 +17,13 @@ import test.config.po.User;
 public class BatchInsertTest {
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing BatchInsertTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public void tx_BatchInsertDemo() {
@@ -44,7 +45,7 @@ public class BatchInsertTest {
 	}
 
 	public static void main(String[] args) {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		User u = new User();
 		long old = System.currentTimeMillis();
 		BatchInsertTest t = BeanBox.getBean(BatchInsertTest.class);

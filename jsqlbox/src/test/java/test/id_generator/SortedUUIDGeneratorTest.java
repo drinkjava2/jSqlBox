@@ -1,5 +1,6 @@
 package test.id_generator;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,7 +10,6 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.SortedUUIDGenerator;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -18,13 +18,15 @@ public class SortedUUIDGeneratorTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println(
+				"===============================Testing SortedUUIDGeneratorTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
-	// @After
-	// public void cleanUp() {
-	// TestPrepare.closeBeanBoxContext();
-	// }
+	@After
+	public void cleanUp() {
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
+	}
 
 	public static class TableGeneratorBox extends BeanBox {
 		{
@@ -46,7 +48,7 @@ public class SortedUUIDGeneratorTest {
 
 	@Test
 	public void insertUserInMysql() {
-		if (Dao.getDefaultDatabaseType() != DatabaseType.MYSQL)
+		if (!Dao.getDefaultDatabaseType().isMySql())
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table t");
@@ -59,7 +61,7 @@ public class SortedUUIDGeneratorTest {
 
 	@Test
 	public void insertUserInOracle() {
-		if (Dao.getDefaultDatabaseType() != DatabaseType.ORACLE)
+		if (!Dao.getDefaultDatabaseType().isOracle())
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table T");

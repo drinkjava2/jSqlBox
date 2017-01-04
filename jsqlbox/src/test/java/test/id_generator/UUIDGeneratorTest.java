@@ -18,12 +18,13 @@ public class UUIDGeneratorTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing UUIDGeneratorTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	@Test

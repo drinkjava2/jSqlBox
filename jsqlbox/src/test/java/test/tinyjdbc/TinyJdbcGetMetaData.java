@@ -31,25 +31,26 @@ public class TinyJdbcGetMetaData {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("=============================Testing TinyJdbcGetMetaData=============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	@Test
 	public void tinyJdbcGetMetadataTest() {
 		DatabaseType type = Dao.getDefaultDatabaseType();
 		DataSource ds = null;
-		if (type == DatabaseType.H2DATABASE)
+		if (type.isH2())
 			ds = BeanBox.getBean(H2DataSourceBox.class);
-		else if (type == DatabaseType.MYSQL)
+		else if (type.isMySql())
 			ds = BeanBox.getBean(MySqlDataSourceBox.class);
-		else if (type == DatabaseType.ORACLE)
+		else if (type.isOracle())
 			ds = BeanBox.getBean(OracleDataSourceBox.class);
-		else if (type == DatabaseType.MS_SQLSERVER)
+		else if (type.isMsSQLSERVER())
 			ds = BeanBox.getBean(MsSqlServerDataSourceBox.class);
 		Assert.assertNotNull(ds);
 		TinyDbMetaData meta = TinyJdbc.getMetaData(ds);

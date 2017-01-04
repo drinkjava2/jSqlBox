@@ -8,7 +8,6 @@ import org.junit.Test;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -17,12 +16,13 @@ public class TableGeneratorTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing TableGeneratorTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public static class TableGeneratorBox extends BeanBox {
@@ -33,7 +33,7 @@ public class TableGeneratorTest {
 
 	@Test
 	public void insertUserInMysql() {
-		if (Dao.getDefaultDatabaseType() != DatabaseType.MYSQL)
+		if (!Dao.getDefaultDatabaseType().isMySql())
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table t");
@@ -47,7 +47,7 @@ public class TableGeneratorTest {
 
 	@Test
 	public void insertUserInOracle() {
-		if (Dao.getDefaultDatabaseType() != DatabaseType.ORACLE)
+		if (!Dao.getDefaultDatabaseType().isOracle())
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table T");

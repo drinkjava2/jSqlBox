@@ -6,7 +6,6 @@ import org.junit.Test;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
 import test.config.JBeanBoxConfig.TxInterceptorBox;
@@ -20,13 +19,13 @@ public class TestPrepare {
 	/**
 	 * Drop and rebuild all tables
 	 */
-	public static void prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables() {
+	public static void prepareDatasource_setDefaultSqlBoxConetxt_recreateTables() {
 		BeanBox.defaultContext.close();
 		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 
 		System.out.println("Drop and re-create all tables for a new test ...");
-		if (Dao.getDefaultDatabaseType() == DatabaseType.ORACLE) {
+		if (Dao.getDefaultDatabaseType().isOracle()) {
 			Dao.executeQuiet("DROP TRIGGER TGR_2");
 			Dao.executeQuiet("DROP SEQUENCE SEQ_2");
 			Dao.executeQuiet("DROP TRIGGER TGR_1");
@@ -35,7 +34,7 @@ public class TestPrepare {
 		Dao.executeQuiet("drop table users");
 		Dao.executeQuiet("drop table users2");
 
-		if (Dao.getDefaultDatabaseType() == DatabaseType.H2DATABASE) {
+		if (Dao.getDefaultDatabaseType().isH2()) {
 			Dao.execute("create table users ", //
 					"(id integer auto_increment ,", //
 					"constraint const1 primary key (ID),", //
@@ -55,7 +54,7 @@ public class TestPrepare {
 					"Age Integer ) ");
 		}
 
-		if (Dao.getDefaultDatabaseType() == DatabaseType.MYSQL) {
+		if (Dao.getDefaultDatabaseType().isMySql()) {
 			Dao.execute("create table users ", //
 					"(id integer auto_increment ,", //
 					"constraint const1 primary key (ID),", //
@@ -75,7 +74,7 @@ public class TestPrepare {
 					"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		}
 
-		if (Dao.getDefaultDatabaseType() == DatabaseType.ORACLE) {
+		if (Dao.getDefaultDatabaseType().isOracle()) {
 			Dao.execute("CREATE TABLE USERS", //
 					"(ID INTEGER,", //
 					"USERNAME VARCHAR (50) ,", //
@@ -105,23 +104,24 @@ public class TestPrepare {
 	/**
 	 * Close BeanBox Context, c3p0 close method will be called before context be closed
 	 */
-	public static void closeDatasource_CloseDefaultSqlBoxConetxt() {
+	public static void closeDatasource_closeDefaultSqlBoxConetxt() {
 		BeanBox.defaultContext.close();// This will close HikariDataSource because preDestroy method set to "Close"
 		SqlBoxContext.getDefaultSqlBoxContext().close();
 	}
 
 	@Test
 	public void testCreateTables() {
-		prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing TestPrepare===============================");
+		prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
-		closeDatasource_CloseDefaultSqlBoxConetxt();
+		closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public static void main(String[] args) {
-		prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
-		closeDatasource_CloseDefaultSqlBoxConetxt();
+		closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 }

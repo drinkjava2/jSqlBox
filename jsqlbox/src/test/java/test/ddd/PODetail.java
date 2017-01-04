@@ -1,8 +1,9 @@
 package test.ddd;
 
+import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
+
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.IEntity;
-import com.github.drinkjava2.jsqlbox.SqlHelper;
 import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 
 public class PODetail implements IEntity {
@@ -74,7 +75,6 @@ public class PODetail implements IEntity {
 
 	public void calculateBackorder() {
 		this.backOrder = poQTY - received;
-		Part.update_pendingPOs(partID);
 	}
 
 	public static PODetail insert(String po, String partID, Integer poQTY) {
@@ -90,20 +90,21 @@ public class PODetail implements IEntity {
 
 	public static void onChange_backorder(PODetail poDetail) {
 		Part part = Dao.load(Part.class, poDetail.getPartID());
-		part.setPendingPOs(Dao.queryForInteger(
-				"select sum(backOrder) from podetail where partID= " + SqlHelper.q(poDetail.getPartID())));
+		part.setPendingPOs(
+				Dao.queryForInteger("select sum(backOrder) from podetail where partID=", q(poDetail.getPartID())));
 	}
 
-	public static void receivePartsFromPO(PODetail poDetail, String partID, Integer receiveQTY) {
+	public static void receivePartsFromPO(PODetail poDetail, Integer receiveQTY) {
 		POReceiving poReceiving = new POReceiving();
 		poReceiving.setPO(poDetail.getPo());
-		poReceiving.setPartID(partID);
+		poReceiving.setPartID(poDetail.getPartID());
 		poReceiving.setReceiveQTY(receiveQTY);
 		POReceiving.insert(poReceiving);
 
 		poDetail.setReceived(poDetail.getReceived() + receiveQTY);
 		poDetail.calculateBackorder();
 		poDetail.update();
+		Part.update_pendingPOs(poDetail.getPartID());
 	}
 
 }

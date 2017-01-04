@@ -15,7 +15,8 @@ import test.config.po.User;
 public class ConditionQueryTest {
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing ConditionQueryTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		User u = new User(); // use default SqlBoxContext
 		u.setUserName("User1");
 		u.setAddress("Address1");

@@ -56,6 +56,7 @@ public class HelloWorld3 {
 
 	@Test
 	public void doTest1() {
+		System.out.println("===============================Testing HelloWorld3===============================");
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 
 		User user = new User();

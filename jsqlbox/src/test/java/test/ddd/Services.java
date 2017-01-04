@@ -1,41 +1,72 @@
 package test.ddd;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
-import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
-import test.config.JBeanBoxConfig.TxInterceptorBox;
+import test.config.TestPrepare;
 
 public class Services {
 
-	public void tx_receivePartsFromPO(PODetail poDetail) {
-		PODetail.receivePartsFromPO(poDetail, "part1", 1);
+	@Before
+	public void setup() {
+		System.out.println("===============================Testing Services===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
-	public static void main(String[] args) {
-		SqlBoxContext.getDefaultSqlBoxContext().close();
-		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
-		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
+	@After
+	public void cleanUp() {
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
+	}
+
+	/**
+	 * This method is wrapped by Spring's declarative transaction
+	 */
+	public void tx_receivePartsFromPO(PODetail poDetail, Integer receiveQTY) {
+		PODetail.receivePartsFromPO(poDetail, receiveQTY);
+	}
+
+	@Test
+	public void doTest() {
 		SqlBoxContext.getDefaultSqlBoxContext().setShowSql(true);
 
 		// drop and recreate tables;
+		// Already tested on H2, MySql, Oracle. For MySql need set InnoDB to support transaction
+		String innoDB = Dao.getDefaultDatabaseType().isMySql() ? "ENGINE=InnoDB DEFAULT CHARSET=utf8;" : "";
 		Dao.executeQuiet("drop table part");
-		Dao.execute(Part.CREATE_SQL);
+		Dao.execute(Part.CREATE_SQL + innoDB);
 		Dao.executeQuiet("drop table podetail");
-		Dao.execute(PODetail.CREATE_SQL);
+		Dao.execute(PODetail.CREATE_SQL + innoDB);
 		Dao.executeQuiet("drop table poreceiving");
-		Dao.execute(POReceiving.CREATE_SQL);
+		Dao.execute(POReceiving.CREATE_SQL + innoDB);
 		Dao.executeQuiet("drop table logpart");
-		Dao.execute(LogPart.CREATE_SQL);
+		Dao.execute(LogPart.CREATE_SQL + innoDB);
 		Dao.refreshMetaData();
 
 		// fill test data
-		Part part = Part.insert("part1", 20);
-		PODetail poDetail = PODetail.insert("po1", part.getPartID(), 5);
+		Part part = Part.insert("part1", 0);
+		PODetail poDetail = PODetail.insert("po1", part.getPartID(), 1);
+		System.out.println("======Here start do the services test========");
 
 		// do test
-		Services service = new Services();
-		service.tx_receivePartsFromPO(poDetail);
+		Services service = BeanBox.getBean(Services.class);
+		service.tx_receivePartsFromPO(poDetail, 1);
+
+		// Check result
+		Part partCheck = Dao.load(Part.class, part.getPartID());
+		Assert.assertEquals(1, (int) partCheck.getTotalCurrentStock());
+		Assert.assertEquals(1, (int) partCheck.getStockAvailable());
+
+		PODetail poDetailCheck = Dao.load(PODetail.class, poDetail.getId());
+		Assert.assertEquals(1, (int) poDetailCheck.getReceived());
+		Assert.assertEquals(0, (int) poDetailCheck.getBackOrder());
+
+		Assert.assertEquals(2, (int) Dao.queryForInteger("select count(*) from logpart"));
+
 	}
 }

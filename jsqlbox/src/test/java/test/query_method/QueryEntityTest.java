@@ -20,7 +20,8 @@ public class QueryEntityTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing QueryEntityTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		User u = new User();
 		for (int i = 0; i < 5; i++)
 			Dao.execute("insert into ", u.table(), //
@@ -33,7 +34,7 @@ public class QueryEntityTest {
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	@Test

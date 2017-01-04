@@ -28,12 +28,13 @@ import test.config.TestPrepare;
 public class TinyJdbcBatchInsert {
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing TinyJdbcBatchInsert===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	@Test
@@ -46,8 +47,8 @@ public class TinyJdbcBatchInsert {
 			args.add(arg);
 		}
 		TinyJdbc.executeBatch(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", args);
-		Assert.assertEquals(1000, (int) TinyJdbc.queryForInteger(ds, TinyJdbc.TRANSACTION_READ_COMMITTED,
-				"select count(*) from users"));
+		Assert.assertEquals(1000,
+				(int) TinyJdbc.queryForInteger(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, "select count(*) from users"));
 	}
 
 }

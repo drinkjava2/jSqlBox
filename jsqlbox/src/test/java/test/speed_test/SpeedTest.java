@@ -6,8 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -16,12 +16,13 @@ public class SpeedTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing SpeedTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	/**
@@ -36,17 +37,32 @@ public class SpeedTest {
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
-			u.insert();
+			if (Dao.getDefaultDatabaseType().isH2())
+				u.insert();
 		}
 		long newTime = System.currentTimeMillis();
 		System.out.println("Time used for 1000 times:" + (newTime - oldTime) + "ms");
-		if (Dao.getDefaultDatabaseType() == DatabaseType.H2DATABASE)
-			Assert.assertTrue((newTime - oldTime) < 1000);
+		Assert.assertTrue((newTime - oldTime) < 1000);
+	}
+
+	public void doGCTest() {
+		SqlBoxContext.getDefaultSqlBoxContext().setShowSql(true);
+		long oldTime = System.currentTimeMillis();
+		for (int i = 0; i < 1000000; i++) {
+			User u = new User();
+			u.setUserName("User2");
+			u.setPhoneNumber("222");
+			SqlBox b = u.box();
+			Assert.assertNotNull(b);
+			Assert.assertEquals(u, b.getEntityBean());
+		}
+		long newTime = System.currentTimeMillis();
+		System.out.println("Time used for 1000000 times:" + (newTime - oldTime) + "ms");
 	}
 
 	public static void main(String[] args) {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		SpeedTest t = new SpeedTest();
-		t.doSpeedTest();
+		t.doGCTest();
 	}
 }

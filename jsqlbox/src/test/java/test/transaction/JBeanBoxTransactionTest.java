@@ -28,12 +28,14 @@ import test.config.po.User;
 public class JBeanBoxTransactionTest {
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println(
+				"===============================Testing JBeanBoxTransactionTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public void tx_InsertUser1() {
@@ -54,13 +56,27 @@ public class JBeanBoxTransactionTest {
 				questionMarks());
 	}
 
+	public static void insertAnother() {
+		User u = new User();
+		Dao.execute("insert into ", u.table(), //
+				" (", u.userName(), empty("user3"), //
+				", ", u.address(), empty("address3"), //
+				", ", u.age(), ")", empty("30"), //
+				questionMarks());
+	}
+
 	public void tx_doInsert() {
 		User u = new User();
 		tx_InsertUser1();
-		int i = Dao.queryForInteger("select count(*) from ", u.table());
-		Assert.assertEquals(1, i);
-		System.out.println(i / 0);// throw a runtime exception
+		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		tx_InsertUser2();
+		Assert.assertEquals(2, (int) Dao.queryForInteger("select count(*) from ", u.table()));
+		insertAnother();
+		Assert.assertEquals(3, (int) Dao.queryForInteger("select count(*) from ", u.table()));
+		int count = Dao.queryForInteger("select count(*) from ", u.table());
+		System.out.println("Inserted " + count + " record into database");
+		Assert.assertEquals(3, count);
+		System.out.println(1 / 0);// throw a runtime exception
 	}
 
 	@Test
@@ -70,10 +86,12 @@ public class JBeanBoxTransactionTest {
 		try {
 			tester.tx_doInsert();
 		} catch (Exception e) {
+			User u = new User();
 			foundException = true;
-			Assert.assertEquals(InvocationTargetException.class.getName(), e.getClass().getName());
-			int i = Dao.queryForInteger("select count(*) from users");
-			Assert.assertEquals(0, i);
+			Assert.assertEquals(InvocationTargetException.class, e.getClass());
+			int count = Dao.queryForInteger("select count(*) from ", u.table());
+			System.out.println("After roll back, there is " + count + " record in database");
+			Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		}
 		Assert.assertEquals(foundException, true);
 	}

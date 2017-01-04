@@ -300,7 +300,7 @@ public class TinyJdbc {
 					tiny.getTableNames().put(((String) tablename).toLowerCase(), (String) tablename);
 				rs.close();
 				pst.close();
-			} else if (dbType == DatabaseType.MS_SQLSERVER) {
+			} else if (dbType == DatabaseType.MSSQLSERVER) {
 				pst = con.prepareStatement("select name from sysobjects where xtype='U'");
 				rs = pst.executeQuery();
 				TinyResult tinyRs = ResultSupport.toResult(rs);

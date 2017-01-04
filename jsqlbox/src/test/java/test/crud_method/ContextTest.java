@@ -32,12 +32,13 @@ public class ContextTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing ContextTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class ContextTest {
 		SqlBoxContext ctx = new SqlBoxContext(ds, DB.class);// create a new context
 
 		User u = ctx.createEntity(User.class);
-		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
 
 		u.setUserName("User1");
 		u.setAddress("Address1");
@@ -85,7 +86,7 @@ public class ContextTest {
 	public void insertFromAntoherContext() {
 		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);
 		User u = ctx.createEntity(User.class);
-		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
@@ -112,7 +113,7 @@ public class ContextTest {
 		u.insert();
 		Assert.assertEquals("User1", Dao.queryForString("select ", u.address(), " from ", u.table(), " where ",
 				u.userName(), "=", q("User1")));
-		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
 
 		SqlBox box2 = ctx.findAndBuildSqlBox(User.class);
 		box2.configColumnName("userName", "address");
@@ -121,7 +122,7 @@ public class ContextTest {
 		Dao.getDefaultContext().setShowSql(true);
 		Assert.assertEquals("User1", Dao.queryForString("select ", u.address(), " from ", u.table(), " where ",
 				u.userName(), "=", q("User1")));
-		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
 	}
 
 }

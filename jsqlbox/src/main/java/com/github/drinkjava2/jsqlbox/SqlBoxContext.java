@@ -215,7 +215,7 @@ public class SqlBoxContext {
 
 	public static void bindBoxToBean(Object bean, SqlBox box) {
 		box.setEntityBean(bean);
-		box.getContext().bind(bean, box);
+		box.getSqlBoxContext().bind(bean, box);
 	}
 
 	/**

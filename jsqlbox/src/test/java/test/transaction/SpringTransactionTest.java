@@ -49,15 +49,19 @@ public class SpringTransactionTest {
 	public void tx_doInsert() {
 		User u = new User();
 		tx_InsertUser1();
-		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
+		int count = Dao.queryForInteger("select count(*) from ", u.table());
+		System.out.println("Inserted " + count + " record into database");
+		Assert.assertEquals(1, count);
 		System.out.println(1 / 0);// throw a runtime exception
 		tx_InsertUser2();
 	}
 
 	@Test
 	public void doTest() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		System.out
+				.println("===============================Testing SpringTransactionTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 
 		AnnotationConfigApplicationContext springCTX = new AnnotationConfigApplicationContext(SpringConfig.class);
 		SqlBoxContext.setDefaultSqlBoxContext(springCTX.getBean(SqlBoxContext.class));
@@ -68,6 +72,8 @@ public class SpringTransactionTest {
 		} catch (Exception e) {
 			foundException = true;
 			User u = new User();
+			int count = Dao.queryForInteger("select count(*) from ", u.table());
+			System.out.println("After roll back, there is " + count + " record in database");
 			Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		}
 		Assert.assertEquals(foundException, true);

@@ -14,6 +14,7 @@ public class HelloWorld {
 
 	@Test
 	public void doTest() {
+		System.out.println("===============================Testing HelloWorld===============================");
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 		Dao.execute("delete from users");
 		Dao.execute("delete from users2");

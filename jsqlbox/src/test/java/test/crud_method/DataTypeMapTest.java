@@ -8,10 +8,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.TestPrepare;
 
@@ -19,17 +18,46 @@ public class DataTypeMapTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("===============================Testing DataTypeMapTest===============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
+	}
+
+	@Test
+	public void insertForH2() {
+		if (!Dao.getDefaultDatabaseType().isH2())
+			return;
+		Dao.executeQuiet("drop table datasample");
+		Dao.execute("create table datasample ("//
+				, "id", " varchar(32)", ","//
+				, "integerField", " int", ","//
+				, "longField", " BIGINT", ","//
+				, "shortField", " SMALLINT", ","//
+				, "floatField", " FLOAT", ","//
+				, "doubleField", " DOUBLE", ","//
+				, "bigDecimalField", " NUMERIC", ","//
+				, "byteField", " TINYINT", ","//
+				, "booleanField", " BIT", ","//
+				, "dateField", " DATE", ","//
+				, "timeField", " Time", ","//
+				, "timestampField", " TIMESTAMP", ","//
+				, "stringField", " VARCHAR(10)"//
+				, ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		Dao.refreshMetaData();
+		DataSample dt = new DataSample();
+		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
+		dt.insert();
+		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from datasample"));
+		Dao.executeQuiet("drop table datasample");
 	}
 
 	@Test
 	public void insertForMysqlOnly() {
-		if (Dao.getDefaultDatabaseType() != DatabaseType.MYSQL)
+		if (!Dao.getDefaultDatabaseType().isMySql())
 			return;
 		Dao.executeQuiet("drop table datasample");
 		Dao.execute("create table datasample ("//
@@ -57,7 +85,7 @@ public class DataTypeMapTest {
 
 	@Test
 	public void insertForOracleOnly() {
-		if (Dao.getDefaultDatabaseType() != DatabaseType.ORACLE)
+		if (!Dao.getDefaultDatabaseType().isOracle())
 			return;
 		Dao.executeQuiet("drop table datasample");
 		Dao.execute("create table datasample ("//

@@ -8,7 +8,6 @@ import org.junit.Test;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.SequenceGenerator;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.TestPrepare;
 import test.config.po.User;
@@ -25,12 +24,13 @@ public class SequenceGeneratorTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("=============================Testing SequenceGeneratorTest=============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public static class SequenceGeneratorBox extends BeanBox {
@@ -41,7 +41,7 @@ public class SequenceGeneratorTest {
 
 	@Test
 	public void insertUser() {
-		if (Dao.getDefaultDatabaseType() != DatabaseType.ORACLE)
+		if (!Dao.getDefaultDatabaseType().isOracle())
 			return;
 		User u = new User();
 		u.box().configIdGenerator("age", BeanBox.getBean(SequenceGeneratorBox.class));

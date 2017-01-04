@@ -1,5 +1,7 @@
 package test.ddd;
 
+import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
+
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.IEntity;
 import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
@@ -84,7 +86,7 @@ public class Part implements IEntity {
 	}
 
 	public void calculate_StockAvailable() {
-		this.setStockAvailable(totalCurrentStock - stockOnHold - pendingPOs);
+		this.setStockAvailable(totalCurrentStock - stockOnHold + pendingPOs);
 	}
 
 	public void calculate_shortage() {
@@ -109,7 +111,7 @@ public class Part implements IEntity {
 
 	public static void update_pendingPOs(String partID) {
 		Part part = Dao.load(Part.class, partID);
-		int pendingPOs = Dao.queryForInteger("select sum(BackOrder) from PODetail");
+		int pendingPOs = Dao.queryForInteger("select sum(BackOrder) from PODetail where partID=", q(partID));
 		part.setPendingPOs(pendingPOs);
 		part.calculate_StockAvailable();
 		part.calculate_shortage();

@@ -16,12 +16,13 @@ public class InsertChildClassTest {
 
 	@Before
 	public void setup() {
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		System.out.println("=============================Testing InsertChildClassTest=============================");
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public static class U2 extends User {
@@ -35,12 +36,12 @@ public class InsertChildClassTest {
 		U2 u = new U2();
 		u.setPhoneNumber("111");
 		u.insert();
-		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
-				" where ", u.phoneNumber(), "=", q("111")));
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(), " where ",
+				u.phoneNumber(), "=", q("111")));
 		u.box().configTable("users");
 		u.setPhoneNumber("222");
 		u.insert();
-		Assert.assertEquals(222, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
-				" where ", u.phoneNumber(), "=", q("222")));
+		Assert.assertEquals(222, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(), " where ",
+				u.phoneNumber(), "=", q("222")));
 	}
 }

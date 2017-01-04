@@ -34,7 +34,7 @@ public class BatchInsertTester {
 	}
 
 	public static void main(String[] args) {// jUnit cann't do multiple thread test
-		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		try {
 			Thread.sleep(5000);// NOSONAR
 		} catch (InterruptedException e) { 
@@ -59,7 +59,7 @@ public class BatchInsertTester {
 			new Thread(m2).start();
 		}
 		System.out.println("done");
-		TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 }
