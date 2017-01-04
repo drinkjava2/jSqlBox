@@ -31,7 +31,7 @@ public class JdbcTest {
 	 */
 	@Test
 	public void tx_jdbcTest() {
-		User u = Dao.createEntity(User.class);
+		User u = new User();
 		Dao.execute("insert into " + u.table() //
 				+ " (" + u.userName() + empty("user1")//
 				+ ", " + u.address() + empty("address1")//

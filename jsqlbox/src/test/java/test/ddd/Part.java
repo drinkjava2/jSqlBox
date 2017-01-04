@@ -1,5 +1,6 @@
 package test.ddd;
 
+import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.IEntity;
 import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 
@@ -64,7 +65,6 @@ public class Part implements IEntity {
 
 	public void setStockAvailable(Integer stockAvailable) {
 		this.stockAvailable = stockAvailable;
-		this.setShortage(stockAvailable - safetyStockLevel);
 	}
 
 	public Integer getSafetyStockLevel() {
@@ -83,29 +83,47 @@ public class Part implements IEntity {
 		this.shortage = shortage;
 	}
 
-	public static void onChange_TotalCurrentStock(Part part, Integer totalCurrentStock) {
-		LogPart log = new LogPart();
-		log.setPartID(part.partID);
-		log.setOldQTY(part.totalCurrentStock);
-		log.setNewQTY(totalCurrentStock);
-		log.insert();
-
-		part.totalCurrentStock = totalCurrentStock;
-		part.setStockAvailable(totalCurrentStock - part.stockOnHold - part.pendingPOs);
-		part.update();
+	public void calculate_StockAvailable() {
+		this.setStockAvailable(totalCurrentStock - stockOnHold - pendingPOs);
 	}
 
-	public static Part create(String partID) {
+	public void calculate_shortage() {
+		this.setShortage(stockAvailable - safetyStockLevel);
+	}
+
+	public static Part insert(String partID, Integer initialQTY) {
 		Part part = new Part();
 		part.partID = partID;
-		part.totalCurrentStock = 0;
+		part.totalCurrentStock = initialQTY;
 		part.stockOnHold = 0;
 		part.pendingPOs = 0;
 		part.stockAvailable = 0;
 		part.safetyStockLevel = 10;
 		part.shortage = 0;
+		part.calculate_StockAvailable();
+		part.calculate_shortage();
+		LogPart.insert(partID, 0, initialQTY);
 		part.insert();
 		return part;
+	}
+
+	public static void update_pendingPOs(String partID) {
+		Part part = Dao.load(Part.class, partID);
+		int pendingPOs = Dao.queryForInteger("select sum(BackOrder) from PODetail");
+		part.setPendingPOs(pendingPOs);
+		part.calculate_StockAvailable();
+		part.calculate_shortage();
+		part.update();
+	}
+
+	public static void receive_part(String partID, Integer receiveQTY) {
+		Part part = Dao.load(Part.class, partID);
+		int oldQTY = part.totalCurrentStock;
+		part.setTotalCurrentStock(part.getTotalCurrentStock() + receiveQTY);
+		part.calculate_StockAvailable();
+		part.calculate_shortage();
+		part.update();
+		LogPart.insert(partID, oldQTY, part.getTotalCurrentStock());
 	}
 
 }

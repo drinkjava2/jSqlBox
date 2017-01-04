@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -55,8 +55,7 @@ public class ContextTest {
 		SqlBoxContext ctx = new SqlBoxContext(ds, DB.class);// create a new context
 
 		User u = ctx.createEntity(User.class);
-		// Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
-		//TODO to fix this bug
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getContext());
 
 		u.setUserName("User1");
 		u.setAddress("Address1");
@@ -82,7 +81,7 @@ public class ContextTest {
 	/**
 	 * Demo how to use IOC tool like BeanBox to create a context
 	 */
-	// @Test
+	@Test
 	public void insertFromAntoherContext() {
 		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);
 		User u = ctx.createEntity(User.class);
@@ -99,7 +98,7 @@ public class ContextTest {
 	/**
 	 * Test dynamic bind context at runtime, first on board, then buy ticket
 	 */
-	// @Test
+	@Test
 	public void dynamicBindContext() {
 		Dao.getDefaultContext().setShowSql(true);
 		User u = new User();

@@ -204,6 +204,8 @@ public class SqlBoxContext {
 			SqlBox box2 = SqlBox.getBox(bean);
 			if (box2 == null)
 				bindBoxToBean(bean, box);
+			else
+				box2.setContext(this);
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext create error");
 		}
@@ -467,6 +469,12 @@ public class SqlBoxContext {
 			SqlHelper.clearLastSQL();
 		}
 		return result;
+	}
+
+	public <T> T load(Class<?> entityOrBoxClass, Object entityID) {
+		T bean = (T) createEntity(entityOrBoxClass);
+		SqlBox box = SqlBox.getBox(bean);
+		return box.load(entityID);
 	}
 	// ========JdbcTemplate wrap methods End============
 

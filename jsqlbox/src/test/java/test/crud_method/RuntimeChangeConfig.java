@@ -25,7 +25,7 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void normal() {
-		User u = Dao.createEntity(User.class);
+		User u = new User();
 		u.setUserName("Sam");
 		u.insert();
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from users"));
@@ -34,7 +34,7 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void changeTable() {
-		User u = Dao.createEntity(User.class);
+		User u = new User();
 		u.box().configTable("users2");
 		u.setUserName("Sam");
 		u.insert();
@@ -44,7 +44,7 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void changeColumnName() {
-		User u = Dao.createEntity(User.class);
+		User u = new User();
 		u.box().configColumnName(u.fieldID(u.userName()), u.address());
 		u.box().configColumnName(u.fieldID(u.address()), u.phoneNumber());
 		u.setUserName("Sam");
@@ -59,7 +59,7 @@ public class RuntimeChangeConfig {
 
 	@Test
 	public void changeTableAndColumnName() {
-		User u = Dao.createEntity(User.class);
+		User u = new User();
 		u.box().configTable("users2");
 		u.box().configColumnName("userName", u.address());
 		u.setUserName("Sam");

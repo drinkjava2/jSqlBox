@@ -5,22 +5,19 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
+import test.config.JBeanBoxConfig.TxInterceptorBox;
 
 public class Services {
-	public void receivePartsFromPO(PODetail podetal, Part part, Integer receiveQTY) {
 
-		POReceiving poReceiving = new POReceiving();
-		poReceiving.setReceiveQTY(receiveQTY);
-		poReceiving.insert();
-
-		part.setTotalCurrentStock(part.getTotalCurrentStock() + receiveQTY);
-
-		podetal.setReceived(podetal.getReceived() + receiveQTY);
+	public void tx_receivePartsFromPO(PODetail poDetail) {
+		PODetail.receivePartsFromPO(poDetail, "part1", 1);
 	}
 
 	public static void main(String[] args) {
 		SqlBoxContext.getDefaultSqlBoxContext().close();
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
+		SqlBoxContext.getDefaultSqlBoxContext().setShowSql(true);
 
 		// drop and recreate tables;
 		Dao.executeQuiet("drop table part");
@@ -34,14 +31,11 @@ public class Services {
 		Dao.refreshMetaData();
 
 		// fill test data
-		Part part = Part.create("part1");
-		Part part2 = Dao.load(Part.class, "part1");
-		System.out.println(part2.getPartID());
-		//PODetail poDetail = PODetail.create("po1", part, 5);
+		Part part = Part.insert("part1", 20);
+		PODetail poDetail = PODetail.insert("po1", part.getPartID(), 5);
 
-		// // do test
-		// Services service = new Services();
-		// service.receivePartsFromPO(poDetail, part, 1);
-
+		// do test
+		Services service = new Services();
+		service.tx_receivePartsFromPO(poDetail);
 	}
 }

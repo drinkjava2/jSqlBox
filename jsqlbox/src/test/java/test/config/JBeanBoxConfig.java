@@ -63,7 +63,7 @@ public class JBeanBoxConfig {
 		{
 			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClassName", "com.mysql.jdbc.Driver");
-			setProperty("username", "root");
+			setProperty("username", "root");// change to your user & password
 			setProperty("password", "root888");
 		}
 	}
@@ -73,7 +73,7 @@ public class JBeanBoxConfig {
 		{
 			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
 			setProperty("driverClassName", "oracle.jdbc.OracleDriver");
-			setProperty("username", "root");
+			setProperty("username", "root");// change to your user & password
 			setProperty("password", "root888");
 		}
 	}
@@ -83,7 +83,7 @@ public class JBeanBoxConfig {
 		{
 			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
 			setProperty("driverClassName", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			setProperty("username", "sa");
+			setProperty("username", "sa");// change to your user & password
 			setProperty("password", "");
 		}
 	}
@@ -112,7 +112,7 @@ public class JBeanBoxConfig {
 	}
 
 	// Spring TransactionInterceptor
-	static class TxInterceptorBox extends BeanBox {
+	public static class TxInterceptorBox extends BeanBox {
 		{
 			Properties props = new Properties();
 			props.put("tx_*", "PROPAGATION_REQUIRED");

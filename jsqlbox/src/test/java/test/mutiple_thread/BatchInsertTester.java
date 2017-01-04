@@ -37,8 +37,7 @@ public class BatchInsertTester {
 		TestPrepare.prepareDatasource_SetDefaultSqlBoxConetxt_RecreateTables();
 		try {
 			Thread.sleep(5000);// NOSONAR
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+		} catch (InterruptedException e) { 
 			e.printStackTrace();
 		}
 		// MultiThread m = new MultiThread();

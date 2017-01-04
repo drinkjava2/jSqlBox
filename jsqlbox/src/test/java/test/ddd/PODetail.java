@@ -3,7 +3,7 @@ package test.ddd;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.IEntity;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
-import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
+import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 
 public class PODetail implements IEntity {
 	public static final String CREATE_SQL = "create table podetail("//
@@ -21,7 +21,7 @@ public class PODetail implements IEntity {
 	Integer received;
 	Integer backOrder;
 	{
-		this.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
+		this.box().configIdGenerator("id", UUID25Generator.INSTANCE);
 	}
 
 	public String getId() {
@@ -72,10 +72,15 @@ public class PODetail implements IEntity {
 		this.backOrder = backOrder;
 	}
 
-	public static PODetail create(String po, Part part, Integer poQTY) {
+	public void calculateBackorder() {
+		this.backOrder = poQTY - received;
+		Part.update_pendingPOs(partID);
+	}
+
+	public static PODetail insert(String po, String partID, Integer poQTY) {
 		PODetail poDetail = new PODetail();
 		poDetail.po = po;
-		poDetail.partID = part.getPartID();
+		poDetail.partID = partID;
 		poDetail.poQTY = poQTY;
 		poDetail.received = 0;
 		poDetail.backOrder = poQTY;
@@ -83,15 +88,22 @@ public class PODetail implements IEntity {
 		return poDetail;
 	}
 
-	public void trigger_calculateBackorder() {
-		this.backOrder = poQTY - received;
-		Part part = Dao.load(Part.class, this.getPartID());
-	}
-
 	public static void onChange_backorder(PODetail poDetail) {
 		Part part = Dao.load(Part.class, poDetail.getPartID());
 		part.setPendingPOs(Dao.queryForInteger(
 				"select sum(backOrder) from podetail where partID= " + SqlHelper.q(poDetail.getPartID())));
+	}
+
+	public static void receivePartsFromPO(PODetail poDetail, String partID, Integer receiveQTY) {
+		POReceiving poReceiving = new POReceiving();
+		poReceiving.setPO(poDetail.getPo());
+		poReceiving.setPartID(partID);
+		poReceiving.setReceiveQTY(receiveQTY);
+		POReceiving.insert(poReceiving);
+
+		poDetail.setReceived(poDetail.getReceived() + receiveQTY);
+		poDetail.calculateBackorder();
+		poDetail.update();
 	}
 
 }

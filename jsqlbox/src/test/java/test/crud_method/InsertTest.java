@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
@@ -43,7 +42,7 @@ public class InsertTest {
 
 	@Test
 	public void insertUserB() {
-		User u = Dao.createEntity(User.class);
+		User u = new User();
 		u.setUserName("User2");
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");
@@ -51,19 +50,6 @@ public class InsertTest {
 		Assert.assertEquals("222", Dao.queryForString("select ", u.phoneNumber(), " from ", u.table(), " where ",
 				u.userName(), "=" + q("User2")));
 		Assert.assertTrue(u.getId() > 0);
-	}
-
-	@Test
-	public void insertUserC() {
-		for (int i = 0; i < 10000; i++) {
-			User u = Dao.createEntity(User.class);
-			u.setUserName("User2");
-			u.setAddress("Address2");
-			u.setPhoneNumber("222");
-			SqlBox d = u.box();
-			if (d == null)
-				System.out.println("null");
-		}
 	}
 
 	@Test

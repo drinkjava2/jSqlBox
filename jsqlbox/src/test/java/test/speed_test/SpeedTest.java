@@ -32,7 +32,7 @@ public class SpeedTest {
 		long oldTime = System.currentTimeMillis();
 		for (int i = 0; i < 1000; i++) {
 			SqlBoxContext.getDefaultSqlBoxContext();
-			User u = Dao.createEntity(User.class);
+			User u = new User();
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");

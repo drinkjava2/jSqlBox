@@ -1,7 +1,7 @@
 package test.ddd;
 
 import com.github.drinkjava2.jsqlbox.IEntity;
-import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
+import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 
 public class LogPart implements IEntity {
 	public static final String CREATE_SQL = "create table logpart("//
@@ -18,7 +18,7 @@ public class LogPart implements IEntity {
 	Integer changedQty;
 
 	{
-		this.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
+		this.box().configIdGenerator("id", UUID25Generator.INSTANCE);
 	}
 
 	public String getId() {
@@ -59,6 +59,15 @@ public class LogPart implements IEntity {
 
 	public void setChangedQty(Integer changedQty) {
 		this.changedQty = changedQty;
+	}
+
+	public static void insert(String partID, Integer oldQTY, Integer newQTY) {
+		LogPart log = new LogPart();
+		log.setPartID(partID);
+		log.setOldQTY(oldQTY);
+		log.setNewQTY(newQTY);
+		log.setChangedQty(newQTY - oldQTY);
+		log.insert();
 	}
 
 }

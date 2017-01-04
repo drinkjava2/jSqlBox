@@ -29,7 +29,7 @@ public class ConditionQueryTest {
 	}
 
 	public int conditionQuery(int condition, Object parameter) {
-		User u = Dao.createEntity(User.class);
+		User u = new User();
 		String sql = "Select count(*) from " + u.table() + " where ";
 		if (condition == 1 || condition == 3)
 			sql = sql + u.userName() + "=" + q(parameter) + " and " + u.address() + "=" + q("Address1");

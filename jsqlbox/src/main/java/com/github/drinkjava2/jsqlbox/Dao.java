@@ -29,7 +29,6 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
  * @version 1.0.0
  * @since 1.0.0
  */
-@SuppressWarnings("unchecked")
 public class Dao {
 
 	private Dao() {
@@ -86,17 +85,11 @@ public class Dao {
 	}
 
 	public static <T> T load(Class<?> entityOrBoxClass, Object entityID) {
-		T bean = (T) SqlBoxContext.getDefaultSqlBoxContext().createEntity(entityOrBoxClass);
-		SqlBox box = SqlBox.getBox(bean);
-		return box.load(entityID);
+		return SqlBoxContext.getDefaultSqlBoxContext().load(entityOrBoxClass, entityID);
 	}
 
 	public static <T> List<T> queryForList(Class<?> dbClass, String... sql) {
 		return SqlBoxContext.getDefaultSqlBoxContext().queryForList(dbClass, sql);
-	}
-
-	public static <T> T createEntity(Class<?> beanOrSqlBoxClass) {
-		return SqlBoxContext.getDefaultSqlBoxContext().createEntity(beanOrSqlBoxClass);
 	}
 
 }
