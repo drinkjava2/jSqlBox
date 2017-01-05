@@ -120,6 +120,14 @@ public class JBeanBoxConfig {
 		}
 	}
 
+	public static class TxInterceptorBox2 extends BeanBox {
+		{
+			Properties props = new Properties();
+			props.put("do*", "PROPAGATION_REQUIRED");
+			setConstructor(TransactionInterceptor.class, TxManagerBox.class, props);
+		}
+	}
+	
 	public static class JdbcTemplateBox extends BeanBox {
 		{
 			setConstructor(JdbcTemplate.class, DataSourceBox.class);
