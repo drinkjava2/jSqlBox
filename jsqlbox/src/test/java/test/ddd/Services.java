@@ -5,10 +5,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.AopAround;
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
+import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
 import test.config.TestPrepare;
 
 public class Services {
@@ -27,7 +29,8 @@ public class Services {
 	/**
 	 * This method is wrapped by Spring's declarative transaction
 	 */
-	public void tx_receivePartsFromPO(PODetail poDetail, Integer receiveQTY) {
+	@AopAround(SpringTxInterceptorBox.class)
+	public void receivePartsFromPO(PODetail poDetail, Integer receiveQTY) {
 		PODetail.receivePartsFromPO(poDetail, receiveQTY);
 	}
 
@@ -55,7 +58,7 @@ public class Services {
 
 		// do test
 		Services service = BeanBox.getBean(Services.class);
-		service.tx_receivePartsFromPO(poDetail, 1);
+		service.receivePartsFromPO(poDetail, 1);
 
 		// Check result
 		Part partCheck = Dao.load(Part.class, part.getPartID());

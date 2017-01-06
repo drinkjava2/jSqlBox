@@ -4,7 +4,6 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
@@ -41,11 +40,11 @@ public class JBeanBoxConfig {
 
 	/**
 	 * ==================================================================================================<br/>
-	 * Data source setting, change below line "H2DataSourceBox" to test on different databases <br/>
+	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to test on MySql <br/>
 	 * This project is already tested on H2 memory database & MySql5 and Oracle11g
 	 * ==================================================================================================<br/>
 	 */
-	public static class DataSourceBox extends H2DataSourceBox {
+	public static class DataSourceBox extends OracleDataSourceBox {
 	}
 
 	// H2Database memory database connection URL
@@ -112,10 +111,10 @@ public class JBeanBoxConfig {
 	}
 
 	// Spring TransactionInterceptor
-	public static class TxInterceptorBox extends BeanBox {
+	public static class SpringTxInterceptorBox extends BeanBox {
 		{
 			Properties props = new Properties();
-			props.put("tx_*", "PROPAGATION_REQUIRED");
+			props.put("*", "PROPAGATION_REQUIRED");
 			setConstructor(TransactionInterceptor.class, TxManagerBox.class, props);
 		}
 	}
@@ -125,12 +124,6 @@ public class JBeanBoxConfig {
 			Properties props = new Properties();
 			props.put("do*", "PROPAGATION_REQUIRED");
 			setConstructor(TransactionInterceptor.class, TxManagerBox.class, props);
-		}
-	}
-	
-	public static class JdbcTemplateBox extends BeanBox {
-		{
-			setConstructor(JdbcTemplate.class, DataSourceBox.class);
 		}
 	}
 

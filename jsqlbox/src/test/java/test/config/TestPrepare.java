@@ -8,7 +8,6 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
-import test.config.JBeanBoxConfig.TxInterceptorBox;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -21,7 +20,6 @@ public class TestPrepare {
 	 */
 	public static void prepareDatasource_setDefaultSqlBoxConetxt_recreateTables() {
 		BeanBox.defaultContext.close();
-		BeanBox.defaultContext.setAOPAround("test.\\w*.\\w*", "tx_\\w*", new TxInterceptorBox(), "invoke");
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 
 		System.out.println("Drop and re-create all tables for a new test ...");
