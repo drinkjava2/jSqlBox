@@ -48,15 +48,17 @@ public class SortedUUIDGeneratorTest {
 
 	@Test
 	public void insertUserInMysql() {
-		if (!Dao.getDefaultDatabaseType().isMySql())
+		if (!(Dao.getDefaultDatabaseType().isMySql() || Dao.getDefaultDatabaseType().isH2()))
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table t");
 		Dao.executeQuiet("create table t (pk varchar(5),v int(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 		u.box().configIdGenerator("userName", BeanBox.getBean(SortedUUIDBox.class));
-		for (int i = 0; i < 60; i++)
+		for (int i = 0; i < 20; i++) {
 			u.insert();
-		Assert.assertEquals(60, (int) Dao.queryForInteger("select count(*) from ", u.table()));
+			System.out.println(u.getUserName());
+		}
+		Assert.assertEquals(20, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 
 	@Test
@@ -67,8 +69,10 @@ public class SortedUUIDGeneratorTest {
 		Dao.executeQuiet("drop table T");
 		Dao.executeQuiet("CREATE TABLE T (PK VARCHAR(5),V INTEGER) ");
 		u.box().configIdGenerator("userName", BeanBox.getBean(SortedUUIDBox.class));
-		for (int i = 0; i < 60; i++)
+		for (int i = 0; i < 20; i++) {
 			u.insert();
+			System.out.println(u.getUserName());
+		}
 		Assert.assertEquals(60, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 

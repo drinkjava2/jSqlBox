@@ -39,10 +39,13 @@ public class SpeedTest {
 			u.setPhoneNumber("222");
 			if (Dao.getDefaultDatabaseType().isH2())
 				u.insert();
+			User u2 = Dao.load(User.class, u.getId());
+			if (u2.getId() == 0)
+				System.out.println("never happen");
 		}
 		long newTime = System.currentTimeMillis();
 		System.out.println("Time used for 1000 times:" + (newTime - oldTime) + "ms");
-		Assert.assertTrue((newTime - oldTime) < 1000);
+		Assert.assertTrue((newTime - oldTime) < 2000);
 	}
 
 	public void doGCTest() {

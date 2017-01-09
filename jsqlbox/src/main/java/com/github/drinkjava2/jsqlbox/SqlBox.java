@@ -226,7 +226,8 @@ public class SqlBox {
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
 		if (getSqlBoxContext().isShowSql())
-			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+			getSqlBoxContext()
+					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
@@ -286,7 +287,8 @@ public class SqlBox {
 		sb.setLength(sb.length() - 4);
 
 		if (this.getSqlBoxContext().isShowSql())
-			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+			getSqlBoxContext()
+					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		// here you go
 		int result = getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
@@ -320,7 +322,8 @@ public class SqlBox {
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
 		if (this.getSqlBoxContext().isShowSql())
-			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+			getSqlBoxContext()
+					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
 		List<Map<String, Object>> rows = this.getJdbc().queryForList(sb.toString(),
 				parameters.toArray(new Object[parameters.size()]));
@@ -354,7 +357,8 @@ public class SqlBox {
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
 		if (this.getSqlBoxContext().isShowSql())
-			getSqlBoxContext().logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
+			getSqlBoxContext()
+					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 		int result = this.getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 		if (result != 1)
 			throwEX("Box delete error, no record delete for entityID:" + entityID);
@@ -678,6 +682,20 @@ public class SqlBox {
 	 */
 	public void configColumnName(String fieldID, String columnName) {
 		getOrBuildConfigColumn(fieldID).setColumnName(columnName);
+	}
+
+	/**
+	 * Config column if allow insert
+	 */
+	public void configInsertable(String fieldID, Boolean insertable) {
+		getOrBuildConfigColumn(fieldID).setInsertable(insertable);
+	}
+
+	/**
+	 * Config column if allow update
+	 */
+	public void configUpdatable(String fieldID, Boolean updatable) {
+		getOrBuildConfigColumn(fieldID).setUpdatable(updatable);
 	}
 
 	/**

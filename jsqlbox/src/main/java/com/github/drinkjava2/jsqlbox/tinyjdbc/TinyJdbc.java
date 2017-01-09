@@ -340,9 +340,7 @@ public class TinyJdbc {
 				rs.close();
 			}
 			return tiny;
-		} catch (
-
-		SQLException e) {
+		} catch (SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
 			try {
 				if (con != null)

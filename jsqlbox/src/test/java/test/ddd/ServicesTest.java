@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
 import test.config.TestPrepare;
 
-public class Services {
+public class ServicesTest {
 
 	@Before
 	public void setup() {
@@ -57,7 +57,7 @@ public class Services {
 		System.out.println("======Here start do the services test========");
 
 		// do test
-		Services service = BeanBox.getBean(Services.class);
+		ServicesTest service = BeanBox.getBean(ServicesTest.class);
 		service.receivePartsFromPO(poDetail, 1);
 
 		// Check result

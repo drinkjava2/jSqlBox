@@ -25,19 +25,16 @@ import com.github.drinkjava2.jsqlbox.id.IdGenerator;
  * @since 1.0
  */
 public class Column {
-	// String name not used
-	private boolean unique = false;
-	private boolean nullable = true;
+	// JPA also use below fields:
+	private boolean nullable = true;// readOnly, determined by Database
 	private boolean insertable = true;
 	private boolean updatable = true;
-	// String columnDefinition not used
 	private int length = 255;
 	private int precision = 0;
 	private int scale = 0;
-	// below fields are for JSQLBox
-	private String columnName = "";
-	// entityID is used for object identity, is different to database primeKey
-	private Boolean entityID = false;
+	// Below fields are for JSQLBox only:
+	private String columnName = ""; // = columnDefinition in JPA
+	private Boolean entityID = false;// = unique in JPA
 	private Boolean autoIncreament = false;
 	private Class<?> propertyType;
 	private String propertyTypeName;
@@ -53,14 +50,6 @@ public class Column {
 
 	public void setFieldID(String fieldID) {
 		this.fieldID = fieldID;
-	}
-
-	public boolean isUnique() {
-		return unique;
-	}
-
-	public void setUnique(boolean unique) {
-		this.unique = unique;
 	}
 
 	public boolean isNullable() {
@@ -185,7 +174,6 @@ public class Column {
 
 	public String debugInfo() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("unique=" + unique).append("\r\n");
 		sb.append("nullable=" + nullable).append("\r\n");
 		sb.append("insertable=" + insertable).append("\r\n");
 		sb.append("updatable=" + updatable).append("\r\n");

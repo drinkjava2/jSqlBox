@@ -3,7 +3,7 @@ package com.github.drinkjava2.jsqlbox;
 /**
  * Each entity bean class should extends from EntityBase class <br/>
  * But for some reason if don't want extends from EntityBase class, just copy all fields and methods in EntityBase class
- * to your entity bean class
+ * to your entity bean class, IEntity only works for JDK8+
  * 
  */
 public interface IEntity {
@@ -11,7 +11,7 @@ public interface IEntity {
 	public default SqlBox box() {
 		return SqlBox.getBox(this);
 	}
- 
+
 	public default String table() {
 		return box().table();
 	}

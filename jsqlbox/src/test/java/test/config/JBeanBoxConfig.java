@@ -44,7 +44,7 @@ public class JBeanBoxConfig {
 	 * This project is already tested on H2 memory database & MySql5 and Oracle11g
 	 * ==================================================================================================<br/>
 	 */
-	public static class DataSourceBox extends OracleDataSourceBox {
+	public static class DataSourceBox extends H2DataSourceBox {
 	}
 
 	// H2Database memory database connection URL
