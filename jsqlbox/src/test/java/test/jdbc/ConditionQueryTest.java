@@ -33,13 +33,13 @@ public class ConditionQueryTest {
 		User u = new User();
 		String sql = "Select count(*) from " + u.table() + " where ";
 		if (condition == 1 || condition == 3)
-			sql = sql + u.userName() + "=" + q(parameter) + " and " + u.address() + "=" + q("Address1");
+			sql = sql + u.USERNAME() + "=" + q(parameter) + " and " + u.ADDRESS() + "=" + q("Address1");
 
 		if (condition == 2)
-			sql = sql + u.userName() + "=" + q(parameter);
+			sql = sql + u.USERNAME() + "=" + q(parameter);
 
 		if (condition == 3)
-			sql = sql + " or " + u.age() + "=" + q(parameter);
+			sql = sql + " or " + u.AGE() + "=" + q(parameter);
 
 		return Dao.queryForInteger(sql);
 	}

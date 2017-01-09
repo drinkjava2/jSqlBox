@@ -42,9 +42,9 @@ public class TinyJdbcTest {
 	public void tx_InsertUser1() {
 		User u = new User();
 		Dao.execute("insert into ", u.table(), //
-				" (", u.userName(), empty("user1"), //
-				", ", u.address(), empty("address1"), //
-				", ", u.age(), ")", empty("10"), //
+				" (", u.USERNAME(), empty("user1"), //
+				", ", u.ADDRESS(), empty("address1"), //
+				", ", u.AGE(), ")", empty("10"), //
 				questionMarks());
 		DataSource ds = Dao.getDefaultContext().getDataSource();
 		TinyJdbc.execute(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");

@@ -37,11 +37,9 @@ public class SpeedTest {
 			u.setUserName("User2");
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
+			u.box();
 			if (Dao.getDefaultDatabaseType().isH2())
 				u.insert();
-			User u2 = Dao.load(User.class, u.getId());
-			if (u2.getId() == 0)
-				System.out.println("never happen");
 		}
 		long newTime = System.currentTimeMillis();
 		System.out.println("Time used for 1000 times:" + (newTime - oldTime) + "ms");

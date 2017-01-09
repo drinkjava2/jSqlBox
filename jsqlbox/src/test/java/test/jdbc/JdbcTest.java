@@ -34,35 +34,35 @@ public class JdbcTest {
 	public void tx_jdbcTest() {
 		User u = new User();
 		Dao.execute("insert into " + u.table() //
-				+ " (" + u.userName() + empty("user1")//
-				+ ", " + u.address() + empty("address1")//
-				+ ", " + u.age() + empty("1")//
+				+ " (" + u.USERNAME() + empty("user1")//
+				+ ", " + u.ADDRESS() + empty("address1")//
+				+ ", " + u.AGE() + empty("1")//
 				+ ") values(?,?,?)");
 
 		Dao.execute("insert into ", u.table(), //
-				" (", u.userName(), empty("user2"), //
-				", ", u.address(), empty("address2"), //
-				", ", u.age(), empty("2"), //
+				" (", u.USERNAME(), empty("user2"), //
+				", ", u.ADDRESS(), empty("address2"), //
+				", ", u.AGE(), empty("2"), //
 				") values(?,?,?)");
 
 		Dao.execute("insert into ", u.table(), //
-				" (", u.userName(), empty("user3"), //
-				", ", u.address(), empty("address3"), //
-				", ", u.age(), empty("3"), //
+				" (", u.USERNAME(), empty("user3"), //
+				", ", u.ADDRESS(), empty("address3"), //
+				", ", u.AGE(), empty("3"), //
 				")", questionMarks());
 
-		Dao.execute("update " + u.table() + " set " + u.userName() + "=" + q("John") + "," + u.address() + "="
-				+ q("Shanghai") + " where " + u.age() + "=" + q(1));
+		Dao.execute("update " + u.table() + " set " + u.USERNAME() + "=" + q("John") + "," + u.ADDRESS() + "="
+				+ q("Shanghai") + " where " + u.AGE() + "=" + q(1));
 
 		Dao.execute("update ", u.table(), " set ", //
-				u.userName(), "=", q("Jeffery"), ",", //
-				u.address(), " =", q("Tianjing"), //
-				" where ", u.age(), "=", q(2));
+				u.USERNAME(), "=", q("Jeffery"), ",", //
+				u.ADDRESS(), " =", q("Tianjing"), //
+				" where ", u.AGE(), "=", q(2));
 
 		Dao.execute("update ", u.table(), " set ", //
-				u.userName(), "=?", empty("Tom"), ",", //
-				u.address(), " =?", empty("Nanjing"), //
-				" where ", u.age(), "=?", empty(3));
+				u.USERNAME(), "=?", empty("Tom"), ",", //
+				u.ADDRESS(), " =?", empty("Nanjing"), //
+				" where ", u.AGE(), "=?", empty(3));
 
 		Assert.assertEquals(3, (int) Dao.queryForInteger("select count(*) from " + u.table()));
 	}

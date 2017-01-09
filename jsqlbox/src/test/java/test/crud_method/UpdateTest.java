@@ -34,12 +34,12 @@ public class UpdateTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.insert();
-		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
-				" where ", u.id(), "=", q(u.getId())));
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(),
+				" where ", u.ID(), "=", q(u.getId())));
 		u.setPhoneNumber("333");
 		u.update();
-		Assert.assertEquals(333, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(),
-				" where ", u.id(), "=", q(u.getId())));
+		Assert.assertEquals(333, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(),
+				" where ", u.ID(), "=", q(u.getId())));
 	}
 
 }

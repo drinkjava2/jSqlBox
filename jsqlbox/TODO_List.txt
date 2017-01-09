@@ -1,0 +1,32 @@
+=====================TODO List======================
+* DB type query (can convert to List, Map, Array, Set)
+example: user.loadList(Email.class)  or user.loadList(Email.class, "order by id");
+loadList method is based on DB query method, so need think about query method carefully.
+
+* L1 Cache (similar but not exact as Hibernate's L1 cache, does not cache save/update/delete command, only cache entities)
+
+* L2 cache (use Hibernate's Ecache,  or Redis)
+
+* nullable, insertable, updatable need implemented in Box's insert update methods
+
+* .cacheLoad()  .cacheQuery()  forceInsert(), forceUpdate()  method to used L2 Cache 
+
+* .cacheCompare() to check if database has been changed.
+
+* .cacheClear() to clear L2 cache
+
+* .BatchCacheSave   .BatchCacheUpdate()   .BatchCacheExecute to Entity batch operate (similar like jdbc batch methods)
+  
+* Blob, Clob type?(or just use JDBCTemplate)
+
+* add MS SQL SERVER 
+
+* Divided or config to 2 different type, one support container PO manager, another not, but both support 1st, 2nd cache.
+
+* For exception, delete class name, add error code, do not directly show entity in error message
+
+
+===========Finished tasks===========
+base class delete dao & clean up
+deleted proxyBean class because no need use it
+

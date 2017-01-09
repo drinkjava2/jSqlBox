@@ -34,8 +34,8 @@ public class InsertTest {
 		u.setPhoneNumber("111");
 		u.setAlive(true);
 		u.insert();
-		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(), " where ",
-				u.userName(), "=", q("User1")));
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.USERNAME(), "=", q("User1")));
 		Assert.assertTrue(u.getId() > 0);
 		User u2 = Dao.load(User.class, u.getId());
 		Assert.assertTrue(u2.getAlive());
@@ -48,8 +48,8 @@ public class InsertTest {
 		u.setAddress("Address2");
 		u.setPhoneNumber("222");
 		u.insert();
-		Assert.assertEquals("222", Dao.queryForString("select ", u.phoneNumber(), " from ", u.table(), " where ",
-				u.userName(), "=" + q("User2")));
+		Assert.assertEquals("222", Dao.queryForString("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.USERNAME(), "=" + q("User2")));
 		Assert.assertTrue(u.getId() > 0);
 	}
 

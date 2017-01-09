@@ -32,7 +32,7 @@ public class UUIDGeneratorTest {
 		User u = new User();
 		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDGenerator.class));
 		u.insert();
-		String username = Dao.queryForString("select ", u.userName(), " from ", u.table());
+		String username = Dao.queryForString("select ", u.USERNAME(), " from ", u.table());
 		Assert.assertEquals(32, username.length());
 		for (int i = 0; i < 60; i++)
 			u.insert();
@@ -44,7 +44,7 @@ public class UUIDGeneratorTest {
 		User u = new User();
 		u.box().configIdGenerator("userName", BeanBox.getBean(UUID25Generator.class));
 		u.insert();
-		String username = Dao.queryForString("select ", u.userName(), " from ", u.table());
+		String username = Dao.queryForString("select ", u.USERNAME(), " from ", u.table());
 		Assert.assertEquals(25, username.length());
 		for (int i = 0; i < 60; i++)
 			u.insert();
@@ -62,7 +62,7 @@ public class UUIDGeneratorTest {
 		User u = new User();
 		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDAnyGeneratorBox.class));
 		u.insert();
-		String username = Dao.queryForString("select ", u.userName(), " from ", u.table());
+		String username = Dao.queryForString("select ", u.USERNAME(), " from ", u.table());
 		Assert.assertEquals(45, username.length());
 		for (int i = 0; i < 60; i++)
 			u.insert();

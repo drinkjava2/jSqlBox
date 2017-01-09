@@ -84,7 +84,7 @@ public class SpringConfig {
 		u.setUserName("Spring");
 		u.insert();
 		Assert.assertEquals("Spring", Dao.queryForString(
-				"select " + u.userName() + " from " + u.table() + " where " + u.userName() + "=" + q("Spring")));
+				"select " + u.USERNAME() + " from " + u.table() + " where " + u.USERNAME() + "=" + q("Spring")));
 		springCtx.close();
 	}
 }

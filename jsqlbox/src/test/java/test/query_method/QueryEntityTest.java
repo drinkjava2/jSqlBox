@@ -25,9 +25,9 @@ public class QueryEntityTest {
 		User u = new User();
 		for (int i = 0; i < 5; i++)
 			Dao.execute("insert into ", u.table(), //
-					" (", u.userName(), empty("user1"), //
-					", ", u.address(), empty("address1"), //
-					", ", u.age(), ")", empty("1"), //
+					" (", u.USERNAME(), empty("user1"), //
+					", ", u.ADDRESS(), empty("address1"), //
+					", ", u.AGE(), ")", empty("1"), //
 					questionMarks());
 		Assert.assertEquals(5, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}

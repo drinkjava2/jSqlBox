@@ -12,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.IEntity;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class User implements IEntity { 
+public class User implements IEntity {
 	private Integer id;
 	private String userName;
 	private String phoneNumber;
@@ -68,29 +68,30 @@ public class User implements IEntity {
 		this.age = age;
 	}
 
-	// Below method are friendly for JDBC, it's not compulsory but recommended to have
-	public String id() {
-		return box().getColumnName();
+	// Below methods are for JDBC & Query use, it's not compulsory for jSqlBox but recommended to have
+
+	public String ID() {
+		return box().getColumnName("id");
 	}
 
-	public String userName() {
-		return box().getColumnName();
+	public String USERNAME() {
+		return box().getColumnName("userName");
 	}
 
-	public String phoneNumber() {
-		return box().getColumnName();
+	public String PHONENUMBER() {
+		return box().getColumnName("phoneNumber");
 	}
 
-	public String address() {
-		return box().getColumnName();
+	public String ADDRESS() {
+		return box().getColumnName("address");
 	}
 
-	public String age() {
-		return box().getColumnName();
+	public String AGE() {
+		return box().getColumnName("age");
 	}
 
-	public String alive() {
-		return box().getColumnName();
+	public String ALIVE() {
+		return box().getColumnName("alive");
 	}
 
 }

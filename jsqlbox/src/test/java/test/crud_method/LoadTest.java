@@ -39,18 +39,18 @@ public class LoadTest {
 	public void loadSingleID() {
 		User u = new User();
 		// Default id is EntityID
-		u.box().configIdGenerator(u.fieldID(u.id()), AutoGenerator.INSTANCE);
+		u.box().configIdGenerator(u.fieldID(u.ID()), AutoGenerator.INSTANCE);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.insert();
-		Assert.assertTrue(Dao.queryForInteger("select ", u.id(), " from ", u.table()) > 0);
+		Assert.assertTrue(Dao.queryForInteger("select ", u.ID(), " from ", u.table()) > 0);
 		Assert.assertTrue(u.getId() > 0);
 		User u2 = Dao.load(User.class, u.getId());
 		Assert.assertEquals("Address1", u2.getAddress());
 		u2.delete();
 		Assert.assertEquals("Address1", u2.getAddress());
 		Assert.assertNull(u2.getId());
-		Assert.assertNull(Dao.queryForString("select ", u.id(), " from ", u.table()));
+		Assert.assertNull(Dao.queryForString("select ", u.ID(), " from ", u.table()));
 		Assert.assertTrue(Dao.queryForInteger("select count(*)   from ", u.table()) == 0);
 	}
 
@@ -58,8 +58,8 @@ public class LoadTest {
 	public void loadCompositeID() {
 		Dao.getDefaultContext().setShowSql(true);
 		User u = new User();
-		u.box().configIdGenerator(u.fieldID(u.id()), AutoGenerator.INSTANCE);
-		u.box().configEntityIDs(u.fieldID(u.userName()), u.fieldID(u.address()));
+		u.box().configIdGenerator(u.fieldID(u.ID()), AutoGenerator.INSTANCE);
+		u.box().configEntityIDs(u.fieldID(u.USERNAME()), u.fieldID(u.ADDRESS()));
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.insert();
@@ -72,16 +72,16 @@ public class LoadTest {
 	@Test
 	public void loadCompositeIDbyMap() {
 		User u = new User();
-		u.box().configIdGenerator(u.fieldID(u.id()), AutoGenerator.INSTANCE);
-		u.box().configEntityIDs(u.fieldID(u.userName()), u.fieldID(u.address()));
+		u.box().configIdGenerator(u.fieldID(u.ID()), AutoGenerator.INSTANCE);
+		u.box().configEntityIDs(u.fieldID(u.USERNAME()), u.fieldID(u.ADDRESS()));
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.insert();
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 		Assert.assertTrue(u.getId() > 0);
 		Map<String, Object> entityID = new HashMap<>();
-		entityID.put(u.userName(), "User1");
-		entityID.put(u.address(), "Address1");
+		entityID.put(u.USERNAME(), "User1");
+		entityID.put(u.ADDRESS(), "Address1");
 		User u2 = Dao.load(User.class, entityID);
 		Assert.assertEquals("Address1", u2.getAddress());
 	}

@@ -446,24 +446,13 @@ public class SqlBox {
 	}
 
 	/**
-	 * get field's database real column name
-	 */
-	public String getColumnName() {
-		String method1 = Thread.currentThread().getStackTrace()[1].getMethodName();
-		String fieldID = "getColumnName".equals(method1) ? Thread.currentThread().getStackTrace()[2].getMethodName()
-				: method1;
-		getFieldIDCache().set(fieldID);
-		return this.getRealColumnName(null, fieldID);
-	}
-
-	/**
 	 * get field's fieldID
 	 */
 	public String fieldID(String realColumnName) {
 		String fieldID = getFieldIDCache().get();
 		if (SqlBoxUtils.isEmptyStr(fieldID) || SqlBoxUtils.isEmptyStr(realColumnName)
-				|| !realColumnName.equals(this.getRealColumnName(null, fieldID)))
-			throwEX("Box getFieldID error, can only be called with getFieldID(xx.xxFieldID()) format");
+				|| !realColumnName.equals(this.getColumnName(fieldID)))
+			throwEX("Box getFieldID error, can only be called as fieldID(xx.SOMECOLUMNNAME()) format");
 		return fieldID;
 	}
 
@@ -609,10 +598,18 @@ public class SqlBox {
 	}
 
 	/**
+	 * get field's database real column name
+	 */
+	public String getColumnName(String fieldID) {
+		getFieldIDCache().set(fieldID);
+		return this.getRealColumnName(null, fieldID);
+	}
+
+	/**
 	 * Get real column name by fieldID <br/>
 	 * userName field will find userName or username or USERNAME or USER_NAME, but only allowed 1
 	 */
-	public String getRealColumnName(String realTableName, String fieldID) {// NOSONAR
+	private String getRealColumnName(String realTableName, String fieldID) {// NOSONAR
 		Column col = getOrBuildConfigColumn(fieldID);
 		String columnName = col.getColumnName();
 		if (columnName == null || columnName.length() == 0)

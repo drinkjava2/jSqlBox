@@ -30,18 +30,18 @@ public class SpringTransactionTest {
 	public void tx_InsertUser1() {
 		User u = new User();
 		Dao.execute("insert into ", u.table(), //
-				" (", u.userName(), empty("user1"), //
-				", ", u.address(), empty("address1"), //
-				", ", u.age(), ")", empty("10"), //
+				" (", u.USERNAME(), empty("user1"), //
+				", ", u.ADDRESS(), empty("address1"), //
+				", ", u.AGE(), ")", empty("10"), //
 				questionMarks());
 	}
 
 	public void tx_InsertUser2() {
 		User u = new User();
 		Dao.execute("insert into ", u.table(), //
-				" (", u.userName(), empty("user2"), //
-				", ", u.address(), empty("address2"), //
-				", ", u.age(), ")", empty("20"), //
+				" (", u.USERNAME(), empty("user2"), //
+				", ", u.ADDRESS(), empty("address2"), //
+				", ", u.AGE(), ")", empty("20"), //
 				questionMarks());
 	}
 

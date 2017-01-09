@@ -30,8 +30,8 @@ public class BatchInsertTest {
 		User u = new User();
 		for (int i = 0; i < 1000; i++)
 			Dao.cacheSQL("insert into ", u.table(), " (", //
-					u.userName(), empty("user" + i), ",", //
-					u.age(), empty("70"), //
+					u.USERNAME(), empty("user" + i), ",", //
+					u.AGE(), empty("70"), //
 					") ", questionMarks());
 		Dao.executeCachedSQLs();
 	}

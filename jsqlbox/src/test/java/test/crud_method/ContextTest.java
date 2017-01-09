@@ -64,8 +64,8 @@ public class ContextTest {
 		u.setAge(10);
 		u.insert();
 		u.box().configTableAlias("a");
-		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(), " where ",
-				u.userName(), "=", q("User1")));
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.USERNAME(), "=", q("User1")));
 		ds.close();
 	}
 
@@ -92,8 +92,8 @@ public class ContextTest {
 		u.setPhoneNumber("111");
 		u.setAge(10);
 		u.insert();
-		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(), " where ",
-				u.userName(), "=", q("User1")));
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.USERNAME(), "=", q("User1")));
 	}
 
 	/**
@@ -111,8 +111,8 @@ public class ContextTest {
 		box.configColumnName("userName", "address");
 		ctx.bind(u, box);
 		u.insert();
-		Assert.assertEquals("User1", Dao.queryForString("select ", u.address(), " from ", u.table(), " where ",
-				u.userName(), "=", q("User1")));
+		Assert.assertEquals("User1", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table(), " where ",
+				u.USERNAME(), "=", q("User1")));
 		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
 
 		SqlBox box2 = ctx.findAndBuildSqlBox(User.class);
@@ -120,8 +120,8 @@ public class ContextTest {
 		ctx.bind(u, box2);
 		u.insert();
 		Dao.getDefaultContext().setShowSql(true);
-		Assert.assertEquals("User1", Dao.queryForString("select ", u.address(), " from ", u.table(), " where ",
-				u.userName(), "=", q("User1")));
+		Assert.assertEquals("User1", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table(), " where ",
+				u.USERNAME(), "=", q("User1")));
 		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
 	}
 

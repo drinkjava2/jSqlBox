@@ -29,47 +29,38 @@ public class TestPrepare {
 			Dao.executeQuiet("DROP TRIGGER TGR_1");
 			Dao.executeQuiet("DROP SEQUENCE SEQ_1");
 		}
+		Dao.executeQuiet("drop table email");
 		Dao.executeQuiet("drop table users");
 		Dao.executeQuiet("drop table users2");
 
-		if (Dao.getDefaultDatabaseType().isH2()) {
+		String innoDB = Dao.getDefaultDatabaseType().isMySql() ? "ENGINE=InnoDB DEFAULT CHARSET=utf8;" : "";
+		if (Dao.getDefaultDatabaseType().isMySql() || Dao.getDefaultDatabaseType().isH2()) {
 			Dao.execute("create table users ", //
 					"(id integer auto_increment ,", //
-					"constraint const1 primary key (ID),", //
 					"username Varchar (50) ,", //
 					"Phone_Number Varchar (50) ,", //
 					"Address Varchar (50) ,", //
 					"Alive Boolean, ", //
-					"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+					"Age Integer,", //
+					"constraint const1 primary key (id)", //
+					")", innoDB);
+
+			Dao.execute("create table email ", //
+					"(id Varchar (32),", //
+					"userid integer,", //
+					"email Varchar (50),", //
+					"constraint const2 primary key (id),", //
+					"constraint const3 foreign key (userid) references users(id)", //
+					")", innoDB);
 
 			Dao.execute("create table users2", //
 					"(id integer auto_increment ,", //
-					"constraint const2 primary key (ID),", //
+					"constraint const4 primary key (ID),", //
 					"username Varchar (50) ,", //
 					"Phone_Number Varchar (50) ,", //
 					"Address Varchar (50) ,", //
 					"Alive Boolean, ", //
-					"Age Integer ) ");
-		}
-
-		if (Dao.getDefaultDatabaseType().isMySql()) {
-			Dao.execute("create table users ", //
-					"(id integer auto_increment ,", //
-					"constraint const1 primary key (ID),", //
-					"username Varchar (50) ,", //
-					"Phone_Number Varchar (50) ,", //
-					"Address Varchar (50) ,", //
-					"Alive Boolean, ", //
-					"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-
-			Dao.execute("create table users2", //
-					"(id integer auto_increment ,", //
-					"constraint const2 primary key (ID),", //
-					"username Varchar (50) ,", //
-					"Phone_Number Varchar (50) ,", //
-					"Address Varchar (50) ,", //
-					"Alive Boolean, ", //
-					"Age Integer )ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+					"Age Integer)", innoDB);
 		}
 
 		if (Dao.getDefaultDatabaseType().isOracle()) {
@@ -79,7 +70,16 @@ public class TestPrepare {
 					"PHONE_NUMBER VARCHAR (50) ,", //
 					"ADDRESS VARCHAR (50) ,", //
 					"ALIVE INTEGER, ", //
-					"AGE INTEGER)");
+					"AGE INTEGER,", //
+					"CONSTRAINT CONST1 PRIMARY KEY (ID)", //
+					")");
+			Dao.execute("CREATE TABLE EMAIL ", //
+					"( ID VARCHAR (32),", //
+					"USER_ID INTEGER,", //
+					"EMAIL VARCHAR (50),", //
+					"CONSTRAINT CONST2 PRIMARY KEY (ID),", //
+					"CONSTRAINT CONST3 FOREIGN KEY (USER_ID) REFERENCES USERS(ID)", //
+					")");
 			Dao.execute("CREATE TABLE USERS2", //
 					"(ID INTEGER,", //
 					"USERNAME VARCHAR (50) ,", //
@@ -112,6 +112,7 @@ public class TestPrepare {
 		System.out.println("===============================Testing TestPrepare===============================");
 		prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
+		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from email"));
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
 		closeDatasource_closeDefaultSqlBoxConetxt();
 	}
@@ -119,6 +120,7 @@ public class TestPrepare {
 	public static void main(String[] args) {
 		prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
+		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from email"));
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
 		closeDatasource_closeDefaultSqlBoxConetxt();
 	}

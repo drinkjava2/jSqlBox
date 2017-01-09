@@ -46,29 +46,29 @@ public class RuntimeChangeConfig {
 	@Test
 	public void changeColumnName() {
 		User u = new User();
-		u.box().configColumnName(u.fieldID(u.userName()), u.address());
-		u.box().configColumnName(u.fieldID(u.address()), u.phoneNumber());
+		u.box().configColumnName(u.fieldID(u.USERNAME()), u.ADDRESS());
+		u.box().configColumnName(u.fieldID(u.ADDRESS()), u.PHONENUMBER());
 		u.setUserName("Sam");
 		u.setPhoneNumber("111");
 		u.insert();
 		// below line, sql is "select Address from users"
-		Assert.assertEquals("Sam", Dao.queryForString("select ", u.userName(), " from ", u.table()));
+		Assert.assertEquals("Sam", Dao.queryForString("select ", u.USERNAME(), " from ", u.table()));
 
 		// below line sql is "select phoneNumber from users"
-		Assert.assertEquals("111", Dao.queryForString("select ", u.address(), " from ", u.table()));
+		Assert.assertEquals("111", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table()));
 	}
 
 	@Test
 	public void changeTableAndColumnName() {
 		User u = new User();
 		u.box().configTable("users2");
-		u.box().configColumnName("userName", u.address());
+		u.box().configColumnName("userName", u.ADDRESS());
 		u.setUserName("Sam");
 		u.insert();
 		// below line, sql is "select Address from users2"
-		Assert.assertEquals("Sam", Dao.queryForString("select ", u.address(), " from ", u.table()));
+		Assert.assertEquals("Sam", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table()));
 
 		// below line, sql is "select Address from users2"
-		Assert.assertEquals("Sam", Dao.queryForString("select ", u.userName(), " from ", u.table()));
+		Assert.assertEquals("Sam", Dao.queryForString("select ", u.USERNAME(), " from ", u.table()));
 	}
 }

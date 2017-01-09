@@ -36,12 +36,12 @@ public class InsertChildClassTest {
 		U2 u = new U2();
 		u.setPhoneNumber("111");
 		u.insert();
-		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(), " where ",
-				u.phoneNumber(), "=", q("111")));
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.PHONENUMBER(), "=", q("111")));
 		u.box().configTable("users");
 		u.setPhoneNumber("222");
 		u.insert();
-		Assert.assertEquals(222, (int) Dao.queryForInteger("select ", u.phoneNumber(), " from ", u.table(), " where ",
-				u.phoneNumber(), "=", q("222")));
+		Assert.assertEquals(222, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.PHONENUMBER(), "=", q("222")));
 	}
 }
