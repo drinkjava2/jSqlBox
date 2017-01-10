@@ -1,7 +1,6 @@
 package test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.clear;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.link;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
 
@@ -45,12 +44,9 @@ public class QueryEntityTest {
 		User u2 = new User();
 		u.box().configTableAlias("a");
 		u2.box().configTableAlias("b");
-		List<DB> list = Dao.queryForList(DB.class, clear(), "select ",
-				link(u.ID(), u.ADDRESS(), u.AGE(), u2.allColumns()), " from ", u.table(), " a, ", u2.table(), " b");
-		for (DB db : list) {
-			System.out.println(db.map);
-			System.out.println(db.user);
-		}
+		List<DB> list = Dao.queryForList(DB.class, "select ",
+				link(u.ID(), u.ADDRESS(), u.AGE(), u2.ID(), u2.PHONENUMBER(), u2.ADDRESS(), u2.USERNAME()), " from ",
+				u.alias(), ", ", u2.alias(), " where ", u.ID(), "=", u2.ID());
 	}
 
 }

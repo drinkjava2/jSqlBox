@@ -62,8 +62,7 @@ public class ContextTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.insert();
-		u.box().configTableAlias("a");
+		u.insert(); 
 		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
 				u.USERNAME(), "=", q("User1")));
 		ds.close();

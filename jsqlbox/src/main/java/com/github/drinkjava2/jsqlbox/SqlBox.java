@@ -24,6 +24,7 @@ import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.ORACLE;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -53,17 +54,17 @@ import com.github.drinkjava2.springsrc.StringUtils;
 
 @SuppressWarnings({ "unchecked" })
 public class SqlBox {
-
+	private static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBox.class);
 	// The entity bean class
 	private Class<?> entityClass;
 
-	// Configuration Columns
+	// Configure Columns
 	private Map<String, Column> configColumns = new HashMap<>();
 
-	// Configuration Table Name
+	// Configure Table Name
 	private String configTable;
 
-	// Configuration Table Alias Name
+	// Configure Table Alias Name
 	private String configTableAlias;
 
 	private SqlBoxContext context;
@@ -483,6 +484,16 @@ public class SqlBox {
 	}
 
 	/**
+	 * Get real database table name
+	 */
+	public String alias() {
+		if (SqlBoxUtils.isEmptyStr(this.getTableAlias()))
+			return table();
+		else
+			return table() + " " + this.getTableAlias();
+	}
+
+	/**
 	 * Return a * for sql
 	 */
 	public String allColumns() {
@@ -533,7 +544,17 @@ public class SqlBox {
 			if (isLegalFieldID(fieldID)) {
 				Column realCol = new Column();
 				realCol.setFieldID(fieldID);
-				realCol.setColumnName(this.getRealColumnName(realTableName, fieldID));// 3080ms cost for speed test
+				String realColumnMatchName = this.getRealColumnName(realTableName, fieldID);
+				if (SqlBoxUtils.isEmptyStr(realColumnMatchName)) {
+					Field field = ReflectionUtils.findField(this.getEntityClass(), fieldID);
+					if (this.getEntityClass().getDeclaredAnnotation(IgnoreWarning.class) == null
+							&& field.getAnnotation(IgnoreWarning.class) == null)// NOSONAR
+						log.info("Field \"" + fieldID + "\" does not match any column in database table \""
+								+ realTableName
+								+ "\", to disable this warning, put an @IgnoreWarning annotation on it.");
+					continue;
+				}
+				realCol.setColumnName(realColumnMatchName);// 3080ms cost for speed test
 				realCol.setPropertyType(pd.getPropertyType());
 				realCol.setReadMethodName(pd.getReadMethod().getName());
 				realCol.setWriteMethodName(pd.getWriteMethod().getName());
@@ -637,8 +658,7 @@ public class SqlBox {
 			realColumnNameUnderline = realColumn.getColumnName();
 
 		if (realColumnNameignoreCase == null && realColumnNameUnderline == null)
-			SqlBoxException.throwEX("SqlBox automaticFitColumnName error, column defination \"" + columnName
-					+ "\" does not match any table column in table " + realTable);
+			return null;
 
 		if (realColumnNameignoreCase != null && realColumnNameUnderline != null
 				&& !realColumnNameignoreCase.equals(realColumnNameUnderline))

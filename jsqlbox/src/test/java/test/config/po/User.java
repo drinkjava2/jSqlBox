@@ -12,6 +12,7 @@ import com.github.drinkjava2.jsqlbox.IEntity;
  * @version 1.0.0
  * @since 1.0.0
  */
+
 public class User implements IEntity {
 	private Integer id;
 	private String userName;

@@ -15,6 +15,10 @@ public interface IEntity {
 	public default String table() {
 		return box().table();
 	}
+	
+	public default String alias() {
+		return box().alias();
+	}
 
 	public default String allColumns() {
 		return box().allColumns();

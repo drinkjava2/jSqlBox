@@ -32,8 +32,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * A tiny Jdbc tool to access database use separated transaction not related to current Spring transaction<br/>
- * Usually there is no need to use TinyJdbc in project.<br/>
- * Can use DBUtils for this purpose but I think DBUtils is still too big.
+ * Usually there is no need to use TinyJdbc in project, may delete this tool at future.
  * 
  *
  * @author Yong Zhu

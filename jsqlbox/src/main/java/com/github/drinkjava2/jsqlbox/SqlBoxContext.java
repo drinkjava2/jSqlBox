@@ -29,8 +29,6 @@ import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
@@ -453,14 +451,17 @@ public class SqlBoxContext {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
 
-			SqlRowSet rs;
+			List<Map<String, Object>> rs;
 			if (sp.getParameters().length == 0)
-				rs = getJdbc().queryForRowSet(sp.getSql());
+				rs = getJdbc().queryForList(sp.getSql());
 			else
-				rs = getJdbc().queryForRowSet(sp.getSql(), sp.getParameters());
+				rs = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+			for (Map<String, Object> map : rs) {
+				System.out.println(map);
+			}
 
-			SqlRowSetMetaData rsm = rs.getMetaData();
-			log.info(SqlBoxUtils.getSqlRowSetMetadataDebugInfo(rsm));
+			// SqlRowSetMetaData rsm = rs.getMetaData();
+			// log.info(SqlBoxUtils.getSqlRowSetMetadataDebugInfo(rsm));
 
 			// Field field = ReflectionUtils.findField(dbClass, "map");
 			// for (Map<String, Object> map : lst) {
