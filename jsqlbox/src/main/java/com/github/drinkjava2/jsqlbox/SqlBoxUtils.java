@@ -28,6 +28,8 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+
 import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 /**
@@ -221,5 +223,23 @@ public class SqlBoxUtils {
 		Method method = ReflectionUtils.findMethod(targetClass, methodName, new Class[] { parameterclazz });
 		map.put(key, method);
 		return method;
+	}
+
+	public static String getSqlRowSetMetadataDebugInfo(SqlRowSetMetaData rsm) {
+		StringBuilder sb = new StringBuilder();
+		int coll = rsm.getColumnCount();
+		for (int i = 0; i < coll; i++) {
+			sb.append("==============================").append("\r\n");
+			sb.append("getColumnName=" + rsm.getColumnName(i + 1)).append("\r\n");
+			sb.append("getColumnClassName=" + rsm.getColumnClassName(i + 1)).append("\r\n");
+			sb.append("getColumnType=" + rsm.getColumnType(i + 1)).append("\r\n");
+			sb.append("getColumnTypeName=" + rsm.getColumnTypeName(i + 1)).append("\r\n");
+			sb.append("getColumnDisplaySize=" + rsm.getColumnDisplaySize(i + 1)).append("\r\n");
+			sb.append("getTableName=" + rsm.getTableName(i + 1)).append("\r\n");
+			sb.append("getCatalogName=" + rsm.getCatalogName(i + 1)).append("\r\n");
+			sb.append("getColumnLabel=" + rsm.getColumnLabel(i + 1)).append("\r\n");
+			sb.append("getSchemaName=" + rsm.getSchemaName(i + 1)).append("\r\n");
+		}
+		return sb.toString();
 	}
 }

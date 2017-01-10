@@ -46,7 +46,7 @@ public class DataTypeMapTest {
 				, "timeField", " Time", ","//
 				, "timestampField", " TIMESTAMP", ","//
 				, "stringField", " VARCHAR(10)"//
-				, ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+				, ")");
 		Dao.refreshMetaData();
 		DataSample dt = new DataSample();
 		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);

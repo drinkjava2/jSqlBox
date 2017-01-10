@@ -320,11 +320,6 @@ public class TinyJdbc {
 			for (String realTableName : tables) {
 				rs = con.getMetaData().getColumns(null, null, realTableName, null);
 				Map<String, Column> oneTable = new HashMap<>();
-
-				/**
-				 * ResultSetMetaData rsm = rs.getMetaData(); int coll = rsm.getColumnCount(); String colName[] = new
-				 * String[coll]; for (int i = 0; i < coll; i++) { colName[i] = rsm.getColumnName(i + 1); }
-				 */
 				while (rs.next()) {// NOSONAR
 					Column col = new Column();
 					col.setColumnName(rs.getString("COLUMN_NAME"));

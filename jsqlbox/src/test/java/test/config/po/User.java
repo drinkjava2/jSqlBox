@@ -68,7 +68,7 @@ public class User implements IEntity {
 		this.age = age;
 	}
 
-	// Below methods are for JDBC & Query use, it's not compulsory for jSqlBox but recommended to have
+	// Below methods are for JDBC & Query use, it's not compulsory but recommended to have
 
 	public String ID() {
 		return box().getColumnName("id");

@@ -19,8 +19,8 @@ public class EntityBase implements IEntity {
 	}
 
 	@Override
-	public String star() {
-		return box().star();
+	public String allColumns() {
+		return box().allColumns();
 	}
 
 	@Override

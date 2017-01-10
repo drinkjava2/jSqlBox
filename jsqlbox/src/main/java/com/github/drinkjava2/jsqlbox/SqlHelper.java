@@ -94,8 +94,9 @@ public class SqlHelper {
 	/**
 	 * Clear last SQL cached in threadlocal
 	 */
-	public static void clearLastSQL() {
+	public static String clear() {
 		sqlCache.get().clear();
+		return "";
 	}
 
 	/**
@@ -157,7 +158,7 @@ public class SqlHelper {
 		ArrayList<String> list = sqlCache.get();
 		sp.setParameters(list.toArray(new String[list.size()]));
 		sp.setSql(sql.toString());
-		clearLastSQL();
+		clear();
 		return sp;
 	}
 
@@ -190,7 +191,7 @@ public class SqlHelper {
 	/**
 	 * SubList a List, divide a list by given blockSize
 	 */
-	private static <T> List<List<T>> subList(List<T> list, int blockSize) { 
+	private static <T> List<List<T>> subList(List<T> list, int blockSize) {// NOSONAR
 		List<List<T>> lists = new ArrayList<>();
 		if (list != null && blockSize > 0) {
 			int listSize = list.size();

@@ -17,7 +17,6 @@ package com.github.drinkjava2.jsqlbox;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 
-import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,11 +29,12 @@ import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
-import com.github.drinkjava2.springsrc.ReflectionUtils;
 
 /**
  * @author Yong Zhu
@@ -47,7 +47,7 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private boolean showSql = false;
+	private boolean showSql = true;
 
 	public static final String SQLBOX_IDENTITY = "BX";
 
@@ -350,7 +350,7 @@ public class SqlBoxContext {
 				}
 			}
 		} finally {
-			SqlHelper.clearLastSQL();
+			SqlHelper.clear();
 		}
 	}
 
@@ -379,7 +379,7 @@ public class SqlBoxContext {
 				return -1;
 			}
 		} finally {
-			SqlHelper.clearLastSQL();
+			SqlHelper.clear();
 		}
 	}
 
@@ -399,7 +399,7 @@ public class SqlBoxContext {
 				return -1;
 			}
 		} finally {
-			SqlHelper.clearLastSQL();
+			SqlHelper.clear();
 		}
 	}
 
@@ -452,21 +452,27 @@ public class SqlBoxContext {
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
-			List<Map<String, Object>> lst;
+
+			SqlRowSet rs;
 			if (sp.getParameters().length == 0)
-				lst = getJdbc().queryForList(sp.getSql());
+				rs = getJdbc().queryForRowSet(sp.getSql());
 			else
-				lst = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-			Field field = ReflectionUtils.findField(dbClass, "map");
-			for (Map<String, Object> map : lst) {
-				Object db = dbClass.newInstance();
-				field.set(db, map);
-				result.add((T) db);
-			}
+				rs = getJdbc().queryForRowSet(sp.getSql(), sp.getParameters());
+
+			SqlRowSetMetaData rsm = rs.getMetaData();
+			log.info(SqlBoxUtils.getSqlRowSetMetadataDebugInfo(rsm));
+
+			// Field field = ReflectionUtils.findField(dbClass, "map");
+			// for (Map<String, Object> map : lst) {
+			// Object db = dbClass.newInstance();
+			// field.set(db, map);
+			// result.add((T) db);
+			// }
+
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext queryForList, sql=" + sql);
 		} finally {
-			SqlHelper.clearLastSQL();
+			SqlHelper.clear();
 		}
 		return result;
 	}

@@ -41,6 +41,7 @@ import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.springsrc.ReflectionUtils;
+import com.github.drinkjava2.springsrc.StringUtils;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -484,8 +485,11 @@ public class SqlBox {
 	/**
 	 * Return a * for sql
 	 */
-	public String star() {
-		return "*";// NOSONAR
+	public String allColumns() {
+		if (StringUtils.isEmpty(this.getTableAlias()))
+			return "*";
+		else
+			return this.getTableAlias() + ".*";
 	}
 
 	/**
@@ -602,7 +606,10 @@ public class SqlBox {
 	 */
 	public String getColumnName(String fieldID) {
 		getFieldIDCache().set(fieldID);
-		return this.getRealColumnName(null, fieldID);
+		if (StringUtils.isEmpty(this.getTableAlias()))
+			return this.getRealColumnName(null, fieldID);
+		else
+			return this.getTableAlias() + "." + this.getRealColumnName(null, fieldID);
 	}
 
 	/**
