@@ -19,6 +19,7 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
@@ -51,7 +51,7 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private boolean showSql = true;
+	private boolean showSql = false;
 
 	public static final String SQLBOX_IDENTITY = "BX";
 
@@ -443,7 +443,8 @@ public class SqlBoxContext {
 		public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
 			List<T> results = new ArrayList<T>();
 			while (rs.next()) {
-				rs.getMetaData();
+				ResultSetMetaData rsm = rs.getMetaData();
+				System.out.println(SqlBoxUtils.getResultSetMeataDataDebugInfo(rsm));
 			}
 			return results;
 		}

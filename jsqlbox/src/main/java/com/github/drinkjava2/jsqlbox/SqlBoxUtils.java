@@ -20,6 +20,8 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +41,6 @@ import com.github.drinkjava2.springsrc.ReflectionUtils;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxUtils {
-	// Use standard JDK logger
 
 	// To check if a class exist, if exist, cache it to avoid check again
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<>();
@@ -225,6 +226,9 @@ public class SqlBoxUtils {
 		return method;
 	}
 
+	/**
+	 * For inside debug use only
+	 */
 	public static String getSqlRowSetMetadataDebugInfo(SqlRowSetMetaData rsm) {
 		StringBuilder sb = new StringBuilder();
 		int coll = rsm.getColumnCount();
@@ -242,4 +246,37 @@ public class SqlBoxUtils {
 		}
 		return sb.toString();
 	}
+
+	/**
+	 * For inside debug use only
+	 */
+	public static String getResultSetMeataDataDebugInfo(ResultSetMetaData rsmd) {
+		StringBuilder sb = new StringBuilder();
+		try {
+			sb.append("===ResultSetMetaData debug info=== ");
+			sb.append("getColumnCount:" + rsmd.getColumnCount()).append("\r\n");
+			for (int i = 1; i < rsmd.getColumnCount() + 1; i++) {
+				sb.append("ColumnName:" + rsmd.getColumnName(i)).append("\t");
+				sb.append("ColumnClassName:" + rsmd.getColumnClassName(i)).append("\t");
+				sb.append("ColumnDisplaySize:" + rsmd.getColumnDisplaySize(i)).append("\t");
+				sb.append("ColumnLabel:" + rsmd.getColumnLabel(i)).append("\t");
+				sb.append("Scale:" + rsmd.getScale(i)).append("\t");
+				sb.append("ColumnType:" + rsmd.getColumnType(i)).append("\t");
+				sb.append("ColumnTypeName:" + rsmd.getColumnTypeName(i)).append("\t");
+				sb.append("Precision:" + rsmd.getPrecision(i)).append("\t");
+				sb.append("SchemaNam:" + rsmd.getSchemaName(i)).append("\t");
+				sb.append("CatalogName:" + rsmd.getCatalogName(i)).append("\t");
+				sb.append("TableName:" + rsmd.getTableName(i)).append("\t");
+				sb.append("isAutoIncrement:" + rsmd.isAutoIncrement(i)).append("\t");
+				sb.append("isCurrency:" + rsmd.isCurrency(i)).append("\t");
+				sb.append("isNullable:" + rsmd.isNullable(i)).append("\t");
+				sb.append("isReadOnly:" + rsmd.isReadOnly(i)).append("\t");
+				sb.append("isSearchable:" + rsmd.isSearchable(i)).append("\r\n");
+			}
+		} catch (SQLException e) {
+			SqlBoxException.throwEX(e, "getResultSetMeataDataDebugInfo error.");
+		}
+		return sb.toString();
+	}
+
 }

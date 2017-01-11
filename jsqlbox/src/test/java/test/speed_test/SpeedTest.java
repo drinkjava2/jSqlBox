@@ -31,7 +31,7 @@ public class SpeedTest {
 	@Test
 	public void doSpeedTest() {
 		long oldTime = System.currentTimeMillis();
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 500; i++) {
 			SqlBoxContext.getDefaultSqlBoxContext();
 			User u = new User();
 			u.setUserName("User2");
@@ -42,8 +42,8 @@ public class SpeedTest {
 				u.insert();
 		}
 		long newTime = System.currentTimeMillis();
-		System.out.println("Time used for 1000 times:" + (newTime - oldTime) + "ms");
-		Assert.assertTrue((newTime - oldTime) < 2000);
+		System.out.println("Time used for 500 times:" + (newTime - oldTime) + "ms");
+		Assert.assertTrue((newTime - oldTime) < 1000);
 	}
 
 	public void doGCTest() {

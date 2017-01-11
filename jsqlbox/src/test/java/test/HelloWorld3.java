@@ -10,6 +10,7 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
+import test.config.TestPrepare;
 import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
 
 public class HelloWorld3 {
@@ -57,7 +58,8 @@ public class HelloWorld3 {
 	@Test
 	public void doTest1() {
 		System.out.println("===============================Testing HelloWorld3===============================");
-		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		// SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 
 		User user = new User();
 		SqlBox box = SqlBox.getBox(user);
@@ -81,7 +83,8 @@ public class HelloWorld3 {
 
 	@Test
 	public void doTest2() {
-		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		// SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		User user = new ChildUser();
 		SqlBox box = SqlBox.getBox(user);
 		box.configTable("users2");

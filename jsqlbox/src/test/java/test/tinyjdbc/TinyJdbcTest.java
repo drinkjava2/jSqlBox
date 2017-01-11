@@ -49,6 +49,7 @@ public class TinyJdbcTest {
 		DataSource ds = Dao.getDefaultContext().getDataSource();
 		TinyJdbc.execute(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, "insert into users (age) values(?)", "20");
 		Assert.assertEquals(20, (int) TinyJdbc.queryForInteger(ds, 2, "select age from users where age =?", "20"));
+		System.out.println(TinyJdbc.getMetaData(ds).getJdbcDriverName());
 	}
 
 	public void tx_InsertUser2() {

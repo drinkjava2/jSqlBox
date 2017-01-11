@@ -45,7 +45,7 @@ public class QueryEntityTest {
 		u.box().configTableAlias("a");
 		u2.box().configTableAlias("b");
 		List<DB> list = Dao.queryForList(DB.class, "select ",
-				link(u.ID(), u.ADDRESS(), u.AGE(), u2.ID(), u2.PHONENUMBER(), u2.ADDRESS(), u2.USERNAME()),
+				link(u.ID(), u.ADDRESS(), u.AGE(), u2.ID() + " as id2", u2.PHONENUMBER(), u2.ADDRESS(), u2.USERNAME()),
 				" from ", u.alias(), ", ", u2.alias(), " where ", u.ID(), "=", u2.ID());
 	}
 
