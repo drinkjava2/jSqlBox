@@ -17,7 +17,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
 import test.config.TestPrepare;
-import test.config.po.DB;
 import test.config.po.User;
 
 /**
@@ -53,7 +52,7 @@ public class ContextTest {
 		ds.setJdbcUrl((String) dsSetting.getProperty("jdbcUrl"));
 		ds.setDriverClassName((String) dsSetting.getProperty("driverClassName"));
 
-		SqlBoxContext ctx = new SqlBoxContext(ds, DB.class);// create a new context
+		SqlBoxContext ctx = new SqlBoxContext(ds);// create a new context
 
 		User u = ctx.createEntity(User.class);
 		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
@@ -62,7 +61,7 @@ public class ContextTest {
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
 		u.setAge(10);
-		u.insert(); 
+		u.insert();
 		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
 				u.USERNAME(), "=", q("User1")));
 		ds.close();
@@ -73,7 +72,6 @@ public class ContextTest {
 		public SqlBoxContext create() {
 			SqlBoxContext ctx = new SqlBoxContext();
 			ctx.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
-			ctx.setDbClass(DB.class);
 			return ctx;
 		}
 	}

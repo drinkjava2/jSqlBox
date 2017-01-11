@@ -547,8 +547,8 @@ public class SqlBox {
 				String realColumnMatchName = this.getRealColumnName(realTableName, fieldID);
 				if (SqlBoxUtils.isEmptyStr(realColumnMatchName)) {
 					Field field = ReflectionUtils.findField(this.getEntityClass(), fieldID);
-					if (this.getEntityClass().getDeclaredAnnotation(IgnoreWarning.class) == null
-							&& field.getAnnotation(IgnoreWarning.class) == null)// NOSONAR
+					if (this.getEntityClass().getDeclaredAnnotation(IgnoreWarning.class) == null// NOSONAR
+							&& field.getAnnotation(IgnoreWarning.class) == null)
 						log.info("Field \"" + fieldID + "\" does not match any column in database table \""
 								+ realTableName
 								+ "\", to disable this warning, put an @IgnoreWarning annotation on it.");

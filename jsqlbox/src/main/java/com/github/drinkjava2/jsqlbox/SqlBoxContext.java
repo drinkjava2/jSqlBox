@@ -18,6 +18,7 @@ package com.github.drinkjava2.jsqlbox;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,13 +27,18 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
+
+import test.config.po.User;
 
 /**
  * @author Yong Zhu
@@ -53,8 +59,6 @@ public class SqlBoxContext {
 	private DataSource dataSource = null;
 
 	private TinyDbMetaData metaData;
-
-	private Class<?> dbClass;
 
 	protected static ThreadLocal<Map<Object, SqlBox>> boxCache = new ThreadLocal<Map<Object, SqlBox>>() {
 		@Override
@@ -77,9 +81,8 @@ public class SqlBoxContext {
 	/**
 	 * Create a SqlBoxContext and register dataSoruce & DB class
 	 */
-	public SqlBoxContext(DataSource dataSource, Class<?> dbClass) {
+	public SqlBoxContext(DataSource dataSource) {
 		this.dataSource = dataSource;
-		this.dbClass = dbClass;
 		if (dataSource != null) {
 			this.jdbc.setDataSource(dataSource);
 			refreshMetaData();
@@ -131,14 +134,6 @@ public class SqlBoxContext {
 		this.metaData = metaData;
 	}
 
-	public Class<?> getDbClass() {
-		return dbClass;
-	}
-
-	public void setDbClass(Class<?> dbClass) {
-		this.dbClass = dbClass;
-	}
-
 	/**
 	 * Put a box instance into thread local cache for a bean
 	 */
@@ -174,7 +169,6 @@ public class SqlBoxContext {
 	 */
 	public void close() {
 		this.dataSource = null;
-		this.dbClass = null;
 		this.metaData = null;
 		this.showSql = false;
 	}
@@ -371,7 +365,7 @@ public class SqlBoxContext {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
 			if (sp.getParameters().length != 0)
-				return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
+				return getJdbc().update(sp.getSql(), sp.getParameters());
 			else {
 				getJdbc().execute(sp.getSql());
 				return -1;
@@ -391,7 +385,7 @@ public class SqlBoxContext {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
 			if (sp.getParameters().length != 0)
-				return getJdbc().update(sp.getSql(), (Object[]) sp.getParameters());
+				return getJdbc().update(sp.getSql(), sp.getParameters());
 			else {
 				getJdbc().execute(sp.getSql());
 				return -1;
@@ -442,6 +436,20 @@ public class SqlBoxContext {
 		}
 	}
 
+	public static class ObjectResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
+
+		// Invoked only once for processing the entire result set.
+		@Override
+		public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
+			List<T> results = new ArrayList<T>();
+			while (rs.next()) {
+				rs.getMetaData();
+			}
+			return results;
+		}
+
+	}
+
 	/**
 	 * Query for a DB type List
 	 */
@@ -451,14 +459,21 @@ public class SqlBoxContext {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
 
-			List<Map<String, Object>> rs;
-			if (sp.getParameters().length == 0)
-				rs = getJdbc().queryForList(sp.getSql());
-			else
-				rs = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-			for (Map<String, Object> map : rs) {
-				System.out.println(map);
+			try {
+				List<User> users = (List<User>) getJdbc().query(sp.getSql(), sp.getParameters(),
+						new ObjectResultSetExtractor());
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+
+			// List<Map<String, Object>> rs;
+			// if (sp.getParameters().length == 0)
+			// rs = getJdbc().queryForList(sp.getSql());
+			// else
+			// rs = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+			// for (Map<String, Object> map : rs) {
+			// System.out.println(map);
+			// }
 
 			// SqlRowSetMetaData rsm = rs.getMetaData();
 			// log.info(SqlBoxUtils.getSqlRowSetMetadataDebugInfo(rsm));

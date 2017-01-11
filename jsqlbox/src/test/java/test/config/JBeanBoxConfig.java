@@ -11,8 +11,6 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
-import test.config.po.DB;
-
 /**
  * This is jBeanBox configuration classes, equal to XML in Spring <br/>
  * About jBeanBox project can google it, it's a small IOC/AOP tool to replace Spring
@@ -33,7 +31,6 @@ public class JBeanBoxConfig {
 		public SqlBoxContext create() {
 			SqlBoxContext ctx = new SqlBoxContext();
 			ctx.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
-			ctx.setDbClass(DB.class);
 			return ctx;
 		}
 	}
@@ -50,7 +47,10 @@ public class JBeanBoxConfig {
 	// H2Database memory database connection URL
 	public static class H2DataSourceBox extends HikariCPBox {
 		{
-			setProperty("jdbcUrl", "jdbc:h2:~/test");
+			setProperty("jdbcUrl", "jdbc:h2:~/test;TRACE_LEVEL_SYSTEM_OUT=3");
+			// setProperty("jdbcUrl", "jdbc:h2:mem:DBName;TRACE_LEVEL_SYSTEM_OUT=3");
+			// jdbc:h2:~/test;MODE=MSSQLServer
+			// jdbc:h2:mem:DBName;DB_CLOSE_DELAY=-1
 			setProperty("driverClassName", "org.h2.Driver");
 			setProperty("username", "sa");
 			setProperty("password", "");

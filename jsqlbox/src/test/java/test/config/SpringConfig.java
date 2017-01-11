@@ -18,7 +18,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
-import test.config.po.DB;
 import test.config.po.User;
 import test.transaction.SpringTransactionTest;
 
@@ -59,7 +58,7 @@ public class SpringConfig {
 
 	@Bean // This is not good
 	public SqlBoxContext sqlBoxCtxBean() {
-		return new SqlBoxContext(HikariDataSourceBean(), DB.class);
+		return new SqlBoxContext(HikariDataSourceBean());
 	}
 
 	@Bean
