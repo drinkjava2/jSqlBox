@@ -164,7 +164,7 @@ public class SqlBox {
 	 * Get last auto increase id, supported by MySQL, SQL Server, DB2, Derby, Sybase, PostgreSQL
 	 */
 	private Object getLastAutoIncreaseIdentity(Column col) {
-		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + table();
+		String sql = "SELECT MAX(" + col.getColumnName() + ") from " + realTable();
 		return this.getJdbc().queryForObject(sql, col.getPropertyType());
 	}
 
@@ -183,7 +183,7 @@ public class SqlBox {
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
 		int count = 0;
-		sb.append("insert into ").append(table()).append(" ( ");
+		sb.append("insert into ").append(realTable()).append(" ( ");
 
 		Map<String, Column> realColumns = buildRealColumns();
 		for (Column col : realColumns.values()) {
@@ -197,7 +197,7 @@ public class SqlBox {
 					if (dbType == MYSQL || dbType == MSSQLSERVER) {// NOSONAR
 						if (!col.getAutoIncreament())
 							throwEX("Box insert error, AutoGenerator type should set on indentity type field for table \""
-									+ this.table() + "\"");
+									+ this.realTable() + "\"");
 					} else {// ORACLE
 
 					}
@@ -261,7 +261,7 @@ public class SqlBox {
 		// start to spell sql
 		StringBuilder sb = new StringBuilder();
 		List<Object> parameters = new ArrayList<>();
-		sb.append("update ").append(table()).append(" set ");
+		sb.append("update ").append(realTable()).append(" set ");
 
 		// set values
 		for (Column col : realColumns.values()) {
@@ -315,7 +315,7 @@ public class SqlBox {
 		}
 
 		sb.setLength(sb.length() - 2);// delete the last ","
-		sb.append(" from ").append(this.table()).append(" where ");
+		sb.append(" from ").append(this.realTable()).append(" where ");
 
 		for (Entry<String, Object> entry : idvalues.entrySet()) {
 			sb.append(entry.getKey()).append("=").append("? and ");
@@ -350,7 +350,7 @@ public class SqlBox {
 		// start to spell sql
 		StringBuilder sb = new StringBuilder("delete ");
 		List<Object> parameters = new ArrayList<>();
-		sb.append(" from ").append(this.table()).append(" where ");
+		sb.append(" from ").append(this.realTable()).append(" where ");
 
 		for (Entry<String, Object> entry : idvalues.entrySet()) {
 			sb.append(entry.getKey()).append("=").append("? and ");
@@ -453,7 +453,7 @@ public class SqlBox {
 	public String fieldID(String realColumnName) {
 		String fieldID = getFieldIDCache().get();
 		if (SqlBoxUtils.isEmptyStr(fieldID) || SqlBoxUtils.isEmptyStr(realColumnName)
-				|| !realColumnName.equals(this.getColumnName(fieldID)))
+				|| !realColumnName.equals(this.getRealColumnName(null, fieldID)))
 			throwEX("Box getFieldID error, can only be called as fieldID(xx.SOMECOLUMNNAME()) format");
 		return fieldID;
 	}
@@ -468,7 +468,7 @@ public class SqlBox {
 	/**
 	 * Get real database table name
 	 */
-	public String table() {
+	public String realTable() {
 		String realTable = configTable;
 		if (SqlBoxUtils.isEmptyStr(realTable)) {
 			realTable = this.getEntityClass().getSimpleName();
@@ -486,11 +486,11 @@ public class SqlBox {
 	/**
 	 * Get real database table name
 	 */
-	public String alias() {
+	public String table() {
 		if (SqlBoxUtils.isEmptyStr(this.getTableAlias()))
-			return table();
+			return realTable();
 		else
-			return table() + " " + this.getTableAlias();
+			return realTable() + " " + this.getTableAlias();
 	}
 
 	/**
@@ -526,7 +526,7 @@ public class SqlBox {
 	public Map<String, Column> buildRealColumns() {
 		if (this.entityClass == null)
 			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
-		String realTableName = this.table();
+		String realTableName = this.realTable();
 		TinyDbMetaData meta = this.getSqlBoxContext().getMetaData();
 		Map<String, Column> oneTable = meta.getOneTable(realTableName.toLowerCase());
 		Map<String, Column> realColumns = new HashMap<>();
@@ -628,9 +628,17 @@ public class SqlBox {
 	public String getColumnName(String fieldID) {
 		getFieldIDCache().set(fieldID);
 		if (StringUtils.isEmpty(this.getTableAlias()))
-			return this.getRealColumnName(null, fieldID);
-		else
-			return this.getTableAlias() + "." + this.getRealColumnName(null, fieldID);
+			return getRealColumnName(null, fieldID);
+		else {
+			if (SqlHelper.getFromTag().get())
+				return getTableAlias() + "." + getRealColumnName(null, fieldID);
+			if (SqlHelper.getSelectTag().get())
+				return getTableAlias() + "." + getRealColumnName(null, fieldID) + " as " + getTableAlias() + "_"
+						+ getRealColumnName(null, fieldID);
+			else
+				return getTableAlias() + "_" + getRealColumnName(null, fieldID);
+
+		}
 	}
 
 	/**
@@ -645,7 +653,7 @@ public class SqlBox {
 
 		String realTable = realTableName;
 		if (SqlBoxUtils.isEmptyStr(realTable))
-			realTable = this.table();
+			realTable = this.realTable();
 		Map<String, Column> oneTableMap = context.getMetaData().getOneTable(realTable.toLowerCase());
 		String realColumnNameignoreCase = null;
 		Column realColumn = oneTableMap.get(columnName.toLowerCase());
@@ -687,18 +695,20 @@ public class SqlBox {
 	/**
 	 * Config table name
 	 */
-	public void configTableAlias(String tableAlias) {
+	public Object configTableAlias(String tableAlias) {
 		configTableAlias = tableAlias;
+		return this.getEntityBean();
 	}
 
 	/**
 	 * Clean old entityID setting, set with given entityIDs
 	 */
-	public void configEntityIDs(String... entityIDs) {
+	public Object configEntityIDs(String... entityIDs) {
 		for (Entry<String, Column> entry : getConfigColumns().entrySet())
 			entry.getValue().setEntityID(false);
 		for (String fieldID : entityIDs)
 			getOrBuildConfigColumn(fieldID).setEntityID(true);
+		return this.getEntityBean();
 	}
 
 	/**
@@ -734,7 +744,7 @@ public class SqlBox {
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("table=" + this.configTable).append("\r\n");
-		sb.append("getRealTable=" + this.table()).append("\r\n");
+		sb.append("getRealTable=" + this.realTable()).append("\r\n");
 		sb.append("entityBean=" + this.entityBean).append("\r\n");
 		sb.append("entityClass=" + this.entityClass).append("\r\n");
 

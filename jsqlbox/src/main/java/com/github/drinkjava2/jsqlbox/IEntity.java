@@ -12,12 +12,9 @@ public interface IEntity {
 		return SqlBox.getBox(this);
 	}
 
+ 
 	public default String table() {
 		return box().table();
-	}
-	
-	public default String alias() {
-		return box().alias();
 	}
 
 	public default String allColumns() {

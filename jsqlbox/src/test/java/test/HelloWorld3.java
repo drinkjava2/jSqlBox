@@ -3,15 +3,12 @@ package test;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.IEntity;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 import test.config.TestPrepare;
-import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
 
 public class HelloWorld3 {
 
@@ -63,7 +60,7 @@ public class HelloWorld3 {
 
 		User user = new User();
 		SqlBox box = SqlBox.getBox(user);
-		Dao.executeQuiet("delete from ", box.table());
+		Dao.executeQuiet("delete from ", box.realTable());
 		user.setUserName("Sam");
 
 		box.insert();
@@ -72,7 +69,7 @@ public class HelloWorld3 {
 		box.configTable("users2");
 		box.configIdGenerator("phoneNumber", UUIDGenerator.INSTANCE);
 		box.configColumnName("userName", "address");
-		Dao.executeQuiet("delete from ", box.table());
+		Dao.executeQuiet("delete from ", box.realTable());
 		box.insert();
 		Assert.assertEquals("Sam", Dao.queryForString("select ADDRESS from users2"));
 		Assert.assertEquals(32, Dao.queryForString("select PHONE_NUMBER from users2").length());
@@ -88,7 +85,7 @@ public class HelloWorld3 {
 		User user = new ChildUser();
 		SqlBox box = SqlBox.getBox(user);
 		box.configTable("users2");
-		Dao.executeQuiet("delete from ", box.table());
+		Dao.executeQuiet("delete from ", box.realTable());
 		user.setUserName("Sam");
 		((IEntity) user).insert();
 		Assert.assertEquals("Sam", Dao.queryForString("select USERNAME from users2"));

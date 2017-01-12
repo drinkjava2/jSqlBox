@@ -17,6 +17,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -88,8 +89,12 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext().load(entityOrBoxClass, entityID);
 	}
 
-	public static <T> List<T> queryForList(Class<?> dbClass, String... sql) {
-		return SqlBoxContext.getDefaultSqlBoxContext().queryForList(dbClass, sql);
+	public static List<Map<String, Object>> queryForList(String... sql) {
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForList(sql);
+	}
+
+	public static <T> List<T> queryForDbList(Class<T> dbClass, String... sql) {
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForDbList(dbClass, sql);
 	}
 
 }

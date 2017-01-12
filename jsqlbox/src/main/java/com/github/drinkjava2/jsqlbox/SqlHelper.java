@@ -39,6 +39,26 @@ public class SqlHelper {
 	};
 
 	/**
+	 * form Tag
+	 */
+	private static ThreadLocal<Boolean> fromTag = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return false;
+		}
+	};
+
+	/**
+	 * select Tag
+	 */
+	private static ThreadLocal<Boolean> selectTag = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return false;
+		}
+	};
+
+	/**
 	 * For batch store SQL and Parameters in threadlocal
 	 */
 	private static ThreadLocal<ArrayList<SqlAndParameters>> sqlBatchCache = new ThreadLocal<ArrayList<SqlAndParameters>>() {
@@ -69,6 +89,20 @@ public class SqlHelper {
 	}
 
 	/**
+	 * Get fromTag cached in Threadlocal
+	 */
+	public static ThreadLocal<Boolean> getFromTag() {
+		return fromTag;
+	}
+
+	/**
+	 * Get slectTag cached in Threadlocal
+	 */
+	public static ThreadLocal<Boolean> getSelectTag() {
+		return selectTag;
+	}
+
+	/**
 	 * Get SQL batch cached in threadlocal
 	 */
 	public static ThreadLocal<ArrayList<SqlAndParameters>> getSqlBatchCache() {
@@ -96,6 +130,8 @@ public class SqlHelper {
 	 */
 	public static String clear() {
 		sqlCache.get().clear();
+		fromTag.set(false);
+		selectTag.set(false);
 		return "";
 	}
 
@@ -103,7 +139,7 @@ public class SqlHelper {
 	 * Clear batch SQL cached in threadlocal
 	 */
 	public static void clearBatchSQLs() {
-		sqlCache.get().clear();
+		clear();
 		sqlBatchCache.get().clear();
 		sqlBatchString.set("");
 	}
@@ -130,6 +166,20 @@ public class SqlHelper {
 		for (Object o : parameters)
 			sqlCache.get().add("" + o);
 		return "";
+	}
+
+	public static String select() {
+		selectTag.set(true);
+		return "select ";
+	}
+
+	public static String from() {
+		fromTag.set(true);
+		return " from ";
+	}
+
+	public static String where() {
+		return " where ";// NOSONAR
 	}
 
 	/**

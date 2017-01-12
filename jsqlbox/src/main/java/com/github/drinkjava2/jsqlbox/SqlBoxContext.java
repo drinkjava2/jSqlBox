@@ -451,10 +451,7 @@ public class SqlBoxContext {
 
 	}
 
-	/**
-	 * Query for a DB type List
-	 */
-	public <T> List<T> queryForList(Class<?> dbClass, String... sql) {
+	public <T> List<T> queryForDbList(Class<T> dbClass, String... sql) {
 		List<T> result = new ArrayList<>();
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
@@ -488,6 +485,23 @@ public class SqlBoxContext {
 
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext queryForList, sql=" + sql);
+		} finally {
+			SqlHelper.clear();
+		}
+		return result;
+	}
+
+	/**
+	 * Query for a DB type List
+	 */
+	public List<Map<String, Object>> queryForList(String... sql) {
+		List<Map<String, Object>> result = null;
+		try {
+			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+			logSql(sp);
+			result = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+		} catch (Exception e) {
+			SqlBoxException.throwEX(e, "SqlBoxContext queryForList error, sql=" + sql);
 		} finally {
 			SqlHelper.clear();
 		}
