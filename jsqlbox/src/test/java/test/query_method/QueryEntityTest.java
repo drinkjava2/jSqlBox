@@ -17,9 +17,9 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
+import test.config.DB;
 import test.config.TestPrepare;
-import test.config.po.DB;
-import test.config.po.User;
+import test.po.User;
 
 public class QueryEntityTest {
 
@@ -79,8 +79,8 @@ public class QueryEntityTest {
 				",", u5.ADDRESS(), from(), u3.table(), ", ", u4.table(), ", ", u5.table(), where(), u3.ID(), "=",
 				u4.ID(), " and ", u3.ID(), "=", u5.ID());
 		for (DB db : list3) {
-			// System.out.println(db.map().get(u4.ID()));
-			// System.out.println(db.user().getAddress());
+			System.out.println("db.map().get(u4.ID())=" + db.map().get(u4.ID()));
+			System.out.println("db.user().getAddress()=" + db.user().getAddress());
 		}
 
 	}

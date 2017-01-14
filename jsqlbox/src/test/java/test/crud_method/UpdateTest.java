@@ -11,7 +11,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 public class UpdateTest {
 

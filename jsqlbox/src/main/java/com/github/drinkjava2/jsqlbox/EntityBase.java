@@ -19,8 +19,8 @@ public class EntityBase implements IEntity {
 	}
 
 	@Override
-	public String allColumns() {
-		return box().allColumns();
+	public String all() {
+		return box().all();
 	}
 
 	@Override

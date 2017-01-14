@@ -12,7 +12,7 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 public class BatchInsertTest {
 	@Before

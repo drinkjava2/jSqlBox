@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import com.github.drinkjava2.BeanBox;
 
 import test.config.TestPrepare;
-import test.config.po.User;
 import test.jdbc.BatchInsertTest;
+import test.po.User;
 
 public class BatchInsertTester {
 

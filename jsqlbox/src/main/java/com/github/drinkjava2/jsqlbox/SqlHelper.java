@@ -27,7 +27,6 @@ import java.util.List;
  * @since 1.0.0
  */
 public class SqlHelper {
-
 	/**
 	 * For store sql and parameters in threadlocal
 	 */

@@ -12,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 /**
  * This is for test load method, and test composite Entiity ID

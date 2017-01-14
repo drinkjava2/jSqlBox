@@ -38,7 +38,7 @@ import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
-import test.config.po.User;
+import test.po.User;
 
 /**
  * @author Yong Zhu

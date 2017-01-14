@@ -18,7 +18,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
-import test.config.po.User;
+import test.po.User;
 import test.transaction.SpringTransactionTest;
 
 /**

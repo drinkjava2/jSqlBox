@@ -16,8 +16,8 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
+import test.po.User;
 import test.config.TestPrepare;
-import test.config.po.User;
 
 /**
  * This is to test jSqlBoxContext class

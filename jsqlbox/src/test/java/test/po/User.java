@@ -1,11 +1,11 @@
-package test.config.po;
+package test.po;
 
 import com.github.drinkjava2.jsqlbox.IEntity;
 
 /**
  * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
  * 
- * Default database table equal to entity class(s) name, in this example it will use "users" as table name
+ * Default database table equal to entity name or add a "s" suffix , in this example it will use "users" as table name
  * 
  * @author Yong Zhu
  *

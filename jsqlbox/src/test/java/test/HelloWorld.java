@@ -11,7 +11,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
 import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
-import test.config.po.User;
+import test.po.User;
 
 /**
  * This HelloWorld shows some key features of jSqlBox project:

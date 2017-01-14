@@ -12,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 public class IdentityGeneratorTest {
 

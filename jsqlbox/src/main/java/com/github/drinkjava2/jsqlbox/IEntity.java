@@ -17,8 +17,8 @@ public interface IEntity {
 		return box().table();
 	}
 
-	public default String allColumns() {
-		return box().allColumns();
+	public default String all() {
+		return box().all();
 	}
 
 	public default void insert() {

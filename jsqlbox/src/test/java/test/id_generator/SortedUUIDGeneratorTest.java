@@ -12,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 public class SortedUUIDGeneratorTest {
 

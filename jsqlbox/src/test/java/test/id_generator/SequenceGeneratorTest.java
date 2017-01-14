@@ -10,7 +10,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.SequenceGenerator;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 /**
  * For this test, I made 2 sequences in Oracle, SEQ_1 is for "id" , SEQ_2 is for "age"

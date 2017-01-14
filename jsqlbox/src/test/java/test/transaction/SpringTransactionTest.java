@@ -14,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.config.SpringConfig;
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 /**
  * This is to test use Spring's Declarative Transaction

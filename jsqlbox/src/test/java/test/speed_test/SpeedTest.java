@@ -10,7 +10,7 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 public class SpeedTest {
 

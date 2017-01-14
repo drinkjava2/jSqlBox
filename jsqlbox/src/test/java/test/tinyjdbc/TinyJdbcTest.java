@@ -15,7 +15,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
 
 import test.config.TestPrepare;
-import test.config.po.User;
+import test.po.User;
 
 /**
  * This is to test TinyJDBC use its own Transaction not related to Spring<br/>

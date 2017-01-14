@@ -15,8 +15,8 @@ import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
+import test.po.User;
 import test.config.TestPrepare;
-import test.config.po.User;
 
 /**
  * This is to test use Spring's Declarative Transaction but use jBeanBox replaced Spring's IOC/AOP core. <br/>

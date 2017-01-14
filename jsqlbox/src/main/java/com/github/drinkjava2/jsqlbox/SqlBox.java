@@ -496,11 +496,30 @@ public class SqlBox {
 	/**
 	 * Return a * for sql
 	 */
-	public String allColumns() {
+	public String all() {
 		if (StringUtils.isEmpty(this.getTableAlias()))
-			return "*";
+			return realTable() + ".*";
 		else
 			return this.getTableAlias() + ".*";
+	}
+
+	/**
+	 * get field's database real column name
+	 */
+	public String getColumnName(String fieldID) {
+		getFieldIDCache().set(fieldID);
+		if (StringUtils.isEmpty(this.getTableAlias()))
+			return getRealColumnName(null, fieldID);
+		else {
+			if (SqlHelper.getFromTag().get())
+				return getTableAlias() + "." + getRealColumnName(null, fieldID);
+			if (SqlHelper.getSelectTag().get())
+				return getTableAlias() + "." + getRealColumnName(null, fieldID) + " as " + getTableAlias() + "_"
+						+ getRealColumnName(null, fieldID);
+			else
+				return getTableAlias() + "_" + getRealColumnName(null, fieldID);
+
+		}
 	}
 
 	/**
@@ -547,11 +566,13 @@ public class SqlBox {
 				String realColumnMatchName = this.getRealColumnName(realTableName, fieldID);
 				if (SqlBoxUtils.isEmptyStr(realColumnMatchName)) {
 					Field field = ReflectionUtils.findField(this.getEntityClass(), fieldID);
-					if (this.getEntityClass().getDeclaredAnnotation(IgnoreWarning.class) == null// NOSONAR
-							&& field.getAnnotation(IgnoreWarning.class) == null)
-						log.info("Field \"" + fieldID + "\" does not match any column in database table \""
-								+ realTableName
-								+ "\", to disable this warning, put an @IgnoreWarning annotation on it.");
+					if (this.getEntityClass().getDeclaredAnnotation(Ignore.class) == null// NOSONAR
+							&& field.getAnnotation(Ignore.class) == null)
+						log.error("Field \"" + fieldID + "\" does not match any column in database table \""
+								+ realTableName + "\", to disable this error message, put an @"
+								+ Ignore.class.getSimpleName() + " annotation on it. "
+								+ (fieldID.contains("ID") ? " Try change xxxID to xxxxId" : ""));
+
 					continue;
 				}
 				realCol.setColumnName(realColumnMatchName);// 3080ms cost for speed test
@@ -620,25 +641,6 @@ public class SqlBox {
 			}
 		}
 		return;
-	}
-
-	/**
-	 * get field's database real column name
-	 */
-	public String getColumnName(String fieldID) {
-		getFieldIDCache().set(fieldID);
-		if (StringUtils.isEmpty(this.getTableAlias()))
-			return getRealColumnName(null, fieldID);
-		else {
-			if (SqlHelper.getFromTag().get())
-				return getTableAlias() + "." + getRealColumnName(null, fieldID);
-			if (SqlHelper.getSelectTag().get())
-				return getTableAlias() + "." + getRealColumnName(null, fieldID) + " as " + getTableAlias() + "_"
-						+ getRealColumnName(null, fieldID);
-			else
-				return getTableAlias() + "_" + getRealColumnName(null, fieldID);
-
-		}
 	}
 
 	/**

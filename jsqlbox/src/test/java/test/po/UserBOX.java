@@ -1,4 +1,4 @@
-package test.config.po;
+package test.po;
 
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
