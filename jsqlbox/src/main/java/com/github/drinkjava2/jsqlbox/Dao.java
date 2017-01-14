@@ -21,8 +21,6 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
-
 /**
  * In this class just copied some common DB access methods from default SqlBoxContext
  * 

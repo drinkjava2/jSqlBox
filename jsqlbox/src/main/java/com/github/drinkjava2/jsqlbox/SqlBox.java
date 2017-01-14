@@ -15,11 +15,11 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import static com.github.drinkjava2.jsqlbox.DatabaseType.MSSQLSERVER;
+import static com.github.drinkjava2.jsqlbox.DatabaseType.MYSQL;
+import static com.github.drinkjava2.jsqlbox.DatabaseType.ORACLE;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
-import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MSSQLSERVER;
-import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.MYSQL;
-import static com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType.ORACLE;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -39,8 +39,6 @@ import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
 import com.github.drinkjava2.springsrc.ReflectionUtils;
 import com.github.drinkjava2.springsrc.StringUtils;
 
@@ -546,7 +544,7 @@ public class SqlBox {
 		if (this.entityClass == null)
 			SqlBoxException.throwEX("SqlBox getRealColumns error, beanClass can not be null");
 		String realTableName = this.realTable();
-		TinyDbMetaData meta = this.getSqlBoxContext().getMetaData();
+		DBMetaData meta = this.getSqlBoxContext().getMetaData();
 		Map<String, Column> oneTable = meta.getOneTable(realTableName.toLowerCase());
 		Map<String, Column> realColumns = new HashMap<>();
 		BeanInfo beanInfo = null;
@@ -566,11 +564,11 @@ public class SqlBox {
 				String realColumnMatchName = this.getRealColumnName(realTableName, fieldID);
 				if (SqlBoxUtils.isEmptyStr(realColumnMatchName)) {
 					Field field = ReflectionUtils.findField(this.getEntityClass(), fieldID);
-					if (this.getEntityClass().getDeclaredAnnotation(Ignore.class) == null// NOSONAR
-							&& field.getAnnotation(Ignore.class) == null)
+					if (this.getEntityClass().getDeclaredAnnotation(IgnoreField.class) == null// NOSONAR
+							&& field.getAnnotation(IgnoreField.class) == null)
 						log.error("Field \"" + fieldID + "\" does not match any column in database table \""
 								+ realTableName + "\", to disable this error message, put an @"
-								+ Ignore.class.getSimpleName() + " annotation on it. "
+								+ IgnoreField.class.getSimpleName() + " annotation on it. "
 								+ (fieldID.contains("ID") ? " Try change xxxID to xxxxId" : ""));
 
 					continue;

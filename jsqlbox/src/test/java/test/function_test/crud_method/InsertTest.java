@@ -1,0 +1,68 @@
+package test.function_test.crud_method;
+
+import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jsqlbox.Dao;
+
+import test.config.PrepareTestContext;
+import test.config.po.User;
+
+public class InsertTest {
+
+	@Before
+	public void setup() {
+		System.out.println("===============================Testing InsertTest===============================");
+		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+	}
+
+	@After
+	public void cleanUp() {
+		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
+	}
+
+	@Test
+	public void insertUserA() {
+		User u = new User();
+		u.setUserName("User1");
+		u.setAddress("Address1");
+		u.setPhoneNumber("111");
+		u.setAlive(true);
+		u.insert();
+		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.USERNAME(), "=", q("User1")));
+		Assert.assertTrue(u.getId() > 0);
+		User u2 = Dao.load(User.class, u.getId());
+		Assert.assertTrue(u2.getAlive());
+	}
+
+	@Test
+	public void insertUserB() {
+		User u = new User();
+		u.setUserName("User2");
+		u.setAddress("Address2");
+		u.setPhoneNumber("222");
+		u.insert();
+		Assert.assertEquals("222", Dao.queryForString("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
+				u.USERNAME(), "=" + q("User2")));
+		Assert.assertTrue(u.getId() > 0);
+	}
+
+	@Test
+	public void tx_insertUsers() {
+		insertUserA();
+		insertUserB();
+	}
+
+	@Test
+	public void insertUsersWithinTransaction() {
+		InsertTest t = BeanBox.getBean(InsertTest.class); // get Proxy bean
+		t.tx_insertUsers(); // use Spring Declarative Transaction
+	}
+
+}

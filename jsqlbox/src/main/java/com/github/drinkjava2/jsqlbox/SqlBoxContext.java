@@ -34,11 +34,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-import com.github.drinkjava2.jsqlbox.tinyjdbc.DatabaseType;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyDbMetaData;
-import com.github.drinkjava2.jsqlbox.tinyjdbc.TinyJdbc;
-
-import test.po.User;
+import test.config.po.User;
 
 /**
  * @author Yong Zhu
@@ -58,7 +54,7 @@ public class SqlBoxContext {
 	private JdbcTemplate jdbc = new JdbcTemplate();
 	private DataSource dataSource = null;
 
-	private TinyDbMetaData metaData;
+	private DBMetaData metaData;
 
 	protected static ThreadLocal<Map<Object, SqlBox>> boxCache = new ThreadLocal<Map<Object, SqlBox>>() {
 		@Override
@@ -126,11 +122,11 @@ public class SqlBoxContext {
 		this.jdbc = jdbc;
 	}
 
-	public TinyDbMetaData getMetaData() {
+	public DBMetaData getMetaData() {
 		return metaData;
 	}
 
-	public void setMetaData(TinyDbMetaData metaData) {
+	public void setMetaData(DBMetaData metaData) {
 		this.metaData = metaData;
 	}
 
@@ -249,7 +245,7 @@ public class SqlBoxContext {
 	 */
 	protected String findRealTableName(String tableName) {
 		String realTableName;
-		TinyDbMetaData meta = this.getMetaData();
+		DBMetaData meta = this.getMetaData();
 		realTableName = meta.getTableNames().get(tableName.toLowerCase());
 		if (!SqlBoxUtils.isEmptyStr(realTableName))
 			return realTableName;
@@ -264,7 +260,7 @@ public class SqlBoxContext {
 	}
 
 	public void refreshMetaData() {
-		this.metaData = TinyJdbc.getMetaData(dataSource);
+		this.metaData = DBMetaData.getMetaData(this);
 	}
 
 	// ========JdbcTemplate wrap methods begin============
@@ -451,6 +447,9 @@ public class SqlBoxContext {
 
 	}
 
+	/**
+	 * Query for get a DB type list, it should have a map() method, and user's Object methods
+	 */
 	public <T> List<T> queryForDbList(Class<T> dbClass, String... sql) {
 		List<T> result = new ArrayList<>();
 		try {
@@ -464,24 +463,27 @@ public class SqlBoxContext {
 				e.printStackTrace();
 			}
 
-			// List<Map<String, Object>> rs;
-			// if (sp.getParameters().length == 0)
-			// rs = getJdbc().queryForList(sp.getSql());
-			// else
-			// rs = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-			// for (Map<String, Object> map : rs) {
-			// System.out.println(map);
-			// }
+			//TODO this method
+			/*
+			 List<Map<String, Object>> rs;
+			 if (sp.getParameters().length == 0)
+			 rs = getJdbc().queryForList(sp.getSql());
+			 else
+			 rs = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+			 for (Map<String, Object> map : rs) {
+			 System.out.println(map);
+			 }
 
-			// SqlRowSetMetaData rsm = rs.getMetaData();
-			// log.info(SqlBoxUtils.getSqlRowSetMetadataDebugInfo(rsm));
+			 SqlRowSetMetaData rsm = rs.getMetaData();
+			 log.info(SqlBoxUtils.getSqlRowSetMetadataDebugInfo(rsm));
 
-			// Field field = ReflectionUtils.findField(dbClass, "map");
-			// for (Map<String, Object> map : lst) {
-			// Object db = dbClass.newInstance();
-			// field.set(db, map);
-			// result.add((T) db);
-			// }
+			 Field field = ReflectionUtils.findField(dbClass, "map");
+			 for (Map<String, Object> map : lst) {
+			 Object db = dbClass.newInstance();
+			 field.set(db, map);
+			 result.add((T) db);
+			 }
+			 */
 
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext queryForList, sql=" + sql);
@@ -492,7 +494,7 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Query for a DB type List
+	 * Query for get a List<Map<String, Object>> List
 	 */
 	public List<Map<String, Object>> queryForList(String... sql) {
 		List<Map<String, Object>> result = null;

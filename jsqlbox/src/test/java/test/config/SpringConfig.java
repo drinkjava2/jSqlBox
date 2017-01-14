@@ -18,8 +18,8 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 import test.config.JBeanBoxConfig.DataSourceBox;
-import test.po.User;
-import test.transaction.SpringTransactionTest;
+import test.config.po.User;
+import test.function_test.transaction.SpringTransactionTest;
 
 /**
  * This is traditional Spring configuration
@@ -31,12 +31,12 @@ public class SpringConfig {
 	@Before
 	public void setup() {
 		System.out.println("===============================Testing SpringConfig===============================");
-		TestPrepare.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@After
 	public void cleanUp() {
-		TestPrepare.closeDatasource_closeDefaultSqlBoxConetxt();
+		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	/**

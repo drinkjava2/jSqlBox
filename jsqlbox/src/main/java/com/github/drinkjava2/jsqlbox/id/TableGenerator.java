@@ -64,10 +64,6 @@ public class TableGenerator implements IdGenerator {
 	 */
 	private Integer lastValue = -1;
 
-	public TableGenerator() {
-		// Default constructor
-	}
-
 	public TableGenerator(String table, String pkColumnName, String pkColumnValue, String valueColumnName,
 			Integer initialValue, Integer allocationSize) {
 		this.table = table;
@@ -116,62 +112,6 @@ public class TableGenerator implements IdGenerator {
 
 	private static int calculateBucketFirstID(Integer currentValue, Integer allocationSize) {
 		return ((currentValue + allocationSize - 1) / allocationSize) * allocationSize + 1;
-	}
-
-	public String getTable() {
-		return table;
-	}
-
-	public void setTable(String table) {
-		this.table = table;
-	}
-
-	public String getPkColumnName() {
-		return pkColumnName;
-	}
-
-	public void setPkColumnName(String pkColumnName) {
-		this.pkColumnName = pkColumnName;
-	}
-
-	public String getPkColumnValue() {
-		return pkColumnValue;
-	}
-
-	public void setPkColumnValue(String pkColumnValue) {
-		this.pkColumnValue = pkColumnValue;
-	}
-
-	public String getValueColumnName() {
-		return valueColumnName;
-	}
-
-	public void setValueColumnName(String valueColumnName) {
-		this.valueColumnName = valueColumnName;
-	}
-
-	public Integer getAllocationSize() {
-		return allocationSize;
-	}
-
-	public void setAllocationSize(Integer allocationSize) {
-		this.allocationSize = allocationSize;
-	}
-
-	public Integer getLastValue() {
-		return lastValue;
-	}
-
-	public void setLastValue(Integer lastValue) {
-		this.lastValue = lastValue;
-	}
-
-	public Integer getInitialValue() {
-		return initialValue;
-	}
-
-	public void setInitialValue(Integer initialValue) {
-		this.initialValue = initialValue;
 	}
 
 }

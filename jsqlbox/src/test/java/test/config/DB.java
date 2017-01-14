@@ -3,7 +3,7 @@ package test.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import test.po.User;
+import test.config.po.User;
 
 public class DB {
 	public User user(String... alias) {
