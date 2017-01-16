@@ -63,9 +63,14 @@ public class SqlBox {
 	private String configTable;
 
 	// Configure Table Alias Name
-	private String configTableAlias;
+	private String alias;
 
 	private SqlBoxContext context;
+
+	/**
+	 * Child Box, used for O-R Mapping query only
+	 */
+	private List<SqlBox> childBox = null;
 
 	private static ThreadLocal<String> fieldIDCache = new ThreadLocal<String>() {
 		@Override
@@ -129,6 +134,15 @@ public class SqlBox {
 		this.entityBean = bean;
 	}
 
+	/**
+	 * Add a node for this box
+	 */
+	public void addNode(IEntity entity) {
+		if (childBox == null)
+			childBox = new ArrayList<SqlBox>();
+		childBox.add(entity.box());
+	}
+
 	// ========getter & setters below==============
 	public Class<?> getEntityClass() {
 		return entityClass;
@@ -154,8 +168,8 @@ public class SqlBox {
 		this.context = context;
 	}
 
-	public String getTableAlias() {
-		return configTableAlias;
+	public String getAlias() {
+		return alias;
 	}
 
 	/**
@@ -485,20 +499,20 @@ public class SqlBox {
 	 * Get real database table name
 	 */
 	public String table() {
-		if (SqlBoxUtils.isEmptyStr(this.getTableAlias()))
+		if (SqlBoxUtils.isEmptyStr(this.getAlias()) || !SqlHelper.getInSqlTag().get())
 			return realTable();
 		else
-			return realTable() + " " + this.getTableAlias();
+			return realTable() + " " + this.getAlias();
 	}
 
 	/**
 	 * Return a * for sql
 	 */
 	public String all() {
-		if (StringUtils.isEmpty(this.getTableAlias()))
+		if (StringUtils.isEmpty(this.getAlias()))
 			return realTable() + ".*";
 		else
-			return this.getTableAlias() + ".*";
+			return this.getAlias() + ".*";
 	}
 
 	/**
@@ -506,17 +520,15 @@ public class SqlBox {
 	 */
 	public String getColumnName(String fieldID) {
 		getFieldIDCache().set(fieldID);
-		if (StringUtils.isEmpty(this.getTableAlias()))
+
+		if (StringUtils.isEmpty(this.getAlias()) || !SqlHelper.getInSqlTag().get())
 			return getRealColumnName(null, fieldID);
 		else {
-			if (SqlHelper.getFromTag().get())
-				return getTableAlias() + "." + getRealColumnName(null, fieldID);
-			if (SqlHelper.getSelectTag().get())
-				return getTableAlias() + "." + getRealColumnName(null, fieldID) + " as " + getTableAlias() + "_"
+			if (SqlHelper.getAliasTag().get())
+				return getAlias() + "." + getRealColumnName(null, fieldID) + " as " + getAlias() + "_"
 						+ getRealColumnName(null, fieldID);
 			else
-				return getTableAlias() + "_" + getRealColumnName(null, fieldID);
-
+				return getAlias() + "." + getRealColumnName(null, fieldID);
 		}
 	}
 
@@ -695,8 +707,8 @@ public class SqlBox {
 	/**
 	 * Config table name
 	 */
-	public Object configTableAlias(String tableAlias) {
-		configTableAlias = tableAlias;
+	public Object configAlias(String tableAlias) {
+		alias = tableAlias;
 		return this.getEntityBean();
 	}
 

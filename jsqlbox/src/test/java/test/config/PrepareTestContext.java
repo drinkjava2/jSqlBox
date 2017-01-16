@@ -86,7 +86,7 @@ public class PrepareTestContext {
 	}
 
 	/**
-	 * Close BeanBox Context, c3p0 close method will be called before context be closed
+	 * Close BeanBox Context
 	 */
 	public static void closeDatasource_closeDefaultSqlBoxConetxt() {
 		BeanBox.defaultContext.close();// This will close HikariDataSource because preDestroy method set to "Close"

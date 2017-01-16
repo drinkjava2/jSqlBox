@@ -20,6 +20,7 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import com.github.drinkjava2.springsrc.ReflectionUtils;
@@ -279,4 +282,17 @@ public class SqlBoxUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Not used but keep here for future use;
+	 */
+	public static class ObjectResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
+		@Override
+		public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
+			List<T> results = new ArrayList<T>();
+			while (rs.next()) {
+				rs.getMetaData();
+			}
+			return results;
+		}
+	}
 }

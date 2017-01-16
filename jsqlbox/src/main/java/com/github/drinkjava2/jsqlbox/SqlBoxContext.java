@@ -18,8 +18,6 @@ package com.github.drinkjava2.jsqlbox;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +26,9 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
-
-import test.config.po.User;
 
 /**
  * @author Yong Zhu
@@ -432,61 +426,24 @@ public class SqlBoxContext {
 		}
 	}
 
-	public static class ObjectResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
-
-		// Invoked only once for processing the entire result set.
-		@Override
-		public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
-			List<T> results = new ArrayList<T>();
-			while (rs.next()) {
-				ResultSetMetaData rsm = rs.getMetaData();
-				System.out.println(SqlBoxUtils.getResultSetMeataDataDebugInfo(rsm));
-			}
-			return results;
-		}
-
-	}
-
 	/**
-	 * Query for get a DB type list, it should have a map() method, and user's Object methods
+	 * Query for get a DB or DB child type list
 	 */
-	public <T> List<T> queryForDbList(Class<T> dbClass, String... sql) {
-		List<T> result = new ArrayList<>();
+	public List<IEntity> queryForEntityList(String... sql) {
+		List<IEntity> result = new ArrayList<>();
+		List<Map<String, Object>> mapList = null;
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
-
-			try {
-				List<User> users = (List<User>) getJdbc().query(sp.getSql(), sp.getParameters(),
-						new ObjectResultSetExtractor());
-			} catch (Exception e) {
-				e.printStackTrace();
+			mapList = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+			for (Map<String, Object> map : mapList) {
+				// TODO
+				// DB db = (DB) dbClass.newInstance();
+				// db.setMap(map);
+				// result.add(db);
 			}
-
-			//TODO this method
-			/*
-			 List<Map<String, Object>> rs;
-			 if (sp.getParameters().length == 0)
-			 rs = getJdbc().queryForList(sp.getSql());
-			 else
-			 rs = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-			 for (Map<String, Object> map : rs) {
-			 System.out.println(map);
-			 }
-
-			 SqlRowSetMetaData rsm = rs.getMetaData();
-			 log.info(SqlBoxUtils.getSqlRowSetMetadataDebugInfo(rsm));
-
-			 Field field = ReflectionUtils.findField(dbClass, "map");
-			 for (Map<String, Object> map : lst) {
-			 Object db = dbClass.newInstance();
-			 field.set(db, map);
-			 result.add((T) db);
-			 }
-			 */
-
 		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SqlBoxContext queryForList, sql=" + sql);
+			SqlBoxException.throwEX(e, "SqlBoxContext queryForDbList error, sql=" + sql);
 		} finally {
 			SqlHelper.clear();
 		}

@@ -1,9 +1,5 @@
 package test.function_test.query_method;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.where;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -73,13 +69,19 @@ public class JoinQueryTest {
 	public void doJoinQueryTest() {
 		Customer customer = new Customer();
 		Order order = new Order();
-		customer.box().configTableAlias("c");
-		order.box().configTableAlias("o");
-		List<Map<String, Object>> result = Dao.queryForList(select(), customer.all(), ",", order.all(), from(),
-				customer.table(), ",", order.table(), where(), customer.ID(), "=", order.CUSTOMERID());
+		customer.box().configAlias("c");
+		order.box().configAlias("o");
+		List<Map<String, Object>> result = Dao.queryForList("select ", customer.all(), ",", order.all(), " from ",
+				customer.table(), ",", order.table(), " where ", customer.ID(), "=", order.CUSTOMERID());
 		for (Map<String, Object> map : result) {
 			System.out.println(map);
 		}
+		List<Map<String, Object>> result2 = Dao.queryForList(
+				"select c.*,o.*,i.*  from customer c left join orders o on c.id=o.customer_id  left join orderitem i on o.id=i.order_id");
+		for (Map<String, Object> map : result2) {
+			System.out.println(map);
+		}
+
 	}
 
 }

@@ -40,7 +40,7 @@ public class SqlHelper {
 	/**
 	 * form Tag
 	 */
-	private static ThreadLocal<Boolean> fromTag = new ThreadLocal<Boolean>() {
+	private static ThreadLocal<Boolean> inSqlTag = new ThreadLocal<Boolean>() {
 		@Override
 		protected Boolean initialValue() {
 			return false;
@@ -50,7 +50,7 @@ public class SqlHelper {
 	/**
 	 * select Tag
 	 */
-	private static ThreadLocal<Boolean> selectTag = new ThreadLocal<Boolean>() {
+	private static ThreadLocal<Boolean> aliasTag = new ThreadLocal<Boolean>() {
 		@Override
 		protected Boolean initialValue() {
 			return false;
@@ -81,24 +81,24 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Get SQL cached in Threadlocal
+	 * Get SQL in Threadlocal
 	 */
 	public static ThreadLocal<ArrayList<String>> getSqlCache() {
 		return sqlCache;
 	}
 
 	/**
-	 * Get fromTag cached in Threadlocal
+	 * Get slectTag in Threadlocal
 	 */
-	public static ThreadLocal<Boolean> getFromTag() {
-		return fromTag;
+	public static ThreadLocal<Boolean> getAliasTag() {
+		return aliasTag;
 	}
 
 	/**
-	 * Get slectTag cached in Threadlocal
+	 * Get inSqlTag in Threadlocal
 	 */
-	public static ThreadLocal<Boolean> getSelectTag() {
-		return selectTag;
+	public static ThreadLocal<Boolean> getInSqlTag() {
+		return inSqlTag;
 	}
 
 	/**
@@ -129,8 +129,8 @@ public class SqlHelper {
 	 */
 	public static String clear() {
 		sqlCache.get().clear();
-		fromTag.set(false);
-		selectTag.set(false);
+		inSqlTag.set(false);
+		aliasTag.set(false);
 		return "";
 	}
 
@@ -167,18 +167,46 @@ public class SqlHelper {
 		return "";
 	}
 
+	/**
+	 * Equal to String " select " but set a tag to let system know a select start
+	 */
+	public static String sql() {
+		clear();
+		inSqlTag.set(true);
+		return "";
+	}
+
+	/**
+	 * Equal to String " select " but set a tag to let system know a select start
+	 */
+	public static String alias() {
+		aliasTag.set(true);
+		return "";
+	}
+
+	/**
+	 * Equal to String " " but cancel a tag to let system know a select ended
+	 */
+	public static String aliasEnd() {
+		aliasTag.set(false);
+		return "";
+	}
+
+	/**
+	 * Equal to " select "+sql()+alias();
+	 */
 	public static String select() {
-		selectTag.set(true);
-		return "select ";
+		sql();
+		alias();
+		return " select ";
 	}
 
+	/**
+	 * Equal to " from "+aliasEnd()
+	 */
 	public static String from() {
-		fromTag.set(true);
+		aliasEnd();
 		return " from ";
-	}
-
-	public static String where() {
-		return " where ";// NOSONAR
 	}
 
 	/**
