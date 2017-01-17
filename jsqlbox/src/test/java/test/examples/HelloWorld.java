@@ -32,13 +32,13 @@ import test.config.po.User;
  * @see Althoug support mutiple SqlBox contexts(= mutiple DataSource), jSqlBox recommend to use a default
  *      "SqlBoxContext" instance to simplify common database access, in this example, it wrapped in Dao class, and of
  *      cause, before use this global instance, need do some configurations(set DataSource for it)
- * @see Without invent a new language, jSqlBox find a way to make JDBC SQL support refactoring, it's not a key feature
+ * @see Without invent a new language, jSqlBox find a way to let JDBC SQL support refactoring, it's not a key feature
  *      of jSqlBox but recommended to follow this practice. And also by using SqlHelper class, it make write SQL safer
- *      and easier.
+ *      and easier to wrap parameters in PreparedStatement.
  * @see There is L1 and L2 cache for jSqlBox project works similar but not identical to Hibernate, jSqlBox does not
  *      cache update/insert/delete SQL commands, it only cache entity objects itself include modified ones. Instead of
  *      automatically send SQL commands at flushing, jSqlBox just simply empty L1 cache when dirty data will be found,
- *      jSqlBox will not sent SQL behind you, it's not a entity management container, it's only a entity cache. entity
+ *      jSqlBox will not sent SQL at background, it's not a entity management container but only a entity cache. entity
  *      can be send to view layer to use. Each entity has it's own box configuration, can still access database(usually
  *      read-only) even without transaction support.
  * @see There is no "one to many", "many to one", "lazy loading" concept in jSqlBox. You can get related entities by

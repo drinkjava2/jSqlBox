@@ -190,9 +190,9 @@ public class SqlBoxContext {
 		Object bean = null;
 		try {
 			bean = box.getEntityClass().newInstance();
-			// Trick here: if already used defaultBox (through its 0 parameter constructor or static block) then
+			// Trick here: if already used defaultBox (through its constructor or static block) then
 			// change to use this context
-			SqlBox box2 = SqlBoxContext.getDefaultBox(bean);
+			SqlBox box2 = getBindedBox(bean);
 			if (box2 == null)
 				bindBoxToBean(bean, box);
 			else

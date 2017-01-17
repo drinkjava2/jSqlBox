@@ -27,8 +27,6 @@ import java.util.Map.Entry;
 
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
-import test.config.PrepareTestContext;
-
 /**
  * MetaData of database
  * 
@@ -166,11 +164,6 @@ public class DBMetaData {
 			DataSourceUtils.releaseConnection(con, context.getDataSource());
 		}
 		return null;
-	}
-
-	public static void main(String[] args) {
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-		getMetaData(Dao.getDefaultContext());
 	}
 
 	public String getDebugInfo() {

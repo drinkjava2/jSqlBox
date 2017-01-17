@@ -78,12 +78,19 @@ public class SpringConfig {
 		AnnotationConfigApplicationContext springCtx = new AnnotationConfigApplicationContext(SpringConfig.class);
 		SqlBoxContext sc = springCtx.getBean("sqlBoxCtxBean", SqlBoxContext.class);
 		User u = sc.createEntity(User.class);
-		// Can not use User u=new User() here because default global SqlBoxContext not configured
+		// Can not use User u=new User() here it use default global SqlBoxContext
+		Assert.assertEquals(sc, u.box().getSqlBoxContext());
+		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
+
 		Dao.execute("delete from " + u.table());
 		u.setUserName("Spring");
 		u.insert();
 		Assert.assertEquals("Spring", Dao.queryForString(
 				"select " + u.USERNAME() + " from " + u.table() + " where " + u.USERNAME() + "=" + q("Spring")));
+
+		User u2 = sc.load(User.class, u.getId());
+		Assert.assertEquals(sc, u2.box().getSqlBoxContext());
+		Assert.assertNotEquals(Dao.getDefaultContext(), u2.box().getSqlBoxContext());
 		springCtx.close();
 	}
 }

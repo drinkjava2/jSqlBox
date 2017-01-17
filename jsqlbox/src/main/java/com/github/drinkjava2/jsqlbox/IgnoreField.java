@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * IgnoreField is the only annotation in this project, used to ignore a field for a entity class <br/>
- * Usually used to make a VO field
+ * Usually used to mark a VO field
  * 
  * @author Yong Zhu
  * @since 2.4
