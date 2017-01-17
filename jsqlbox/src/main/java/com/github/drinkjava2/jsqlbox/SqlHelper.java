@@ -168,7 +168,7 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Equal to String " select " but set a tag to let system know a select start
+	 * Return String " select " but set a tag in ThreadLocal to let system know a SQL start
 	 */
 	public static String sql() {
 		clear();
@@ -177,7 +177,7 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Equal to String " select " but set a tag to let system know a select start
+	 * Return String " select " but set a tag in ThreadLocal to let system know start to use alias for columns
 	 */
 	public static String alias() {
 		aliasTag.set(true);
@@ -185,7 +185,7 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Equal to String " " but cancel a tag to let system know a select ended
+	 * Return String "" but set a tag in ThreadLocal to let system know stop to use alias for columns
 	 */
 	public static String aliasEnd() {
 		aliasTag.set(false);
@@ -193,7 +193,7 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Equal to " select "+sql()+alias();
+	 * Equal to sql()+alias()+" select ";
 	 */
 	public static String select() {
 		sql();
@@ -202,7 +202,7 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Equal to " from "+aliasEnd()
+	 * Equal to aliasEnd()+" from "
 	 */
 	public static String from() {
 		aliasEnd();
@@ -210,9 +210,9 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Link parameters together only but do not cache it
+	 * Join parameters together and seperated with comma
 	 */
-	public static String link(Object... parameters) {
+	public static String comma(Object... parameters) {
 		StringBuilder result = new StringBuilder("");
 		for (int i = 0; i < parameters.length; i++) {
 			if (i != parameters.length - 1)
@@ -251,7 +251,7 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Create "value(?,?,?,?)" string by given howManyQuestionMark
+	 * Create " value(?,?,?,?)" string by given howManyQuestionMark quantity
 	 */
 	public static String createValueString(int howManyQuestionMark) {
 		StringBuilder sb = new StringBuilder(" values(");

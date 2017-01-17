@@ -4,8 +4,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.IEntity;
+import com.github.drinkjava2.jsqlbox.Entity;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 import test.config.PrepareTestContext;
@@ -59,7 +60,7 @@ public class HelloWorld3 {
 		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 
 		User user = new User();
-		SqlBox box = SqlBox.getBox(user);
+		SqlBox box = SqlBoxContext.getDefaultBox(user);
 		Dao.executeQuiet("delete from ", box.realTable());
 		user.setUserName("Sam");
 
@@ -75,7 +76,7 @@ public class HelloWorld3 {
 		Assert.assertEquals(32, Dao.queryForString("select PHONE_NUMBER from users2").length());
 	}
 
-	public static class ChildUser extends User implements IEntity {
+	public static class ChildUser extends User implements Entity {
 	}
 
 	@Test
@@ -83,11 +84,11 @@ public class HelloWorld3 {
 		// SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		User user = new ChildUser();
-		SqlBox box = SqlBox.getBox(user);
+		SqlBox box = SqlBoxContext.getDefaultBox(user);
 		box.configTable("users2");
 		Dao.executeQuiet("delete from ", box.realTable());
 		user.setUserName("Sam");
-		((IEntity) user).insert();
+		((Entity) user).insert();
 		Assert.assertEquals("Sam", Dao.queryForString("select USERNAME from users2"));
 	}
 

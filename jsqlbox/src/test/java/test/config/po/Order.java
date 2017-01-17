@@ -2,7 +2,7 @@ package test.config.po;
 
 import java.util.Date;
 
-import com.github.drinkjava2.jsqlbox.IEntity;
+import com.github.drinkjava2.jsqlbox.Entity;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 /**
@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class Order implements IEntity {
+public class Order implements Entity {
 	public static final String CREATE_SQL = "create table orders("//
 			+ "id varchar(32),"//
 			+ "order_name varchar(50),"//

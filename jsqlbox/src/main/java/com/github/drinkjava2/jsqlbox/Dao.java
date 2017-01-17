@@ -91,7 +91,7 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext().queryForList(sql);
 	}
 
-	public static List<IEntity> queryForEntityList(String... sql) {
+	public static List<Entity> queryForEntityList(String... sql) {
 		return SqlBoxContext.getDefaultSqlBoxContext().queryForEntityList(sql);
 	}
 

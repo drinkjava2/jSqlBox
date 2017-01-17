@@ -176,6 +176,13 @@ public class SqlBoxContext {
 	}
 
 	/**
+	 * Get a box instance from thread local cache for a bean
+	 */
+	public static SqlBox getDefaultBox(Object bean) {
+		return defaultSqlBoxContext.getBox(bean);
+	}
+
+	/**
 	 * Create an entity instance
 	 */
 	public <T> T createEntity(Class<?> entityOrBoxClass) {
@@ -183,7 +190,9 @@ public class SqlBoxContext {
 		Object bean = null;
 		try {
 			bean = box.getEntityClass().newInstance();
-			SqlBox box2 = SqlBox.getBox(bean);
+			// Trick here: if already used defaultBox (through its 0 parameter constructor or static block) then
+			// change to use this context
+			SqlBox box2 = SqlBoxContext.getDefaultBox(bean);
 			if (box2 == null)
 				bindBoxToBean(bean, box);
 			else
@@ -429,15 +438,15 @@ public class SqlBoxContext {
 	/**
 	 * Query for get a DB or DB child type list
 	 */
-	public List<IEntity> queryForEntityList(String... sql) {
-		List<IEntity> result = new ArrayList<>();
+	public List<Entity> queryForEntityList(String... sql) {
+		List<Entity> result = new ArrayList<>();
 		List<Map<String, Object>> mapList = null;
 		try {
 			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
 			logSql(sp);
 			mapList = getJdbc().queryForList(sp.getSql(), sp.getParameters());
 			for (Map<String, Object> map : mapList) {
-				// TODO
+				// TODO work on it
 				// DB db = (DB) dbClass.newInstance();
 				// db.setMap(map);
 				// result.add(db);
@@ -469,7 +478,7 @@ public class SqlBoxContext {
 
 	public <T> T load(Class<?> entityOrBoxClass, Object entityID) {
 		T bean = (T) createEntity(entityOrBoxClass);
-		SqlBox box = SqlBox.getBox(bean);
+		SqlBox box = SqlBoxContext.getBindedBox(bean);
 		return box.load(entityID);
 	}
 	// ========JdbcTemplate wrap methods End============

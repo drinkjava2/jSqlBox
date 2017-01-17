@@ -1,6 +1,6 @@
 package test.config.po;
 
-import com.github.drinkjava2.jsqlbox.IEntity;
+import com.github.drinkjava2.jsqlbox.Entity;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 /**
@@ -11,7 +11,7 @@ import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class OrderItem implements IEntity {
+public class OrderItem implements Entity {
 	public static final String CREATE_SQL = "create table orderitem("//
 			+ "id varchar(32),"//
 			+ "item_name varchar(50),"//

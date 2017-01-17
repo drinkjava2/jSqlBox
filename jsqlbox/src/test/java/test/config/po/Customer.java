@@ -2,7 +2,7 @@ package test.config.po;
 
 import java.util.List;
 
-import com.github.drinkjava2.jsqlbox.IEntity;
+import com.github.drinkjava2.jsqlbox.Entity;
 import com.github.drinkjava2.jsqlbox.IgnoreField;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
@@ -14,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class Customer implements IEntity {
+public class Customer implements Entity {
 	public static final String CREATE_SQL = "create table customer("//
 			+ "id varchar(32),"//
 			+ "customer_name varchar(50),"//

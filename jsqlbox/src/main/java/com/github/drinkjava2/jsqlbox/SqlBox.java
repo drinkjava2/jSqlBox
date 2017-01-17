@@ -102,18 +102,6 @@ public class SqlBox {
 	}
 
 	/**
-	 * Get a box instance from thread local cache for a bean
-	 */
-	public static SqlBox getBox(Object bean) {
-		SqlBox box = SqlBoxContext.getBindedBox(bean);
-		if (box != null)
-			return box;
-		box = SqlBoxContext.getDefaultSqlBoxContext().findAndBuildSqlBox(bean.getClass());
-		SqlBoxContext.bindBoxToBean(bean, box);
-		return box;
-	}
-
-	/**
 	 * Get default Box
 	 */
 	public static SqlBox defaultBox() {
@@ -137,9 +125,9 @@ public class SqlBox {
 	/**
 	 * Add a node for this box
 	 */
-	public void addNode(IEntity entity) {
+	public void addNode(Entity entity) {
 		if (childBox == null)
-			childBox = new ArrayList<SqlBox>();
+			childBox = new ArrayList<>();
 		childBox.add(entity.box());
 	}
 
@@ -509,10 +497,19 @@ public class SqlBox {
 	 * Return a * for sql
 	 */
 	public String all() {
-		if (StringUtils.isEmpty(this.getAlias()))
-			return realTable() + ".*";
-		else
-			return this.getAlias() + ".*";
+		StringBuilder sb = new StringBuilder();
+		Map<String, Column> realColumns = buildRealColumns();
+		for (Column column : realColumns.values()) {
+			if (column.isEnable()) {
+				if (SqlBoxUtils.isEmptyStr(this.getAlias()))
+					sb.append(column.getColumnName()).append(",");
+				else
+					sb.append(this.getAlias()).append(".").append(column.getColumnName()).append(" as ")
+							.append(getAlias()).append("_").append(column.getColumnName()).append(",");
+			}
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
 	}
 
 	/**

@@ -6,5 +6,5 @@ package com.github.drinkjava2.jsqlbox;
  * bean class
  * 
  */
-public class EntityBase implements IEntity {
+public class EntityBase implements Entity {
 }

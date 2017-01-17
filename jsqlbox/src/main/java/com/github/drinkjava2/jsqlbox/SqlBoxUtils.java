@@ -288,7 +288,7 @@ public class SqlBoxUtils {
 	public static class ObjectResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
 		@Override
 		public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
-			List<T> results = new ArrayList<T>();
+			List<T> results = new ArrayList<>();
 			while (rs.next()) {
 				rs.getMetaData();
 			}

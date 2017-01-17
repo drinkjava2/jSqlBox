@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.IEntity;
+import com.github.drinkjava2.jsqlbox.Entity;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
@@ -13,7 +13,7 @@ import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
 
 public class HelloWorld2 {
 
-	public static class User implements IEntity {
+	public static class User implements Entity {
 		Integer id;
 		String userName;
 		String address;

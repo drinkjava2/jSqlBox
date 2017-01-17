@@ -3,15 +3,18 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.List;
 
 /**
- * Each entity bean class should extends from EntityBase class <br/>
- * But for some reason if don't want extends from EntityBase class, just copy all fields and methods in EntityBase class
- * to your entity bean class, IEntity only works for JDK8+
+ * Each entity bean class should extends from EntityBase class(forDK7 and below) or implements Entity interface(For
+ * JDK8+)
  * 
  */
-public interface IEntity {
+public interface Entity {
 
 	public default SqlBox box() {
-		return SqlBox.getBox(this);
+		return SqlBoxContext.getDefaultBox(this);
+	}
+
+	public default SqlBox box(SqlBoxContext context) {
+		return context.getBox(this);
 	}
 
 	public default String table() {
@@ -42,18 +45,18 @@ public interface IEntity {
 		return this.box().getAlias() + "_" + realColumnName;
 	}
 
-	public default IEntity configAlias(String tableAlias) {
+	public default Entity configAlias(String tableAlias) {
 		this.box().configAlias(tableAlias);
 		return this;
 	}
 
-	public default IEntity addNode(IEntity entity) {
+	public default Entity addNode(Entity entity) {
 		this.box().addNode(entity);
 		return this;
 	}
 
-	public default List<IEntity> getList(int index) {
-		return null;// TODO
+	public default List<Entity> getList(int index) {
+		return null;// TODO work on it
 	}
 
 }

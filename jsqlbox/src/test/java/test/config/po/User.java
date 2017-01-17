@@ -1,6 +1,6 @@
 package test.config.po;
 
-import com.github.drinkjava2.jsqlbox.IEntity;
+import com.github.drinkjava2.jsqlbox.Entity;
 
 /**
  * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.IEntity;
  * @since 1.0.0
  */
 
-public class User implements IEntity {
+public class User implements Entity {
 	private Integer id;
 	private String userName;
 	private String phoneNumber;

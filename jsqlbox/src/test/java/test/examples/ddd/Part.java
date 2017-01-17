@@ -3,10 +3,10 @@ package test.examples.ddd;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.IEntity;
+import com.github.drinkjava2.jsqlbox.Entity;
 import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 
-public class Part implements IEntity {
+public class Part implements Entity {
 	public static final String CREATE_SQL = "create table part("//
 			+ "partid varchar(32),"//
 			+ "totalCurrentStock int,"//
