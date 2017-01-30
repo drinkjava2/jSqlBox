@@ -20,10 +20,13 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +34,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
@@ -283,16 +285,29 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Not used but keep here for future use;
+	 * Not used but keep here for future use, I think I many forgot this
 	 */
 	public static class ObjectResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
 		@Override
-		public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
+		public List<T> extractData(ResultSet rs) throws SQLException {
 			List<T> results = new ArrayList<>();
 			while (rs.next()) {
 				rs.getMetaData();
 			}
 			return results;
 		}
+	}
+
+	/**
+	 * Check if a class is a basic Java data type
+	 */
+	public static boolean isBaseDataType(Class<?> clazz) {// NOSONAR
+		if (clazz == null)
+			return false;
+		return (clazz.equals(String.class) || clazz.equals(Integer.class) || clazz.equals(Byte.class)// NOSONAR
+				|| clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class)
+				|| clazz.equals(Character.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class)
+				|| clazz.equals(BigInteger.class) || clazz.equals(Boolean.class) || clazz.equals(Date.class)
+				|| clazz.isPrimitive());
 	}
 }

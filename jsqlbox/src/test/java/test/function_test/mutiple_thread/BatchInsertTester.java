@@ -57,6 +57,7 @@ public class BatchInsertTester {
 			new Thread(m2).start();
 		}
 		System.out.println("done");
-		// PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt(); //can not close datasource
+		// PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
+		// do not close dataSource because threads are running
 	}
 }

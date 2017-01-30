@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is to cache parameters in threadlocal
+ * This class is to cache parameters in threadLocal
  * 
  * @author Yong Zhu
  * @version 1.0.0
@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class SqlHelper {
 	/**
-	 * For store sql and parameters in threadlocal
+	 * For store sql and parameters in threadLocal
 	 */
 	private static ThreadLocal<ArrayList<String>> sqlCache = new ThreadLocal<ArrayList<String>>() {
 		@Override
@@ -48,7 +48,7 @@ public class SqlHelper {
 	};
 
 	/**
-	 * select Tag
+	 * alias Tag
 	 */
 	private static ThreadLocal<Boolean> aliasTag = new ThreadLocal<Boolean>() {
 		@Override
@@ -58,7 +58,27 @@ public class SqlHelper {
 	};
 
 	/**
-	 * For batch store SQL and Parameters in threadlocal
+	 * one Tag
+	 */
+	private static ThreadLocal<ArrayList<String>> one = new ThreadLocal<ArrayList<String>>() {
+		@Override
+		protected ArrayList<String> initialValue() {
+			return new ArrayList<>();
+		}
+	};
+
+	/**
+	 * many Tag
+	 */
+	private static ThreadLocal<ArrayList<String>> many = new ThreadLocal<ArrayList<String>>() {
+		@Override
+		protected ArrayList<String> initialValue() {
+			return new ArrayList<>();
+		}
+	};
+
+	/**
+	 * For batch store SQL and Parameters in threadLocal
 	 */
 	private static ThreadLocal<ArrayList<SqlAndParameters>> sqlBatchCache = new ThreadLocal<ArrayList<SqlAndParameters>>() {
 		@Override
@@ -68,7 +88,7 @@ public class SqlHelper {
 	};
 
 	/**
-	 * For store last batch Sql in threadlocal
+	 * For store last batch Sql in threadLocal
 	 */
 	private static ThreadLocal<String> sqlBatchString = new ThreadLocal<String>() {
 		@Override
@@ -78,13 +98,6 @@ public class SqlHelper {
 	};
 
 	private SqlHelper() {// Disable default public constructor
-	}
-
-	/**
-	 * Get SQL in Threadlocal
-	 */
-	public static ThreadLocal<ArrayList<String>> getSqlCache() {
-		return sqlCache;
 	}
 
 	/**
@@ -131,6 +144,8 @@ public class SqlHelper {
 		sqlCache.get().clear();
 		inSqlTag.set(false);
 		aliasTag.set(false);
+		one.get().clear();
+		many.get().clear();
 		return "";
 	}
 
@@ -168,16 +183,7 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Return String " select " but set a tag in ThreadLocal to let system know a SQL start
-	 */
-	public static String sql() {
-		clear();
-		inSqlTag.set(true);
-		return "";
-	}
-
-	/**
-	 * Return String " select " but set a tag in ThreadLocal to let system know start to use alias for columns
+	 * Return empty String "" but set a alias tag in ThreadLocal
 	 */
 	public static String alias() {
 		aliasTag.set(true);
@@ -185,28 +191,44 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Return String "" but set a tag in ThreadLocal to let system know stop to use alias for columns
+	 * Return String "" but cancel the alias tag in ThreadLocal
 	 */
-	public static String aliasEnd() {
+	public static String endAlias() {
 		aliasTag.set(false);
 		return "";
 	}
 
 	/**
-	 * Equal to sql()+alias()+" select ";
+	 * @return "" but set a inSQL tag in ThreadLocal
 	 */
-	public static String select() {
+	public static String sql() {
+		inSqlTag.set(true);
+		return "";
+	}
+
+	/**
+	 * Equal to " select "+ sql() + alias()
+	 */
+	public static String selectAlias() {
 		sql();
 		alias();
 		return " select ";
 	}
 
 	/**
-	 * Equal to aliasEnd()+" from "
+	 * Return Empty String "" but set a "one" tag
 	 */
-	public static String from() {
-		aliasEnd();
-		return " from ";
+	public static String one(String columnName) {
+		one.get().add(columnName);
+		return columnName;
+	}
+
+	/**
+	 * Return Empty String "" but set a "many" tag
+	 */
+	public static String many(String columnName) {
+		many.get().add(columnName);
+		return columnName;
 	}
 
 	/**
@@ -246,7 +268,10 @@ public class SqlHelper {
 		return subList(sqlBatchCache.get(), 500);
 	}
 
-	public static String questionMarks() {
+	/**
+	 * Create " value(?,?,?,?)" strings according how many sql parameters be cached in ThreadLocal
+	 */
+	public static String valuesAndQuestions() {
 		return createValueString(sqlCache.get().size());
 	}
 

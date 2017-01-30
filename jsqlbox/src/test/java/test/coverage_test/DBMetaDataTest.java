@@ -30,7 +30,7 @@ public class DBMetaDataTest {
 
 	@Before
 	public void setup() {
-		System.out.println("=============================Testing TinyJdbcGetMetaData=============================");
+		System.out.println("=============================Testing DBMetaDataTest=============================");
 		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 

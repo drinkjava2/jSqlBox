@@ -70,7 +70,7 @@ public class SqlBox {
 	/**
 	 * Child Box, used for O-R Mapping query only
 	 */
-	private List<SqlBox> childBox = null;
+	private List<Entity> childBox = null;
 
 	private static ThreadLocal<String> fieldIDCache = new ThreadLocal<String>() {
 		@Override
@@ -128,7 +128,7 @@ public class SqlBox {
 	public void addNode(Entity entity) {
 		if (childBox == null)
 			childBox = new ArrayList<>();
-		childBox.add(entity.box());
+		childBox.add(entity);
 	}
 
 	// ========getter & setters below==============
@@ -459,6 +459,15 @@ public class SqlBox {
 	}
 
 	/**
+	 * Get alias Column Name
+	 */
+	public String aliasColumnName(String realColumnName) {
+		if (SqlBoxUtils.isEmptyStr(this.getAlias()))
+			return realColumnName;
+		return this.getAlias() + "_" + realColumnName;
+	}
+
+	/**
 	 * Return a JdbcTemplate instance related to current context<br/>
 	 */
 	public JdbcTemplate getJdbc() {
@@ -513,11 +522,15 @@ public class SqlBox {
 	}
 
 	/**
-	 * get field's database real column name
+	 * get field's database column name <br/>
+	 * 1)No alias, return "columnName" <br/>
+	 * 2)Not in sql, return "alias_columnName" <br/>
+	 * 3)In Sql, in alias tag, return "alias.columnName as alias_columnName" <br/>
+	 * 4)In Sql, not in alias tag, return "alias.columnName" <br/>
+	 * 
 	 */
 	public String getColumnName(String fieldID) {
 		getFieldIDCache().set(fieldID);
-
 		if (StringUtils.isEmpty(this.getAlias()) || !SqlHelper.getInSqlTag().get())
 			return getRealColumnName(null, fieldID);
 		else {
@@ -532,12 +545,14 @@ public class SqlBox {
 	/**
 	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
 	 */
-	private boolean isLegalFieldID(String fieldID) {
+	private boolean isLegalFieldID(String fieldID, Class<?> clazz) {
 		if ("class".equals(fieldID))
 			return false;
 		if (SqlBoxUtils.isEmptyStr(fieldID))
 			return false;
 		if (SqlBoxUtils.isCapitalizedString(fieldID))
+			return false;
+		if (!SqlBoxUtils.isBaseDataType(clazz))
 			return false;
 		/**
 		 * try { Method method = ReflectionUtils.getDeclaredMethod(entityClass, fieldID, new Class[] {}); if (method ==
@@ -567,7 +582,7 @@ public class SqlBox {
 
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
-			if (isLegalFieldID(fieldID)) {
+			if (isLegalFieldID(fieldID, pd.getPropertyType())) {
 				Column realCol = new Column();
 				realCol.setFieldID(fieldID);
 				String realColumnMatchName = this.getRealColumnName(realTableName, fieldID);
@@ -575,8 +590,8 @@ public class SqlBox {
 					Field field = ReflectionUtils.findField(this.getEntityClass(), fieldID);
 					if (this.getEntityClass().getDeclaredAnnotation(IgnoreField.class) == null// NOSONAR
 							&& field.getAnnotation(IgnoreField.class) == null)
-						log.error("Field \"" + fieldID + "\" does not match any column in database table \""
-								+ realTableName + "\", to disable this error message, put an @"
+						log.warn("Field \"" + fieldID + "\" does not match any column in database table \""
+								+ realTableName + "\", to disable this warning message, put an @"
 								+ IgnoreField.class.getSimpleName() + " annotation on it. "
 								+ (fieldID.contains("ID") ? " Try change xxxID to xxxxId" : ""));
 
@@ -684,7 +699,10 @@ public class SqlBox {
 		return realColumnNameignoreCase != null ? realColumnNameignoreCase : realColumnNameUnderline;
 	}
 
-	public Column getOrBuildConfigColumn(String fieldID) {
+	/**
+	 * Get or Build the config column
+	 */
+	protected Column getOrBuildConfigColumn(String fieldID) {
 		Column col = this.getConfigColumns().get(fieldID);
 		if (col == null) {
 			col = new Column();

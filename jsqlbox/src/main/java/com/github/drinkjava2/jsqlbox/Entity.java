@@ -7,6 +7,7 @@ import java.util.List;
  * JDK8+)
  * 
  */
+@SuppressWarnings("unchecked")
 public interface Entity {
 
 	public default SqlBox box() {
@@ -25,16 +26,19 @@ public interface Entity {
 		return box().all();
 	}
 
-	public default void insert() {
+	public default <T> T insert() {
 		this.box().insert();
+		return (T) this;
 	}
 
-	public default void update() {
+	public default <T> T update() {
 		this.box().update();
+		return (T) this;
 	}
 
-	public default void delete() {
+	public default <T> T delete() {
 		this.box().delete();
+		return (T) this;
 	}
 
 	public default String fieldID(String realColumnName) {
@@ -42,20 +46,20 @@ public interface Entity {
 	}
 
 	public default String alias(String realColumnName) {
-		return this.box().getAlias() + "_" + realColumnName;
+		return this.box().aliasColumnName(realColumnName);
 	}
 
-	public default Entity configAlias(String tableAlias) {
+	public default <T> T configAlias(String tableAlias) {
 		this.box().configAlias(tableAlias);
-		return this;
+		return (T) this;
 	}
 
-	public default Entity addNode(Entity entity) {
+	public default <T> T configNode(Entity entity) {
 		this.box().addNode(entity);
-		return this;
+		return (T) this;
 	}
 
-	public default List<Entity> getList(int index) {
+	public default List<Object> getNodeList(Entity entity) {
 		return null;// TODO work on it
 	}
 

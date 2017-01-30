@@ -1,7 +1,7 @@
 package test.config.po;
 
 import com.github.drinkjava2.jsqlbox.Entity;
-import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
+import com.github.drinkjava2.jsqlbox.id.SimpleGenerator;
 
 /**
  * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
@@ -27,7 +27,7 @@ public class OrderItem implements Entity {
 	private Integer itemQty;
 	private String orderId;
 	{
-		this.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
+		this.box().configIdGenerator("id", SimpleGenerator.INSTANCE);
 	}
 
 	public String getId() {

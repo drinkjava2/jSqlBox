@@ -1,7 +1,7 @@
 package test.function_test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class SpringTransactionTest {
 				" (", u.USERNAME(), empty("user1"), //
 				", ", u.ADDRESS(), empty("address1"), //
 				", ", u.AGE(), ")", empty("10"), //
-				questionMarks());
+				valuesAndQuestions());
 	}
 
 	public void tx_InsertUser2() {
@@ -42,7 +42,7 @@ public class SpringTransactionTest {
 				" (", u.USERNAME(), empty("user2"), //
 				", ", u.ADDRESS(), empty("address2"), //
 				", ", u.AGE(), ")", empty("20"), //
-				questionMarks());
+				valuesAndQuestions());
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)

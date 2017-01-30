@@ -438,7 +438,7 @@ public class SqlBoxContext {
 	/**
 	 * Query for get a DB or DB child type list
 	 */
-	public List<Entity> queryForEntityList(String... sql) {
+	public List<Entity> queryForEntityTree(String... sql) {
 		List<Entity> result = new ArrayList<>();
 		List<Map<String, Object>> mapList = null;
 		try {
@@ -446,10 +446,9 @@ public class SqlBoxContext {
 			logSql(sp);
 			mapList = getJdbc().queryForList(sp.getSql(), sp.getParameters());
 			for (Map<String, Object> map : mapList) {
-				// TODO work on it
-				// DB db = (DB) dbClass.newInstance();
-				// db.setMap(map);
-				// result.add(db);
+				if (map == null) {
+				}
+				// TODO work on it 
 			}
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext queryForDbList error, sql=" + sql);

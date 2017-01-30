@@ -40,7 +40,7 @@ public class PrepareTestContext {
 					"username Varchar (50) ,", //
 					"Phone_Number Varchar (50) ,", //
 					"Address Varchar (50) ,", //
-					"Alive Boolean, ", //
+					"active Boolean, ", //
 					"Age Integer,", //
 					"constraint const1 primary key (id)", //
 					")", innoDB);
@@ -51,7 +51,7 @@ public class PrepareTestContext {
 					"username Varchar (50) ,", //
 					"Phone_Number Varchar (50) ,", //
 					"Address Varchar (50) ,", //
-					"Alive Boolean, ", //
+					"active Boolean, ", //
 					"Age Integer)", innoDB);
 		}
 
@@ -61,7 +61,7 @@ public class PrepareTestContext {
 					"USERNAME VARCHAR (50) ,", //
 					"PHONE_NUMBER VARCHAR (50) ,", //
 					"ADDRESS VARCHAR (50) ,", //
-					"ALIVE INTEGER, ", //
+					"ACTIVE INTEGER, ", //
 					"AGE INTEGER,", //
 					"CONSTRAINT CONST1 PRIMARY KEY (ID)", //
 					")");
@@ -71,7 +71,7 @@ public class PrepareTestContext {
 					"USERNAME VARCHAR (50) ,", //
 					"PHONE_NUMBER VARCHAR (50) ,", //
 					"ADDRESS VARCHAR (50) ,", //
-					"ALIVE INTEGER, ", //
+					"ACTIVE INTEGER, ", //
 					"AGE INTEGER)");
 			Dao.execute(
 					"CREATE SEQUENCE SEQ_1 MINVALUE 1 MAXVALUE 99999999 START WITH 1 INCREMENT BY 1 NOCYCLE CACHE 10");

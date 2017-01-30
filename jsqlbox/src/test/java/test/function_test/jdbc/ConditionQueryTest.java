@@ -26,7 +26,7 @@ public class ConditionQueryTest {
 
 	@After
 	public void cleanUp() {
-		//TestPrepare.closeDatasource_CloseDefaultSqlBoxConetxt();
+		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {

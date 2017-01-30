@@ -3,7 +3,7 @@ package test.config.po;
 import java.util.Date;
 
 import com.github.drinkjava2.jsqlbox.Entity;
-import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
+import com.github.drinkjava2.jsqlbox.id.SimpleGenerator;
 
 /**
  * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
@@ -29,7 +29,7 @@ public class Order implements Entity {
 	private String customerId;
 
 	{
-		this.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
+		this.box().configIdGenerator("id", SimpleGenerator.INSTANCE);
 	}
 
 	public String getId() {

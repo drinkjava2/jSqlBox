@@ -1,7 +1,9 @@
 package test.function_test.query_method;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.many;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.one;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.selectAlias;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.endAlias;
 
 import java.util.Date;
 import java.util.List;
@@ -19,8 +21,11 @@ import test.config.po.Customer;
 import test.config.po.Order;
 import test.config.po.OrderItem;
 
-public class JoinQueryTest {
+public class LeftJoinQueryTest {
 
+	/**
+	 * Prepare test data for object tree
+	 */
 	@Before
 	public void setup() {
 		System.out.println("===============================Testing JoinQueryTest===============================");
@@ -46,16 +51,18 @@ public class JoinQueryTest {
 		Order o = new Order();
 		o.setCustomerId(c.getId());
 		o.setOrderDate(new Date());
-		o.setOrderName("PO2017-001");
+		o.setOrderName("Order1");
 		o.insert();
-		o.setOrderName("PO2017-002");
+		o.setOrderName("Order2");
 		o.insert();
-		Assert.assertEquals(2, (int) Dao.queryForInteger("select count(*) from orders"));
+		o.setOrderName("Order3");
+		o.insert();
+		Assert.assertEquals(3, (int) Dao.queryForInteger("select count(*) from orders"));
 
 		for (int i = 0; i < 5; i++) {
 			OrderItem item = new OrderItem();
 			item.setOrderId(o.getId());
-			item.setItemName("Book" + i);
+			item.setItemName("OrderItem" + i);
 			item.setItemQty(i);
 			item.insert();
 		}
@@ -69,21 +76,19 @@ public class JoinQueryTest {
 	}
 
 	@Test
-	public void doJoinQueryTest() {
-		Customer customer = new Customer();
-		Order order = new Order();
-		customer.box().configAlias("c");
-		order.box().configAlias("o");
-		List<Map<String, Object>> result = Dao.queryForList(select(), customer.all(), ",", order.all(), from(),
-				customer.table(), ",", order.table(), " where ", customer.ID(), "=", order.CUSTOMERID());
-		for (Map<String, Object> map : result) {
-			System.out.println(map);
-		}
-		List<Map<String, Object>> result2 = Dao.queryForList(
-				"select c.*,o.*,i.*  from customer c left outer join orders o on c.id=o.customer_id  left outer join orderitem i on o.id=i.order_id");
+	public void doLeftJoinQuery() {
+		Customer c = new Customer().configAlias("c");
+		Order o = new Order().configAlias("o");
+		OrderItem i = new OrderItem().configAlias("i");
+		List<Map<String, Object>> result2 = Dao.queryForList(selectAlias(), c.all(), ",", o.all(), ",", i.all(),
+				endAlias(), " from ", c.table(), //
+				" left outer join ", o.table(), " on ", one(c.ID()), "=", many(o.CUSTOMERID()), //
+				"  left outer join ", i.table(), " on ", one(o.ID()), "=", many(i.ORDERID()));
 		for (Map<String, Object> map : result2) {
 			System.out.println(map);
+			System.out.println(map.get(o.ORDERNAME()));
 		}
+		// TODO: work on it
 
 	}
 

@@ -2,7 +2,7 @@ package test.function_test.jdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -49,7 +49,7 @@ public class JdbcTest {
 				" (", u.USERNAME(), empty("user3"), //
 				", ", u.ADDRESS(), empty("address3"), //
 				", ", u.AGE(), empty("3"), //
-				")", questionMarks());
+				")", valuesAndQuestions());
 
 		Dao.execute("update " + u.table() + " set " + u.USERNAME() + "=" + q("John") + "," + u.ADDRESS() + "="
 				+ q("Shanghai") + " where " + u.AGE() + "=" + q(1));

@@ -32,13 +32,13 @@ public class InsertTest {
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");
-		u.setAlive(true);
+		u.setActive(true);
 		u.insert();
 		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
 				u.USERNAME(), "=", q("User1")));
 		Assert.assertTrue(u.getId() > 0);
 		User u2 = Dao.load(User.class, u.getId());
-		Assert.assertTrue(u2.getAlive());
+		Assert.assertTrue(u2.getActive());
 	}
 
 	@Test

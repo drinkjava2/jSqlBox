@@ -19,14 +19,14 @@ public class User implements Entity {
 	private String phoneNumber;
 	private String address;
 	private Integer age;
-	private Boolean alive;
+	private Boolean active;
 
-	public Boolean getAlive() {
-		return alive;
+	public Boolean getActive() {
+		return active;
 	}
 
-	public void setAlive(Boolean alive) {
-		this.alive = alive;
+	public void setActive(Boolean active) {
+		this.active = active;
 	}
 
 	public Integer getId() {
@@ -91,8 +91,8 @@ public class User implements Entity {
 		return box().getColumnName("age");
 	}
 
-	public String ALIVE() {
-		return box().getColumnName("alive");
+	public String ACTIVE() {
+		return box().getColumnName("active");
 	}
 
 }

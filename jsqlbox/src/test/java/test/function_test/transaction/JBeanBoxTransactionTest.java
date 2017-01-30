@@ -1,7 +1,7 @@
 package test.function_test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.questionMarks;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -44,7 +44,7 @@ public class JBeanBoxTransactionTest {
 				" (", u.USERNAME(), empty("user1"), //
 				", ", u.ADDRESS(), empty("address1"), //
 				", ", u.AGE(), ")", empty("10"), //
-				questionMarks());
+				valuesAndQuestions());
 	}
 
 	public void tx_InsertUser2() {
@@ -53,7 +53,7 @@ public class JBeanBoxTransactionTest {
 				" (", u.USERNAME(), empty("user2"), //
 				", ", u.ADDRESS(), empty("address2"), //
 				", ", u.AGE(), ")", empty("20"), //
-				questionMarks());
+				valuesAndQuestions());
 	}
 
 	public void tx_doInsert() {
@@ -92,7 +92,7 @@ public class JBeanBoxTransactionTest {
 		Dao.execute("insert into ", u.table(), " (", //
 				u.USERNAME() + empty("user3"), ", ", //
 				u.AGE() + empty("30"), //
-				")", questionMarks());
+				")", valuesAndQuestions());
 		int count = Dao.queryForInteger("select count(*) from ", u.table());
 		System.out.println("Inserted " + count + " record into database");
 		Assert.assertEquals(1, count);
