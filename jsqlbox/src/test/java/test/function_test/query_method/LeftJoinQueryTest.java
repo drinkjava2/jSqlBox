@@ -80,10 +80,13 @@ public class LeftJoinQueryTest {
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
+		//bind(onoToMany(), c.ID(), o.CUSTOMERID());
+		//bind(onoToOne(), c.ID(), o.CUSTOMERID());
+		//bind(manyToMany(), c.ID(), o.CUSTOMERID());
 		List<Map<String, Object>> result2 = Dao.queryForList(selectAlias(), c.all(), ",", o.all(), ",", i.all(),
 				endAlias(), " from ", c.table(), //
-				" left outer join ", o.table(), " on ", one(c.ID()), "=", many(o.CUSTOMERID()), //
-				"  left outer join ", i.table(), " on ", one(o.ID()), "=", many(i.ORDERID()));
+				" left outer join ", o.table(), " on ", c.ID(), "=", o.CUSTOMERID(), //
+				"  left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID());
 		for (Map<String, Object> map : result2) {
 			System.out.println(map);
 			System.out.println(map.get(o.ORDERNAME()));

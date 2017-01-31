@@ -531,15 +531,16 @@ public class SqlBox {
 	 */
 	public String getColumnName(String fieldID) {
 		getFieldIDCache().set(fieldID);
-		if (StringUtils.isEmpty(this.getAlias()) || !SqlHelper.getInSqlTag().get())
+		if (StringUtils.isEmpty(this.getAlias()))
 			return getRealColumnName(null, fieldID);
-		else {
-			if (SqlHelper.getAliasTag().get())
-				return getAlias() + "." + getRealColumnName(null, fieldID) + " as " + getAlias() + "_"
-						+ getRealColumnName(null, fieldID);
-			else
-				return getAlias() + "." + getRealColumnName(null, fieldID);
-		}
+		if (SqlHelper.getAliasTag().get() && SqlHelper.getInSqlTag().get())
+			return getAlias() + "." + getRealColumnName(null, fieldID) + " as " + getAlias() + "_"
+					+ getRealColumnName(null, fieldID);
+		else if (SqlHelper.getAliasTag().get() && !SqlHelper.getInSqlTag().get())
+			return getAlias() + "_" + getRealColumnName(null, fieldID);
+		else if (!SqlHelper.getAliasTag().get() && SqlHelper.getInSqlTag().get())
+			return getAlias() + "." + getRealColumnName(null, fieldID);
+		return getRealColumnName(null, fieldID);
 	}
 
 	/**

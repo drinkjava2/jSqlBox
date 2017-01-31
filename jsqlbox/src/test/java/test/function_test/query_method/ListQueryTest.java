@@ -2,6 +2,7 @@ package test.function_test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.comma;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.alias;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.endAlias;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.selectAlias;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
@@ -66,9 +67,11 @@ public class ListQueryTest {
 				comma(u1.table(), u2.table()), " where ", u1.ID(), "=", u2.ID());
 		Map<String, Object> map = list2.get(0);
 
-		Assert.assertEquals("Sam", map.get(u1.alias(u1.USERNAME())));
-		Assert.assertEquals("BeiJing", map.get(u1.alias(u1.ADDRESS())));
-		Assert.assertEquals("0", map.get(u1.alias(u1.PHONENUMBER())));
+		alias();
+		Assert.assertEquals("Sam", map.get(u1.USERNAME()));
+		Assert.assertEquals("BeiJing", map.get(u1.ADDRESS()));
+		Assert.assertEquals("0", map.get(u1.PHONENUMBER()));
+		endAlias();
 	}
 
 }
