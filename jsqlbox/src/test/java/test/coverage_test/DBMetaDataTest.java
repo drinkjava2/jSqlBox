@@ -7,10 +7,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jsqlbox.DBMetaData;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.DatabaseType;
-import com.github.drinkjava2.jsqlbox.DBMetaData;
 
 import test.config.JBeanBoxConfig.H2DataSourceBox;
 import test.config.JBeanBoxConfig.MsSqlServerDataSourceBox;

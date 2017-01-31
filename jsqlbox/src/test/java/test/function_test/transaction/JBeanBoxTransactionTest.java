@@ -10,13 +10,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.AopAround;
-import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jbeanbox.AopAround;
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
-import test.config.po.User;
 import test.config.PrepareTestContext;
+import test.config.po.User;
 
 /**
  * This is to test use Spring's Declarative Transaction but use jBeanBox replaced Spring's IOC/AOP core. <br/>

@@ -36,8 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
-
-import com.github.drinkjava2.springsrc.ReflectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Yong Zhu

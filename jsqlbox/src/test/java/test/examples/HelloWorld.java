@@ -5,7 +5,7 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;

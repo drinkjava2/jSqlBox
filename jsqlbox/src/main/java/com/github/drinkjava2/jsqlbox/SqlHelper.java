@@ -48,9 +48,19 @@ public class SqlHelper {
 	};
 
 	/**
-	 * alias Tag
+	 * inSelect Tag
 	 */
-	private static ThreadLocal<Boolean> aliasTag = new ThreadLocal<Boolean>() {
+	private static ThreadLocal<Boolean> inSelectTag = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return false;
+		}
+	};
+
+	/**
+	 * inAlias Tag
+	 */
+	private static ThreadLocal<Boolean> inAliasTag = new ThreadLocal<Boolean>() {
 		@Override
 		protected Boolean initialValue() {
 			return false;
@@ -101,10 +111,17 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Get slectTag in Threadlocal
+	 * Get inSlectTag in Threadlocal
 	 */
-	public static ThreadLocal<Boolean> getAliasTag() {
-		return aliasTag;
+	public static ThreadLocal<Boolean> getInSelectTag() {
+		return inSelectTag;
+	}
+
+	/**
+	 * Get inAliasTag in Threadlocal
+	 */
+	public static ThreadLocal<Boolean> getInAliasTag() {
+		return inAliasTag;
 	}
 
 	/**
@@ -143,7 +160,7 @@ public class SqlHelper {
 	public static String clear() {
 		sqlCache.get().clear();
 		inSqlTag.set(false);
-		aliasTag.set(false);
+		inSelectTag.set(false);
 		one.get().clear();
 		many.get().clear();
 		return "";
@@ -183,18 +200,35 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Return empty String "" but set a alias tag in ThreadLocal
+	 * Return empty String "" but set a inSelectTag tag in ThreadLocal
 	 */
-	public static String alias() {
-		aliasTag.set(true);
+	public static String selectBegin() {
+		sql();
+		inSelectTag.set(true);
 		return "";
 	}
 
 	/**
-	 * Return String "" but cancel the alias tag in ThreadLocal
+	 * Return String "" but cancel the inSelectTag tag in ThreadLocal
 	 */
-	public static String endAlias() {
-		aliasTag.set(false);
+	public static String selectEnd() {
+		inSelectTag.set(false);
+		return "";
+	}
+
+	/**
+	 * Return empty String "", set a alias tag in ThreadLocal
+	 */
+	public static String aliasBegin() {
+		inAliasTag.set(true);
+		return "";
+	}
+
+	/**
+	 * Return String "", cancel the alias tag in ThreadLocal
+	 */
+	public static String aliasEnd() {
+		inAliasTag.set(false);
 		return "";
 	}
 
@@ -207,12 +241,20 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Equal to " select "+ sql() + alias()
+	 * Equal to " select "+ sql() + selectBegin()
 	 */
-	public static String selectAlias() {
+	public static String select() {
 		sql();
-		alias();
+		selectBegin();
 		return " select ";
+	}
+
+	/**
+	 * Equal to " from "+ sql() + selectEnd()
+	 */
+	public static String from() {
+		selectEnd();
+		return " from ";
 	}
 
 	/**

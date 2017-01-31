@@ -2,7 +2,7 @@ package test.function_test.mutiple_thread;
 
 import java.util.ArrayList;
 
-import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jbeanbox.BeanBox;
 
 import test.config.PrepareTestContext;
 import test.config.po.User;

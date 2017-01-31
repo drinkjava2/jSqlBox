@@ -1,9 +1,7 @@
 package test.function_test.query_method;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.many;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.one;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.selectAlias;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.endAlias;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 
 import java.util.Date;
 import java.util.List;
@@ -76,23 +74,42 @@ public class LeftJoinQueryTest {
 	}
 
 	@Test
-	public void doLeftJoinQuery() {
+	public void leftJoinQueryNoAlias() {
+		Dao.getDefaultContext().setShowSql(true);
+		Dao.getDefaultContext().setFormatSql(true);
+		Customer c = new Customer();
+		Order o = new Order();
+		OrderItem i = new OrderItem();
+		List<Map<String, Object>> result2 = Dao.queryForList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
+				c.table(), //
+				" left outer join ", o.table(), " on ", c.ID(), "=", o.CUSTOMERID(), //
+				"  left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID());
+
+		for (Map<String, Object> map : result2) {
+			System.out.println(map);
+			System.out.println(map.get(o.alias(o.ORDERNAME())));
+		}
+	}
+
+	@Test
+	public void leftJoinQueryWithAlias() {
+		Dao.getDefaultContext().setShowSql(true);
+		Dao.getDefaultContext().setFormatSql(true);
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
-		//bind(onoToMany(), c.ID(), o.CUSTOMERID());
-		//bind(onoToOne(), c.ID(), o.CUSTOMERID());
-		//bind(manyToMany(), c.ID(), o.CUSTOMERID());
-		List<Map<String, Object>> result2 = Dao.queryForList(selectAlias(), c.all(), ",", o.all(), ",", i.all(),
-				endAlias(), " from ", c.table(), //
+		// bind(onoToMany(), c.ID(), o.CUSTOMERID());
+		// bind(onoToMany(), o.ID(), i.ORDERID());
+		List<Map<String, Object>> result2 = Dao.queryForList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
+				c.table(), //
 				" left outer join ", o.table(), " on ", c.ID(), "=", o.CUSTOMERID(), //
 				"  left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID());
+
 		for (Map<String, Object> map : result2) {
 			System.out.println(map);
-			System.out.println(map.get(o.ORDERNAME()));
+			System.out.println(map.get(o.alias(o.ORDERNAME())));
 		}
-		// TODO: work on it
-
+		// TODO work on it
 	}
 
 }

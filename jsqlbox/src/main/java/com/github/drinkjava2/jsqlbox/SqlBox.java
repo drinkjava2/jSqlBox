@@ -34,13 +34,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.ReflectionUtils;
 
 import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
-import com.github.drinkjava2.springsrc.ReflectionUtils;
-import com.github.drinkjava2.springsrc.StringUtils;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -227,7 +226,7 @@ public class SqlBox {
 		// delete the last ","
 		sb.deleteCharAt(sb.length() - 1).append(") ");
 		sb.append(SqlHelper.createValueString(count));
-		if (getSqlBoxContext().isShowSql())
+		if (getSqlBoxContext().getShowSql())
 			getSqlBoxContext()
 					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
@@ -288,7 +287,7 @@ public class SqlBox {
 		}
 		sb.setLength(sb.length() - 4);
 
-		if (this.getSqlBoxContext().isShowSql())
+		if (this.getSqlBoxContext().getShowSql())
 			getSqlBoxContext()
 					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
@@ -323,7 +322,7 @@ public class SqlBox {
 		}
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
-		if (this.getSqlBoxContext().isShowSql())
+		if (this.getSqlBoxContext().getShowSql())
 			getSqlBoxContext()
 					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 
@@ -358,7 +357,7 @@ public class SqlBox {
 		}
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
-		if (this.getSqlBoxContext().isShowSql())
+		if (this.getSqlBoxContext().getShowSql())
 			getSqlBoxContext()
 					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
 		int result = this.getJdbc().update(sb.toString(), parameters.toArray(new Object[parameters.size()]));
@@ -503,25 +502,6 @@ public class SqlBox {
 	}
 
 	/**
-	 * Return a * for sql
-	 */
-	public String all() {
-		StringBuilder sb = new StringBuilder();
-		Map<String, Column> realColumns = buildRealColumns();
-		for (Column column : realColumns.values()) {
-			if (column.isEnable()) {
-				if (SqlBoxUtils.isEmptyStr(this.getAlias()))
-					sb.append(column.getColumnName()).append(",");
-				else
-					sb.append(this.getAlias()).append(".").append(column.getColumnName()).append(" as ")
-							.append(getAlias()).append("_").append(column.getColumnName()).append(",");
-			}
-		}
-		sb.deleteCharAt(sb.length() - 1);
-		return sb.toString();
-	}
-
-	/**
 	 * get field's database column name <br/>
 	 * 1)No alias, return "columnName" <br/>
 	 * 2)Not in sql, return "alias_columnName" <br/>
@@ -529,18 +509,60 @@ public class SqlBox {
 	 * 4)In Sql, not in alias tag, return "alias.columnName" <br/>
 	 * 
 	 */
-	public String getColumnName(String fieldID) {
+	public String getColumnName(String fieldID) {// NOSONAR
 		getFieldIDCache().set(fieldID);
-		if (StringUtils.isEmpty(this.getAlias()))
-			return getRealColumnName(null, fieldID);
-		if (SqlHelper.getAliasTag().get() && SqlHelper.getInSqlTag().get())
-			return getAlias() + "." + getRealColumnName(null, fieldID) + " as " + getAlias() + "_"
-					+ getRealColumnName(null, fieldID);
-		else if (SqlHelper.getAliasTag().get() && !SqlHelper.getInSqlTag().get())
-			return getAlias() + "_" + getRealColumnName(null, fieldID);
-		else if (!SqlHelper.getAliasTag().get() && SqlHelper.getInSqlTag().get())
-			return getAlias() + "." + getRealColumnName(null, fieldID);
-		return getRealColumnName(null, fieldID);
+		String colname = getRealColumnName(null, fieldID);
+		String als = this.getAlias();
+		boolean inSQL = SqlHelper.getInSqlTag().get();
+		boolean inSelectTag = SqlHelper.getInSelectTag().get();
+		if (inSQL) {
+			if (!SqlBoxUtils.isEmptyStr(als)) {
+				if (inSelectTag)
+					return als + "." + colname + " as " + als + "_" + colname;
+				else
+					return als + "." + colname;
+
+			} else
+				return realTable() + "." + colname;
+		} else {
+			if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(als))
+				return als + "_" + colname;
+			else
+				return colname;
+		}
+	}
+
+	/**
+	 * Return all active fields for sql
+	 */
+	public String all() {
+		String als = this.getAlias();
+		boolean inSQL = SqlHelper.getInSqlTag().get();
+		boolean inSelectTag = SqlHelper.getInSelectTag().get();
+		StringBuilder sb = new StringBuilder();
+		Map<String, Column> realColumns = buildRealColumns();
+		for (Column column : realColumns.values()) {
+			if (column.isEnable()) {
+				String colname = column.getColumnName();
+
+				if (inSQL) {
+					if (!SqlBoxUtils.isEmptyStr(als)) {// NOSONAR
+						if (inSelectTag)
+							sb.append(als + "." + colname + " as " + als + "_" + colname).append(",");
+						else
+							sb.append(als + "." + colname).append(",");
+					} else
+						sb.append(realTable() + "." + colname).append(",");
+				} else {
+					if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(als))// NOSONAR
+						sb.append(als + "_" + colname).append(",");
+					else
+						sb.append(colname).append(",");
+				}
+			}
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
 	}
 
 	/**

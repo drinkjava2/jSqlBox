@@ -3,7 +3,7 @@ package test.examples;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.BeanBox;
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.Entity;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;

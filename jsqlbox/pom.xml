@@ -55,7 +55,7 @@
         <version.gpg-plugin>1.6</version.gpg-plugin>
 
 		<!--Below properties are for unit test only-->
-        <spring.version>4.3.2</spring.version>
+        <spring.version>4.3.6</spring.version>
     </properties>
 
    <repositories>
@@ -73,15 +73,8 @@
    </repositories>
 
  <dependencies>   
-     <!-- jSqlBox depends on jBeanBox because it included CGLIB & ASM libs in its own naming space, this project need a CGLIB to create proxy entity-->
-     <!-- And also I need jSqlBox to configure some beans to do unit test because it's more convenient than Spring  -->
-    <dependency>
-        <groupId>com.github.drinkjava2</groupId>
-        <artifactId>jbeanbox</artifactId>
-        <version>2.4.2-SNAPSHOT</version>
-    </dependency>
-
-	<!-- jSqlBox depends on Spring Transaction, I hope in future can find replacement, but not right now  -->
+ 
+    <!-- jSqlBox depends on Spring Transaction, I hope in future can find replacement, but not right now  -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
@@ -102,6 +95,14 @@
     <!-- ============================================================================================================== --> 
     <!-- ============================================================================================================== -->
         
+    <!-- jBeanBox is an IOC/AOP tool I wrote to replace Spring-core, in this project used to do some unit test configuration  -->
+    <dependency>
+        <groupId>com.github.drinkjava2</groupId>
+        <artifactId>jbeanbox</artifactId>
+        <version>2.4.2-SNAPSHOT</version>
+        <scope>test</scope>
+    </dependency> 
+    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

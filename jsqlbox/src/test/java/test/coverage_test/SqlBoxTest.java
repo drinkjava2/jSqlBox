@@ -1,7 +1,8 @@
 
 package test.coverage_test;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.selectAlias;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 
 import java.util.List;
 import java.util.Map;
@@ -38,9 +39,9 @@ public class SqlBoxTest {
 		u.box().configColumnName(u.fieldID(u.USERNAME()), u.ADDRESS());
 		u.setUserName("user1");
 		u.insert();
-		Assert.assertEquals("user1", Dao.queryForString(selectAlias(), u.USERNAME(), " from ", u.table()));
+		Assert.assertEquals("user1", Dao.queryForString(select(), u.USERNAME(), from(), u.table()));
 
-		List<Map<String, Object>> list = Dao.queryForList(selectAlias(), u.all(), " from ", u.table());
+		List<Map<String, Object>> list = Dao.queryForList(select(), u.all(), from(), u.table());
 		Map<String, Object> map = list.get(0);
 		Assert.assertEquals("user1", map.get(u.ADDRESS()));
 	}
@@ -55,9 +56,9 @@ public class SqlBoxTest {
 		u.box().configColumnName(u.fieldID(u.USERNAME()), u.ADDRESS());
 		u.setUserName("user2");
 		u.insert();
-		Assert.assertEquals("user2", Dao.queryForString(selectAlias(), u.ADDRESS(), " from ", u.table()));
+		Assert.assertEquals("user2", Dao.queryForString(select(), u.ADDRESS(), from(), u.table()));
 
-		List<Map<String, Object>> list = Dao.queryForList(selectAlias(), u.all(), " from ", u.table());
+		List<Map<String, Object>> list = Dao.queryForList(select(), u.all(), from(), u.table());
 		Map<String, Object> map = list.get(0);
 		Assert.assertEquals("user2", map.get(u.alias(u.ADDRESS())));
 	}

@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Yong Zhu
@@ -41,7 +42,8 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private boolean showSql = false;
+	private Boolean showSql = false;
+	private Boolean formatSql = false;
 
 	public static final String SQLBOX_IDENTITY = "BX";
 
@@ -100,12 +102,20 @@ public class SqlBoxContext {
 		refreshMetaData();
 	}
 
-	public boolean isShowSql() {
+	public Boolean getShowSql() {
 		return showSql;
 	}
 
-	public void setShowSql(boolean showSql) {
+	public void setShowSql(Boolean showSql) {
 		this.showSql = showSql;
+	}
+
+	public Boolean getFormatSql() {
+		return formatSql;
+	}
+
+	public void setFormatSql(Boolean formatSql) {
+		this.formatSql = formatSql;
 	}
 
 	public JdbcTemplate getJdbc() {
@@ -273,7 +283,7 @@ public class SqlBoxContext {
 	 */
 	protected void logSql(SqlAndParameters sp) {
 		// check if allowed print SQL
-		if (!this.isShowSql())
+		if (!this.getShowSql())
 			return;
 		StringBuilder sb = new StringBuilder(sp.getSql());
 		Object[] args = sp.getParameters();
@@ -287,11 +297,28 @@ public class SqlBoxContext {
 					sb.append("\r\n");
 			}
 		}
-		log.info(sb.toString());
+		String sql = sb.toString();
+		if (getFormatSql()) {
+			sql = " " + sql;
+			sql = StringUtils.replace(sql, ",", ",\r\n\t");
+			sql = StringUtils.replace(sql, " select ", "\r\nselect \r\n\t");
+			sql = StringUtils.replace(sql, " from ", "\r\nfrom \r\n\t");
+			sql = StringUtils.replace(sql, " where ", "\r\nwhere \r\n\t");
+			sql = StringUtils.replace(sql, " delete ", "\r\ndelete \r\n\t");
+			sql = StringUtils.replace(sql, " update ", "\r\nupdate \r\n\t");
+			sql = StringUtils.replace(sql, " left ", "\r\nleft ");
+			sql = StringUtils.replace(sql, " right ", "\r\nright ");
+			sql = StringUtils.replace(sql, " inner ", "\r\ninner ");
+			sql = StringUtils.replace(sql, " join ", " join \r\n\t");
+			sql = StringUtils.replace(sql, " on ", "\r\n   on   ");
+			sql = StringUtils.replace(sql, " group ", "\r\ngroup \r\n\t");
+			sql = StringUtils.replace(sql, " order ", "\r\norder \r\n\t");
+		}
+		log.info(sql);
 	}
 
 	private void logCachedSQL(List<List<SqlAndParameters>> subSPlist) {
-		if (this.isShowSql()) {
+		if (this.getShowSql()) {
 			if (subSPlist != null) {
 				List<SqlAndParameters> l = subSPlist.get(0);
 				if (l != null) {
@@ -448,7 +475,7 @@ public class SqlBoxContext {
 			for (Map<String, Object> map : mapList) {
 				if (map == null) {
 				}
-				// TODO work on it 
+				// TODO work on it
 			}
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext queryForDbList error, sql=" + sql);
