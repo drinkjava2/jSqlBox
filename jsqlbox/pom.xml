@@ -54,7 +54,7 @@
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
 
-		<!--Below properties are for unit test only-->
+		<!--Already tested on Spring 4.3.2 and 4.3.6 version-->
         <spring.version>4.3.6</spring.version>
     </properties>
 
@@ -74,13 +74,6 @@
 
  <dependencies>   
  
-    <!-- jSqlBox depends on Spring Transaction, I hope in future can find replacement, but not right now  -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${spring.version}.RELEASE</version>
-    </dependency> 
-    
 	<!-- jSqlBox depends on Spring JdbcTemplate, I hope in future can find replacement, but not right now -->
     <dependency>
         <groupId>org.springframework</groupId>
@@ -88,14 +81,24 @@
         <version>${spring.version}.RELEASE</version>
     </dependency>
 
-    <!-- ============================================================================================================== -->   
-    <!-- ============================================================================================================== -->
-    <!-- Below libs are for unit test only, jSqlBox has no dependency on them, scope be set to "test" only              -->
-    <!-- jSqlBox unit test based on H2-Database, and also passed the MySql5, Oracle11g database test              -->    
-    <!-- ============================================================================================================== --> 
-    <!-- ============================================================================================================== -->
+    <!-- Spring context is not used for jSqlBox core, only used for unit test, but did not set to test scope to make
+         sure it has same version with jdbcTemplate -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}.RELEASE</version>
+    </dependency> 
+    
+    
+    <!-- ================================================================================================== -->   
+    <!-- ================================================================================================== -->
+    <!-- Below libs are for unit test only, scope be set to "test"                                          -->
+    <!-- jSqlBox unit test passed H2, MySql5, Oracle11g testing                                             -->    
+    <!-- ================================================================================================== --> 
+    <!-- ================================================================================================== -->
+
         
-    <!-- jBeanBox is an IOC/AOP tool I wrote to replace Spring-core, in this project used to do some unit test configuration  -->
+    <!-- jBeanBox is an IOC/AOP tool, in this project used to do some unit test configuration  -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jbeanbox</artifactId>

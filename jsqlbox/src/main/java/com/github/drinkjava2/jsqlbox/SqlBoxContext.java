@@ -96,42 +96,47 @@ public class SqlBoxContext {
 	/**
 	 * Set DataSource for SqlBoxContext
 	 */
-	public void setDataSource(DataSource dataSource) {
+	public SqlBoxContext setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 		this.jdbc.setDataSource(dataSource);
 		refreshMetaData();
+		return this;
 	}
 
 	public Boolean getShowSql() {
 		return showSql;
 	}
 
-	public void setShowSql(Boolean showSql) {
+	public SqlBoxContext setShowSql(Boolean showSql) {
 		this.showSql = showSql;
+		return this;
 	}
 
 	public Boolean getFormatSql() {
 		return formatSql;
 	}
 
-	public void setFormatSql(Boolean formatSql) {
+	public SqlBoxContext setFormatSql(Boolean formatSql) {
 		this.formatSql = formatSql;
+		return this;
 	}
 
 	public JdbcTemplate getJdbc() {
 		return jdbc;
 	}
 
-	public void setJdbc(JdbcTemplate jdbc) {
+	public SqlBoxContext setJdbc(JdbcTemplate jdbc) {
 		this.jdbc = jdbc;
+		return this;
 	}
 
 	public DBMetaData getMetaData() {
 		return metaData;
 	}
 
-	public void setMetaData(DBMetaData metaData) {
+	public SqlBoxContext setMetaData(DBMetaData metaData) {
 		this.metaData = metaData;
+		return this;
 	}
 
 	/**
@@ -310,7 +315,7 @@ public class SqlBoxContext {
 			sql = StringUtils.replace(sql, " right ", "\r\nright ");
 			sql = StringUtils.replace(sql, " inner ", "\r\ninner ");
 			sql = StringUtils.replace(sql, " join ", " join \r\n\t");
-			sql = StringUtils.replace(sql, " on ", "\r\n   on   ");
+			sql = StringUtils.replace(sql, " on ", "\r\n   on  ");
 			sql = StringUtils.replace(sql, " group ", "\r\ngroup \r\n\t");
 			sql = StringUtils.replace(sql, " order ", "\r\norder \r\n\t");
 		}
@@ -475,7 +480,7 @@ public class SqlBoxContext {
 			for (Map<String, Object> map : mapList) {
 				if (map == null) {
 				}
-				// TODO work on it
+				// TODO work on it, should return a tree result
 			}
 		} catch (Exception e) {
 			SqlBoxException.throwEX(e, "SqlBoxContext queryForDbList error, sql=" + sql);

@@ -45,8 +45,7 @@ public class ListQueryTest {
 
 	@Test
 	public void simpleQueryTest() {
-		Dao.getDefaultContext().setShowSql(true);
-		Dao.getDefaultContext().setFormatSql(true);
+		Dao.getDefaultContext().setShowSql(true).setFormatSql(true);
 		System.out.println("=====test simple query====");
 		User u = new User();
 		List<Map<String, Object>> list = Dao.queryForList(select(), u.ID(), ",", u.ADDRESS(), ",", u.AGE(), from(),
@@ -69,6 +68,8 @@ public class ListQueryTest {
 				comma(u1.table(), u2.table()), " where ", u1.ID(), "=", u2.ID());
 		Map<String, Object> map = list2.get(0);
 
+		Assert.assertEquals(null, map.get(u1.USERNAME()));
+		Assert.assertEquals("Sam", map.get(u1.alias(u1.USERNAME())));
 		try {
 			aliasBegin();
 			Assert.assertEquals("Sam", map.get(u1.USERNAME()));

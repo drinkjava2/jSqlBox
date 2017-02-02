@@ -59,8 +59,12 @@ public interface Entity {
 		return (T) this;
 	}
 
+	public default String automaticQuerySQL() {
+		return this.box().automaticQuerySQL();
+	}
+
 	public default List<Object> getNodeList(Entity entity) {
-		return null;// TODO work on it
+		return null;// TODO work on it, need return a object tree
 	}
 
 }

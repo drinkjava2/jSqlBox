@@ -61,4 +61,8 @@ public class Customer implements Entity {
 		return box().getColumnName("customerName");
 	};
 
+	public String ORDERLIST() {
+		return box().getColumnName("ordersList");
+	};
+
 }

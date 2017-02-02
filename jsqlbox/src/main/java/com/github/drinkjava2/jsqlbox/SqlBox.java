@@ -451,9 +451,14 @@ public class SqlBox {
 	 */
 	public String fieldID(String realColumnName) {
 		String fieldID = getFieldIDCache().get();
+		String toCompare;
+		if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(this.getAlias()))
+			toCompare = this.getAlias() + "_" + this.getRealColumnName(null, fieldID);
+		else
+			toCompare = this.getRealColumnName(null, fieldID);
 		if (SqlBoxUtils.isEmptyStr(fieldID) || SqlBoxUtils.isEmptyStr(realColumnName)
-				|| !realColumnName.equals(this.getRealColumnName(null, fieldID)))
-			throwEX("Box getFieldID error, can only be called as fieldID(xx.SOMECOLUMNNAME()) format");
+				|| !realColumnName.equals(toCompare))
+			throwEX("Box fieldID error, can only be called according fieldID(xx.SOMECOLUMNNAME()) format");
 		return fieldID;
 	}
 
@@ -689,7 +694,7 @@ public class SqlBox {
 	}
 
 	/**
-	 * Get real column name by fieldID <br/>
+	 * Get real column name by fieldID , realTableName can leave null if don't know <br/>
 	 * userName field will find userName or username or USERNAME or USER_NAME, but only allowed 1
 	 */
 	private String getRealColumnName(String realTableName, String fieldID) {// NOSONAR
@@ -748,6 +753,13 @@ public class SqlBox {
 	public Object configAlias(String tableAlias) {
 		alias = tableAlias;
 		return this.getEntityBean();
+	}
+
+	/**
+	 * Config table name
+	 */
+	public String automaticQuerySQL() {
+		return SqlHelper.select() + this.all() + SqlHelper.from() + this.table();
 	}
 
 	/**
