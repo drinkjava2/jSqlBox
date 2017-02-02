@@ -37,9 +37,6 @@ public class LeftJoinQueryTest {
 		Dao.execute(Order.CREATE_SQL);
 		Dao.execute(OrderItem.CREATE_SQL);
 		Dao.refreshMetaData();
-		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from customer"));
-		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from orders"));
-		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from orderitem"));
 
 		Customer c = new Customer();
 		c.setCustomerName("Sam");
@@ -77,15 +74,14 @@ public class LeftJoinQueryTest {
 
 	@Test
 	public void leftJoinQueryNoAlias() {
-		Dao.getDefaultContext().setShowSql(true);
 		Customer c = new Customer();
 		Order o = new Order();
 		OrderItem i = new OrderItem();
 		List<Map<String, Object>> result2 = Dao.queryForList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
 				" left outer join ", o.table(), " on ", c.ID(), "=", o.CUSTOMERID(), //
-				"  left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID());
-
+				" left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID(), //
+				" order by ", o.ID(), ",", i.ID());
 		for (Map<String, Object> map : result2) {
 			System.out.println(map.get(o.ORDERNAME()));
 		}
@@ -93,7 +89,6 @@ public class LeftJoinQueryTest {
 
 	@Test
 	public void leftJoinQueryWithAlias1() {
-		Dao.getDefaultContext().setShowSql(true);
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
@@ -103,7 +98,8 @@ public class LeftJoinQueryTest {
 		List<Map<String, Object>> result2 = Dao.queryForList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
 				" left outer join ", o.table(), " on ", c.ID(), "=", o.CUSTOMERID(), //
-				"  left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID());
+				" left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID(), //
+				" order by ", o.ID(), ",", i.ID());
 
 		for (Map<String, Object> map : result2) {
 			System.out.println(map.get(o.alias(o.ORDERNAME())));
@@ -113,16 +109,14 @@ public class LeftJoinQueryTest {
 
 	@Test
 	public void leftJoinQueryWithAlias2() {
-		Dao.getDefaultContext().setShowSql(true);
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
-
 		List<Map<String, Object>> result2 = Dao.queryForList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
 				" left outer join ", o.table(), " on ", mapping(oneToMany(), c.ID(), o.CUSTOMERID()), //
-				"  left outer join ", i.table(), " on ", mapping(oneToMany(), o.ID(), i.ORDERID()));
-
+				" left outer join ", i.table(), " on ", mapping(oneToMany(), o.ID(), i.ORDERID()), //
+				" order by ", o.ID(), ",", i.ID());
 		for (Map<String, Object> map : result2) {
 			System.out.println(map.get(o.alias(o.ORDERNAME())));
 		}
@@ -130,14 +124,13 @@ public class LeftJoinQueryTest {
 
 	@Test
 	public void leftJoinQueryAutomaticQuerySQL() {
-		Dao.getDefaultContext().setShowSql(true);
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
 		mapping(oneToMany(), c.ID(), o.CUSTOMERID());
 		mapping(oneToMany(), o.ID(), i.ORDERID());
 
-		List<Map<String, Object>> result2 = Dao.queryForList(c.automaticQuerySQL());
+		List<Map<String, Object>> result2 = Dao.queryForList(c.automaticQuerySQL(), " order by ", c.ID());
 		// TODO work on it, automaticQuerySQL should return the full left join SQL
 
 		for (Map<String, Object> map : result2) {
