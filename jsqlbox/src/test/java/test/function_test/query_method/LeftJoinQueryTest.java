@@ -124,12 +124,11 @@ public class LeftJoinQueryTest {
 
 	@Test
 	public void leftJoinQueryAutomaticQuerySQL() {
-		Customer c = new Customer().configAlias("c");
-		Order o = new Order().configAlias("o");
-		OrderItem i = new OrderItem().configAlias("i");
+		Customer c = new Customer();
+		Order o = new Order();
+		OrderItem i = new OrderItem();
 		mapping(oneToMany(), c.ID(), o.CUSTOMERID());
 		mapping(oneToMany(), o.ID(), i.ORDERID());
-
 		List<Map<String, Object>> result2 = Dao.queryForList(c.automaticQuerySQL(), " order by ", c.ID());
 		// TODO work on it, automaticQuerySQL should return the full left join SQL
 

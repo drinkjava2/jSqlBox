@@ -450,16 +450,21 @@ public class SqlBox {
 	 * get field's fieldID
 	 */
 	public String fieldID(String realColumnName) {
-		String fieldID = getFieldIDCache().get();
-		String toCompare;
-		if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(this.getAlias()))
-			toCompare = this.getAlias() + "_" + this.getRealColumnName(null, fieldID);
-		else
-			toCompare = this.getRealColumnName(null, fieldID);
-		if (SqlBoxUtils.isEmptyStr(fieldID) || SqlBoxUtils.isEmptyStr(realColumnName)
-				|| !realColumnName.equals(toCompare))
-			throwEX("Box fieldID error, can only be called according fieldID(xx.SOMECOLUMNNAME()) format");
-		return fieldID;
+		try {
+			String fieldID = getFieldIDCache().get();
+			String toCompare;
+			if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(this.getAlias()))
+				toCompare = this.getAlias() + "_" + this.getRealColumnName(null, fieldID);
+			else
+				toCompare = this.getRealColumnName(null, fieldID);
+			if (SqlBoxUtils.isEmptyStr(fieldID) || SqlBoxUtils.isEmptyStr(realColumnName)
+					|| !realColumnName.equals(toCompare))
+				throwEX("Box fieldID error, can only be called according fieldID(xx.SOMECOLUMNNAME()) format");
+
+			return fieldID;
+		} finally {
+			getFieldIDCache().set(null);
+		}
 	}
 
 	/**
