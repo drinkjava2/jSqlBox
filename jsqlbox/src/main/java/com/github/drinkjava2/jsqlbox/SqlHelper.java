@@ -149,7 +149,7 @@ public class SqlHelper {
 	 * Cache SQL in threadlocal
 	 */
 	public static void cacheSQL(String... sql) {
-		SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
 		sqlBatchCache.get().add(sp);
 		sqlBatchString.set(sp.getSql());
 	}
@@ -169,9 +169,12 @@ public class SqlHelper {
 	/**
 	 * Clear batch SQL cached in threadlocal
 	 */
-	public static void clearBatchSQLs() {
+	protected static void clearBatchSQLs() {
 		clear();
 		sqlBatchCache.get().clear();
+	}
+
+	protected static void clearBatchSQLStringOnly() {
 		sqlBatchString.set("");
 	}
 
@@ -290,24 +293,42 @@ public class SqlHelper {
 	/**
 	 * Get cached sql and parameters from threadlocal, return a SqlAndParameters instance
 	 */
-	public static SqlAndParameters splitSQLandParameters(String[] sqls) {
-		StringBuilder sql = new StringBuilder("");
-		for (String str : sqls) {
-			sql.append(str);
+	public static SqlAndParameters prepareSQLandParameters(String... sqls) {
+		try {
+			StringBuilder sql = new StringBuilder("");
+			for (String str : sqls) {
+				sql.append(str);
+			}
+			SqlAndParameters sp = new SqlAndParameters();
+			ArrayList<String> list = sqlCache.get();
+			sp.setParameters(list.toArray(new String[list.size()]));
+			sp.setSql(sql.toString());
+			return sp;
+		} finally {
+			SqlHelper.clear();
 		}
-		SqlAndParameters sp = new SqlAndParameters();
-		ArrayList<String> list = sqlCache.get();
-		sp.setParameters(list.toArray(new String[list.size()]));
-		sp.setSql(sql.toString());
-		clear();
-		return sp;
 	}
 
 	/**
 	 * Get cached sql and parameters from threadlocal, return a sublisted SqlAndParameters list
 	 */
-	public static List<List<SqlAndParameters>> getSQLandParameterSubList() {
-		return subList(sqlBatchCache.get(), 500);
+	public static List<List<SqlAndParameters>> getAndClearBatchSQLs() {
+		try {
+			return subList(sqlBatchCache.get(), 500);
+		} finally {
+			clearBatchSQLs();
+		}
+	}
+
+	/**
+	 * Get cached sql and parameters from threadlocal, return a sublisted SqlAndParameters list
+	 */
+	public static String getAndClearBatchSqlString() {
+		try {
+			return sqlBatchString.get();
+		} finally {
+			clearBatchSQLStringOnly();
+		}
 	}
 
 	/**
@@ -335,24 +356,25 @@ public class SqlHelper {
 	/**
 	 * SubList a List, divide a list by given blockSize
 	 */
-	private static <T> List<List<T>> subList(List<T> list, int blockSize) {// NOSONAR
-		List<List<T>> lists = new ArrayList<>();
-		if (list != null && blockSize > 0) {
-			int listSize = list.size();
+	private static <T> List<List<T>> subList(List<T> srcList, int blockSize) {// NOSONAR
+		List<T> copiedList = new ArrayList<>(srcList); // srcList not safe it stored in ThreadLocal
+		List<List<T>> resultList = new ArrayList<>();
+		if (blockSize > 0) {
+			int listSize = copiedList.size();
 			if (listSize <= blockSize) {
-				lists.add(list);
-				return lists;
+				resultList.add(copiedList);
+				return resultList;
 			}
 			int batchSize = listSize / blockSize;
 			int remain = listSize % blockSize;
 			for (int i = 0; i < batchSize; i++) {
 				int fromIndex = i * blockSize;
 				int toIndex = fromIndex + blockSize;
-				lists.add(list.subList(fromIndex, toIndex));
+				resultList.add(copiedList.subList(fromIndex, toIndex));
 			}
 			if (remain > 0)
-				lists.add(list.subList(listSize - remain, listSize));
+				resultList.add(copiedList.subList(listSize - remain, listSize));
 		}
-		return lists;
+		return resultList;
 	}
 }

@@ -16,6 +16,8 @@
 
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.ArrayList;
+
 /**
  * This class is for transfer SQL query result List<Map<String, Object>> to object trees<br/>
  * There are 4 type mappings: oneToOne, oneToMany, manyToMany, tree <br/>
@@ -31,33 +33,82 @@ package com.github.drinkjava2.jsqlbox;
  * mapping(manyToMany(c.ORDERLIST(), o.CUSTOMERLIST()), c.ID(),o.CUSTOMERID()); <br/>
  * mapping(tree(), c.ID(),c.PID); <br/>
  * 
+ * note: c.ORDER(), c.ORDERLIST is for bind the node or node list to a field <br/>
+ * 
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
-public class SqlMapping {
-	private static final String EMPTY_STRING = "";
+public class MappingHelper {
+	private static ThreadLocal<MappingType> inMapping = new ThreadLocal<MappingType>() {
+		@Override
+		protected MappingType initialValue() {
+			return null;
+		}
+	};
 
-	private SqlMapping() {// Disable default public constructor
+	private static ThreadLocal<ArrayList<Mapping>> mappingCache = new ThreadLocal<ArrayList<Mapping>>() {
+		@Override
+		protected ArrayList<Mapping> initialValue() {
+			return new ArrayList<>();
+		}
+	};
+
+	private static ThreadLocal<ArrayList<Object>> entityCache = new ThreadLocal<ArrayList<Object>>() {
+		@Override
+		protected ArrayList<Object> initialValue() {
+			return new ArrayList<>();
+		}
+	};
+
+	private MappingHelper() {// Disable default public constructor
 	}
 
-	public static String mapping(String mappingType, String fieldID1, String fieldID2) {
-		return new StringBuilder(" ").append(fieldID1).append(" = ").append(fieldID2).append(" ").toString();
+	public static Boolean isInMapping() {
+		return inMapping.get() != null;
+	}
+
+	public static ArrayList<Object> getEntityCache() {
+		return entityCache.get();
+	}
+
+	public static String mapping(String... args) {
+		try {
+			Mapping mapping = new Mapping();
+			mapping.setMappingType(inMapping.get());
+			mapping.setThisEntity(null);
+
+			mappingCache.get().add(mapping);
+
+			StringBuilder sb = new StringBuilder(" ");
+			for (String string : args) {
+				sb.append(string);
+			}
+			sb.append(" ");
+			return sb.toString();
+		} finally {
+			inMapping.set(null);
+			entityCache.get().clear();
+		}
 	}
 
 	public static String oneToOne(String... fieldID) {
-		return EMPTY_STRING;
+		inMapping.set(MappingType.ONETOONE);
+		return "";
 	}
 
 	public static String oneToMany(String... fieldID) {
-		return EMPTY_STRING;
+		inMapping.set(MappingType.ONETOMANY);
+		return "";
 	}
 
 	public static String manyToMany(String... fieldID) {
-		return EMPTY_STRING;
+		inMapping.set(MappingType.MANYTOMANY);
+		return "";
 	}
 
 	public static String tree(String... fieldID) {
-		return EMPTY_STRING;
+		inMapping.set(MappingType.TREE);
+		return "";
 	}
 }

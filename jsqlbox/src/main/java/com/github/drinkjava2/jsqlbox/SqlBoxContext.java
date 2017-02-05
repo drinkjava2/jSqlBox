@@ -29,7 +29,6 @@ import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Yong Zhu
@@ -303,22 +302,8 @@ public class SqlBoxContext {
 			}
 		}
 		String sql = sb.toString();
-		if (getFormatSql()) {
-			sql = " " + sql;
-			sql = StringUtils.replace(sql, ",", ",\r\n\t");
-			sql = StringUtils.replace(sql, " select ", "\r\nselect \r\n\t");
-			sql = StringUtils.replace(sql, " from ", "\r\nfrom \r\n\t");
-			sql = StringUtils.replace(sql, " where ", "\r\nwhere \r\n\t");
-			sql = StringUtils.replace(sql, " delete ", "\r\ndelete \r\n\t");
-			sql = StringUtils.replace(sql, " update ", "\r\nupdate \r\n\t");
-			sql = StringUtils.replace(sql, " left ", "\r\nleft ");
-			sql = StringUtils.replace(sql, " right ", "\r\nright ");
-			sql = StringUtils.replace(sql, " inner ", "\r\ninner ");
-			sql = StringUtils.replace(sql, " join ", " join \r\n\t");
-			sql = StringUtils.replace(sql, " on ", "\r\n   on  ");
-			sql = StringUtils.replace(sql, " group ", "\r\ngroup \r\n\t");
-			sql = StringUtils.replace(sql, " order ", "\r\norder \r\n\t");
-		}
+		if (getFormatSql())
+			sql = SqlBoxUtils.formatSQL(sql);
 		log.info(sql);
 	}
 
@@ -359,21 +344,17 @@ public class SqlBoxContext {
 	 * Return Object type query result, sql be translated to prepared statement
 	 */
 	public <T> T queryForObject(Class<?> clazz, String... sql) {
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			if (sp.getParameters().length != 0)
-				return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
-			else {
-				try {
-					return (T) getJdbc().queryForObject(sp.getSql(), clazz);
-				} catch (EmptyResultDataAccessException e) {
-					SqlBoxException.eatException(e);
-					return null;
-				}
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
+		logSql(sp);
+		if (sp.getParameters().length != 0)
+			return (T) getJdbc().queryForObject(sp.getSql(), sp.getParameters(), clazz);
+		else {
+			try {
+				return (T) getJdbc().queryForObject(sp.getSql(), clazz);
+			} catch (EmptyResultDataAccessException e) {
+				SqlBoxException.eatException(e);
+				return null;
 			}
-		} finally {
-			SqlHelper.clear();
 		}
 	}
 
@@ -392,17 +373,13 @@ public class SqlBoxContext {
 	 * 
 	 */
 	public Integer execute(String... sql) {
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			if (sp.getParameters().length != 0)
-				return getJdbc().update(sp.getSql(), sp.getParameters());
-			else {
-				getJdbc().execute(sp.getSql());
-				return -1;
-			}
-		} finally {
-			SqlHelper.clear();
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
+		logSql(sp);
+		if (sp.getParameters().length != 0)
+			return getJdbc().update(sp.getSql(), sp.getParameters());
+		else {
+			getJdbc().execute(sp.getSql());
+			return -1;
 		}
 	}
 
@@ -412,17 +389,13 @@ public class SqlBoxContext {
 	 * 
 	 */
 	public Integer executeInsert(String... sql) {
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			if (sp.getParameters().length != 0)
-				return getJdbc().update(sp.getSql(), sp.getParameters());
-			else {
-				getJdbc().execute(sp.getSql());
-				return -1;
-			}
-		} finally {
-			SqlHelper.clear();
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
+		logSql(sp);
+		if (sp.getParameters().length != 0)
+			return getJdbc().update(sp.getSql(), sp.getParameters());
+		else {
+			getJdbc().execute(sp.getSql());
+			return -1;
 		}
 	}
 
@@ -442,69 +415,49 @@ public class SqlBoxContext {
 	 * Transfer cached SQLs to Prepared Statement and batch execute these SQLs
 	 */
 	public void executeCachedSQLs() {
-		try {
-			List<List<SqlAndParameters>> subSPlist = SqlHelper.getSQLandParameterSubList();
-			logCachedSQL(subSPlist);
-			for (final List<SqlAndParameters> splist : subSPlist) {
-				getJdbc().batchUpdate(SqlHelper.getSqlForBatch().get(), new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						SqlAndParameters sp = splist.get(i);
-						int index = 1;
-						for (Object parameter : sp.getParameters()) {
-							ps.setObject(index++, parameter);
-						}
+		String sql = SqlHelper.getAndClearBatchSqlString();
+		List<List<SqlAndParameters>> subSPlist = SqlHelper.getAndClearBatchSQLs();
+		logCachedSQL(subSPlist);
+		for (List<SqlAndParameters> splist : subSPlist) {
+			getJdbc().batchUpdate(sql, new BatchPreparedStatementSetter() {
+				@Override
+				public void setValues(PreparedStatement ps, int i) throws SQLException {
+					SqlAndParameters sp = splist.get(i);
+					int index = 1;
+					for (Object parameter : sp.getParameters()) {
+						ps.setObject(index++, parameter);
 					}
+				}
 
-					@Override
-					public int getBatchSize() {
-						return splist.size();
-					}
-				});
-			}
-		} finally {
-			SqlHelper.clearBatchSQLs();
+				@Override
+				public int getBatchSize() {
+					return splist.size();
+				}
+			});
 		}
+
+	}
+
+	public static <T> List<T> transferListToEntities(List<Map<String, Object>> list) {
+		return new ArrayList<>();
+		// TODO work on it
 	}
 
 	/**
 	 * Query for get a DB or DB child type list
 	 */
-	public List<Entity> queryForEntityTree(String... sql) {
-		List<Entity> result = new ArrayList<>();
-		List<Map<String, Object>> mapList = null;
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			mapList = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-			for (Map<String, Object> map : mapList) {
-				if (map == null) {
-				}
-				// TODO work on it, should return a tree result
-			}
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SqlBoxContext queryForDbList error, sql=" + sql);
-		} finally {
-			SqlHelper.clear();
-		}
-		return result;
+	public <T> List<T> queryForEntityList(String... sql) {
+		List<Map<String, Object>> list = queryForList(sql);
+		return transferListToEntities(list);
 	}
 
 	/**
 	 * Query for get a List<Map<String, Object>> List
 	 */
 	public List<Map<String, Object>> queryForList(String... sql) {
-		List<Map<String, Object>> result = null;
-		try {
-			SqlAndParameters sp = SqlHelper.splitSQLandParameters(sql);
-			logSql(sp);
-			result = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-		} catch (Exception e) {
-			SqlBoxException.throwEX(e, "SqlBoxContext queryForList error, sql=" + sql);
-		} finally {
-			SqlHelper.clear();
-		}
-		return result;
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
+		logSql(sp);
+		return getJdbc().queryForList(sp.getSql(), sp.getParameters());
 	}
 
 	public <T> T load(Class<?> entityOrBoxClass, Object entityID) {

@@ -4,11 +4,11 @@
  
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
- <version>1.0.0</version>
+ <version>1.0.0-SNAPSHOT</version>
  <packaging>jar</packaging> 
  
  <name>jSQLBox</name>
- <description>jSQLBox is a macro scale persistence tool for Java 7 and above.</description>
+ <description>jSQLBox is a macro scale persistence tool for Java8+</description>
  <url>https://github.com/drinkjava2/jsqlbox</url>
   
  <issueManagement>
@@ -53,13 +53,13 @@
         <version.source-plugin>2.4</version.source-plugin>
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
-
+		
 		<!--Already tested on Spring 4.3.2 and 4.3.6 version-->
         <spring.version>4.3.6</spring.version>
     </properties>
 
    <repositories>
-     <!-- LDS is not safe offical site, temporarily use this to get Oracle driver for unit test --> 
+     <!-- LDS is not offical site, temporarily use this to get Oracle driver for unit test --> 
      <repository>
         <id>codelds</id>
         <url>https://code.lds.org/nexus/content/groups/main-repo</url>
@@ -221,8 +221,12 @@
             </plugin>
         </plugins>
     </build>
+	
 
+		
+		
     <profiles>
+
         <profile>
             <id>release</id>
             <build>
@@ -260,6 +264,7 @@
                             <links>
                                 <link>http://docs.oracle.com/javase/${version.javadoc}/docs/api</link>
                             </links>
+							<additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -282,15 +287,15 @@
 			        will release to sanpshot site, but they use same command:
 					"mvn clean deploy -P release -Dgpg.passphrase=yourGPGpwd"
 			   -->	
-               <snapshotRepository>
-                  <id>oss</id>
-                  <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-               </snapshotRepository>
-               <repository>
-                  <id>oss</id>
-                  <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-               </repository>
-            </distributionManagement>
+              <snapshotRepository>
+                 <id>oss</id>
+                 <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+              </snapshotRepository>
+              <repository>
+                 <id>oss</id>
+                 <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+              </repository>
+           </distributionManagement>
         </profile>
 		
 		<!-- If want release to private or company server, can take a look this releaseLocal profile -->

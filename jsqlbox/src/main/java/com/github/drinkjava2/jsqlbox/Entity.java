@@ -55,7 +55,7 @@ public interface Entity {
 	}
 
 	public default <T> T configNode(Entity entity) {
-		this.box().addNode(entity);
+		// TODO work on it
 		return (T) this;
 	}
 

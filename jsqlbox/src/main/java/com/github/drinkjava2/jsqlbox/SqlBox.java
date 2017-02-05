@@ -66,11 +66,6 @@ public class SqlBox {
 
 	private SqlBoxContext context;
 
-	/**
-	 * Child Box, used for O-R Mapping query only
-	 */
-	private List<Entity> childBox = null;
-
 	private static ThreadLocal<String> fieldIDCache = new ThreadLocal<String>() {
 		@Override
 		protected String initialValue() {
@@ -119,15 +114,6 @@ public class SqlBox {
 	 */
 	public void setEntityBean(Object bean) {
 		this.entityBean = bean;
-	}
-
-	/**
-	 * Add a node for this box
-	 */
-	public void addNode(Entity entity) {
-		if (childBox == null)
-			childBox = new ArrayList<>();
-		childBox.add(entity);
 	}
 
 	// ========getter & setters below==============
@@ -520,6 +506,9 @@ public class SqlBox {
 	 * 
 	 */
 	public String getColumnName(String fieldID) {// NOSONAR
+		if (MappingHelper.isInMapping()) {
+			MappingHelper.getEntityCache().add(this.getEntityBean());
+		}
 		getFieldIDCache().set(fieldID);
 		String colname = getRealColumnName(null, fieldID);
 		String als = this.getAlias();

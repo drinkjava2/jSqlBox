@@ -2,8 +2,8 @@ package test.function_test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
-import static com.github.drinkjava2.jsqlbox.SqlMapping.mapping;
-import static com.github.drinkjava2.jsqlbox.SqlMapping.oneToMany;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.mapping;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 
 import java.util.Date;
 import java.util.List;
@@ -88,41 +88,6 @@ public class LeftJoinQueryTest {
 	}
 
 	@Test
-	public void leftJoinQueryWithAlias1() {
-		Customer c = new Customer().configAlias("c");
-		Order o = new Order().configAlias("o");
-		OrderItem i = new OrderItem().configAlias("i");
-		mapping(oneToMany(), c.ID(), o.CUSTOMERID());
-		mapping(oneToMany(), o.ID(), i.ORDERID());
-
-		List<Map<String, Object>> result2 = Dao.queryForList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
-				c.table(), //
-				" left outer join ", o.table(), " on ", c.ID(), "=", o.CUSTOMERID(), //
-				" left outer join ", i.table(), " on ", o.ID(), "=", i.ORDERID(), //
-				" order by ", o.ID(), ",", i.ID());
-
-		for (Map<String, Object> map : result2) {
-			System.out.println(map.get(o.alias(o.ORDERNAME())));
-		}
-		// TODO work on it, need add a method on entity to transfer result list to object tree
-	}
-
-	@Test
-	public void leftJoinQueryWithAlias2() {
-		Customer c = new Customer().configAlias("c");
-		Order o = new Order().configAlias("o");
-		OrderItem i = new OrderItem().configAlias("i");
-		List<Map<String, Object>> result2 = Dao.queryForList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
-				c.table(), //
-				" left outer join ", o.table(), " on ", mapping(oneToMany(), c.ID(), o.CUSTOMERID()), //
-				" left outer join ", i.table(), " on ", mapping(oneToMany(), o.ID(), i.ORDERID()), //
-				" order by ", o.ID(), ",", i.ID());
-		for (Map<String, Object> map : result2) {
-			System.out.println(map.get(o.alias(o.ORDERNAME())));
-		}
-	}
-
-	@Test
 	public void leftJoinQueryAutomaticQuerySQL() {
 		Customer c = new Customer();
 		Order o = new Order();
@@ -136,6 +101,21 @@ public class LeftJoinQueryTest {
 			System.out.println(map);
 			System.out.println(map.get(o.alias(o.ORDERNAME())));
 		}
+	}
+
+	@Test
+	public void leftJoinQueryWithAlias() {
+		Customer c = new Customer().configAlias("c");
+		Order o = new Order().configAlias("o");
+		OrderItem i = new OrderItem().configAlias("i");
+		List<Customer> Customers = Dao.queryForEntityList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
+				c.table(), //
+				" left outer join ", o.table(), " on ", mapping(oneToMany(), c.ID(), "=", o.CUSTOMERID()), //
+				" left outer join ", i.table(), " on ", mapping(oneToMany(), o.ID(), "=", i.ORDERID()), //
+				" order by ", o.ID(), ",", i.ID());
+		System.out.println(Customers);
+		// TODO work on it
+		// System.out.println(Customers.get(0).getCustomerName());
 	}
 
 }

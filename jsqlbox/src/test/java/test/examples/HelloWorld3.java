@@ -13,7 +13,7 @@ import test.config.PrepareTestContext;
 
 public class HelloWorld3 {
 
-	public static class User {
+	public static class User implements Entity {
 		Integer id;
 		String userName;
 		String address;

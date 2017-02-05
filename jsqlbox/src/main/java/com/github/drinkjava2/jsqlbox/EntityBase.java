@@ -7,4 +7,5 @@ package com.github.drinkjava2.jsqlbox;
  * 
  */
 public class EntityBase implements Entity {
+
 }

@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Yong Zhu
@@ -308,5 +309,23 @@ public class SqlBoxUtils {
 				|| clazz.equals(Character.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class)
 				|| clazz.equals(BigInteger.class) || clazz.equals(Boolean.class) || clazz.equals(Date.class)
 				|| clazz.isPrimitive());
+	}
+
+	public static String formatSQL(String sql) {
+		String fSql = " " + sql;
+		fSql = StringUtils.replace(fSql, ",", ",\r\n\t");
+		fSql = StringUtils.replace(fSql, " select ", "\r\nselect \r\n\t");
+		fSql = StringUtils.replace(fSql, " from ", "\r\nfrom \r\n\t");
+		fSql = StringUtils.replace(fSql, " where ", "\r\nwhere \r\n\t");
+		fSql = StringUtils.replace(fSql, " delete ", "\r\ndelete \r\n\t");
+		fSql = StringUtils.replace(fSql, " update ", "\r\nupdate \r\n\t");
+		fSql = StringUtils.replace(fSql, " left ", "\r\nleft ");
+		fSql = StringUtils.replace(fSql, " right ", "\r\nright ");
+		fSql = StringUtils.replace(fSql, " inner ", "\r\ninner ");
+		fSql = StringUtils.replace(fSql, " join ", " join \r\n\t");
+		fSql = StringUtils.replace(fSql, " on ", "\r\n   on  ");
+		fSql = StringUtils.replace(fSql, " group ", "\r\ngroup \r\n\t");
+		fSql = StringUtils.replace(fSql, " order ", "\r\norder \r\n\t");
+		return fSql;
 	}
 }

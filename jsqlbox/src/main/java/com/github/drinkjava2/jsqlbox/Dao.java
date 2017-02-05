@@ -19,8 +19,6 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-
 /**
  * In this class just copied some common DB access methods from default SqlBoxContext
  * 
@@ -67,10 +65,6 @@ public class Dao {
 		SqlBoxContext.getDefaultSqlBoxContext().executeCachedSQLs();
 	}
 
-	public static JdbcTemplate getDefaultJdbc() {
-		return SqlBoxContext.getDefaultSqlBoxContext().getJdbc();
-	}
-
 	public static SqlBoxContext getDefaultContext() {
 		return SqlBoxContext.getDefaultSqlBoxContext();
 	}
@@ -91,8 +85,8 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext().queryForList(sql);
 	}
 
-	public static List<Entity> queryForEntityTree(String... sql) {
-		return SqlBoxContext.getDefaultSqlBoxContext().queryForEntityTree(sql);
+	public static <T> List<T> queryForEntityList(String... sql) {
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForEntityList(sql);
 	}
 
 }
