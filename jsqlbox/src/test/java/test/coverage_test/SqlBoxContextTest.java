@@ -26,6 +26,9 @@ public class SqlBoxContextTest {
 		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
+	/**
+	 * Pagination test, already tested on H2, MySql, MSSQL, Oracle
+	 */
 	@Test
 	public void paginationTest() {
 		for (int i = 1; i <= 80; i++) {
@@ -42,7 +45,7 @@ public class SqlBoxContextTest {
 		for (Map<String, Object> map : list)
 			System.out.print(map.get(u.AGE()) + ",");
 		System.out.println();
-		Assert.assertEquals(11, list.get(0).get(u.AGE()));
+		Assert.assertEquals(11, (int) list.get(0).get(u.AGE()));
 	}
 
 }

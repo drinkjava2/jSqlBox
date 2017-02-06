@@ -21,7 +21,7 @@ import test.config.po.Customer;
 import test.config.po.Order;
 import test.config.po.OrderItem;
 
-public class LeftJoinQueryTest {
+public class MappingQueryTest {
 
 	/**
 	 * Prepare test data for object tree

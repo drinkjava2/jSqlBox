@@ -45,6 +45,9 @@ public class SqlMappingTest {
 		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
+	/**
+	 * Coverage test of mapping method only
+	 */
 	@Test
 	public void prepareSQLandParameters() {
 		Customer c = new Customer();
@@ -52,10 +55,11 @@ public class SqlMappingTest {
 		OrderItem i = new OrderItem();
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
-				" left outer join ", o.table(), " on ", mapping(oneToOne(c.ID()), c.ID(), "=", o.CUSTOMERID()), //
-				" left outer join ", o.table(), " on ", mapping(oneToMany(), c.ID(), "=", o.CUSTOMERID()), //
-				" left outer join ", i.table(), " on ", mapping(manyToMany(), o.ID(), "=", i.ORDERID()), //
-				" left outer join ", i.table(), " on ", mapping(tree(), o.ID(), "=", i.ORDERID()), //
+				" left outer join ", o.table(), " on ", mapping(oneToOne(), c.ID(), "=", o.CUSTOMERID()), //
+				" left outer join ", o.table(), " on ", mapping(oneToMany(), c.ID(), "=", o.CUSTOMERID(), c.ID()), //
+				" left outer join ", i.table(), " on ",
+				mapping(manyToMany(), o.ID(), "=", i.ORDERID(), c.ID(), "newfield"), //
+				" left outer join ", i.table(), " on ", mapping(tree(), o.ID(), "=", i.ORDERID(), o.ID(), i.ORDERID()), //
 				" order by ", o.ID(), ",", i.ID());
 		System.out.println(SqlBoxUtils.formatSQL(sp.getSql()));
 		List<Mapping> l = sp.getMappingList();

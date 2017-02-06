@@ -81,8 +81,8 @@ public class PrepareTestContext {
 					"USERNAME VARCHAR (50) ,", //
 					"PHONE_NUMBER VARCHAR (50) ,", //
 					"ADDRESS VARCHAR (50) ,", //
-					"ACTIVE INTEGER, ", //
-					"AGE INTEGER,", //
+					"ACTIVE NUMBER(8), ", //
+					"AGE NUMBER(8),", //
 					"CONSTRAINT CONST1 PRIMARY KEY (ID)", //
 					")");
 
@@ -91,8 +91,9 @@ public class PrepareTestContext {
 					"USERNAME VARCHAR (50) ,", //
 					"PHONE_NUMBER VARCHAR (50) ,", //
 					"ADDRESS VARCHAR (50) ,", //
-					"ACTIVE INTEGER, ", //
-					"AGE INTEGER)");
+					"ACTIVE NUMBER(8), ", //
+					"AGE NUMBER(8)", //					
+					")");
 			Dao.execute(
 					"CREATE SEQUENCE SEQ_1 MINVALUE 1 MAXVALUE 99999999 START WITH 1 INCREMENT BY 1 NOCYCLE CACHE 10");
 			Dao.execute(

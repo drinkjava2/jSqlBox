@@ -55,9 +55,16 @@ public class MappingHelper {
 		}
 	};
 
-	private static ThreadLocal<ArrayList<Object>> entityCache = new ThreadLocal<ArrayList<Object>>() {
+	private static ThreadLocal<ArrayList<Object>> entityPairCache = new ThreadLocal<ArrayList<Object>>() {
 		@Override
 		protected ArrayList<Object> initialValue() {
+			return new ArrayList<>();
+		}
+	};
+
+	private static ThreadLocal<ArrayList<String>> idPairCache = new ThreadLocal<ArrayList<String>>() {
+		@Override
+		protected ArrayList<String> initialValue() {
 			return new ArrayList<>();
 		}
 	};
@@ -71,15 +78,19 @@ public class MappingHelper {
 	public static void clear() {
 		inMapping.set(null);
 		mappingListCache.get().clear();
-		entityCache.get().clear();
+		entityPairCache.get().clear();
 	}
 
 	public static Boolean isInMapping() {
 		return inMapping.get() != null;
 	}
 
-	public static List<Object> getEntityCache() {
-		return entityCache.get();
+	public static List<Object> getEntityPairCache() {
+		return entityPairCache.get();
+	}
+
+	public static List<String> getIdPairCache() {
+		return idPairCache.get();
 	}
 
 	public static List<Mapping> getMappingListCache() {
@@ -91,6 +102,12 @@ public class MappingHelper {
 			Mapping mapping = new Mapping();
 			mapping.setMappingType(inMapping.get());
 			mapping.setThisEntity(null);
+			
+			mapping.setThisEntity(entityPairCache.get().get(0));
+			mapping.setThisField(idPairCache.get().get(0));
+			mapping.setOtherEntity(entityPairCache.get().get(1));
+			mapping.setOtherfield(idPairCache.get().get(1));
+			
 
 			mappingListCache.get().add(mapping);
 
@@ -102,26 +119,27 @@ public class MappingHelper {
 			return sb.toString();
 		} finally {
 			inMapping.set(null);
-			entityCache.get().clear();
+			getEntityPairCache().clear();
+			getIdPairCache().clear();
 		}
 	}
 
-	public static String oneToOne(String... fieldID) {
+	public static String oneToOne() {
 		inMapping.set(MappingType.ONETOONE);
 		return "";
 	}
 
-	public static String oneToMany(String... fieldID) {
+	public static String oneToMany() {
 		inMapping.set(MappingType.ONETOMANY);
 		return "";
 	}
 
-	public static String manyToMany(String... fieldID) {
+	public static String manyToMany() {
 		inMapping.set(MappingType.MANYTOMANY);
 		return "";
 	}
 
-	public static String tree(String... fieldID) {
+	public static String tree() {
 		inMapping.set(MappingType.TREE);
 		return "";
 	}
