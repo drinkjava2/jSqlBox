@@ -38,14 +38,14 @@ public class JBeanBoxConfig {
 	/**
 	 * ==================================================================================================<br/>
 	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to test on MySql <br/>
-	 * This project is already tested on H2 memory database & MySql5 and Oracle11g
+	 * This project is already tested on H2, MySql5, Oracle11g, MSSQL2012
 	 * ==================================================================================================<br/>
 	 */
-	public static class DataSourceBox extends H2DataSourceBox {
+	public static class DataSourceBox extends H2DataSourceBox {// change here to test on different database
 	}
 
 	// H2Database memory database connection URL
-	public static class H2DataSourceBox extends OracleDataSourceBox {
+	public static class H2DataSourceBox extends HikariCPBox {
 		{
 			setProperty("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 			setProperty("driverClassName", "org.h2.Driver");
@@ -67,7 +67,7 @@ public class JBeanBoxConfig {
 	// Oracle connection URL
 	public static class OracleDataSourceBox extends HikariCPBox {
 		{
-			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:xe");
+			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:XE");
 			setProperty("driverClassName", "oracle.jdbc.OracleDriver");
 			setProperty("username", "root");// change to your user & password
 			setProperty("password", "root888");
@@ -80,7 +80,7 @@ public class JBeanBoxConfig {
 			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
 			setProperty("driverClassName", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			setProperty("username", "sa");// change to your user & password
-			setProperty("password", "");
+			setProperty("password", "root888");
 		}
 	}
 

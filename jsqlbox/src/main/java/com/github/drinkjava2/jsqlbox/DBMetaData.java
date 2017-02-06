@@ -131,6 +131,11 @@ public class DBMetaData {
 					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
 					if (dbType == DatabaseType.MYSQL)// NOSONAR
 						col.setAutoIncreament(rs.getBoolean("IS_AUTOINCREMENT"));
+					else if (dbType == DatabaseType.MSSQLSERVER)// NOSONAR
+					{
+						boolean isautoInc = "YES".equals(rs.getString("IS_AUTOINCREMENT"));
+						col.setAutoIncreament(isautoInc);
+					}
 					oneTable.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
 				}
 				tiny.getTables().put(realTableName.toLowerCase(), oneTable);

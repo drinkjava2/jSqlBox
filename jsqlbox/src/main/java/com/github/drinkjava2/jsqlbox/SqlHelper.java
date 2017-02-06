@@ -265,6 +265,7 @@ public class SqlHelper {
 			SqlHelper.clear();
 			MappingHelper.clear();
 			SqlBoxContext.paginationEndCache.set(null);
+			SqlBoxContext.paginationOrderByCache.set(null);
 		}
 	}
 
@@ -336,4 +337,5 @@ public class SqlHelper {
 		}
 		return resultList;
 	}
+
 }

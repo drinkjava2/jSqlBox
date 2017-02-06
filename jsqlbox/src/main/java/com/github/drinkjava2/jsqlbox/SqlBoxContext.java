@@ -466,6 +466,20 @@ public class SqlBoxContext {
 	}
 
 	/**
+	 * Store "order by xxx desc" in ThreadLocal, return "", this is for MSSQL2005+ only <br/>
+	 */
+	public String orderBy(String... orderBy) {
+		StringBuilder sb = new StringBuilder(" order by ");
+		for (String str : orderBy)
+			sb.append(str);
+		if (this.getDatabaseType().isMsSQLSERVER()) {
+			paginationOrderByCache.set(sb.toString());
+			return " ";
+		} else
+			return sb.toString();
+	}
+
+	/**
 	 * Return pagination SQL depends different database type <br/>
 	 */
 	public String pagination(int pageNumber, int pageSize) {
@@ -476,9 +490,9 @@ public class SqlBoxContext {
 			end = " limit " + (pageNumber - 1) * pageSize + ", " + pageSize + " ";
 		} else if (this.getDatabaseType().isMsSQLSERVER()) {
 			// For SQL Server 2005 and later
-			start = "select a_tb.* from (select row_number() over(order by __orderby__ as rownum, ";
-			end = ") as a_tb where rownum between " + (pageNumber - 1) * pageSize + " and " + pageNumber * pageSize
-					+ " ";
+			start = " a_tb.* from (select row_number() over(__orderby__) as rownum, ";
+			end = ") as a_tb where rownum between " + ((pageNumber - 1) * pageSize + 1) + " and "
+					+ pageNumber * pageSize + " ";
 			/**
 			 * For SqlServer 2012 and later can also use <br/>
 			 * start = " "; <br/>

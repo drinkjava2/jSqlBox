@@ -32,7 +32,6 @@ public class Dao {
 		// Hide default constructor
 	}
 
-	// == shortcut methods, just copy some common public static method here======
 	public static Integer queryForInteger(String... sql) {
 		return SqlBoxContext.getDefaultSqlBoxContext().queryForInteger(sql);
 	}
@@ -71,6 +70,10 @@ public class Dao {
 
 	public static String pagination(int pageNumber, int pageSize) {
 		return SqlBoxContext.getDefaultSqlBoxContext().pagination(pageNumber, pageSize);
+	}
+
+	public static String orderBy(String... sql) {
+		return SqlBoxContext.getDefaultSqlBoxContext().orderBy(sql);
 	}
 
 	public static DatabaseType getDefaultDatabaseType() {

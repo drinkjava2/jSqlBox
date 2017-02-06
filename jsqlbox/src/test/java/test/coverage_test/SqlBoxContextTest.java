@@ -37,7 +37,7 @@ public class SqlBoxContextTest {
 		User u = new User();
 		Dao.getDefaultContext().setShowSql(true);
 		List<Map<String, Object>> list = Dao.queryForList("select", Dao.pagination(2, 10), " * from ", u.table(),
-				" order by ", u.AGE());
+				Dao.orderBy(u.AGE()));
 
 		for (Map<String, Object> map : list)
 			System.out.print(map.get(u.AGE()) + ",");

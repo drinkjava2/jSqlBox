@@ -54,6 +54,26 @@ public class PrepareTestContext {
 					"active Boolean, ", //
 					"Age Integer)", innoDB);
 		}
+		if (Dao.getDefaultDatabaseType().isMsSQLSERVER()) {
+			Dao.execute("create table users ", //
+					"(id integer identity(1,1),", //
+					"username Varchar (50) ,", //
+					"Phone_Number Varchar (50) ,", //
+					"Address Varchar (50) ,", //
+					"active bit, ", //
+					"Age Integer,", //
+					"constraint const1 primary key (id)", //
+					")");
+
+			Dao.execute("create table users2", //
+					"(id integer identity(1,1),", //
+					"constraint const4 primary key (ID),", //
+					"username Varchar (50) ,", //
+					"Phone_Number Varchar (50) ,", //
+					"Address Varchar (50) ,", //
+					"active bit, ", //
+					"Age Integer)");
+		}
 
 		if (Dao.getDefaultDatabaseType().isOracle()) {
 			Dao.execute("CREATE TABLE USERS", //
