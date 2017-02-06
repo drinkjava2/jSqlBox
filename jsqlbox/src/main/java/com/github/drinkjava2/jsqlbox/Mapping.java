@@ -88,4 +88,19 @@ public class Mapping {
 		this.otherPropertyName = otherPropertyName;
 	}
 
+	/**
+	 * Get debug info of Mapping instance
+	 */
+	public String getDebugInfo() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("============").append("\r\n");
+		sb.append("mappingType=" + mappingType).append("\r\n");
+		sb.append("thisEntity=" + thisEntity).append("\r\n");
+		sb.append("thisField=" + thisField).append("\r\n");
+		sb.append("thisPropertyName=" + thisPropertyName).append("\r\n");
+		sb.append("otherEntity=" + otherEntity).append("\r\n");
+		sb.append("otherfield=" + otherfield).append("\r\n");
+		sb.append("otherPropertyName=" + otherPropertyName).append("\r\n");
+		return sb.toString();
+	}
 }

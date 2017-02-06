@@ -69,6 +69,10 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext();
 	}
 
+	public static String pagination(int pageNumber, int pageSize) {
+		return SqlBoxContext.getDefaultSqlBoxContext().pagination(pageNumber, pageSize);
+	}
+
 	public static DatabaseType getDefaultDatabaseType() {
 		return SqlBoxContext.getDefaultSqlBoxContext().getDatabaseType();
 	}

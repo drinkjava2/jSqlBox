@@ -51,6 +51,29 @@ public class SqlBoxContext {
 
 	private DBMetaData metaData;
 
+	/**
+	 * Store paging pageNumber in ThreadLocal
+	 */
+	protected static ThreadLocal<String> paginationEndCache = new ThreadLocal<String>() {
+		@Override
+		protected String initialValue() {
+			return null;
+		}
+	};
+
+	/**
+	 * Store order by SQL piece, only needed for SQL Server 2005 and later
+	 */
+	protected static ThreadLocal<String> paginationOrderByCache = new ThreadLocal<String>() {
+		@Override
+		protected String initialValue() {
+			return null;
+		}
+	};
+
+	/**
+	 * Store boxes binded on entities
+	 */
 	protected static ThreadLocal<Map<Object, SqlBox>> boxCache = new ThreadLocal<Map<Object, SqlBox>>() {
 		@Override
 		protected Map<Object, SqlBox> initialValue() {
@@ -193,7 +216,12 @@ public class SqlBoxContext {
 	 * Get a box instance from thread local cache for a bean
 	 */
 	public static SqlBox getDefaultBox(Object bean) {
-		return defaultSqlBoxContext.getBox(bean);
+		SqlBox box = getBindedBox(bean);
+		if (box != null)
+			return box;
+		box = defaultSqlBoxContext.findAndBuildSqlBox(bean.getClass());
+		SqlBoxContext.bindBoxToBean(bean, box);
+		return box;
 	}
 
 	/**
@@ -435,7 +463,35 @@ public class SqlBoxContext {
 				}
 			});
 		}
+	}
 
+	/**
+	 * Return pagination SQL depends different database type <br/>
+	 */
+	public String pagination(int pageNumber, int pageSize) {
+		String start;
+		String end;
+		if (this.getDatabaseType().isH2() || this.getDatabaseType().isMySql()) {
+			start = " ";
+			end = " limit " + (pageNumber - 1) * pageSize + ", " + pageSize + " ";
+		} else if (this.getDatabaseType().isMsSQLSERVER()) {
+			// For SQL Server 2005 and later
+			start = "select a_tb.* from (select row_number() over(order by __orderby__ as rownum, ";
+			end = ") as a_tb where rownum between " + (pageNumber - 1) * pageSize + " and " + pageNumber * pageSize
+					+ " ";
+			/**
+			 * For SqlServer 2012 and later can also use <br/>
+			 * start = " "; <br/>
+			 * end = " offset " + (pageNumber - 1) * pageSize + " rows fetch next " + pageSize + " rows only ";
+			 */
+		} else if (this.getDatabaseType().isOracle()) {
+			start = " * FROM (SELECT a_tb.*, ROWNUM r_num FROM ( SELECT ";
+			end = " ) a_tb WHERE ROWNUM <= " + pageNumber * pageSize + ") WHERE r_num > " + (pageNumber - 1) * pageSize
+					+ " ";
+		} else
+			return (String) SqlBoxException.throwEX("pagination error: so far do not support this database.");
+		paginationEndCache.set(end);
+		return start;
 	}
 
 	public static <T> List<T> transferListToEntities(List<Map<String, Object>> list) {

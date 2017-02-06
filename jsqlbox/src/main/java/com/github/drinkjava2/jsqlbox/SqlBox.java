@@ -439,7 +439,7 @@ public class SqlBox {
 		try {
 			String fieldID = getFieldIDCache().get();
 			String toCompare;
-			if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(this.getAlias()))
+			if (SqlHelper.getInAliasTag() && !SqlBoxUtils.isEmptyStr(this.getAlias()))
 				toCompare = this.getAlias() + "_" + this.getRealColumnName(null, fieldID);
 			else
 				toCompare = this.getRealColumnName(null, fieldID);
@@ -491,7 +491,7 @@ public class SqlBox {
 	 * Get real database table name
 	 */
 	public String table() {
-		if (SqlBoxUtils.isEmptyStr(this.getAlias()) || !SqlHelper.getInSqlTag().get())
+		if (SqlBoxUtils.isEmptyStr(this.getAlias()) || !SqlHelper.getInSqlTag())
 			return realTable();
 		else
 			return realTable() + " " + this.getAlias();
@@ -512,8 +512,8 @@ public class SqlBox {
 		getFieldIDCache().set(fieldID);
 		String colname = getRealColumnName(null, fieldID);
 		String als = this.getAlias();
-		boolean inSQL = SqlHelper.getInSqlTag().get();
-		boolean inSelectTag = SqlHelper.getInSelectTag().get();
+		boolean inSQL = SqlHelper.getInSqlTag();
+		boolean inSelectTag = SqlHelper.getInSelectTag();
 		if (inSQL) {
 			if (!SqlBoxUtils.isEmptyStr(als)) {
 				if (inSelectTag)
@@ -524,7 +524,7 @@ public class SqlBox {
 			} else
 				return realTable() + "." + colname;
 		} else {
-			if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(als))
+			if (SqlHelper.getInAliasTag() && !SqlBoxUtils.isEmptyStr(als))
 				return als + "_" + colname;
 			else
 				return colname;
@@ -536,8 +536,8 @@ public class SqlBox {
 	 */
 	public String all() {
 		String als = this.getAlias();
-		boolean inSQL = SqlHelper.getInSqlTag().get();
-		boolean inSelectTag = SqlHelper.getInSelectTag().get();
+		boolean inSQL = SqlHelper.getInSqlTag();
+		boolean inSelectTag = SqlHelper.getInSelectTag();
 		StringBuilder sb = new StringBuilder();
 		Map<String, Column> realColumns = buildRealColumns();
 		for (Column column : realColumns.values()) {
@@ -553,7 +553,7 @@ public class SqlBox {
 					} else
 						sb.append(realTable() + "." + colname).append(",");
 				} else {
-					if (SqlHelper.getInAliasTag().get() && !SqlBoxUtils.isEmptyStr(als))// NOSONAR
+					if (SqlHelper.getInAliasTag() && !SqlBoxUtils.isEmptyStr(als))// NOSONAR
 						sb.append(als + "_" + colname).append(",");
 					else
 						sb.append(colname).append(",");

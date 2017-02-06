@@ -68,26 +68,6 @@ public class SqlHelper {
 	};
 
 	/**
-	 * one Tag
-	 */
-	private static ThreadLocal<ArrayList<String>> one = new ThreadLocal<ArrayList<String>>() {
-		@Override
-		protected ArrayList<String> initialValue() {
-			return new ArrayList<>();
-		}
-	};
-
-	/**
-	 * many Tag
-	 */
-	private static ThreadLocal<ArrayList<String>> many = new ThreadLocal<ArrayList<String>>() {
-		@Override
-		protected ArrayList<String> initialValue() {
-			return new ArrayList<>();
-		}
-	};
-
-	/**
 	 * For batch store SQL and Parameters in threadLocal
 	 */
 	private static ThreadLocal<ArrayList<SqlAndParameters>> sqlBatchCache = new ThreadLocal<ArrayList<SqlAndParameters>>() {
@@ -113,36 +93,22 @@ public class SqlHelper {
 	/**
 	 * Get inSlectTag in Threadlocal
 	 */
-	public static ThreadLocal<Boolean> getInSelectTag() {
-		return inSelectTag;
+	public static Boolean getInSelectTag() {
+		return inSelectTag.get();
 	}
 
 	/**
 	 * Get inAliasTag in Threadlocal
 	 */
-	public static ThreadLocal<Boolean> getInAliasTag() {
-		return inAliasTag;
+	public static Boolean getInAliasTag() {
+		return inAliasTag.get();
 	}
 
 	/**
 	 * Get inSqlTag in Threadlocal
 	 */
-	public static ThreadLocal<Boolean> getInSqlTag() {
-		return inSqlTag;
-	}
-
-	/**
-	 * Get SQL batch cached in threadlocal
-	 */
-	public static ThreadLocal<ArrayList<SqlAndParameters>> getSqlBatchCache() {
-		return sqlBatchCache;
-	}
-
-	/**
-	 * Get last SQL for batch cached in threadlocal
-	 */
-	public static ThreadLocal<String> getSqlForBatch() {
-		return sqlBatchString;
+	public static Boolean getInSqlTag() {
+		return inSqlTag.get();
 	}
 
 	/**
@@ -161,8 +127,6 @@ public class SqlHelper {
 		sqlCache.get().clear();
 		inSqlTag.set(false);
 		inSelectTag.set(false);
-		one.get().clear();
-		many.get().clear();
 		return "";
 	}
 
@@ -261,22 +225,6 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Return Empty String "" but set a "one" tag
-	 */
-	public static String one(String columnName) {
-		one.get().add(columnName);
-		return columnName;
-	}
-
-	/**
-	 * Return Empty String "" but set a "many" tag
-	 */
-	public static String many(String columnName) {
-		many.get().add(columnName);
-		return columnName;
-	}
-
-	/**
 	 * Join parameters together and seperated with comma
 	 */
 	public static String comma(Object... parameters) {
@@ -295,17 +243,28 @@ public class SqlHelper {
 	 */
 	public static SqlAndParameters prepareSQLandParameters(String... sqls) {
 		try {
-			StringBuilder sql = new StringBuilder("");
+			StringBuilder sb = new StringBuilder("");
 			for (String str : sqls) {
-				sql.append(str);
+				sb.append(str);
 			}
+			if (SqlBoxContext.paginationEndCache.get() != null)
+				sb.append(SqlBoxContext.paginationEndCache.get());
 			SqlAndParameters sp = new SqlAndParameters();
+			String sql = sb.toString();
+			if (SqlBoxContext.paginationOrderByCache.get() != null)
+				sql = sql.replaceFirst("__orderby__", SqlBoxContext.paginationOrderByCache.get());
+			sp.setSql(sql);
+
 			ArrayList<String> list = sqlCache.get();
 			sp.setParameters(list.toArray(new String[list.size()]));
-			sp.setSql(sql.toString());
+
+			List<Mapping> mappings = new ArrayList<>(MappingHelper.getMappingListCache());
+			sp.setMappingList(mappings);
 			return sp;
 		} finally {
 			SqlHelper.clear();
+			MappingHelper.clear();
+			SqlBoxContext.paginationEndCache.set(null);
 		}
 	}
 

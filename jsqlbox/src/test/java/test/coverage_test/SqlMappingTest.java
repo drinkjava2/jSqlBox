@@ -1,19 +1,22 @@
 
 package test.coverage_test;
 
-import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.manyToMany;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.mapping;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToOne;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.tree;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
+
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.Mapping;
 import com.github.drinkjava2.jsqlbox.SqlAndParameters;
 import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
@@ -55,6 +58,10 @@ public class SqlMappingTest {
 				" left outer join ", i.table(), " on ", mapping(tree(), o.ID(), "=", i.ORDERID()), //
 				" order by ", o.ID(), ",", i.ID());
 		System.out.println(SqlBoxUtils.formatSQL(sp.getSql()));
+		List<Mapping> l = sp.getMappingList();
+		for (Mapping mapping : l) {
+			System.out.println(mapping.getDebugInfo());
+		}
 	}
 
 }

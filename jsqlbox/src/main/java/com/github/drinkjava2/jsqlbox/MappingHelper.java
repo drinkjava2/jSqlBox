@@ -17,6 +17,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is for transfer SQL query result List<Map<String, Object>> to object trees<br/>
@@ -47,7 +48,7 @@ public class MappingHelper {
 		}
 	};
 
-	private static ThreadLocal<ArrayList<Mapping>> mappingCache = new ThreadLocal<ArrayList<Mapping>>() {
+	private static ThreadLocal<ArrayList<Mapping>> mappingListCache = new ThreadLocal<ArrayList<Mapping>>() {
 		@Override
 		protected ArrayList<Mapping> initialValue() {
 			return new ArrayList<>();
@@ -64,12 +65,25 @@ public class MappingHelper {
 	private MappingHelper() {// Disable default public constructor
 	}
 
+	/**
+	 * Clear all threadLocal variants
+	 */
+	public static void clear() {
+		inMapping.set(null);
+		mappingListCache.get().clear();
+		entityCache.get().clear();
+	}
+
 	public static Boolean isInMapping() {
 		return inMapping.get() != null;
 	}
 
-	public static ArrayList<Object> getEntityCache() {
+	public static List<Object> getEntityCache() {
 		return entityCache.get();
+	}
+
+	public static List<Mapping> getMappingListCache() {
+		return mappingListCache.get();
 	}
 
 	public static String mapping(String... args) {
@@ -78,7 +92,7 @@ public class MappingHelper {
 			mapping.setMappingType(inMapping.get());
 			mapping.setThisEntity(null);
 
-			mappingCache.get().add(mapping);
+			mappingListCache.get().add(mapping);
 
 			StringBuilder sb = new StringBuilder(" ");
 			for (String string : args) {

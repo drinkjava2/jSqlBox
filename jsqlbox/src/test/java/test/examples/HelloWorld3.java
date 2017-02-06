@@ -56,7 +56,6 @@ public class HelloWorld3 {
 	@Test
 	public void doTest1() {
 		System.out.println("===============================Testing HelloWorld3===============================");
-		// SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 
 		User user = new User();
@@ -81,7 +80,6 @@ public class HelloWorld3 {
 
 	@Test
 	public void doTest2() {
-		// SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		User user = new ChildUser();
 		SqlBox box = SqlBoxContext.getDefaultBox(user);
