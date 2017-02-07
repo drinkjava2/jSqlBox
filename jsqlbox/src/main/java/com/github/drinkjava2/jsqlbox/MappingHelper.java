@@ -69,16 +69,25 @@ public class MappingHelper {
 		}
 	};
 
+	private static ThreadLocal<ArrayList<String>> propertyPairCache = new ThreadLocal<ArrayList<String>>() {
+		@Override
+		protected ArrayList<String> initialValue() {
+			return new ArrayList<>();
+		}
+	};
+
 	private MappingHelper() {// Disable default public constructor
 	}
 
 	/**
 	 * Clear all threadLocal variants
 	 */
-	public static void clear() {
+	public static void clearAllMappingCached() {
 		inMapping.set(null);
 		mappingListCache.get().clear();
 		entityPairCache.get().clear();
+		idPairCache.get().clear();
+		propertyPairCache.get().clear();
 	}
 
 	public static Boolean isInMapping() {
@@ -93,34 +102,48 @@ public class MappingHelper {
 		return idPairCache.get();
 	}
 
+	public static List<String> getPropertyPairCache() {
+		return propertyPairCache.get();
+	}
+
 	public static List<Mapping> getMappingListCache() {
 		return mappingListCache.get();
 	}
 
-	public static String mapping(String... args) {
+	/**
+	 * Read cached mapping info from ThreadLocal and re-cache a Mapping instance in ThreadLocal
+	 */
+	public static String to(String... propertyFieldName) {// NOSONAR propertyFieldName is useful, can not remove
 		try {
 			Mapping mapping = new Mapping();
 			mapping.setMappingType(inMapping.get());
 			mapping.setThisEntity(null);
-			
+
 			mapping.setThisEntity(entityPairCache.get().get(0));
 			mapping.setThisField(idPairCache.get().get(0));
 			mapping.setOtherEntity(entityPairCache.get().get(1));
 			mapping.setOtherfield(idPairCache.get().get(1));
-			
+
+			if (propertyFieldName.length == 2) {
+				if (SqlBoxUtils.isEmptyStr(propertyFieldName[0]) && SqlBoxUtils.isEmptyStr(propertyFieldName[1]))
+					SqlBoxException.throwEX("MappingHelper to() can not set both empty propertyFieldNames");
+				else if (SqlBoxUtils.isEmptyStr(propertyFieldName[0])) {
+					mapping.setOtherPropertyName(getPropertyPairCache().get(0));
+				} else if (SqlBoxUtils.isEmptyStr(propertyFieldName[1])) {
+					mapping.setThisPropertyName(getPropertyPairCache().get(0));
+				} else {
+					mapping.setThisPropertyName(getPropertyPairCache().get(0));
+					mapping.setOtherPropertyName(getPropertyPairCache().get(1));
+				}
+			}
 
 			mappingListCache.get().add(mapping);
-
-			StringBuilder sb = new StringBuilder(" ");
-			for (String string : args) {
-				sb.append(string);
-			}
-			sb.append(" ");
-			return sb.toString();
+			return "";
 		} finally {
 			inMapping.set(null);
-			getEntityPairCache().clear();
-			getIdPairCache().clear();
+			entityPairCache.get().clear();
+			idPairCache.get().clear();
+			propertyPairCache.get().clear();
 		}
 	}
 

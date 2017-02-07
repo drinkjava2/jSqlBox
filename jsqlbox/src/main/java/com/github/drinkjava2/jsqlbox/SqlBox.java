@@ -507,8 +507,11 @@ public class SqlBox {
 	 */
 	public String getColumnName(String fieldID) {// NOSONAR
 		if (MappingHelper.isInMapping()) {
-			MappingHelper.getEntityPairCache().add(this.getEntityBean());
-			MappingHelper.getIdPairCache().add(fieldID);
+			if (MappingHelper.getIdPairCache().size() <2) {
+				MappingHelper.getIdPairCache().add(fieldID);
+				MappingHelper.getEntityPairCache().add(this.getEntityBean());
+			} else 
+				MappingHelper.getPropertyPairCache().add(fieldID); 
 		}
 		getFieldIDCache().set(fieldID);
 		String colname = getRealColumnName(null, fieldID);

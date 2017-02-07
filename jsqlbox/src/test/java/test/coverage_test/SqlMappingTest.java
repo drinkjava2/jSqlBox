@@ -2,7 +2,7 @@
 package test.coverage_test;
 
 import static com.github.drinkjava2.jsqlbox.MappingHelper.manyToMany;
-import static com.github.drinkjava2.jsqlbox.MappingHelper.mapping;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToOne;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.tree;
@@ -12,6 +12,7 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,7 +47,7 @@ public class SqlMappingTest {
 	}
 
 	/**
-	 * Coverage test of mapping method only
+	 * Coverage test of mapping methods only, this is a fake query
 	 */
 	@Test
 	public void prepareSQLandParameters() {
@@ -55,17 +56,24 @@ public class SqlMappingTest {
 		OrderItem i = new OrderItem();
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
-				" left outer join ", o.table(), " on ", mapping(oneToOne(), c.ID(), "=", o.CUSTOMERID()), //
-				" left outer join ", o.table(), " on ", mapping(oneToMany(), c.ID(), "=", o.CUSTOMERID(), c.ID()), //
-				" left outer join ", i.table(), " on ",
-				mapping(manyToMany(), o.ID(), "=", i.ORDERID(), c.ID(), "newfield"), //
-				" left outer join ", i.table(), " on ", mapping(tree(), o.ID(), "=", i.ORDERID(), o.ID(), i.ORDERID()), //
+				" left join ", o.table(), " on ", oneToOne(), c.ID(), "=", o.CUSTOMERID(), to(), //
+				" left join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(null, o.CUSTOMERID()), //
+				" left join ", i.table(), " on ", manyToMany(), o.ID(), "=", i.ORDERID(), to(c.ID(), null), //
+				" left join ", i.table(), " on ", tree(), o.ID(), "=", i.ORDERID(), to(c.ID(), o.CUSTOMERID()), //
 				" order by ", o.ID(), ",", i.ID());
 		System.out.println(SqlBoxUtils.formatSQL(sp.getSql()));
 		List<Mapping> l = sp.getMappingList();
+		Mapping m0 = l.get(1);
+
+		Assert.assertEquals(c, m0.getThisEntity());
+		Assert.assertEquals(o, m0.getOtherEntity());
+		Assert.assertNull(m0.getThisPropertyName());
+		Assert.assertEquals(o.fieldID(o.CUSTOMERID()), m0.getOtherPropertyName());
+
 		for (Mapping mapping : l) {
 			System.out.println(mapping.getDebugInfo());
 		}
+
 	}
 
 }

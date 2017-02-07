@@ -263,7 +263,7 @@ public class SqlHelper {
 			return sp;
 		} finally {
 			SqlHelper.clear();
-			MappingHelper.clear();
+			MappingHelper.clearAllMappingCached();
 			SqlBoxContext.paginationEndCache.set(null);
 			SqlBoxContext.paginationOrderByCache.set(null);
 		}
