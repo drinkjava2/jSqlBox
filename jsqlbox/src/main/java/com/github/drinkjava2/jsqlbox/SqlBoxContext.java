@@ -88,6 +88,13 @@ public class SqlBoxContext {
 		}
 	};
 
+	protected static ThreadLocal<Integer> circleDependencyCache = new ThreadLocal<Integer>() {
+		@Override
+		protected Integer initialValue() {
+			return 0;
+		}
+	};
+
 	public SqlBoxContext() {
 		// Default constructor
 	}
@@ -508,17 +515,101 @@ public class SqlBoxContext {
 		return start;
 	}
 
-	public static <T> List<T> transferListToEntities(List<Map<String, Object>> list) {
-		return new ArrayList<>();
-		// TODO work on it
+	/**
+	 * Here build Child Entity List
+	 */
+	private List<Map<String, Object>> buildChildEntity(Entity parent, List<Map<String, Object>> list,
+			List<Mapping> mappingList) {
+		int count = increaseCircleDependency();
+
+		List<Map<String, Object>> thisList = new ArrayList<Map<String, Object>>();
+		// find direct nodes which parent is parent
+		// thisList
+
+		// TODO add real code here to fill the thisList
+
+		circleDependencyCache.set(count);
+		return thisList;
 	}
 
 	/**
-	 * Query for get a DB or DB child type list
+	 * For circle dependency check
+	 */
+	private int increaseCircleDependency() {
+		int count = circleDependencyCache.get();
+		circleDependencyCache.set(count + 1);
+		if (count > 2000)
+			SqlBoxException.throwEX("Error: circle dependency or too deep tree(>2000).");
+		return count;
+	}
+
+	/**
+	 * Here build Root Entity List
+	 */
+	private <T> List<T> buildRootEntity(Mapping rootMapping, List<Map<String, Object>> list,
+			List<Mapping> mappingList) {
+		Class<?> entityClass = rootMapping.getThisEntity().getClass();
+		List<T> resultList = new ArrayList<>();
+		for (Map<String, Object> m : list) {
+			Entity root = this.createEntity(entityClass);
+			// TODO add real code here
+			resultList.add((T) root);
+		}
+		for (T root : resultList) {
+			Entity entity = (Entity) root;
+			List<Map<String, Object>> childList = buildChildEntity(entity, list, mappingList);
+			entity.box().setChildEntityList(childList);
+		}
+		return resultList;
+	}
+
+	/**
+	 * Check if mappingList is legal, then build Entity List
+	 * 
+	 * @param list
+	 *            The SQL query List
+	 * @param mappingList
+	 *            The the mapping list in SQL
+	 * @return The root entity list, each entity has it's child node list stored in box, use
+	 *         entity.box().getChildEntityList() to get child nodes, each child node point to its parent node, use
+	 *         entity.box().getParentEntity() to get parent node
+	 */
+	private <T> List<T> checkAndBuildEntityList(List<Map<String, Object>> list, List<Mapping> mappingList) {// NOSONAR
+		if (list.size() > 10000)
+			log.warn("Warning: queryForEntityList for list size >10000 is not recommanded.");
+		if (list.size() > 100000)
+			SqlBoxException.throwEX(
+					"SqlBoxContext checkAndBuildEntityList Error: queryForEntityList for list size >100000 is not allowed.");
+		int isRootCount = 0;
+		Mapping root = null;
+		for (Mapping mp1 : mappingList) {
+			boolean isRoot = true;
+			for (Mapping mp2 : mappingList) {
+				if (mp2.getOtherEntity() == mp1.getThisEntity()) {
+					isRoot = false;
+					break;
+				}
+			}
+			if (isRoot) {
+				mp1.setIsRoot(isRoot);
+				root = mp1;
+				isRootCount++;
+			}
+		}
+		if (isRootCount != 1)
+			SqlBoxException
+					.throwEX("SqlBoxContext checkAndBuildEntityList error: should have and only have 1 root entity");
+		return buildRootEntity(root, list, mappingList);
+	}
+
+	/**
+	 * Query for get Entity List
 	 */
 	public <T> List<T> queryForEntityList(String... sql) {
-		List<Map<String, Object>> list = queryForList(sql);
-		return transferListToEntities(list);
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
+		logSql(sp);
+		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+		return checkAndBuildEntityList(list, sp.getMappingList());
 	}
 
 	/**

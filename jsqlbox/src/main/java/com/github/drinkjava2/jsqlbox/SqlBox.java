@@ -55,6 +55,9 @@ public class SqlBox {
 	// The entity bean class
 	private Class<?> entityClass;
 
+	// Entity Bean Instance
+	private Object entityBean;
+
 	// Configure Columns
 	private Map<String, Column> configColumns = new HashMap<>();
 
@@ -66,15 +69,25 @@ public class SqlBox {
 
 	private SqlBoxContext context;
 
+	/**
+	 * Child node list, come from O-R Mapping query, Object at here can be Entity or Entity list type
+	 */
+	private List<Map<String, Object>> childEntityList;
+
+	/**
+	 * Parent node, come from O-R Mapping query
+	 */
+	private Entity parentEntity;
+
+	/**
+	 * Store fieldID for SQL Helper or other place use
+	 */
 	private static ThreadLocal<String> fieldIDCache = new ThreadLocal<String>() {
 		@Override
 		protected String initialValue() {
 			return "";
 		}
 	};
-
-	// Entity Bean Instance
-	private Object entityBean;
 
 	public SqlBox() {
 		// Default Constructor
@@ -143,6 +156,22 @@ public class SqlBox {
 
 	public String getAlias() {
 		return alias;
+	}
+
+	public List<Map<String, Object>> getChildEntityList() {
+		return childEntityList;
+	}
+
+	public void setChildEntityList(List<Map<String, Object>> childEntityList) {
+		this.childEntityList = childEntityList;
+	}
+
+	public Entity getParentEntity() {
+		return parentEntity;
+	}
+
+	public void setParentEntity(Entity parentEntity) {
+		this.parentEntity = parentEntity;
 	}
 
 	/**
@@ -507,11 +536,11 @@ public class SqlBox {
 	 */
 	public String getColumnName(String fieldID) {// NOSONAR
 		if (MappingHelper.isInMapping()) {
-			if (MappingHelper.getIdPairCache().size() <2) {
+			if (MappingHelper.getIdPairCache().size() < 2) {
 				MappingHelper.getIdPairCache().add(fieldID);
 				MappingHelper.getEntityPairCache().add(this.getEntityBean());
-			} else 
-				MappingHelper.getPropertyPairCache().add(fieldID); 
+			} else
+				MappingHelper.getPropertyPairCache().add(fieldID);
 		}
 		getFieldIDCache().set(fieldID);
 		String colname = getRealColumnName(null, fieldID);

@@ -2,7 +2,7 @@ package test.function_test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
-import static com.github.drinkjava2.jsqlbox.MappingHelper.mapping;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 
 import java.util.Date;
@@ -46,24 +46,22 @@ public class MappingQueryTest {
 		Assert.assertEquals(2, (int) Dao.queryForInteger("select count(*) from customer"));
 
 		Order o = new Order();
-		o.setCustomerId(c.getId());
-		o.setOrderDate(new Date());
-		o.setOrderName("Order1");
-		o.insert();
-		o.setOrderName("Order2");
-		o.insert();
-		o.setOrderName("Order3");
-		o.insert();
+		for (int i = 0; i < 3; i++) {
+			o.setCustomerId(c.getId());
+			o.setOrderDate(new Date());
+			o.setOrderName("Order" + i);
+			o.insert();
+		}
 		Assert.assertEquals(3, (int) Dao.queryForInteger("select count(*) from orders"));
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 3; i++) {
 			OrderItem item = new OrderItem();
 			item.setOrderId(o.getId());
 			item.setItemName("OrderItem" + i);
 			item.setItemQty(i);
 			item.insert();
 		}
-		Assert.assertEquals(5, (int) Dao.queryForInteger("select count(*) from orderitem"));
+		Assert.assertEquals(3, (int) Dao.queryForInteger("select count(*) from orderitem"));
 		Dao.getDefaultContext().setShowSql(true);
 	}
 
@@ -88,30 +86,14 @@ public class MappingQueryTest {
 	}
 
 	@Test
-	public void leftJoinQueryAutomaticQuerySQL() {
-		Customer c = new Customer();
-		Order o = new Order();
-		OrderItem i = new OrderItem();
-		mapping(oneToMany(), c.ID(), o.CUSTOMERID());
-		mapping(oneToMany(), o.ID(), i.ORDERID());
-		List<Map<String, Object>> result2 = Dao.queryForList(c.automaticQuerySQL(), " order by ", c.ID());
-		// TODO work on it, automaticQuerySQL should return the full left join SQL
-
-		for (Map<String, Object> map : result2) {
-			System.out.println(map);
-			System.out.println(map.get(o.alias(o.ORDERNAME())));
-		}
-	}
-
-	@Test
 	public void leftJoinQueryWithAlias() {
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
 		List<Customer> Customers = Dao.queryForEntityList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
-				" left outer join ", o.table(), " on ", mapping(oneToMany(), c.ID(), "=", o.CUSTOMERID()), //
-				" left outer join ", i.table(), " on ", mapping(oneToMany(), o.ID(), "=", i.ORDERID()), //
+				" left outer join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(), //
+				" left outer join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), to(), //
 				" order by ", o.ID(), ",", i.ID());
 		System.out.println(Customers);
 		// TODO work on it
