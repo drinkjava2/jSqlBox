@@ -46,7 +46,11 @@ public interface Entity {
 	}
 
 	public default String alias(String realColumnName) {
-		return this.box().aliasColumnName(realColumnName);
+		return this.box().aliasByRealColumnName(realColumnName);
+	}
+
+	public default String aliasByFieldID(String fieldID) {
+		return this.box().aliasByFieldID(fieldID);
 	}
 
 	public default <T> T configAlias(String tableAlias) {

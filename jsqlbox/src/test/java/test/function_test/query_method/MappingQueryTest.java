@@ -67,7 +67,7 @@ public class MappingQueryTest {
 
 	@After
 	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
+		// PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	@Test
@@ -95,7 +95,9 @@ public class MappingQueryTest {
 				" left outer join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(), //
 				" left outer join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), to(), //
 				" order by ", o.ID(), ",", i.ID());
-		System.out.println(Customers);
+		for (Customer customer : Customers) {
+			System.out.println(customer.getId() + "," + customer.getCustomerName());
+		}
 		// TODO work on it
 		// System.out.println(Customers.get(0).getCustomerName());
 	}

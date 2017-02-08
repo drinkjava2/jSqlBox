@@ -516,6 +516,17 @@ public class SqlBoxContext {
 	}
 
 	/**
+	 * For circle dependency check
+	 */
+	private int increaseCircleDependency() {
+		int count = circleDependencyCache.get();
+		circleDependencyCache.set(count + 1);
+		if (count > 2000)
+			SqlBoxException.throwEX("Error: circle dependency or too deep tree(>2000).");
+		return count;
+	}
+
+	/**
 	 * Here build Child Entity List
 	 */
 	private List<Map<String, Object>> buildChildEntity(Entity parent, List<Map<String, Object>> list,
@@ -533,38 +544,42 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * For circle dependency check
-	 */
-	private int increaseCircleDependency() {
-		int count = circleDependencyCache.get();
-		circleDependencyCache.set(count + 1);
-		if (count > 2000)
-			SqlBoxException.throwEX("Error: circle dependency or too deep tree(>2000).");
-		return count;
-	}
-
-	/**
 	 * Here build Root Entity List
 	 */
 	private <T> List<T> buildRootEntity(Mapping rootMapping, List<Map<String, Object>> list,
 			List<Mapping> mappingList) {
-		Class<?> entityClass = rootMapping.getThisEntity().getClass();
+		Entity root = (Entity) rootMapping.getThisEntity();
+		String rootFieldID = rootMapping.getThisField();
 		List<T> resultList = new ArrayList<>();
-		for (Map<String, Object> m : list) {
-			Entity root = this.createEntity(entityClass);
-			// TODO add real code here
-			resultList.add((T) root);
+
+		String rootAliasColumnName = root.aliasByFieldID(rootFieldID).toUpperCase();
+		Map<Object, Map<String, Object>> rootValueMap = new HashMap<>();
+
+		for (Map<String, Object> m : list) {// get the unique root entities
+			Object value = m.get(rootAliasColumnName);
+			if (value != null && !rootValueMap.containsKey(value))
+				rootValueMap.put(value, m);
 		}
-		for (T root : resultList) {
-			Entity entity = (Entity) root;
+		for (Map<String, Object> oneLine : rootValueMap.values()) {// set value for root entities
+			Entity entity = this.createEntity(root.getClass());
+			SqlBox box = entity.box();
+			box.configAlias(root.box().getAlias());
+			Map<String, Column> realColumns = box.buildRealColumns();
+			for (Column col : realColumns.values()) {
+				String aiasColUp = entity.aliasByFieldID(col.getFieldID()).toUpperCase();
+				if (oneLine.containsKey(aiasColUp))
+					box.setFieldRealValue(col, oneLine.get(aiasColUp));
+			}
+			// add child entity node list
 			List<Map<String, Object>> childList = buildChildEntity(entity, list, mappingList);
-			entity.box().setChildEntityList(childList);
+			box.setChildEntityList(childList);
+			resultList.add((T) entity);
 		}
 		return resultList;
 	}
 
 	/**
-	 * Check if mappingList is legal, then build Entity List
+	 * Transfer List<Map<String, Object>> list to List<T>, you can call it O-R Mapping
 	 * 
 	 * @param list
 	 *            The SQL query List
@@ -574,12 +589,11 @@ public class SqlBoxContext {
 	 *         entity.box().getChildEntityList() to get child nodes, each child node point to its parent node, use
 	 *         entity.box().getParentEntity() to get parent node
 	 */
-	private <T> List<T> checkAndBuildEntityList(List<Map<String, Object>> list, List<Mapping> mappingList) {// NOSONAR
+	public <T> List<T> transfer(List<Map<String, Object>> list, List<Mapping> mappingList) {// NOSONAR
 		if (list.size() > 10000)
-			log.warn("Warning: queryForEntityList for list size >10000 is not recommanded.");
+			log.warn("SqlBoxContext Warning: transfer for list size >10000 is strongly not recommanded.");
 		if (list.size() > 100000)
-			SqlBoxException.throwEX(
-					"SqlBoxContext checkAndBuildEntityList Error: queryForEntityList for list size >100000 is not allowed.");
+			SqlBoxException.throwEX("SqlBoxContext transfer Error: transfer for list size >100000 is not supported.");
 		int isRootCount = 0;
 		Mapping root = null;
 		for (Mapping mp1 : mappingList) {
@@ -609,7 +623,7 @@ public class SqlBoxContext {
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
 		logSql(sp);
 		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-		return checkAndBuildEntityList(list, sp.getMappingList());
+		return transfer(list, sp.getMappingList());
 	}
 
 	/**

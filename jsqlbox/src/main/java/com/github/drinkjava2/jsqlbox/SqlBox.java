@@ -440,7 +440,7 @@ public class SqlBox {
 	/**
 	 * Set Field value by it's column defination
 	 */
-	private void setFieldRealValue(Column col, Object value) {
+	protected void setFieldRealValue(Column col, Object value) {
 		try {
 			Method m = ReflectionUtils.findMethod(this.entityBean.getClass(), col.getWriteMethodName(),
 					new Class[] { col.getPropertyType() });
@@ -485,10 +485,19 @@ public class SqlBox {
 	/**
 	 * Get alias Column Name
 	 */
-	public String aliasColumnName(String realColumnName) {
+	public String aliasByRealColumnName(String realColumnName) {
 		if (SqlBoxUtils.isEmptyStr(this.getAlias()))
 			return realColumnName;
 		return this.getAlias() + "_" + realColumnName;
+	}
+
+	/**
+	 * Get alias Column Name
+	 */
+	public String aliasByFieldID(String fieldID) {
+		if (SqlBoxUtils.isEmptyStr(this.getAlias()))
+			return this.getColumnName(fieldID);
+		return this.getAlias() + "_" + this.getColumnName(fieldID); 
 	}
 
 	/**
@@ -841,14 +850,14 @@ public class SqlBox {
 		Map<String, Column> cfgs = this.getConfigColumns();
 		for (Entry<String, Column> entry : cfgs.entrySet()) {
 			sb.append("key=" + entry.getKey()).append("\r\n");
-			sb.append(entry.getValue().debugInfo());
+			sb.append(entry.getValue().getDebugInfo());
 		}
 
 		sb.append("=====buildRealColumns======").append("\r\n");
 		cfgs = this.buildRealColumns();
 		for (Entry<String, Column> entry : cfgs.entrySet()) {
 			sb.append("key=" + entry.getKey()).append("\r\n");
-			sb.append(entry.getValue().debugInfo());
+			sb.append(entry.getValue().getDebugInfo());
 		}
 		return sb.toString();
 	}

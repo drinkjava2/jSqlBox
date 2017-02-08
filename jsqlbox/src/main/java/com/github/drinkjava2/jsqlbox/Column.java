@@ -181,7 +181,7 @@ public class Column {
 		this.enable = enable;
 	}
 
-	public String debugInfo() {
+	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("nullable=" + nullable).append("\r\n");
 		sb.append("insertable=" + insertable).append("\r\n");
