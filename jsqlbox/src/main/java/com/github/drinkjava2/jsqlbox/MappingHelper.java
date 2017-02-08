@@ -111,7 +111,8 @@ public class MappingHelper {
 	}
 
 	/**
-	 * Read cached mapping info from ThreadLocal and re-cache a Mapping instance in ThreadLocal
+	 * Read cached mapping info from ThreadLocal and re-cache a Mapping instance in ThreadLocal, if propertyFieldName
+	 * exist, link it with the Entity or Entity List
 	 */
 	public static String to(String... propertyFieldName) {// NOSONAR propertyFieldName is useful, can not remove
 		try {
