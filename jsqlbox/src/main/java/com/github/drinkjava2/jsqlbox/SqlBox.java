@@ -72,7 +72,7 @@ public class SqlBox {
 	/**
 	 * Child node list, come from O-R Mapping query, Object at here can be Entity or Entity list type
 	 */
-	private List<Map<String, Object>> childEntityList;
+	private Map<String, Object> childEntityMap;
 
 	/**
 	 * Parent node, come from O-R Mapping query
@@ -158,12 +158,14 @@ public class SqlBox {
 		return alias;
 	}
 
-	public List<Map<String, Object>> getChildEntityList() {
-		return childEntityList;
+ 
+
+	public Map<String, Object> getChildEntityMap() {
+		return childEntityMap;
 	}
 
-	public void setChildEntityList(List<Map<String, Object>> childEntityList) {
-		this.childEntityList = childEntityList;
+	public void setChildEntityMap(Map<String, Object> childEntityMap) {
+		this.childEntityMap = childEntityMap;
 	}
 
 	public Entity getParentEntity() {

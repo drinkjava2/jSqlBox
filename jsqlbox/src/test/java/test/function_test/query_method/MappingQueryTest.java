@@ -2,6 +2,8 @@ package test.function_test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.aliasBegin;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.aliasEnd;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 
@@ -90,32 +92,28 @@ public class MappingQueryTest {
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
-		List<Map<String, Object>> list1 = Dao.queryForEntityList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
+		Map<String, Object> map1 = Dao.queryForEntityMap(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
 				" left outer join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(), //
 				" left outer join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), to(), //
 				" order by ", o.ID(), ",", i.ID());
-		System.out.println("list1=" + list1);
-		for (Map<String, Object> map : list1) {
-			System.out.println("map=" + map);
-			List<Customer> list2 = (List<Customer>) map.get(c.alias(c.ID()));
-			System.out.println("list2=" + list2);
-			for (Customer customer : list2) {
-				System.out.println("customer=" + customer.getId() + "," + customer.getCustomerName());
-				List<Map<String, Object>> list3 = customer.box().getChildEntityList();
-				System.out.println("list3=" + list3);
-				for (Map<String, Object> map3 : list3) {
-					System.out.println("map3=" + map3);
-					List<Order> list4 = (List<Order>) map3.get(o.alias(o.ID()));
-					System.out.println("list4=" + list4);
-					for (Order order : list4) {
-						System.out.println("order=" + order.getId() + "," + order.getOrderName());
-						List<Map<String, Object>> list5 = order.box().getChildEntityList();
-						System.out.println("list5=" + list5);
+		// System.out.println("map1=" + map1);
+		try {
+			aliasBegin(); 
+			for (Customer customer : (List<Customer>) map1.get(c.ID())) {
+				System.out.println("Customer=" + customer.getId() + "," + customer.getCustomerName());
+				Map<String, Object> map2 = customer.box().getChildEntityMap(); 
+				List<Order> listOrder = (List<Order>) map2.get(o.ID()); 
+				if (listOrder != null)
+					for (Order order : listOrder) {
+						System.out.println(
+								"\tOrder=" + order.getId() + "," + order.getOrderName() + "," + order.getCustomerId());
+						 Map<String, Object> map3 = order.box().getChildEntityMap(); 
+						 System.out.println(map3);
 					}
-				}
-
 			}
+		} finally {
+			aliasEnd();
 		}
 	}
 
