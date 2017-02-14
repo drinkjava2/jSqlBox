@@ -72,7 +72,7 @@ public class SqlBox {
 	/**
 	 * Child node list, come from O-R Mapping query, Object at here can be Entity or Entity list type
 	 */
-	private Map<String, Object> childEntityMap;
+	private Map<String, List<Object>> childEntityMap;
 
 	/**
 	 * Parent node, come from O-R Mapping query
@@ -158,14 +158,32 @@ public class SqlBox {
 		return alias;
 	}
 
- 
-
-	public Map<String, Object> getChildEntityMap() {
+	public Map<String, List<Object>> getChildEntityMap() {
 		return childEntityMap;
 	}
 
-	public void setChildEntityMap(Map<String, Object> childEntityMap) {
+	public void setChildEntityMap(Map<String, List<Object>> childEntityMap) {
 		this.childEntityMap = childEntityMap;
+	}
+
+	/**
+	 * Return the node list
+	 */
+	public List<Object> getNodeList(String key) {
+		List<Object> result = childEntityMap.get(key);
+		if (result == null)
+			return new ArrayList<>();
+		return result;
+	}
+
+	/**
+	 * Return the first element in node list
+	 */
+	public <T> T getNode(String key) {
+		List<Object> result = getNodeList(key);
+		if (result.isEmpty())
+			return null;
+		return (T) result.get(0);
 	}
 
 	public Entity getParentEntity() {
@@ -499,7 +517,7 @@ public class SqlBox {
 	public String aliasByFieldID(String fieldID) {
 		if (SqlBoxUtils.isEmptyStr(this.getAlias()))
 			return this.getColumnName(fieldID);
-		return this.getAlias() + "_" + this.getColumnName(fieldID); 
+		return this.getAlias() + "_" + this.getColumnName(fieldID);
 	}
 
 	/**

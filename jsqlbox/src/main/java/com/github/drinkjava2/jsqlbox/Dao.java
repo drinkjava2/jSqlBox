@@ -92,8 +92,12 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext().queryForList(sql);
 	}
 
-	public static  Map<String, Object> queryForEntityMap(String... sql) {
-		return SqlBoxContext.getDefaultSqlBoxContext().queryForEntityMap(sql);
+	public static Map<String, List<Object>> queryForEntityMap(String... sql) {
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForEntityListMap(sql);
+	}
+
+	public static <T> List<T> queryForEntityList(String... sql) {
+		return SqlBoxContext.getDefaultSqlBoxContext().queryForEntityList(sql);
 	}
 
 }

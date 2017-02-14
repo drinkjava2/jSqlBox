@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -527,11 +528,30 @@ public class SqlBoxContext {
 	/**
 	 * Query for get Entity Map
 	 */
-	public Map<String, Object> queryForEntityMap(String... sql) {
+	public Map<String, List<Object>> queryForEntityListMap(String... sql) {
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
 		logSql(sp);
 		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+		for (Map<String, Object> map : list) {
+			System.out.println(map);
+		}
+		//TODO work on this
 		return transfer(list, sp.getMappingList());
+	}
+
+	/**
+	 * Query for get Entity
+	 */
+	public <T> List<T> queryForEntityList(String... sql) {
+		List<T> resultList = new ArrayList<>();
+		Map<String, List<Object>> listMap = queryForEntityListMap(sql);
+		if (listMap.isEmpty())
+			return resultList;
+		for (Iterator<List<Object>> it = listMap.values().iterator(); it.hasNext();) {
+			List<T> oneList = (List<T>) it.next();
+			resultList.addAll(oneList);
+		}
+		return resultList;
 	}
 
 	/**
@@ -545,7 +565,7 @@ public class SqlBoxContext {
 	 *         entity.box().getChildEntityList() to get child nodes, each child node point to its parent node, use
 	 *         entity.box().getParentEntity() to get parent node
 	 */
-	public Map<String, Object> transfer(List<Map<String, Object>> list, List<Mapping> mappingList) {// NOSONAR
+	public <T> Map<String, List<Object>> transfer(List<Map<String, Object>> list, List<Mapping> mappingList) {// NOSONAR
 		if (list.size() > 10000)
 			log.warn("SqlBoxContext Warning: transfer for list size >10000 is strongly not recommanded.");
 		if (list.size() > 100000)
@@ -563,19 +583,18 @@ public class SqlBoxContext {
 				rootMappingList.add(mp);
 		}
 		if (rootMappingList.isEmpty())
-			return (Map<String, Object>) SqlBoxException
-					.throwEX("SqlBoxContext checkAndBuildEntityList error: should have at least 1 root entity");
+			SqlBoxException.throwEX("SqlBoxContext checkAndBuildEntityList error: should have at least 1 root entity");
 		return buildNextEntityList(null, null, rootMappingList, list, mappingList);
 	}
 
 	/**
 	 * Here do the job to build Entity list from sqlResultList
 	 */
-	private <T> Map<String, Object> buildNextEntityList(Mapping parentMapping, Entity parentEntity,
+	private <T> Map<String, List<Object>> buildNextEntityList(Mapping parentMapping, Entity parentEntity,
 			List<Mapping> mappingForBuild, List<Map<String, Object>> sqlResultList, List<Mapping> mappingList) {
 
 		int count = increaseCircleDependency(); // Do circle dependency check
-		Map<String, Object> oneList = new LinkedCaseInsensitiveMap<>();
+		Map<String, List<Object>> oneList = new LinkedCaseInsensitiveMap<>();
 		for (Mapping mapping : mappingForBuild) {
 			Entity thisTmpEntity = (Entity) mapping.getThisEntity();
 			String thisTmpField = mapping.getThisField();
@@ -583,7 +602,7 @@ public class SqlBoxContext {
 			// find child mappings
 			List<Mapping> childMappingList = findChildMappingList(mappingList, mapping);
 
-			List<T> resultList = new ArrayList<>();
+			List<Object> resultList = new ArrayList<>();
 
 			String thisTmpAliasColumn = thisTmpEntity.aliasByFieldID(thisTmpField).toUpperCase();
 
@@ -597,10 +616,10 @@ public class SqlBoxContext {
 					box.setParentEntity(parentEntity);
 
 				// Recursion build child list
-				Map<String, Object> childList = buildNextEntityList(mapping, entity, childMappingList, sqlResultList,
-						mappingList);
+				Map<String, List<Object>> childList = buildNextEntityList(mapping, entity, childMappingList,
+						sqlResultList, mappingList);
 				box.setChildEntityMap(childList);
-				resultList.add((T) entity);
+				resultList.add(entity);
 			}
 
 			if (SqlBoxUtils.isEmptyStr(mapping.getThisPropertyName()))

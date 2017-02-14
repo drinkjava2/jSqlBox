@@ -92,28 +92,24 @@ public class MappingQueryTest {
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
-		Map<String, Object> map1 = Dao.queryForEntityMap(select(), c.all(), ",", o.all(), ",", i.all(), from(),
+		List<Customer> customers = Dao.queryForEntityList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
 				" left outer join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(), //
 				" left outer join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), to(), //
 				" order by ", o.ID(), ",", i.ID());
-		// System.out.println("map1=" + map1);
-		try {
-			aliasBegin(); 
-			for (Customer customer : (List<Customer>) map1.get(c.ID())) {
-				System.out.println("Customer=" + customer.getId() + "," + customer.getCustomerName());
-				Map<String, Object> map2 = customer.box().getChildEntityMap(); 
-				List<Order> listOrder = (List<Order>) map2.get(o.ID()); 
-				if (listOrder != null)
-					for (Order order : listOrder) {
-						System.out.println(
-								"\tOrder=" + order.getId() + "," + order.getOrderName() + "," + order.getCustomerId());
-						 Map<String, Object> map3 = order.box().getChildEntityMap(); 
-						 System.out.println(map3);
-					}
+		// TODO work on this
+
+		for (Customer customer : customers) {
+			System.out.println("Customer=" + customer.getId() + "," + customer.getCustomerName());
+			List<Order> listOrder = customer.getNodeList(o.alias(o.ID()));
+			for (Order order : listOrder) {
+				System.out
+						.println("\tOrder=" + order.getId() + "," + order.getOrderName() + "," + order.getCustomerId());
+				List<OrderItem> listOrderItem = order.getNodeList(i.alias(i.ID()));
+				for (OrderItem orderItem : listOrderItem) {
+					System.out.println("orderItem=" + orderItem.getId() + "," + orderItem.getItemName());
+				}
 			}
-		} finally {
-			aliasEnd();
 		}
 	}
 

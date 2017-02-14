@@ -67,8 +67,12 @@ public interface Entity {
 		return this.box().automaticQuerySQL();
 	}
 
-	public default List<Object> getNodeList(Entity entity) {
-		return null;// TODO work on it, need return a object tree
+	public default <T> List<T> getNodeList(String key) {
+		return (List<T>) this.box().getNodeList(key);
+	}
+
+	public default <T> T getNode(String key) {
+		return this.box().getNode(key);
 	}
 
 }
