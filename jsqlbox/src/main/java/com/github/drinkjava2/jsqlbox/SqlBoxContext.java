@@ -45,6 +45,7 @@ public class SqlBoxContext {
 	// print SQL to console or log depends logging.properties
 	private Boolean showSql = false;
 	private Boolean formatSql = false;
+	private Boolean showQueryResult = false;
 
 	public static final String SQLBOX_IDENTITY = "BX";
 
@@ -149,6 +150,15 @@ public class SqlBoxContext {
 
 	public SqlBoxContext setFormatSql(Boolean formatSql) {
 		this.formatSql = formatSql;
+		return this;
+	}
+
+	public Boolean getShowQueryResult() {
+		return showQueryResult;
+	}
+
+	public SqlBoxContext setShowQueryResult(Boolean showQueryResult) {
+		this.showQueryResult = showQueryResult;
 		return this;
 	}
 
@@ -522,25 +532,30 @@ public class SqlBoxContext {
 	public List<Map<String, Object>> queryForList(String... sql) {
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
 		logSql(sp);
-		return getJdbc().queryForList(sp.getSql(), sp.getParameters());
+		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+		if (this.getShowQueryResult())
+			for (Map<String, Object> map : list) {
+				log.info(map.toString());
+			}
+		return list;
 	}
 
 	/**
-	 * Query for get Entity Map
+	 * Query for get Entity List Map, different entity list use different key (column name) to distinguish
 	 */
 	public Map<String, List<Object>> queryForEntityListMap(String... sql) {
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
 		logSql(sp);
 		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-		for (Map<String, Object> map : list) {
-			System.out.println(map);
-		}
-		//TODO work on this
+		if (this.getShowQueryResult())
+			for (Map<String, Object> map : list) {
+				log.info(map.toString());
+			}
 		return transfer(list, sp.getMappingList());
 	}
 
 	/**
-	 * Query for get Entity
+	 * Query for get Entity List, different type entities be put in same list, this may cause confusion.
 	 */
 	public <T> List<T> queryForEntityList(String... sql) {
 		List<T> resultList = new ArrayList<>();
@@ -555,7 +570,7 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> list to List<T>, you can call it O-R Mapping
+	 * Transfer List<Map<String, Object>> to Map<String, List<Object>>, you can call it O-R Mapping
 	 * 
 	 * @param list
 	 *            The SQL query List
@@ -567,9 +582,9 @@ public class SqlBoxContext {
 	 */
 	public <T> Map<String, List<Object>> transfer(List<Map<String, Object>> list, List<Mapping> mappingList) {// NOSONAR
 		if (list.size() > 10000)
-			log.warn("SqlBoxContext Warning: transfer for list size >10000 is strongly not recommanded.");
+			log.warn("SqlBoxContext Warning: transfer for list size >10000 is not recommanded.");
 		if (list.size() > 100000)
-			SqlBoxException.throwEX("SqlBoxContext transfer Error: transfer for list size >100000 is not supported.");
+			SqlBoxException.throwEX("SqlBoxContext Error: transfer for list size >100000 is not supported.");
 		List<Mapping> rootMappingList = new ArrayList<>();
 		for (Mapping mp : mappingList) {
 			boolean isRoot = true;

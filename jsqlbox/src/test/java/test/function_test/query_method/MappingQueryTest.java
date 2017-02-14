@@ -2,8 +2,6 @@ package test.function_test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.aliasBegin;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.aliasEnd;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 
@@ -64,7 +62,7 @@ public class MappingQueryTest {
 			item.insert();
 		}
 		Assert.assertEquals(3, (int) Dao.queryForInteger("select count(*) from orderitem"));
-		Dao.getDefaultContext().setShowSql(true).setFormatSql(true);
+		Dao.getDefaultContext().setShowSql(true).setFormatSql(true).setShowQueryResult(true);
 	}
 
 	@After

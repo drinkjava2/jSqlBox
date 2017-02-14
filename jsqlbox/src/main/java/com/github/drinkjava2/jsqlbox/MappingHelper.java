@@ -112,7 +112,7 @@ public class MappingHelper {
 
 	/**
 	 * Read cached mapping info from ThreadLocal and re-cache a Mapping instance in ThreadLocal, if propertyFieldName
-	 * exist, link it with the Entity or Entity List
+	 * exist, at the query result tree, entity will be binded to the given property field
 	 */
 	public static String to(String... propertyFieldName) {// NOSONAR propertyFieldName is useful, can not remove
 		try {

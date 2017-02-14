@@ -22,7 +22,7 @@ import test.config.po.User;
  *      public SqlBox box() { <br/>
  *      return SqlBox.getBox(this);<br/>
  *      }<br/>
- * @see Each entity class has a "SqlBox" type configuration, it's a Java class usually naming like "xxxBOX" at same
+ * @see Each entity class has a "SqlBox" type configuration, it's a Java class usually named like "xxxBOX" at same
  *      folder of entity class or just embedded inside of entity class, same concept like jBeanBox project. And usually
  *      for common entity classes there is no need explicitly write BOX configuration if followed Java Bean naming
  *      conventions, SqlBox will automatically map field name "someField" to "somefield" or "SOME_FIELD" database column
@@ -41,12 +41,12 @@ import test.config.po.User;
  *      jSqlBox will not sent SQL at background, it's not a entity management container but only a entity cache. entity
  *      can be send to view layer to use. Each entity has it's own box configuration, can still access database(usually
  *      read-only) even without transaction support.
- * @see There is no "one to many", "many to one", "lazy loading" concept in jSqlBox. You can get related entities by
- *      using query()/load() methods at runtime easily, and they will be cached in L1/L2 cache for better performance.
- *      There is a "DB.class" be used to help navigate between entities in query result.
- * @see jSqlBox based on Spring JdbcTemplate do the dirty lower layer database access job, by call box().getJdbc() can
- *      get a JdbcTemplate instance to use. And also jSqlBox use Spring's declaration transaction services. In future
- *      jSqlBox may kick Spring out, but not right now.
+ * @see There is no "lazy loading" mechanism in jSqlBox. You can get related entities by using query methods at runtime,
+ *      and entity will be cached in L1/L2 cache for better performance.
+ * @see jSqlBox based on Spring JdbcTemplate, it do the dirty job to access database, by call box().getJdbc() can get a
+ *      JdbcTemplate instance to use. And also jSqlBox use Spring's declaration transaction services. In future jSqlBox
+ *      may kick Spring out, but not right now, I can not find a better database tools than springTemplate supporting
+ *      declaration transaction.
  * 
  * @author Yong Zhu
  * @version 1.0.0
@@ -66,6 +66,7 @@ public class HelloWorld4 {
 		u.insert();
 
 		User u2 = Dao.load(User.class, u.getId());// NO SQL be sent, load from L1 cache
+		// TODO L1 cache is not implemented, will work on it
 		Assert.assertEquals("James", u2.getUserName());
 
 		u.box().configTable("users2");// to use database table "users2"
