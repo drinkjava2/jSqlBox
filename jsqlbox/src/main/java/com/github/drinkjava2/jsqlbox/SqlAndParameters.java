@@ -30,6 +30,7 @@ public class SqlAndParameters {
 	private String sql;
 	private Object[] parameters;
 	private List<Mapping> mappingList = new ArrayList<>();
+	private List<Class<?>> entityClassForQueryList = new ArrayList<>();
 
 	public SqlAndParameters() {
 		// default Constructor
@@ -62,6 +63,14 @@ public class SqlAndParameters {
 
 	public void setMappingList(List<Mapping> mappingList) {
 		this.mappingList = mappingList;
+	}
+
+	public List<Class<?>> getEntityClassForQueryList() {
+		return entityClassForQueryList;
+	}
+
+	public void setEntityClassesForQuery(List<Class<?>> entityClassForQueryList) {
+		this.entityClassForQueryList = entityClassForQueryList;
 	}
 
 }

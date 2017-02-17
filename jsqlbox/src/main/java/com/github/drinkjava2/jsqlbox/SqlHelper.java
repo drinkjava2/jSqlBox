@@ -26,6 +26,13 @@ import java.util.List;
  * @version 1.0.0
  * @since 1.0.0
  */
+/**
+ * 
+ * 
+ * @author Yong Zhu
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class SqlHelper {
 	/**
 	 * For store sql and parameters in threadLocal
@@ -260,12 +267,17 @@ public class SqlHelper {
 
 			List<Mapping> mappings = new ArrayList<>(MappingHelper.getMappingListCache());
 			sp.setMappingList(mappings);
+
+			List<Class<?>> entityClasses = new ArrayList<>(MappingHelper.getEntityClassesForQuery());
+			sp.setEntityClassesForQuery(entityClasses);
+
 			return sp;
 		} finally {
 			SqlHelper.clear();
 			MappingHelper.clearAllMappingCached();
 			SqlBoxContext.paginationEndCache.set(null);
 			SqlBoxContext.paginationOrderByCache.set(null);
+
 		}
 	}
 

@@ -76,6 +76,17 @@ public class MappingHelper {
 		}
 	};
 
+	/**
+	 * For store entity classes in tThreadlocal, these entities indicate how many classes will be created when do O-R
+	 * mapping
+	 */
+	private static ThreadLocal<ArrayList<Class<?>>> entityClassesForQuery = new ThreadLocal<ArrayList<Class<?>>>() {
+		@Override
+		protected ArrayList<Class<?>> initialValue() {
+			return new ArrayList<>();
+		}
+	};
+
 	private MappingHelper() {// Disable default public constructor
 	}
 
@@ -88,26 +99,49 @@ public class MappingHelper {
 		entityPairCache.get().clear();
 		idPairCache.get().clear();
 		propertyPairCache.get().clear();
+		entityClassesForQuery.get().clear();
 	}
 
+	/**
+	 * Check inMapping in Threadlocal not null
+	 */
 	public static Boolean isInMapping() {
 		return inMapping.get() != null;
 	}
 
+	/**
+	 * Get entityPairCache in Threadlocal
+	 */
 	public static List<Object> getEntityPairCache() {
 		return entityPairCache.get();
 	}
 
+	/**
+	 * Get idPairCache in Threadlocal
+	 */
 	public static List<String> getIdPairCache() {
 		return idPairCache.get();
 	}
 
+	/**
+	 * Get propertyPairCache in Threadlocal
+	 */
 	public static List<String> getPropertyPairCache() {
 		return propertyPairCache.get();
 	}
 
+	/**
+	 * Get mappingListCache in Threadlocal
+	 */
 	public static List<Mapping> getMappingListCache() {
 		return mappingListCache.get();
+	}
+
+	/**
+	 * Get entityClassForQuery in Threadlocal
+	 */
+	public static List<Class<?>> getEntityClassesForQuery() {
+		return entityClassesForQuery.get();
 	}
 
 	/**

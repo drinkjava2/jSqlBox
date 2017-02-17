@@ -30,7 +30,8 @@ import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.LinkedCaseInsensitiveMap;
+
+import test.config.po.Customer;
 
 /**
  * @author Yong Zhu
@@ -446,6 +447,15 @@ public class SqlBoxContext {
 	}
 
 	/**
+	 * Load a entity by its entityID from database or L1 Cache
+	 */
+	public <T> T load(Class<?> entityOrBoxClass, Object entityID) {
+		T bean = (T) createEntity(entityOrBoxClass);
+		SqlBox box = SqlBoxContext.getBindedBox(bean);
+		return box.load(entityID);
+	}
+
+	/**
 	 * Execute sql without exception threw, return -1 if no parameters sql executed, return -2 if exception found
 	 */
 	public Integer executeQuiet(String... sql) {
@@ -541,25 +551,11 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Query for get Entity List Map, different entity list use different key (column name) to distinguish
-	 */
-	public Map<String, List<Object>> queryForEntityListMap(String... sql) {
-		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
-		logSql(sp);
-		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
-		if (this.getShowQueryResult())
-			for (Map<String, Object> map : list) {
-				log.info(map.toString());
-			}
-		return transfer(list, sp.getMappingList());
-	}
-
-	/**
-	 * Query for get Entity List, different type entities be put in same list, this may cause confusion.
+	 * Query for get Entity List
 	 */
 	public <T> List<T> queryForEntityList(String... sql) {
 		List<T> resultList = new ArrayList<>();
-		Map<String, List<Object>> listMap = queryForEntityListMap(sql);
+		Map<Class<?>, List<Object>> listMap = queryForEntityListMap(sql);
 		if (listMap.isEmpty())
 			return resultList;
 		for (Iterator<List<Object>> it = listMap.values().iterator(); it.hasNext();) {
@@ -570,134 +566,67 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> to Map<String, List<Object>>, you can call it O-R Mapping
+	 * Query for get Entity List Map, different entity list use different key (column name) to distinguish
+	 */
+	public Map<Class<?>, List<Object>> queryForEntityListMap(String... sql) {
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
+		logSql(sp);
+		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
+		if (this.getShowQueryResult())
+			for (Map<String, Object> map : list) {
+				log.info(map.toString());
+			}
+		return transfer(list, sp);
+	}
+
+	/**
+	 * Transfer resultList List<Map<String, Object>> to Map<Class<?>, List<Object>>,<br/>
 	 * 
-	 * @param list
-	 *            The SQL query List
-	 * @param mappingList
-	 *            The the mapping list in SQL
-	 * @return The root entity list, each entity has it's child node list stored in box, use
-	 *         entity.box().getChildEntityList() to get child nodes, each child node point to its parent node, use
-	 *         entity.box().getParentEntity() to get parent node
+	 * <pre>
+	 *   
+	 * sqlResult: 
+	 * A1,B1
+	 * A1,B1,C1 
+	 * A2,B2,C2
+	 * A2,B2,C3
+	 * D1
+	 * D2
+	 * 
+	 * return:
+	 * A.class->[A1 (A1.b=B1 (B1.c=[C1]), A2 (A2.b=b2 (b2.c=[c2,c3]]]
+	 * D.class->[D1, D2]
+	 * 
+	 * </pre>
 	 */
-	public <T> Map<String, List<Object>> transfer(List<Map<String, Object>> list, List<Mapping> mappingList) {// NOSONAR
-		if (list.size() > 10000)
-			log.warn("SqlBoxContext Warning: transfer for list size >10000 is not recommanded.");
-		if (list.size() > 100000)
-			SqlBoxException.throwEX("SqlBoxContext Error: transfer for list size >100000 is not supported.");
-		List<Mapping> rootMappingList = new ArrayList<>();
-		for (Mapping mp : mappingList) {
-			boolean isRoot = true;
-			for (Mapping mp2 : mappingList) {
-				if (mp2.getOtherEntity() == mp.getThisEntity()) {
-					isRoot = false;
-					break;
-				}
-			}
-			if (isRoot)
-				rootMappingList.add(mp);
+	public Map<Class<?>, List<Object>> transfer(List<Map<String, Object>> sqlResult, SqlAndParameters sp) {
+		Map<Class<?>, List<Object>> rootResult = new HashMap<>();
+		List<Class<?>> classes = sp.getEntityClassForQueryList();
+		for (Class<?> clazz : classes) {
+			List<Object> list = new ArrayList<>();
+			rootResult.put(clazz, list);
 		}
-		if (rootMappingList.isEmpty())
-			SqlBoxException.throwEX("SqlBoxContext checkAndBuildEntityList error: should have at least 1 root entity");
-		return buildNextEntityList(null, null, rootMappingList, list, mappingList);
+		for (Map<String, Object> oneLine : sqlResult)
+			doTransfer(rootResult, oneLine, sp);
+		return rootResult;
 	}
 
 	/**
-	 * Here do the job to build Entity list from sqlResultList
+	 * <pre>
+	 * Do transfer for 1 line
+	 * 1)create bean instances for each entity classes
+	 * 2)if find property match column, set it to bean, put bean in BEAN_CACHE
+	 * 3)assemble mapping relationship between this bean and BEAN_CACHE
+	 * 4)iterate BEAN_CACHE, if a bean has no parent, put it in the return rootResult
+	 *    
+	 * 
+	 * </<pre>
 	 */
-	private <T> Map<String, List<Object>> buildNextEntityList(Mapping parentMapping, Entity parentEntity,
-			List<Mapping> mappingForBuild, List<Map<String, Object>> sqlResultList, List<Mapping> mappingList) {
-
-		int count = increaseCircleDependency(); // Do circle dependency check
-		Map<String, List<Object>> oneList = new LinkedCaseInsensitiveMap<>();
-		for (Mapping mapping : mappingForBuild) {
-			Entity thisTmpEntity = (Entity) mapping.getThisEntity();
-			String thisTmpField = mapping.getThisField();
-
-			// find child mappings
-			List<Mapping> childMappingList = findChildMappingList(mappingList, mapping);
-
-			List<Object> resultList = new ArrayList<>();
-
-			String thisTmpAliasColumn = thisTmpEntity.aliasByFieldID(thisTmpField).toUpperCase();
-
-			Map<Object, Map<String, Object>> uniqueValuesMap = getUniqueValues(parentMapping, parentEntity,
-					sqlResultList, thisTmpAliasColumn);
-
-			for (Map<String, Object> oneLine : uniqueValuesMap.values()) {// set value for root entities
-				Entity entity = this.createEntity(thisTmpEntity.getClass());
-				SqlBox box = fetchValueFromList(thisTmpEntity, oneLine, entity);
-				if (parentEntity != null)
-					box.setParentEntity(parentEntity);
-
-				// Recursion build child list
-				Map<String, List<Object>> childList = buildNextEntityList(mapping, entity, childMappingList,
-						sqlResultList, mappingList);
-				box.setChildEntityMap(childList);
-				resultList.add(entity);
-			}
-
-			if (SqlBoxUtils.isEmptyStr(mapping.getThisPropertyName()))
-				oneList.put(thisTmpAliasColumn, resultList);
-			else
-				oneList.put(mapping.getThisPropertyName(), resultList);
-		}
-		circleDependencyCache.set(count);
-		return oneList;
-	}
-
-	/**
-	 * select a list from mappingList which are mapping's child
-	 */
-	private List<Mapping> findChildMappingList(List<Mapping> mappingList, Mapping parentMapping) {
-		List<Mapping> childMappingList = new ArrayList<>();
-		for (Mapping mp : mappingList)
-			if (mp.getThisEntity() != null && mp.getThisEntity() == parentMapping.getOtherEntity())
-				childMappingList.add(mp);
-		return childMappingList;
-	}
-
-	/**
-	 * For circle dependency check
-	 */
-	private int increaseCircleDependency() {
-		int count = circleDependencyCache.get();
-		circleDependencyCache.set(count + 1);
-		if (count > 1000)
-			SqlBoxException.throwEX("Error: circle dependency or tree too deep(>1000).");
-		return count;
-	}
-
-	// Fetch values from one line of result List
-	private SqlBox fetchValueFromList(Entity root, Map<String, Object> oneLine, Entity entity) {
-		SqlBox box = entity.box();
-		box.configAlias(root.box().getAlias());
-		Map<String, Column> realColumns = box.buildRealColumns();
-		for (Column col : realColumns.values()) {
-			String aiasColUp = entity.aliasByFieldID(col.getFieldID()).toUpperCase();
-			if (oneLine.containsKey(aiasColUp))
-				box.setFieldRealValue(col, oneLine.get(aiasColUp));
-		}
-		return box;
-	}
-
-	// Get a unique Map of a column from a list
-	private Map<Object, Map<String, Object>> getUniqueValues(Mapping parentMapping, Entity parentValue,
-			List<Map<String, Object>> list, String rootAliasColumnName) {
-		Map<Object, Map<String, Object>> rootValueMap = new HashMap<>();
-
-		for (Map<String, Object> m : list) {// get the unique root entities
-			Object value = m.get(rootAliasColumnName);
-			if (value != null && !rootValueMap.containsKey(value))
-				rootValueMap.put(value, m);
-		}
-		return rootValueMap;
-	}
-
-	public <T> T load(Class<?> entityOrBoxClass, Object entityID) {
-		T bean = (T) createEntity(entityOrBoxClass);
-		SqlBox box = SqlBoxContext.getBindedBox(bean);
-		return box.load(entityID);
+	private void doTransfer(Map<Class<?>, List<Object>> rootResult, Map<String, Object> oneLine, SqlAndParameters sp) {
+		List<Object> list = rootResult.get(Customer.class);
+		Customer c = new Customer();
+		c.setCustomerName("testname");
+		c.setId("testid");
+		list.add(c);
 	}
 
 }

@@ -170,6 +170,8 @@ public class SqlBox {
 	 * Return the node list
 	 */
 	public List<Object> getNodeList(String key) {
+		if (childEntityMap == null)
+			return new ArrayList<>();
 		List<Object> result = childEntityMap.get(key);
 		if (result == null)
 			return new ArrayList<>();
@@ -600,6 +602,8 @@ public class SqlBox {
 		String als = this.getAlias();
 		boolean inSQL = SqlHelper.getInSqlTag();
 		boolean inSelectTag = SqlHelper.getInSelectTag();
+		if (inSelectTag)
+			MappingHelper.getEntityClassesForQuery().add(this.getEntityClass());
 		StringBuilder sb = new StringBuilder();
 		Map<String, Column> realColumns = buildRealColumns();
 		for (Column column : realColumns.values()) {
