@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.ReflectionUtils;
@@ -70,14 +71,16 @@ public class SqlBox {
 	private SqlBoxContext context;
 
 	/**
-	 * Child node list, come from O-R Mapping query, Object at here can be Entity or Entity list type
+	 * Store parent entity corresponded fieldID <br/>
+	 * like: map1(customer1, set("id","customerName"))
 	 */
-	private Map<String, List<Object>> childEntityMap;
+	private Map<Entity, Set<String>> partents;
 
 	/**
-	 * Parent node, come from O-R Mapping query
+	 * Point to entityCache, which is built by queryForEntityList or queryForEntityMaps methods <br/>
+	 * like: map1(Customer.class, Map("id1", customer1))
 	 */
-	private Entity parentEntity;
+	private Map<Class<?>, Map<Object, Entity>> entityCache;
 
 	/**
 	 * Store fieldID for SQL Helper or other place use
@@ -158,42 +161,62 @@ public class SqlBox {
 		return alias;
 	}
 
-	public Map<String, List<Object>> getChildEntityMap() {
-		return childEntityMap;
+	public Map<Entity, Set<String>> getPartents() {
+		return partents;
 	}
 
-	public void setChildEntityMap(Map<String, List<Object>> childEntityMap) {
-		this.childEntityMap = childEntityMap;
+	public void setPartents(Map<Entity, Set<String>> partents) {
+		this.partents = partents;
 	}
 
+	
+	
 	/**
-	 * Return the node list
+	 * Automatically find and return the parent or childNode list, no need tell the fieldID of parent class, but
+	 * entityClass should be unique in object tree<br/>
+	 * This may cause delay because need search path each time, in future version may make a path cache
 	 */
-	public List<Object> getNodeList(String key) {
-		if (childEntityMap == null)
-			return new ArrayList<>();
-		List<Object> result = childEntityMap.get(key);
-		if (result == null)
-			return new ArrayList<>();
-		return result;
+	public <T> List<T> getSmartNodeList(Class<?> entityClass) {
+		List<Object> path = new ArrayList<>();
+		//TODO work on here
+		return new ArrayList<>();
+	}
+
+	
+	
+	/**
+	 * Return the child node list for a Entity binded with this box
+	 */
+	public <T> List<T> getNodeList(Class<?> entityClass, String fieldID) {
+		List<T> l = new ArrayList<>();
+		if (entityCache == null || entityCache.isEmpty())
+			return l;
+		Map<Object, Entity> entities = entityCache.get(entityClass);
+		for (Entity entity : entities.values()) {
+			Map<Entity, Set<String>> p = entity.box().getPartents();
+			if (p != null && p.containsKey(this.getEntityBean())
+					&& (SqlBoxUtils.isEmptyStr(fieldID) || p.get(this.getEntityBean()).contains(fieldID)))
+				l.add((T) entity);
+		}
+		return l;
+	}
+
+	public Map<Class<?>, Map<Object, Entity>> getEntityCache() {
+		return entityCache;
+	}
+
+	public void setEntityCache(Map<Class<?>, Map<Object, Entity>> entityCache) {
+		this.entityCache = entityCache;
 	}
 
 	/**
 	 * Return the first element in node list
 	 */
-	public <T> T getNode(String key) {
-		List<Object> result = getNodeList(key);
+	public <T> T getNode(Class<?> entityClass, String fieldID) {
+		List<Object> result = getNodeList(entityClass, fieldID);
 		if (result.isEmpty())
 			return null;
 		return (T) result.get(0);
-	}
-
-	public Entity getParentEntity() {
-		return parentEntity;
-	}
-
-	public void setParentEntity(Entity parentEntity) {
-		this.parentEntity = parentEntity;
 	}
 
 	/**
@@ -427,7 +450,8 @@ public class SqlBox {
 			Column col = entry.getValue();
 			if (col.getEntityID()) {
 				Object idValue = SqlBoxUtils.getFieldRealValue(this.entityBean, col);
-				assureNotNull(idValue, "Box update error, ID can not be null, column=" + col.getColumnName());
+				if (idValue == null)
+					return null;
 				col.setPropertyValue(idValue);
 				result.put(col.getColumnName(), idValue);
 			}
@@ -603,7 +627,7 @@ public class SqlBox {
 		boolean inSQL = SqlHelper.getInSqlTag();
 		boolean inSelectTag = SqlHelper.getInSelectTag();
 		if (inSelectTag)
-			MappingHelper.getEntityClassesForQuery().add(this.getEntityClass());
+			MappingHelper.getEntityTemplates().add((Entity) this.getEntityBean());
 		StringBuilder sb = new StringBuilder();
 		Map<String, Column> realColumns = buildRealColumns();
 		for (Column column : realColumns.values()) {

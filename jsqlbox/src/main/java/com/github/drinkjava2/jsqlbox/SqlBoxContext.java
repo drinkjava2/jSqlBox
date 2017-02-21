@@ -21,17 +21,17 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import test.config.po.Customer;
 
 /**
  * @author Yong Zhu
@@ -509,6 +509,7 @@ public class SqlBoxContext {
 
 	/**
 	 * Return pagination SQL depends different database type <br/>
+	 * PageNumber Start from 1
 	 */
 	public String pagination(int pageNumber, int pageSize) {
 		String start;
@@ -553,22 +554,15 @@ public class SqlBoxContext {
 	/**
 	 * Query for get Entity List
 	 */
-	public <T> List<T> queryForEntityList(String... sql) {
-		List<T> resultList = new ArrayList<>();
-		Map<Class<?>, List<Object>> listMap = queryForEntityListMap(sql);
-		if (listMap.isEmpty())
-			return resultList;
-		for (Iterator<List<Object>> it = listMap.values().iterator(); it.hasNext();) {
-			List<T> oneList = (List<T>) it.next();
-			resultList.addAll(oneList);
-		}
-		return resultList;
+	@SuppressWarnings("rawtypes")
+	public <T> List<T> queryForEntityList(Class<?> clazz, String... sql) {
+		return new ArrayList(queryForEntityMaps(sql).get(clazz).values());
 	}
 
 	/**
 	 * Query for get Entity List Map, different entity list use different key (column name) to distinguish
 	 */
-	public Map<Class<?>, List<Object>> queryForEntityListMap(String... sql) {
+	public Map<Class<?>, Map<Object, Entity>> queryForEntityMaps(String... sql) {
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
 		logSql(sp);
 		List<Map<String, Object>> list = getJdbc().queryForList(sp.getSql(), sp.getParameters());
@@ -598,35 +592,90 @@ public class SqlBoxContext {
 	 * 
 	 * </pre>
 	 */
-	public Map<Class<?>, List<Object>> transfer(List<Map<String, Object>> sqlResult, SqlAndParameters sp) {
-		Map<Class<?>, List<Object>> rootResult = new HashMap<>();
-		List<Class<?>> classes = sp.getEntityClassForQueryList();
-		for (Class<?> clazz : classes) {
-			List<Object> list = new ArrayList<>();
-			rootResult.put(clazz, list);
+	public Map<Class<?>, Map<Object, Entity>> transfer(List<Map<String, Object>> sqlResultList,
+			final SqlAndParameters sp) {
+		Map<Class<?>, Map<Object, Entity>> entityCache = new HashMap<>();
+		List<Entity> templates = sp.getEntityTemplates();
+		for (Entity entity : templates) {
+			Map<Object, Entity> list = new LinkedHashMap<>();
+			entityCache.put(entity.box().getEntityClass(), list);
 		}
-		for (Map<String, Object> oneLine : sqlResult)
-			doTransfer(rootResult, oneLine, sp);
-		return rootResult;
+
+		for (Map<String, Object> oneLine : sqlResultList)
+			doOneLineTransfer(entityCache, oneLine, sp);
+		return entityCache;
 	}
 
 	/**
 	 * <pre>
 	 * Do transfer for 1 line
-	 * 1)create bean instances for each entity classes
-	 * 2)if find property match column, set it to bean, put bean in BEAN_CACHE
-	 * 3)assemble mapping relationship between this bean and BEAN_CACHE
-	 * 4)iterate BEAN_CACHE, if a bean has no parent, put it in the return rootResult
+	 * 1)Create bean instances for each entity classes, put bean in resultMap if not exist
+	 * 2)If find property match column, set it to bean 
+	 * 3)Assemble mapping relationship between these beans 
 	 *    
-	 * 
-	 * </<pre>
+	 * </
+	 * <pre>
 	 */
-	private void doTransfer(Map<Class<?>, List<Object>> rootResult, Map<String, Object> oneLine, SqlAndParameters sp) {
-		List<Object> list = rootResult.get(Customer.class);
-		Customer c = new Customer();
-		c.setCustomerName("testname");
-		c.setId("testid");
-		list.add(c);
+	private void doOneLineTransfer(Map<Class<?>, Map<Object, Entity>> entityCache, Map<String, Object> oneLine, // NOSONAR
+			final SqlAndParameters sp) {
+		List<Entity> classes = sp.getEntityTemplates();
+
+		ArrayList<Entity> thisLineEntities = new ArrayList<>();
+
+		// create entity, if not cached in entityCache, put it inside
+		for (Entity template : classes) {
+			Entity entity = this.createEntity(template.box().getEntityClass());
+			SqlBoxUtils.fetchValueFromList(template.box().getAlias(), oneLine, entity);
+			Map<String, Object> id = entity.box().getEntityID();
+			if (id != null && !id.isEmpty()) {
+				Map<Object, Entity> entityMap = entityCache.get(template.box().getEntityClass());
+				Entity cachedEntity = SqlBoxUtils.findEntityByID(id, entityMap);
+				if (cachedEntity == null) {
+					entity.box().setEntityCache(entityCache);
+					SqlBoxUtils.cacheEntityToEntityMap(entity, entityMap);
+					thisLineEntities.add(entity);
+				} else
+					thisLineEntities.add(cachedEntity);
+			}
+		}
+
+		// now cached thisLineEntities in entityResult, start to assemble relationship
+		for (Entity entity1 : thisLineEntities) {// entity1
+			SqlBox box1 = entity1.box();
+			Class<?> c1 = box1.getEntityClass();
+			for (Entity entity2 : thisLineEntities) {// entity2
+				SqlBox box2 = entity2.box();
+				Class<?> c2 = box2.getEntityClass();
+				Map<Entity, Set<String>> parent2 = box2.getPartents();
+				if (box1 != box2)
+					for (Mapping map : sp.getMappingList()) {// NOSONAR
+						Class<?> thisClass = map.getThisEntity().getClass();
+						Class<?> otherClass = map.getOtherEntity().getClass();
+						String thisField = map.getThisField();
+						String otherField = map.getOtherfield();
+						if (c1.equals(thisClass) && c2.equals(otherClass)) {// 2 classes match
+							Object value1 = SqlBoxUtils.getPropertyValueByFieldID(entity1, thisField);
+							Object value2 = SqlBoxUtils.getPropertyValueByFieldID(entity2, otherField);
+							if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 fields value same
+								if (parent2 == null) {
+									Set<String> fieldSet2 = new HashSet<>();
+									fieldSet2.add(thisField);
+									Map<Entity, Set<String>> parentMap2 = new HashMap<>();
+									parentMap2.put(entity1, fieldSet2);
+									box2.setPartents(parentMap2);
+								} else {
+									Set<String> fieldSet2 = parent2.get(entity1);
+									if (fieldSet2 == null) {
+										fieldSet2 = new HashSet<>();
+										parent2.put(entity1, fieldSet2);
+									}
+									fieldSet2.add(thisField);
+								}
+							}
+						}
+					}
+			}
+		}
 	}
 
 }

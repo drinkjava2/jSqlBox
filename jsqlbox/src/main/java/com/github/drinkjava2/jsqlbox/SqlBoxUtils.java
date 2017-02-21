@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -187,6 +188,20 @@ public class SqlBoxUtils {
 	}
 
 	/**
+	 * Get Field value by it's column definition
+	 */
+	public static Object getPropertyValueByFieldID(Entity entityBean, String fieldID) {
+		String getMethod = "get" + SqlBoxUtils.toFirstLetterUpperCase(fieldID);
+		try {
+			Method m = ReflectionUtils.findMethod(entityBean.getClass(), getMethod, new Class[] {});
+			return m.invoke(entityBean, new Object[] {});
+		} catch (Exception e) {
+			return throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method \"" + getMethod
+					+ "\" not found in " + entityBean.getClass());
+		}
+	}
+
+	/**
 	 * Extract EntityID Values from realColumns
 	 */
 	public static Map<String, Object> extractEntityIDValues(Object entityID, Map<String, Column> realColumns) {
@@ -309,6 +324,60 @@ public class SqlBoxUtils {
 				|| clazz.equals(Character.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class)
 				|| clazz.equals(BigInteger.class) || clazz.equals(Boolean.class) || clazz.equals(Date.class)
 				|| clazz.isPrimitive());
+	}
+
+	/**
+	 * Find an entity from entityMap by entityID
+	 */
+	public static Entity findEntityByID(Map<String, Object> id, Map<Object, Entity> entityMap) {
+		if (id == null || id.isEmpty() || entityMap.isEmpty())
+			return null;
+		if (id.size() == 1)
+			return entityMap.get(id.values().iterator().next());
+
+		Object[] key = id.keySet().toArray();
+		Arrays.sort(key);
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < key.length; i++) {
+			sb.append(key[i]).append("=").append(id.get(key[i])).append(",");
+		}
+		return entityMap.get(sb.toString());
+	}
+
+	/**
+	 * Cache an entity to entityMap, use entityID as key
+	 */
+	public static void cacheEntityToEntityMap(Entity entity, Map<Object, Entity> entityMap) {
+		if (entity == null)
+			return;
+		Map<String, Object> id = entity.box().getEntityID();
+		if (id.size() == 1)
+			entityMap.put(id.values().iterator().next(), entity);
+		else {
+
+			Object[] key = id.keySet().toArray();
+			Arrays.sort(key);
+
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < key.length; i++) {
+				sb.append(key[i]).append("=").append(id.get(key[i])).append(",");
+			}
+			entityMap.put(sb.toString(), entity);
+		}
+	}
+
+	// Fetch values from one line of result List
+	protected static SqlBox fetchValueFromList(String alias, Map<String, Object> oneLine, Entity entity) {
+		SqlBox box = entity.box();
+		box.configAlias(alias);
+		Map<String, Column> realColumns = box.buildRealColumns();
+		for (Column col : realColumns.values()) {
+			String aiasColUppserCaseName = entity.aliasByFieldID(col.getFieldID()).toUpperCase();
+			if (oneLine.containsKey(aiasColUppserCaseName))
+				box.setFieldRealValue(col, oneLine.get(aiasColUppserCaseName));
+		}
+		return box;
 	}
 
 	public static String formatSQL(String sql) {

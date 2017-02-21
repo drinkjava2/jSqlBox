@@ -58,21 +58,28 @@ public interface Entity {
 		return (T) this;
 	}
 
-	public default <T> T configNode(Entity entity) {
-		// TODO work on it
-		return (T) this;
-	}
-
 	public default String automaticQuerySQL() {
 		return this.box().automaticQuerySQL();
 	}
 
-	public default <T> List<T> getNodeList(String key) {
-		return (List<T>) this.box().getNodeList(key);
+	public default <T> List<T> getSmartNodeList(Class<?> entityClass) {
+		return this.box().getSmartNodeList(entityClass);
 	}
 
-	public default <T> T getNode(String key) {
-		return this.box().getNode(key);
+	public default <T> List<T> getNodeList(Class<?> entityClass, String fieldID) {
+		return this.box().getNodeList(entityClass, fieldID);
+	}
+
+	public default <T> List<T> getNodeList(Class<?> entityClass) {
+		return this.box().getNodeList(entityClass, null);
+	}
+
+	public default <T> T getNode(Class<?> entityClass, String fieldID) {
+		return this.box().getNode(entityClass, fieldID);
+	}
+
+	public default <T> T getNode(Class<?> entityClass) {
+		return this.box().getNode(entityClass, null);
 	}
 
 }

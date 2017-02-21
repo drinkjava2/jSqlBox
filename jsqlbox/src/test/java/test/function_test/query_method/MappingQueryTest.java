@@ -70,7 +70,6 @@ public class MappingQueryTest {
 		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
-	@Test
 	public void leftJoinQueryNoAlias() {
 		Customer c = new Customer();
 		Order o = new Order();
@@ -90,22 +89,19 @@ public class MappingQueryTest {
 		Customer c = new Customer().configAlias("c");
 		Order o = new Order().configAlias("o");
 		OrderItem i = new OrderItem().configAlias("i");
-		List<Customer> customers = Dao.queryForEntityList(select(), c.all(), ",", o.all(), ",", i.all(), from(),
-				c.table(), //
+		List<Customer> customers = Dao.queryForEntityList(Customer.class, select(), c.all(), ",", o.all(), ",", i.all(),
+				from(), c.table(), //
 				" left outer join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(), //
 				" left outer join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), to(), //
 				" order by ", o.ID(), ",", i.ID());
-		// TODO work on this
-
 		for (Customer customer : customers) {
 			System.out.println("Customer=" + customer.getId() + "," + customer.getCustomerName());
-			List<Order> listOrder = customer.getNodeList(o.alias(o.ID()));
+			List<Order> listOrder = customer.getNodeList(Order.class);
 			for (Order order : listOrder) {
-				System.out
-						.println("\tOrder=" + order.getId() + "," + order.getOrderName() + "," + order.getCustomerId());
-				List<OrderItem> listOrderItem = order.getNodeList(i.alias(i.ID()));
+				System.out.println("\tOrder=" + order.getId() + "," + order.getOrderName());
+				List<OrderItem> listOrderItem = order.getNodeList(OrderItem.class);
 				for (OrderItem orderItem : listOrderItem) {
-					System.out.println("orderItem=" + orderItem.getId() + "," + orderItem.getItemName());
+					System.out.println("\t\torderItem=" + orderItem.getId() + "," + orderItem.getItemName());
 				}
 			}
 		}

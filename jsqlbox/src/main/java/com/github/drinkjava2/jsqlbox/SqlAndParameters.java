@@ -28,9 +28,20 @@ import java.util.List;
  */
 public class SqlAndParameters {
 	private String sql;
+	/**
+	 * Sql parameters
+	 */
 	private Object[] parameters;
+
+	/**
+	 * Entity mapping list
+	 */
 	private List<Mapping> mappingList = new ArrayList<>();
-	private List<Class<?>> entityClassForQueryList = new ArrayList<>();
+
+	/**
+	 * Entity class list, these entity classes will be created for each sql query result
+	 */
+	private List<Entity> entityTemplates = new ArrayList<>();
 
 	public SqlAndParameters() {
 		// default Constructor
@@ -65,12 +76,12 @@ public class SqlAndParameters {
 		this.mappingList = mappingList;
 	}
 
-	public List<Class<?>> getEntityClassForQueryList() {
-		return entityClassForQueryList;
+	public List<Entity> getEntityTemplates() {
+		return entityTemplates;
 	}
 
-	public void setEntityClassesForQuery(List<Class<?>> entityClassForQueryList) {
-		this.entityClassForQueryList = entityClassForQueryList;
+	public void setEntityTemplates(List<Entity> entityTemplates) {
+		this.entityTemplates = entityTemplates;
 	}
 
 }

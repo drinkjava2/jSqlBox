@@ -268,8 +268,8 @@ public class SqlHelper {
 			List<Mapping> mappings = new ArrayList<>(MappingHelper.getMappingListCache());
 			sp.setMappingList(mappings);
 
-			List<Class<?>> entityClasses = new ArrayList<>(MappingHelper.getEntityClassesForQuery());
-			sp.setEntityClassesForQuery(entityClasses);
+			List<Entity> templates = new ArrayList<>(MappingHelper.getEntityTemplates());
+			sp.setEntityTemplates(templates);
 
 			return sp;
 		} finally {
