@@ -96,10 +96,10 @@ public class MappingQueryTest {
 				" order by ", o.ID(), ",", i.ID());
 		for (Customer customer : customers) {
 			System.out.println("Customer=" + customer.getId() + "," + customer.getCustomerName());
-			List<Order> listOrder = customer.getNodeList(Order.class);
+			List<Order> listOrder = customer.getChildNodeList(Order.class);
 			for (Order order : listOrder) {
 				System.out.println("\tOrder=" + order.getId() + "," + order.getOrderName());
-				List<OrderItem> listOrderItem = order.getNodeList(OrderItem.class);
+				List<OrderItem> listOrderItem = order.getChildNodeList(OrderItem.class);
 				for (OrderItem orderItem : listOrderItem) {
 					System.out.println("\t\torderItem=" + orderItem.getId() + "," + orderItem.getItemName());
 				}

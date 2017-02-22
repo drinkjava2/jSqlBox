@@ -66,20 +66,20 @@ public interface Entity {
 		return this.box().getUniqueNodeList(entityClass);
 	}
 
-	public default <T> List<T> getNodeList(Class<?> entityClass, String fieldID) {
-		return this.box().getNodeList(entityClass, fieldID);
+	public default <T> List<T> getChildNodeList(Class<?> entityClass, String fieldID) {
+		return this.box().getChildNodeList(entityClass, fieldID);
 	}
 
-	public default <T> List<T> getNodeList(Class<?> entityClass) {
-		return this.box().getNodeList(entityClass, null);
+	public default <T> List<T> getChildNodeList(Class<?> entityClass) {
+		return this.box().getChildNodeList(entityClass, null);
 	}
 
-	public default <T> T getNode(Class<?> entityClass, String fieldID) {
-		return this.box().getNode(entityClass, fieldID);
+	public default <T> T getOneChildNode(Class<?> entityClass, String fieldID) {
+		return this.box().getOneChildNode(entityClass, fieldID);
 	}
 
-	public default <T> T getNode(Class<?> entityClass) {
-		return this.box().getNode(entityClass, null);
+	public default <T> T getOneChildNode(Class<?> entityClass) {
+		return this.box().getOneChildNode(entityClass, null);
 	}
 
 }

@@ -191,21 +191,23 @@ public class SqlBox {
 	}
 
 	/**
-	 * Automatically find and return the parent or childNode list, no need tell the fieldID of parent class, but
-	 * entityClass should be unique in object tree<br/>
-	 * This may cause delay because need search path each time, in future version may make a path cache
+	 * Automatically search and return the targetClass entity node list, no need give the path, but targetClass and path
+	 * should be unique in who object graph
 	 */
-	public <T> List<T> getUniqueNodeList(Class<?> entityClass) {
+	public <T> List<T> getUniqueNodeList(Class<?> targetClass) {
 		List<Object> currentPath = new ArrayList<>();
-		Class<?> currentClass = this.getEntityClass();
-		List<Object> path = findNodePath(this.getSpCache().getMappingList(), currentClass, currentPath);
-		for (Object obj : path) {
-			System.out.println(obj);
+		List<Object> path = searchNodePath(this.getSpCache().getMappingList(), this.getEntityClass(),
+				this.getEntityClass(), targetClass, currentPath);
+		System.out.println("================Path===============");
+		for (Object p : path) {
+			System.out.println(p);
 		}
+		System.out.println("===============================");
 		return new ArrayList<>();
 	}
 
-	public List<Object> findNodePath(List<Mapping> mapping, Class<?> currentClass, List<Object> currentPath) {
+	protected List<Object> searchNodePath(List<Mapping> mapping, Class<?> currentClass, Class<?> oldClass,
+			Class<?> targetClass, List<Object> currentPath) {
 		//TODO work on here
 		return null;
 	}
@@ -213,7 +215,7 @@ public class SqlBox {
 	/**
 	 * Return the child node list for a Entity binded with this box
 	 */
-	public <T> List<T> getNodeList(Class<?> entityClass, String fieldID) {
+	public <T> List<T> getChildNodeList(Class<?> entityClass, String fieldID) {
 		List<T> l = new ArrayList<>();
 		if (entityCache == null || entityCache.isEmpty())
 			return l;
@@ -230,8 +232,8 @@ public class SqlBox {
 	/**
 	 * Return the first element in node list
 	 */
-	public <T> T getNode(Class<?> entityClass, String fieldID) {
-		List<Object> result = getNodeList(entityClass, fieldID);
+	public <T> T getOneChildNode(Class<?> entityClass, String fieldID) {
+		List<Object> result = getChildNodeList(entityClass, fieldID);
 		if (result.isEmpty())
 			return null;
 		return (T) result.get(0);

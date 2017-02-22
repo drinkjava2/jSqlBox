@@ -96,7 +96,6 @@ public class ORMDemo {
 				System.out.println(priv.getPrivilegeName());
 			}
 		}
-
 	}
 
 }
