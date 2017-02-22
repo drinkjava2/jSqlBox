@@ -9,6 +9,7 @@ public class Role implements Entity {
 	String id;
 	String roleName;
 	{
+		this.box().configTable("roles");
 		this.box().configAlias("r");
 	}
 

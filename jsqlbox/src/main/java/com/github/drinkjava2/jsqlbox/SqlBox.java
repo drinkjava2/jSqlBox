@@ -77,10 +77,15 @@ public class SqlBox {
 	private Map<Entity, Set<String>> partents;
 
 	/**
-	 * Point to entityCache, which is built by queryForEntityList or queryForEntityMaps methods <br/>
+	 * Point to entityCache, which is built by queryForEntityList or queryForEntityMaps methods or transfer methods<br/>
 	 * like: map1(Customer.class, Map("id1", customer1))
 	 */
 	private Map<Class<?>, Map<Object, Entity>> entityCache;
+
+	/**
+	 * store the SqlAndParameters cache, which is used by queryForEntityList or queryForEntityMaps or transfer methods
+	 */
+	private SqlAndParameters spCache;
 
 	/**
 	 * Store fieldID for SQL Helper or other place use
@@ -169,21 +174,42 @@ public class SqlBox {
 		this.partents = partents;
 	}
 
-	
-	
+	public Map<Class<?>, Map<Object, Entity>> getEntityCache() {
+		return entityCache;
+	}
+
+	public void setEntityCache(Map<Class<?>, Map<Object, Entity>> entityCache) {
+		this.entityCache = entityCache;
+	}
+
+	public SqlAndParameters getSpCache() {
+		return spCache;
+	}
+
+	public void setSpCache(SqlAndParameters spCache) {
+		this.spCache = spCache;
+	}
+
 	/**
 	 * Automatically find and return the parent or childNode list, no need tell the fieldID of parent class, but
 	 * entityClass should be unique in object tree<br/>
 	 * This may cause delay because need search path each time, in future version may make a path cache
 	 */
-	public <T> List<T> getSmartNodeList(Class<?> entityClass) {
-		List<Object> path = new ArrayList<>();
-		//TODO work on here
+	public <T> List<T> getUniqueNodeList(Class<?> entityClass) {
+		List<Object> currentPath = new ArrayList<>();
+		Class<?> currentClass = this.getEntityClass();
+		List<Object> path = findNodePath(this.getSpCache().getMappingList(), currentClass, currentPath);
+		for (Object obj : path) {
+			System.out.println(obj);
+		}
 		return new ArrayList<>();
 	}
 
-	
-	
+	public List<Object> findNodePath(List<Mapping> mapping, Class<?> currentClass, List<Object> currentPath) {
+		//TODO work on here
+		return null;
+	}
+
 	/**
 	 * Return the child node list for a Entity binded with this box
 	 */
@@ -199,14 +225,6 @@ public class SqlBox {
 				l.add((T) entity);
 		}
 		return l;
-	}
-
-	public Map<Class<?>, Map<Object, Entity>> getEntityCache() {
-		return entityCache;
-	}
-
-	public void setEntityCache(Map<Class<?>, Map<Object, Entity>> entityCache) {
-		this.entityCache = entityCache;
 	}
 
 	/**

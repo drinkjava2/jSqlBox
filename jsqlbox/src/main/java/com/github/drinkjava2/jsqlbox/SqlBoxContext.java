@@ -632,6 +632,7 @@ public class SqlBoxContext {
 				Entity cachedEntity = SqlBoxUtils.findEntityByID(id, entityMap);
 				if (cachedEntity == null) {
 					entity.box().setEntityCache(entityCache);
+					entity.box().setSpCache(sp);
 					SqlBoxUtils.cacheEntityToEntityMap(entity, entityMap);
 					thisLineEntities.add(entity);
 				} else

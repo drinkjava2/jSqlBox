@@ -62,8 +62,8 @@ public interface Entity {
 		return this.box().automaticQuerySQL();
 	}
 
-	public default <T> List<T> getSmartNodeList(Class<?> entityClass) {
-		return this.box().getSmartNodeList(entityClass);
+	public default <T> List<T> getUniqueNodeList(Class<?> entityClass) {
+		return this.box().getUniqueNodeList(entityClass);
 	}
 
 	public default <T> List<T> getNodeList(Class<?> entityClass, String fieldID) {
