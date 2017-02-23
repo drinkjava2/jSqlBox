@@ -27,6 +27,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -378,6 +379,16 @@ public class SqlBoxUtils {
 				box.setFieldRealValue(col, oneLine.get(aiasColUppserCaseName));
 		}
 		return box;
+	}
+
+	/**
+	 * Usually used for get the last element from a linkedHashset
+	 */
+	public static <E> E getLastElement(Collection<E> c) {
+		E last = null;
+		for (E e : c)
+			last = e;
+		return last;
 	}
 
 	public static String formatSQL(String sql) {

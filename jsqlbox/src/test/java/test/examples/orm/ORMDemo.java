@@ -91,7 +91,7 @@ public class ORMDemo {
 			System.out.println(user.getUserName());
 			System.out.println(user.getId());
 			System.out.println(user.box().getEntityID());
-			List<Privilege> privs = user.getUniqueNodeList(Privilege.class);
+			List<Privilege> privs = user.getUniqueNodeList(Role.class);
 			for (Privilege priv : privs) {
 				System.out.println(priv.getPrivilegeName());
 			}

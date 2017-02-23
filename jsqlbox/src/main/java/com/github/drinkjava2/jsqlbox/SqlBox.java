@@ -29,6 +29,8 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -195,21 +197,69 @@ public class SqlBox {
 	 * should be unique in who object graph
 	 */
 	public <T> List<T> getUniqueNodeList(Class<?> targetClass) {
-		List<Object> currentPath = new ArrayList<>();
-		List<Object> path = searchNodePath(this.getSpCache().getMappingList(), this.getEntityClass(),
-				this.getEntityClass(), targetClass, currentPath);
-		System.out.println("================Path===============");
-		for (Object p : path) {
-			System.out.println(p);
-		}
-		System.out.println("===============================");
-		return new ArrayList<>();
+		Set<Class<?>> path = searchNodePath(this.getSpCache().getMappingList(), this.getEntityClass(), targetClass);
+		return getNodeList(path.toArray(new Class[0]));
 	}
 
-	protected List<Object> searchNodePath(List<Mapping> mapping, Class<?> currentClass, Class<?> oldClass,
-			Class<?> targetClass, List<Object> currentPath) {
-		//TODO work on here
-		return null;
+	protected Set<Class<?>> searchNodePath(List<Mapping> mapping, Class<?> from, Class<?> to) {
+		Set<Class<?>> checked = new HashSet<>();
+		checked.add(from);
+		Set<Class<?>> path = new LinkedHashSet<>();
+		path.add(from);
+		List<Set<Class<?>>> paths = new ArrayList<>();
+		paths.add(path);
+		int i = 0;
+		Set<Class<?>> newPath = null;
+		do {
+			i++;
+			Class<?> foundClass;
+			do {
+				foundClass = null;
+				for (Set<Class<?>> set : paths) {
+					if (set.size() == i) {
+						Class<?> last = SqlBoxUtils.getLastElement(set);
+						for (Mapping mp : mapping) {
+							Class<?> p = mp.getThisEntity().getClass();
+							Class<?> c = mp.getOtherEntity().getClass();
+							if (!checked.contains(c) && p.equals(last)) {
+								foundClass = c;
+								break;
+							} else if (!checked.contains(p) && c.equals(last)) {
+								foundClass = p;
+								break;
+							}
+						}
+					}
+					if (foundClass != null) {
+						newPath = new LinkedHashSet<>(set);
+						newPath.add(foundClass);
+						if (foundClass.equals(to))
+							return newPath;
+						checked.add(foundClass);
+						break;
+					}
+				}
+				if (newPath != null)
+					paths.add(newPath);
+			} while (foundClass != null);
+		} while (i < 100);
+		return path;// this
+	}
+
+	/**
+	 * Get the NodeList by given path c1,c2,...cn, cn is targetClass
+	 */
+	public <T> List<T> getNodeList(Class<?>... classes) {
+		List<T> result = new ArrayList<>();
+		if (entityCache == null || entityCache.isEmpty())
+			return result;
+
+		for (Class<?> z : classes) {
+			if (!z.equals(this.getEntityClass())) {// skip self
+				// TODO: work at here
+			}
+		}
+		return result;
 	}
 
 	/**
