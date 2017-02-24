@@ -1,6 +1,12 @@
 package test.examples.orm;
 
+import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
+
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +19,6 @@ import test.examples.orm.entities.Role;
 import test.examples.orm.entities.RolePrivilege;
 import test.examples.orm.entities.User;
 import test.examples.orm.entities.UserRole;
-
-import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
-import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 
 public class ORMDemo {
 
@@ -89,13 +90,28 @@ public class ORMDemo {
 
 		for (User user : users) {
 			System.out.println(user.getUserName());
-			System.out.println(user.getId());
-			System.out.println(user.box().getEntityID());
-			List<Privilege> privs = user.getUniqueNodeList(Role.class);
+			Set<Privilege> privs = user.getUniqueNodeList(Privilege.class);
 			for (Privilege priv : privs) {
-				System.out.println(priv.getPrivilegeName());
+				System.out.println("\t" + priv.getPrivilegeName());
 			}
 		}
+
+		List<Privilege> privs = Dao.queryForEntityList(Privilege.class, select(), Dao.pagination(1, 10), u.all(), ",",
+				ur.all(), ",", r.all(), ",", rp.all(), ",", p.all(), from(), u.table(), //
+				" left join ", ur.table(), " on ", oneToMany(), u.ID(), "=", ur.UID(), to(), //
+				" left join ", r.table(), " on ", oneToMany(), r.ID(), "=", ur.RID(), to(), //
+				" left join ", rp.table(), " on ", oneToMany(), r.ID(), "=", rp.RID(), to(), //
+				" left join ", p.table(), " on ", oneToMany(), p.ID(), "=", rp.PID(), to(), //
+				" order by ", u.ID());
+
+		for (Privilege prv : privs) {
+			System.out.println(prv.getPrivilegeName());
+			Set<User> userList = prv.getUniqueNodeList(User.class);
+			for (User usr : userList) {
+				System.out.println("\t" + usr.getUserName());
+			}
+		}
+
 	}
 
 }

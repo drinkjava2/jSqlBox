@@ -1,6 +1,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Each entity bean class should extends from EntityBase class(forDK7 and below) or implements Entity interface(For
@@ -62,8 +63,8 @@ public interface Entity {
 		return this.box().automaticQuerySQL();
 	}
 
-	public default <T> List<T> getUniqueNodeList(Class<?> entityClass) {
-		return this.box().getUniqueNodeList(entityClass);
+	public default <T> Set<T> getUniqueNodeList(Class<?> entityClass) {
+		return (Set<T>) this.box().getUniqueNodeList(entityClass);
 	}
 
 	public default <T> List<T> getChildNodeList(Class<?> entityClass, String fieldID) {

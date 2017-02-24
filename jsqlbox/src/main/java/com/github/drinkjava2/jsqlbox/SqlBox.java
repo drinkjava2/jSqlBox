@@ -196,7 +196,7 @@ public class SqlBox {
 	 * Automatically search and return the targetClass entity node list, no need give the path, but targetClass and path
 	 * should be unique in who object graph
 	 */
-	public <T> List<T> getUniqueNodeList(Class<?> targetClass) {
+	public <T> Set<T> getUniqueNodeList(Class<?> targetClass) {
 		Set<Class<?>> path = searchNodePath(this.getSpCache().getMappingList(), this.getEntityClass(), targetClass);
 		return getNodeList(path.toArray(new Class[0]));
 	}
@@ -249,18 +249,53 @@ public class SqlBox {
 	/**
 	 * Get the NodeList by given path c1,c2,...cn, cn is targetClass
 	 */
-	public <T> List<T> getNodeList(Class<?>... classes) {
-		List<T> result = new ArrayList<>();
-		if (entityCache == null || entityCache.isEmpty())
-			return result;
+	public <T> Set<T> getNodeList(Class<?>... classes) {
+		Class<?> lastClass = this.getEntityClass();
 
-		for (Class<?> z : classes) {
-			if (!z.equals(this.getEntityClass())) {// skip self
-				// TODO: work at here
+		Set<Object> lastResult = new LinkedHashSet<>();
+		lastResult.add(this.getEntityBean());
+
+		if (entityCache == null || entityCache.isEmpty())
+			return (Set<T>) lastResult;
+
+		for (Class<?> thisClass : classes) {
+			if (!thisClass.equals(this.getEntityClass())) {// skip self
+				Mapping mapping = findTheMapping(lastClass, thisClass);
+				Set<Object> newResult = new LinkedHashSet<>();
+				if (mapping.getThisEntity().getClass().equals(lastClass)) {// find child
+					for (Object lastEntity : lastResult) {
+						List<Object> oneList = ((Entity) lastEntity)
+								.getChildNodeList(mapping.getOtherEntity().getClass(), null);
+						for (Object obj : oneList) {
+							newResult.add(obj);
+						}
+					}
+				} else {// find parent
+					for (Object lastEntity : lastResult) {
+						Object p = ((Entity) lastEntity).box().getParentNode(mapping.getThisEntity().getClass());
+						newResult.add(p);
+					}
+				}
+				lastClass = thisClass;
+				lastResult = newResult;
 			}
 		}
-		return result;
+		return (Set<T>) lastResult;
 	}
+
+	private Mapping findTheMapping(Class<?> lastClass, Class<?> thisClass) {
+		List<Mapping> mappings = this.getSpCache().getMappingList();
+		for (Mapping mapping : mappings) {
+			Class<?> c1 = mapping.getThisEntity().getClass();
+			Class<?> c2 = mapping.getOtherEntity().getClass();
+			if (lastClass.equals(c1) && thisClass.equals(c2))
+				return mapping;
+			if (lastClass.equals(c2) && thisClass.equals(c1))
+				return mapping;
+		}
+		return (Mapping) SqlBoxException.throwEX("SqlBox findTheMapping error: can not find classes " + lastClass + ","
+				+ thisClass + " in mapping cache.");
+	};
 
 	/**
 	 * Return the child node list for a Entity binded with this box
@@ -277,6 +312,15 @@ public class SqlBox {
 				l.add((T) entity);
 		}
 		return l;
+	}
+
+	public <T> T getParentNode(Class<?> entityClass) {
+		Set<Entity> keys = this.getPartents().keySet();
+		for (Entity entity : keys) {
+			if (entity.getClass().equals(entityClass))
+				return (T) entity;
+		}
+		return null;
 	}
 
 	/**
