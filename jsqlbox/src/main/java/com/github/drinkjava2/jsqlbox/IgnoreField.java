@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  * Usually used to mark a VO field
  * 
  * @author Yong Zhu
- * @since 2.4
+ * @since 1.0.0
  *
  */
 @Retention(RetentionPolicy.RUNTIME)

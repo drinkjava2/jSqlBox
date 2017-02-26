@@ -1,8 +1,7 @@
 
 package test.coverage_test;
 
-import static com.github.drinkjava2.jsqlbox.MappingHelper.manyToMany;
-import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.bind;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToOne;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.tree;
@@ -56,10 +55,10 @@ public class SqlMappingTest {
 		OrderItem i = new OrderItem();
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(select(), c.all(), ",", o.all(), ",", i.all(), from(),
 				c.table(), //
-				" left join ", o.table(), " on ", oneToOne(), c.ID(), "=", o.CUSTOMERID(), to(), //
-				" left join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(null, o.CUSTOMERID()), //
-				" left join ", i.table(), " on ", manyToMany(), o.ID(), "=", i.ORDERID(), to(c.ID(), null), //
-				" left join ", i.table(), " on ", tree(), o.ID(), "=", i.ORDERID(), to(c.ID(), o.CUSTOMERID()), //
+				" left join ", o.table(), " on ", oneToOne(), c.ID(), "=", o.CUSTOMERID(), bind(), //
+				" left join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), bind(null, o.CUSTOMERID()), //
+				" left join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), bind(c.ID(), null), //
+				" left join ", i.table(), " on ", tree(), o.ID(), "=", i.ORDERID(), bind(c.ID(), o.CUSTOMERID()), //
 				" order by ", o.ID(), ",", i.ID());
 		System.out.println(SqlBoxUtils.formatSQL(sp.getSql()));
 		List<Mapping> l = sp.getMappingList();

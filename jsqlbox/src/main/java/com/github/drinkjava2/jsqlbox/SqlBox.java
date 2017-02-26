@@ -264,7 +264,7 @@ public class SqlBox {
 				Set<Object> newResult = new LinkedHashSet<>();
 				if (mapping.getThisEntity().getClass().equals(lastClass)) {// find child
 					for (Object lastEntity : lastResult) {
-						List<Object> oneList = ((Entity) lastEntity)
+						Set<Object> oneList = ((Entity) lastEntity)
 								.getChildNodeList(mapping.getOtherEntity().getClass(), null);
 						for (Object obj : oneList) {
 							newResult.add(obj);
@@ -300,18 +300,18 @@ public class SqlBox {
 	/**
 	 * Return the child node list for a Entity binded with this box
 	 */
-	public <T> List<T> getChildNodeList(Class<?> entityClass, String fieldID) {
-		List<T> l = new ArrayList<>();
+	public <T> Set<T> getChildNodeList(Class<?> entityClass, String fieldID) {
+		Set<T> result = new LinkedHashSet<>();
 		if (entityCache == null || entityCache.isEmpty())
-			return l;
+			return result;
 		Map<Object, Entity> entities = entityCache.get(entityClass);
 		for (Entity entity : entities.values()) {
 			Map<Entity, Set<String>> p = entity.box().getPartents();
 			if (p != null && p.containsKey(this.getEntityBean())
 					&& (SqlBoxUtils.isEmptyStr(fieldID) || p.get(this.getEntityBean()).contains(fieldID)))
-				l.add((T) entity);
+				result.add((T) entity);
 		}
-		return l;
+		return result;
 	}
 
 	public <T> T getParentNode(Class<?> entityClass) {
@@ -326,11 +326,11 @@ public class SqlBox {
 	/**
 	 * Return the first element in node list
 	 */
-	public <T> T getOneChildNode(Class<?> entityClass, String fieldID) {
-		List<Object> result = getChildNodeList(entityClass, fieldID);
+	public <T> T getChildNode(Class<?> entityClass, String fieldID) {
+		Set<Object> result = getChildNodeList(entityClass, fieldID);
 		if (result.isEmpty())
 			return null;
-		return (T) result.get(0);
+		return (T) result.iterator().next();
 	}
 
 	/**

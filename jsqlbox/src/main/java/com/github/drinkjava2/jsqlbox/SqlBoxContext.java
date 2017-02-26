@@ -519,7 +519,7 @@ public class SqlBoxContext {
 			end = " limit " + (pageNumber - 1) * pageSize + ", " + pageSize + " ";
 		} else if (this.getDatabaseType().isMsSQLSERVER()) {
 			// For SQL Server 2005 and later
-			start = " a_tb.* from (select row_number() over(__orderby__) as rownum, ";
+			start = " a_tb.* from (select row_number() over(__ORDERBY__) as rownum, ";
 			end = ") as a_tb where rownum between " + ((pageNumber - 1) * pageSize + 1) + " and "
 					+ pageNumber * pageSize + " ";
 			/**
@@ -577,7 +577,6 @@ public class SqlBoxContext {
 	 * Transfer resultList List<Map<String, Object>> to Map<Class<?>, List<Object>>,<br/>
 	 * 
 	 * <pre>
-	 *   
 	 * sqlResult: 
 	 * A1,B1
 	 * A1,B1,C1 
@@ -589,7 +588,8 @@ public class SqlBoxContext {
 	 * return:
 	 * A.class->[A1 (A1.b=B1 (B1.c=[C1]), A2 (A2.b=b2 (b2.c=[c2,c3]]]
 	 * D.class->[D1, D2]
-	 * 
+	 * B.class->...
+	 * C.class->...
 	 * </pre>
 	 */
 	public Map<Class<?>, Map<Object, Entity>> transfer(List<Map<String, Object>> sqlResultList,
@@ -622,7 +622,7 @@ public class SqlBoxContext {
 
 		ArrayList<Entity> thisLineEntities = new ArrayList<>();
 
-		// create entity, if not cached in entityCache, put it inside
+		// create entity, if not cached in entityCache, put it in
 		for (Entity template : classes) {
 			Entity entity = this.createEntity(template.box().getEntityClass());
 			SqlBoxUtils.fetchValueFromList(template.box().getAlias(), oneLine, entity);
@@ -647,24 +647,56 @@ public class SqlBoxContext {
 			for (Entity entity2 : thisLineEntities) {// entity2
 				SqlBox box2 = entity2.box();
 				Class<?> c2 = box2.getEntityClass();
+
 				Map<Entity, Set<String>> parent2 = box2.getPartents();
-				if (box1 != box2)
+				// It's not allowed link to entity self
+				if (box1 != box2) {
 					for (Mapping map : sp.getMappingList()) {// NOSONAR
 						Class<?> thisClass = map.getThisEntity().getClass();
 						Class<?> otherClass = map.getOtherEntity().getClass();
 						String thisField = map.getThisField();
 						String otherField = map.getOtherfield();
-						if (c1.equals(thisClass) && c2.equals(otherClass)) {// 2 classes match
-							Object value1 = SqlBoxUtils.getPropertyValueByFieldID(entity1, thisField);
-							Object value2 = SqlBoxUtils.getPropertyValueByFieldID(entity2, otherField);
-							if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 fields value same
+						String thisProperty = map.getThisPropertyName();
+						String otherProperty = map.getOtherPropertyName();
+
+						if (c1.equals(thisClass) && c2.equals(otherClass)) {// 2 classes match mapping setting
+							Object value1 = SqlBoxUtils.getFieldValueByFieldID(entity1, thisField);
+							Object value2 = SqlBoxUtils.getFieldValueByFieldID(entity2, otherField);
+							if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 values also match
 								if (parent2 == null) {
+									// If parent is null, create a new parent map
+									// Note: one box can have many parent entities, so, parent is a map
+									// one child can have many parents, one parent can have many child
+									// key is parent entity, value is set<parent fields>
+									Map<Entity, Set<String>> parentMap2 = new HashMap<>();
 									Set<String> fieldSet2 = new HashSet<>();
 									fieldSet2.add(thisField);
-									Map<Entity, Set<String>> parentMap2 = new HashMap<>();
 									parentMap2.put(entity1, fieldSet2);
 									box2.setPartents(parentMap2);
+
+									// if parent entity1 need bind child entity2
+									if (!SqlBoxUtils.isEmptyStr(thisProperty)) {
+										// oneToOne
+										if (map.getMappingType().isOneToOne()) {
+											SqlBoxUtils.setFieldValueByFieldID(entity1, thisProperty, entity2);
+										} else
+										// oneToMany
+										if (map.getMappingType().isOneToMany()) {
+											SqlBoxUtils.addFieldValueByFieldID(entity1, thisProperty, entity2);
+										}
+
+										// oneToMany
+									}
+
+									// if child entity2 need bind parent entity1
+									if (!SqlBoxUtils.isEmptyStr(otherProperty)) {
+										// oneToOne, oneToMany
+										if (map.getMappingType().isOneToOne() || map.getMappingType().isOneToMany())
+											SqlBoxUtils.setFieldValueByFieldID(entity2, otherProperty, entity1);
+									}
+
 								} else {
+									// Already have parent map found, only need insert new founded parent into it
 									Set<String> fieldSet2 = parent2.get(entity1);
 									if (fieldSet2 == null) {
 										fieldSet2 = new HashSet<>();
@@ -675,6 +707,7 @@ public class SqlBoxContext {
 							}
 						}
 					}
+				}
 			}
 		}
 	}

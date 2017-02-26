@@ -259,7 +259,7 @@ public class SqlHelper {
 			SqlAndParameters sp = new SqlAndParameters();
 			String sql = sb.toString();
 			if (SqlBoxContext.paginationOrderByCache.get() != null)
-				sql = sql.replaceFirst("__orderby__", SqlBoxContext.paginationOrderByCache.get());
+				sql = sql.replaceFirst("__ORDERBY__", SqlBoxContext.paginationOrderByCache.get());
 			sp.setSql(sql);
 
 			ArrayList<String> list = sqlCache.get();

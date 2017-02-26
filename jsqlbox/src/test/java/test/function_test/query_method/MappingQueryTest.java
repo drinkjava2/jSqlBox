@@ -1,13 +1,14 @@
 package test.function_test.query_method;
 
 import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
-import static com.github.drinkjava2.jsqlbox.MappingHelper.to;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.bind;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -91,15 +92,15 @@ public class MappingQueryTest {
 		OrderItem i = new OrderItem().configAlias("i");
 		List<Customer> customers = Dao.queryForEntityList(Customer.class, select(), c.all(), ",", o.all(), ",", i.all(),
 				from(), c.table(), //
-				" left outer join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), to(), //
-				" left outer join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), to(), //
+				" left outer join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), bind(), //
+				" left outer join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), bind(), //
 				" order by ", o.ID(), ",", i.ID());
 		for (Customer customer : customers) {
 			System.out.println("Customer=" + customer.getId() + "," + customer.getCustomerName());
-			List<Order> listOrder = customer.getChildNodeList(Order.class);
+			Set<Order> listOrder = customer.getChildNodeList(Order.class);
 			for (Order order : listOrder) {
 				System.out.println("\tOrder=" + order.getId() + "," + order.getOrderName());
-				List<OrderItem> listOrderItem = order.getChildNodeList(OrderItem.class);
+				Set<OrderItem> listOrderItem = order.getChildNodeList(OrderItem.class);
 				for (OrderItem orderItem : listOrderItem) {
 					System.out.println("\t\torderItem=" + orderItem.getId() + "," + orderItem.getItemName());
 				}

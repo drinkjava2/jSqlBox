@@ -24,20 +24,18 @@ package com.github.drinkjava2.jsqlbox;
  * @since 1.0.0
  */
 public enum MappingType {
-	ONETOONE, ONETOMANY, MANYTOMANY, TREE;
+	ONETOONE, ONETOMANY, TREE;
 
-	public static MappingType getMappingType(String mappingName) {
-		if ("ONETOONE".equalsIgnoreCase(mappingName))
-			return ONETOONE;
-		if ("ONETOMANY".equalsIgnoreCase(mappingName))
-			return ONETOMANY;
-		if ("MANYTOMANY".equalsIgnoreCase(mappingName))
-			return MANYTOMANY;
-		if ("TREE".equalsIgnoreCase(mappingName))
-			return TREE;
-		else
-			SqlBoxException.throwEX("MappingType error, \"" + mappingName + "\" is not a legel mapping name.");
-		return null;
+	public boolean isOneToOne() {
+		return this.equals(ONETOONE);
+	}
+
+	public boolean isOneToMany() {
+		return this.equals(ONETOMANY);
+	}
+
+	public boolean isTree() {
+		return this.equals(TREE);
 	}
 
 }

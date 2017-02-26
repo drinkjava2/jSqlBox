@@ -17,7 +17,9 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class is for transfer SQL query result List<Map<String, Object>> to object trees<br/>
@@ -80,10 +82,10 @@ public class MappingHelper {
 	 * For store entity classes in tThreadlocal, these entities indicate how many classes will be created when do O-R
 	 * mapping
 	 */
-	private static ThreadLocal<ArrayList<Entity>> entityTemplates = new ThreadLocal<ArrayList<Entity>>() {
+	private static ThreadLocal<HashSet<Entity>> entityTemplates = new ThreadLocal<HashSet<Entity>>() {
 		@Override
-		protected ArrayList<Entity> initialValue() {
-			return new ArrayList<>();
+		protected HashSet<Entity> initialValue() {
+			return new HashSet<>();
 		}
 	};
 
@@ -140,28 +142,36 @@ public class MappingHelper {
 	/**
 	 * Get entityClassForQuery in Threadlocal
 	 */
-	public static List<Entity> getEntityTemplates() {
+	public static Set<Entity> getEntityTemplates() {
 		return entityTemplates.get();
 	}
 
 	/**
+	 * Bind entity property with parent or child entity or entities <br/>
 	 * Read cached mapping info from ThreadLocal and re-cache a Mapping instance in ThreadLocal, if propertyFieldName
 	 * exist, at the query result tree, entity will be binded to the given property field
 	 */
-	public static String to(String... propertyFieldName) {// NOSONAR propertyFieldName is useful, can not remove
+	public static String bind(String... propertyFieldName) {// NOSONAR propertyFieldName is useful, can not remove
 		try {
 			Mapping mapping = new Mapping();
 			mapping.setMappingType(inMapping.get());
-			mapping.setThisEntity(null);
 
 			mapping.setThisEntity(entityPairCache.get().get(0));
 			mapping.setThisField(idPairCache.get().get(0));
+
 			mapping.setOtherEntity(entityPairCache.get().get(1));
 			mapping.setOtherfield(idPairCache.get().get(1));
 
+			if (propertyFieldName.length == 1) {
+				if (SqlBoxUtils.isEmptyStr(propertyFieldName[0]))
+					SqlBoxException.throwEX("MappingHelper to() can not set empty propertyFieldNames parameter");
+				else
+					mapping.setThisPropertyName(getPropertyPairCache().get(0));
+			}
+
 			if (propertyFieldName.length == 2) {
 				if (SqlBoxUtils.isEmptyStr(propertyFieldName[0]) && SqlBoxUtils.isEmptyStr(propertyFieldName[1]))
-					SqlBoxException.throwEX("MappingHelper to() can not set both empty propertyFieldNames");
+					SqlBoxException.throwEX("MappingHelper to() can not set both empty propertyFieldNames parameters");
 				else if (SqlBoxUtils.isEmptyStr(propertyFieldName[0])) {
 					mapping.setOtherPropertyName(getPropertyPairCache().get(0));
 				} else if (SqlBoxUtils.isEmptyStr(propertyFieldName[1])) {
@@ -189,11 +199,6 @@ public class MappingHelper {
 
 	public static String oneToMany() {
 		inMapping.set(MappingType.ONETOMANY);
-		return "";
-	}
-
-	public static String manyToMany() {
-		inMapping.set(MappingType.MANYTOMANY);
 		return "";
 	}
 

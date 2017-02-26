@@ -30,9 +30,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -189,9 +191,9 @@ public class SqlBoxUtils {
 	}
 
 	/**
-	 * Get Field value by it's column definition
+	 * Get Field value by it's fieldID
 	 */
-	public static Object getPropertyValueByFieldID(Entity entityBean, String fieldID) {
+	public static Object getFieldValueByFieldID(Entity entityBean, String fieldID) {
 		String getMethod = "get" + SqlBoxUtils.toFirstLetterUpperCase(fieldID);
 		try {
 			Method m = ReflectionUtils.findMethod(entityBean.getClass(), getMethod, new Class[] {});
@@ -199,6 +201,46 @@ public class SqlBoxUtils {
 		} catch (Exception e) {
 			return throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method \"" + getMethod
 					+ "\" not found in " + entityBean.getClass());
+		}
+	}
+
+	/**
+	 * Set Field value by it's fieldID
+	 */
+	public static void setFieldValueByFieldID(Entity entityBean, String fieldID, Object value) {
+		String setMethod = "set" + SqlBoxUtils.toFirstLetterUpperCase(fieldID);
+		try {
+			Method m = ReflectionUtils.findMethod(entityBean.getClass(), setMethod, new Class[] { value.getClass() });
+			m.invoke(entityBean, new Object[] { value });
+		} catch (Exception e) {
+			throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method \"" + setMethod + "\" not found in "
+					+ entityBean.getClass());
+		}
+	}
+
+	/**
+	 * add Field value by it's fieldID, field is a Set type field, value will be added into this field
+	 */
+	public static void addFieldValueByFieldID(Entity entityBean, String fieldID, Object value) {
+		Set<Object> property = null;
+		String getMethod = "get" + SqlBoxUtils.toFirstLetterUpperCase(fieldID);
+		try {
+			Method m = ReflectionUtils.findMethod(entityBean.getClass(), getMethod, new Class[] {});
+			property = (Set<Object>) m.invoke(entityBean, new Object[] {});
+		} catch (Exception e) {
+			throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method \"" + getMethod + "\" not found in "
+					+ entityBean.getClass());
+		}
+		if (property == null)
+			property = new LinkedHashSet<>();
+		property.add(value);
+		String setMethod = "set" + SqlBoxUtils.toFirstLetterUpperCase(fieldID);
+		try {
+			Method m = ReflectionUtils.findMethod(entityBean.getClass(), setMethod, new Class[] { Set.class });
+			m.invoke(entityBean, new Object[] { property });
+		} catch (Exception e) {
+			throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method \"" + setMethod + "\" not found in "
+					+ entityBean.getClass());
 		}
 	}
 

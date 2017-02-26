@@ -1,5 +1,7 @@
 package test.examples.orm.entities;
 
+import java.util.Set;
+
 import com.github.drinkjava2.jsqlbox.Entity;
 
 public class User implements Entity {
@@ -9,6 +11,8 @@ public class User implements Entity {
 
 	String id;
 	String userName;
+	Address address;
+	Set<Email> emails;
 	{
 		this.box().configAlias("u");
 	}
@@ -29,7 +33,31 @@ public class User implements Entity {
 		this.userName = userName;
 	}
 
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+
+	public Set<Email> getEmails() {
+		return emails;
+	}
+
+	public void setEmails(Set<Email> emails) {
+		this.emails = emails;
+	}
+
 	public String ID() {
 		return box().getColumnName("id");
+	}
+
+	public String ADDRESS() {
+		return box().getColumnName("address");
+	}
+
+	public String EMAILS() {
+		return box().getColumnName("emails");
 	}
 }
