@@ -1,4 +1,4 @@
-/**
+/** 
  * Copyright (C) 2016 Yong Zhu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -201,7 +201,7 @@ public class SqlBox {
 		return getNodeList(path.toArray(new Class[0]));
 	}
 
-	protected Set<Class<?>> searchNodePath(List<Mapping> mapping, Class<?> from, Class<?> to) {
+	protected Set<Class<?>> searchNodePath(List<Mapping> mapping, Class<?> from, Class<?> to) {//NOSONAR
 		Set<Class<?>> checked = new HashSet<>();
 		checked.add(from);
 		Set<Class<?>> path = new LinkedHashSet<>();
@@ -216,9 +216,9 @@ public class SqlBox {
 			do {
 				foundClass = null;
 				for (Set<Class<?>> set : paths) {
-					if (set.size() == i) {
+					if (set.size() == i) {// NOSONAR
 						Class<?> last = SqlBoxUtils.getLastElement(set);
-						for (Mapping mp : mapping) {
+						for (Mapping mp : mapping) {// NOSONAR
 							Class<?> p = mp.getThisEntity().getClass();
 							Class<?> c = mp.getOtherEntity().getClass();
 							if (!checked.contains(c) && p.equals(last)) {
@@ -230,7 +230,7 @@ public class SqlBox {
 							}
 						}
 					}
-					if (foundClass != null) {
+					if (foundClass != null) {// NOSONAR
 						newPath = new LinkedHashSet<>(set);
 						newPath.add(foundClass);
 						if (foundClass.equals(to))
@@ -263,7 +263,7 @@ public class SqlBox {
 				Mapping mapping = findTheMapping(lastClass, thisClass);
 				Set<Object> newResult = new LinkedHashSet<>();
 				if (mapping.getThisEntity().getClass().equals(lastClass)) {// find child
-					for (Object lastEntity : lastResult) {
+					for (Object lastEntity : lastResult) {//NOSONAR
 						Set<Object> oneList = ((Entity) lastEntity)
 								.getChildNodeList(mapping.getOtherEntity().getClass(), null);
 						for (Object obj : oneList) {
@@ -271,7 +271,7 @@ public class SqlBox {
 						}
 					}
 				} else {// find parent
-					for (Object lastEntity : lastResult) {
+					for (Object lastEntity : lastResult) {//NOSONAR
 						Object p = ((Entity) lastEntity).box().getParentNode(mapping.getThisEntity().getClass());
 						newResult.add(p);
 					}
@@ -295,7 +295,7 @@ public class SqlBox {
 		}
 		return (Mapping) SqlBoxException.throwEX("SqlBox findTheMapping error: can not find classes " + lastClass + ","
 				+ thisClass + " in mapping cache.");
-	};
+	}
 
 	/**
 	 * Return the child node list for a Entity binded with this box
@@ -769,25 +769,6 @@ public class SqlBox {
 	}
 
 	/**
-	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
-	 */
-	private boolean isLegalFieldID(String fieldID, Class<?> clazz) {
-		if ("class".equals(fieldID))
-			return false;
-		if (SqlBoxUtils.isEmptyStr(fieldID))
-			return false;
-		if (SqlBoxUtils.isCapitalizedString(fieldID))
-			return false;
-		if (!SqlBoxUtils.isBaseDataType(clazz))
-			return false;
-		/**
-		 * try { Method method = ReflectionUtils.getDeclaredMethod(entityClass, fieldID, new Class[] {}); if (method ==
-		 * null) return false; } catch (Exception e) { return false; }
-		 */
-		return true;
-	}
-
-	/**
 	 * Return real Columns match to table meta data
 	 */
 	public Map<String, Column> buildRealColumns() {
@@ -808,7 +789,7 @@ public class SqlBox {
 
 		for (PropertyDescriptor pd : pds) {
 			String fieldID = pd.getName();
-			if (isLegalFieldID(fieldID, pd.getPropertyType())) {
+			if (SqlBoxUtils.isLegalFieldID(fieldID, pd.getPropertyType())) {
 				Column realCol = new Column();
 				realCol.setFieldID(fieldID);
 				String realColumnMatchName = this.getRealColumnName(realTableName, fieldID);

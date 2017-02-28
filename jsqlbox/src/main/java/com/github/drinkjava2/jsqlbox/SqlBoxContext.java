@@ -689,10 +689,9 @@ public class SqlBoxContext {
 									}
 
 									// if child entity2 need bind parent entity1
-									if (!SqlBoxUtils.isEmptyStr(otherProperty)) {
-										// oneToOne, oneToMany
-										if (map.getMappingType().isOneToOne() || map.getMappingType().isOneToMany())
-											SqlBoxUtils.setFieldValueByFieldID(entity2, otherProperty, entity1);
+									if (!SqlBoxUtils.isEmptyStr(otherProperty) && (map.getMappingType().isOneToOne()
+											|| map.getMappingType().isOneToMany())) {
+										SqlBoxUtils.setFieldValueByFieldID(entity2, otherProperty, entity1);
 									}
 
 								} else {

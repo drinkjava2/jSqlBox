@@ -9,6 +9,7 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,6 +92,11 @@ public class ORMDemo {
 
 		Dao.refreshMetaData();
 		// Dao.getDefaultContext().setShowSql(true).setShowQueryResult(true);
+	}
+
+	@After
+	public void cleanUp() {
+		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	/**

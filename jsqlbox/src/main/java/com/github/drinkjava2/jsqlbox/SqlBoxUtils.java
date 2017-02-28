@@ -178,6 +178,21 @@ public class SqlBoxUtils {
 	}
 
 	/**
+	 * In entity class, a legal fieldID like userName must have a same name no parameter method like userName()
+	 */
+	public static boolean isLegalFieldID(String fieldID, Class<?> clazz) {
+		if ("class".equals(fieldID))
+			return false;
+		if (SqlBoxUtils.isEmptyStr(fieldID))
+			return false;
+		if (SqlBoxUtils.isCapitalizedString(fieldID))
+			return false;
+		if (!SqlBoxUtils.isBaseDataType(clazz))
+			return false;
+		return true;
+	}
+
+	/**
 	 * Get Field value by it's column definition
 	 */
 	public static Object getFieldRealValue(Object entityBean, Column col) {
@@ -199,8 +214,8 @@ public class SqlBoxUtils {
 			Method m = ReflectionUtils.findMethod(entityBean.getClass(), getMethod, new Class[] {});
 			return m.invoke(entityBean, new Object[] {});
 		} catch (Exception e) {
-			return throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method \"" + getMethod
-					+ "\" not found in " + entityBean.getClass());
+			return throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method " + getMethod + " not found in "
+					+ entityBean.getClass());
 		}
 	}
 
@@ -213,7 +228,7 @@ public class SqlBoxUtils {
 			Method m = ReflectionUtils.findMethod(entityBean.getClass(), setMethod, new Class[] { value.getClass() });
 			m.invoke(entityBean, new Object[] { value });
 		} catch (Exception e) {
-			throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method \"" + setMethod + "\" not found in "
+			throwEX(e, "SqlBoxUtils getPropertyValueByFieldID error,   method " + setMethod + " not found in "
 					+ entityBean.getClass());
 		}
 	}
