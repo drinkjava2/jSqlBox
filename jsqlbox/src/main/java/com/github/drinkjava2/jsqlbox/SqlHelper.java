@@ -165,11 +165,20 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Cache parameters in thread local and return a empty string
+	 * Return a empty string and cache parameters in thread local for SQL use
 	 */
 	public static String empty(Object... parameters) {
 		for (Object o : parameters)
 			sqlCache.get().add("" + o);
+		return "";
+	}
+
+	/**
+	 * Merely return a empty string but do not cache parameters for SQL
+	 */
+	public static String use(Object... parameters) {
+		if (parameters == null)
+			return "";
 		return "";
 	}
 

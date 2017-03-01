@@ -7,6 +7,7 @@ import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToOne;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.tree;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.use;
 
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class SqlMappingTest {
 				" left join ", o.table(), " on ", oneToOne(), c.ID(), "=", o.CUSTOMERID(), bind(), //
 				" left join ", o.table(), " on ", oneToMany(), c.ID(), "=", o.CUSTOMERID(), bind(null, o.CUSTOMERID()), //
 				" left join ", i.table(), " on ", oneToMany(), o.ID(), "=", i.ORDERID(), bind(c.ID(), null), //
-				" left join ", i.table(), " on ", tree(), o.ID(), "=", i.ORDERID(), bind(c.ID(), o.CUSTOMERID()), //
+				" left join ", i.table(), " on ", tree(), use(o.ID(), o.CUSTOMERID()), bind(o.ID(), o.CUSTOMERID()), //
 				" order by ", o.ID(), ",", i.ID());
 		System.out.println(SqlBoxUtils.formatSQL(sp.getSql()));
 		List<Mapping> l = sp.getMappingList();

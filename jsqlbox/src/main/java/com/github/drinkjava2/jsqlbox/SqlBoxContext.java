@@ -649,64 +649,97 @@ public class SqlBoxContext {
 				Class<?> c2 = box2.getEntityClass();
 
 				Map<Entity, Set<String>> parent2 = box2.getPartents();
-				// It's not allowed link to entity self
-				if (box1 != box2) {
-					for (Mapping map : sp.getMappingList()) {// NOSONAR
-						Class<?> thisClass = map.getThisEntity().getClass();
-						Class<?> otherClass = map.getOtherEntity().getClass();
-						String thisField = map.getThisField();
-						String otherField = map.getOtherfield();
-						String thisProperty = map.getThisPropertyName();
-						String otherProperty = map.getOtherPropertyName();
 
-						if (c1.equals(thisClass) && c2.equals(otherClass)) {// 2 classes match mapping setting
-							Object value1 = SqlBoxUtils.getFieldValueByFieldID(entity1, thisField);
-							Object value2 = SqlBoxUtils.getFieldValueByFieldID(entity2, otherField);
-							if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 values also match
+				for (Mapping map : sp.getMappingList()) {// NOSONAR
+					Class<?> thisClass = map.getThisEntity().getClass();
+					Class<?> otherClass = map.getOtherEntity().getClass();
+					String thisField = map.getThisField();
+					String otherField = map.getOtherfield();
+					String thisProperty = map.getThisPropertyName();
+					String otherProperty = map.getOtherPropertyName();
+
+					if (c1.equals(thisClass) && c2.equals(otherClass)) {// 2 classes match mapping setting
+						Object value1 = SqlBoxUtils.getFieldValueByFieldID(entity1, thisField);
+						Object value2 = SqlBoxUtils.getFieldValueByFieldID(entity2, otherField);
+
+						if (map.getMappingType().isTree() && entity1 == entity2) {// Tree
+							// value1 is parentID , will only find entity which field2 equals value1
+							Map<Object, Entity> entityMap = entityCache.get(thisClass);
+							Map<String, Object> id = box1.getEntityID();
+							Entity cachedEntity = SqlBoxUtils.findEntityByID(id, entityMap);
+
+							if (cachedEntity != null) {// found parent
+
 								if (parent2 == null) {
-									// If parent is null, create a new parent map
-									// Note: one box can have many parent entities, so, parent is a map
-									// one child can have many parents, one parent can have many child
-									// key is parent entity, value is set<parent fields>
 									Map<Entity, Set<String>> parentMap2 = new HashMap<>();
 									Set<String> fieldSet2 = new HashSet<>();
 									fieldSet2.add(thisField);
-									parentMap2.put(entity1, fieldSet2);
+									parentMap2.put(cachedEntity, fieldSet2);
 									box2.setPartents(parentMap2);
 
-									// if parent entity1 need bind child entity2
-									if (!SqlBoxUtils.isEmptyStr(thisProperty)) {
-										// oneToOne
-										if (map.getMappingType().isOneToOne()) {
-											SqlBoxUtils.setFieldValueByFieldID(entity1, thisProperty, entity2);
-										} else
-										// oneToMany
-										if (map.getMappingType().isOneToMany()) {
-											SqlBoxUtils.addFieldValueByFieldID(entity1, thisProperty, entity2);
-										}
+									// if parent cachedEntity need bind child entity2
+									if (!SqlBoxUtils.isEmptyStr(thisProperty))
+										SqlBoxUtils.addFieldValueByFieldID(cachedEntity, thisProperty, entity2);
 
-										// oneToMany
-									}
-
-									// if child entity2 need bind parent entity1
-									if (!SqlBoxUtils.isEmptyStr(otherProperty) && (map.getMappingType().isOneToOne()
-											|| map.getMappingType().isOneToMany())) {
-										SqlBoxUtils.setFieldValueByFieldID(entity2, otherProperty, entity1);
-									}
+									// if child entity2 need bind parent cachedEntity
+									if (!SqlBoxUtils.isEmptyStr(otherProperty))
+										SqlBoxUtils.setFieldValueByFieldID(entity2, otherProperty, cachedEntity);
 
 								} else {
 									// Already have parent map found, only need insert new founded parent into it
-									Set<String> fieldSet2 = parent2.get(entity1);
+									Set<String> fieldSet2 = parent2.get(cachedEntity);
 									if (fieldSet2 == null) {
 										fieldSet2 = new HashSet<>();
-										parent2.put(entity1, fieldSet2);
+										parent2.put(cachedEntity, fieldSet2);
 									}
 									fieldSet2.add(thisField);
 								}
+
+							}
+
+						} else if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 values match
+							if (parent2 == null) {
+								// If parent is null, create a new parent map
+								// Note: one box can have many parent entities, so, parent is a map
+								// one child can have many parents, one parent can have many child
+								// key is parent entity, value is set<parent fields>
+								Map<Entity, Set<String>> parentMap2 = new HashMap<>();
+								Set<String> fieldSet2 = new HashSet<>();
+								fieldSet2.add(thisField);
+								parentMap2.put(entity1, fieldSet2);
+								box2.setPartents(parentMap2);
+
+								// if parent entity1 need bind child entity2
+								if (!SqlBoxUtils.isEmptyStr(thisProperty)) {
+									// oneToOne
+									if (map.getMappingType().isOneToOne()) {
+										SqlBoxUtils.setFieldValueByFieldID(entity1, thisProperty, entity2);
+									} else
+									// oneToMany
+									if (map.getMappingType().isOneToMany()) {
+										SqlBoxUtils.addFieldValueByFieldID(entity1, thisProperty, entity2);
+									}
+								}
+
+								// if child entity2 need bind parent entity1
+								if (!SqlBoxUtils.isEmptyStr(otherProperty)
+										&& (map.getMappingType().isOneToOne() || map.getMappingType().isOneToMany())) {
+									SqlBoxUtils.setFieldValueByFieldID(entity2, otherProperty, entity1);
+								}
+
+							} else {
+								// Already have parent map found, only need insert new founded parent into it
+								Set<String> fieldSet2 = parent2.get(entity1);
+								if (fieldSet2 == null) {
+									fieldSet2 = new HashSet<>();
+									parent2.put(entity1, fieldSet2);
+								}
+								fieldSet2.add(thisField);
 							}
 						}
 					}
 				}
+
 			}
 		}
 	}

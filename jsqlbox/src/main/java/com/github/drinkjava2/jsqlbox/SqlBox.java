@@ -305,8 +305,12 @@ public class SqlBox {
 		if (entityCache == null || entityCache.isEmpty())
 			return result;
 		Map<Object, Entity> entities = entityCache.get(entityClass);
+		System.out.println("entityCache="+entityCache);
 		for (Entity entity : entities.values()) {
 			Map<Entity, Set<String>> p = entity.box().getPartents();
+			System.out.println("p="+p);
+			
+			
 			if (p != null && p.containsKey(this.getEntityBean())
 					&& (SqlBoxUtils.isEmptyStr(fieldID) || p.get(this.getEntityBean()).contains(fieldID)))
 				result.add((T) entity);
@@ -705,6 +709,8 @@ public class SqlBox {
 	 */
 	public String getColumnName(String fieldID) {// NOSONAR
 		if (MappingHelper.isInMapping()) {
+			//IdPair is to tell mapping which fieldIDs be linked
+			//tPropertyPair is to tell mapping which property field be binded
 			if (MappingHelper.getIdPairCache().size() < 2) {
 				MappingHelper.getIdPairCache().add(fieldID);
 				MappingHelper.getEntityPairCache().add(this.getEntityBean());

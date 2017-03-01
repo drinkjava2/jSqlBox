@@ -31,7 +31,6 @@ public class Mapping {
 	Object otherEntity;
 	String otherfield;
 	String otherPropertyName;
-	Boolean isRoot;
 
 	public MappingType getMappingType() {
 		return mappingType;
@@ -89,14 +88,6 @@ public class Mapping {
 		this.otherPropertyName = otherPropertyName;
 	}
 
-	public Boolean getIsRoot() {
-		return isRoot;
-	}
-
-	public void setIsRoot(Boolean isRoot) {
-		this.isRoot = isRoot;
-	}
-
 	/**
 	 * Get debug info of Mapping instance
 	 */
@@ -110,7 +101,6 @@ public class Mapping {
 		sb.append("otherEntity=" + otherEntity).append("\r\n");
 		sb.append("otherfield=" + otherfield).append("\r\n");
 		sb.append("otherPropertyName=" + otherPropertyName).append("\r\n");
-		sb.append("isRoot=" + isRoot).append("\r\n");
 		return sb.toString();
 	}
 }

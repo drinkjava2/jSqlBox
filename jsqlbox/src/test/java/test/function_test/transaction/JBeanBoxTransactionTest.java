@@ -100,15 +100,6 @@ public class JBeanBoxTransactionTest {
 	}
 
 	@Test
-	public void doAopAroundTest2() {
-		JBeanBoxTransactionTest tester = BeanBox.getBean(JBeanBoxTransactionTest.class);
-		boolean foundException = false;
-
-		tester.insertButUseAopAroundAnnotation();
-
-	}
-
-	@Test
 	public void doAopAroundTest() {
 		JBeanBoxTransactionTest tester = BeanBox.getBean(JBeanBoxTransactionTest.class);
 		boolean foundException = false;

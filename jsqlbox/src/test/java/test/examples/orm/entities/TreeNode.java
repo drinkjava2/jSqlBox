@@ -10,13 +10,14 @@ public class TreeNode implements Entity {
 			+ "line integer,   "//
 			+ "level integer,   "//
 			+ "tempno integer, "//
-			+ "  temporder integer  "//
+			+ "temporder integer  "//
 			+ ") ";
 
 	String id;
 	String comments;
 	String pid;
 	Integer line;
+	Integer level;
 	Integer tempno;
 	Integer temporder;
 	{
@@ -55,6 +56,14 @@ public class TreeNode implements Entity {
 		this.line = line;
 	}
 
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
+
 	public Integer getTempno() {
 		return tempno;
 	}
@@ -69,6 +78,22 @@ public class TreeNode implements Entity {
 
 	public void setTemporder(Integer temporder) {
 		this.temporder = temporder;
+	}
+
+	public String ID() {
+		return box().getColumnName("id");
+	}
+
+	public String PID() {
+		return box().getColumnName("pid");
+	}
+
+	public String LINE() {
+		return box().getColumnName("line");
+	}
+
+	public String LEVEL() {
+		return box().getColumnName("level");
 	}
 
 }
