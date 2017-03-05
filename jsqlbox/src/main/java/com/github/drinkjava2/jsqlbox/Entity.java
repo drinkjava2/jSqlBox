@@ -4,8 +4,8 @@ import java.util.Set;
 
 /**
  * Each entity bean should extends from EntityBase class (for DK7 and below) or simply implements Entity interface(For
- * JDK8+), This project only released JDK8 version, for JDK7 and below, need move all method in Entity to EntityBase
- * class and re-compile this project, but that's the only work need to do.
+ * JDK8+), This project only released JDK8 version, for JDK7 and below which does support "default" method in interface,
+ * so need move all methods in Entity to EntityBase class and re-compile source code, that's the only work need to do.
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -61,20 +61,24 @@ public interface Entity {
 		return (T) this;
 	}
 
+	public default String configMapping(String... mappingSql) {
+		return this.box().configMapping(mappingSql);
+	}
+
 	public default String automaticQuerySQL() {
 		return this.box().automaticQuerySQL();
 	}
 
-	public default <T> Set<T> getUniqueNodeList(Class<?> entityClass) {
-		return (Set<T>) this.box().getUniqueNodeList(entityClass);
+	public default <T> Set<T> getUniqueNodeSet(Class<?> entityClass) {
+		return (Set<T>) this.box().getUniqueNodeSet(entityClass);
 	}
 
-	public default <T> Set<T> getChildNodeList(Class<?> entityClass, String fieldID) {
-		return this.box().getChildNodeList(entityClass, fieldID);
+	public default <T> Set<T> getChildNodeSet(Class<?> entityClass, String fieldID) {
+		return this.box().getChildNodeSet(entityClass, fieldID);
 	}
 
-	public default <T> Set<T> getChildNodeList(Class<?> entityClass) {
-		return this.box().getChildNodeList(entityClass, null);
+	public default <T> Set<T> getChildNodeSet(Class<?> entityClass) {
+		return this.box().getChildNodeSet(entityClass, null);
 	}
 
 	public default <T> T getChildNode(Class<?> entityClass, String fieldID) {

@@ -1,5 +1,7 @@
 package test.examples.orm.entities;
 
+import java.util.Set;
+
 import com.github.drinkjava2.jsqlbox.Entity;
 
 public class TreeNode implements Entity {
@@ -20,6 +22,9 @@ public class TreeNode implements Entity {
 	Integer level;
 	Integer tempno;
 	Integer temporder;
+	TreeNode parent;
+	Set<TreeNode> childs;
+
 	{
 		this.box().configTable("treetest");
 	}
@@ -80,6 +85,22 @@ public class TreeNode implements Entity {
 		this.temporder = temporder;
 	}
 
+	public TreeNode getParent() {
+		return parent;
+	}
+
+	public void setParent(TreeNode parent) {
+		this.parent = parent;
+	}
+
+	public Set<TreeNode> getChilds() {
+		return childs;
+	}
+
+	public void setChilds(Set<TreeNode> childs) {
+		this.childs = childs;
+	}
+
 	public String ID() {
 		return box().getColumnName("id");
 	}
@@ -94,6 +115,14 @@ public class TreeNode implements Entity {
 
 	public String LEVEL() {
 		return box().getColumnName("level");
+	}
+
+	public String PARENT() {
+		return box().getColumnName("parent");
+	}
+
+	public String CHILDS() {
+		return box().getColumnName("childs");
 	}
 
 }

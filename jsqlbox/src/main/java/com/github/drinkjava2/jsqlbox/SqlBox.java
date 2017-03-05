@@ -67,6 +67,8 @@ public class SqlBox {
 	// Configure Table Name
 	private String configTable;
 
+	private List<Mapping> configMappings;
+
 	// Configure Table Alias Name
 	private String alias;
 
@@ -192,16 +194,24 @@ public class SqlBox {
 		this.spCache = spCache;
 	}
 
+	public List<Mapping> getConfigMappings() {
+		return configMappings;
+	}
+
+	public void setConfigMappings(List<Mapping> configMappings) {
+		this.configMappings = configMappings;
+	}
+
 	/**
 	 * Automatically search and return the targetClass entity node list, no need give the path, but targetClass and path
 	 * should be unique in who object graph
 	 */
-	public <T> Set<T> getUniqueNodeList(Class<?> targetClass) {
+	public <T> Set<T> getUniqueNodeSet(Class<?> targetClass) {
 		Set<Class<?>> path = searchNodePath(this.getSpCache().getMappingList(), this.getEntityClass(), targetClass);
 		return getNodeList(path.toArray(new Class[0]));
 	}
 
-	protected Set<Class<?>> searchNodePath(List<Mapping> mapping, Class<?> from, Class<?> to) {//NOSONAR
+	protected Set<Class<?>> searchNodePath(List<Mapping> mapping, Class<?> from, Class<?> to) {// NOSONAR
 		Set<Class<?>> checked = new HashSet<>();
 		checked.add(from);
 		Set<Class<?>> path = new LinkedHashSet<>();
@@ -263,15 +273,15 @@ public class SqlBox {
 				Mapping mapping = findTheMapping(lastClass, thisClass);
 				Set<Object> newResult = new LinkedHashSet<>();
 				if (mapping.getThisEntity().getClass().equals(lastClass)) {// find child
-					for (Object lastEntity : lastResult) {//NOSONAR
-						Set<Object> oneList = ((Entity) lastEntity)
-								.getChildNodeList(mapping.getOtherEntity().getClass(), null);
+					for (Object lastEntity : lastResult) {// NOSONAR
+						Set<Object> oneList = ((Entity) lastEntity).getChildNodeSet(mapping.getOtherEntity().getClass(),
+								null);
 						for (Object obj : oneList) {
 							newResult.add(obj);
 						}
 					}
 				} else {// find parent
-					for (Object lastEntity : lastResult) {//NOSONAR
+					for (Object lastEntity : lastResult) {// NOSONAR
 						Object p = ((Entity) lastEntity).box().getParentNode(mapping.getThisEntity().getClass());
 						newResult.add(p);
 					}
@@ -300,17 +310,13 @@ public class SqlBox {
 	/**
 	 * Return the child node list for a Entity binded with this box
 	 */
-	public <T> Set<T> getChildNodeList(Class<?> entityClass, String fieldID) {
+	public <T> Set<T> getChildNodeSet(Class<?> entityClass, String fieldID) {
 		Set<T> result = new LinkedHashSet<>();
 		if (entityCache == null || entityCache.isEmpty())
 			return result;
 		Map<Object, Entity> entities = entityCache.get(entityClass);
-		System.out.println("entityCache="+entityCache);
 		for (Entity entity : entities.values()) {
 			Map<Entity, Set<String>> p = entity.box().getPartents();
-			System.out.println("p="+p);
-			
-			
 			if (p != null && p.containsKey(this.getEntityBean())
 					&& (SqlBoxUtils.isEmptyStr(fieldID) || p.get(this.getEntityBean()).contains(fieldID)))
 				result.add((T) entity);
@@ -331,7 +337,7 @@ public class SqlBox {
 	 * Return the first element in node list
 	 */
 	public <T> T getChildNode(Class<?> entityClass, String fieldID) {
-		Set<Object> result = getChildNodeList(entityClass, fieldID);
+		Set<Object> result = getChildNodeSet(entityClass, fieldID);
 		if (result.isEmpty())
 			return null;
 		return (T) result.iterator().next();
@@ -708,16 +714,17 @@ public class SqlBox {
 	 * 
 	 */
 	public String getColumnName(String fieldID) {// NOSONAR
+		getFieldIDCache().set(fieldID);
 		if (MappingHelper.isInMapping()) {
-			//IdPair is to tell mapping which fieldIDs be linked
-			//tPropertyPair is to tell mapping which property field be binded
+			// IdPair is to tell mapping which fieldIDs be linked
+			// tPropertyPair is to tell mapping which property field be binded
 			if (MappingHelper.getIdPairCache().size() < 2) {
 				MappingHelper.getIdPairCache().add(fieldID);
 				MappingHelper.getEntityPairCache().add(this.getEntityBean());
 			} else
 				MappingHelper.getPropertyPairCache().add(fieldID);
 		}
-		getFieldIDCache().set(fieldID);
+
 		String colname = getRealColumnName(null, fieldID);
 		String als = this.getAlias();
 		boolean inSQL = SqlHelper.getInSqlTag();
@@ -734,6 +741,8 @@ public class SqlBox {
 		} else {
 			if (SqlHelper.getInAliasTag() && !SqlBoxUtils.isEmptyStr(als))
 				return als + "_" + colname;
+			else if (SqlBoxUtils.isEmptyStr(colname))
+				return "COL_NOT_FOUND";// Need set a value to tell bind() method in MappingHelper.java
 			else
 				return colname;
 		}
@@ -938,6 +947,18 @@ public class SqlBox {
 	public Object configAlias(String tableAlias) {
 		alias = tableAlias;
 		return this.getEntityBean();
+	}
+
+	/**
+	 * Config mappings in box, The mappingList stored in box will join to mappingList created in SQL, Detail see
+	 * SqlHelper.prepareSQLandParameters() method
+	 * 
+	 * @return The String result if not empty, can re-used in SQL
+	 */
+	public String configMapping(String... mappingSqls) {
+		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(mappingSqls);
+		this.setConfigMappings(sp.getMappingList());
+		return sp.getSql();
 	}
 
 	/**

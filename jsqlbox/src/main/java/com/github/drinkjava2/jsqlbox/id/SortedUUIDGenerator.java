@@ -61,10 +61,16 @@ public class SortedUUIDGenerator implements IdGenerator {
 		return sb.toString();
 	}
 
+	/**
+	 * Get the total length of the ID
+	 */
 	public Integer getFixTotalLength() {
 		return fixTotalLength;
 	}
 
+	/**
+	 * Set the total length of the ID, If >0, will fix total length and put "1" at beginning
+	 */
 	public void setFixTotalLength(Integer fixTotalLength) {
 		this.fixTotalLength = fixTotalLength;
 	}

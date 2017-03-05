@@ -126,8 +126,9 @@ public class ORMDemo {
 		System.out.println("============oneToOneWithBind=========");
 		User u = new User();
 		Address a = new Address();
+		u.configMapping(oneToOne(), u.ID(), a.UID(), bind(u.ADDRESS(), a.USER()));
 		List<User> users = Dao.queryForEntityList(User.class, select(), u.all(), ",", a.all(), from(), u.table(), ",",
-				a.table(), " where ", oneToOne(), u.ID(), "=", a.UID(), bind(u.ADDRESS(), a.USER()));
+				a.table(), " where ", u.ID(), "=", a.UID());
 		for (User user : users) {
 			System.out.println(user.getUserName());
 			Address address = user.getAddress();
@@ -149,7 +150,7 @@ public class ORMDemo {
 				e.table(), " where ", oneToMany(), u.ID(), "=", e.UID(), bind());
 		for (User user : users) {
 			System.out.println(user.getUserName());
-			Set<Email> emails = user.getChildNodeList(Email.class);
+			Set<Email> emails = user.getChildNodeSet(Email.class);
 			for (Email email : emails) {
 				System.out.println("\t" + email.getEmailName());
 				Assert.assertTrue(user == email.getParentNode(User.class));
@@ -213,10 +214,10 @@ public class ORMDemo {
 				Dao.orderBy(u.ID(), ",", r.ID(), ",", p.ID()));
 		for (User user : users) {
 			System.out.println(user.getUserName());
-			Set<Role> roles = user.getUniqueNodeList(Role.class);
+			Set<Role> roles = user.getUniqueNodeSet(Role.class);
 			for (Role role : roles)
 				System.out.println("\t" + role.getRoleName());
-			Set<Privilege> privs = user.getUniqueNodeList(Privilege.class);
+			Set<Privilege> privs = user.getUniqueNodeSet(Privilege.class);
 			for (Privilege priv : privs)
 				System.out.println("\t" + priv.getPrivilegeName());
 		}

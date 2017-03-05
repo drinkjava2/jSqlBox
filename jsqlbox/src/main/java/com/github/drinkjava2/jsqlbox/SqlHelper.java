@@ -183,15 +183,6 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Return empty String "" but set a inSelectTag tag in ThreadLocal
-	 */
-	public static String selectBegin() {
-		sql();
-		inSelectTag.set(true);
-		return "";
-	}
-
-	/**
 	 * Return String "" but cancel the inSelectTag tag in ThreadLocal
 	 */
 	public static String selectEnd() {
@@ -227,8 +218,8 @@ public class SqlHelper {
 	 * Equal to " select "+ sql() + selectBegin()
 	 */
 	public static String select() {
-		sql();
-		selectBegin();
+		inSqlTag.set(true);
+		inSelectTag.set(true);
 		return " select ";
 	}
 
@@ -274,11 +265,19 @@ public class SqlHelper {
 			ArrayList<String> list = sqlCache.get();
 			sp.setParameters(list.toArray(new String[list.size()]));
 
+			// get the mapping config in SQL
 			List<Mapping> mappings = new ArrayList<>(MappingHelper.getMappingListCache());
 			sp.setMappingList(mappings);
 
 			List<Entity> templates = new ArrayList<>(MappingHelper.getEntityTemplates());
 			sp.setEntityTemplates(templates);
+
+			// join mapping configs stored in entity templates to mappings
+			for (Entity entity : templates) {
+				if (entity.box().getConfigMappings() != null)
+					for (Mapping mp : entity.box().getConfigMappings())
+						mappings.add(mp);
+			}
 
 			return sp;
 		} finally {

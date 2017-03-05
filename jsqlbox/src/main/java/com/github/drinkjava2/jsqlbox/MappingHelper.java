@@ -164,14 +164,15 @@ public class MappingHelper {
 
 			if (propertyFieldName.length == 1) {
 				if (SqlBoxUtils.isEmptyStr(propertyFieldName[0]))
-					SqlBoxException.throwEX("MappingHelper to() can not set empty propertyFieldNames parameter");
+					SqlBoxException.throwEX("MappingHelper bind() can not set empty propertyFieldNames parameter");
 				else
 					mapping.setThisPropertyName(getPropertyPairCache().get(0));
 			}
 
 			if (propertyFieldName.length == 2) {
 				if (SqlBoxUtils.isEmptyStr(propertyFieldName[0]) && SqlBoxUtils.isEmptyStr(propertyFieldName[1]))
-					SqlBoxException.throwEX("MappingHelper to() can not set both empty propertyFieldNames parameters");
+					SqlBoxException
+							.throwEX("MappingHelper bind() can not set both empty propertyFieldNames parameters");
 				else if (SqlBoxUtils.isEmptyStr(propertyFieldName[0])) {
 					mapping.setOtherPropertyName(getPropertyPairCache().get(0));
 				} else if (SqlBoxUtils.isEmptyStr(propertyFieldName[1])) {
@@ -181,6 +182,8 @@ public class MappingHelper {
 					mapping.setOtherPropertyName(getPropertyPairCache().get(1));
 				}
 			}
+			if (propertyFieldName.length > 2)
+				SqlBoxException.throwEX("MappingHelper bind() can not have more than 2 parameters");
 
 			mappingListCache.get().add(mapping);
 			return "";

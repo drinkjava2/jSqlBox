@@ -603,6 +603,14 @@ public class SqlBoxContext {
 
 		for (Map<String, Object> oneLine : sqlResultList)
 			doOneLineTransfer(entityCache, oneLine, sp);
+
+		boolean hasTreeMap = false;
+		for (Mapping map : sp.getMappingList())
+			if (map.getMappingType().isTree())
+				hasTreeMap = true;
+		if (hasTreeMap)
+			for (Map<String, Object> oneLine : sqlResultList)
+				doTransferTree(entityCache, oneLine, sp);
 		return entityCache;
 	}
 
@@ -650,7 +658,9 @@ public class SqlBoxContext {
 
 				Map<Entity, Set<String>> parent2 = box2.getPartents();
 
-				for (Mapping map : sp.getMappingList()) {// NOSONAR
+				for (Mapping map : sp.getMappingList()) {
+					if (map.getMappingType().isTree())
+						continue;
 					Class<?> thisClass = map.getThisEntity().getClass();
 					Class<?> otherClass = map.getOtherEntity().getClass();
 					String thisField = map.getThisField();
@@ -662,42 +672,7 @@ public class SqlBoxContext {
 						Object value1 = SqlBoxUtils.getFieldValueByFieldID(entity1, thisField);
 						Object value2 = SqlBoxUtils.getFieldValueByFieldID(entity2, otherField);
 
-						if (map.getMappingType().isTree() && entity1 == entity2) {// Tree
-							// value1 is parentID , will only find entity which field2 equals value1
-							Map<Object, Entity> entityMap = entityCache.get(thisClass);
-							Map<String, Object> id = box1.getEntityID();
-							Entity cachedEntity = SqlBoxUtils.findEntityByID(id, entityMap);
-
-							if (cachedEntity != null) {// found parent
-
-								if (parent2 == null) {
-									Map<Entity, Set<String>> parentMap2 = new HashMap<>();
-									Set<String> fieldSet2 = new HashSet<>();
-									fieldSet2.add(thisField);
-									parentMap2.put(cachedEntity, fieldSet2);
-									box2.setPartents(parentMap2);
-
-									// if parent cachedEntity need bind child entity2
-									if (!SqlBoxUtils.isEmptyStr(thisProperty))
-										SqlBoxUtils.addFieldValueByFieldID(cachedEntity, thisProperty, entity2);
-
-									// if child entity2 need bind parent cachedEntity
-									if (!SqlBoxUtils.isEmptyStr(otherProperty))
-										SqlBoxUtils.setFieldValueByFieldID(entity2, otherProperty, cachedEntity);
-
-								} else {
-									// Already have parent map found, only need insert new founded parent into it
-									Set<String> fieldSet2 = parent2.get(cachedEntity);
-									if (fieldSet2 == null) {
-										fieldSet2 = new HashSet<>();
-										parent2.put(cachedEntity, fieldSet2);
-									}
-									fieldSet2.add(thisField);
-								}
-
-							}
-
-						} else if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 values match
+						if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 values match
 							if (parent2 == null) {
 								// If parent is null, create a new parent map
 								// Note: one box can have many parent entities, so, parent is a map
@@ -741,6 +716,86 @@ public class SqlBoxContext {
 				}
 
 			}
+		}
+	}
+
+	private void doTransferTree(Map<Class<?>, Map<Object, Entity>> entityCache, Map<String, Object> oneLine, // NOSONAR
+			final SqlAndParameters sp) {
+		List<Entity> classes = sp.getEntityTemplates();
+
+		ArrayList<Entity> thisLineEntities = new ArrayList<>();
+
+		// create entity, if not cached in entityCache, put it in
+		for (Entity template : classes) {
+			Entity entity = this.createEntity(template.box().getEntityClass());
+			SqlBoxUtils.fetchValueFromList(template.box().getAlias(), oneLine, entity);
+			Map<String, Object> id = entity.box().getEntityID();
+			if (id != null && !id.isEmpty()) {
+				Map<Object, Entity> entityMap = entityCache.get(template.box().getEntityClass());
+				Entity cachedEntity = SqlBoxUtils.findEntityByID(id, entityMap);
+				SqlBoxException.assureNotNull(cachedEntity, "doTransferTree cachedEntity can not be null");
+				thisLineEntities.add(cachedEntity);
+			}
+		}
+
+		// now cached thisLineEntities in entityResult, start to assemble relationship
+		for (Entity entity : thisLineEntities) {// entity1
+			SqlBox box = entity.box();
+			Class<?> clazz = box.getEntityClass();
+
+			Map<Entity, Set<String>> boxParent = box.getPartents();
+
+			for (Mapping map : sp.getMappingList()) {// NOSONAR
+				if (!map.getMappingType().isTree())
+					continue;
+				Class<?> mappingClass = map.getThisEntity().getClass();
+				if (!clazz.equals(mappingClass))
+					continue;
+				String pidField = map.getOtherfield();// pid
+				String parentProperty = map.getOtherPropertyName();// parentNode
+				String childProperty = map.getThisPropertyName(); // childs 
+
+				Object pidValue = SqlBoxUtils.getFieldValueByFieldID(entity, pidField);
+				if (pidValue == null || "".equals(pidValue))
+					continue;
+
+				// now find parentEntity from entityCache map
+				Map<Object, Entity> entityMap = entityCache.get(mappingClass);
+				Map<String, Object> pid = new HashMap<>();
+				pid.put(pidField, pidValue);
+				Entity parentEntity = SqlBoxUtils.findEntityByID(pid, entityMap);
+
+				if (parentEntity != null) {// found parent entity
+					if (boxParent == null) { // if boxParent is null, need create it
+						Map<Entity, Set<String>> parentMap = new HashMap<>();
+						// one entity may have many parents, but for tree only 1 parent
+						Set<String> parentFields = new HashSet<>();
+						parentFields.add(pidField);
+						parentMap.put(parentEntity, parentFields);
+						box.setPartents(parentMap);
+
+						// if parent cachedEntity need bind child entity2
+						if (!SqlBoxUtils.isEmptyStr(childProperty))
+							SqlBoxUtils.addFieldValueByFieldID(parentEntity, childProperty, entity);
+
+						// if child entity2 need bind parent cachedEntity
+						if (!SqlBoxUtils.isEmptyStr(parentProperty))
+							SqlBoxUtils.setFieldValueByFieldID(entity, parentProperty, parentEntity);
+
+					} else {
+						// Already have parent map found, only need insert new founded parent into it
+						// But it's very rare a entity has many parents
+						Set<String> parentFields = boxParent.get(parentEntity);
+						if (parentFields == null) {
+							parentFields = new HashSet<>();
+							boxParent.put(parentEntity, parentFields);
+						}
+						parentFields.add(pidField);
+					}
+				}
+
+			}
+
 		}
 	}
 
