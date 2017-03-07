@@ -86,7 +86,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>${spring.version}.RELEASE</version>
+      <version>${spring.version}.RELEASE</version> 
     </dependency> 
     
     
@@ -102,7 +102,7 @@
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jbeanbox</artifactId>
-        <version>2.4.2-SNAPSHOT</version>
+        <version>2.4.2</version>
         <scope>test</scope>
     </dependency> 
     
