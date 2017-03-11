@@ -125,7 +125,7 @@ public class ORMDemo {
 	public void oneToOneWithBind() {
 		System.out.println("============oneToOneWithBind=========");
 		User u = new User();
-		Address a = new Address();
+		Address a = new Address(); 
 		u.configMapping(oneToOne(), u.ID(), a.UID(), bind(u.ADDRESS(), a.USER()));
 		List<User> users = Dao.queryForEntityList(User.class, select(), u.all(), ",", a.all(), from(), u.table(), ",",
 				a.table(), " where ", u.ID(), "=", a.UID());

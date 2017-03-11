@@ -54,8 +54,8 @@
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
 		
-		<!--Already tested on Spring 4.3.2 and 4.3.6 version-->
-        <spring.version>4.3.6</spring.version>
+		<!--Already tested on Spring 4.3.2, 4.3.6, 4.2.7 -->
+        <spring.version>4.3.7</spring.version>
     </properties>
 
    <repositories>

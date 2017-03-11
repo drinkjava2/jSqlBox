@@ -40,6 +40,8 @@ public class TreeORMTest {
 	@Before
 	public void setup() {
 		System.out.println("===============================Testing TreeORMTest===============================");
+		System.out.println(" !!!Note: Only run on MySql, need set  DataSourceBox extends MySqlDataSourceBox in jBeanBoxConfig.java ");
+		System.out.println("=================================================================================");
 		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		if (!Dao.getDefaultContext().getDatabaseType().isMySql())
 			return;
@@ -113,9 +115,9 @@ public class TreeORMTest {
 		c.configMapping(tree(), use(c.ID(), c.PID()), bind());
 
 		List<TreeNode> c_childtree = loadChildTree(c);
-		TreeNode c2 = c_childtree.get(0);
-		Assert.assertEquals("C", c2.getId());
-		printUnbindedChildNode(c2);
+		TreeNode croot = c_childtree.get(0);
+		Assert.assertEquals("C", croot.getId());
+		printUnbindedChildNode(croot);
 	}
 
 	/**
@@ -175,8 +177,9 @@ public class TreeORMTest {
 		System.out.println("============treeWithBindTest=========");
 		sortMySqlTree();
 		TreeNode t = new TreeNode().configAlias("t");
+		t.configMapping(tree(), use(t.ID(), t.PID()), bind(t.CHILDS(), t.PARENT()));
 		List<TreeNode> childNodes = Dao.queryForEntityList(TreeNode.class, select(), t.all(), from(), t.table(),
-				" where level>0 order by ", t.LINE(), tree(), use(t.ID(), t.PID()), bind(t.CHILDS(), t.PARENT()));
+				" where level>0 order by ", t.LINE());
 		TreeNode root = childNodes.get(0);
 		Assert.assertEquals("A", root.getId());
 		Assert.assertEquals(root, root.getChilds().iterator().next().getParent());

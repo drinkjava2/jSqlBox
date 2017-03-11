@@ -48,7 +48,7 @@ public class SqlBoxContext {
 	private Boolean formatSql = false;
 	private Boolean showQueryResult = false;
 
-	public static final String SQLBOX_IDENTITY = "BX";
+	public static final String SQLBOX_IDENTITY = "BOX";
 
 	private JdbcTemplate jdbc = new JdbcTemplate();
 	private DataSource dataSource = null;

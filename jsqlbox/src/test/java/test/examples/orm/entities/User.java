@@ -14,7 +14,7 @@ public class User implements Entity {
 	Address address;
 	Set<Email> emails;
 	{
-		this.box().configAlias("u");
+		this.box().configAlias("u"); 
 	}
 
 	public String getId() {
