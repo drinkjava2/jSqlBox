@@ -32,13 +32,13 @@ jSqlBox虽然最初目的是给Hibernate加一个动态配置,但考虑到实体
 *可配置,当数据库表名、字段名与缺省匹配规则不一致时,可用配置的方式来解决,配置为同目录或内嵌的"类名+Box"的Java类,也可将配置写在类初始化块中。  
 *多配置和动态配置,同一个PO可采用不同的配置以进行多种方式的存取,配置可以继承重用已有的配置,配置可以在运行期动态生成和修改,与jBeanBox项目配置类似。  
 *支持多种主键生成方式,与Hibernate/JPA类似,目前支持9种主键生成方式,也可自定义主键生成类。  
-*(开发中)一级缓存与脏检查,与Hibernate类似,提供以ID为主键的行级缓存,一级缓存在跨越多个方法的同一事务中有效,对PO的存取不再重复访问数据库。与Hibernate的区别在于jSqlBox一级缓存比较简单,只缓存实体,包括已修改过的,不缓存SQL命令。  
-*(开发中)二级缓存和查询缓存,类似于Hibernate的缓存设计,可配置第三方缓存工具如EHcache等。  
+*(待开发)一级缓存与脏检查,与Hibernate类似,提供以ID为主键的行级缓存,一级缓存在跨越多个方法的同一事务中有效,对PO的存取不再重复访问数据库。与Hibernate的区别在于jSqlBox一级缓存比较简单,只缓存实体,包括已修改过的,不缓存SQL命令。  
+*(待开发)二级缓存和查询缓存,类似于Hibernate的缓存设计,可配置第三方缓存工具如EHcache等。  
 *支持多主键,适于使用了业务多主键的数据库。  
 *跨数据库,目前已在H2,MySql,SqlServer,Oracle上测试过,今后将加入更多的数据库支持。事务借用Spring的声明式事务。一些特殊的需求可以通过直接调用内核的JdbcTemplate来实现,内核建立在JdbcTemplate上倒不是作者对Spring有偏爱,而是因为它的声明式事务比较好用,目前找不到其它的JDBC类底层工具可以提供类似Spring的声明式事务。  
 *不使用代理类，不会有代理类造成的希奇古怪的问题。没有懒加载，也就没有OpenSessionInView问题, PO类可以直接充当VO传递到View层,PO在View层事务已关闭情况下,依然可以继续存取数据库(工作在自动提交模式,但通常只读)。  
 *提供简单的O-R映射,有一对一,一对多,树结构三种映射类型,多对多可由两个一对多组合成。支持固定、动态关联和越级自动查找关联功能。  
-*跨数据库的分页支持  
+*(正在开发中)简单明了的跨数据库的分页支持，内部借用了Hibernate的方言库，支持多达67种方言，基本包括了所有已知的数据库版本。因为是通过拼SQL的方法实现分页，所以这个通用的分页功能也可以单独抽取出来，使用在其它持久层工具如DbUtils或纯JDBC上。
 
 ###jSqlBox缺点:
 *比较新,缺少足够测试、文档、缺少开发和试用者(欢迎在个人项目中试用或加入开发组,任何问题和建议都会促使它不断完善)。  
@@ -195,7 +195,7 @@ jSqlBox快速入门：
 示例 9 来看一下实体类的写法,没有JPA注解,不继承任何基类,但必须声明实现Entity接口(适用于Java8), 声明实现一个接口在Java8中是一种低侵入,因为不用实做任何方法,直接使用Java8接口的默认方法即可。
 ```
 public class User implements Entity{ 
-	private Integer id;//取名为"id"的字段默认即为实体ID
+	private String id;//取名为"id"的字段默认即为实体ID
 	private String userName;
 	private String phoneNumber;
 	private String address;
@@ -206,7 +206,7 @@ public class User implements Entity{
 	{
 	//this.box().configEntityIDs("id");//这句代码可以省略,因为"id"字段默认即为实体ID
 	//configEntityIDs方法可以有多个参数,用于多主键场合,详见LoadTest.java测试示例
-	this.box.configIdGenerator("id", BeanBox.getBean(UUIDGenerator.class));//配置ID为UUID类型
+	this.box().configIdGenerator("id", BeanBox.getBean(UUIDGenerator.class));//配置ID为UUID类型
 	}
 	
 	//以下方法不是必须的,但是jSqlBox建议具有,以实现对SQL重构的支持:
@@ -235,7 +235,7 @@ public class User implements Entity{
 	}
 }
 ```
-jSqlBox目前有9种主键生成策略, 并可方便地自定义主键生成类,详见单元测试及源码的id子目录。  在示例7中用到了u.table()、u.ADDRESS()之类的方法,这就是jSqlBox支持Sql重构的秘密,每个实体类的每个属性都有一个对应的大写的同名方法,在SQL中调用这个方法而不是直接写数据库表的字段名,通过这种方式将数据库字段与Java代码解耦,从而实现SQL支持重构。这种大写方法不是强制的,可用也可以不用,如果不在乎SQL是否支持重构,可以不写。
+jSqlBox目前有9种主键生成策略, 并可方便地自定义主键生成类,详见单元测试及源码的id子目录。  在示例7中用到了u.table()、u.ADDRESS()之类的方法,这就是jSqlBox支持Sql重构的秘密,每个实体类的每个属性都有一个对应的大写的同名方法,在SQL中调用这个方法而不是直接写数据库表的字段名,通过这种方式将数据库字段与Java方法耦合,从而实现SQL支持重构。这种大写方法不是强制的,可用也可以不用,如果不在乎SQL是否支持重构,可以不写。
 
 示例 10 - Box配置类: User类数据库的表名和字段是可配置的,只要在User类同目录下放一个名为UserBox的类即可,配置类支持继承。配置实例可在运行期调用box()方法获得并更改,这与jBeanBox项目类似。
 ```

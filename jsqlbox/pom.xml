@@ -89,7 +89,13 @@
       <version>${spring.version}.RELEASE</version> 
     </dependency> 
     
-    
+    <!-- Hibernate is imported since 2017.3.19, reason is re-use it's pagination for support all databases -->    
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>5.2.8.Final</version>
+    </dependency>
+
     <!-- ================================================================================================== -->   
     <!-- ================================================================================================== -->
     <!-- Below libs are for unit test only, scope be set to "test"                                          -->

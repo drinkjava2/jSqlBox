@@ -2,29 +2,16 @@ package test.function_test.crud_method;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class InsertTest {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing InsertTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class InsertTest extends TestBase {
 
 	@Test
 	public void insertUserA() {

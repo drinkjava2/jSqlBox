@@ -4,9 +4,7 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import javax.sql.DataSource;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
@@ -15,8 +13,8 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
+import test.TestBase;
 import test.config.JBeanBoxConfig.DataSourceBox;
-import test.config.PrepareTestContext;
 import test.config.po.User;
 
 /**
@@ -27,18 +25,7 @@ import test.config.po.User;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class ContextTest {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing ContextTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class ContextTest extends TestBase {
 
 	/**
 	 * Demo how to create context and use it

@@ -1,28 +1,14 @@
 package test.function_test.crud_method;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class RuntimeChangeConfig {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing RuntimeChangeConfig===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-		Dao.getDefaultContext().setShowSql(true);
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class RuntimeChangeConfig extends TestBase {
 
 	@Test
 	public void normal() {

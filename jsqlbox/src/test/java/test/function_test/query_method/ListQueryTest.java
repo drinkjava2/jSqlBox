@@ -11,22 +11,20 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class ListQueryTest {
+public class ListQueryTest extends TestBase {
 
 	@Before
 	public void setup() {
-		System.out.println("===============================Testing QueryEntityTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+		super.setup();
 		User u = new User();
 		for (int i = 0; i < 5; i++)
 			Dao.execute("insert into ", u.table(), //
@@ -36,11 +34,6 @@ public class ListQueryTest {
 					", ", u.AGE(), ")", empty("1"), //
 					valuesAndQuestions());
 		Assert.assertEquals(5, (int) Dao.queryForInteger("select count(*) from ", u.table()));
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	@Test

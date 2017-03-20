@@ -5,17 +5,15 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.AopAround;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
+import test.TestBase;
 import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
-import test.config.PrepareTestContext;
 import test.config.po.User;
 
 /**
@@ -26,17 +24,7 @@ import test.config.po.User;
  *
  * @since 1.0.0
  */
-public class JBeanBoxTransactionTest {
-	@Before
-	public void setup() {
-		System.out.println("=========================Testing JBeanBoxTransactionTest=========================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class JBeanBoxTransactionTest extends TestBase {
 
 	public void tx_InsertUser1() {
 		User u = new User();

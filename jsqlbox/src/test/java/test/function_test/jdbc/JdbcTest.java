@@ -4,28 +4,16 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class JdbcTest {
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing JdbcTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class JdbcTest extends TestBase {
 
 	/**
 	 * Test Jdbc methods, SQL be automatically wrapped to preparedStatement

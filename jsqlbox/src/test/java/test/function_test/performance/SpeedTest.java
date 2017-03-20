@@ -1,28 +1,15 @@
-package test.function_test;
+package test.function_test.performance;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class SpeedTest {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing SpeedTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class SpeedTest extends TestBase {
 
 	/**
 	 * Test jSqlBox its self, do not write to database, only test configuring time

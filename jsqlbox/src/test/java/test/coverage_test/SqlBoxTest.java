@@ -9,27 +9,15 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class SqlBoxTest {
-	@Before
-	public void setup() {
-		System.out.println("=============================Testing SqlBoxTest=============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class SqlBoxTest extends TestBase {
 
 	/**
 	 * Test if no alias config the column name

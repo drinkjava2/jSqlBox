@@ -3,29 +3,16 @@ package test.function_test.crud_method;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 
-public class DataTypeMapTest {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing DataTypeMapTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class DataTypeMapTest extends TestBase {
 
 	@Test
 	public void insertForMysqlOnly() {

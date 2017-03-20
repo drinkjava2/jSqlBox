@@ -1,8 +1,6 @@
 package test.coverage_test.id;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
@@ -11,21 +9,10 @@ import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class UUIDGeneratorTest {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing UUIDGeneratorTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class UUIDGeneratorTest extends TestBase {
 
 	@Test
 	public void testUUID() {

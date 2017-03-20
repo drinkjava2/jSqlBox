@@ -2,9 +2,7 @@ package test.coverage_test;
 
 import javax.sql.DataSource;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
@@ -12,11 +10,11 @@ import com.github.drinkjava2.jsqlbox.DBMetaData;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.DatabaseType;
 
+import test.TestBase;
 import test.config.JBeanBoxConfig.H2DataSourceBox;
 import test.config.JBeanBoxConfig.MsSqlServerDataSourceBox;
 import test.config.JBeanBoxConfig.MySqlDataSourceBox;
 import test.config.JBeanBoxConfig.OracleDataSourceBox;
-import test.config.PrepareTestContext;
 
 /**
  * This is to test TinyJDBC get meta data
@@ -26,18 +24,7 @@ import test.config.PrepareTestContext;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class DBMetaDataTest {
-
-	@Before
-	public void setup() {
-		System.out.println("=============================Testing DBMetaDataTest=============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class DBMetaDataTest extends TestBase {
 
 	@Test
 	public void tinyJdbcGetMetadataTest() {

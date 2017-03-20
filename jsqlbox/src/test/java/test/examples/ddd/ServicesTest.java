@@ -1,8 +1,6 @@
 package test.examples.ddd;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.AopAround;
@@ -10,21 +8,10 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
+import test.TestBase;
 import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
-import test.config.PrepareTestContext;
 
-public class ServicesTest {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing Services===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class ServicesTest extends TestBase {
 
 	/**
 	 * This method is wrapped by Spring's declarative transaction

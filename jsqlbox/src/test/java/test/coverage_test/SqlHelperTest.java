@@ -1,30 +1,18 @@
 
 package test.coverage_test;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlAndParameters;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class SqlHelperTest {
-	@Before
-	public void setup() {
-		System.out.println("=============================Testing SqlBoxTest=============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
+public class SqlHelperTest extends TestBase {
 
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
-	
 	@Test
 	public void prepareSQLandParameters() {
 		User u = new User();
@@ -33,7 +21,5 @@ public class SqlHelperTest {
 				Integer.class);
 		Assert.assertEquals(0, count);
 	}
-
- 
 
 }

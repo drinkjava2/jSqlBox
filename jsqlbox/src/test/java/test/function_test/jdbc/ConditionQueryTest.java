@@ -2,31 +2,24 @@ package test.function_test.jdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
-public class ConditionQueryTest {
+public class ConditionQueryTest extends TestBase {
 	@Before
 	public void setup() {
-		System.out.println("===============================Testing ConditionQueryTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+		super.setup();
 		User u = new User(); // use default SqlBoxContext
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setAge(10);
 		u.insert();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public int conditionQuery(int condition, Object parameter) {

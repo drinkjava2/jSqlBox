@@ -9,14 +9,13 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.examples.orm.entities.Address;
 import test.examples.orm.entities.Email;
 import test.examples.orm.entities.Privilege;
@@ -25,12 +24,11 @@ import test.examples.orm.entities.RolePrivilege;
 import test.examples.orm.entities.User;
 import test.examples.orm.entities.UserRole;
 
-public class ORMDemo {
+public class ORMDemo extends TestBase {
 
 	@Before
 	public void setup() {
-		System.out.println("===============================Testing ORMDemo===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+		super.setup();
 		Dao.executeQuiet("DROP TABLE users");
 		Dao.executeQuiet("DROP TABLE email");
 		Dao.executeQuiet("DROP TABLE address");
@@ -94,11 +92,6 @@ public class ORMDemo {
 		// Dao.getDefaultContext().setShowSql(true).setShowQueryResult(true);
 	}
 
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
-
 	/**
 	 * 1 user has 1 address, 1 address has 1 user
 	 */
@@ -125,7 +118,7 @@ public class ORMDemo {
 	public void oneToOneWithBind() {
 		System.out.println("============oneToOneWithBind=========");
 		User u = new User();
-		Address a = new Address(); 
+		Address a = new Address();
 		u.configMapping(oneToOne(), u.ID(), a.UID(), bind(u.ADDRESS(), a.USER()));
 		List<User> users = Dao.queryForEntityList(User.class, select(), u.all(), ",", a.all(), from(), u.table(), ",",
 				a.table(), " where ", u.ID(), "=", a.UID());

@@ -1,7 +1,7 @@
 package test.function_test.query_method;
 
-import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 import static com.github.drinkjava2.jsqlbox.MappingHelper.bind;
+import static com.github.drinkjava2.jsqlbox.MappingHelper.oneToMany;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
 
@@ -10,27 +10,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.Customer;
 import test.config.po.Order;
 import test.config.po.OrderItem;
 
-public class MappingQueryTest {
+public class MappingQueryTest extends TestBase {
 
 	/**
 	 * Prepare test data for object tree
 	 */
 	@Before
 	public void setup() {
-		System.out.println("===============================Testing JoinQueryTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+		super.setup();
 		Dao.executeQuiet("drop table orderitem");
 		Dao.executeQuiet("drop table orders");
 		Dao.executeQuiet("drop table customer");
@@ -64,11 +62,6 @@ public class MappingQueryTest {
 		}
 		Assert.assertEquals(3, (int) Dao.queryForInteger("select count(*) from orderitem"));
 		Dao.getDefaultContext().setShowSql(true).setFormatSql(true).setShowQueryResult(true);
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public void leftJoinQueryNoAlias() {

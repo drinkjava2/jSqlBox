@@ -12,14 +12,13 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.examples.orm.entities.TreeNode;
 import test.utils.tinyjdbc.TinyJdbc;
 
@@ -35,14 +34,13 @@ import test.utils.tinyjdbc.TinyJdbc;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class TreeORMTest {
+public class TreeORMTest extends TestBase {
 
 	@Before
 	public void setup() {
-		System.out.println("===============================Testing TreeORMTest===============================");
-		System.out.println(" !!!Note: Only run on MySql, need set  DataSourceBox extends MySqlDataSourceBox in jBeanBoxConfig.java ");
-		System.out.println("=================================================================================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
+		super.setup();
+		System.out.println(
+				" !!!Note: Only run on MySql, need set  DataSourceBox extends MySqlDataSourceBox in jBeanBoxConfig.java ");
 		if (!Dao.getDefaultContext().getDatabaseType().isMySql())
 			return;
 		// Dao.getDefaultContext().setShowSql(true).setShowQueryResult(true);
@@ -82,11 +80,6 @@ public class TreeORMTest {
 		}
 		int count = Dao.queryForInteger("select count(*) from treetest");
 		Dao.execute("insert into treetest (id,comments,Pid,line,level) values('END','End Tag',null," + ++count + ",0)");
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 	public void executeJDBC(String sql) {

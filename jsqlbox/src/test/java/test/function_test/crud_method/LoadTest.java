@@ -1,17 +1,16 @@
 
 package test.function_test.crud_method;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
-import test.config.PrepareTestContext;
+import test.TestBase;
 import test.config.po.User;
 
 /**
@@ -22,18 +21,7 @@ import test.config.po.User;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class LoadTest {
-
-	@Before
-	public void setup() {
-		System.out.println("===============================Testing LoadTest===============================");
-		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-	}
-
-	@After
-	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
-	}
+public class LoadTest extends TestBase {
 
 	@Test
 	public void loadSingleID() {
