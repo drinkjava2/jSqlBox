@@ -59,11 +59,11 @@
     </properties>
 
    <repositories>
-     <!-- LDS is not offical site, temporarily use this to get Oracle driver for unit test --> 
-     <repository>
+     <!-- Here I delete this un-safe repository, in future to test Oracle, have to manually download Oracle driver --> 
+     <!--repository>
         <id>codelds</id>
         <url>https://code.lds.org/nexus/content/groups/main-repo</url>
-     </repository>
+     </repository-->
 	 
 	 <!-- To download snapshot version jars from Maven site, it's necessary to add this repository  -->
      <repository>
@@ -89,11 +89,12 @@
       <version>${spring.version}.RELEASE</version> 
     </dependency> 
     
-    <!-- Hibernate is imported since 2017.3.19, reason is re-use it's pagination for support all databases -->    
+    <!-- Hibernate is imported since 2017.3.19, reason is re-use it's pagination for support all databases -->   
+    <!-- Will soon add a scope "build"  -->   
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>5.2.8.Final</version>
+      <version>5.2.9.Final</version>
     </dependency>
 
     <!-- ================================================================================================== -->   
@@ -102,8 +103,7 @@
     <!-- jSqlBox unit test passed H2, MySql5, Oracle11g testing                                             -->    
     <!-- ================================================================================================== --> 
     <!-- ================================================================================================== -->
-
-        
+      
     <!-- jBeanBox is an IOC/AOP tool, in this project used to do some unit test configuration  -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
@@ -171,13 +171,13 @@
       <scope>test</scope>
     </dependency>
  
-    <!-- Oracle Database driver for unit test, only needed when config run unit test on Oracle --> 
-    <dependency>
+    <!-- Have to download Oracle driver manually because Maven does not offer Oracle  driver--> 
+    <!--dependency>
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc6</artifactId>
       <version>11.2.0.3</version>
       <scope>test</scope>
-    </dependency>
+    </dependency-->
 	
 	<!-- MS-SQLServer Database driver for unit test, only needed when config run unit test on Oracle --> 
 	<!-- To be added at later, but seems can not find jar at Maven Centre lib-->
