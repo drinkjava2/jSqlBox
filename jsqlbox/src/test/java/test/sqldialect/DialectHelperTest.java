@@ -1,6 +1,12 @@
 package test.sqldialect;
 
+import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
+
+import java.lang.reflect.Field;
+import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.dialect.DB2400Dialect;
 import org.hibernate.dialect.DB2Dialect;
@@ -25,16 +31,23 @@ import org.hibernate.dialect.PostgresPlusDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseASE15Dialect;
 import org.hibernate.dialect.SybaseAnywhereDialect;
+import org.hibernate.dialect.TypeNames;
 import org.hibernate.dialect.pagination.LimitHandler;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
 import org.hibernate.engine.spi.RowSelection;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.sqldialect.DialectHelper;
+import com.github.drinkjava2.jbeanbox.springsrc.ReflectionUtils;
+import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.SqlHelper;
+
+import test.config.PrepareTestContext;
 
 /**
+ * ========================== will move this into a new project ===============================
  * This is for test sql dialect, not finished, SqlDialect will be a new tiny project
  *
  * @author Yong Zhu
@@ -42,34 +55,21 @@ import com.github.drinkjava2.sqldialect.DialectHelper;
  * @version 1.0.0
  * @since 1.0.0
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "unchecked" })
 public class DialectHelperTest {
-
-	@Test
-	public void testDialectCodeBuilder() {
-		System.out.println("testDialectHelper========================");
-		RowSelection r = new RowSelection();
-		r.setFirstRow(90);
-		r.setMaxRows(100);
-		r.setFetchSize(5);
-		r.setTimeout(1000);
-
-		List<Class<? extends Dialect>> dialects = DialectHelper.SUPPORTED_DIALECTS;
-		for (Class<? extends Dialect> class1 : dialects) {
-			Dialect dia = DialectHelper.buildDialectByName(class1);
-			LimitHandler l = dia.getLimitHandler();
-			try {
-				System.out.println("Dialect=" + class1);
-				String sql = l.processSql(
-						"select a.col1 as c1, a.col2 as c2, b.col3 as b1 from atb a, btb b order by a.col1, b.col4", r);
-				System.out.println("SQL=" + sql);
-			} catch (Exception e) {
-				System.out.println("ExceptionL=" + e.getMessage());
-			}
-		}
+	@Before
+	public void setup() {
+		System.out.println("=============Testing " + this.getClass().getName() + "================");
+		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 	}
 
 	@Test
+	public void doBuild() {
+		testPreregisteredDialects();// first test if Dialects exist
+		transferPagination();// Save Pagination into DB
+		transferTypeNames();// Save TypeNames & HibernateTypeNames into DB
+	}
+
 	public void testPreregisteredDialects() {
 		System.out.println("testDialectHelper=======================");
 		DialectResolver resolver = StandardDialectResolver.INSTANCE;
@@ -118,6 +118,247 @@ public class DialectHelperTest {
 		Assert.assertEquals(Oracle9iDialect.class, DialectHelper.guessDialect("Oracle", 9, resolver).getClass());
 		Assert.assertEquals(Oracle10gDialect.class, DialectHelper.guessDialect("Oracle", 10, resolver).getClass());
 		Assert.assertEquals(Oracle10gDialect.class, DialectHelper.guessDialect("Oracle", 11, resolver).getClass());
-
 	}
+
+	public void transferPagination() {
+		String createSQL = "create table tb_pagination ("//
+				+ "dialect varchar(100),"//
+				+ "SupoortLimit varchar(10),"//
+				+ "supportsLimitOffset varchar(10),"//
+				+ "pagination1 varchar(800),"//
+				+ "pagination2 varchar(800),"//
+				+ "pagination3 varchar(800) "//
+				+ ")";
+		Dao.executeQuiet("drop table tb_pagination");
+		Dao.execute(createSQL);
+		exportDialectPaginations();
+	}
+
+	public void exportDialectPaginations() {
+		RowSelection r = new RowSelection();
+		r.setFirstRow(90);
+		r.setMaxRows(100);
+		r.setFetchSize(5);
+		r.setTimeout(1000);
+		List<Class<? extends Dialect>> dialects = DialectHelper.SUPPORTED_DIALECTS;
+		for (Class<? extends Dialect> class1 : dialects) {
+			Dialect dia = DialectHelper.buildDialectByName(class1);
+			LimitHandler l = dia.getLimitHandler();
+			try {
+				String dialect = class1.getSimpleName();
+				String supoortLimit = l.supportsLimit() + "";
+				String supportsLimitOffset = l.supportsLimitOffset() + "";
+				String pagination1 = "N/A";
+				try {
+					pagination1 = l.processSql("select a from b", r);
+				} catch (Exception e) {
+				}
+
+				String pagination2 = "N/A";
+				try {
+					pagination2 = l.processSql("select * from b order by b.id", r);
+				} catch (Exception e) {
+				}
+
+				String pagination3 = "N/A";
+				try {
+					pagination3 = l.processSql(
+							"select a.col1 as c1, a.col2 as c2, b.col3 as b1 from atb a, btb b order by a.col1, b.col4",
+							r);
+				} catch (Exception e) {
+				}
+				Dao.executeInsert("insert into tb_pagination ("//
+						+ "dialect ," + empty(dialect)//
+						+ "SupoortLimit ," + empty(supoortLimit)//
+						+ "supportsLimitOffset ," + empty(supportsLimitOffset)//
+						+ "pagination1  ," + empty(pagination1)//
+						+ "pagination2  ," + empty(pagination2)//
+						+ "pagination3) " + empty(pagination3)//
+						+ valuesAndQuestions());
+			} finally {
+				SqlHelper.clear();
+			}
+		}
+	}
+
+	public void transferTypeNames() {
+		String createSQL = "create table tb_typeNames ("//
+				+ "line integer,"//
+				+ "dialect varchar(100),"//
+				+ "Types_BIT varchar(300),"//
+				+ "Types_TINYINT varchar(300),"//
+				+ "Types_SMALLINT varchar(300),"//
+				+ "Types_INTEGER varchar(300),"//
+				+ "Types_BIGINT varchar(300),"//
+				+ "Types_FLOAT varchar(300),"//
+				+ "Types_REAL varchar(300),"//
+				+ "Types_DOUBLE varchar(300),"//
+				+ "Types_NUMERIC varchar(300),"//
+				+ "Types_DECIMAL varchar(300),"//
+				+ "Types_CHAR varchar(300),"//
+				+ "Types_VARCHAR varchar(300),"//
+				+ "Types_LONGVARCHAR varchar(300),"//
+				+ "Types_DATE varchar(300),"//
+				+ "Types_TIME varchar(300),"//
+				+ "Types_TIMESTAMP varchar(300),"//
+				+ "Types_BINARY varchar(300),"//
+				+ "Types_VARBINARY varchar(300),"//
+				+ "Types_LONGVARBINARY varchar(300),"//
+				+ "Types_NULL varchar(300),"//
+				+ "Types_OTHER varchar(300),"//
+				+ "Types_JAVA_OBJECT varchar(300),"//
+				+ "Types_DISTINCT varchar(300),"//
+				+ "Types_STRUCT varchar(300),"//
+				+ "Types_ARRAY varchar(300),"//
+				+ "Types_BLOB varchar(300),"//
+				+ "Types_CLOB varchar(300),"//
+				+ "Types_REF varchar(300),"//
+				+ "Types_DATALINK varchar(300),"//
+				+ "Types_BOOLEAN varchar(300),"//
+				+ "Types_ROWID varchar(300),"//
+				+ "Types_NCHAR varchar(300),"//
+				+ "Types_NVARCHAR varchar(300),"//
+				+ "Types_LONGNVARCHAR varchar(300),"//
+				+ "Types_NCLOB varchar(300),"//
+				+ "Types_SQLXML varchar(300),"//
+				+ "Types_REF_CURSOR varchar(300),"//
+				+ "Types_TIME_WITH_TIMEZONE varchar(300),"//
+				+ "Types_TIMESTAMP_WITH_TIMEZONE varchar(300) "//
+				+ ")";
+		Dao.executeQuiet("drop table tb_typeNames");
+		Dao.execute(createSQL);
+		exportDialectTypeNames();
+	}
+
+	public void exportDialectTypeNames() {
+		int line = 0;
+		System.out.println("testDialectRegisterColumnType========================");
+		List<Class<? extends Dialect>> dialects = DialectHelper.SUPPORTED_DIALECTS;
+		for (Class<? extends Dialect> class1 : dialects) {
+			Dialect dia = DialectHelper.buildDialectByName(class1);
+			TypeNames t = (TypeNames) findFieldObject(dia, "typeNames");
+			String insertSQL = "insert into tb_typeNames ("//
+					+ "line," + empty(++line)//
+					+ "dialect," + empty(dia.getClass().getSimpleName())//
+					+ "Types_BIT," + empty(getTypeNameDefString(t, (Types.BIT)))//
+					+ "Types_TINYINT," + empty(getTypeNameDefString(t, (Types.TINYINT)))//
+					+ "Types_SMALLINT," + empty(getTypeNameDefString(t, (Types.SMALLINT)))//
+					+ "Types_INTEGER," + empty(getTypeNameDefString(t, (Types.INTEGER)))//
+					+ "Types_BIGINT," + empty(getTypeNameDefString(t, (Types.BIGINT)))//
+					+ "Types_FLOAT," + empty(getTypeNameDefString(t, (Types.FLOAT)))//
+					+ "Types_REAL," + empty(getTypeNameDefString(t, (Types.REAL)))//
+					+ "Types_DOUBLE," + empty(getTypeNameDefString(t, (Types.DOUBLE)))//
+					+ "Types_NUMERIC," + empty(getTypeNameDefString(t, (Types.NUMERIC)))//
+					+ "Types_DECIMAL," + empty(getTypeNameDefString(t, (Types.DECIMAL)))//
+					+ "Types_CHAR," + empty(getTypeNameDefString(t, (Types.CHAR)))//
+					+ "Types_VARCHAR," + empty(getTypeNameDefString(t, (Types.VARCHAR)))//
+					+ "Types_LONGVARCHAR," + empty(getTypeNameDefString(t, (Types.LONGVARCHAR)))//
+					+ "Types_DATE," + empty(getTypeNameDefString(t, (Types.DATE)))//
+					+ "Types_TIME," + empty(getTypeNameDefString(t, (Types.TIME)))//
+					+ "Types_TIMESTAMP," + empty(getTypeNameDefString(t, (Types.TIMESTAMP)))//
+					+ "Types_BINARY," + empty(getTypeNameDefString(t, (Types.BINARY)))//
+					+ "Types_VARBINARY," + empty(getTypeNameDefString(t, (Types.VARBINARY)))//
+					+ "Types_LONGVARBINARY," + empty(getTypeNameDefString(t, (Types.LONGVARBINARY)))//
+					+ "Types_NULL," + empty(getTypeNameDefString(t, (Types.NULL)))//
+					+ "Types_OTHER," + empty(getTypeNameDefString(t, (Types.OTHER)))//
+					+ "Types_JAVA_OBJECT," + empty(getTypeNameDefString(t, (Types.JAVA_OBJECT)))//
+					+ "Types_DISTINCT," + empty(getTypeNameDefString(t, (Types.DISTINCT)))//
+					+ "Types_STRUCT," + empty(getTypeNameDefString(t, (Types.STRUCT)))//
+					+ "Types_ARRAY," + empty(getTypeNameDefString(t, (Types.ARRAY)))//
+					+ "Types_BLOB," + empty(getTypeNameDefString(t, (Types.BLOB)))//
+					+ "Types_CLOB," + empty(getTypeNameDefString(t, (Types.CLOB)))//
+					+ "Types_REF," + empty(getTypeNameDefString(t, (Types.REF)))//
+					+ "Types_DATALINK," + empty(getTypeNameDefString(t, (Types.DATALINK)))//
+					+ "Types_BOOLEAN," + empty(getTypeNameDefString(t, (Types.BOOLEAN)))//
+					+ "Types_ROWID," + empty(getTypeNameDefString(t, (Types.ROWID)))//
+					+ "Types_NCHAR," + empty(getTypeNameDefString(t, (Types.NCHAR)))//
+					+ "Types_NVARCHAR," + empty(getTypeNameDefString(t, (Types.NVARCHAR)))//
+					+ "Types_LONGNVARCHAR," + empty(getTypeNameDefString(t, (Types.LONGNVARCHAR)))//
+					+ "Types_NCLOB," + empty(getTypeNameDefString(t, (Types.NCLOB)))//
+					+ "Types_SQLXML," + empty(getTypeNameDefString(t, (Types.SQLXML)))//
+					+ "Types_REF_CURSOR," + empty(getTypeNameDefString(t, (Types.REF_CURSOR)))//
+					+ "Types_TIME_WITH_TIMEZONE," + empty(getTypeNameDefString(t, (Types.TIME_WITH_TIMEZONE)))//
+					+ "Types_TIMESTAMP_WITH_TIMEZONE" + empty(getTypeNameDefString(t, (Types.TIMESTAMP_WITH_TIMEZONE)))//
+					+ ")" //
+					+ valuesAndQuestions();
+			Dao.executeInsert(insertSQL);
+
+			t = (TypeNames) findFieldObject(dia, "hibernateTypeNames");// Hibernate Type
+			insertSQL = "insert into tb_typeNames ("//
+					+ "line," + empty(++line)//
+					+ "dialect," + empty("Hib_" + dia.getClass().getSimpleName())//
+					+ "Types_BIT," + empty(getTypeNameDefString(t, (Types.BIT)))//
+					+ "Types_TINYINT," + empty(getTypeNameDefString(t, (Types.TINYINT)))//
+					+ "Types_SMALLINT," + empty(getTypeNameDefString(t, (Types.SMALLINT)))//
+					+ "Types_INTEGER," + empty(getTypeNameDefString(t, (Types.INTEGER)))//
+					+ "Types_BIGINT," + empty(getTypeNameDefString(t, (Types.BIGINT)))//
+					+ "Types_FLOAT," + empty(getTypeNameDefString(t, (Types.FLOAT)))//
+					+ "Types_REAL," + empty(getTypeNameDefString(t, (Types.REAL)))//
+					+ "Types_DOUBLE," + empty(getTypeNameDefString(t, (Types.DOUBLE)))//
+					+ "Types_NUMERIC," + empty(getTypeNameDefString(t, (Types.NUMERIC)))//
+					+ "Types_DECIMAL," + empty(getTypeNameDefString(t, (Types.DECIMAL)))//
+					+ "Types_CHAR," + empty(getTypeNameDefString(t, (Types.CHAR)))//
+					+ "Types_VARCHAR," + empty(getTypeNameDefString(t, (Types.VARCHAR)))//
+					+ "Types_LONGVARCHAR," + empty(getTypeNameDefString(t, (Types.LONGVARCHAR)))//
+					+ "Types_DATE," + empty(getTypeNameDefString(t, (Types.DATE)))//
+					+ "Types_TIME," + empty(getTypeNameDefString(t, (Types.TIME)))//
+					+ "Types_TIMESTAMP," + empty(getTypeNameDefString(t, (Types.TIMESTAMP)))//
+					+ "Types_BINARY," + empty(getTypeNameDefString(t, (Types.BINARY)))//
+					+ "Types_VARBINARY," + empty(getTypeNameDefString(t, (Types.VARBINARY)))//
+					+ "Types_LONGVARBINARY," + empty(getTypeNameDefString(t, (Types.LONGVARBINARY)))//
+					+ "Types_NULL," + empty(getTypeNameDefString(t, (Types.NULL)))//
+					+ "Types_OTHER," + empty(getTypeNameDefString(t, (Types.OTHER)))//
+					+ "Types_JAVA_OBJECT," + empty(getTypeNameDefString(t, (Types.JAVA_OBJECT)))//
+					+ "Types_DISTINCT," + empty(getTypeNameDefString(t, (Types.DISTINCT)))//
+					+ "Types_STRUCT," + empty(getTypeNameDefString(t, (Types.STRUCT)))//
+					+ "Types_ARRAY," + empty(getTypeNameDefString(t, (Types.ARRAY)))//
+					+ "Types_BLOB," + empty(getTypeNameDefString(t, (Types.BLOB)))//
+					+ "Types_CLOB," + empty(getTypeNameDefString(t, (Types.CLOB)))//
+					+ "Types_REF," + empty(getTypeNameDefString(t, (Types.REF)))//
+					+ "Types_DATALINK," + empty(getTypeNameDefString(t, (Types.DATALINK)))//
+					+ "Types_BOOLEAN," + empty(getTypeNameDefString(t, (Types.BOOLEAN)))//
+					+ "Types_ROWID," + empty(getTypeNameDefString(t, (Types.ROWID)))//
+					+ "Types_NCHAR," + empty(getTypeNameDefString(t, (Types.NCHAR)))//
+					+ "Types_NVARCHAR," + empty(getTypeNameDefString(t, (Types.NVARCHAR)))//
+					+ "Types_LONGNVARCHAR," + empty(getTypeNameDefString(t, (Types.LONGNVARCHAR)))//
+					+ "Types_NCLOB," + empty(getTypeNameDefString(t, (Types.NCLOB)))//
+					+ "Types_SQLXML," + empty(getTypeNameDefString(t, (Types.SQLXML)))//
+					+ "Types_REF_CURSOR," + empty(getTypeNameDefString(t, (Types.REF_CURSOR)))//
+					+ "Types_TIME_WITH_TIMEZONE," + empty(getTypeNameDefString(t, (Types.TIME_WITH_TIMEZONE)))//
+					+ "Types_TIMESTAMP_WITH_TIMEZONE" + empty(getTypeNameDefString(t, (Types.TIMESTAMP_WITH_TIMEZONE)))//
+					+ ")" //
+					+ valuesAndQuestions();
+			Dao.executeInsert(insertSQL);
+
+			Dao.executeInsert("insert into tb_typeNames (line)" + empty(++line) + valuesAndQuestions());
+		}
+	}
+
+	private static String getTypeNameDefString(TypeNames t, int typeCode) {
+		String s = "N/A";
+		try {
+			s = t.get(typeCode);
+		} catch (Exception e) {
+		}
+		Map<Integer, Map<Long, String>> weighted = (Map<Integer, Map<Long, String>>) findFieldObject(t, "weighted");
+		Map<Long, String> map = weighted.get(typeCode);
+		if (map != null && map.size() > 0) {
+			for (Map.Entry<Long, String> entry : map.entrySet()) {
+				s += "|" + entry.getKey() + "," + entry.getValue();
+			}
+		}
+		return s;
+	}
+
+	private static Object findFieldObject(Object obj, String fieldname) {
+		try {
+			Field field = ReflectionUtils.findField(obj.getClass(), fieldname);
+			field.setAccessible(true);
+			Object o = field.get(obj);
+			return o;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 }

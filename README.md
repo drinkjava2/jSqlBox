@@ -148,7 +148,7 @@ jSqlBox快速入门：
              SqlHelper.questionMarks());  
 ```
 其优点在于要被赋值的字段和实际参数写在同一行上,便于维护。如果字段很多的话(>10行),就能看出好处了,直接删除添加一行就好了,不用担心删除添加错位置,问号和参数不配对。
-上面的empty()方法返回一个空字符,q方法返回一个问号,参数通过Threadlocal暂存传给Dao的execute方法使用,更多介绍可见http://www.iteye.com/topic/1145415贴子。
+上面的empty()方法返回一个空字符,q方法返回一个问号,参数通过Threadlocal暂存传给Dao的execute方法使用,更多介绍可见[http://www.iteye.com/topic/1145415](http://www.iteye.com/topic/1145415) 贴子。
 
 示例 6 - 快速插入：批量插入10000行数据,耗时~5秒,同样sql自动转为preparedStatement(防止Sql注入)
 ```
@@ -321,7 +321,7 @@ getUniqueNodeList(target.class)方法是一个通用的获取与当前实体关�
 		
 ```
 jSqlBox支持将Adjacency List模式存储的树结构SQL查询结果拼成内存中关联的树结构。同样bind()方法参数为空则为动态关联,不为空则为固定关联。上例中是关联配置的另一种写法,即不写在SQL中而是在实例对象中用configMapping方法来进行配置,这和SQL中写配置是等同的而且可以混用。
-至于Adjacency List模式(即每行保存一个父ID）如何用一个单句SQL高效查询出整个子树来,如果不想用递归查询,可以参考一下本人发明的无限深度树方案,见http://drinkjava2.iteye.com/blog/2353983。
+至于Adjacency List模式(即每行保存一个父ID）如何用一个单句SQL高效查询出整个子树来,如果不想用递归查询,可以参考一下本人发明的无限深度树方案,见http://drinkjava2.iteye.com/blog/2353983
 示例图：![image](tree.png) 
 
 下面这个示例演示了将整个D子树移动到另一个节点C下,然后用一句SQL调入新的节点树并打印,详细源码见测试类中的TreeORMTest.java,算法原理见"无限深度树方案"。

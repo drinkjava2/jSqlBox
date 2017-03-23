@@ -89,21 +89,23 @@
       <version>${spring.version}.RELEASE</version> 
     </dependency> 
     
-    <!-- Hibernate is imported since 2017.3.19, reason is re-use it's pagination for support all databases -->   
-    <!-- Will soon add a scope "build"  -->   
+ 
+
+    <!-- ================================================================================================== -->   
+    <!-- ================================================================================================== -->
+    <!-- Below dependencies are for unit test only, scope be set to "test"                                          -->
+    <!-- jSqlBox unit test should passed H2, MySql5, Oracle11g testing                                             -->    
+    <!-- ================================================================================================== --> 
+    <!-- ================================================================================================== -->
+      
+    <!-- Hibernate will be delete from this project, currently imported only for develop SqlDialects sub projcect -->   
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>5.2.9.Final</version>
+       <scope>test</scope>
     </dependency>
-
-    <!-- ================================================================================================== -->   
-    <!-- ================================================================================================== -->
-    <!-- Below libs are for unit test only, scope be set to "test"                                          -->
-    <!-- jSqlBox unit test passed H2, MySql5, Oracle11g testing                                             -->    
-    <!-- ================================================================================================== --> 
-    <!-- ================================================================================================== -->
-      
+    
     <!-- jBeanBox is an IOC/AOP tool, in this project used to do some unit test configuration  -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>

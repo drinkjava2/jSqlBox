@@ -1,5 +1,5 @@
 
-package com.github.drinkjava2.sqldialect;
+package test.sqldialect;
 
 /**
  * This package will be separated into a new project, a tiny universal sql dialect tool, support pagination
