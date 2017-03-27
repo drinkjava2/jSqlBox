@@ -16,16 +16,13 @@
 package test.sqldialect;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.CUBRIDDialect;
 import org.hibernate.dialect.Cache71Dialect;
 import org.hibernate.dialect.DB2390Dialect;
@@ -250,17 +247,6 @@ public class DialectHelper {
 		SUPPORTED_DIALECTS.add(TeradataDialect.class);
 		SUPPORTED_DIALECTS.add(Teradata14Dialect.class);
 		SUPPORTED_DIALECTS.add(TimesTenDialect.class);
-	}
-
-	public static Dialect buildDialectByName(Class<?> dialect) {
-		BootstrapServiceRegistry bootReg = new BootstrapServiceRegistryBuilder()
-				.applyClassLoader(DialectHelper.class.getClassLoader()).build();
-		StandardServiceRegistry registry = new StandardServiceRegistryBuilder(bootReg).build();
-		DialectFactoryImpl dialectFactory = new DialectFactoryImpl();
-		dialectFactory.injectServices((ServiceRegistryImplementor) registry);
-		final Map<String, String> configValues = new HashMap<>();
-		configValues.put(Environment.DIALECT, dialect.getName());
-		return dialectFactory.buildDialect(configValues, null);
 	}
 
 	/**

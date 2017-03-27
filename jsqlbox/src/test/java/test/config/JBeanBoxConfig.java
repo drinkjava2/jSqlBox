@@ -45,7 +45,7 @@ public class JBeanBoxConfig {
 	}
 
 	// H2Database memory database connection URL
-	public static class H2DataSourceBox extends HikariCPBox {
+	public static class H2DataSourceBox extends MySqlDataSourceBox {
 		{
 			setProperty("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 			setProperty("driverClassName", "org.h2.Driver");
@@ -74,7 +74,7 @@ public class JBeanBoxConfig {
 		}
 	}
 
-	// MsSql Server connection URL, I haven't test MSSQL server
+	// MsSql Server connection URL
 	public static class MsSqlServerDataSourceBox extends HikariCPBox {
 		{
 			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");

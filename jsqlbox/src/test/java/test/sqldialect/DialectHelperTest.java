@@ -5,9 +5,16 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 
 import java.lang.reflect.Field;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.hibernate.boot.registry.BootstrapServiceRegistry;
+import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.DB2400Dialect;
 import org.hibernate.dialect.DB2Dialect;
 import org.hibernate.dialect.DerbyDialect;
@@ -32,10 +39,24 @@ import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseASE15Dialect;
 import org.hibernate.dialect.SybaseAnywhereDialect;
 import org.hibernate.dialect.TypeNames;
+import org.hibernate.dialect.function.AnsiTrimEmulationFunction;
+import org.hibernate.dialect.function.AnsiTrimFunction;
+import org.hibernate.dialect.function.CastFunction;
+import org.hibernate.dialect.function.CharIndexFunction;
+import org.hibernate.dialect.function.ConvertFunction;
+import org.hibernate.dialect.function.DerbyConcatFunction;
+import org.hibernate.dialect.function.NoArgSQLFunction;
+import org.hibernate.dialect.function.NvlFunction;
+import org.hibernate.dialect.function.PositionSubstringFunction;
+import org.hibernate.dialect.function.SQLFunction;
+import org.hibernate.dialect.function.StaticPrecisionFspTimestampFunction;
+import org.hibernate.dialect.function.VarArgsSQLFunction;
 import org.hibernate.dialect.pagination.LimitHandler;
+import org.hibernate.engine.jdbc.dialect.internal.DialectFactoryImpl;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
 import org.hibernate.engine.spi.RowSelection;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,8 +68,8 @@ import com.github.drinkjava2.jsqlbox.SqlHelper;
 import test.config.PrepareTestContext;
 
 /**
- * ========================== will move this into a new project ===============================
- * This is for test sql dialect, not finished, SqlDialect will be a new tiny project
+ * ========================== will move this into a new project =============================== This is for test sql
+ * dialect, not finished, SqlDialect will be a new tiny project
  *
  * @author Yong Zhu
  *
@@ -68,6 +89,7 @@ public class DialectHelperTest {
 		testPreregisteredDialects();// first test if Dialects exist
 		transferPagination();// Save Pagination into DB
 		transferTypeNames();// Save TypeNames & HibernateTypeNames into DB
+		transferFunctions();//Save registered functions into DB
 	}
 
 	public void testPreregisteredDialects() {
@@ -134,7 +156,19 @@ public class DialectHelperTest {
 		exportDialectPaginations();
 	}
 
+	private static Dialect buildDialectByName(Class<?> dialect) {
+		BootstrapServiceRegistry bootReg = new BootstrapServiceRegistryBuilder()
+				.applyClassLoader(DialectHelper.class.getClassLoader()).build();
+		StandardServiceRegistry registry = new StandardServiceRegistryBuilder(bootReg).build();
+		DialectFactoryImpl dialectFactory = new DialectFactoryImpl();
+		dialectFactory.injectServices((ServiceRegistryImplementor) registry);
+		final Map<String, String> configValues = new HashMap<>();
+		configValues.put(Environment.DIALECT, dialect.getName());
+		return dialectFactory.buildDialect(configValues, null);
+	}
+
 	public void exportDialectPaginations() {
+		System.out.println("exportDialectPaginations========================");
 		RowSelection r = new RowSelection();
 		r.setFirstRow(90);
 		r.setMaxRows(100);
@@ -142,7 +176,7 @@ public class DialectHelperTest {
 		r.setTimeout(1000);
 		List<Class<? extends Dialect>> dialects = DialectHelper.SUPPORTED_DIALECTS;
 		for (Class<? extends Dialect> class1 : dialects) {
-			Dialect dia = DialectHelper.buildDialectByName(class1);
+			Dialect dia = buildDialectByName(class1);
 			LimitHandler l = dia.getLimitHandler();
 			try {
 				String dialect = class1.getSimpleName();
@@ -232,10 +266,10 @@ public class DialectHelperTest {
 
 	public void exportDialectTypeNames() {
 		int line = 0;
-		System.out.println("testDialectRegisterColumnType========================");
+		System.out.println("exportDialectTypeNames========================");
 		List<Class<? extends Dialect>> dialects = DialectHelper.SUPPORTED_DIALECTS;
 		for (Class<? extends Dialect> class1 : dialects) {
-			Dialect dia = DialectHelper.buildDialectByName(class1);
+			Dialect dia = buildDialectByName(class1);
 			TypeNames t = (TypeNames) findFieldObject(dia, "typeNames");
 			String insertSQL = "insert into tb_typeNames ("//
 					+ "line," + empty(++line)//
@@ -358,6 +392,68 @@ public class DialectHelperTest {
 			return o;
 		} catch (Exception e) {
 			return null;
+		}
+	}
+
+	public void transferFunctions() {
+		String createSQL = "create table tb_functions ("//
+				+ "fn_name varchar(200)  " + ", constraint const_fn_name primary key (fn_name))";
+		Dao.executeQuiet("drop table tb_functions");
+		Dao.execute(createSQL);
+		exportDialectFunctions();
+		// Map<String, SQLFunction> sqlFunctions
+	}
+
+	public void exportDialectFunctions() {
+		System.out.println("exportDialectFunctions========================");
+		List<Class<? extends Dialect>> dialects = DialectHelper.SUPPORTED_DIALECTS;
+		for (Class<? extends Dialect> class1 : dialects) {
+			Dialect dia = buildDialectByName(class1);
+			String diaName = dia.getClass().getSimpleName();
+			Dao.execute("alter table tb_functions add  " + diaName + " varchar(200)");
+			Dao.executeQuiet("insert into tb_functions (" + diaName + ", fn_name) values(?,?)", empty(diaName),
+					empty("FUNCTIONS"));
+			Map<String, SQLFunction> sqlFunctions = (Map<String, SQLFunction>) findFieldObject(dia, "sqlFunctions");
+
+			for (Entry<String, SQLFunction> entry : sqlFunctions.entrySet()) {
+				String fn_name = entry.getKey();
+				Dao.executeQuiet("insert into tb_functions (" + diaName + ", fn_name) values(?,?)", empty("---"),
+						empty(fn_name));
+
+				SQLFunction fun = entry.getValue();
+				@SuppressWarnings("rawtypes")
+				Class funClass = fun.getClass();
+				String sqlName = fun.toString();
+
+				if (VarArgsSQLFunction.class.equals(funClass)) {
+					sqlName = "" + findFieldObject(fun, "begin") + findFieldObject(fun, "sep")
+							+ findFieldObject(fun, "end");
+				} else if (NoArgSQLFunction.class.equals(funClass)) {
+					sqlName = "" + findFieldObject(fun, "name");
+					if ((Boolean) findFieldObject(fun, "hasParenthesesIfNoArguments"))
+						sqlName += "()";
+				} else if (ConvertFunction.class.equals(funClass)) {
+					sqlName = "*convert";
+				} else if (CastFunction.class.equals(funClass)) {
+					sqlName = "*cast";
+				} else if (NvlFunction.class.equals(funClass)) {
+					sqlName = "*nul";
+				} else if (AnsiTrimFunction.class.equals(funClass)) {
+					sqlName = "*trim";
+				} else if (DerbyConcatFunction.class.equals(funClass)) {
+					sqlName = "*||";
+				} else if (StaticPrecisionFspTimestampFunction.class.equals(funClass)) {
+					sqlName = "*||";
+				} else if (PositionSubstringFunction.class.equals(funClass)) {
+					sqlName = "*position/substring";
+				} else if (AnsiTrimEmulationFunction.class.equals(funClass)) {
+					sqlName = "*TrimEmulation";
+				} else if (CharIndexFunction.class.equals(funClass)) {
+					sqlName = "*charindex";
+				}
+				Dao.execute("update tb_functions set " + diaName + "=? where fn_name=?", empty(sqlName),
+						empty(fn_name));
+			}
 		}
 	}
 
