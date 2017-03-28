@@ -45,7 +45,7 @@ public class TreeORMTest extends TestBase {
 			return;
 		// Dao.getDefaultContext().setShowSql(true).setShowQueryResult(true);
 		Dao.executeQuiet("drop table if exists treetest");
-		Dao.execute(TreeNode.CREATE_SQL);
+		Dao.execute(TreeNode.CREATE_SQL+" ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		Dao.refreshMetaData();
 		Dao.execute("insert into treetest (id,comments,Pid) values('A','found a bug',null)");
 		Dao.execute("insert into treetest (id,comments,Pid) values('B','is a worm?','A')");
