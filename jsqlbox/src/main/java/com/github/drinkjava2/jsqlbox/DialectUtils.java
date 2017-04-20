@@ -18,36 +18,32 @@ package com.github.drinkjava2.jsqlbox;
 import com.github.drinkjava2.jdialects.Dialect;
 
 /**
+ * Dialect Utils to deal with jDialects project's Dialects
+ * 
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
 
-public class DatabaseType {
-	private Dialect dialect; //use jDialect project's dialect
+public class DialectUtils {
 
-	public DatabaseType(Dialect dialect) {
-		this.dialect = dialect;
+	private DialectUtils() {
+		// Hide default constructor
 	}
 
-	public static DatabaseType getDatabaseType(String jdbcDriverName) {// NOSONAR 
-		 
-		//work on here not finished
-	}
-
-	public boolean isMySql() { 
+	public static boolean isMySql(Dialect dialect) {
 		return dialect.toString().startsWith("MySQL");
 	}
 
-	public boolean isOracle() {
+	public static boolean isOracle(Dialect dialect) {
 		return dialect.toString().startsWith("Oracle");
 	}
 
-	public boolean isH2() {
+	public static boolean isH2(Dialect dialect) {
 		return Dialect.H2Dialect.equals(dialect);
 	}
 
-	public boolean isMsSQLSERVER() { 
+	public static boolean isMsSQLSERVER(Dialect dialect) {
 		return dialect.toString().startsWith("SQLServer");
 	}
 }

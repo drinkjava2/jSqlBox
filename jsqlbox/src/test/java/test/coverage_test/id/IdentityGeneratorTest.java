@@ -37,7 +37,7 @@ public class IdentityGeneratorTest extends TestBase {
 
 	@Test
 	public void insertUserForMysql() {
-		if (!(Dao.getDefaultDatabaseType().isMySql() || Dao.getDefaultDatabaseType().isH2()))
+		if (!(Dao.isMySql() || Dao.isH2()))
 			return;
 		User u = new User();
 		u.box().configIdGenerator("id", IdentityGenerator.INSTANCE);

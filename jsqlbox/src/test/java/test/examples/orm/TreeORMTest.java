@@ -23,8 +23,9 @@ import test.examples.orm.entities.TreeNode;
 import test.utils.tinyjdbc.TinyJdbc;
 
 /**
- * To Test Tree ORM, currently only support MySQL because sortMySqlTree() method used some special function of MySQL,
- * need in jBeanBoxConfig.java change below line: <br/>
+ * To Test Tree ORM, currently only support MySQL because sortMySqlTree() method
+ * used some special function of MySQL, need in jBeanBoxConfig.java change below
+ * line: <br/>
  * public static class DataSourceBox extends H2DataSourceBox <br/>
  * to: <br/>
  * public static class DataSourceBox extends MySqlDataSourceBox <br/>
@@ -41,11 +42,11 @@ public class TreeORMTest extends TestBase {
 		super.setup();
 		System.out.println(
 				" !!!Note: Only run on MySql, need set  DataSourceBox extends MySqlDataSourceBox in jBeanBoxConfig.java ");
-		if (!Dao.getDefaultContext().getDatabaseType().isMySql())
+		if (!Dao.isMySql())
 			return;
 		// Dao.getDefaultContext().setShowSql(true).setShowQueryResult(true);
 		Dao.executeQuiet("drop table if exists treetest");
-		Dao.execute(TreeNode.CREATE_SQL+" ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		Dao.execute(TreeNode.CREATE_SQL + " ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		Dao.refreshMetaData();
 		Dao.execute("insert into treetest (id,comments,Pid) values('A','found a bug',null)");
 		Dao.execute("insert into treetest (id,comments,Pid) values('B','is a worm?','A')");
@@ -62,7 +63,8 @@ public class TreeORMTest extends TestBase {
 	}
 
 	/**
-	 * A common method to sort "Adjacency List" tree to "Sorted-Unlimited-Depth-Tree", only for MySql
+	 * A common method to sort "Adjacency List" tree to
+	 * "Sorted-Unlimited-Depth-Tree", only for MySql
 	 */
 	public void sortMySqlTree() {
 		Dao.execute("delete from treetest where id='END'");
@@ -88,19 +90,23 @@ public class TreeORMTest extends TestBase {
 	}
 
 	/**
-	 * In this test move whole "D" child tree to under "C" node and before "G" Node <br/>
-	 * More detail of "Sorted-Unlimited-Depth-Tree" can see https://github.com/drinkjava2/Multiple-Columns-Tree <br/>
-	 * "Sorted-Unlimited-Depth-Tree" has better query performance than "Adjacency List" mode
+	 * In this test move whole "D" child tree to under "C" node and before "G"
+	 * Node <br/>
+	 * More detail of "Sorted-Unlimited-Depth-Tree" can see
+	 * https://github.com/drinkjava2/Multiple-Columns-Tree <br/>
+	 * "Sorted-Unlimited-Depth-Tree" has better query performance than
+	 * "Adjacency List" mode
 	 */
 	@Test
 	public void moveNodeTest() {
-		if (!Dao.getDefaultContext().getDatabaseType().isMySql())
+		if (!Dao.isMySql())
 			return;
 		System.out.println("============moveNodeTest=========");
 		TreeNode d = Dao.load(TreeNode.class, "D");
 		d.setPid("C");// move whole "D" sub-Tree to "C"
 		d.update();
-		sortMySqlTree(); // Important!, transfer Adjacency List to Sorted-Unlimited-Depth-Tree
+		sortMySqlTree(); // Important!, transfer Adjacency List to
+							// Sorted-Unlimited-Depth-Tree
 
 		TreeNode c = Dao.load(TreeNode.class, "C");
 		Assert.assertEquals("C", c.getId());
@@ -124,14 +130,15 @@ public class TreeORMTest extends TestBase {
 	}
 
 	/**
-	 * This test show the tree mapping configuration, there are 2 configuration ways <br/>
+	 * This test show the tree mapping configuration, there are 2 configuration
+	 * ways <br/>
 	 * 1. use entity.configMapping() method <br/>
 	 * 2. write config mapping direct in SQL <br/>
 	 * Here show the 1st way
 	 */
 	@Test
 	public void treeNoBindTest() {
-		if (!Dao.getDefaultContext().getDatabaseType().isMySql())
+		if (!Dao.isMySql())
 			return;
 		System.out.println("============treeNoBindTest=========");
 		sortMySqlTree();
@@ -161,11 +168,12 @@ public class TreeORMTest extends TestBase {
 	}
 
 	/**
-	 * This test show how to bind the CHILDS and PARENT property and write mapping configuration in SQL
+	 * This test show how to bind the CHILDS and PARENT property and write
+	 * mapping configuration in SQL
 	 */
 	@Test
 	public void treeWithBindTest() {
-		if (!Dao.getDefaultContext().getDatabaseType().isMySql())
+		if (!Dao.isMySql())
 			return;
 		System.out.println("============treeWithBindTest=========");
 		sortMySqlTree();

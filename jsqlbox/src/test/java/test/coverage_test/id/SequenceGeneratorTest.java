@@ -11,7 +11,8 @@ import test.TestBase;
 import test.config.po.User;
 
 /**
- * For this test, I made 2 sequences in Oracle, SEQ_1 is for "id" , SEQ_2 is for "age"
+ * For this test, I made 2 sequences in Oracle, SEQ_1 is for "id" , SEQ_2 is for
+ * "age"
  *
  * @author Yong Zhu
  *
@@ -28,7 +29,7 @@ public class SequenceGeneratorTest extends TestBase {
 
 	@Test
 	public void insertUser() {
-		if (!Dao.getDefaultDatabaseType().isOracle())
+		if (!Dao.isOracle())
 			return;
 		User u = new User();
 		u.box().configIdGenerator("age", BeanBox.getBean(SequenceGeneratorBox.class));

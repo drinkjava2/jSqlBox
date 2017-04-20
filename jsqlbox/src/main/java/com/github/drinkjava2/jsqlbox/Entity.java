@@ -3,9 +3,11 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.Set;
 
 /**
- * Each entity bean should extends from EntityBase class (for DK7 and below) or simply implements Entity interface(For
- * JDK8+), This project only released JDK8 version, for JDK7 and below which does support "default" method in interface,
- * so need move all methods in Entity to EntityBase class and re-compile source code, that's the only work need to do.
+ * Each entity bean should extends from EntityBase class (for DK7 and below) or
+ * simply implements Entity interface(For JDK8+), This project only released
+ * JDK8 version, for JDK7 and below which does support "default" method in
+ * interface, so need move all methods in Entity to EntityBase class and
+ * re-compile source code, that's the only work need to do.
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -91,6 +93,13 @@ public interface Entity {
 
 	public default <T> T getParentNode(Class<?> entityClass) {
 		return this.box().getParentNode(entityClass);
+	}
+
+	public default String pagination(int pageNumber, int pageSize, String... sql) {
+		StringBuilder sb = new StringBuilder();
+		for (String str : sql)
+			sb.append(str);
+		return this.box().getDialect().paginate(pageNumber, pageSize, sb.toString());
 	}
 
 }

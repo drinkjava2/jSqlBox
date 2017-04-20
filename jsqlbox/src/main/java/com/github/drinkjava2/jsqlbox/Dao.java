@@ -19,8 +19,11 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.List;
 import java.util.Map;
 
+import com.github.drinkjava2.jdialects.Dialect;
+
 /**
- * In this class just copied some common DB access methods from default SqlBoxContext
+ * In this class most methods are copied from default SqlBoxContext for
+ * convenient use
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
@@ -68,16 +71,31 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext();
 	}
 
-	public static String pagination(int pageNumber, int pageSize) {
-		return SqlBoxContext.getDefaultSqlBoxContext().pagination(pageNumber, pageSize);
+	public static String pagination(int pageNumber, int pageSize, String... sql) {
+		StringBuilder sb = new StringBuilder();
+		for (String str : sql)
+			sb.append(str);
+		return Dao.getDefaultDialect().paginate(pageNumber, pageSize, sb.toString());
 	}
 
-	public static String orderBy(String... sql) {
-		return SqlBoxContext.getDefaultSqlBoxContext().orderBy(sql);
+	public static Dialect getDefaultDialect() {
+		return SqlBoxContext.getDefaultSqlBoxContext().getDialect();
 	}
 
-	public static DatabaseType getDefaultDatabaseType() {
-		return SqlBoxContext.getDefaultSqlBoxContext().getDatabaseType();
+	public static boolean isMySql() {
+		return DialectUtils.isMySql(Dao.getDefaultDialect());
+	}
+
+	public static boolean isOracle() {
+		return DialectUtils.isOracle(Dao.getDefaultDialect());
+	}
+
+	public static boolean isMsSQLSERVER() {
+		return DialectUtils.isMsSQLSERVER(Dao.getDefaultDialect());
+	}
+
+	public static boolean isH2() {
+		return DialectUtils.isH2(Dao.getDefaultDialect());
 	}
 
 	public static void refreshMetaData() {

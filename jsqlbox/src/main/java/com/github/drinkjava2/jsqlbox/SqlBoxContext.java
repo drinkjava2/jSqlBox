@@ -33,6 +33,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.github.drinkjava2.jdialects.Dialect;
+
 /**
  * @author Yong Zhu
  * @version 1.0.0
@@ -54,26 +56,6 @@ public class SqlBoxContext {
 	private DataSource dataSource = null;
 
 	private DBMetaData metaData;
-
-	/**
-	 * Store paging pageNumber in ThreadLocal
-	 */
-	protected static ThreadLocal<String> paginationEndCache = new ThreadLocal<String>() {
-		@Override
-		protected String initialValue() {
-			return null;
-		}
-	};
-
-	/**
-	 * Store order by SQL piece, only needed for SQL Server 2005 and later
-	 */
-	protected static ThreadLocal<String> paginationOrderByCache = new ThreadLocal<String>() {
-		@Override
-		protected String initialValue() {
-			return null;
-		}
-	};
 
 	/**
 	 * Store boxes binded on entities
@@ -322,8 +304,12 @@ public class SqlBoxContext {
 		return null;
 	}
 
-	public DatabaseType getDatabaseType() {
-		return this.getMetaData().getDatabaseType();
+	public void setDialect(Dialect dialect) {
+		this.getMetaData().setDialect(dialect);
+	}
+
+	public Dialect getDialect() {
+		return this.getMetaData().getDialect();
 	}
 
 	public void refreshMetaData() {
@@ -497,52 +483,6 @@ public class SqlBoxContext {
 				}
 			});
 		}
-	}
-
-	/**
-	 * Store "order by xxx desc" in ThreadLocal, return "", this is for
-	 * MSSQL2005+ only <br/>
-	 */
-	public String orderBy(String... orderBy) {
-		StringBuilder sb = new StringBuilder(" order by ");
-		for (String str : orderBy)
-			sb.append(str);
-		if (this.getDatabaseType().isMsSQLSERVER()) {
-			paginationOrderByCache.set(sb.toString());
-			return " ";
-		} else
-			return sb.toString();
-	}
-
-	/**
-	 * Return pagination SQL depends different database type <br/>
-	 * PageNumber Start from 1
-	 */
-	public String pagination(int pageNumber, int pageSize) {
-		String start;
-		String end;
-		if (this.getDatabaseType().isH2() || this.getDatabaseType().isMySql()) {
-			start = " ";
-			end = " limit " + (pageNumber - 1) * pageSize + ", " + pageSize + " ";
-		} else if (this.getDatabaseType().isMsSQLSERVER()) {
-			// For SQL Server 2005 and later
-			start = " a_tb.* from (select row_number() over(__ORDERBY__) as rownum, ";
-			end = ") as a_tb where rownum between " + ((pageNumber - 1) * pageSize + 1) + " and "
-					+ pageNumber * pageSize + " ";
-			/**
-			 * For SqlServer 2012 and later can also use <br/>
-			 * start = " "; <br/>
-			 * end = " offset " + (pageNumber - 1) * pageSize +
-			 * " rows fetch next " + pageSize + " rows only ";
-			 */
-		} else if (this.getDatabaseType().isOracle()) {
-			start = " * FROM (SELECT a_tb.*, ROWNUM r_num FROM ( SELECT ";
-			end = " ) a_tb WHERE ROWNUM <= " + pageNumber * pageSize + ") WHERE r_num > " + (pageNumber - 1) * pageSize
-					+ " ";
-		} else
-			return (String) SqlBoxException.throwEX("pagination error: so far do not support this database.");
-		paginationEndCache.set(end);
-		return start;
 	}
 
 	/**

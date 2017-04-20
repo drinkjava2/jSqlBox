@@ -220,7 +220,7 @@ public class SqlHelper {
 	public static String select() {
 		inSqlTag.set(true);
 		inSelectTag.set(true);
-		return " select ";
+		return "select ";
 	}
 
 	/**
@@ -246,7 +246,8 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Get cached sql and parameters from threadlocal, return a SqlAndParameters instance
+	 * Get cached sql and parameters from threadlocal, return a SqlAndParameters
+	 * instance
 	 */
 	public static SqlAndParameters prepareSQLandParameters(String... sqls) {
 		try {
@@ -254,12 +255,8 @@ public class SqlHelper {
 			for (String str : sqls) {
 				sb.append(str);
 			}
-			if (SqlBoxContext.paginationEndCache.get() != null)
-				sb.append(SqlBoxContext.paginationEndCache.get());
 			SqlAndParameters sp = new SqlAndParameters();
 			String sql = sb.toString();
-			if (SqlBoxContext.paginationOrderByCache.get() != null)
-				sql = sql.replaceFirst("__ORDERBY__", SqlBoxContext.paginationOrderByCache.get());
 			sp.setSql(sql);
 
 			ArrayList<String> list = sqlCache.get();
@@ -283,14 +280,12 @@ public class SqlHelper {
 		} finally {
 			SqlHelper.clear();
 			MappingHelper.clearAllMappingCached();
-			SqlBoxContext.paginationEndCache.set(null);
-			SqlBoxContext.paginationOrderByCache.set(null);
-
 		}
 	}
 
 	/**
-	 * Get cached sql and parameters from threadlocal, return a sublisted SqlAndParameters list
+	 * Get cached sql and parameters from threadlocal, return a sublisted
+	 * SqlAndParameters list
 	 */
 	public static List<List<SqlAndParameters>> getAndClearBatchSQLs() {
 		try {
@@ -301,7 +296,8 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Get cached sql and parameters from threadlocal, return a sublisted SqlAndParameters list
+	 * Get cached sql and parameters from threadlocal, return a sublisted
+	 * SqlAndParameters list
 	 */
 	public static String getAndClearBatchSqlString() {
 		try {
@@ -312,7 +308,8 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Create " value(?,?,?,?)" strings according how many sql parameters be cached in ThreadLocal
+	 * Create " value(?,?,?,?)" strings according how many sql parameters be
+	 * cached in ThreadLocal
 	 */
 	public static String valuesAndQuestions() {
 		return createValueString(sqlCache.get().size());
@@ -337,7 +334,8 @@ public class SqlHelper {
 	 * SubList a List, divide a list by given blockSize
 	 */
 	private static <T> List<List<T>> subList(List<T> srcList, int blockSize) {// NOSONAR
-		List<T> copiedList = new ArrayList<>(srcList); // srcList not safe it stored in ThreadLocal
+		List<T> copiedList = new ArrayList<>(srcList); // srcList not safe it
+														// stored in ThreadLocal
 		List<List<T>> resultList = new ArrayList<>();
 		if (blockSize > 0) {
 			int listSize = copiedList.size();

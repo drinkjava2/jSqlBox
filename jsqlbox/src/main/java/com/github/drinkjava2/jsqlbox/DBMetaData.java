@@ -27,6 +27,8 @@ import java.util.Map.Entry;
 
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
+import com.github.drinkjava2.jdialects.Dialect;
+
 /**
  * MetaData of database
  * 
@@ -36,7 +38,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  */
 public class DBMetaData {
 	private static final String TABLE_NAME = "TABLE_NAME";
-	String jdbcDriverName;
+	Dialect dialect;
 	Map<String, String> tableNames = new HashMap<>();
 
 	/**
@@ -55,20 +57,16 @@ public class DBMetaData {
 	}
 	// getter & setters==============
 
-	public DatabaseType getDatabaseType() {
-		return DatabaseType.getDatabaseType(getJdbcDriverName());
-	}
-
-	public String getJdbcDriverName() {
-		return jdbcDriverName;
-	}
-
-	public void setJdbcDriverName(String jdbcDriverName) {
-		this.jdbcDriverName = jdbcDriverName;
-	}
-
 	public Map<String, Map<String, Column>> getTables() {
 		return tables;
+	}
+
+	public Dialect getDialect() {
+		return dialect;
+	}
+
+	public void setDialect(Dialect dialect) {
+		this.dialect = dialect;
 	}
 
 	public void setTables(Map<String, Map<String, Column>> tables) {
@@ -90,35 +88,36 @@ public class DBMetaData {
 		try {
 			con = DataSourceUtils.getConnection(context.getDataSource());// NOSONAR
 			DatabaseMetaData meta = con.getMetaData();
-			DBMetaData tiny = new DBMetaData();
-			tiny.setJdbcDriverName(meta.getDriverName());
-			DatabaseType dbType = DatabaseType.getDatabaseType(meta.getDriverName());
-			if (dbType.isOracle()) {
+			DBMetaData dbMeta = new DBMetaData();
+			Dialect dialect = Dialect.guessDialect(con);
+			dbMeta.setDialect(dialect);
+
+			if (DialectUtils.isOracle(dialect)) {
 				pst = con.prepareStatement("SELECT TABLE_NAME FROM USER_TABLES");// NOSONAR
 				rs = pst.executeQuery();
 				while (rs.next()) {
-					tiny.getTableNames().put(rs.getString(TABLE_NAME).toLowerCase(), rs.getString(TABLE_NAME));
+					dbMeta.getTableNames().put(rs.getString(TABLE_NAME).toLowerCase(), rs.getString(TABLE_NAME));
 				}
 				rs.close();
 				pst.close();
-			} else if (dbType.isMsSQLSERVER()) {
+			} else if (DialectUtils.isMsSQLSERVER(dialect)) {
 				pst = con.prepareStatement("select name from sysobjects where xtype='U'");
 				rs = pst.executeQuery();
 				while (rs.next()) {
-					tiny.getTableNames().put(rs.getString("name").toLowerCase(), rs.getString("name"));
+					dbMeta.getTableNames().put(rs.getString("name").toLowerCase(), rs.getString("name"));
 				}
 				rs.close();
 				pst.close();
 			} else {
 				rs = meta.getTables(null, null, null, new String[] { "TABLE" });
 				while (rs.next()) {
-					tiny.getTableNames().put(rs.getString(TABLE_NAME).toLowerCase(), rs.getString(TABLE_NAME));
+					dbMeta.getTableNames().put(rs.getString(TABLE_NAME).toLowerCase(), rs.getString(TABLE_NAME));
 				}
 				rs.close();
 
 			}
 
-			Collection<String> tables = tiny.getTableNames().values();
+			Collection<String> tables = dbMeta.getTableNames().values();
 			for (String realTableName : tables) {
 				rs = con.getMetaData().getColumns(null, null, realTableName, null);
 				Map<String, Column> oneTable = new HashMap<>();
@@ -129,19 +128,19 @@ public class DBMetaData {
 					col.setLength(rs.getInt("COLUMN_SIZE"));
 					col.setNullable(rs.getInt("NULLABLE") > 0);
 					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
-					if (dbType.isMySql())// NOSONAR
+					if (DialectUtils.isMySql(dialect))// NOSONAR
 						col.setAutoIncreament(rs.getBoolean("IS_AUTOINCREMENT"));
-					else if (dbType.isMsSQLSERVER())// NOSONAR
+					else if (DialectUtils.isMsSQLSERVER(dialect))// NOSONAR
 					{
 						boolean isautoInc = "YES".equals(rs.getString("IS_AUTOINCREMENT"));
 						col.setAutoIncreament(isautoInc);
 					}
 					oneTable.put(rs.getString("COLUMN_NAME").toLowerCase(), col);
 				}
-				tiny.getTables().put(realTableName.toLowerCase(), oneTable);
+				dbMeta.getTables().put(realTableName.toLowerCase(), oneTable);
 				rs.close();
 			}
-			return tiny;
+			return dbMeta;
 		} catch (SQLException e) {
 			SqlBoxException.throwEX(e, e.getMessage());
 			try {

@@ -12,7 +12,8 @@ import test.config.po.User;
 public class SpeedTest extends TestBase {
 
 	/**
-	 * Test jSqlBox its self, do not write to database, only test configuring time
+	 * Test jSqlBox its self, do not write to database, only test configuring
+	 * time
 	 */
 	@Test
 	public void doSpeedTest() {
@@ -24,7 +25,7 @@ public class SpeedTest extends TestBase {
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
 			u.box();
-			if (Dao.getDefaultDatabaseType().isH2())
+			if (Dao.isH2())
 				u.insert();
 		}
 		long newTime = System.currentTimeMillis();

@@ -16,7 +16,7 @@ public class DataTypeMapTest extends TestBase {
 
 	@Test
 	public void insertForMysqlOnly() {
-		if (!(Dao.getDefaultDatabaseType().isMySql() || Dao.getDefaultDatabaseType().isH2()))
+		if (!(Dao.isMySql() || Dao.isH2()))
 			return;
 		Dao.executeQuiet("drop table datasample");
 		Dao.execute("create table datasample ("//
@@ -44,7 +44,7 @@ public class DataTypeMapTest extends TestBase {
 
 	@Test
 	public void insertForOracleOnly() {
-		if (!Dao.getDefaultDatabaseType().isOracle())
+		if (!Dao.isOracle())
 			return;
 		Dao.executeQuiet("drop table datasample");
 		Dao.execute("create table datasample ("//

@@ -6,9 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jsqlbox.DBMetaData;
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.DatabaseType;
 
 import test.TestBase;
 import test.config.JBeanBoxConfig.H2DataSourceBox;
@@ -28,19 +26,16 @@ public class DBMetaDataTest extends TestBase {
 
 	@Test
 	public void tinyJdbcGetMetadataTest() {
-		DatabaseType type = Dao.getDefaultDatabaseType();
 		DataSource ds = null;
-		if (type.isH2())
+		if (Dao.isH2())
 			ds = BeanBox.getBean(H2DataSourceBox.class);
-		else if (type.isMySql())
+		else if (Dao.isMySql())
 			ds = BeanBox.getBean(MySqlDataSourceBox.class);
-		else if (type.isOracle())
+		else if (Dao.isOracle())
 			ds = BeanBox.getBean(OracleDataSourceBox.class);
-		else if (type.isMsSQLSERVER())
+		else if (Dao.isMsSQLSERVER())
 			ds = BeanBox.getBean(MsSqlServerDataSourceBox.class);
 		Assert.assertNotNull(ds);
-		DBMetaData meta = Dao.getDefaultContext().getMetaData();
-		System.out.println(meta.getJdbcDriverName());
 	}
 
 }

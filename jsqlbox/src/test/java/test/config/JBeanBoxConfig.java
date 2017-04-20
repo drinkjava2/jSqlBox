@@ -41,7 +41,7 @@ public class JBeanBoxConfig {
 	 * This project is already tested on H2, MySql5, Oracle11g, MSSQL2012
 	 * ==================================================================================================<br/>
 	 */
-	public static class DataSourceBox extends MySqlDataSourceBox {// change here to test on different database
+	public static class DataSourceBox extends H2DataSourceBox {// change here to test on different database
 	}
 
 	// H2Database memory database connection URL

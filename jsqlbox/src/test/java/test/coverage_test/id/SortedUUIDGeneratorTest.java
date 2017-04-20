@@ -34,7 +34,7 @@ public class SortedUUIDGeneratorTest extends TestBase {
 
 	@Test
 	public void insertUserInMysql() {
-		if (!(Dao.getDefaultDatabaseType().isMySql() || Dao.getDefaultDatabaseType().isH2()))
+		if (!(Dao.isMySql() || Dao.isH2()))
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table t");
@@ -49,7 +49,7 @@ public class SortedUUIDGeneratorTest extends TestBase {
 
 	@Test
 	public void insertUserInOracle() {
-		if (!Dao.getDefaultDatabaseType().isOracle())
+		if (!Dao.isOracle())
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table T");

@@ -32,24 +32,24 @@ jSqlBox虽然最初目的是给Hibernate加一个动态配置,但考虑到实体
 *可配置,当数据库表名、字段名与缺省匹配规则不一致时,可用配置的方式来解决,配置为同目录或内嵌的"类名+Box"的Java类,也可将配置写在类初始化块中。  
 *多配置和动态配置,同一个PO可采用不同的配置以进行多种方式的存取,配置可以继承重用已有的配置,配置可以在运行期动态生成和修改,与jBeanBox项目配置类似。  
 *支持多种主键生成方式,与Hibernate/JPA类似,目前支持9种主键生成方式,也可自定义主键生成类。  
-*(待开发)一级缓存与脏检查,与Hibernate类似,提供以ID为主键的行级缓存,一级缓存在跨越多个方法的同一事务中有效,对PO的存取不再重复访问数据库。与Hibernate的区别在于jSqlBox一级缓存比较简单,只缓存实体,包括已修改过的,不缓存SQL命令。  
-*(待开发)二级缓存和查询缓存,类似于Hibernate的缓存设计,可配置第三方缓存工具如EHcache等。  
 *支持多主键,适于使用了业务多主键的数据库。  
-*(正在开发中)跨数据库,内部将采用jDialects项目，支持70多种数据库方言。jDialects是一个与jSQLBox无关的小项目，可以使用在所有用到了原生SQL的场合。主要用于生成对应各种数据库的分页SQL和DLL。jDialects内核是由代码生成工具抽取Hibernate内核而生成，支持Hibernate的所有方言。  
+*(待开发)一级缓存与脏检查,与Hibernate类似,提供以ID为主键的行级缓存,一级缓存在跨越多个方法的同一事务中有效,对PO的存取不再重复访问数据库。与Hibernate的区别在于jSqlBox一级缓存比较简单,只缓存实体,包括已修改过的,不缓存CRUD命令。  
+*(待开发)二级缓存和查询缓存,类似于Hibernate的缓存设计,可配置第三方缓存工具如EHcache等。  
+*跨数据库的分页SQL和DDL支持。采用了jDialects项目，支持包括Hibernate的所有方言在内的70多种数据库方言。jDialects是一个独立的、从Hibernate中抽取的SQL方言工具，可以使用在任何用到了原生SQL和JDBC的场合。
 *目前jSqlBox内核建立在JDBCTemplate基础上，事务借用Spring的声明式事务。一些特殊的需求可以通过直接调用内核的JdbcTemplate来实现,内核建立在JdbcTemplate上是因为它的声明式事务与JdbcTemplate结合紧密,目前找不到其它更方便、好用、成熟的类似Spring的声明式事务。  
-*(正在开发中)内核正在考虑采用纯JDBC或JDBCTemplate两种内核模式，分别对应于小型项目和大型项目两种场合。  
+*(正在考虑中)内核考虑采用纯JDBC/DbUtils/JDBCTemplate三种内核模式，分别应用于不同的场合。  
 *不使用代理类，不会有代理类造成的希奇古怪的问题。没有懒加载，没有OpenSessionInView问题, PO类可以直接充当VO传递到View层,PO在View层事务已关闭情况下,依然可以继续存取数据库(工作在自动提交模式,但通常只读)。  
 *提供简单的O-R映射,有一对一,一对多,树结构三种映射类型,多对多可由两个一对多组合成。支持固定、动态关联和越级自动查找关联功能。  
-*(开发计划)考虑到有人喜欢将SQL集中放在一起管理（尤其是很长的SQL)， 将提供简单的模板功能演示。jSqlBox执行SQL是建立在动态拼接原生SQL基础上，没有发明新的SQL语法，所以和使用模板不冲突。(目前正在研究是否可以直接用JSP来当SQL模板，这样就能直接利用上某些IDE对JSP的查错和重构支持)  
+*(开发计划)考虑到有人喜欢将SQL集中放在一起管理（尤其是很长的SQL)， 将提供简单的模板功能演示。jSqlBox是建立在执行原生SQL基础上，没有发明新的SQL语法，所以和使用模板不冲突，目前用什么模板还未确定。(正在研究是否可以直接用JSP来当SQL模板，这样就能直接利用某些IDE对JSP的查错和重构支持)  
 
 ### jSqlBox缺点:
 *比较新,缺少足够测试、文档、缺少开发和试用者(欢迎在个人项目中试用或加入开发组,任何问题和建议都会促使它不断完善)。  
-*实体映射比较简单,不支持多重嵌套映射和懒加载;只支持单向从数据库读取并装配成对象树,不支持对象树级联更新到数据库,必须由用户在程序中手工处理。  
+*实体映射比较简单,不支持多重嵌套映射和懒加载;只支持单向从数据库读取并装配成对象树,不支持对象树更新到数据库,必须手工进行处理。  
 *暂不支持Blob,Clob类型的包装,待今后版本加入,目前可利用内核的JDBCTemplate来进行Blob,Clob字段的存取。  
-*暂无分库、分表、读写分离等功能，待今后加入。  
+*暂无分库、分表、读写分离等功能，待今后考虑加入。  
 
 ### 如何使用jSqlBox?
-(待更新)在项目的pom.xml中加入:
+(待上传)在项目的pom.xml中加入:
 ```
 <dependency>
     <groupId>com.github.drinkjava2</groupId>
@@ -276,14 +276,15 @@ User与Email的关系为一对多,bind()方法有参数,表示这是一个固定
 		Privilege p = new Privilege();
 		UserRole ur = new UserRole();
 		RolePrivilege rp = new RolePrivilege();
-		Dao.getDefaultContext().setShowSql(true);
-		List<User> users = Dao.queryForEntityList(User.class, select(), Dao.pagination(1, 10), u.all(), ",", ur.all(),
-				",", r.all(), ",", rp.all(), ",", p.all(), from(), u.table(), //
-				" left join ", ur.table(), " on ", oneToMany(), u.ID(), "=", ur.UID(), bind(), //
-				" left join ", r.table(), " on ", oneToMany(), r.ID(), "=", ur.RID(), bind(), //
-				" left join ", rp.table(), " on ", oneToMany(), r.ID(), "=", rp.RID(), bind(), //
-				" left join ", p.table(), " on ", oneToMany(), p.ID(), "=", rp.PID(), bind(), //
-				Dao.orderBy(u.ID(), ",", r.ID(), ",", p.ID()));
+		Dao.getDefaultContext().setShowSql(true);//SQL日志输出
+		List<User> users = Dao.queryForEntityList(User.class,
+				u.pagination(1, 10, //
+						select(), u.all(), ",", ur.all(), ",", r.all(), ",", rp.all(), ",", p.all(), from(), u.table(), //
+						" left join ", ur.table(), " on ", oneToMany(), u.ID(), "=", ur.UID(), bind(), //
+						" left join ", r.table(), " on ", oneToMany(), r.ID(), "=", ur.RID(), bind(), //
+						" left join ", rp.table(), " on ", oneToMany(), r.ID(), "=", rp.RID(), bind(), //
+						" left join ", p.table(), " on ", oneToMany(), p.ID(), "=", rp.PID(), bind(), //
+						" order by ", u.ID(), ",", r.ID(), ",", p.ID()));
 		for (User user : users) {
 			System.out.println(user.getUserName());
 			Set<Role> roles = user.getUniqueNodeSet(Role.class);
@@ -296,7 +297,7 @@ User与Email的关系为一对多,bind()方法有参数,表示这是一个固定
 ```
 多对多关联是用两个一对多来组合完成,如上例,User与Role是多对多关系,Role与Privilege是多对多关系,UserRole和RolePrivilege是两个中间表,用来连接多对多关系。  
 getUniqueNodeSet(target.class)方法是一个通用的获取与当前实体关联的所有子对象或父对象列表的方法,可以在内存对象图中跨级别搜索到所有关联的目标对象。有了这个方法,可以轻易地实现对象图中无限层级关系的一对多、多对多关系查找,但使用这个方法的限制是路径和目标类必须在整个对象图中是唯一的,否则必须手工给出查找路径。  
-这个示列中也演示了两个分页方法pagination()和orderBy(),这两个方法结合起来可以实现通用的跨数据库的分页。  
+这个示列中也演示了分页方法pagination()的使用，它可以实现通用的跨数据库的分页。  
 示例11到示例13的对象关系示意图如下：![image](orm.png)  
  
 示例 14 - 树结构关联映射

@@ -255,13 +255,14 @@ Example 13 - Many to Many mapping:
 		UserRole ur = new UserRole();
 		RolePrivilege rp = new RolePrivilege();
 		Dao.getDefaultContext().setShowSql(true);
-		List<User> users = Dao.queryForEntityList(User.class, select(), Dao.pagination(1, 10), u.all(), ",", ur.all(),
-				",", r.all(), ",", rp.all(), ",", p.all(), from(), u.table(), //
-				" left join ", ur.table(), " on ", oneToMany(), u.ID(), "=", ur.UID(), bind(), //
-				" left join ", r.table(), " on ", oneToMany(), r.ID(), "=", ur.RID(), bind(), //
-				" left join ", rp.table(), " on ", oneToMany(), r.ID(), "=", rp.RID(), bind(), //
-				" left join ", p.table(), " on ", oneToMany(), p.ID(), "=", rp.PID(), bind(), //
-				Dao.orderBy(u.ID(), ",", r.ID(), ",", p.ID()));
+		List<User> users = Dao.queryForEntityList(User.class,
+				u.pagination(1, 10, //
+						select(), u.all(), ",", ur.all(), ",", r.all(), ",", rp.all(), ",", p.all(), from(), u.table(), //
+						" left join ", ur.table(), " on ", oneToMany(), u.ID(), "=", ur.UID(), bind(), //
+						" left join ", r.table(), " on ", oneToMany(), r.ID(), "=", ur.RID(), bind(), //
+						" left join ", rp.table(), " on ", oneToMany(), r.ID(), "=", rp.RID(), bind(), //
+						" left join ", p.table(), " on ", oneToMany(), p.ID(), "=", rp.PID(), bind(), //
+						" order by ", u.ID(), ",", r.ID(), ",", p.ID()));
 		for (User user : users) {
 			System.out.println(user.getUserName());
 			Set<Role> roles = user.getUniqueNodeSet(Role.class);
