@@ -212,7 +212,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Release resources (DataSource handle), usually no need call this method except use multiple SqlBoxContext
+	 * Release resources (DataSource handle), usually no need call this method
+	 * except use multiple SqlBoxContext
 	 */
 	public void close() {
 		this.dataSource = null;
@@ -252,7 +253,8 @@ public class SqlBoxContext {
 		Object bean = null;
 		try {
 			bean = box.getEntityClass().newInstance();
-			// Trick here: if already used defaultBox (through its constructor or static block) then
+			// Trick here: if already used defaultBox (through its constructor
+			// or static block) then
 			// change to use this context
 			SqlBox box2 = getBindedBox(bean);
 			if (box2 == null)
@@ -406,7 +408,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to prepared statement
+	 * Cache SQL in memory for executeCachedSQLs call, sql be translated to
+	 * prepared statement
 	 * 
 	 * @param sql
 	 */
@@ -415,7 +418,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Execute sql and return how many record be affected, sql be translated to prepared statement<br/>
+	 * Execute sql and return how many record be affected, sql be translated to
+	 * prepared statement<br/>
 	 * Return -1 if no parameters sql executed<br/>
 	 * 
 	 */
@@ -431,7 +435,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Execute sql and return how many record be affected, sql be translated to prepared statement<br/>
+	 * Execute sql and return how many record be affected, sql be translated to
+	 * prepared statement<br/>
 	 * Return -1 if no parameters sql executed<br/>
 	 * 
 	 */
@@ -456,7 +461,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Execute sql without exception threw, return -1 if no parameters sql executed, return -2 if exception found
+	 * Execute sql without exception threw, return -1 if no parameters sql
+	 * executed, return -2 if exception found
 	 */
 	public Integer executeQuiet(String... sql) {
 		try {
@@ -494,7 +500,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Store "order by xxx desc" in ThreadLocal, return "", this is for MSSQL2005+ only <br/>
+	 * Store "order by xxx desc" in ThreadLocal, return "", this is for
+	 * MSSQL2005+ only <br/>
 	 */
 	public String orderBy(String... orderBy) {
 		StringBuilder sb = new StringBuilder(" order by ");
@@ -525,7 +532,8 @@ public class SqlBoxContext {
 			/**
 			 * For SqlServer 2012 and later can also use <br/>
 			 * start = " "; <br/>
-			 * end = " offset " + (pageNumber - 1) * pageSize + " rows fetch next " + pageSize + " rows only ";
+			 * end = " offset " + (pageNumber - 1) * pageSize +
+			 * " rows fetch next " + pageSize + " rows only ";
 			 */
 		} else if (this.getDatabaseType().isOracle()) {
 			start = " * FROM (SELECT a_tb.*, ROWNUM r_num FROM ( SELECT ";
@@ -560,7 +568,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Query for get Entity List Map, different entity list use different key (column name) to distinguish
+	 * Query for get Entity List Map, different entity list use different key
+	 * (column name) to distinguish
 	 */
 	public Map<Class<?>, Map<Object, Entity>> queryForEntityMaps(String... sql) {
 		SqlAndParameters sp = SqlHelper.prepareSQLandParameters(sql);
@@ -574,7 +583,8 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Transfer resultList List<Map<String, Object>> to Map<Class<?>, List<Object>>,<br/>
+	 * Transfer resultList List<Map<String, Object>> to Map<Class<?>, List
+	 * <Object>>,<br/>
 	 * 
 	 * <pre>
 	 * sqlResult: 
@@ -648,7 +658,8 @@ public class SqlBoxContext {
 			}
 		}
 
-		// now cached thisLineEntities in entityResult, start to assemble relationship
+		// now cached thisLineEntities in entityResult, start to assemble
+		// relationship
 		for (Entity entity1 : thisLineEntities) {// entity1
 			SqlBox box1 = entity1.box();
 			Class<?> c1 = box1.getEntityClass();
@@ -659,7 +670,7 @@ public class SqlBoxContext {
 				Map<Entity, Set<String>> parent2 = box2.getPartents();
 
 				for (Mapping map : sp.getMappingList()) {
-					if (map.getMappingType().isTree())
+					if (map.getMappingType().isTree())// NOSONAR
 						continue;
 					Class<?> thisClass = map.getThisEntity().getClass();
 					Class<?> otherClass = map.getOtherEntity().getClass();
@@ -668,16 +679,26 @@ public class SqlBoxContext {
 					String thisProperty = map.getThisPropertyName();
 					String otherProperty = map.getOtherPropertyName();
 
-					if (c1.equals(thisClass) && c2.equals(otherClass)) {// 2 classes match mapping setting
+					if (c1.equals(thisClass) && c2.equals(otherClass)) {// NOSONAR
+																		// 2
+																		// classes
+																		// match
+																		// mapping
+																		// setting
 						Object value1 = SqlBoxUtils.getFieldValueByFieldID(entity1, thisField);
 						Object value2 = SqlBoxUtils.getFieldValueByFieldID(entity2, otherField);
 
-						if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2 values match
+						if (value1 != null && value1.equals(value2) && !"".equals(value1)) {// 2
+																							// values
+																							// match
 							if (parent2 == null) {
 								// If parent is null, create a new parent map
-								// Note: one box can have many parent entities, so, parent is a map
-								// one child can have many parents, one parent can have many child
-								// key is parent entity, value is set<parent fields>
+								// Note: one box can have many parent entities,
+								// so, parent is a map
+								// one child can have many parents, one parent
+								// can have many child
+								// key is parent entity, value is set<parent
+								// fields>
 								Map<Entity, Set<String>> parentMap2 = new HashMap<>();
 								Set<String> fieldSet2 = new HashSet<>();
 								fieldSet2.add(thisField);
@@ -703,7 +724,8 @@ public class SqlBoxContext {
 								}
 
 							} else {
-								// Already have parent map found, only need insert new founded parent into it
+								// Already have parent map found, only need
+								// insert new founded parent into it
 								Set<String> fieldSet2 = parent2.get(entity1);
 								if (fieldSet2 == null) {
 									fieldSet2 = new HashSet<>();
@@ -738,7 +760,8 @@ public class SqlBoxContext {
 			}
 		}
 
-		// now cached thisLineEntities in entityResult, start to assemble relationship
+		// now cached thisLineEntities in entityResult, start to assemble
+		// relationship
 		for (Entity entity : thisLineEntities) {// entity1
 			SqlBox box = entity.box();
 			Class<?> clazz = box.getEntityClass();
@@ -753,7 +776,7 @@ public class SqlBoxContext {
 					continue;
 				String pidField = map.getOtherfield();// pid
 				String parentProperty = map.getOtherPropertyName();// parentNode
-				String childProperty = map.getThisPropertyName(); // childs 
+				String childProperty = map.getThisPropertyName(); // childs
 
 				Object pidValue = SqlBoxUtils.getFieldValueByFieldID(entity, pidField);
 				if (pidValue == null || "".equals(pidValue))
@@ -766,9 +789,11 @@ public class SqlBoxContext {
 				Entity parentEntity = SqlBoxUtils.findEntityByID(pid, entityMap);
 
 				if (parentEntity != null) {// found parent entity
-					if (boxParent == null) { // if boxParent is null, need create it
+					// if boxParent is null, need create it
+					if (boxParent == null) { // NOSONAR
 						Map<Entity, Set<String>> parentMap = new HashMap<>();
-						// one entity may have many parents, but for tree only 1 parent
+						// one entity may have many parents, but for tree only 1
+						// parent
 						Set<String> parentFields = new HashSet<>();
 						parentFields.add(pidField);
 						parentMap.put(parentEntity, parentFields);
@@ -783,7 +808,8 @@ public class SqlBoxContext {
 							SqlBoxUtils.setFieldValueByFieldID(entity, parentProperty, parentEntity);
 
 					} else {
-						// Already have parent map found, only need insert new founded parent into it
+						// Already have parent map found, only need insert new
+						// founded parent into it
 						// But it's very rare a entity has many parents
 						Set<String> parentFields = boxParent.get(parentEntity);
 						if (parentFields == null) {

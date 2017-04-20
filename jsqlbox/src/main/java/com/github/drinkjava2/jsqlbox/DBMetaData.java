@@ -93,7 +93,7 @@ public class DBMetaData {
 			DBMetaData tiny = new DBMetaData();
 			tiny.setJdbcDriverName(meta.getDriverName());
 			DatabaseType dbType = DatabaseType.getDatabaseType(meta.getDriverName());
-			if (dbType == DatabaseType.ORACLE) {
+			if (dbType.isOracle()) {
 				pst = con.prepareStatement("SELECT TABLE_NAME FROM USER_TABLES");// NOSONAR
 				rs = pst.executeQuery();
 				while (rs.next()) {
@@ -101,7 +101,7 @@ public class DBMetaData {
 				}
 				rs.close();
 				pst.close();
-			} else if (dbType == DatabaseType.MSSQLSERVER) {
+			} else if (dbType.isMsSQLSERVER()) {
 				pst = con.prepareStatement("select name from sysobjects where xtype='U'");
 				rs = pst.executeQuery();
 				while (rs.next()) {
@@ -129,9 +129,9 @@ public class DBMetaData {
 					col.setLength(rs.getInt("COLUMN_SIZE"));
 					col.setNullable(rs.getInt("NULLABLE") > 0);
 					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
-					if (dbType == DatabaseType.MYSQL)// NOSONAR
+					if (dbType.isMySql())// NOSONAR
 						col.setAutoIncreament(rs.getBoolean("IS_AUTOINCREMENT"));
-					else if (dbType == DatabaseType.MSSQLSERVER)// NOSONAR
+					else if (dbType.isMsSQLSERVER())// NOSONAR
 					{
 						boolean isautoInc = "YES".equals(rs.getString("IS_AUTOINCREMENT"));
 						col.setAutoIncreament(isautoInc);

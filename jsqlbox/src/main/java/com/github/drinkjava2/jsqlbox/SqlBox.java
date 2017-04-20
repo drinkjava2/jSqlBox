@@ -15,9 +15,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import static com.github.drinkjava2.jsqlbox.DatabaseType.MSSQLSERVER;
-import static com.github.drinkjava2.jsqlbox.DatabaseType.MYSQL;
-import static com.github.drinkjava2.jsqlbox.DatabaseType.ORACLE;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.assureNotNull;
 import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 
@@ -374,10 +371,10 @@ public class SqlBox {
 			if (idGen != null && !(idGen instanceof AssignedGenerator)) {
 				Object idValue = idGen.getNextID(this.getSqlBoxContext());
 				if (idGen instanceof IdentityGenerator) {
-					if (dbType == ORACLE)// NOSONAR
+					if (dbType.isOracle())// NOSONAR
 						throwEX("Box insert error, IdentityGenerator type should not set to ORACLE");
 				} else if (idGen instanceof AutoGenerator) {
-					if (dbType == MYSQL || dbType == MSSQLSERVER) {// NOSONAR
+					if (dbType.isMySql()  || dbType.isMsSQLSERVER()) {// NOSONAR
 						if (!col.getAutoIncreament())
 							throwEX("Box insert error, AutoGenerator type should set on indentity type field for table \""
 									+ this.realTable() + "\"");

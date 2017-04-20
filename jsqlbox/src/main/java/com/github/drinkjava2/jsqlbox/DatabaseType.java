@@ -15,42 +15,39 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import com.github.drinkjava2.jdialects.Dialect;
+
 /**
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
 
-public enum DatabaseType {
-	DB2, DERBY, H2, HSQL, INFORMIX, MSSQLSERVER, MYSQL, ORACLE, POSTGRESQL, SYBASE, HANA;
+public class DatabaseType {
+	private Dialect dialect; //use jDialect project's dialect
 
-	public static DatabaseType getDatabaseType(String jdbcDriverName) {// NOSONAR
-		String drv = jdbcDriverName.toUpperCase();
-		if (drv.contains("MYSQL"))
-			return DatabaseType.MYSQL;
-		else if (drv.contains("ORACLE"))
-			return DatabaseType.ORACLE;
-		else if (drv.contains("H2 "))
-			return DatabaseType.H2;
-		else if (drv.contains("SQL") && drv.contains("SERVER"))
-			return DatabaseType.MSSQLSERVER;
-		else
-			return null;
+	public DatabaseType(Dialect dialect) {
+		this.dialect = dialect;
 	}
 
-	public boolean isMySql() {
-		return this == MYSQL;
+	public static DatabaseType getDatabaseType(String jdbcDriverName) {// NOSONAR 
+		 
+		//work on here not finished
+	}
+
+	public boolean isMySql() { 
+		return dialect.toString().startsWith("MySQL");
 	}
 
 	public boolean isOracle() {
-		return this == ORACLE;
+		return dialect.toString().startsWith("Oracle");
 	}
 
 	public boolean isH2() {
-		return this == H2;
+		return Dialect.H2Dialect.equals(dialect);
 	}
 
-	public boolean isMsSQLSERVER() {
-		return this == MSSQLSERVER;
+	public boolean isMsSQLSERVER() { 
+		return dialect.toString().startsWith("SQLServer");
 	}
 }

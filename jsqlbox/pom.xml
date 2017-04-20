@@ -4,7 +4,7 @@
  
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
- <version>1.0.0-SNAPSHOT</version>
+ <version>1.0.0</version>
  <packaging>jar</packaging> 
  
  <name>jSQLBox</name>
@@ -58,46 +58,36 @@
         <spring.version>4.3.7</spring.version>
     </properties>
 
-   <repositories>
-     <!-- Here I delete this un-safe repository, in future to test Oracle, have to manually download Oracle driver --> 
-     <!--repository>
-        <id>codelds</id>
-        <url>https://code.lds.org/nexus/content/groups/main-repo</url>
-     </repository-->
-	 
-	 <!-- To download snapshot version jars from Maven site, it's necessary to add this repository  -->
-     <repository>
-       <id>oss</id>
-       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-     </repository>
-   </repositories>
-
  <dependencies>   
+    <!-- jSqlBox depends on jDialects to create pagination SQL and DDL -->
+  	<dependency>  
+		<groupId>com.github.drinkjava2</groupId>  
+		<artifactId>jdialects</artifactId>  
+		<version>1.0.0</version>  
+	</dependency>
  
-	<!-- jSqlBox only depends on Spring JdbcTemplate, I hope in future can kick JdbcTemplate out, but not right now -->
+	<!-- jSqlBox depends on Spring JdbcTemplate, I hope in future can kick JdbcTemplate out to avoid dependency of Spring -->
     <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-jdbc</artifactId>
         <version>${spring.version}.RELEASE</version>
     </dependency>
 
-    <!-- Spring context is not used for jSqlBox core, only used for unit test, but did not set to test scope to make
-         sure it has same version with jdbcTemplate -->
+    <!-- Spring context is needed for Transaction, I hope in future can kick Spring context out to avoid dependency of Spring  -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>${spring.version}.RELEASE</version> 
-    </dependency> 
-     
+    </dependency>  
 
-    <!-- ================================================================================================== -->   
+
     <!-- ================================================================================================== -->
     <!-- Below dependencies are for unit test only, scope be set to "test"                                  -->
-    <!-- jSqlBox unit test should passed H2, MySql5, MSSQL2012, Oracle11g testing                           -->    
+    <!-- jSqlBox should pass unit test on H2, MySql5, MSSQL2012 and Oracle11g                               -->  
+    <!-- Note: Oracle11g JDBC driver need download manually                                                 -->  	
     <!-- ================================================================================================== --> 
-    <!-- ================================================================================================== -->
     
-    <!-- jBeanBox is an IOC/AOP tool, in this project used to do some unit test configuration  -->
+    <!-- jBeanBox is a small IOC/AOP tool, in this project used to do some unit test configuration  -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jbeanbox</artifactId>
@@ -105,7 +95,7 @@
         <scope>test</scope>
     </dependency> 
     
-    <!-- Try use JSP as SQL template -->
+    <!-- I's trying use JSP as SQL template -->
     <dependency>  
        <groupId>javax.servlet</groupId>  
        <artifactId>javax.servlet-api</artifactId>  
@@ -169,19 +159,35 @@
         <groupId>mysql</groupId>
         <artifactId>mysql-connector-java</artifactId>
         <version>5.1.39</version>
-      <scope>test</scope>
+        <scope>test</scope>
     </dependency>
  
-    <!-- Have to download Oracle driver manually because Maven does not offer Oracle  driver--> 
-    <!--dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>ojdbc6</artifactId>
-      <version>11.2.0.3</version>
-      <scope>test</scope>
-    </dependency-->
+    <!-- Oracle JDBC driver missing, need install it manually, 
+	see https://www.mkyong.com/maven/how-to-add-oracle-jdbc-driver-in-your-maven-local-repository/--> 
+  
+	<!-- ojdbc6.jar example -->
+	<!-- dependency>
+		<groupId>com.oracle</groupId>
+		<artifactId>ojdbc6</artifactId>
+		<version>11.2.0</version>
+		<scope>test</scope>
+	</dependency-->
+
+	<!-- ojdbc7.jar example -->
+	<!--dependency>
+		<groupId>com.oracle</groupId>
+		<artifactId>ojdbc7</artifactId>
+		<version>12.1.0</version>
+		<scope>test</scope>
+	</dependency--> 
 	
-	<!-- MS-SQLServer Database driver for unit test, only needed when config run unit test on Oracle --> 
-	<!-- To be added at later, but seems can not find jar at Maven Centre lib-->
+	<!-- MS-SQLServer JDBC driver, see http://stackoverflow.com/questions/6942407/setting-up-maven-dependency-for-sql-server -->  
+	<dependency>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <artifactId>mssql-jdbc</artifactId>
+      <version>6.1.0.jre8</version>
+	  <scope>test</scope>
+    </dependency>
 	
  </dependencies> 
  
@@ -228,9 +234,7 @@
             </plugin>
         </plugins>
     </build>
-	
-
-		
+	 
 		
     <profiles>
 
