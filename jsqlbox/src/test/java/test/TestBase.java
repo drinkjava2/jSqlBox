@@ -30,7 +30,7 @@ public class TestBase {
 	 */
 	@After
 	public void cleanUp() {
-		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
+	//	PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 }

@@ -449,7 +449,7 @@ public class SqlBoxUtils {
 	}
 
 	public static String formatSQL(String sql) {
-		String fSql = " " + sql;
+		String fSql = "\r\n" + sql;
 		fSql = StringUtils.replace(fSql, ",", ",\r\n\t");
 		fSql = StringUtils.replace(fSql, " select ", "\r\nselect \r\n\t");
 		fSql = StringUtils.replace(fSql, " from ", "\r\nfrom \r\n\t");

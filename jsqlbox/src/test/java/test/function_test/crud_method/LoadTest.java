@@ -7,6 +7,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
@@ -32,7 +33,7 @@ public class LoadTest extends TestBase {
 		u.setAddress("Address1");
 		u.insert();
 		Assert.assertTrue(Dao.queryForInteger("select ", u.ID(), " from ", u.table()) > 0);
-		Assert.assertTrue(u.getId() > 0);
+		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
 		User u2 = Dao.load(User.class, u.getId());
 		Assert.assertEquals("Address1", u2.getAddress());
 		u2.delete();
@@ -52,7 +53,7 @@ public class LoadTest extends TestBase {
 		u.setAddress("Address1");
 		u.insert();
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
-		Assert.assertTrue(u.getId() > 0);
+		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
 		User u2 = Dao.load(User.class, u.box().getEntityID());
 		Assert.assertEquals("Address1", u2.getAddress());
 	}
@@ -66,7 +67,7 @@ public class LoadTest extends TestBase {
 		u.setAddress("Address1");
 		u.insert();
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
-		Assert.assertTrue(u.getId() > 0);
+		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
 		Map<String, Object> entityID = new HashMap<>();
 		entityID.put(u.USERNAME(), "User1");
 		entityID.put(u.ADDRESS(), "Address1");

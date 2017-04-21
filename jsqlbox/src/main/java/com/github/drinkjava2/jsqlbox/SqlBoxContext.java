@@ -34,6 +34,8 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jsqlbox.id.IdGenerator;
+import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 /**
  * @author Yong Zhu
@@ -46,9 +48,15 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private Boolean showSql = false;
-	private Boolean formatSql = false;
+	private Boolean showSql = true;
+	private Boolean formatSql = true;
 	private Boolean showQueryResult = false;
+
+	/**
+	 * If an entity has id field and no other Object ID defined, this id field
+	 * will use this defaultIDGenerator
+	 */
+	private IdGenerator defaultIDGenerator = UUIDGenerator.INSTANCE;
 
 	public static final String SQLBOX_IDENTITY = "BOX";
 
@@ -161,6 +169,14 @@ public class SqlBoxContext {
 	public SqlBoxContext setMetaData(DBMetaData metaData) {
 		this.metaData = metaData;
 		return this;
+	}
+
+	public IdGenerator getDefaultIDGenerator() {
+		return defaultIDGenerator;
+	}
+
+	public void setDefaultIDGenerator(IdGenerator defaultIDGenerator) {
+		this.defaultIDGenerator = defaultIDGenerator;
 	}
 
 	/**

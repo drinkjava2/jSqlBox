@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
@@ -23,7 +24,7 @@ public class InsertTest extends TestBase {
 		u.insert();
 		Assert.assertEquals(111, (int) Dao.queryForInteger("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
 				u.USERNAME(), "=", q("User1")));
-		Assert.assertTrue(u.getId() > 0);
+		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
 		User u2 = Dao.load(User.class, u.getId());
 		Assert.assertTrue(u2.getActive());
 	}
@@ -37,7 +38,7 @@ public class InsertTest extends TestBase {
 		u.insert();
 		Assert.assertEquals("222", Dao.queryForString("select ", u.PHONENUMBER(), " from ", u.table(), " where ",
 				u.USERNAME(), "=" + q("User2")));
-		Assert.assertTrue(u.getId() > 0);
+		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
 	}
 
 	@Test

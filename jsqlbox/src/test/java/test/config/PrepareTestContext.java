@@ -4,10 +4,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.config.JBeanBoxConfig.DefaultSqlBoxContextBox;
+import test.config.po.User;
 
 /**
  * This is a configuration class, equal to XML in Spring
@@ -19,6 +21,24 @@ public class PrepareTestContext {
 	 * Drop and rebuild all tables
 	 */
 	public static void prepareDatasource_setDefaultSqlBoxConetxt_recreateTables() {
+		BeanBox.defaultContext.close();
+		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		System.out.println("Drop and re-create a demo \"users\" table for next unit test ...");
+		User u = new User();
+		Dao.executeQuiet("drop table users");
+		Dao.executeQuiet("drop table users2");
+		String ddl = u.ddl();
+		Dao.execute(ddl);
+		ddl = StrUtils.replace(ddl, "users", "users2");
+		ddl = StrUtils.replace(ddl, "pkeycons1", "pkeycons2");
+		Dao.execute(ddl);
+		Dao.refreshMetaData();
+	}
+
+	/**
+	 * Drop and rebuild all tables
+	 */
+	public static void prepareDatasource_setDefaultSqlBoxConetxt_recreateTablesOld() {
 		BeanBox.defaultContext.close();
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
 
@@ -34,6 +54,7 @@ public class PrepareTestContext {
 		Dao.executeQuiet("drop table users2");
 
 		String innoDB = Dao.isMySql() ? "ENGINE=InnoDB DEFAULT CHARSET=utf8;" : "";
+
 		if (Dao.isMySql() || Dao.isH2()) {
 			Dao.execute("create table users ", //
 					"(id integer auto_increment ,", //

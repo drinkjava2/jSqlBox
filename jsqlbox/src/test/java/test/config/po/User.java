@@ -1,11 +1,14 @@
 package test.config.po;
 
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.Entity;
 
 /**
- * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
+ * Entity class is not a POJO, need extends from EntityBase or implements
+ * EntityInterface interface<br/>
  * 
- * Default database table equal to entity name or add a "s" suffix , in this example it will use "users" as table name
+ * Default database table equal to entity name or add a "s" suffix , in this
+ * example it will use "users" as table name
  * 
  * @author Yong Zhu
  *
@@ -14,12 +17,25 @@ import com.github.drinkjava2.jsqlbox.Entity;
  */
 
 public class User implements Entity {
-	private Integer id;
+	private String id;
 	private String userName;
 	private String phoneNumber;
 	private String address;
 	private Integer age;
 	private Boolean active;
+
+	public String ddl() {
+		Dialect d = this.box().getDialect();
+		return "create table users " //
+				+ "(id " + d.VARCHAR(32) //
+				+ ", username " + d.VARCHAR(32) //
+				+ ", Phone_Number " + d.VARCHAR(30) //
+				+ ", Address  " + d.VARCHAR(32) //
+				+ ", active " + d.BOOLEAN() //
+				+ ", Age " + d.INTEGER() //
+				+ ", constraint pkeycons1 primary key (id)" //
+				+ ")" + d.ENGINE();
+	}
 
 	public Boolean getActive() {
 		return active;
@@ -29,11 +45,11 @@ public class User implements Entity {
 		this.active = active;
 	}
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -69,7 +85,8 @@ public class User implements Entity {
 		this.age = age;
 	}
 
-	// Below methods are for JDBC & Query use, it's not compulsory but recommended to have
+	// Below methods are for JDBC & Query use, it's not compulsory but
+	// recommended to have
 
 	public String ID() {
 		return box().getColumnName("id");

@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
+import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 import test.TestBase;
 import test.config.PrepareTestContext;
@@ -19,6 +20,7 @@ public class BatchInsertTest extends TestBase {
 		User u = new User();
 		for (int i = 0; i < 1000; i++)
 			Dao.cacheSQL("insert into ", u.table(), " (", //
+					u.ID(), empty(i), ",", //
 					u.USERNAME(), empty("user" + i), ",", //
 					u.AGE(), empty("70"), //
 					") ", valuesAndQuestions());

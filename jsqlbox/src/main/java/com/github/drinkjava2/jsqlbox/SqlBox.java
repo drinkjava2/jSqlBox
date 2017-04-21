@@ -41,6 +41,7 @@ import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
+import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -863,12 +864,13 @@ public class SqlBox {
 	/**
 	 * Find and set Object IDs automatically, rule:<br/>
 	 * 
-	 * Find how many entityID <br/>
-	 * Found lots? return <br/>
-	 * only found 1? if no generator, set to auto type <br/>
-	 * Not found? look for id field found? set as EntityID if no generator, set
-	 * to auto type <br/>
-	 * No found throw ex <br/>
+	 * <pre>
+	 * Find how many entityID?
+	 * Found lots? return them
+	 * only found 1? if no generator, set to UUID if is String, set to auto type if not String
+	 * Not found? look for id field, found? set to UUID if is String, set to auto type if not String
+	 * No found? throw ex
+	 * </pre>
 	 */
 	private void findAndSetEntityID(Class<?> entityClass, Map<String, Column> realColumns) {// NOSONAR
 		Column idColumn = null;
@@ -893,9 +895,12 @@ public class SqlBox {
 				return;
 			else {
 				idColumn.setEntityID(true);
-				if (idColumn.getIdGenerator() == null)// entityColumn=null or
-														// entityColumn=idColumn
-					idColumn.setIdGenerator(AutoGenerator.INSTANCE);
+				if (idColumn.getIdGenerator() == null) {
+					if (idColumn.getPropertyType().equals(String.class))// NOSONAR
+						idColumn.setIdGenerator(this.getSqlBoxContext().getDefaultIDGenerator());
+					else
+						idColumn.setIdGenerator(AutoGenerator.INSTANCE);
+				}
 			}
 		}
 		return;
