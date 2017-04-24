@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -87,26 +88,37 @@ public class ContextTest extends TestBase {
 	public void dynamicBindContext() {
 		Dao.getDefaultContext().setShowSql(true);
 		User u = new User();
-		u.setUserName("User1");
+		u.setUserName("Sam");
+		u.setAddress("BeiJing");
+		u.insert();
+
+		Dao.executeQuiet("drop table users2");
+		Dialect d = Dao.getDialect();
+		String ddl = "create table users2 " //
+				+ "(" + d.VARCHAR("id", 32) //
+				+ "," + d.VARCHAR("username", 50) //
+				+ "," + d.VARCHAR("newAddress", 50) //
+				+ "," + d.INTEGER("Age") //
+				+ ")" + d.engine();
+		Dao.execute(ddl);
+		Dao.refreshMetaData();
 
 		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);
 		SqlBox box = new SqlBox(ctx);
-		box.configTable("Users2");
-		box.configColumnName("userName", "address");
-		ctx.bind(u, box);
-		u.insert();
-		Assert.assertEquals("User1", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table(), " where ",
-				u.USERNAME(), "=", q("User1")));
-		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
+		box.configTable("users2");
+		box.configColumnName(u.fieldID(u.ADDRESS()), "newAddress");
+		ctx.bind(u, box); // u be bound to new context ctx
 
-		SqlBox box2 = ctx.findAndBuildSqlBox(User.class);
-		box2.configColumnName("userName", "address");
-		ctx.bind(u, box2);
+		// Or use below:
+		// u.box().setContext(ctx);
+		// u.box().configColumnName(u.fieldID(u.ADDRESS()), "newAddress");
+		// u.box().configTable("Users2");
+
 		u.insert();
-		Dao.getDefaultContext().setShowSql(true);
-		Assert.assertEquals("User1", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table(), " where ",
-				u.USERNAME(), "=", q("User1")));
+		Assert.assertEquals("BeiJing",
+				Dao.queryForString("select ", u.ADDRESS(), " from ", u.table(), " where ", u.USERNAME("Sam"), "=?"));
 		Assert.assertNotEquals(Dao.getDefaultContext(), u.box().getSqlBoxContext());
+		Dao.executeQuiet("drop table users2");
 	}
 
 }

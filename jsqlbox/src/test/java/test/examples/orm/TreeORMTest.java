@@ -42,7 +42,7 @@ public class TreeORMTest extends TestBase {
 		super.setup();
 		System.out.println(
 				" !!!Note: Only run on MySql, need set  DataSourceBox extends MySqlDataSourceBox in jBeanBoxConfig.java ");
-		if (!Dao.isMySql())
+		if (!Dao.getDialect().isMySqlFamily())
 			return;
 		// Dao.getDefaultContext().setShowSql(true).setShowQueryResult(true);
 		Dao.executeQuiet("drop table if exists treetest");
@@ -99,7 +99,7 @@ public class TreeORMTest extends TestBase {
 	 */
 	@Test
 	public void moveNodeTest() {
-		if (!Dao.isMySql())
+		if (!Dao.getDialect().isMySqlFamily())
 			return;
 		System.out.println("============moveNodeTest=========");
 		TreeNode d = Dao.load(TreeNode.class, "D");
@@ -138,7 +138,7 @@ public class TreeORMTest extends TestBase {
 	 */
 	@Test
 	public void treeNoBindTest() {
-		if (!Dao.isMySql())
+		if (!Dao.getDialect().isMySqlFamily())
 			return;
 		System.out.println("============treeNoBindTest=========");
 		sortMySqlTree();
@@ -173,7 +173,7 @@ public class TreeORMTest extends TestBase {
 	 */
 	@Test
 	public void treeWithBindTest() {
-		if (!Dao.isMySql())
+		if (!Dao.getDialect().isMySqlFamily())
 			return;
 		System.out.println("============treeWithBindTest=========");
 		sortMySqlTree();

@@ -6,6 +6,7 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
@@ -16,52 +17,23 @@ public class DataTypeMapTest extends TestBase {
 
 	@Test
 	public void insertForMysqlOnly() {
-		if (!(Dao.isMySql() || Dao.isH2()))
-			return;
 		Dao.executeQuiet("drop table datasample");
-		Dao.execute("create table datasample ("//
-				, "id", " varchar(32)", ","//
-				, "integerField", " int", ","//
-				, "longField", " BIGINT", ","//
-				, "shortField", " SMALLINT", ","//
-				, "floatField", " FLOAT", ","//
-				, "doubleField", " DOUBLE", ","//
-				, "bigDecimalField", " NUMERIC", ","//
-				, "byteField", " TINYINT", ","//
-				, "booleanField", " BIT", ","//
-				, "dateField", " DATE", ","//
-				, "timeField", " Time", ","//
-				, "timestampField", " TIMESTAMP", ","//
-				, "stringField", " VARCHAR(10)"//
-				, ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-		Dao.refreshMetaData();
-		DataSample dt = new DataSample();
-		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);
-		dt.insert();
-		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from datasample"));
-		Dao.executeQuiet("drop table datasample");
-	}
-
-	@Test
-	public void insertForOracleOnly() {
-		if (!Dao.isOracle())
-			return;
-		Dao.executeQuiet("drop table datasample");
-		Dao.execute("create table datasample ("//
-				, "id", " varchar(32)", ","//
-				, "integer_Field", " int", ","//
-				, "long_Field", " NUMERIC", ","//
-				, "short_Field", " SMALLINT", ","//
-				, "float_Field", " FLOAT", ","//
-				, "double_Field", " NUMERIC", ","//
-				, "big_Decimal_Field", " NUMERIC", ","//
-				, "byte_Field", " NUMERIC", ","//
-				, "boolean_Field", " NUMERIC", ","//
-				, "date_Field", " DATE", ","//
-				, "time_Field", " DATE", ","//
-				, "timestamp_Field", " DATE", ","//
-				, "string_Field", " VARCHAR(10)"//
-				, ")");
+		Dialect d = Dao.getDialect();
+		Dao.execute("create table " + d.check("datasample")//
+				, " (", d.VARCHAR("id", 32)//
+				, ",", d.INTEGER("integerField")//
+				, ",", d.BIGINT("longField")//
+				, ",", d.SMALLINT("shortField")//
+				, ",", d.FLOAT("floatField")//
+				, ",", d.DOUBLE("doubleField")//
+				, ",", d.BIGDECIMAL("bigDecimalField", 10, 2)//
+				, ",", d.TINYINT("byteField")//
+				, ",", d.BOOLEAN("booleanField")//
+				, ",", d.DATE("dateField")//
+				, ",", d.TIME("timeField")//
+				, ",", d.TIMESTAMP("timestampField")//
+				, ",", d.VARCHAR("stringField", 10)//
+				, ")", d.engine(" DEFAULT CHARSET=utf8"));
 		Dao.refreshMetaData();
 		DataSample dt = new DataSample();
 		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);

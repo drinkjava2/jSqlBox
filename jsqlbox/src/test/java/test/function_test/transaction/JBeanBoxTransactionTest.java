@@ -1,7 +1,7 @@
 package test.function_test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questions;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -17,7 +17,8 @@ import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
 import test.config.po.User;
 
 /**
- * This is to test use Spring's Declarative Transaction but use jBeanBox replaced Spring's IOC/AOP core. <br/>
+ * This is to test use Spring's Declarative Transaction but use jBeanBox
+ * replaced Spring's IOC/AOP core. <br/>
  * More detail please see jBeanBox project
  *
  * @author Yong Zhu
@@ -31,17 +32,17 @@ public class JBeanBoxTransactionTest extends TestBase {
 		Dao.execute("insert into ", u.table(), //
 				" (", u.USERNAME(), empty("user1"), //
 				", ", u.ADDRESS(), empty("address1"), //
-				", ", u.AGE(), ")", empty("10"), //
-				valuesAndQuestions());
+				", ", u.AGE(), empty("10"), //
+				") values ", questions());
 	}
 
 	public void tx_InsertUser2() {
 		User u = new User();
 		Dao.execute("insert into ", u.table(), //
-				" (", u.USERNAME(), empty("user2"), //
-				", ", u.ADDRESS(), empty("address2"), //
-				", ", u.AGE(), ")", empty("20"), //
-				valuesAndQuestions());
+				" (", u.USERNAME("user2"), //
+				", ", u.ADDRESS("address2"), //
+				", ", u.AGE("20"), //
+				") values ", questions());
 	}
 
 	public void tx_doInsert() {
@@ -80,7 +81,7 @@ public class JBeanBoxTransactionTest extends TestBase {
 		Dao.execute("insert into ", u.table(), " (", //
 				u.USERNAME() + empty("user3"), ", ", //
 				u.AGE() + empty("30"), //
-				")", valuesAndQuestions());
+				") values ", questions());
 		int count = Dao.queryForInteger("select count(*) from ", u.table());
 		System.out.println("Inserted " + count + " record into database");
 		Assert.assertEquals(1, count);

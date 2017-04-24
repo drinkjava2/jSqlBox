@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
 import test.TestBase;
 import test.config.po.User;
@@ -25,15 +24,14 @@ import test.config.po.User;
 public class LoadTest extends TestBase {
 
 	@Test
-	public void loadSingleID() {
+	public void loadSingleID() {// default Entity ID is "id" field
 		User u = new User();
-		// Default id is EntityID
-		u.box().configIdGenerator(u.fieldID(u.ID()), AutoGenerator.INSTANCE);
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.insert();
-		Assert.assertTrue(Dao.queryForInteger("select ", u.ID(), " from ", u.table()) > 0);
+		String id = Dao.queryForString("select ", u.ID(), " from ", u.table());
 		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
+		Assert.assertEquals(id, u.getId());
 		User u2 = Dao.load(User.class, u.getId());
 		Assert.assertEquals("Address1", u2.getAddress());
 		u2.delete();
@@ -45,15 +43,16 @@ public class LoadTest extends TestBase {
 
 	@Test
 	public void loadCompositeID() {
-		Dao.getDefaultContext().setShowSql(true);
 		User u = new User();
-		u.box().configIdGenerator(u.fieldID(u.ID()), AutoGenerator.INSTANCE);
+		// Change Entity ID to username + address
 		u.box().configEntityIDs(u.fieldID(u.USERNAME()), u.fieldID(u.ADDRESS()));
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.insert();
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
-		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
+		// id is null because id is no longer the default entityID, UUID
+		// generator will not be set to field
+		Assert.assertTrue(StrUtils.isEmpty(u.getId()));
 		User u2 = Dao.load(User.class, u.box().getEntityID());
 		Assert.assertEquals("Address1", u2.getAddress());
 	}
@@ -61,13 +60,15 @@ public class LoadTest extends TestBase {
 	@Test
 	public void loadCompositeIDbyMap() {
 		User u = new User();
-		u.box().configIdGenerator(u.fieldID(u.ID()), AutoGenerator.INSTANCE);
 		u.box().configEntityIDs(u.fieldID(u.USERNAME()), u.fieldID(u.ADDRESS()));
+		//u.setId((String) u.nextID());
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.insert();
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from ", u.table()));
-		Assert.assertTrue(!StrUtils.isEmpty(u.getId()));
+		// id is null because id is no longer the default entityID, UUID
+		// generator will not be set to id field
+		Assert.assertTrue(StrUtils.isEmpty(u.getId()));
 		Map<String, Object> entityID = new HashMap<>();
 		entityID.put(u.USERNAME(), "User1");
 		entityID.put(u.ADDRESS(), "Address1");

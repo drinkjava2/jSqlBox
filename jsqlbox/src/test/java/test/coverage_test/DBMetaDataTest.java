@@ -27,13 +27,13 @@ public class DBMetaDataTest extends TestBase {
 	@Test
 	public void tinyJdbcGetMetadataTest() {
 		DataSource ds = null;
-		if (Dao.isH2())
+		if (Dao.getDialect().isH2Family())
 			ds = BeanBox.getBean(H2DataSourceBox.class);
-		else if (Dao.isMySql())
+		else if (Dao.getDialect().isMySqlFamily())
 			ds = BeanBox.getBean(MySqlDataSourceBox.class);
-		else if (Dao.isOracle())
+		else if (Dao.getDialect().isOracleFamily())
 			ds = BeanBox.getBean(OracleDataSourceBox.class);
-		else if (Dao.isMsSQLSERVER())
+		else if (Dao.getDialect().isMySqlFamily())
 			ds = BeanBox.getBean(MsSqlServerDataSourceBox.class);
 		Assert.assertNotNull(ds);
 	}

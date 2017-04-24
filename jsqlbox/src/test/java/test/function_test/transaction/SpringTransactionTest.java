@@ -1,7 +1,7 @@
 package test.function_test.transaction;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questions;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,17 +32,17 @@ public class SpringTransactionTest {
 		Dao.execute("insert into ", u.table(), //
 				" (", u.USERNAME(), empty("user1"), //
 				", ", u.ADDRESS(), empty("address1"), //
-				", ", u.AGE(), ")", empty("10"), //
-				valuesAndQuestions());
+				", ", u.AGE(), empty("10"), //
+				") values ", questions());
 	}
 
 	public void tx_InsertUser2() {
 		User u = new User();
 		Dao.execute("insert into ", u.table(), //
-				" (", u.USERNAME(), empty("user2"), //
-				", ", u.ADDRESS(), empty("address2"), //
-				", ", u.AGE(), ")", empty("20"), //
-				valuesAndQuestions());
+				" (", u.USERNAME("user2"), //
+				", ", u.ADDRESS("address2"), //
+				", ", u.AGE("20"), //
+				") values ", questions());
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)

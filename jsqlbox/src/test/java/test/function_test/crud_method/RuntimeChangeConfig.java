@@ -3,6 +3,7 @@ package test.function_test.crud_method;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
@@ -16,17 +17,26 @@ public class RuntimeChangeConfig extends TestBase {
 		u.setUserName("Sam");
 		u.insert();
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from users"));
-		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
 	}
 
 	@Test
 	public void changeTable() {
+		Dao.executeQuiet("drop table users2");
+		Dialect d = Dao.getDialect();
+		String ddl = "create table users2 " //
+				+ "(" + d.VARCHAR("id", 32) //
+				+ "," + d.VARCHAR("username", 50) //
+				+ ")" + d.engine();
+		Dao.execute(ddl);
+		Dao.refreshMetaData();
+
 		User u = new User();
 		u.box().configTable("users2");
 		u.setUserName("Sam");
 		u.insert();
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
 		Assert.assertEquals(1, (int) Dao.queryForInteger("select count(*) from users2"));
+		Dao.executeQuiet("drop table users2");
 	}
 
 	@Test
@@ -44,17 +54,4 @@ public class RuntimeChangeConfig extends TestBase {
 		Assert.assertEquals("111", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table()));
 	}
 
-	@Test
-	public void changeTableAndColumnName() {
-		User u = new User();
-		u.box().configTable("users2");
-		u.box().configColumnName("userName", u.ADDRESS());
-		u.setUserName("Sam");
-		u.insert();
-		// below line, sql is "select Address from users2"
-		Assert.assertEquals("Sam", Dao.queryForString("select ", u.ADDRESS(), " from ", u.table()));
-
-		// below line, sql is "select Address from users2"
-		Assert.assertEquals("Sam", Dao.queryForString("select ", u.USERNAME(), " from ", u.table()));
-	}
 }

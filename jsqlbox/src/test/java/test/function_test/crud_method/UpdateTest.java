@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 
 import test.TestBase;
 import test.config.po.User;
@@ -15,8 +14,7 @@ public class UpdateTest extends TestBase {
 
 	@Test
 	public void updateUser() {
-		User u = new User();
-		u.box().configIdGenerator("id", AutoGenerator.INSTANCE);
+		User u = new User(); 
 		u.setUserName("User1");
 		u.setAddress("Address1");
 		u.setPhoneNumber("111");

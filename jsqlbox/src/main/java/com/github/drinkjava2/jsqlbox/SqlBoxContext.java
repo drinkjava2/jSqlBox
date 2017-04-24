@@ -49,7 +49,7 @@ public class SqlBoxContext {
 
 	// print SQL to console or log depends logging.properties
 	private Boolean showSql = true;
-	private Boolean formatSql = true;
+	private Boolean formatSql = false;
 	private Boolean showQueryResult = false;
 
 	/**
@@ -109,6 +109,25 @@ public class SqlBoxContext {
 			defaultSqlBoxContext = new SqlBoxContext();
 		return defaultSqlBoxContext;
 
+	}
+
+	/**
+	 * Build a pagination sql, detail see project:
+	 * https://github.com/drinkjava2/jDialects
+	 * 
+	 * @param pageNumber
+	 *            the page number
+	 * @param pageSize
+	 *            the page size
+	 * @param sql
+	 *            the SQL should start with "select"
+	 * @return the pagination SQL
+	 */
+	public String pagination(int pageNumber, int pageSize, String... sql) {
+		StringBuilder sb = new StringBuilder();
+		for (String str : sql)
+			sb.append(str);
+		return getDialect().paginate(pageNumber, pageSize, sb.toString());
 	}
 
 	// ================== getter & setters below============

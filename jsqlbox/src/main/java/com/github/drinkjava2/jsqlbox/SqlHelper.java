@@ -308,20 +308,20 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Create " value(?,?,?,?)" strings according how many sql parameters be
-	 * cached in ThreadLocal
+	 * Create "(?,?,?...,?)" strings according how many sql parameters be cached
+	 * in ThreadLocal
 	 */
-	public static String valuesAndQuestions() {
-		return createValueString(sqlCache.get().size());
+	public static String questions() {
+		return buildQuestions(sqlCache.get().size());
 	}
 
 	/**
-	 * Create " value(?,?,?,?)" string by given howManyQuestionMark quantity
+	 * Create "(?,?,?...,?)" string by given howManyQuestionMarks quantity
 	 */
-	public static String createValueString(int howManyQuestionMark) {
-		StringBuilder sb = new StringBuilder(" values(");
-		for (int i = 0; i < howManyQuestionMark; i++) {
-			if (i != howManyQuestionMark - 1)
+	public static String buildQuestions(int howManyQuestionMarks) {
+		StringBuilder sb = new StringBuilder("(");
+		for (int i = 0; i < howManyQuestionMarks; i++) {
+			if (i != howManyQuestionMarks - 1)
 				sb.append("?,");
 			else
 				sb.append("?");

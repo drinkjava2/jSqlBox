@@ -92,7 +92,7 @@ public class DBMetaData {
 			Dialect dialect = Dialect.guessDialect(con);
 			dbMeta.setDialect(dialect);
 
-			if (DialectUtils.isOracle(dialect)) {
+			if (dialect.isOracleFamily()) {
 				pst = con.prepareStatement("SELECT TABLE_NAME FROM USER_TABLES");// NOSONAR
 				rs = pst.executeQuery();
 				while (rs.next()) {
@@ -100,7 +100,7 @@ public class DBMetaData {
 				}
 				rs.close();
 				pst.close();
-			} else if (DialectUtils.isMsSQLSERVER(dialect)) {
+			} else if (dialect.isSQLServerFamily()) {
 				pst = con.prepareStatement("select name from sysobjects where xtype='U'");
 				rs = pst.executeQuery();
 				while (rs.next()) {
@@ -128,9 +128,9 @@ public class DBMetaData {
 					col.setLength(rs.getInt("COLUMN_SIZE"));
 					col.setNullable(rs.getInt("NULLABLE") > 0);
 					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
-					if (DialectUtils.isMySql(dialect))// NOSONAR
+					if (dialect.isMySqlFamily())// NOSONAR
 						col.setAutoIncreament(rs.getBoolean("IS_AUTOINCREMENT"));
-					else if (DialectUtils.isMsSQLSERVER(dialect))// NOSONAR
+					else if (dialect.isSQLServerFamily())// NOSONAR
 					{
 						boolean isautoInc = "YES".equals(rs.getString("IS_AUTOINCREMENT"));
 						col.setAutoIncreament(isautoInc);

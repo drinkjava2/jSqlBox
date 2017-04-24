@@ -46,6 +46,11 @@ public interface Entity {
 		return (T) this;
 	}
 
+	public default Object nextID() {
+		SqlBoxContext context = this.box().getSqlBoxContext();
+		return context.getDefaultIDGenerator().getNextID(context);
+	}
+
 	public default String fieldID(String realColumnName) {
 		return this.box().fieldID(realColumnName);
 	}

@@ -47,6 +47,7 @@ public class UUIDGeneratorTest extends TestBase {
 	@Test
 	public void testUUIDAny() {
 		User u = new User();
+		Dao.getDefaultContext().setShowSql(true);
 		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDAnyGeneratorBox.class));
 		u.insert();
 		String username = Dao.queryForString("select ", u.USERNAME(), " from ", u.table());

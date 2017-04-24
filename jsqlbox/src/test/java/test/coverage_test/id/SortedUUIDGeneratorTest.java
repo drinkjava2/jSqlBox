@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.SortedUUIDGenerator;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
@@ -34,7 +35,8 @@ public class SortedUUIDGeneratorTest extends TestBase {
 
 	@Test
 	public void insertUserInMysql() {
-		if (!(Dao.isMySql() || Dao.isH2()))
+		Dialect d = Dao.getDialect();
+		if (!(d.isMySqlFamily() || d.isH2Family()))
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table t");
@@ -49,7 +51,7 @@ public class SortedUUIDGeneratorTest extends TestBase {
 
 	@Test
 	public void insertUserInOracle() {
-		if (!Dao.isOracle())
+		if (!Dao.getDialect().isOracleFamily())
 			return;
 		User u = new User();
 		Dao.executeQuiet("drop table T");

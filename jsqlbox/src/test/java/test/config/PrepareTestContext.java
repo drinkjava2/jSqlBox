@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
@@ -23,98 +23,35 @@ public class PrepareTestContext {
 	public static void prepareDatasource_setDefaultSqlBoxConetxt_recreateTables() {
 		BeanBox.defaultContext.close();
 		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		System.out.println(Dao.getDialect());
 		System.out.println("Drop and re-create a demo \"users\" table for next unit test ...");
-		User u = new User();
 		Dao.executeQuiet("drop table users");
-		Dao.executeQuiet("drop table users2");
-		String ddl = u.ddl();
-		Dao.execute(ddl);
-		ddl = StrUtils.replace(ddl, "users", "users2");
-		ddl = StrUtils.replace(ddl, "pkeycons1", "pkeycons2");
-		Dao.execute(ddl);
+		Dao.execute(User.ddl(Dao.getDialect()));
 		Dao.refreshMetaData();
 	}
 
 	/**
 	 * Drop and rebuild all tables
 	 */
+	@Deprecated() // will delete
 	public static void prepareDatasource_setDefaultSqlBoxConetxt_recreateTablesOld() {
-		BeanBox.defaultContext.close();
-		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
+		Dialect d = Dao.getDialect();
 
 		System.out.println("Drop and re-create all tables for a new test ...");
-		if (Dao.isOracle()) {
+		if (d.isOracleFamily()) {
 			Dao.executeQuiet("DROP TRIGGER TGR_2");
 			Dao.executeQuiet("DROP SEQUENCE SEQ_2");
 			Dao.executeQuiet("DROP TRIGGER TGR_1");
 			Dao.executeQuiet("DROP SEQUENCE SEQ_1");
 		}
-		Dao.executeQuiet("drop table email");
-		Dao.executeQuiet("drop table users");
-		Dao.executeQuiet("drop table users2");
 
-		String innoDB = Dao.isMySql() ? "ENGINE=InnoDB DEFAULT CHARSET=utf8;" : "";
-
-		if (Dao.isMySql() || Dao.isH2()) {
-			Dao.execute("create table users ", //
-					"(id integer auto_increment ,", //
-					"username Varchar (50) ,", //
-					"Phone_Number Varchar (50) ,", //
-					"Address Varchar (50) ,", //
-					"active Boolean, ", //
-					"Age Integer,", //
-					"constraint const1 primary key (id)", //
-					")", innoDB);
-
-			Dao.execute("create table users2", //
-					"(id integer auto_increment ,", //
-					"constraint const4 primary key (ID),", //
-					"username Varchar (50) ,", //
-					"Phone_Number Varchar (50) ,", //
-					"Address Varchar (50) ,", //
-					"active Boolean, ", //
-					"Age Integer)", innoDB);
+		if (d.isMySqlFamily() || d.isH2Family()) {
 		}
-		if (Dao.isMsSQLSERVER()) {
-			Dao.execute("create table users ", //
-					"(id integer identity(1,1),", //
-					"username Varchar (50) ,", //
-					"Phone_Number Varchar (50) ,", //
-					"Address Varchar (50) ,", //
-					"active bit, ", //
-					"Age Integer,", //
-					"constraint const1 primary key (id)", //
-					")");
-
-			Dao.execute("create table users2", //
-					"(id integer identity(1,1),", //
-					"constraint const4 primary key (ID),", //
-					"username Varchar (50) ,", //
-					"Phone_Number Varchar (50) ,", //
-					"Address Varchar (50) ,", //
-					"active bit, ", //
-					"Age Integer)");
+		if (d.isSQLServerFamily()) {
 		}
 
-		if (Dao.isOracle()) {
-			Dao.execute("CREATE TABLE USERS", //
-					"(ID INTEGER,", //
-					"USERNAME VARCHAR (50) ,", //
-					"PHONE_NUMBER VARCHAR (50) ,", //
-					"ADDRESS VARCHAR (50) ,", //
-					"ACTIVE NUMBER(8), ", //
-					"AGE NUMBER(8),", //
-					"CONSTRAINT CONST1 PRIMARY KEY (ID)", //
-					")");
+		if (d.isOracleFamily()) {
 
-			Dao.execute("CREATE TABLE USERS2", //
-					"(ID INTEGER,", //
-					"USERNAME VARCHAR (50) ,", //
-					"PHONE_NUMBER VARCHAR (50) ,", //
-					"ADDRESS VARCHAR (50) ,", //
-					"ACTIVE NUMBER(8), ", //
-					"AGE NUMBER(8)", //
-					")");
 			Dao.execute(
 					"CREATE SEQUENCE SEQ_1 MINVALUE 1 MAXVALUE 99999999 START WITH 1 INCREMENT BY 1 NOCYCLE CACHE 10");
 			Dao.execute(
@@ -142,14 +79,7 @@ public class PrepareTestContext {
 		System.out.println("===============================Testing TestPrepare===============================");
 		prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
 		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
-		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
 		closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
-	public static void main(String[] args) {
-		prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users"));
-		Assert.assertEquals(0, (int) Dao.queryForInteger("select count(*) from users2"));
-		closeDatasource_closeDefaultSqlBoxConetxt();
-	}
 }

@@ -28,7 +28,7 @@ public class ServicesTest extends TestBase {
 		// drop and recreate tables;
 		// Already tested on H2, MySql, Oracle. For MySql need set InnoDB to
 		// support transaction
-		String innoDB = Dao.isMySql() ? "ENGINE=InnoDB DEFAULT CHARSET=utf8;" : "";
+		String innoDB = Dao.getDialect().isMySqlFamily() ? "ENGINE=InnoDB DEFAULT CHARSET=utf8;" : "";
 		Dao.executeQuiet("drop table part");
 		Dao.execute(Part.CREATE_SQL + innoDB);
 		Dao.executeQuiet("drop table podetail");

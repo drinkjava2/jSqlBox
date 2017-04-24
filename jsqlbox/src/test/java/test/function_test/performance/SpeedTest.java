@@ -25,7 +25,7 @@ public class SpeedTest extends TestBase {
 			u.setAddress("Address2");
 			u.setPhoneNumber("222");
 			u.box();
-			if (Dao.isH2())
+			if (Dao.getDialect().isH2Family())
 				u.insert();
 		}
 		long newTime = System.currentTimeMillis();

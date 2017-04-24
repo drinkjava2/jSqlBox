@@ -29,7 +29,7 @@ public class SequenceGeneratorTest extends TestBase {
 
 	@Test
 	public void insertUser() {
-		if (!Dao.isOracle())
+		if (!Dao.getDialect().isOracleFamily())
 			return;
 		User u = new User();
 		u.box().configIdGenerator("age", BeanBox.getBean(SequenceGeneratorBox.class));

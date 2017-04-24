@@ -22,8 +22,7 @@ import java.util.Map;
 import com.github.drinkjava2.jdialects.Dialect;
 
 /**
- * In this class most methods are copied from default SqlBoxContext for
- * convenient use
+ * In this class most methods are copied from default SqlBoxContext
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
@@ -72,30 +71,11 @@ public class Dao {
 	}
 
 	public static String pagination(int pageNumber, int pageSize, String... sql) {
-		StringBuilder sb = new StringBuilder();
-		for (String str : sql)
-			sb.append(str);
-		return Dao.getDefaultDialect().paginate(pageNumber, pageSize, sb.toString());
+		return SqlBoxContext.getDefaultSqlBoxContext().pagination(pageNumber, pageSize, sql);
 	}
 
-	public static Dialect getDefaultDialect() {
+	public static Dialect getDialect() {
 		return SqlBoxContext.getDefaultSqlBoxContext().getDialect();
-	}
-
-	public static boolean isMySql() {
-		return DialectUtils.isMySql(Dao.getDefaultDialect());
-	}
-
-	public static boolean isOracle() {
-		return DialectUtils.isOracle(Dao.getDefaultDialect());
-	}
-
-	public static boolean isMsSQLSERVER() {
-		return DialectUtils.isMsSQLSERVER(Dao.getDefaultDialect());
-	}
-
-	public static boolean isH2() {
-		return DialectUtils.isH2(Dao.getDefaultDialect());
 	}
 
 	public static void refreshMetaData() {

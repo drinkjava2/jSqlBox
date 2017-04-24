@@ -41,7 +41,6 @@ import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
-import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.
@@ -382,10 +381,10 @@ public class SqlBox {
 			if (idGen != null && !(idGen instanceof AssignedGenerator)) {
 				Object idValue = idGen.getNextID(this.getSqlBoxContext());
 				if (idGen instanceof IdentityGenerator) {
-					if (DialectUtils.isOracle(dialect))// NOSONAR
+					if (dialect.isOracleFamily())// NOSONAR
 						throwEX("Box insert error, IdentityGenerator type should not set to ORACLE");
 				} else if (idGen instanceof AutoGenerator) {
-					if (DialectUtils.isMySql(dialect) || DialectUtils.isMsSQLSERVER(dialect)) {// NOSONAR
+					if (dialect.isMySqlFamily() || dialect.isSQLServerFamily()) {// NOSONAR
 						if (!col.getAutoIncreament())
 							throwEX("Box insert error, AutoGenerator type should set on indentity type field for table \""
 									+ this.realTable() + "\"");
@@ -418,7 +417,7 @@ public class SqlBox {
 		}
 		// delete the last ","
 		sb.deleteCharAt(sb.length() - 1).append(") ");
-		sb.append(SqlHelper.createValueString(count));
+		sb.append("values").append(SqlHelper.buildQuestions(count));
 		if (getSqlBoxContext().getShowSql())
 			getSqlBoxContext()
 					.logSql(new SqlAndParameters(sb.toString(), parameters.toArray(new Object[parameters.size()])));
@@ -700,8 +699,8 @@ public class SqlBox {
 		}
 		String resultTable = context.findRealTableName(realTable);
 		if (SqlBoxUtils.isEmptyStr(resultTable))
-			SqlBoxException
-					.throwEX("SqlBox getRealTable error: " + this.getEntityClass() + ", table name:" + realTable);
+			SqlBoxException.throwEX("Can not find database table \"" + realTable + "\" for class \""
+					+ this.getEntityClass() + "\", sometimes may caused by forgot call refreshMetaData.");
 		return resultTable;
 	}
 
@@ -724,7 +723,12 @@ public class SqlBox {
 	 * 4)In Sql, not in alias tag, return "alias.columnName" <br/>
 	 * 
 	 */
-	public String getColumnName(String fieldID) {// NOSONAR
+	public String getColumnName(String fieldID, Object... args) {// NOSONAR
+		// "insert into user(",u.ID(123),",", u.NAME("sam"),") values(?,?)"
+		// "update user set "+u.NAME("John")+"=? where "+u.ID(123)+"=?"
+		for (Object arg : args)
+			SqlHelper.empty(arg);
+
 		getFieldIDCache().set(fieldID);
 		if (MappingHelper.isInMapping()) {
 			// IdPair is to tell mapping which fieldIDs be linked
@@ -821,6 +825,10 @@ public class SqlBox {
 				realCol.setFieldID(fieldID);
 				String realColumnMatchName = this.getRealColumnName(realTableName, fieldID);
 				if (SqlBoxUtils.isEmptyStr(realColumnMatchName)) {
+					Column configColumn = configColumns.get(fieldID);
+					// if is a disabled field, do not print warning
+					if (configColumn != null && !configColumn.isEnable())
+						continue;
 					Field field = ReflectionUtils.findField(this.getEntityClass(), fieldID);
 					if (this.getEntityClass().getDeclaredAnnotation(IgnoreField.class) == null// NOSONAR
 							&& field.getAnnotation(IgnoreField.class) == null)
@@ -828,7 +836,6 @@ public class SqlBox {
 								+ realTableName + "\", to disable this warning message, put an @"
 								+ IgnoreField.class.getSimpleName() + " annotation on it. "
 								+ (fieldID.contains("ID") ? " Try change xxxID to xxxxId" : ""));
-
 					continue;
 				}
 				realCol.setColumnName(realColumnMatchName);// 3080ms cost for
@@ -1020,6 +1027,13 @@ public class SqlBox {
 	 */
 	public void configUpdatable(String fieldID, Boolean updatable) {
 		getOrBuildConfigColumn(fieldID).setUpdatable(updatable);
+	}
+
+	/**
+	 * Config column enable
+	 */
+	public void configEnable(String fieldID, Boolean enable) {
+		getOrBuildConfigColumn(fieldID).setEnable(enable);
 	}
 
 	/**

@@ -6,8 +6,9 @@ import org.junit.Before;
 import test.config.PrepareTestContext;
 
 /**
- * This is the base class for all test cases which need prepare a database for test, default using H2 memory database,
- * see configurations in JBeanBoxConfig.java
+ * This is the base class for all test cases which need prepare a database for
+ * test, default using H2 memory database, see configurations in
+ * JBeanBoxConfig.java
  *
  * @author Yong Zhu
  *
@@ -17,7 +18,8 @@ import test.config.PrepareTestContext;
 public class TestBase {
 
 	/**
-	 * Set up DataSource pool, default SqlBoxContext, insert test data into database
+	 * Set up DataSource pool, default SqlBoxContext, insert test data into
+	 * database
 	 */
 	@Before
 	public void setup() {
@@ -30,7 +32,7 @@ public class TestBase {
 	 */
 	@After
 	public void cleanUp() {
-	//	PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
+		PrepareTestContext.closeDatasource_closeDefaultSqlBoxConetxt();
 	}
 
 }

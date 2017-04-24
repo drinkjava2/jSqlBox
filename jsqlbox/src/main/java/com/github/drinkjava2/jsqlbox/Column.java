@@ -26,10 +26,11 @@ import com.github.drinkjava2.jsqlbox.id.IdGenerator;
  */
 public class Column {
 	// JPA also use below fields:
-	private boolean nullable = true;// readOnly, determined by Database
-	private boolean insertable = true;
-	private boolean updatable = true;
-	private boolean enable = true;// if set false will ignore any operation of this field
+	private Boolean nullable = true;// readOnly, determined by Database
+	private Boolean insertable = true;
+	private Boolean updatable = true;
+	private Boolean enable = true;// if set false will ignore any operation of
+									// this field
 	private int length = 255;
 	private int precision = 0;
 	private int scale = 0;
@@ -53,27 +54,27 @@ public class Column {
 		this.fieldID = fieldID;
 	}
 
-	public boolean isNullable() {
+	public Boolean isNullable() {
 		return nullable;
 	}
 
-	public void setNullable(boolean nullable) {
+	public void setNullable(Boolean nullable) {
 		this.nullable = nullable;
 	}
 
-	public boolean isInsertable() {
+	public Boolean isInsertable() {
 		return insertable;
 	}
 
-	public void setInsertable(boolean insertable) {
+	public void setInsertable(Boolean insertable) {
 		this.insertable = insertable;
 	}
 
-	public boolean isUpdatable() {
+	public Boolean isUpdatable() {
 		return updatable;
 	}
 
-	public void setUpdatable(boolean updatable) {
+	public void setUpdatable(Boolean updatable) {
 		this.updatable = updatable;
 	}
 
@@ -173,11 +174,11 @@ public class Column {
 		this.entityID = entityID;
 	}
 
-	public boolean isEnable() {
+	public Boolean isEnable() {
 		return enable;
 	}
 
-	public void setEnable(boolean enable) {
+	public void setEnable(Boolean enable) {
 		this.enable = enable;
 	}
 

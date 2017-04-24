@@ -1,14 +1,13 @@
 package test.function_test.jdbc;
 
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questions;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 import test.TestBase;
 import test.config.PrepareTestContext;
@@ -23,7 +22,7 @@ public class BatchInsertTest extends TestBase {
 					u.ID(), empty(i), ",", //
 					u.USERNAME(), empty("user" + i), ",", //
 					u.AGE(), empty("70"), //
-					") ", valuesAndQuestions());
+					") values ", questions());
 		Dao.executeCachedSQLs();
 	}
 

@@ -3,10 +3,9 @@ package test.function_test.query_method;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.aliasBegin;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.aliasEnd;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.comma;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.from;
+import static com.github.drinkjava2.jsqlbox.SqlHelper.questions;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.select;
-import static com.github.drinkjava2.jsqlbox.SqlHelper.valuesAndQuestions;
 
 import java.util.List;
 import java.util.Map;
@@ -27,12 +26,14 @@ public class ListQueryTest extends TestBase {
 		super.setup();
 		User u = new User();
 		for (int i = 0; i < 5; i++)
-			Dao.execute("insert into ", u.table(), //
-					" (", u.USERNAME(), empty("Sam"), //
-					", ", u.ADDRESS(), empty("BeiJing"), //
-					", ", u.PHONENUMBER(), empty(i), //
-					", ", u.AGE(), ")", empty("1"), //
-					valuesAndQuestions());
+			Dao.cacheSQL("insert into ", u.table(), //
+					" (", u.ID(u.nextID()), //
+					", ", u.USERNAME("Sam"), //
+					", ", u.ADDRESS("BeiJing"), //
+					", ", u.PHONENUMBER(i), //
+					", ", u.AGE("1"), //
+					") values ", questions());
+		Dao.executeCachedSQLs();
 		Assert.assertEquals(5, (int) Dao.queryForInteger("select count(*) from ", u.table()));
 	}
 
