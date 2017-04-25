@@ -1,34 +1,18 @@
+=====================Bug List======================
+*Bug: u.box().configEntityIDs("userName"); should throw a exception if userName spell wrong
+
+
 =====================TODO List======================
-* Oracle, mysql ... reserved words checking function need add into jDialects 
-
-* Sql query result list map to Object tree (oneToOne, oneToMany, manyToMany, tree)
-
-* L1 Cache (similar but not exact as Hibernate's L1 cache, does not cache save/update/delete command, only cache entities)
-
-* L2 cache (use Hibernate's Ecache,  or Redis)
-
-* Query Cache (similar lie Hibernate's Query cache)
-
-* nullable, insertable, updatable need implemented in Box's insert update methods
-
-* .cacheLoad()  .cacheQuery()  forceInsert(), forceUpdate()  method to used L2 Cache 
-
-* .cacheCompare() to check if database has been changed.
-
-* .cacheClear() to clear L2 cache
-
-* .BatchCacheSave   .BatchCacheUpdate()   .BatchCacheExecute to Entity batch operate (similar like jdbc batch methods)
-  
-* Blob, Clob type?(or just use JDBCTemplate)
-
-* add MS SQL SERVER 
-
-* Divided or config to 2 different type, one support container PO manager, another not, but both support 1st, 2nd cache.
-
-* For exception, delete class name, add error code, do not directly show entity in error message
+ 
+* L1/L2/Query Cache  
+* nullable, insertable, updatable need implemented in Box's insert update methods 
+* Blob, Clob type support (currently is using JDBCTemplate's)  
+* Consider release Lite version use pure JDBC 
 
 
 ===========Finished tasks===========
-base class delete dao & clean up
-deleted proxyBean class because no need use it
+base class delete dao & clean up -- Done
+deleted proxyBean class because no need use it -- Done
+Sql query result list map to Object tree (oneToOne, oneToMany, manyToMany, tree) -- Done
+Oracle, mysql ... reserved words checking function need add into jDialects -- Done
 

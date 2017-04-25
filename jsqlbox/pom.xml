@@ -4,7 +4,7 @@
  
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
- <version>1.0.0</version>
+ <version>1.0.0-SNAPSHOT</version>
  <packaging>jar</packaging> 
  
  <name>jSQLBox</name>
@@ -63,7 +63,7 @@
   	<dependency>  
 		<groupId>com.github.drinkjava2</groupId>  
 		<artifactId>jdialects</artifactId>  
-		<version>1.0.1-SNAPSHOT</version>  
+		<version>1.0.1</version>  
 	</dependency>
  
 	<!-- jSqlBox depends on Spring JdbcTemplate, I hope in future can kick JdbcTemplate out to avoid dependency of Spring -->

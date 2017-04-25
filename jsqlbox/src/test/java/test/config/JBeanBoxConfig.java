@@ -13,7 +13,8 @@ import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * This is jBeanBox configuration classes, equal to XML in Spring <br/>
- * About jBeanBox project can google it, it's a small IOC/AOP tool to replace Spring
+ * About jBeanBox project can google it, it's a small IOC/AOP tool to replace
+ * Spring
  * 
  * @author Yong Zhu
  *
@@ -23,8 +24,8 @@ import com.zaxxer.hikari.HikariDataSource;
 public class JBeanBoxConfig {
 
 	/**
-	 * This is a SqlBoxContext setting, you can set up as many as possible contexts in one project, but for most
-	 * projects usually only use one defaultSqlBox context
+	 * This is a SqlBoxContext setting, you can set up many contexts in one
+	 * project, but for most projects usually only use one defaultSqlBox context
 	 * 
 	 */
 	public static class DefaultSqlBoxContextBox extends BeanBox {
@@ -36,17 +37,15 @@ public class JBeanBoxConfig {
 	}
 
 	/**
-	 * ==================================================================================================<br/>
-	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to test on MySql <br/>
+	 * ================================================================<br/>
+	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to
+	 * test on MySql <br/>
 	 * This project is already tested on H2, MySql5, Oracle11g, MSSQL2012
-	 * ==================================================================================================<br/>
+	 * ================================================================<br/>
 	 */
-	public static class DataSourceBox extends MySqlDataSourceBox {// change here to test on different database
+	public static class DataSourceBox extends H2DataSourceBox {
 	}
 
-	
-	
-	
 	// H2Database memory database connection URL
 	public static class H2DataSourceBox extends HikariCPBox {
 		{

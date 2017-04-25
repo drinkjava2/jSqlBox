@@ -26,6 +26,8 @@ Add below configuration in pom.xml:
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
+jSQLBox need run on Java8+, in future may consider release Java7 version.
+
 Note: if already used other Spring version in project, need put below lines to force jSqlBox use existed Spring version:
 ```
     <exclusions>

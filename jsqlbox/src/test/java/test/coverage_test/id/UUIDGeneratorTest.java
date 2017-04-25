@@ -16,10 +16,25 @@ public class UUIDGeneratorTest extends TestBase {
 
 	@Test
 	public void testUUID() {
-		User u = new User();
-		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDGenerator.class));
+		User u = new User(); 
+		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDGenerator.class)); 
 		u.insert();
-		String username = Dao.queryForString("select ", u.USERNAME(), " from ", u.table());
+		String username = Dao.queryForString("select ", u.USERNAME(), " from ", u.table()); 
+		Assert.assertEquals(1 , (int) Dao.queryForInteger("select count(*) from ", u.table())); 
+		Assert.assertEquals(32, username.length());
+		for (int i = 0; i < 60; i++)
+			u.insert();
+		Assert.assertEquals(61, (int) Dao.queryForInteger("select count(*) from ", u.table()));
+	}
+	
+	@Test
+	public void testUUIDAsEntityID() {
+		User u = new User(); 
+		u.box().configIdGenerator("userName", BeanBox.getBean(UUIDGenerator.class)); 
+		u.box().configEntityIDs("userName");
+		u.insert();
+		String username = Dao.queryForString("select ", u.USERNAME(), " from ", u.table()); 
+		Assert.assertEquals(1 , (int) Dao.queryForInteger("select count(*) from ", u.table())); 
 		Assert.assertEquals(32, username.length());
 		for (int i = 0; i < 60; i++)
 			u.insert();

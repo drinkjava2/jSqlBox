@@ -49,15 +49,15 @@ jSqlBox虽然最初目的是给Hibernate加一个动态配置,但考虑到实体
 *暂无分库、分表、读写分离等功能，待今后考虑加入。  
 
 ### 如何使用jSqlBox?
-(待上传)在项目的pom.xml中加入:
+在项目的pom.xml中加入:
 ```
 <dependency>
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jsqlbox</artifactId>
-    <version>1.0.0.jre8</version> 
+    <version>1.0.0-SNAPSHOT</version> 
 </dependency>
 ```
-注:目前只有Java8版本,待项目稳定后将同时发布Java7和Java8两个版本,它们的唯一差别是Java7的实体类必须继承于EntityBase类,而Java8的实体类只需要声明实现Entity接口即可。  
+注:目前只支持Java8版本,待项目稳定后将发布Java7和Java8两个版本,它们的唯一差别是Java7的实体类必须继承于EntityBase类,而Java8的实体类只需要声明实现Entity接口即可。  
 
 ### 如何将jSqlBox项目导入Eclipse(对于开发者)?
 1)安装JDK8或以上、 Git bash、 Maven, 在命令行下运行：  
