@@ -904,7 +904,7 @@ public class SqlBox {
 				idColumn.setEntityID(true);
 				if (idColumn.getIdGenerator() == null) {
 					if (idColumn.getPropertyType().equals(String.class))// NOSONAR
-						idColumn.setIdGenerator(this.getSqlBoxContext().getDefaultIDGenerator());
+						idColumn.setIdGenerator(this.getSqlBoxContext().getDefaultUUIDGenerator());
 					else
 						idColumn.setIdGenerator(AutoGenerator.INSTANCE);
 				}

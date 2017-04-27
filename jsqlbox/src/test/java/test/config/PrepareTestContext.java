@@ -22,8 +22,7 @@ public class PrepareTestContext {
 	 */
 	public static void prepareDatasource_setDefaultSqlBoxConetxt_recreateTables() {
 		BeanBox.defaultContext.close();
-		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class));
-		System.out.println(Dao.getDialect());
+		SqlBoxContext.setDefaultSqlBoxContext(BeanBox.getBean(DefaultSqlBoxContextBox.class)); 
 		System.out.println("Drop and re-create a demo \"users\" table for next unit test ...");
 		Dao.executeQuiet("drop table users");
 		Dao.execute(User.ddl(Dao.getDialect()));

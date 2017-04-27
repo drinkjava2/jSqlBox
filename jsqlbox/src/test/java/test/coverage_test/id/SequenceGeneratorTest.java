@@ -19,7 +19,7 @@ import test.config.po.User;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class SequenceGeneratorTest extends TestBase {
+public class SequenceGeneratorTest extends TestBase {//TODO fix this sequence test
 
 	public static class SequenceGeneratorBox extends BeanBox {
 		{
@@ -28,7 +28,7 @@ public class SequenceGeneratorTest extends TestBase {
 	}
 
 	@Test
-	public void insertUser() {
+	public void insertUser() { 
 		if (!Dao.getDialect().isOracleFamily())
 			return;
 		User u = new User();

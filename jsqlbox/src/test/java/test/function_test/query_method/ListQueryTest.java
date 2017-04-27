@@ -27,7 +27,7 @@ public class ListQueryTest extends TestBase {
 		User u = new User();
 		for (int i = 0; i < 5; i++)
 			Dao.cacheSQL("insert into ", u.table(), //
-					" (", u.ID(u.nextID()), //
+					" (", u.ID(u.nextUUID()), //
 					", ", u.USERNAME("Sam"), //
 					", ", u.ADDRESS("BeiJing"), //
 					", ", u.PHONENUMBER(i), //

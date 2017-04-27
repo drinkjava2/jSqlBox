@@ -48,7 +48,7 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private Boolean showSql = false;
+	private Boolean showSql = true;
 	private Boolean formatSql = false;
 	private Boolean showQueryResult = false;
 
@@ -56,7 +56,7 @@ public class SqlBoxContext {
 	 * If an entity has id field and no other Object ID defined, this id field
 	 * will use this defaultIDGenerator
 	 */
-	private IdGenerator defaultIDGenerator = UUIDGenerator.INSTANCE;
+	private IdGenerator defaultUUIDGenerator = UUIDGenerator.INSTANCE;
 
 	public static final String SQLBOX_IDENTITY = "BOX";
 
@@ -190,12 +190,12 @@ public class SqlBoxContext {
 		return this;
 	}
 
-	public IdGenerator getDefaultIDGenerator() {
-		return defaultIDGenerator;
+	public IdGenerator getDefaultUUIDGenerator() {
+		return defaultUUIDGenerator;
 	}
 
-	public void setDefaultIDGenerator(IdGenerator defaultIDGenerator) {
-		this.defaultIDGenerator = defaultIDGenerator;
+	public void setDefaultIDGenerator(IdGenerator defaultUUIDGenerator) {
+		this.defaultUUIDGenerator = defaultUUIDGenerator;
 	}
 
 	/**
@@ -347,6 +347,9 @@ public class SqlBoxContext {
 		return this.getMetaData().getDialect();
 	}
 
+	/**
+	 * Refresh Meta data, note this is not a thread safe method
+	 */
 	public void refreshMetaData() {
 		this.metaData = DBMetaData.getMetaData(this);
 	}

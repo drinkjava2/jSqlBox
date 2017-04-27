@@ -25,28 +25,28 @@ public class JdbcTest extends TestBase {
 	public void tx_jdbcTest() {
 		User u = new User();
 		Dao.execute("insert into " + u.table() //
-				+ " (" + u.ID() + empty(u.nextID())//
+				+ " (" + u.ID() + empty(u.nextUUID())//
 				+ ", " + u.USERNAME() + empty("user1")//
 				+ ", " + u.ADDRESS() + empty("address1")//
 				+ ", " + u.AGE() + empty("1")//
 				+ ") values(?,?,?,?)");
 
 		Dao.execute("insert into ", u.table(), //
-				" (", u.ID(), empty(u.nextID()), //
+				" (", u.ID(), empty(u.nextUUID()), //
 				", ", u.USERNAME(), empty("user2"), //
 				", ", u.ADDRESS(), empty("address2"), //
 				", ", u.AGE(), empty("2"), //
 				") values(?,?,?,?)");
 
 		Dao.execute("insert into ", u.table(), //
-				" (", u.ID(), empty(u.nextID()), //
+				" (", u.ID(), empty(u.nextUUID()), //
 				", ", u.USERNAME(), empty("user3"), //
 				", ", u.ADDRESS(), empty("address2"), //
 				", ", u.AGE(), empty("3"), //
 				") values ", questions());
 
 		Dao.execute("insert into ", u.table(), //
-				" (", u.ID(u.nextID()), //
+				" (", u.ID(u.nextUUID()), //
 				", ", u.USERNAME("user3"), //
 				", ", u.ADDRESS("address2"), //
 				", ", u.AGE("4"), //

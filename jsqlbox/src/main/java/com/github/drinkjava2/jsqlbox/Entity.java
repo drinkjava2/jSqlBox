@@ -32,79 +32,79 @@ public interface Entity {
 	}
 
 	public default <T> T insert() {
-		this.box().insert();
+		box().insert();
 		return (T) this;
 	}
 
 	public default <T> T update() {
-		this.box().update();
+		box().update();
 		return (T) this;
 	}
 
 	public default <T> T delete() {
-		this.box().delete();
+		box().delete();
 		return (T) this;
 	}
 
-	public default Object nextID() {
-		SqlBoxContext context = this.box().getSqlBoxContext();
-		return context.getDefaultIDGenerator().getNextID(context);
+	public default String nextUUID() {
+		SqlBoxContext ctx = box().getSqlBoxContext();
+		return (String) ctx.getDefaultUUIDGenerator().getNextID(ctx);
 	}
 
 	public default String fieldID(String realColumnName) {
-		return this.box().fieldID(realColumnName);
+		return box().fieldID(realColumnName);
 	}
 
 	public default String alias(String realColumnName) {
-		return this.box().aliasByRealColumnName(realColumnName);
+		return box().aliasByRealColumnName(realColumnName);
 	}
 
 	public default String aliasByFieldID(String fieldID) {
-		return this.box().aliasByFieldID(fieldID);
+		return box().aliasByFieldID(fieldID);
 	}
 
 	public default <T> T configAlias(String tableAlias) {
-		this.box().configAlias(tableAlias);
+		box().configAlias(tableAlias);
 		return (T) this;
 	}
 
 	public default String configMapping(String... mappingSql) {
-		return this.box().configMapping(mappingSql);
+		return box().configMapping(mappingSql);
 	}
 
 	public default String automaticQuerySQL() {
-		return this.box().automaticQuerySQL();
+		return box().automaticQuerySQL();
 	}
 
 	public default <T> Set<T> getUniqueNodeSet(Class<?> entityClass) {
-		return (Set<T>) this.box().getUniqueNodeSet(entityClass);
+		return (Set<T>) box().getUniqueNodeSet(entityClass);
 	}
 
 	public default <T> Set<T> getChildNodeSet(Class<?> entityClass, String fieldID) {
-		return this.box().getChildNodeSet(entityClass, fieldID);
+		return box().getChildNodeSet(entityClass, fieldID);
 	}
 
 	public default <T> Set<T> getChildNodeSet(Class<?> entityClass) {
-		return this.box().getChildNodeSet(entityClass, null);
+		return box().getChildNodeSet(entityClass, null);
 	}
 
 	public default <T> T getChildNode(Class<?> entityClass, String fieldID) {
-		return this.box().getChildNode(entityClass, fieldID);
+		return box().getChildNode(entityClass, fieldID);
 	}
 
 	public default <T> T getChildNode(Class<?> entityClass) {
-		return this.box().getChildNode(entityClass, null);
+		return box().getChildNode(entityClass, null);
 	}
 
 	public default <T> T getParentNode(Class<?> entityClass) {
-		return this.box().getParentNode(entityClass);
+		return box().getParentNode(entityClass);
 	}
 
 	public default String pagination(int pageNumber, int pageSize, String... sql) {
 		StringBuilder sb = new StringBuilder();
 		for (String str : sql)
 			sb.append(str);
-		return this.box().getDialect().paginate(pageNumber, pageSize, sb.toString());
+		return box().getDialect().paginate(pageNumber, pageSize, sb.toString());
 	}
 
 }

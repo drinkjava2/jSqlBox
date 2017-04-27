@@ -8,7 +8,7 @@
 <%if ("byUserNameAndAddress".equals(sqlID)) {%>
 
 select * from <%=u.table() %> where
-   <%=u.ADDRESS() %> = <%=q(u.getAddress())%>,
+   <%=u.ADDRESS() %> = <%=q(u.getAddress()+q("3"))%>,
    <%=u.USERNAME() %> = <%=q(u.getUserName())%>
 order by <%=u.ID() %>     
 
