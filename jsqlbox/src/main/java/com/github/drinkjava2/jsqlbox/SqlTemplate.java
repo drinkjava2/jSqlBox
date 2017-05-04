@@ -36,7 +36,7 @@ public class SqlTemplate {
 	public String toString() {
 		String className = this.getClass().getName(); 
 		className = SqlBoxStringUtils.substringAfterLast(className, ".");
-		String templateSqlFile = SqlBoxStringUtils.substringBefore(className, "$") + ".java";
+		String templateSqlFile = SqlBoxStringUtils.substringBefore(className, "$") + ".sql";
 		String sqlPublicStaticClass = SqlBoxStringUtils.substringAfter(className, "$"); 
 		String templateText = getSqlTemplate(templateSqlFile);
 		return extractSqlInComments(templateText, sqlPublicStaticClass);
