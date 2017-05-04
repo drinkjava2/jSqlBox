@@ -43,11 +43,11 @@ public class SqlTemplate {
 	}
 
 	public static String extractSqlInComments(String templateText, String sqlPublicStaticClass) {
-		String classText = StrUtils.substringBetween(templateText, "public " + sqlPublicStaticClass + "(",
+		String classText = StrUtils.substringBetween(templateText, "public static class " + sqlPublicStaticClass,
 				"public static class");
 		if (StrUtils.isEmpty(classText))
 			return (String) SqlBoxException
-					.throwEX("Can not find sql template class started with: public " + sqlPublicStaticClass + "(");
+					.throwEX("Can not find sql template class started with: public static class " + sqlPublicStaticClass);
 		String[] comments = SqlBoxStringUtils.substringsBetween(classText, "/*", "*/");
 		StringBuilder sb = new StringBuilder();
 		for (String str : comments) {

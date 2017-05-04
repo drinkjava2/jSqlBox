@@ -48,7 +48,7 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private Boolean showSql = true;
+	private Boolean showSql = false;
 	private Boolean formatSql = false;
 	private Boolean showQueryResult = false;
 
