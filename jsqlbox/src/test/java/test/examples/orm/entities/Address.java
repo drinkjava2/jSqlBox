@@ -1,8 +1,8 @@
 package test.examples.orm.entities;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
-public class Address implements Entity {
+public class Address extends EntityBase {
 	public static final String CREATE_SQL = "create table address("//
 			+ "id varchar(32),"//
 			+ "addressName varchar(32) ," //

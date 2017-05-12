@@ -2,18 +2,19 @@ package test.config.po;
 
 import java.util.Date;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.SimpleGenerator;
 
 /**
- * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
+ * Entity class is not a POJO, need extends from EntityBase or implements
+ * EntityInterface interface<br/>
  * 
  * @author Yong Zhu
  *
  * @version 1.0.0
  * @since 1.0.0
  */
-public class Order implements Entity {
+public class Order extends EntityBase {
 	public static final String CREATE_SQL = "create table orders("//
 			+ "id varchar(32),"//
 			+ "order_name varchar(50),"//

@@ -3,10 +3,10 @@ package test.examples.ddd;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.q;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 
-public class PODetail implements Entity {
+public class PODetail extends EntityBase {
 	public static final String CREATE_SQL = "create table podetail("//
 			+ "id varchar(32),"//
 			+ "po varchar(32),"//

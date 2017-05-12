@@ -1,17 +1,18 @@
 package test.config.po;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.SimpleGenerator;
 
 /**
- * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
+ * Entity class is not a POJO, need extends from EntityBase or implements
+ * EntityInterface interface<br/>
  * 
  * @author Yong Zhu
  *
  * @version 1.0.0
  * @since 1.0.0
  */
-public class OrderItem implements Entity {
+public class OrderItem extends EntityBase {
 	public static final String CREATE_SQL = "create table orderitem("//
 			+ "id varchar(32),"//
 			+ "item_name varchar(50),"//

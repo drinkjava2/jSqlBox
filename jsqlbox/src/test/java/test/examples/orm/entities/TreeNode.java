@@ -2,9 +2,9 @@ package test.examples.orm.entities;
 
 import java.util.Set;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
-public class TreeNode implements Entity {
+public class TreeNode extends EntityBase {
 	public static final String CREATE_SQL = "create table treetest (  "//
 			+ "id varchar(32),  "//
 			+ "comments varchar(55), "//

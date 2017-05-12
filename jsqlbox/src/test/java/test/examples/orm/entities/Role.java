@@ -1,8 +1,8 @@
 package test.examples.orm.entities;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
-public class Role implements Entity {
+public class Role extends EntityBase {
 	public static final String CREATE_SQL = "create table roles("//
 			+ "id varchar(32),"//
 			+ "roleName varchar(32) )";

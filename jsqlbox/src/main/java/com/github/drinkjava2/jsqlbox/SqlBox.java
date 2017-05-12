@@ -21,6 +21,7 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxException.throwEX;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -799,6 +800,14 @@ public class SqlBox {
 		return sb.toString();
 	}
 
+	private boolean existAnnotation(Class<?> targetClass, Class<?> annotationClass) {
+		Annotation[] annos = targetClass.getDeclaredAnnotations();
+		for (Annotation annotation : annos)
+			if (annotation.getClass().equals(annotationClass))
+				return true;
+		return false;
+	}
+
 	/**
 	 * Return real Columns match to table meta data
 	 */
@@ -830,7 +839,7 @@ public class SqlBox {
 					if (configColumn != null && !configColumn.isEnable())
 						continue;
 					Field field = ReflectionUtils.findField(this.getEntityClass(), fieldID);
-					if (this.getEntityClass().getDeclaredAnnotation(IgnoreField.class) == null// NOSONAR
+					if (!existAnnotation(this.getEntityClass(), IgnoreField.class) // NOSONAR
 							&& field.getAnnotation(IgnoreField.class) == null)
 						log.warn("Field \"" + fieldID + "\" does not match any column in database table \""
 								+ realTableName + "\", to disable this warning message, put an @"

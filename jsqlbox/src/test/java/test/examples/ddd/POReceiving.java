@@ -1,9 +1,9 @@
 package test.examples.ddd;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 
-public class POReceiving implements Entity {
+public class POReceiving extends EntityBase {
 	public static final String CREATE_SQL = "create table poreceiving("//
 			+ "id varchar(32),"//
 			+ "PO varchar(32),"//

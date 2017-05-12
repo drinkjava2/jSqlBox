@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.Dao;
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
 
 import test.TestBase;
@@ -19,7 +19,7 @@ import test.TestBase;
  * @since 1.0.0
  */
 public class IdentityGeneratorTest extends TestBase {
-	public static class UserTemp implements Entity {
+	public static class UserTemp extends EntityBase {
 
 		Integer id;
 		String userName;

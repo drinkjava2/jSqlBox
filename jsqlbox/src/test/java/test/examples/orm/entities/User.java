@@ -2,9 +2,9 @@ package test.examples.orm.entities;
 
 import java.util.Set;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
-public class User implements Entity {
+public class User extends EntityBase {
 	public static final String CREATE_SQL = "create table users("//
 			+ "id varchar(32),"//
 			+ "userName varchar(32) )";
@@ -14,7 +14,7 @@ public class User implements Entity {
 	Address address;
 	Set<Email> emails;
 	{
-		this.box().configAlias("u"); 
+		this.box().configAlias("u");
 	}
 
 	public String getId() {

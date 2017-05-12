@@ -504,7 +504,7 @@ public class SqlBoxContext {
 		String sql = SqlHelper.getAndClearBatchSqlString();
 		List<List<SqlAndParameters>> subSPlist = SqlHelper.getAndClearBatchSQLs();
 		logCachedSQL(subSPlist);
-		for (List<SqlAndParameters> splist : subSPlist) {
+		for (final List<SqlAndParameters> splist : subSPlist) {
 			getJdbc().batchUpdate(sql, new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int i) throws SQLException {

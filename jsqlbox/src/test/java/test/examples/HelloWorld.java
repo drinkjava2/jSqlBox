@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -58,7 +58,7 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class HelloWorld {
 
-	public static class UserDemo implements Entity {
+	public static class UserDemo extends EntityBase {
 
 		public static String ddl(Dialect d) {
 			return "create table " + d.check("UserDemo") //

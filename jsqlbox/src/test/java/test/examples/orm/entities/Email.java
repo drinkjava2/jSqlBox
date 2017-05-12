@@ -1,8 +1,8 @@
 package test.examples.orm.entities;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
-public class Email implements Entity {
+public class Email extends EntityBase {
 	public static final String CREATE_SQL = "create table email("//
 			+ "id varchar(32),"//
 			+ "emailName varchar(32)," //

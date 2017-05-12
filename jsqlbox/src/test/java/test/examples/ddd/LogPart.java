@@ -1,9 +1,9 @@
 package test.examples.ddd;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.UUID25Generator;
 
-public class LogPart implements Entity {
+public class LogPart extends EntityBase {
 	public static final String CREATE_SQL = "create table logpart("//
 			+ "id varchar(32),"//
 			+ "partID varchar(32),"//

@@ -1,8 +1,8 @@
 package test.examples.orm.entities;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
-public class RolePrivilege implements Entity {
+public class RolePrivilege extends EntityBase {
 	public static final String CREATE_SQL = "create table roleprivilege("//
 			+ "rid varchar(32),"//
 			+ "pid varchar(32) )";

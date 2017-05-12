@@ -1,8 +1,8 @@
 package test.examples.orm.entities;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
-public class UserRole implements Entity {
+public class UserRole extends EntityBase {
 	// userrole change to userroletb because userrole is Oracle's keyword
 	public static final String CREATE_SQL = "create table userroletb (" + "userid varchar(32),"//
 			+ "rid varchar(32) )";

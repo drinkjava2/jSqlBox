@@ -35,15 +35,15 @@ jSqlBox虽然最初目的是给Hibernate加一个动态配置,但考虑到实体
 *支持多主键,适于使用了业务多主键的数据库。  
 *(待开发)一级缓存与脏检查,与Hibernate类似,提供以ID为主键的行级缓存,一级缓存在跨越多个方法的同一事务中有效,对PO的存取不再重复访问数据库。与Hibernate的区别在于jSqlBox一级缓存比较简单,只缓存实体,包括已修改过的,不缓存CRUD命令。  
 *(待开发)二级缓存和查询缓存,类似于Hibernate的缓存设计,可配置第三方缓存工具如EHcache等。  
-*跨数据库的分页SQL和DDL支持。采用了jDialects项目，支持包括Hibernate的所有方言在内的70多种数据库方言。jDialects是一个独立的、从Hibernate中抽取的SQL方言工具，可以使用在任何用到了原生SQL和JDBC的场合。
-*目前jSqlBox内核建立在JDBCTemplate基础上，事务借用Spring的声明式事务。一些特殊的需求可以通过直接调用内核的JdbcTemplate来实现,内核建立在JdbcTemplate上是因为它的声明式事务与JdbcTemplate结合紧密,目前找不到其它更方便、好用、成熟的类似Spring的声明式事务。  
-*(正在考虑中)内核考虑采用纯JDBC/DbUtils/JDBCTemplate三种内核模式，分别应用于不同的场合。  
-*不使用代理类，不会有代理类造成的希奇古怪的问题。没有懒加载，没有OpenSessionInView问题, PO类可以直接充当VO传递到View层,PO在View层事务已关闭情况下,依然可以继续存取数据库(工作在自动提交模式,但通常只读)。  
+*跨数据库的分页SQL和DDL支持。采用了jDialects项目，支持包括Hibernate的所有方言在内的70多种数据库方言。jDialects是一个独立的、从Hibernate中抽取的SQL方言工具，可以使用在任何用到了原生SQL的Java项目。  
+*目前jSqlBox内核建立在JDBCTemplate基础上，事务借用Spring的声明式事务。一些特殊的需求可以通过直接调用内核的JdbcTemplate来实现,内核建立在JdbcTemplate上是因为它的声明式事务与JdbcTemplate结合紧密,使用起来比较方便，而且节省了作者大量构建底层架构的时间。  
+*(正在考虑中)内核考虑采用纯JDBC/JDBCTemplate两种内核模式，分别应用于手机和服务器端两种不同的开发场合。  
+*不使用代理类，不会有代理类造成的希奇古怪的问题。没有懒加载，没有OpenSessionInView问题，PO类可以直接充当VO传递到View层,PO在View层事务已关闭情况下,依然可以继续存取数据库(工作在自动提交模式,但通常只读)。  
 *提供简单的O-R映射,有一对一,一对多,树结构三种映射类型,多对多可由两个一对多组合成。支持固定、动态关联和越级自动查找关联功能。  
-*(开发计划)考虑到有人喜欢将SQL集中放在一起管理（尤其是很长的SQL)， 将提供简单的模板功能演示。jSqlBox是建立在执行原生SQL基础上，没有发明新的SQL语法，所以和使用模板不冲突，目前用什么模板还未确定。(正在研究是否可以直接用JSP来当SQL模板，这样就能直接利用某些IDE对JSP的查错和重构支持)  
+*(正在考虑中)关于用模板来集中管理多行SQL。jSqlBox是建立在执行原生SQL基础上，没有发明新的SQL语法，所以和使用模板不冲突，考虑加入一种模板的演示。另外用纯Java方式也可以实现多行SQL管理，详见文章：https://my.oschina.net/drinkjava2/blog/892309  
 
 ### jSqlBox缺点:
-*比较新,缺少足够测试、文档、缺少开发和试用者(欢迎在个人项目中试用或加入开发组,任何问题和建议都会促使它不断完善)。  
+*比较新,缓存功能尚未开发完成，缺少足够测试、文档，缺少开发和试用者(欢迎在个人项目中试用,任何问题和建议都会促使它不断完善)。  
 *实体映射比较简单,不支持多重嵌套映射和懒加载;只支持单向从数据库读取并装配成对象树,不支持对象树更新到数据库,必须手工进行处理。  
 *暂不支持Blob,Clob类型的包装,待今后版本加入,目前可利用内核的JDBCTemplate来进行Blob,Clob字段的存取。  
 *暂无分库、分表、读写分离等功能，待今后考虑加入。  
@@ -54,10 +54,16 @@ jSqlBox虽然最初目的是给Hibernate加一个动态配置,但考虑到实体
 <dependency>
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jsqlbox</artifactId>
-    <version>1.0.0-SNAPSHOT</version> 
+    <version>1.0.0-JRE7-SNAPSHOT</version> 
+</dependency>
+或
+<dependency>
+    <groupId>com.github.drinkjava2</groupId>
+    <artifactId>jsqlbox</artifactId>
+    <version>1.0.0-JRE8-SNAPSHOT</version> 
 </dependency>
 ```
-注:目前只支持Java8版本,待项目稳定后将发布Java7和Java8两个版本,它们的唯一差别是Java7的实体类必须继承于EntityBase类,而Java8的实体类只需要声明实现Entity接口即可。  
+以上分别对应Java7和Java8版本，它们的唯一差别是Java7的实体类必须继承于EntityBase类,而Java8的实体类只需要声明实现Entity接口即可。
 
 ### 如何将jSqlBox项目导入Eclipse(对于开发者)?
 1)安装JDK8或以上、 Git bash、 Maven, 在命令行下运行：  
@@ -135,7 +141,7 @@ jSqlBox快速入门：
             ", age)", empty("60"), //  
              SqlHelper.questionMarks());  
 ```
-其优点在于要被赋值的字段和实际参数写在同一行上,便于维护，这一点很重要！如果字段很多的话(>10行),就能看出好处了,直接删除添加一行就好了,不用担心删除添加错位置,问号和参数不配对，普通SQL维护困难主要是两个原因:1）SQL写在一行，添加和删除字段时不方便 2)参数的代入和问号的匹配要非常小心，不能搞串了，即使使用命名参数来避免问与的问题，也是一种比较繁琐的做法。
+其优点在于要被赋值的字段和实际参数写在同一行上,便于维护，这一点很重要！如果字段很多的话(>10行),就能看出好处了,直接删除添加一行就好了,不用担心删除添加错位置,问号和参数不配对，普通SQL维护困难主要是两个原因:1）SQL写在一行，添加和删除字段时不方便 2)参数的代入和问号的匹配要非常小心，不能搞串了，即使使用命名参数，也是一种比较繁琐的做法，因为命名参数不支持重构。  
 上面示例的empty()方法返回一个空字符,q方法返回一个问号,参数通过Threadlocal暂存传给Dao的execute方法使用,更多介绍可见贴子: http://www.iteye.com/topic/1145415
 
 示例 6 - 快速插入：批量插入10000行数据,耗时~5秒,同样sql自动转为preparedStatement(防止Sql注入)
@@ -163,14 +169,12 @@ jSqlBox快速入门：
 ```
 以上三个示例5、6、7不属于jSQLBox的关键特性，只是本人推荐的一种编程风格，使用了其它持久层工具的项目也可以借签。
 
-示例 8 - 事务支持, 直接利用Spring的事明式事务,详见test\function_test\transaction目录下jBeanBox和Spring的两种配置示例
+示例 8 - 事务支持, 直接利用Spring对JDBCTemplate的事务支持。在test\function_test\transaction目录下给出了jBeanBox和Spring的两种配置示例
 ```
 	@AopAround(SpringTxInterceptorBox.class) //方法将包装在事务中
 	public void insertUser() {
 		User u = new User(); 
 		u.setUserName("User2");
-		u.setAddress("Address2");		 
-		u.setAlive(true); 
 		u.insert(); 
 	} 
 
@@ -181,21 +185,19 @@ jSqlBox快速入门：
 
 ```
 
-示例 9 来看一下实体类的写法,没有JPA注解,不继承任何基类,但必须声明实现Entity接口(适用于Java8), 声明实现一个接口在Java8中是一种低侵入,因为不用实做任何方法,直接使用Java8接口的默认方法即可。
+示例 9 来看一下实体类的写法,没有JPA注解,不继承任何基类,但必须声明实现Entity接口(仅适用于Java8), 声明实现一个接口在Java8中是一种低侵入,因为不用实做任何方法,直接使用Java8接口的默认方法即可。
 ```
 public class User implements Entity{ 
-	private String id;//取名为"id"的字段默认即为实体ID
+	private String id;//取名为"id"的字段,默认UUID类型
 	private String userName;
 	private String phoneNumber;
-	private String address;
-	private Integer age;
-	private Boolean active;
+	private String address; 
 	//Getter & Setter 略
 
 	{
 	//this.box().configEntityIDs("id");//这句代码可以省略,因为"id"字段默认即为实体ID
 	//configEntityIDs方法可以有多个参数,用于多主键场合,详见LoadTest.java测试示例
-	this.box().configIdGenerator("id", UUIDGenerator.INSTANCE));//配置ID为UUID类型
+	//this.box().configIdGenerator("id", BeanBox.getBean(SequenceGeneratorBox.class));//配置ID为Sequence类型
 	}
 	
 	//以下方法不是必须的,但是jSqlBox建议具有,以实现对SQL重构的支持:
@@ -213,17 +215,10 @@ public class User implements Entity{
 
 	public String ADDRESS() {
 		return box().getColumnName("address");
-	}
-
-	public String AGE() {
-		return box().getColumnName("age");
-	}
-
-	public String ACTIVE() {
-		return box().getColumnName("active");
-	}
+	} 
 }
 ```
+如果在Java7中，上例的类型声明要写成: public class User extends EntityBase  
 jSqlBox目前有9种主键生成策略, 并可方便地自定义主键生成类,详见单元测试及源码的id子目录。  在示例7中用到了u.table()、u.ADDRESS()之类的方法,这就是jSqlBox支持Sql重构的秘密,每个实体类的每个属性都有一个对应的大写的同名方法,在SQL中调用这个方法而不是直接写数据库表的字段名,通过这种方式将数据库字段与Java方法耦合,从而实现SQL支持重构。这种大写方法不是强制的,可用也可以不用,如果不在乎SQL是否支持重构,可以不写。
 
 示例 10 - Box配置类: User类数据库的表名和字段是可配置的,只要在User类同目录下放一个名为UserBox的类即可,配置类支持继承。配置实例可在运行期调用box()方法获得并更改,这与jBeanBox项目类似。
@@ -232,9 +227,9 @@ public class UserBox extends SqlBox {
 	{
 		this.setBeanClass(User2.class);
 		this.configTableName("usertable2");
-		this.configColumnName(User.UserName, "User_Name2");
-		this.configColumnName(User.Address, "Address2");
-		this.configColumnName(User.PhoneNumber, "Phone2");
+		this.configColumnName("userName", "User_Name2");
+		this.configColumnName("address", "Address2");
+		this.configColumnName("phoneNumber", "Phone2");
 	}
 }
 ```
@@ -278,7 +273,7 @@ User与Email的关系为一对多,bind()方法有参数,表示这是一个固定
 		RolePrivilege rp = new RolePrivilege();
 		Dao.getDefaultContext().setShowSql(true);//SQL日志输出
 		List<User> users = Dao.queryForEntityList(User.class,
-				u.pagination(1, 10, //
+				u.paginate(1, 10, //
 						select(), u.all(), ",", ur.all(), ",", r.all(), ",", rp.all(), ",", p.all(), from(), u.table(), //
 						" left join ", ur.table(), " on ", oneToMany(), u.ID(), "=", ur.UID(), bind(), //
 						" left join ", r.table(), " on ", oneToMany(), r.ID(), "=", ur.RID(), bind(), //
@@ -297,7 +292,7 @@ User与Email的关系为一对多,bind()方法有参数,表示这是一个固定
 ```
 多对多关联是用两个一对多来组合完成,如上例,User与Role是多对多关系,Role与Privilege是多对多关系,UserRole和RolePrivilege是两个中间表,用来连接多对多关系。  
 getUniqueNodeSet(target.class)方法是一个通用的获取与当前实体关联的所有子对象或父对象列表的方法,可以在内存对象图中跨级别搜索到所有关联的目标对象。有了这个方法,可以轻易地实现对象图中无限层级关系的一对多、多对多关系查找,但使用这个方法的限制是路径和目标类必须在整个对象图中是唯一的,否则必须手工给出查找路径。  
-这个示列中也演示了分页方法pagination()的使用，它可以实现通用的跨数据库的分页。  
+这个示列中也演示了分页方法paginate()的使用，它可以实现通用的跨数据库的分页。  
 示例11到示例13的对象关系示意图如下：![image](orm.png)  
  
 示例 14 - 树结构关联映射
@@ -324,10 +319,10 @@ jSqlBox支持将Adjacency List模式存储的树结构SQL查询结果拼成内�
 		TreeNode c = Dao.load(TreeNode.class, "C");
 		c.configAlias("c");
 		c.configMapping(tree(), use(c.ID(), c.PID()), bind());
-		List<TreeNode> c_childtree = loadChildTree(c);
+		List<TreeNode> c_childtree = loadChildTree(c);//一条SQL查询出整个C子树
 		TreeNode croot = c_childtree.get(0);
 		Assert.assertEquals("C", croot.getId());
-		printUnbindedChildNode(croot);//递归打印整个树节点
+		printUnbindedChildNode(croot);//递归打印出C子树所有节点
 		
 		private List<TreeNode> loadChildTree(TreeNode n) {//一条SQL查询出整个子树
 		List<TreeNode> childtree = Dao.queryForEntityList(TreeNode.class, select(), n.all(), from(), n.table(),
@@ -338,7 +333,7 @@ jSqlBox支持将Adjacency List模式存储的树结构SQL查询结果拼成内�
 ```
 
 示例 15 - 缓存(正在开发中)
-缓存为持久层工具的一个重点和难点,有些功能如版本检查、脏检查都与缓存有关,要考虑的比较多,如何设计的即简单又实用, 很有难度。初步设想是简单的实体缓存和脏检查要有,查询缓存要有,可配置的第三方缓存也要有。
+缓存为持久层工具的一个重点和难点,有些功能如版本检查、脏检查都与缓存有关,要考虑的比较多,如何设计的即简单又实用, 很有难度。初步设想是简单的实体缓存要有,查询缓存和可配置的第三方缓存也要有。
 	
 作为一个只有30个类的小项目，以上即为jSqlBox目前所有文档，相信您对这个项目的设计思路已经有了大概的了解，如有不明之处，请查看jSqlBox的测试用例或源码。	
 最后欢迎大家试用jSqlBox或提出建议,或加入开发组。

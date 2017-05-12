@@ -1,7 +1,7 @@
 package test.config.po;
 
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 
 /**
  * User class is not a POJO, need extends from EntityBase(For JAVA7-) or
@@ -16,7 +16,7 @@ import com.github.drinkjava2.jsqlbox.Entity;
  * @since 1.0.0
  */
 
-public class User implements Entity {
+public class User extends EntityBase {
 	private String id;
 	private String userName;
 	private String phoneNumber;

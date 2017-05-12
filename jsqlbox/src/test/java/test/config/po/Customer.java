@@ -2,19 +2,20 @@ package test.config.po;
 
 import java.util.List;
 
-import com.github.drinkjava2.jsqlbox.Entity;
+import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.IgnoreField;
 import com.github.drinkjava2.jsqlbox.id.SimpleGenerator;
 
 /**
- * Entity class is not a POJO, need extends from EntityBase or implements EntityInterface interface<br/>
+ * Entity class is not a POJO, need extends from EntityBase or implements
+ * EntityInterface interface<br/>
  * 
  * @author Yong Zhu
  *
  * @version 1.0.0
  * @since 1.0.0
  */
-public class Customer implements Entity {
+public class Customer extends EntityBase {
 	public static final String CREATE_SQL = "create table customer("//
 			+ "id varchar(32),"//
 			+ "customer_name varchar(50),"//

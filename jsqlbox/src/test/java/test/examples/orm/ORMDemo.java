@@ -200,7 +200,7 @@ public class ORMDemo extends TestBase {
 		RolePrivilege rp = new RolePrivilege();
 		Dao.getDefaultContext().setShowSql(true);
 		List<User> users = Dao.queryForEntityList(User.class,
-				u.pagination(1, 10, //
+				u.paginate(1, 10, //
 						select(), u.all(), ",", ur.all(), ",", r.all(), ",", rp.all(), ",", p.all(), from(), u.table(), //
 						" left join ", ur.table(), " on ", oneToMany(), u.ID(), "=", ur.UID(), bind(), //
 						" left join ", r.table(), " on ", oneToMany(), r.ID(), "=", ur.RID(), bind(), //
