@@ -26,7 +26,7 @@ public class ConditionQueryTest extends TestBase {
 		User u = new User();
 		String sql = "Select count(*) from " + u.table() + " where ";
 		if (condition == 1 || condition == 3)
-			sql = sql + u.USERNAME() + "=" + q(parameter) + " and " + u.ADDRESS() + "=" + q("Address1");
+			sql = sql + u.USERNAME() + "=" + q(parameter.toString()) + " and " + u.ADDRESS() + "=" + q("Address1");
 
 		if (condition == 2)
 			sql = sql + u.USERNAME() + "=" + q(parameter);

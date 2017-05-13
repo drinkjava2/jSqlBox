@@ -54,7 +54,7 @@ public class EntityBase implements Entity {
 	@Override
 	public String nextUUID() {
 		SqlBoxContext ctx = box().getSqlBoxContext();
-		return (String) ctx.getDefaultUUIDGenerator().getNextID(ctx);
+		return (String) ctx.getDefaultUUIDGenerator().getNextID(null);
 	}
 
 	@Override

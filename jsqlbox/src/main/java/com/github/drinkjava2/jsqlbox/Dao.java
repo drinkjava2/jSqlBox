@@ -98,4 +98,7 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext().queryForEntityList(clazz, sql);
 	}
 
+	public static String nextUUID() {
+		return (String) SqlBoxContext.getDefaultSqlBoxContext().getDefaultUUIDGenerator().getNextID(null);
+	}
 }

@@ -37,9 +37,9 @@ public class SqlHelper {
 	/**
 	 * For store sql and parameters in threadLocal
 	 */
-	private static ThreadLocal<ArrayList<String>> sqlCache = new ThreadLocal<ArrayList<String>>() {
+	private static ThreadLocal<ArrayList<Object>> sqlCache = new ThreadLocal<ArrayList<Object>>() {
 		@Override
-		protected ArrayList<String> initialValue() {
+		protected ArrayList<Object> initialValue() {
 			return new ArrayList<>();
 		}
 	};
@@ -95,6 +95,13 @@ public class SqlHelper {
 	};
 
 	private SqlHelper() {// Disable default public constructor
+	}
+
+	/**
+	 * Get SqlCache in Threadlocal
+	 */
+	public static ThreadLocal<ArrayList<Object>> getSqlCache() {
+		return sqlCache;
 	}
 
 	/**
@@ -155,7 +162,7 @@ public class SqlHelper {
 	public static String q(Object... parameters) {
 		StringBuilder result = new StringBuilder("");
 		for (int i = 0; i < parameters.length; i++) {
-			sqlCache.get().add("" + parameters[i]);
+			sqlCache.get().add(parameters[i]);
 			if (i != parameters.length - 1)
 				result.append("?,");
 			else
@@ -165,12 +172,30 @@ public class SqlHelper {
 	}
 
 	/**
-	 * Return a empty string and cache parameters in thread local for SQL use
+	 * Clear thread cache, then start cache parameters in thread local and
+	 * return a "?" string
+	 */
+	public static String q0(Object... parameters) {
+		sqlCache.get().clear();
+		return q(parameters);
+	}
+
+	/**
+	 * Return a empty "" string and cache parameters in thread local for SQL use
 	 */
 	public static String empty(Object... parameters) {
 		for (Object o : parameters)
-			sqlCache.get().add("" + o);
+			sqlCache.get().add(o);
 		return "";
+	}
+
+	/**
+	 * Clear thread cache, then start cache parameters in thread local and
+	 * return a empty "" string
+	 */
+	public static String empty0(Object... parameters) {
+		sqlCache.get().clear();
+		return empty(parameters);
 	}
 
 	/**
@@ -259,8 +284,8 @@ public class SqlHelper {
 			String sql = sb.toString();
 			sp.setSql(sql);
 
-			ArrayList<String> list = sqlCache.get();
-			sp.setParameters(list.toArray(new String[list.size()]));
+			ArrayList<Object> list = sqlCache.get();
+			sp.setParameters(list.toArray(new Object[list.size()]));
 
 			// get the mapping config in SQL
 			List<Mapping> mappings = new ArrayList<>(MappingHelper.getMappingListCache());
