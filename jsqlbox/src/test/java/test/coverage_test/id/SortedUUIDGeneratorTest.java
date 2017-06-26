@@ -11,7 +11,7 @@ import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class SortedUUIDGeneratorTest extends TestBase {
 

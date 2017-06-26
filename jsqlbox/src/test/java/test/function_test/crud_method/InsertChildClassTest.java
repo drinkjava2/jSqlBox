@@ -7,11 +7,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.Table;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.config.PrepareTestContext;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class InsertChildClassTest {
 
@@ -19,8 +19,8 @@ public class InsertChildClassTest {
 	public void setup() {
 		System.out.println("=============Testing " + this.getClass().getName() + "================");
 		PrepareTestContext.prepareDatasource_setDefaultSqlBoxConetxt_recreateTables();
-		Dao.executeQuiet("drop table user2");
-		Dao.execute(User2.ddl(Dao.getDialect()));
+		Dao.executeManyQuiet(Dao.getDialect().toDropDDL(User2.model()));
+		Dao.executeMany(Dao.getDialect().toCreateDDL(User2.model()));
 		Dao.refreshMetaData();
 	}
 
@@ -36,14 +36,13 @@ public class InsertChildClassTest {
 			// this.box().configEnable("age", false);
 		}
 
-		public static String ddl(Dialect d) {
-			return "create table user2 " //
-					+ "(id " + d.VARCHAR(32) //
-					+ ", username " + d.VARCHAR(32) //
-					+ ", Phone_Number " + d.VARCHAR(30) //
-					+ ", Address  " + d.VARCHAR(32) //
-					+ ", constraint users2_pk primary key (id)" //
-					+ ")" + d.engine();
+		public static Table model() {
+			Table t = new Table("user2");
+			t.column("id").VARCHAR(32).pkey();
+			t.column("username").VARCHAR(32);
+			t.column("Phone_Number").VARCHAR(32);
+			t.column("Address").VARCHAR(32);
+			return t;
 		}
 	}
 

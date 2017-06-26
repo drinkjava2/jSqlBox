@@ -15,8 +15,8 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import static com.github.drinkjava2.jsqlbox.SqlHelper.empty;
 
-import test.config.JBeanBoxConfig.DataSourceBox;
-import test.config.po.User;
+import test.config.DataSourceConfig.DataSourceBox;
+import test.config.entity.User;
 
 /**
  * This is to test use Spring's TransactionTemplate to control transaction
@@ -34,8 +34,8 @@ public class SpringTransactionTemplateTest {
 		DataSource ds = BeanBox.getBean(DataSourceBox.class);
 		SqlBoxContext.setDefaultSqlBoxContext(new SqlBoxContext(ds));
 
-		Dao.executeQuiet("drop table users");// auto commit mode
-		Dao.execute(User.ddl(Dao.getDialect()));// auto commit mode
+		Dao.executeManyQuiet(Dao.getDialect().toDropDDL(User.model()));
+		Dao.executeMany(Dao.getDialect().toCreateDDL(User.model()));
 		Dao.refreshMetaData();
 
 		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);

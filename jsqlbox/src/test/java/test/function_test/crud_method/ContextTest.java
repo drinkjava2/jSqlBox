@@ -9,14 +9,15 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.Table;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 import test.TestBase;
-import test.config.JBeanBoxConfig.DataSourceBox;
-import test.config.po.User;
+import test.config.DataSourceConfig.DataSourceBox;
+import test.config.entity.User;
 
 /**
  * This is to test jSqlBoxContext class
@@ -92,15 +93,15 @@ public class ContextTest extends TestBase {
 		u.setAddress("BeiJing");
 		u.insert();
 
-		Dao.executeQuiet("drop table users2");
 		Dialect d = Dao.getDialect();
-		String ddl = "create table users2 " //
-				+ "(" + d.VARCHAR("id", 32) //
-				+ "," + d.VARCHAR("username", 50) //
-				+ "," + d.VARCHAR("newAddress", 50) //
-				+ "," + d.INTEGER("Age") //
-				+ ")" + d.engine();
-		Dao.execute(ddl);
+		Table t = new Table("users2");
+		t.column("id").VARCHAR(32);
+		t.column("username").VARCHAR(50);
+		t.column("newAddress").VARCHAR(50);
+		t.column("Age").INTEGER();
+
+		Dao.executeManyQuiet(d.toDropDDL(t));
+		Dao.executeMany(d.toCreateDDL(t));
 		Dao.refreshMetaData();
 
 		SqlBoxContext ctx = BeanBox.getBean(AnotherSqlBoxContextBox.class);

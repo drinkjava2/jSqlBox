@@ -1,6 +1,8 @@
 package com.github.drinkjava2.jsqlbox.id;
 
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * Define a Sequence type ID generator, supported by Oracle, postgreSQL, DB2
@@ -25,7 +27,10 @@ public class SequenceGenerator implements IdGenerator {
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		return ctx.getJdbc().queryForObject("select " + sequenceName + ".nextval from dual", Integer.class);
+		SqlBoxException.assureNotEmpty(sequenceName, "sequenceName can not be empty");
+		String sequenctSQL = ctx.getDialect().getDdlFeatures().getSequenceNextValString();
+		sequenctSQL = StrUtils.replace(sequenctSQL, "_SEQNAME", sequenceName);
+		return ctx.getJdbc().queryForObject(sequenctSQL, Integer.class);
 	}
 
 	// Getter & Setters below

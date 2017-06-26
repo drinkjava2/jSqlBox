@@ -15,7 +15,7 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class SqlBoxTest extends TestBase {
 

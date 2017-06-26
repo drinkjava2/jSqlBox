@@ -1,6 +1,6 @@
-package test.config.po;
+package test.config.entity;
 
-import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.Table;
 import com.github.drinkjava2.jsqlbox.EntityBase;
 
 /**
@@ -24,15 +24,15 @@ public class User extends EntityBase {
 	private Integer age;
 	private Boolean active;
 
-	public static String ddl(Dialect d) {
-		return "create table " + d.check("users") //
-				+ "(" + d.VARCHAR("id", 32) //
-				+ "," + d.VARCHAR("username", 50) //
-				+ "," + d.VARCHAR("Phone_Number", 50) //
-				+ "," + d.VARCHAR("Address", 50) //
-				+ "," + d.BOOLEAN("active") //
-				+ "," + d.INTEGER("Age") //
-				+ ")" + d.engine();
+	public static Table model() {
+		Table t = new Table("users");
+		t.column("id").VARCHAR(32);
+		t.column("username").VARCHAR(50).defaultValue("'aaa'");
+		t.column("Phone_Number").VARCHAR(50).index("IDX_PhoneNM");
+		t.column("Address").VARCHAR(50).index();
+		t.column("active").BOOLEAN();
+		t.column("Age").INTEGER().check("Age > 0");
+		return t;
 	}
 
 	public Boolean getActive() {

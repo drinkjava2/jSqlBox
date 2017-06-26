@@ -11,7 +11,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
 import test.config.PrepareTestContext;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class BatchInsertTest extends TestBase {
 

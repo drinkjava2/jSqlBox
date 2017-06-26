@@ -10,7 +10,7 @@ import com.github.drinkjava2.jsqlbox.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class UUIDGeneratorTest extends TestBase {
 

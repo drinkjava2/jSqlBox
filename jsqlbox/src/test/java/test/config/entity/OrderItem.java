@@ -1,4 +1,4 @@
-package test.config.po;
+package test.config.entity;
 
 import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.SimpleGenerator;

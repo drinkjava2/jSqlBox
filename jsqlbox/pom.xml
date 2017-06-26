@@ -60,16 +60,25 @@
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
 		
-		<!--Already tested on Spring 4.3.2, 4.3.6, 4.2.7 -->
-        <spring.version>4.3.7</spring.version>
+		<!--Already tested on Spring  4.2.7 to 4.3.7 -->
+        <spring.version>4.3.9</spring.version>
     </properties>
 
+   <!-- To download SNAPSHOT jars by Maven, it's necessary to add this snapshots repository  -->
+   <repositories>	 
+     <repository>
+       <id>oss</id>
+       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+     </repository>
+   </repositories>
+   
+   
  <dependencies>   
     <!-- jSqlBox depends on jDialects to create pagination SQL and DDL -->
   	<dependency>  
 		<groupId>com.github.drinkjava2</groupId>  
 		<artifactId>jdialects</artifactId>  
-		<version>1.0.1</version>  
+		<version>1.0.3-SNAPSHOT</version>  
 	</dependency>
  
 	<!-- jSqlBox depends on Spring JdbcTemplate, I hope in future can kick JdbcTemplate out to avoid dependency of Spring -->

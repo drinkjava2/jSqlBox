@@ -12,8 +12,8 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
-import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
-import test.config.po.User;
+import test.config.DataSourceConfig.SpringTxInterceptorBox;
+import test.config.entity.User;
 
 public class JdbcTest extends TestBase {
 

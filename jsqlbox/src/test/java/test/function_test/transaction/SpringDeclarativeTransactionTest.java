@@ -16,8 +16,8 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
-import test.config.JBeanBoxConfig.DataSourceBox;
-import test.config.po.User;
+import test.config.DataSourceConfig.DataSourceBox;
+import test.config.entity.User;
 
 /**
  * This is to test use Spring's Declarative Transaction to control transaction
@@ -80,8 +80,8 @@ public class SpringDeclarativeTransactionTest {
 		AnnotationConfigApplicationContext springCTX = new AnnotationConfigApplicationContext(SpringConfig.class);
 		SqlBoxContext.setDefaultSqlBoxContext(springCTX.getBean("sqlBoxCtxBean"));
 
-		Dao.executeQuiet("drop table users");// auto commit mode
-		Dao.execute(User.ddl(Dao.getDialect()));// auto commit mode
+		Dao.executeManyQuiet(Dao.getDialect().toDropDDL(User.model()));
+		Dao.executeMany(Dao.getDialect().toCreateDDL(User.model()));
 		Dao.refreshMetaData();
 
 		SpringDeclarativeTransactionTest tester = springCTX.getBean(SpringDeclarativeTransactionTest.class);

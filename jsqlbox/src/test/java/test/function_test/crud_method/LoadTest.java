@@ -11,7 +11,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 /**
  * This is for test load method, and test composite Entiity ID

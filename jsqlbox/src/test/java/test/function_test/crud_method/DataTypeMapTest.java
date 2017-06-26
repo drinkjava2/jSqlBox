@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.Table;
 import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
@@ -17,23 +18,26 @@ public class DataTypeMapTest extends TestBase {
 
 	@Test
 	public void insertForMysqlOnly() {
+		Table t = new Table("datasample");
+		t.column("id").VARBINARY(32);
+		t.column("integerField").INTEGER();
+		t.column("longField").LONG();
+		t.column("shortField").SHORT();
+		t.column("floatField").FLOAT();
+		t.column("doubleField").DOUBLE();
+		t.column("bigDecimalField").BIGDECIMAL(10, 2);
+		t.column("byteField").TINYINT();
+		t.column("booleanField").BOOLEAN();
+		t.column("dateField").DATE();
+		t.column("timeField").TIME();
+		t.column("timestampField").TIMESTAMP();
+		t.column("stringField").VARCHAR(10);
+		t.engineTail(" DEFAULT CHARSET=utf8");
+
 		Dao.executeQuiet("drop table datasample");
 		Dialect d = Dao.getDialect();
-		Dao.execute("create table " + d.check("datasample")//
-				, " (", d.VARCHAR("id", 32)//
-				, ",", d.INTEGER("integerField")//
-				, ",", d.BIGINT("longField")//
-				, ",", d.SMALLINT("shortField")//
-				, ",", d.FLOAT("floatField")//
-				, ",", d.DOUBLE("doubleField")//
-				, ",", d.BIGDECIMAL("bigDecimalField", 10, 2)//
-				, ",", d.TINYINT("byteField")//
-				, ",", d.BOOLEAN("booleanField")//
-				, ",", d.DATE("dateField")//
-				, ",", d.TIME("timeField")//
-				, ",", d.TIMESTAMP("timestampField")//
-				, ",", d.VARCHAR("stringField", 10)//
-				, ")", d.engine(" DEFAULT CHARSET=utf8"));
+		Dao.executeManyQuiet(d.toDropDDL(t));
+		Dao.execute(d.toCreateDDL(t));
 		Dao.refreshMetaData();
 		DataSample dt = new DataSample();
 		dt.box().configIdGenerator("id", UUIDGenerator.INSTANCE);

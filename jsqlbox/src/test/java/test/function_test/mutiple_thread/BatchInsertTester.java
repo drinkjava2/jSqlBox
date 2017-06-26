@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 
 import test.config.PrepareTestContext;
-import test.config.po.User;
+import test.config.entity.User;
 import test.function_test.jdbc.BatchInsertTest;
 
 /**

@@ -22,9 +22,9 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
 import test.TestBase;
-import test.config.po.Customer;
-import test.config.po.Order;
-import test.config.po.OrderItem;
+import test.config.entity.Customer;
+import test.config.entity.Order;
+import test.config.entity.OrderItem;
 
 public class SqlMappingTest extends TestBase {
 

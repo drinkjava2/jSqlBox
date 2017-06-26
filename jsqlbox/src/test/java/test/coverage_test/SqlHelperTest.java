@@ -9,7 +9,7 @@ import com.github.drinkjava2.jsqlbox.SqlAndParameters;
 import com.github.drinkjava2.jsqlbox.SqlHelper;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class SqlHelperTest extends TestBase {
 

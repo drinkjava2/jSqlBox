@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.Table;
 import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
@@ -59,14 +60,12 @@ import com.zaxxer.hikari.HikariDataSource;
 public class HelloWorld {
 
 	public static class UserDemo extends EntityBase {
-
-		public static String ddl(Dialect d) {
-			return "create table " + d.check("UserDemo") //
-					+ "(" + d.VARCHAR("id", 32) //
-					+ "," + d.VARCHAR("user_name", 50) //
-					+ "," + d.VARCHAR("ADDRESS", 50) //
-					+ ", constraint users_pk primary key (id)" //
-					+ ")" + d.engine();
+		public static Table model() {
+			Table t = new Table("UserDemo");
+			t.column("id").VARCHAR(32).pkey();
+			t.column("user_name").VARCHAR(32);
+			t.column("ADDRESS").VARCHAR(32);
+			return t;
 		}
 
 		String id;
@@ -110,8 +109,9 @@ public class HelloWorld {
 		ds.setMaximumPoolSize(3);
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		ctx.executeQuiet("drop table users");
-		ctx.execute(UserDemo.ddl(ctx.getDialect()));
+		Dialect d = ctx.getDialect();
+		ctx.executeQuiet(d.toDropDDL(UserDemo.model()));
+		ctx.execute(d.toCreateDDL(UserDemo.model()));
 		ctx.refreshMetaData();
 
 		UserDemo u = ctx.createEntity(UserDemo.class);

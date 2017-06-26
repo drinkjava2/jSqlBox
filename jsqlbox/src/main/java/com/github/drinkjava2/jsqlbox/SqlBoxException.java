@@ -18,6 +18,8 @@ package com.github.drinkjava2.jsqlbox;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import com.github.drinkjava2.jdialects.DialectException;
+
 /**
  * @author Yong Zhu
  * @version 1.0.0
@@ -37,7 +39,8 @@ public class SqlBoxException extends RuntimeException {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
+	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only
+	 * place throw Exception in this project
 	 */
 	public static Object throwEX(Exception e, String errorMsg) {
 		if (e != null) {
@@ -51,7 +54,8 @@ public class SqlBoxException extends RuntimeException {
 	}
 
 	/**
-	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only place throw Exception in this project
+	 * Transfer all Exceptions to RuntimeException SqlBoxException. The only
+	 * place throw Exception in this project
 	 */
 	public static Object throwEX(String errorMsg) {
 		return throwEX(null, errorMsg);
@@ -70,6 +74,12 @@ public class SqlBoxException extends RuntimeException {
 	public static void assureNotNull(Object obj, String... optionMessages) {
 		if (obj == null)
 			throw new NullPointerException(optionMessages.length == 0 ? "" : optionMessages[0]);
+	}
+
+	public static void assureNotEmpty(String str, String... optionMessages) {
+		if (str == null || str.length() == 0)
+			throw new DialectException(
+					optionMessages.length == 0 ? "Assert error, String parameter can not be empty" : optionMessages[0]);
 	}
 
 }

@@ -1,4 +1,4 @@
-package test.config.po;
+package test.config.entity;
 
 import java.util.Date;
 

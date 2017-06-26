@@ -9,7 +9,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.id.TableGenerator;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class TableGeneratorTest extends TestBase {
 

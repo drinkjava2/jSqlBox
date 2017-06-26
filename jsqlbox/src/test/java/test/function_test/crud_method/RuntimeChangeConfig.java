@@ -4,10 +4,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.Table;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class RuntimeChangeConfig extends TestBase {
 
@@ -23,11 +24,12 @@ public class RuntimeChangeConfig extends TestBase {
 	public void changeTable() {
 		Dao.executeQuiet("drop table users2");
 		Dialect d = Dao.getDialect();
-		String ddl = "create table users2 " //
-				+ "(" + d.VARCHAR("id", 32) //
-				+ "," + d.VARCHAR("username", 50) //
-				+ ")" + d.engine();
-		Dao.execute(ddl);
+		Table tb2 = new Table("users2");
+		tb2.column("id").VARCHAR(32);
+		tb2.column("username").VARCHAR(50);
+		Dao.executeManyQuiet(d.toDropDDL(tb2));
+		Dao.executeMany(d.toCreateDDL(tb2));
+
 		Dao.refreshMetaData();
 
 		User u = new User();

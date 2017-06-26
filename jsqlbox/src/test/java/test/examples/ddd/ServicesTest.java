@@ -9,7 +9,7 @@ import com.github.drinkjava2.jsqlbox.Dao;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 import test.TestBase;
-import test.config.JBeanBoxConfig.SpringTxInterceptorBox;
+import test.config.DataSourceConfig.SpringTxInterceptorBox;
 
 public class ServicesTest extends TestBase {
 

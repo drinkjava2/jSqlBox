@@ -10,7 +10,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
-import test.config.po.User;
+import test.config.entity.User;
 
 public class InsertTest extends TestBase {
 

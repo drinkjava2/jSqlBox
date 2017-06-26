@@ -54,6 +54,18 @@ public class Dao {
 		return SqlBoxContext.getDefaultSqlBoxContext().execute(sql);
 	}
 
+	public static void executeMany(String... sqls) {
+		for (String sql : sqls) {
+			SqlBoxContext.getDefaultSqlBoxContext().execute(sql);
+		}
+	}
+
+	public static void executeManyQuiet(String... sqls) {
+		for (String sql : sqls) {
+			SqlBoxContext.getDefaultSqlBoxContext().executeQuiet(sql);
+		}
+	}
+
 	public static Integer executeInsert(String... sql) {
 		return SqlBoxContext.getDefaultSqlBoxContext().executeInsert(sql);
 	}

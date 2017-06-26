@@ -9,10 +9,10 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
-import test.config.JBeanBoxConfig.H2DataSourceBox;
-import test.config.JBeanBoxConfig.MsSqlServerDataSourceBox;
-import test.config.JBeanBoxConfig.MySqlDataSourceBox;
-import test.config.JBeanBoxConfig.OracleDataSourceBox;
+import test.config.DataSourceConfig.H2DataSourceBox;
+import test.config.DataSourceConfig.MsSqlServerDataSourceBox;
+import test.config.DataSourceConfig.MySqlDataSourceBox;
+import test.config.DataSourceConfig.OracleDataSourceBox;
 
 /**
  * This is to test TinyJDBC get meta data

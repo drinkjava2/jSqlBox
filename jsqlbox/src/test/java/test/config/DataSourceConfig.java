@@ -21,7 +21,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class JBeanBoxConfig {
+public class DataSourceConfig {
 
 	/**
 	 * This is a SqlBoxContext setting, you can set up many contexts in one
