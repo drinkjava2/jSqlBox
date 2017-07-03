@@ -15,9 +15,8 @@
 */
 package com.github.drinkjava2.jsqlbox.id;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.thinjdbc.jdbc.core.JdbcTemplate;
 
 /**
  * Define a table ID generator, simlar like JPA TableGenerator but delete name field

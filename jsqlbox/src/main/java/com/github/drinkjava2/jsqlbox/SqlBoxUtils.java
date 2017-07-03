@@ -38,10 +38,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
+import com.github.drinkjava2.thinjdbc.jdbc.core.ResultSetExtractor;
+import com.github.drinkjava2.thinjdbc.jdbc.support.rowset.SqlRowSetMetaData;
+import com.github.drinkjava2.thinjdbc.util.ReflectionUtils;
+import com.github.drinkjava2.thinjdbc.util.StringUtils;
 
 /**
  * @author Yong Zhu

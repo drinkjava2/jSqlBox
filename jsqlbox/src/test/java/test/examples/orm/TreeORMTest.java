@@ -10,8 +10,6 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.use;
 import java.util.List;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,12 +18,11 @@ import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
 import test.examples.orm.entities.TreeNode;
-import test.utils.tinyjdbc.TinyJdbc;
 
 /**
  * To Test Tree ORM, currently only support MySQL because sortMySqlTree() method
- * used some special function of MySQL, need in jBeanBoxConfig.java change below
- * line: <br/>
+ * used some special function of MySQL, need in DataSourceConfig.java change
+ * below line: <br/>
  * public static class DataSourceBox extends H2DataSourceBox <br/>
  * to: <br/>
  * public static class DataSourceBox extends MySqlDataSourceBox <br/>
@@ -41,7 +38,7 @@ public class TreeORMTest extends TestBase {
 	public void setup() {
 		super.setup();
 		System.out.println(
-				" !!!Note: Only run on MySql, need set  DataSourceBox extends MySqlDataSourceBox in jBeanBoxConfig.java ");
+				" !!!Note: Only run on MySql, need set  DataSourceBox extends MySqlDataSourceBox in DataSourceConfig.java ");
 		if (!Dao.getDialect().isMySqlFamily())
 			return;
 		// Dao.getDefaultContext().setShowSql(true).setShowQueryResult(true);
@@ -68,25 +65,20 @@ public class TreeORMTest extends TestBase {
 	 */
 	public void sortMySqlTree() {
 		Dao.execute("delete from treetest where id='END'");
-		executeJDBC("set @mycnt=0");
-		executeJDBC("update treetest set line=0,level=0, tempno=0, temporder=(@mycnt := @mycnt + 1) order by id");
-		executeJDBC("update treetest set level=1, line=1 where pid is null");
+		Dao.execute("set @mycnt=0");
+		Dao.execute("update treetest set line=0,level=0, tempno=0, temporder=(@mycnt := @mycnt + 1) order by id");
+		Dao.execute("update treetest set level=1, line=1 where pid is null");
 		int level = 1;
 		while (Dao.queryForInteger("select line from treetest where line=0 limit 1") != null) {
-			executeJDBC("update treetest set tempno=line*100000 where line>0 ");
-			executeJDBC("update treetest a, treetest b set a.level=" + (level + 1)
+			Dao.execute("update treetest set tempno=line*100000 where line>0 ");
+			Dao.execute("update treetest a, treetest b set a.level=" + (level + 1)
 					+ ", a.tempno=b.tempno+a.temporder where a.level=0 and a.pid=b.id and b.level=" + level);
-			executeJDBC("set @mycnt=0");
-			executeJDBC("update treetest set line=(@mycnt := @mycnt + 1) where level>0 order by tempno");
+			Dao.execute("set @mycnt=0");
+			Dao.execute("update treetest set line=(@mycnt := @mycnt + 1) where level>0 order by tempno");
 			level++;
 		}
 		int count = Dao.queryForInteger("select count(*) from treetest");
 		Dao.execute("insert into treetest (id,comments,Pid,line,level) values('END','End Tag',null," + ++count + ",0)");
-	}
-
-	public void executeJDBC(String sql) {
-		DataSource ds = Dao.getDefaultContext().getDataSource();
-		TinyJdbc.execute(ds, TinyJdbc.TRANSACTION_READ_COMMITTED, sql, new Object[] {});
 	}
 
 	/**

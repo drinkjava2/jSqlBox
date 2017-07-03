@@ -25,9 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.springframework.jdbc.datasource.DataSourceUtils;
-
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.thinjdbc.DataSourceManager;
 
 /**
  * MetaData of database
@@ -85,8 +84,9 @@ public class DBMetaData {
 		Connection con = null;
 		ResultSet rs = null;
 		PreparedStatement pst = null;
+		DataSourceManager dm = context.getJdbc().getDataSourceManager();
 		try {
-			con = DataSourceUtils.getConnection(context.getDataSource());// NOSONAR
+			con = dm.getConnection(context.getDataSource());// NOSONAR
 			DatabaseMetaData meta = con.getMetaData();
 			DBMetaData dbMeta = new DBMetaData();
 			Dialect dialect = Dialect.guessDialect(con);
@@ -154,7 +154,7 @@ public class DBMetaData {
 				try {
 					rs.close();
 				} catch (SQLException e) {
-					DataSourceUtils.releaseConnection(con, context.getDataSource());
+					dm.releaseConnection(con, context.getDataSource());
 					SqlBoxException.throwEX(e, e.getMessage());
 				}
 			}
@@ -162,10 +162,10 @@ public class DBMetaData {
 				if (pst != null)
 					pst.close();
 			} catch (SQLException e) {
-				DataSourceUtils.releaseConnection(con, context.getDataSource());
+				dm.releaseConnection(con, context.getDataSource());
 				SqlBoxException.throwEX(e, e.getMessage());
 			}
-			DataSourceUtils.releaseConnection(con, context.getDataSource());
+			dm.releaseConnection(con, context.getDataSource());
 		}
 		return null;
 	}

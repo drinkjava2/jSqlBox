@@ -1,9 +1,11 @@
 package test.config;
 
-import javax.sql.DataSource;
+import java.util.Properties;
+
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -19,23 +21,8 @@ import com.zaxxer.hikari.HikariDataSource;
 public class DataSourceConfig {
 
 	/**
-	 * This is a SqlBoxContext setting, you can set up many contexts in one
-	 * project, but for most projects usually only use one defaultSqlBox context
-	 * 
-	 */
-	public static class DefaultSqlBoxContextBox extends BeanBox {
-		public SqlBoxContext create() {
-			SqlBoxContext ctx = new SqlBoxContext();
-			ctx.setDataSource((DataSource) BeanBox.getBean(DataSourceBox.class));
-			return ctx;
-		}
-	}
-
-	/**
 	 * ================================================================<br/>
-	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to
-	 * test on MySql <br/>
-	 * This project is already tested on H2, MySql5, Oracle11g, MSSQL2012
+	 * Data source setting, change here to test on different databases
 	 * ================================================================<br/>
 	 */
 	public static class DataSourceBox extends H2DataSourceBox {
@@ -83,7 +70,6 @@ public class DataSourceConfig {
 
 	// HikariCP is a DataSource pool much quicker than C3P0
 	public static class HikariCPBox extends BeanBox {
-		//In jBeanBox, bean default is singleton
 		public HikariDataSource create() {
 			HikariDataSource ds = new HikariDataSource();
 			ds.addDataSourceProperty("cachePrepStmts", true);
@@ -92,9 +78,34 @@ public class DataSourceConfig {
 			ds.addDataSourceProperty("useServerPrepStmts", true);
 			ds.setMaximumPoolSize(3);
 			ds.setConnectionTimeout(5000);
-			this.setPreDestory("close");// jBeanBox will close pool
+			this.setPreDestory("close");// jBeanBox will close DS pool
 			return ds;
 		}
-	} 
- 
+	}
+
+	// Spring TxManager
+	static class TxManagerBox extends BeanBox {
+		{
+			setClassOrValue(DataSourceTransactionManager.class);
+			setProperty("dataSource", DataSourceBox.class);
+		}
+	}
+
+	// Spring TransactionInterceptor
+	public static class SpringTxInterceptorBox extends BeanBox {
+		{
+			Properties props = new Properties();
+			props.put("tx_*", "PROPAGATION_REQUIRED");
+			setConstructor(TransactionInterceptor.class, TxManagerBox.class, props);
+		}
+	}
+
+	public static class TxInterceptorBox2 extends BeanBox {
+		{
+			Properties props = new Properties();
+			props.put("do*", "PROPAGATION_REQUIRED");
+			setConstructor(TransactionInterceptor.class, TxManagerBox.class, props);
+		}
+	}
+
 }

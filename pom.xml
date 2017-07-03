@@ -22,18 +22,18 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <artifactId>jsqlbox-package</artifactId>
 
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <name>jsqlbox-package</name>
 
-  <description>jSQLBox is a micro scale persistence tool for Java 7 and above</description>
+  <description>jSqlBox is a micro scale persistence tool for Java 7 and above</description>
 
   <modules>
-    <!-- jSQLBox -->
+    <!-- jSqlBox -->
     <module>jsqlbox</module>
     
-    <!-- examples how to use jSQLBox -->
-    <!--module>jsqlbox-examples</module-->
+    <!-- Examples show how to integrate Spring's transaction wtih jSqlBox -->
+    <module>jsqlbox-spring-transaction-demo</module>
   </modules>
 
   <properties> 

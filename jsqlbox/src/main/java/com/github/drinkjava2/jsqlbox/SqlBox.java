@@ -34,14 +34,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.ReflectionUtils;
-
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.id.AssignedGenerator;
 import com.github.drinkjava2.jsqlbox.id.AutoGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.IdentityGenerator;
+import com.github.drinkjava2.thinjdbc.jdbc.core.JdbcTemplate;
+import com.github.drinkjava2.thinjdbc.util.ReflectionUtils;
 
 /**
  * jSQLBox is a macro scale persistence tool for Java 7 and above.

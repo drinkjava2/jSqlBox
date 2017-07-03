@@ -29,13 +29,13 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.id.IdGenerator;
 import com.github.drinkjava2.jsqlbox.id.UUIDGenerator;
+import com.github.drinkjava2.thinjdbc.DataSourceManager;
+import com.github.drinkjava2.thinjdbc.dao.EmptyResultDataAccessException;
+import com.github.drinkjava2.thinjdbc.jdbc.core.BatchPreparedStatementSetter;
+import com.github.drinkjava2.thinjdbc.jdbc.core.JdbcTemplate;
 
 /**
  * @author Yong Zhu
@@ -48,7 +48,7 @@ public class SqlBoxContext {
 	private static SqlBoxContext defaultSqlBoxContext;
 
 	// print SQL to console or log depends logging.properties
-	private Boolean showSql = true;
+	private Boolean showSql = false;
 	private Boolean formatSql = false;
 	private Boolean showQueryResult = false;
 
@@ -61,7 +61,6 @@ public class SqlBoxContext {
 	public static final String SQLBOX_IDENTITY = "BOX";
 
 	private JdbcTemplate jdbc = new JdbcTemplate();
-	private DataSource dataSource = null;
 
 	private DBMetaData metaData;
 
@@ -94,14 +93,21 @@ public class SqlBoxContext {
 	}
 
 	/**
-	 * Create a SqlBoxContext and register dataSoruce & DB class
+	 * Create a SqlBoxContext and register dataSoruce
 	 */
 	public SqlBoxContext(DataSource dataSource) {
-		this.dataSource = dataSource;
+		this.jdbc.setDataSource(dataSource);
 		if (dataSource != null) {
-			this.jdbc.setDataSource(dataSource);
 			refreshMetaData();
 		}
+	}
+
+	/**
+	 * Create a SqlBoxContext and register dataSoruce & dataSourceManager
+	 */
+	public SqlBoxContext(DataSource dataSource, DataSourceManager dataSourceManager) {
+		this.setDataSourceManager(dataSourceManager);
+		this.setDataSource(dataSource); 
 	}
 
 	public static SqlBoxContext getDefaultSqlBoxContext() {
@@ -132,17 +138,23 @@ public class SqlBoxContext {
 
 	// ================== getter & setters below============
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.jdbc.getDataSource();
 	}
 
 	/**
 	 * Set DataSource for SqlBoxContext
 	 */
 	public SqlBoxContext setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
 		this.jdbc.setDataSource(dataSource);
-		refreshMetaData();
+		if (dataSource == null) {
+			this.metaData = null;
+		} else
+			refreshMetaData();
 		return this;
+	}
+
+	public void setDataSourceManager(DataSourceManager dataSourceManager) {
+		this.jdbc.setDataSourceManager(dataSourceManager);
 	}
 
 	public Boolean getShowSql() {
@@ -230,10 +242,11 @@ public class SqlBoxContext {
 
 	/**
 	 * Release resources (DataSource handle), usually no need call this method
-	 * except use multiple SqlBoxContext
+	 * except use multiple SqlBoxContext or run multiple unit tests
 	 */
 	public void close() {
-		this.dataSource = null;
+		this.setDataSource(null);
+		this.setDataSourceManager(DataSourceManager.jdbcDataSourceManager());
 		this.metaData = null;
 		this.showSql = false;
 	}

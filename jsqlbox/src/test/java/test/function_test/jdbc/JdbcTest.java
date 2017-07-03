@@ -7,12 +7,9 @@ import static com.github.drinkjava2.jsqlbox.SqlHelper.questions;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jbeanbox.AopAround;
-import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Dao;
 
 import test.TestBase;
-import test.config.DataSourceConfig.SpringTxInterceptorBox;
 import test.config.entity.User;
 
 public class JdbcTest extends TestBase {
@@ -21,7 +18,6 @@ public class JdbcTest extends TestBase {
 	 * Test Jdbc methods, SQL be automatically wrapped to preparedStatement
 	 */
 	@Test
-	@AopAround(SpringTxInterceptorBox.class)
 	public void tx_jdbcTest() {
 		User u = new User();
 		Dao.execute("insert into " + u.table() //
@@ -74,15 +70,6 @@ public class JdbcTest extends TestBase {
 
 		Assert.assertEquals(4, (int) Dao.queryForInteger("select count(*) from " + u.table() + " where ",
 				u.USERNAME("John", "Jeffery", "Tom", "Joe"), " in ", questions()));
-	}
-
-	/**
-	 * Do test within transaction
-	 */
-	@Test
-	public void doTestWithTransaction() {
-		JdbcTest t = BeanBox.getBean(JdbcTest.class); // get Proxy bean
-		t.tx_jdbcTest(); // use Spring Declarative Transaction
 	}
 
 }
