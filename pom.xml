@@ -33,7 +33,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <module>jsqlbox</module>
     
     <!-- Examples show how to integrate Spring's transaction wtih jSqlBox -->
-    <module>jsqlbox-spring-transaction-demo</module>
+    <!--module>jsqlbox-spring-transaction-demo</module-->
   </modules>
 
   <properties> 

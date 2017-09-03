@@ -77,16 +77,17 @@
   	<dependency>  
 		<groupId>com.github.drinkjava2</groupId>
 		<artifactId>jdialects</artifactId>  
-		<version>1.0.3-SNAPSHOT</version>  
+		<version>1.0.4</version>  
 	</dependency> 
 	
-	 <!-- jSqlBox depends on ThinJDBC, ThinJDBC is a JDBC tool extracted from Spring's JDBCTempalte but without any 3rd party dependency -->
+	 <!-- jSqlBox depends on DbUtils-Pro, it's a improved version of DbUtils  --> 
 	 <dependency>  
 		<groupId>com.github.drinkjava2</groupId>
-		<artifactId>thinjdbc</artifactId>  
-		<version>1.0.0-SNAPSHOT</version>  
-	 </dependency> 
-	
+		<artifactId>dbutils-pro</artifactId>  
+		<version>1.7.0</version>  <!-- DbUtils-Pro-1.7.0 depends on DbUtils1.7 -->
+	 </dependency>
+
+
     <!-- ================================================================================================== -->
     <!-- Below dependencies are for unit test only, scope be set to "test"                                  -->
     <!-- jSqlBox only test on H2, MySql5, MSSQL2012 and Oracle11g                                           -->  
