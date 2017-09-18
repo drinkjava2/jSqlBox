@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox.id;
 
-import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.utils.StrUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
@@ -30,7 +30,7 @@ public class SequenceGenerator implements IdGenerator {
 		SqlBoxException.assureNotEmpty(sequenceName, "sequenceName can not be empty");
 		String sequenctSQL = ctx.getDialect().getDdlFeatures().getSequenceNextValString();
 		sequenctSQL = StrUtils.replace(sequenctSQL, "_SEQNAME", sequenceName);
-		return ctx.getJdbc().queryForObject(sequenctSQL, Integer.class);
+		return ctx.getDb().nQueryForObject(sequenctSQL);
 	}
 
 	// Getter & Setters below

@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  
- <!-- To switch release between Java7 and Java8, need do: -->
- <!-- 1. Change below version to -JRE7 or -JRE8  --> 
+ <!-- To switch release between Java6 and Java8, need do: -->
+ <!-- 1. Change below version to -JRE6 or -JRE8  --> 
  <!-- 2. Change below version.java in properties to 1.7 or 1.8 -->
  <!-- 3. Change Entity.java, only Java8 support default methods in interface -->
  <!-- 4. To close doc lint check for JAVA8, need set <additionalparam>-Xdoclint:none</additionalparam>  -->
@@ -11,7 +11,7 @@
  
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
- <version>1.0.1-JRE8-SNAPSHOT</version>
+ <version>1.0.2.JRE6</version>
  <packaging>jar</packaging> 
  
  <name>jSQLBox</name>
@@ -48,9 +48,9 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
-		<!-- I like develop on Java8 so can use SONAR, but release 2 verisons: Java7 & Java8 -->
-        <version.java>1.8</version.java>
-        <version.javadoc>8</version.javadoc>
+		<!-- I like develop on Java8 so can use SONAR, but release 2 verisons: Java6 & Java8 -->
+        <version.java>1.6</version.java>
+        <version.javadoc>6</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
         <version.war-plugin>2.6</version.war-plugin>
         <version.clean-plugin>3.0.0</version.clean-plugin>
@@ -68,23 +68,28 @@
        <id>oss</id>
        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
      </repository>
-   </repositories>
-   
-    
+   </repositories> 
    
  <dependencies>   
-    <!-- jSqlBox depends on jDialects, jDialects is a small tool extracted from Hibernate to support ~70 dialects' pagination & DDL -->
+    <!-- jSqlBox depends on jDialects, jDialects is a database dialect tool support ~70 dialects' pagination & DDL -->
   	<dependency>  
 		<groupId>com.github.drinkjava2</groupId>
 		<artifactId>jdialects</artifactId>  
-		<version>1.0.4</version>  
-	</dependency> 
+		<version>1.0.6</version>  
+	</dependency>
 	
-	 <!-- jSqlBox depends on DbUtils-Pro, it's a improved version of DbUtils  --> 
+	<!-- jSqlBox depends on Apache Commons DbUtils  -->   
+    <dependency>
+      <groupId>commons-dbutils</groupId>
+      <artifactId>commons-dbutils</artifactId>
+      <version>1.7</version>
+    </dependency>
+	
+	 <!-- jSqlBox depends on jDbPro, it's an improved JDBC Tool based on Apache Commons DbUtils  --> 
 	 <dependency>  
 		<groupId>com.github.drinkjava2</groupId>
-		<artifactId>dbutils-pro</artifactId>  
-		<version>1.7.0</version>  <!-- DbUtils-Pro-1.7.0 depends on DbUtils1.7 -->
+		<artifactId>jdbpro</artifactId>  
+		<version>1.7.0</version>   
 	 </dependency>
 
 
@@ -94,11 +99,11 @@
     <!-- Note: Oracle11g JDBC driver need installed manually by yourself                                    -->  	
     <!-- ================================================================================================== --> 
     
-    <!-- jBeanBox is a small IOC/AOP tool to replace Spring-core, in this project used to do some unit test configuration  -->
+    <!-- jBeanBox is a small IOC/AOP tool, in this project used to do some unit test configuration  -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jbeanbox</artifactId>
-        <version>2.4.2</version>
+        <version>2.4.5</version>
         <scope>test</scope>
     </dependency> 
      
@@ -109,42 +114,27 @@
       <scope>test</scope>
     </dependency>
     
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.2</version>
+      <scope>test</scope>
+    </dependency>
+    
     <dependency>  
       <groupId>log4j</groupId>  
       <artifactId>log4j</artifactId>  
       <version>1.2.17</version> 
       <scope>test</scope> 
-    </dependency> 
-    
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.22</version>
-      <scope>test</scope>
     </dependency>
     
+   <!-- HikariCP is a dataSource pool quicker than c3p0 -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.22</version>
-      <scope>test</scope> 
-    </dependency>
-       
-   <!-- HikariCP is a dataSource pool quicker than c3p0 -->
-   <dependency>
-     <groupId>com.zaxxer</groupId>
-     <artifactId>HikariCP</artifactId>
-     <version>2.4.7</version>
-     <scope>test</scope>
-   </dependency>
-	
-   <!-- HikariCP is a dataSource pool quicker than c3p0 -->
-   <dependency>
         <groupId>com.zaxxer</groupId>
-        <artifactId>HikariCP-java7</artifactId>
-        <version>2.4.9</version>
+        <artifactId>HikariCP-java6</artifactId>
+        <version>2.3.13</version>
         <scope>test</scope>
-   </dependency>
+    </dependency>
  
     <!-- H2Database memory database for unit test -->
     <dependency>
@@ -158,7 +148,7 @@
     <dependency>
         <groupId>mysql</groupId>
         <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.39</version>
+        <version>5.1.43</version>
         <scope>test</scope>
     </dependency>
  
@@ -182,12 +172,12 @@
 	</dependency--> 
 	
 	<!-- MS-SQLServer JDBC driver, see http://stackoverflow.com/questions/6942407/setting-up-maven-dependency-for-sql-server -->  
-	<dependency>
+	<!--dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
       <version>6.1.0.jre8</version>
 	  <scope>test</scope>
-    </dependency>
+    </dependency-->
 	
  </dependencies> 
  

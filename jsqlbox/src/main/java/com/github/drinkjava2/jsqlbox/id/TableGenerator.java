@@ -1,25 +1,26 @@
 /**
-* Copyright (C) 2016 Yong Zhu.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2016 Yong Zhu.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.github.drinkjava2.jsqlbox.id;
 
+import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.thinjdbc.jdbc.core.JdbcTemplate;
 
 /**
- * Define a table ID generator, simlar like JPA TableGenerator but delete name field
+ * Define a table ID generator, simlar like JPA TableGenerator but delete name
+ * field
  * 
  * @author Yong Zhu
  * @version 1.0.0
@@ -28,28 +29,32 @@ import com.github.drinkjava2.thinjdbc.jdbc.core.JdbcTemplate;
 public class TableGenerator implements IdGenerator {
 
 	/**
-	 * Name of table that stores the generated id values. Defaults to a name chosen by persistence provider.
+	 * Name of table that stores the generated id values. Defaults to a name chosen
+	 * by persistence provider.
 	 */
 	private String table = "";
 
 	/**
-	 * Name of the primary key column in the table. Defaults to a provider-chosen name.
+	 * Name of the primary key column in the table. Defaults to a provider-chosen
+	 * name.
 	 */
 	private String pkColumnName = "";
 
 	/**
-	 * Name of the column that stores the last value generated. Defaults to a provider-chosen name.
+	 * Name of the column that stores the last value generated. Defaults to a
+	 * provider-chosen name.
 	 */
 	private String valueColumnName = "";
 
 	/**
-	 * The primary key value in the generator table that distinguishes this set of generated values from others that may
-	 * be stored in the table.
+	 * The primary key value in the generator table that distinguishes this set of
+	 * generated values from others that may be stored in the table.
 	 */
 	private String pkColumnValue = "";
 
 	/**
-	 * The initial value to be used to initialize the column that stores the last value generated.
+	 * The initial value to be used to initialize the column that stores the last
+	 * value generated.
 	 */
 	private Integer initialValue = 0;
 
@@ -78,23 +83,23 @@ public class TableGenerator implements IdGenerator {
 	 */
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		JdbcTemplate jdbc = ctx.getJdbc();
+		DbPro jdbc = ctx.getDb();
 		if (lastValue == -1) {
-			int countOfRec = jdbc.queryForObject("select count(*) from " + table + " where " + pkColumnName + "=?",
-					Integer.class, new Object[] { pkColumnValue });
+			int countOfRec = jdbc.nQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?",
+					Integer.class, pkColumnValue);
 			if (countOfRec == 0) {
-				jdbc.update("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
-						new Object[] { pkColumnValue, initialValue });
+				jdbc.nUpdate("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
+						pkColumnValue, initialValue);
 				lastValue = initialValue;
 				return lastValue;
 			} else {
-				int last = jdbc.queryForObject(
+				int last = jdbc.nQueryForObject(
 						"select " + valueColumnName + " from " + table + " where " + pkColumnName + "=?", Integer.class,
-						new Object[] { pkColumnValue }); // 70 or 99 or 100 or 101
+						pkColumnValue); // 70 or 99 or 100 or 101
 				last = calculateBucketFirstID(last, allocationSize);// 101 or 101 or 101 or 151
-				jdbc.update("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
-						new Object[] { calculateBucketFirstID(last + 1, allocationSize), pkColumnValue });// 151, 151,
-																											// 151, 201
+				jdbc.nUpdate("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
+						calculateBucketFirstID(last + 1, allocationSize), pkColumnValue);// 151, 151,
+																							// 151, 201
 				lastValue = last;
 				return lastValue;
 			}
@@ -102,8 +107,8 @@ public class TableGenerator implements IdGenerator {
 			int last = lastValue;
 			int nextBucketFirstID = calculateBucketFirstID(last, allocationSize);
 			if (last + 1 >= nextBucketFirstID)
-				jdbc.update("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
-						new Object[] { calculateBucketFirstID(last + 1, allocationSize), pkColumnValue });
+				jdbc.nUpdate("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
+						calculateBucketFirstID(last + 1, allocationSize), pkColumnValue);
 			lastValue = last + 1;
 			return lastValue;
 		}
