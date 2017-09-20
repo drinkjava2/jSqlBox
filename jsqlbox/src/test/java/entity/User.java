@@ -10,10 +10,10 @@ import com.github.drinkjava2.jsqlbox.EntityBase;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 /**
- * User class is not a POJO, need extends from EntityBase(For JAVA7-) or
- * implements EntityInterface interface(for JAVA8+)<br/>
+ * User class is not a POJO, need extends from EntityBase(For Java6 & 7) or
+ * implements EntityInterface interface(for Java8)<br/>
  * 
- * Default database table equal to entity name or add a "s" suffix , in this
+ * Default database table equal to entity name, in this
  * example it will use "users" as table name
  * 
  * @author Yong Zhu
@@ -44,23 +44,21 @@ public class User extends EntityBase {
 		t.column("id").VARCHAR(32);
 		t.column("user_name2").VARCHAR(50).pojoField("userName").defaultValue("'aaa'");
 		t.column("Phone_Number").VARCHAR(50).singleIndex("IDX_PhoneNM");
-		t.column("Address").VARCHAR(50).singleIndex().singleFKey("users","id");
+		t.column("Address").VARCHAR(50).singleIndex().singleFKey("users", "id");
 		t.column("active").BOOLEAN();
 		t.column("Age").INTEGER().check("Age > 0");
 		return t;
 	}
 
 	{
-		TableModel model = this.box().getTableModel();
-		model.setTableName("users");
-		model.getColumn("username").pojoField("user_name").CHAR(23);
+		SqlBox box = this.box();
+		box.configTableName("users");
+		box.getColumn("username").pojoField("user_name").CHAR(23);
 	}
 
 	public static class UserBox extends SqlBox {
 		{
-			TableModel model = this.getTableModel();
-			model.setTableName("users");
-			model.getColumn("username").pojoField("user_name").CHAR(23);
+
 		}
 	}
 

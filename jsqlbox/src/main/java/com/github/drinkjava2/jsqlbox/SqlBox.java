@@ -11,10 +11,11 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * jSQLBox is a macro scale ORM tool
+ * SqlBox is the configuration of a POJO class
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @version 1.0.0
@@ -24,21 +25,29 @@ public class SqlBox {
 	TableModel tableModel;
 	SqlBoxContext context;
 
+	public void configTableName(String tableName) {
+		this.tableModel.setTableName(tableName);
+	}
+
+	public ColumnModel getColumn(String columnName) {
+		return this.tableModel.getColumn(columnName);
+	}
+
 	// getter & setter ========
-	public TableModel getTableModel() {
-		return tableModel;
-	}
-
-	public void setTableModel(TableModel tableModel) {
-		this.tableModel = tableModel;
-	}
-
 	public SqlBoxContext getContext() {
 		return context;
 	}
 
 	public void setContext(SqlBoxContext context) {
 		this.context = context;
+	}
+
+	public TableModel getTableModel() {
+		return tableModel;
+	}
+
+	public void setTableModel(TableModel tableModel) {
+		this.tableModel = tableModel;
 	}
 
 }
