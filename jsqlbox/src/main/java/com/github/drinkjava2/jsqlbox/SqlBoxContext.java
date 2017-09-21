@@ -22,28 +22,46 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.0
  */
 public class SqlBoxContext {
-	private DbPro db;
+	public static SqlBoxContext DefaultContext = null;
+	private DbPro dbPro;
 	private Dialect dialect;
 
 	public SqlBoxContext() {
-		db = new DbPro();
+		dbPro = new DbPro();
 	}
 
 	public SqlBoxContext(DataSource ds) {
-		db = new DbPro(ds);
+		dbPro = new DbPro(ds);
 	}
 
 	public SqlBoxContext(DataSource ds, ConnectionManager cm) {
-		db = new DbPro(ds, cm);
+		dbPro = new DbPro(ds, cm);
+	}
+
+	// =============CRUD methods=====
+	public <T> T insert(Object entity) {
+		return null;
+	}
+
+	public <T> T update(Object entity) {
+		return null;
+	}
+
+	public <T> T delete(Object entity) {
+		return null;
+	}
+
+	public <T> T load(Object entity, Object pkey) {
+		return null;
 	}
 
 	// getter & setter =======
-	public DbPro getDb() {
-		return db;
+	public DbPro getDbPro() {
+		return dbPro;
 	}
 
-	public void setDb(DbPro db) {
-		this.db = db;
+	public void setDbPro(DbPro dbPro) {
+		this.dbPro = dbPro;
 	}
 
 	public Dialect getDialect() {

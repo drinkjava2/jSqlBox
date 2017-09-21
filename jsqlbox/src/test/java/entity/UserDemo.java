@@ -1,74 +1,38 @@
+/*
+ * Copyright (C) 2016 Yong Zhu.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ * OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ */
 package entity;
 
-import com.github.drinkjava2.jdialects.Dialect;
+import org.junit.Test;
+
 import com.github.drinkjava2.jdialects.annotation.Column;
 import com.github.drinkjava2.jdialects.annotation.Entity;
 import com.github.drinkjava2.jdialects.annotation.Table;
-import com.github.drinkjava2.jdialects.hibernatesrc.utils.DDLFormatter;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.EntityBase;
+import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * User class is not a POJO, need extends from EntityBase(For Java6 & 7) or
- * implements EntityInterface interface(for Java8)<br/>
- * 
- * Default database table equal to entity name, in this
- * example it will use "users" as table name
+ * Demo of jSqlBox configurations
  * 
  * @author Yong Zhu
- *
- * @version 1.0.0
  * @since 1.0.0
  */
 @Entity
-@Table(name = "users")
-public class User extends EntityBase {
+@Table(name = "user_demo")
+public class UserDemo extends ActiveRecord {
 	private String id;
-	@Column(name = "user_name1")
+	@Column(name = "user_name2", length = 32)
 	private String userName;
-	private String phoneNumber;
-	private String address;
-	private Integer age;
-	private Boolean active;
-
-	public static void main(String[] args) {
-		String[] ddls = Dialect.H2Dialect.toCreateDDL(User.tableModel());
-		for (String ddl : ddls) {
-			System.out.println(DDLFormatter.format(ddl));
-		}
-	}
-
-	public static TableModel tableModel() {
-		TableModel t = TableModel.fromPojo(User.class);
-		t.column("id").VARCHAR(32);
-		t.column("user_name2").VARCHAR(50).pojoField("userName").defaultValue("'aaa'");
-		t.column("Phone_Number").VARCHAR(50).singleIndex("IDX_PhoneNM");
-		t.column("Address").VARCHAR(50).singleIndex().singleFKey("users", "id");
-		t.column("active").BOOLEAN();
-		t.column("Age").INTEGER().check("Age > 0");
-		return t;
-	}
-
-	{
-		SqlBox box = this.box();
-		box.configTableName("users");
-		box.getColumn("username").pojoField("user_name").CHAR(23);
-	}
-
-	public static class UserBox extends SqlBox {
-		{
-
-		}
-	}
-
-	public Boolean getActive() {
-		return active;
-	}
-
-	public void setActive(Boolean active) {
-		this.active = active;
-	}
 
 	public String getId() {
 		return id;
@@ -86,28 +50,35 @@ public class User extends EntityBase {
 		this.userName = userName;
 	}
 
-	public String getPhoneNumber() {
-		return phoneNumber;
+	public static TableModel tableModel() {
+		TableModel t = TableModel.fromPojo(UserDemo.class);
+		t.column("id").VARCHAR(32).pkey();
+		t.column("user_name3").VARCHAR(50).pojoField("userName").defaultValue("'aaa'");
+		return t;
 	}
 
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
+	public static class UserBox extends SqlBox {
+		{
+			this.setTableModel(tableModel());
+			this.columnModel("user_name3").setColumnName("user_name4");
+		}
 	}
 
-	public String getAddress() {
-		return address;
+	{
+		SqlBox.findBox(this).columnModel("user_name4").setColumnName("user_name5");
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+	@Test
+	public void test() {
+		UserDemo u = new UserDemo();
+		u.setId("001");
+		u.setUserName("Sam");
+		u.box().columnModel("user_name5").setColumnName("user_name6");
+		u.insert();
 
-	public Integer getAge() {
-		return age;
-	}
-
-	public void setAge(Integer age) {
-		this.age = age;
+		u.setId("002");
+		u.setUserName("Tam");
+		SqlBoxContext.DefaultContext.insert(u);
 	}
 
 }

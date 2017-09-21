@@ -25,14 +25,18 @@ public class SqlBox {
 	TableModel tableModel;
 	SqlBoxContext context;
 
-	public void configTableName(String tableName) {
-		this.tableModel.setTableName(tableName);
+	public TableModel tableModel() {
+		return getTableModel();
 	}
 
-	public ColumnModel getColumn(String columnName) {
-		return this.tableModel.getColumn(columnName);
+	public ColumnModel columnModel(String columnName) {
+		return getTableModel().getColumn(columnName);
 	}
 
+	public static SqlBox findBox(Object entity) {
+		return null;
+	}
+	
 	// getter & setter ========
 	public SqlBoxContext getContext() {
 		return context;

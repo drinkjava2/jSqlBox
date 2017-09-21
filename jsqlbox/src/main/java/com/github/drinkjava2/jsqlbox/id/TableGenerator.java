@@ -83,7 +83,7 @@ public class TableGenerator implements IdGenerator {
 	 */
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		DbPro jdbc = ctx.getDb();
+		DbPro jdbc = ctx.getDbPro();
 		if (lastValue == -1) {
 			int countOfRec = jdbc.nQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?",
 					Integer.class, pkColumnValue);
