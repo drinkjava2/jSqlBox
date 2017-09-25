@@ -15,7 +15,6 @@
  */
 package com.github.drinkjava2.jsqlbox.id;
 
-import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
@@ -83,21 +82,20 @@ public class TableGenerator implements IdGenerator {
 	 */
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
-		DbPro jdbc = ctx.getDbPro();
 		if (lastValue == -1) {
-			int countOfRec = jdbc.nQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?",
+			int countOfRec = ctx.nQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?",
 					Integer.class, pkColumnValue);
 			if (countOfRec == 0) {
-				jdbc.nUpdate("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
+				ctx.nUpdate("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
 						pkColumnValue, initialValue);
 				lastValue = initialValue;
 				return lastValue;
 			} else {
-				int last = jdbc.nQueryForObject(
+				int last = ctx.nQueryForObject(
 						"select " + valueColumnName + " from " + table + " where " + pkColumnName + "=?", Integer.class,
 						pkColumnValue); // 70 or 99 or 100 or 101
 				last = calculateBucketFirstID(last, allocationSize);// 101 or 101 or 101 or 151
-				jdbc.nUpdate("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
+				ctx.nUpdate("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
 						calculateBucketFirstID(last + 1, allocationSize), pkColumnValue);// 151, 151,
 																							// 151, 201
 				lastValue = last;
@@ -107,7 +105,7 @@ public class TableGenerator implements IdGenerator {
 			int last = lastValue;
 			int nextBucketFirstID = calculateBucketFirstID(last, allocationSize);
 			if (last + 1 >= nextBucketFirstID)
-				jdbc.nUpdate("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
+				ctx.nUpdate("update " + table + " set " + valueColumnName + "=? where " + pkColumnName + " =?",
 						calculateBucketFirstID(last + 1, allocationSize), pkColumnValue);
 			lastValue = last + 1;
 			return lastValue;

@@ -11,24 +11,23 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import com.github.drinkjava2.jdbpro.DbPro;
-
 /**
+ * ActiveRecordSupport designed for Java8, in Java8 if a entity class implements
+ * ActiveRecordSupport interface, it will have CRUD Method.
+ * To release jSqlBox-x.x.x-java8.jar, need change source code of this class
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public interface ActiveRecordType {
+public interface ActiveRecordSupport {
 
+	//=========For release to Java6==========
 	/** @return SqlBox instance */
 	public SqlBox box();
 
 	/** @return SqlBoxContext instance */
 	public SqlBoxContext context();
-
-	/** @return DbPro instance */
-	public DbPro dbPro();
-
+ 
 	/** Insert entity to database */
 	public <T> T insert();
 
@@ -41,4 +40,8 @@ public interface ActiveRecordType {
 	/** Load entity from database by primary key, key can be single value or Map */
 	public <T> T load(Object pkey);
 
+	//=========For release to Java8==========
+	//TODO: default methods for Java8
+ 
+	
 }

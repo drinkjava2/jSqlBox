@@ -18,25 +18,23 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * SqlBox is the configuration of a POJO class
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
- * @version 1.0.0
  * @since 1.0.0
  */
 public class SqlBox {
+
+	/** A TableModel instance */
 	TableModel tableModel;
+
+	/** A SqlBoxContext instance */
 	SqlBoxContext context;
 
-	public TableModel tableModel() {
-		return getTableModel();
-	}
+	/** A binded entity instance */
+	Object entityBean;
 
-	public ColumnModel columnModel(String columnName) {
+	public ColumnModel getColumnModel(String columnName) {
 		return getTableModel().getColumn(columnName);
 	}
 
-	public static SqlBox findBox(Object entity) {
-		return null;
-	}
-	
 	// getter & setter ========
 	public SqlBoxContext getContext() {
 		return context;
@@ -47,11 +45,21 @@ public class SqlBox {
 	}
 
 	public TableModel getTableModel() {
+		if (tableModel == null)
+			tableModel = new TableModel();
 		return tableModel;
 	}
 
 	public void setTableModel(TableModel tableModel) {
 		this.tableModel = tableModel;
+	}
+
+	public Object getEntityBean() {
+		return entityBean;
+	}
+
+	public void setEntityBean(Object entityBean) {
+		this.entityBean = entityBean;
 	}
 
 }

@@ -36,12 +36,19 @@ public class SqlBoxException extends RuntimeException {
 		super(msg, cause);
 	}
 
+	/** Eat exception to avoid SONAR warning */
+	public static void eatException(Exception e) {
+		// do nothing here
+	}
+
+	/** Assure object not null, optionMessages is optional */
 	public static void assureNotNull(Object obj, String... optionMessages) {
 		if (obj == null)
 			throw new SqlBoxException(
 					optionMessages.length == 0 ? "Assert error, Parameter can not be null" : optionMessages[0]);
 	}
 
+	/** Assure String not Empty, optionMessages is optional */
 	public static void assureNotEmpty(String str, String... optionMessages) {
 		if (str == null || str.length() == 0)
 			throw new SqlBoxException(

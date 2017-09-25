@@ -30,7 +30,7 @@ public class SequenceGenerator implements IdGenerator {
 		SqlBoxException.assureNotEmpty(sequenceName, "sequenceName can not be empty");
 		String sequenctSQL = ctx.getDialect().getDdlFeatures().getSequenceNextValString();
 		sequenctSQL = StrUtils.replace(sequenctSQL, "_SEQNAME", sequenceName);
-		return ctx.getDbPro().nQueryForObject(sequenctSQL);
+		return ctx.nQueryForObject(sequenctSQL);
 	}
 
 	// Getter & Setters below

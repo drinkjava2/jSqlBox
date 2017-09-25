@@ -15,27 +15,39 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.utils.ConvertUtils;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class SqlBoxContext {
-	public static SqlBoxContext DefaultContext = null;
-	private DbPro dbPro;
+public class SqlBoxContext extends DbPro {
+	public static SqlBoxContext defaultContext = null;
 	private Dialect dialect;
 
 	public SqlBoxContext() {
-		dbPro = new DbPro();
+		super();
 	}
 
 	public SqlBoxContext(DataSource ds) {
-		dbPro = new DbPro(ds);
+		super(ds);
+		this.dialect = Dialect.guessDialect(ds);
 	}
 
 	public SqlBoxContext(DataSource ds, ConnectionManager cm) {
-		dbPro = new DbPro(ds, cm);
+		super(ds, cm);
+		dialect = Dialect.guessDialect(ds);
+	}
+
+	public SqlBoxContext(DataSource ds, Dialect dialect) {
+		super(ds);
+		this.dialect = dialect;
+	}
+
+	public SqlBoxContext(DataSource ds, Dialect dialect, ConnectionManager cm) {
+		super(ds, cm);
+		this.dialect = dialect;
 	}
 
 	// =============CRUD methods=====
@@ -55,14 +67,12 @@ public class SqlBoxContext {
 		return null;
 	}
 
-	// getter & setter =======
-	public DbPro getDbPro() {
-		return dbPro;
+	// ========Utils methods=====
+	public String[] toCreateDDL(Class<?> pojoClasses) {
+		return dialect.toCreateDDL(ConvertUtils.pojos2Models(pojoClasses));
 	}
 
-	public void setDbPro(DbPro dbPro) {
-		this.dbPro = dbPro;
-	}
+	// getter & setter =======
 
 	public Dialect getDialect() {
 		return dialect;
@@ -70,6 +80,14 @@ public class SqlBoxContext {
 
 	public void setDialect(Dialect dialect) {
 		this.dialect = dialect;
+	}
+
+	public static SqlBoxContext getDefaultContext() {
+		return defaultContext;
+	}
+
+	public static void setDefaultContext(SqlBoxContext defaultContext) {
+		SqlBoxContext.defaultContext = defaultContext;
 	}
 
 }

@@ -11,8 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import com.github.drinkjava2.jdbpro.DbPro;
-
 /**
  * Entity class extended from ActiveRecord will get CRUD methods, see below
  * difference in jSqlBox to save ActiveRecord entity and POJO entity into
@@ -33,21 +31,16 @@ import com.github.drinkjava2.jdbpro.DbPro;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class ActiveRecord implements ActiveRecordType {
+public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public SqlBox box() {
-		return null;
+		return SqlBoxUtils.findBox(this);
 	}
 
 	@Override
 	public SqlBoxContext context() {
 		return box().getContext();
-	}
-
-	@Override
-	public DbPro dbPro() {
-		return box().getContext().getDbPro();
 	}
 
 	@Override
