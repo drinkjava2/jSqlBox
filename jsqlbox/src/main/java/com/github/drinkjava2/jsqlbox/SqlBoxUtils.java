@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jdialects.utils.DialectUtils;
 
 /**
  * SqlBoxUtils is help class to store some public methods concern to SqlBox
@@ -24,7 +24,15 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public abstract class SqlBoxUtils {
-	public static String SQLBOX_IDENTITY = "BX";
+	private static String sqlBoxSuffixIdentity = "BX";
+
+	public static String getSqlBoxSuffixIdentity() {
+		return sqlBoxSuffixIdentity;
+	}
+
+	public static void setSqlBoxSuffixIdentity(String sqlBoxSuffixIdentity) {
+		SqlBoxUtils.sqlBoxSuffixIdentity = sqlBoxSuffixIdentity;
+	}
 
 	// To check if a class exist, if exist, cache it to avoid check again
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<String, Integer>();
@@ -72,17 +80,16 @@ public abstract class SqlBoxUtils {
 		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
-			boxClass = SqlBoxUtils.checkSqlBoxClassExist(entityOrBoxClass.getName() + SQLBOX_IDENTITY);
+			boxClass = SqlBoxUtils.checkSqlBoxClassExist(entityOrBoxClass.getName() + sqlBoxSuffixIdentity);
 		if (boxClass == null)
 			boxClass = SqlBoxUtils.checkSqlBoxClassExist(
-					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + SQLBOX_IDENTITY);
+					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + sqlBoxSuffixIdentity);
 		SqlBox box = null;
 		if (boxClass == null) {
 			box = new SqlBox();
-			box.setTableModel(TableModel.fromPojo(entityOrBoxClass));
+			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
 		} else {
 			try {
-				System.out.println("boxClass=" + boxClass);
 				box = (SqlBox) boxClass.newInstance();
 			} catch (Exception e) {
 				throw new SqlBoxException("Can not create SqlBox instance: " + entityOrBoxClass, e);
@@ -129,4 +136,5 @@ public abstract class SqlBoxUtils {
 		box.setEntityBean(entity);
 		boxCache.get().put(entity, box);
 	}
+	
 }

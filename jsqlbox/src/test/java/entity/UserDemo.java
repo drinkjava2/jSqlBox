@@ -55,19 +55,15 @@ public class UserDemo extends ActiveRecord {
 		this.userName = userName;
 	}
 
-	public static TableModel tableModel() {
-		TableModel t = TableModel.fromPojo(UserDemo.class);
+	public static void config(TableModel t) {
 		t.column("id").VARCHAR(32).pkey();
-		t.column("user_name2").setColumnName("user_name3");;
-		return t;
+		t.column("user_name2").setColumnName("user_name3");
 	}
 
 	public static class UserDemoBX extends SqlBox {
 		{
-			System.out.println("tableModel()=" + tableModel());
-			this.setTableModel(tableModel());
-			System.out.println("this tablemodel=" + this.getTableModel());
-			this.getColumnModel("user_name3").setColumnName("user_name4");
+			System.out.println("UserDemoBX======");
+			this.getTableModel().column("user_name3").setColumnName("user_name4");
 		}
 	}
 
@@ -75,7 +71,6 @@ public class UserDemo extends ActiveRecord {
 		System.out.println("================aaaa=");
 		SqlBox box = SqlBoxUtils.findBox(this);
 		System.out.println("box=" + box);
-		System.out.println("tableModel=" + box.getTableModel());
 		// System.out.println("getTableModelDebugInfo=" +
 		// DebugUtils.getTableModelDebugInfo(box.getTableModel()));
 
@@ -103,10 +98,10 @@ public class UserDemo extends ActiveRecord {
 		UserDemo u = new UserDemo();
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		SqlBox box=u.box();
+		SqlBox box = u.box();
 		box.setContext(ctx);
-		System.out.println("box="+box);
-		
+		System.out.println("box=" + box);
+
 		String[] ddls = Dialect.H2Dialect.toCreateDDL(u.box().getTableModel());
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
@@ -117,7 +112,7 @@ public class UserDemo extends ActiveRecord {
 		u.insert();
 
 		u.setId("002");
-		u.setUserName("Tam"); 
+		u.setUserName("Tam");
 	}
-	
+
 }

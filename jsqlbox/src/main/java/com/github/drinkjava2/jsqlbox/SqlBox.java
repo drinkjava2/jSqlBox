@@ -21,7 +21,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public class SqlBox {
-
 	/** A TableModel instance */
 	TableModel tableModel;
 
@@ -44,6 +43,14 @@ public class SqlBox {
 		this.context = context;
 	}
 
+	public Object getEntityBean() {
+		return entityBean;
+	}
+
+	public void setEntityBean(Object entityBean) {
+		this.entityBean = entityBean;
+	}
+
 	public TableModel getTableModel() {
 		if (tableModel == null)
 			tableModel = new TableModel();
@@ -52,14 +59,6 @@ public class SqlBox {
 
 	public void setTableModel(TableModel tableModel) {
 		this.tableModel = tableModel;
-	}
-
-	public Object getEntityBean() {
-		return entityBean;
-	}
-
-	public void setEntityBean(Object entityBean) {
-		this.entityBean = entityBean;
 	}
 
 }
