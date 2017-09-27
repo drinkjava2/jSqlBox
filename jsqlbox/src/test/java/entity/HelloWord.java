@@ -13,6 +13,8 @@ package entity;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.utils.ConvertUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -24,23 +26,14 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 
 public class HelloWord {
-	private String id;
-	private String userName;
+	private String name;
 
-	public String getId() {
-		return id;
+	public String getName() {
+		return name;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Test
@@ -49,18 +42,16 @@ public class HelloWord {
 		ds.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		ds.setDriverClassName("org.h2.Driver");
 		ds.setUsername("sa");
-		ds.setPassword(""); 
+		ds.setPassword("");
 
-		SqlBoxContext.setDefaultContext(new SqlBoxContext(ds));
-		String[] ddls = SqlBoxContext.defaultContext.toCreateDDL(HelloWord.class);
+		SqlBoxContext.setDefaultContext(new SqlBoxContext(ds, Dialect.H2Dialect));
+		String[] ddls = Dialect.H2Dialect.toCreateDDL(ConvertUtils.pojos2Models(HelloWord.class));
 		for (String ddl : ddls)
 			SqlBoxContext.defaultContext.nExecute(ddl);
 
-		UserDemo u = new UserDemo();
-		u.setId("001");
-		u.setUserName("Sam");
-		u.box().getColumnModel("user_name5").setColumnName("user_name6");
-		u.insert(); 
+		HelloWord u = new HelloWord();
+		u.setName("Sam");
+		SqlBoxContext.defaultContext.insert(u);
 	}
 
 }
