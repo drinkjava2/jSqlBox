@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.jdialects.utils.DialectUtils;
+import com.github.drinkjava2.jdialects.utils.StrUtils;
 
 /**
  * SqlBoxUtils is help class to store some public methods concern to SqlBox
@@ -62,6 +63,7 @@ public abstract class SqlBoxUtils {
 	 * and bind it to bean
 	 */
 	public static SqlBox findBox(Object entity) {
+		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
 		SqlBox box = getBindedBox(entity);
 		if (box != null)
 			return box;
@@ -91,6 +93,8 @@ public abstract class SqlBoxUtils {
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
+				if (StrUtils.isEmpty(box.getTableModel().getTableName()))
+					box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
 			} catch (Exception e) {
 				throw new SqlBoxException("Can not create SqlBox instance: " + entityOrBoxClass, e);
 			}
@@ -136,5 +140,5 @@ public abstract class SqlBoxUtils {
 		box.setEntityBean(entity);
 		boxCache.get().put(entity, box);
 	}
-	
+
 }

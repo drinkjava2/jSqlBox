@@ -13,8 +13,6 @@ package entity;
 
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.utils.ConvertUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -43,15 +41,17 @@ public class HelloWord {
 		ds.setDriverClassName("org.h2.Driver");
 		ds.setUsername("sa");
 		ds.setPassword("");
+		ds.setMaximumPoolSize(8);
+		ds.setConnectionTimeout(2000);
 
-		SqlBoxContext.setDefaultContext(new SqlBoxContext(ds, Dialect.H2Dialect));
-		String[] ddls = Dialect.H2Dialect.toCreateDDL(ConvertUtils.pojos2Models(HelloWord.class));
+		SqlBoxContext context = new SqlBoxContext(ds);
+		String[] ddls = context.pojos2CreateDDLs(HelloWord.class);
 		for (String ddl : ddls)
-			SqlBoxContext.defaultContext.nExecute(ddl);
+			context.nExecute(ddl);
 
 		HelloWord u = new HelloWord();
 		u.setName("Sam");
-		SqlBoxContext.defaultContext.insert(u);
+		context.insert(u);
 	}
 
 }

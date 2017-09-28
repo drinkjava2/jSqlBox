@@ -27,7 +27,7 @@ public class SqlBox {
 	/** A SqlBoxContext instance */
 	SqlBoxContext context;
 
-	/** A binded entity instance */
+	/** Bind to which entity Bean instance */
 	Object entityBean;
 
 	public ColumnModel getColumnModel(String columnName) {

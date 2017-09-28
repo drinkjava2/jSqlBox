@@ -15,7 +15,6 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -68,8 +67,29 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	// ========Utils methods=====
-	public String[] toCreateDDL(Class<?> pojoClasses) {
-		return dialect.toCreateDDL(DialectUtils.pojos2Models(pojoClasses));
+	// DDL about
+	public String[] pojos2CreateDDLs(Class<?> pojoClasses) {
+		return dialect.toCreateDDL(pojoClasses);
+	}
+
+	public String[] pojos2DropAndCreateDDLs(Class<?> pojoClasses) {
+		return dialect.toDropAndCreateDDL(pojoClasses);
+	}
+
+	public String[] pojo2DropDDL(Class<?> pojoClasses) {
+		return dialect.toDropDDL(pojoClasses);
+	}
+
+	public String[] pojos2CreateDDLs(Object entity) {
+		return dialect.toCreateDDL(SqlBoxUtils.findBox(entity).getTableModel());
+	}
+
+	public String[] pojos2DropAndCreateDDLs(Object entity) {
+		return dialect.toDropAndCreateDDL(SqlBoxUtils.findBox(entity).getTableModel());
+	}
+
+	public String[] pojo2DropDDL(Object entity) {
+		return dialect.toDropDDL(SqlBoxUtils.findBox(entity).getTableModel());
 	}
 
 	// getter & setter =======
