@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package entity;
+package helloworld;
 
 import org.junit.Test;
 
@@ -52,6 +52,8 @@ public class HelloWord {
 		HelloWord u = new HelloWord();
 		u.setName("Sam");
 		context.insert(u);
+
+		ds.close();
 	}
 
 }

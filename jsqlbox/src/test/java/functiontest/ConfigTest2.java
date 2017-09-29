@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package entity;
+package functiontest;
 
 import org.junit.Test;
 
@@ -21,7 +21,6 @@ import com.github.drinkjava2.jsqlbox.DebugUtils;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
-import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * Demo of jSqlBox configurations
@@ -31,18 +30,9 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 @Entity
 @Table(name = "user_demo")
-public class UserDemo {
-	private String id;
+public class ConfigTest2 extends TestBase {
 	@Column(name = "user_name2", length = 32)
 	private String userName;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getUserName() {
 		return userName;
@@ -68,17 +58,9 @@ public class UserDemo {
 
 	@Test
 	public void doTest() {
-		HikariDataSource ds = new HikariDataSource();
-		ds.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-		ds.setDriverClassName("org.h2.Driver");
-		ds.setUsername("sa");
-		ds.setPassword("");
-		ds.setMaximumPoolSize(8);
-		ds.setConnectionTimeout(2000);
-
-		SqlBoxContext context = new SqlBoxContext(ds);
+		SqlBoxContext context = new SqlBoxContext(dataSource);
 		context.setAllowShowSQL(true);
-		UserDemo u = new UserDemo();
+		ConfigTest2 u = new ConfigTest2();
 
 		SqlBox box = SqlBoxUtils.findBox(u);
 		System.out.println("box=" + box);
@@ -89,7 +71,6 @@ public class UserDemo {
 		for (String ddl : ddls)
 			context.nExecute(ddl);
 
-		u.setId("001");
 		u.setUserName("Sam");
 		context.insert(u);
 	}
