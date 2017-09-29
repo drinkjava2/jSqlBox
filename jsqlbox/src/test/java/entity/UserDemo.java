@@ -17,7 +17,6 @@ import com.github.drinkjava2.jdialects.annotation.Column;
 import com.github.drinkjava2.jdialects.annotation.Entity;
 import com.github.drinkjava2.jdialects.annotation.Table;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jsqlbox.DebugUtils;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -54,14 +53,16 @@ public class UserDemo {
 	}
 
 	public static void config(TableModel t) {
+		t.setTableName("t3");
 		t.column("id").VARCHAR(32).pkey();
 		t.column("user_name2").setColumnName("user_name3");
 	}
 
 	public static class UserDemoBX extends SqlBox {
 		{
-			this.setTableModel(DialectUtils.pojo2Model(UserDemo.class));
-			this.getColumnModel("user_name3").setColumnName("user_name4");
+			TableModel t = new TableModel("tb2");
+			t.column("a").STRING(40).pkey();
+			this.setTableModel(t);
 		}
 	}
 
@@ -79,7 +80,7 @@ public class UserDemo {
 		context.setAllowShowSQL(true);
 		UserDemo u = new UserDemo();
 
-		SqlBox box = SqlBoxUtils.findBox(this);
+		SqlBox box = SqlBoxUtils.findBox(u);
 		System.out.println("box=" + box);
 		System.out
 				.println("=====getTableModelDebugInfo====\r" + DebugUtils.getTableModelDebugInfo(box.getTableModel()));

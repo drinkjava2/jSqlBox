@@ -11,7 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -29,10 +28,6 @@ public class SqlBox {
 
 	/** Bind to which entity Bean instance */
 	Object entityBean;
-
-	public ColumnModel getColumnModel(String columnName) {
-		return getTableModel().getColumn(columnName);
-	}
 
 	// getter & setter ========
 	public SqlBoxContext getContext() {
@@ -52,8 +47,6 @@ public class SqlBox {
 	}
 
 	public TableModel getTableModel() {
-		if (tableModel == null)
-			tableModel = new TableModel();
 		return tableModel;
 	}
 
