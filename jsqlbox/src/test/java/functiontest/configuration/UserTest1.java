@@ -9,28 +9,24 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package functiontest;
+package functiontest.configuration;
 
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.annotation.Column;
-import com.github.drinkjava2.jdialects.annotation.Entity;
-import com.github.drinkjava2.jdialects.annotation.Table;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.DebugUtils;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
+
+import functiontest.TestBase;
 
 /**
- * Demo of jSqlBox configurations
+ * Demo of jDialects configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-@Entity
-@Table(name = "user_demo")
-public class ConfigTest1 extends TestBase {
+public class UserTest1 extends TestBase {
 	@Column(name = "user_name2", length = 32)
 	private String userName;
 
@@ -43,28 +39,31 @@ public class ConfigTest1 extends TestBase {
 	}
 
 	public static void config(TableModel t) {
-		t.setTableName("t3");
-		t.column("id").VARCHAR(32).pkey();
+		t.setTableName("table1");
 		t.column("user_name2").setColumnName("user_name3");
 	}
 
 	@Test
 	public void doTest() {
+		SqlBoxContext.setDefaultContext(null);
 		SqlBoxContext context = new SqlBoxContext(dataSource);
 		context.setAllowShowSQL(true);
-		ConfigTest1 u = new ConfigTest1();
-
-		SqlBox box = SqlBoxUtils.findBox(u);
-		System.out.println("box=" + box);
-		System.out
-				.println("=====getTableModelDebugInfo====\r" + DebugUtils.getTableModelDebugInfo(box.getTableModel()));
-
-		String[] ddls = context.pojos2CreateDDLs(u);
+		String[] ddls = context.pojos2CreateDDLs(UserTest1.class);
 		for (String ddl : ddls)
 			context.nExecute(ddl);
 
+		UserTest1 u = new UserTest1();
 		u.setUserName("Sam");
 		context.insert(u);
+		
+		UserTest1 u2=new UserTest1();
+		System.out.println(u==u2);
+		SqlBox box1=context.findSqlBox(u);
+		SqlBox box2=context.findSqlBox(u2);
+		System.out.println(box1==box2);
+		TableModel tm=box1.getTableModel();
+		TableModel tm2=box2.getTableModel();
+		System.out.println(tm==tm2); 
 	}
 
 }

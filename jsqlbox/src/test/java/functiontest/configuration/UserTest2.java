@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package functiontest;
+package functiontest.configuration;
 
 import org.junit.Test;
 
@@ -17,10 +17,11 @@ import com.github.drinkjava2.jdialects.annotation.Column;
 import com.github.drinkjava2.jdialects.annotation.Entity;
 import com.github.drinkjava2.jdialects.annotation.Table;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.DebugUtils;
+import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
+
+import functiontest.TestBase;
 
 /**
  * Demo of jSqlBox configurations
@@ -30,7 +31,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
  */
 @Entity
 @Table(name = "user_demo")
-public class ConfigTest2 extends TestBase {
+public class UserTest2 extends TestBase {
 	@Column(name = "user_name2", length = 32)
 	private String userName;
 
@@ -43,16 +44,21 @@ public class ConfigTest2 extends TestBase {
 	}
 
 	public static void config(TableModel t) {
-		t.setTableName("t3");
+		t.setTableName("table2");
 		t.column("id").VARCHAR(32).pkey();
 		t.column("user_name2").setColumnName("user_name3");
 	}
 
-	public static class UserDemoBX extends SqlBox {
+	public static class UserTest2BX extends SqlBox {
 		{
-			TableModel t = new TableModel("tb2");
-			t.column("a").STRING(40).pkey();
+			TableModel t = DialectUtils.pojo2Model(UserTest2.class);
+			t.removeColumn("id");
+			t.column("user_name3").STRING(40).pkey().setColumnName("user_name4");
 			this.setTableModel(t);
+		}
+
+		public void config(TableModel t) {
+			t.column("newField").INTEGER();
 		}
 	}
 
@@ -60,12 +66,7 @@ public class ConfigTest2 extends TestBase {
 	public void doTest() {
 		SqlBoxContext context = new SqlBoxContext(dataSource);
 		context.setAllowShowSQL(true);
-		ConfigTest2 u = new ConfigTest2();
-
-		SqlBox box = SqlBoxUtils.findBox(u);
-		System.out.println("box=" + box);
-		System.out
-				.println("=====getTableModelDebugInfo====\r" + DebugUtils.getTableModelDebugInfo(box.getTableModel()));
+		UserTest2 u = new UserTest2();
 
 		String[] ddls = context.pojos2CreateDDLs(u);
 		for (String ddl : ddls)

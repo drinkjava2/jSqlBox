@@ -11,10 +11,14 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Method;
+
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -22,6 +26,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.0
  */
 public class SqlBoxContext extends DbPro {
+	private static String sqlBoxSuffixIdentity = "BX";
 	public static SqlBoxContext defaultContext = null;
 	private Dialect dialect;
 
@@ -49,17 +54,72 @@ public class SqlBoxContext extends DbPro {
 		this.dialect = dialect;
 	}
 
+	public static String getSqlBoxSuffixIdentity() {
+		return sqlBoxSuffixIdentity;
+	}
+
+	public static void setSqlBoxSuffixIdentity(String newSqlBoxSuffixIdentity) {
+		sqlBoxSuffixIdentity = newSqlBoxSuffixIdentity;
+	}
+
+	public SqlBox findSqlBox(Object entity) {
+		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
+		SqlBox box = SqlBoxUtility.getBindedBox(entity);
+		if (box != null)
+			return box;
+		box = createSqlBox(entity.getClass());
+		SqlBoxUtility.bindBoxToBean(box, entity, this);
+		return box;
+	}
+
+	public SqlBox createSqlBox(Class<?> entityOrBoxClass) {
+		Class<?> boxClass = null;
+		if (entityOrBoxClass == null)
+			throw new SqlBoxException("Bean Or SqlBox class can not be null");
+		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
+			boxClass = entityOrBoxClass;
+		if (boxClass == null)
+			boxClass = SqlBoxUtility.checkSqlBoxClassExist(entityOrBoxClass.getName() + sqlBoxSuffixIdentity);
+		if (boxClass == null)
+			boxClass = SqlBoxUtility.checkSqlBoxClassExist(
+					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + sqlBoxSuffixIdentity);
+		SqlBox box = null;
+		if (boxClass == null) {
+			box = new SqlBox();
+			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass).newCopy());
+		} else {
+			try {
+				box = (SqlBox) boxClass.newInstance();
+				TableModel model = box.getTableModel();
+				if (model == null) {
+					model = DialectUtils.pojo2Model(entityOrBoxClass).newCopy();
+					box.setTableModel(model);
+				}
+				Method configMethod = null;
+				try {//NOSONAR
+					configMethod = boxClass.getMethod("config", TableModel.class);
+				} catch (Exception e) {//NOSONAR
+				}
+				if (configMethod != null)
+					configMethod.invoke(box, model);
+			} catch (Exception e) {
+				throw new SqlBoxException("Can not create SqlBox instance: " + entityOrBoxClass, e);
+			}
+		}
+		if (box.getContext() == null)
+			box.setContext(this);
+		return box;
+	}
+
 	// =============CRUD methods=====
-	public <T> T insert(Object entity) {
-		return null;
+	public void insert(Object entity) {
+		SqlBoxContextUtility.insert(entity, this.findSqlBox(entity));
 	}
 
-	public <T> T update(Object entity) {
-		return null;
+	public void update(Object entity) {
 	}
 
-	public <T> T delete(Object entity) {
-		return null;
+	public void delete(Object entity) {
 	}
 
 	public <T> T load(Object entity, Object pkey) {
@@ -81,15 +141,15 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	public String[] pojos2CreateDDLs(Object entity) {
-		return dialect.toCreateDDL(SqlBoxUtils.findBox(entity).getTableModel());
+		return dialect.toCreateDDL(this.findSqlBox(entity).getTableModel());
 	}
 
 	public String[] pojos2DropAndCreateDDLs(Object entity) {
-		return dialect.toDropAndCreateDDL(SqlBoxUtils.findBox(entity).getTableModel());
+		return dialect.toDropAndCreateDDL(this.findSqlBox(entity).getTableModel());
 	}
 
 	public String[] pojo2DropDDL(Object entity) {
-		return dialect.toDropDDL(SqlBoxUtils.findBox(entity).getTableModel());
+		return dialect.toDropDDL(this.findSqlBox(entity).getTableModel());
 	}
 
 	// getter & setter =======

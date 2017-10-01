@@ -9,10 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package helloworld;
+package functiontest.configuration;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -23,8 +24,9 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.0
  */
 
-public class HelloWord {
+public class HelloWord extends ActiveRecord {
 	private String name;
+	private String address;
 
 	public String getName() {
 		return name;
@@ -32,6 +34,14 @@ public class HelloWord {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	@Test
@@ -44,15 +54,20 @@ public class HelloWord {
 		ds.setMaximumPoolSize(8);
 		ds.setConnectionTimeout(2000);
 
-		SqlBoxContext context = new SqlBoxContext(ds);
-		String[] ddls = context.pojos2CreateDDLs(HelloWord.class);
+		SqlBoxContext ctx = new SqlBoxContext(ds);
+		ctx.setAllowShowSQL(true);
+		String[] ddls = ctx.pojos2CreateDDLs(HelloWord.class);
 		for (String ddl : ddls)
-			context.nExecute(ddl);
+			ctx.nExecute(ddl);
 
 		HelloWord u = new HelloWord();
 		u.setName("Sam");
-		context.insert(u);
+		ctx.insert(u);
 
+		u.setName("Tom");
+		u.insert(); 
+		
+		System.out.println(ctx.nQueryForObject("select count(*) from helloword"));
 		ds.close();
 	}
 

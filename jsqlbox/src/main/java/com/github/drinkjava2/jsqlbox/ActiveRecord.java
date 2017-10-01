@@ -11,32 +11,38 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import com.github.drinkjava2.jdialects.model.TableModel;
+
 /**
  * Entity class extended from ActiveRecord will get CRUD methods, see below
  * difference in jSqlBox to save ActiveRecord entity and POJO entity into
  * database:
  * 
  * <pre>
- * ActiveRecord Entity:               
+ * ActiveRecord Entity:    
+ *     SqlBoxContext.setDefaultContext(new SqlBoxContext(dataSource));           
  *     entity.insert(); 
  * 
- * POJO entity:   
- *     context.insert(entity);
+ * Non-ActiveRecord entity:   
+ *     SqlBoxContext ctx=new SqlBoxContext(dataSource);
+ *     ctx.insert(entity);
  * </pre>
  * 
- * To make ActiveRecord methods like entity.insert() work, need configure
- * entity's SqlBoxContext property or set a global Default SqlBoxContext
- * instance in advance, detail see README.MD
+ * ActiveRecord only works when a global defaultContext be set.
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class ActiveRecord implements ActiveRecordSupport {
+public class ActiveRecord implements ActiveRecordType {
 
 	@Override
 	public SqlBox box() {
-		return SqlBoxUtils.findBox(this);
+		return SqlBoxUtility.findBox(this);
 	}
+
+	public TableModel tableModel() {
+		return box().getTableModel();
+	};
 
 	@Override
 	public SqlBoxContext context() {
@@ -44,18 +50,16 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public <T> T insert() {
-		return context().insert(this);
+	public void insert() {
+		 context().insert(this);
 	}
 
 	@Override
-	public <T> T update() {
-		return null;
+	public void update() { 
 	}
 
 	@Override
-	public <T> T delete() {
-		return null;
+	public void delete() { 
 	}
 
 	@Override

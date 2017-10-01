@@ -23,10 +23,10 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.0
  */
 public class TestBase {
-	HikariDataSource dataSource;
+	protected HikariDataSource dataSource;
 
 	@Before
-	public void beforetest() {
+	public void init() {
 		dataSource = new HikariDataSource();
 		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		dataSource.setDriverClassName("org.h2.Driver");
@@ -37,7 +37,7 @@ public class TestBase {
 	}
 
 	@After
-	public void aftertest() {
+	public void cleanUp() {
 		dataSource.close();
 	}
 }

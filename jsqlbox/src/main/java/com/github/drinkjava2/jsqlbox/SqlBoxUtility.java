@@ -15,25 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
-
 /**
- * SqlBoxUtils is help class to store some public methods concern to SqlBox
+ * SqlBoxUtility is utility class to store some public methods concern to SqlBox
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public abstract class SqlBoxUtils {
-	private static String sqlBoxSuffixIdentity = "BX";
-
-	public static String getSqlBoxSuffixIdentity() {
-		return sqlBoxSuffixIdentity;
-	}
-
-	public static void setSqlBoxSuffixIdentity(String sqlBoxSuffixIdentity) {
-		SqlBoxUtils.sqlBoxSuffixIdentity = sqlBoxSuffixIdentity;
-	}
-
+public abstract class SqlBoxUtility { 
 	// To check if a class exist, if exist, cache it to avoid check again
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<String, Integer>();
 
@@ -58,47 +46,15 @@ public abstract class SqlBoxUtils {
 	}
 
 	/**
-	 * Find a binded SqlBox for a bean, if no binded SqlBox found, create a new
-	 * one and bind it to bean
+	 * Find a binded SqlBox for a bean, if no binded SqlBox found, create a new one
+	 * and bind it to bean
 	 */
 	public static SqlBox findBox(Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
 		SqlBox box = getBindedBox(entity);
 		if (box != null)
 			return box;
-		box = findAndBuildSqlBox(entity.getClass());
-		bindBoxToBean(box, entity, SqlBoxContext.defaultContext);
-		return box;
-	}
-
-	/**
-	 * Find and create a SqlBox instance according bean class or SqlBox Class
-	 */
-	public static SqlBox findAndBuildSqlBox(Class<?> entityOrBoxClass) {
-		Class<?> boxClass = null;
-		if (entityOrBoxClass == null)
-			throw new SqlBoxException("Bean Or SqlBox class can not be null");
-		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
-			boxClass = entityOrBoxClass;
-		if (boxClass == null)
-			boxClass = SqlBoxUtils.checkSqlBoxClassExist(entityOrBoxClass.getName() + sqlBoxSuffixIdentity);
-		if (boxClass == null)
-			boxClass = SqlBoxUtils.checkSqlBoxClassExist(
-					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + sqlBoxSuffixIdentity);
-		SqlBox box = null;
-		if (boxClass == null) {
-			box = new SqlBox();
-			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
-		} else {
-			try {
-				box = (SqlBox) boxClass.newInstance();
-				if (box.getTableModel() == null)
-					box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
-			} catch (Exception e) {
-				throw new SqlBoxException("Can not create SqlBox instance: " + entityOrBoxClass, e);
-			}
-		}
-		return box;
+		return SqlBoxContext.defaultContext.findSqlBox(entity); 
 	}
 
 	/** * Check class if exist */
