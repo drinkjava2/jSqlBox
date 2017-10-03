@@ -78,18 +78,11 @@
 		<version>1.0.6</version>  
 	</dependency>
 	
-	<!-- jSqlBox depends on Apache Commons DbUtils  -->   
-    <dependency>
-      <groupId>commons-dbutils</groupId>
-      <artifactId>commons-dbutils</artifactId>
-      <version>1.7</version>
-    </dependency>
-	
-	 <!-- jSqlBox depends on jDbPro, it's an improved JDBC Tool based on Apache Commons DbUtils  --> 
+	<!-- jSqlBox depends on jDbPro, it's an improved JDBC Tool, depends on Apache Commons DbUtils commons-dbutils-1.7.jar  --> 
 	 <dependency>  
 		<groupId>com.github.drinkjava2</groupId>
 		<artifactId>jdbpro</artifactId>  
-		<version>1.7.0</version>   
+		<version>1.7.0.1</version>   
 	 </dependency>
 
 

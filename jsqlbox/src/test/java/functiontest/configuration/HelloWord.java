@@ -68,7 +68,7 @@ public class HelloWord extends ActiveRecord {
 		u.insert(); 
 		
 		System.out.println(ctx.nQueryForObject("select count(*) from helloword"));
-		ds.close();
+		ds.close(); 
 	}
 
 }

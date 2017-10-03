@@ -26,12 +26,17 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class UUIDGenerator implements IdGenerator {
-	public static final UUIDGenerator INSTANCE = new UUIDGenerator();
+public class UUID32Generator implements IdGenerator {
+	public static final UUID32Generator INSTANCE = new UUID32Generator();
 
 	@Override
 	public Object getNextID(SqlBoxContext ctx) {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}
 
+	public static void main(String[] args) {
+		for (int i = 0; i < 100; i++) {
+			System.out.println(UUID.randomUUID().toString());
+		}
+	}
 }
