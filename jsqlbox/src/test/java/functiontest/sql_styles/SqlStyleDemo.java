@@ -31,7 +31,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class SqlStyleDemo  {
+public class SqlStyleDemo {
 	protected HikariDataSource dataSource;
 
 	@Before
@@ -40,7 +40,7 @@ public class SqlStyleDemo  {
 		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");
-		dataSource.setPassword(""); 
+		dataSource.setPassword("");
 	}
 
 	@After
@@ -83,8 +83,7 @@ public class SqlStyleDemo  {
 		user.setName("Sam");
 		user.setAddress("Canada");
 
-		System.out.println("===============================================================");
-		System.out.println("DbUtils old style, need close connection and catch SQLException");
+		System.out.println("==DbUtils old style, need close connection and catch SQLException===");
 		Connection conn = null;
 		try {
 			conn = ctx.prepareConnection();
@@ -103,8 +102,7 @@ public class SqlStyleDemo  {
 			}
 		}
 
-		System.out.println("===============================================================");
-		System.out.println("DbUtils old style, need catch SQLException");
+		System.out.println("========= DbUtils old style, need catch SQLException========");
 		try {
 			ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 			ctx.execute("update users set name=?, address=?", "Sam", "Canada");
@@ -115,15 +113,14 @@ public class SqlStyleDemo  {
 			e.printStackTrace();
 		}
 
-		System.out.println("===============================================================");
-		System.out.println("nXxxx methods, new Sql style, no need catch SQLException");
+		System.out.println("=== nXxxx methods, New JDBC style, no need catch Exception ===");
 		ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 		ctx.nExecute("update users set name=?, address=?", "Sam", "Canada");
 		Assert.assertEquals(1L,
 				ctx.nQueryForObject("select count(*) from users where name=? and address=?", "Sam", "Canada"));
 		ctx.nExecute("delete from users where name=? or address=?", "Sam", "Canada");
 
-		System.out.println("===============================================================");
+		System.out.println("============= Ixxx methods, In-line style===================");
 		System.out.println("iXxxx methods, In-line style");
 		ctx.iExecute("insert into users (", //
 				" name ,", param0("Sam"), //
@@ -134,15 +131,13 @@ public class SqlStyleDemo  {
 		Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where name=" + question0("Sam")));
 		ctx.iExecute("delete from users where name=", question0("Sam"), " and address=", question("Canada"));
 
-		System.out.println("===============================================================");
-		System.out.println("Another demo of In-line style");
+		System.out.println("========== Another demo of In-line style=======================");
 		ctx.iExecute("insert into users (", inline0(user, "", ", ") + ") ", valuesQuesions());
 		ctx.iExecute("update users set ", inline0(user, "=?", ", "));
 		Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where ", inline0(user, "=?", " and ")));
 		ctx.iExecute(param0(), "delete from users where ", inline(user, "=?", " or "));
 
-		System.out.println("===============================================================");
-		System.out.println("tXxxx methods, Template style");
+		System.out.println("========== Txxx methods, Template style ===================");
 		put0("user", user);
 		ctx.tExecute("insert into users (name, address) values(#{user.name},#{user.address})");
 		put0("name", "Sam");
@@ -154,26 +149,21 @@ public class SqlStyleDemo  {
 		ctx.tExecute("delete from users where name=#{name} or address=#{addr}", put0("name", "Sam"),
 				put("addr", "Canada"));
 
-		System.out.println("===============================================================");
-		System.out.println("Data Mapper style");
-		ctx.insert(user);
+		System.out.println("================ Data Mapper style =================");
+		ctx.insert(user);// insert
 		user.setName("Sam");
 		user.setAddress("Canada");
-		ctx.update(user);
-		User user2 = ctx.load(User.class, "Sam");
-		ctx.delete(user2);
-
-		System.out.println("===============================================================");
-		System.out.println("ActiveRecord style");
+		ctx.update(user);// update
+		User user2 = ctx.load(User.class, "Sam");// read
+		ctx.delete(user2);// delete
+ 
+		System.out.println("=============== ActiveRecord style ================");
 		SqlBoxContext.setDefaultContext(ctx);
-		System.out.println(user.box());
-		System.out.println(user.context());
-		user.insert();
-		user.setName("Sam");
-		user.setAddress("Canada");
-		user.update();
-		User user3 = user.load("Sam");
-		user3.delete();
+		user.insert(); // insert
+		user.setAddress("China");
+		user.update(); // update
+		User user4 = user.load("Sam");// read
+		user4.delete();// delete
 	}
 
 }

@@ -32,7 +32,7 @@ public class SqlBox {
 	// getter & setter ========
 	public SqlBoxContext getContext() {
 		return context;
-	}
+	} 
 
 	public void setContext(SqlBoxContext context) {
 		this.context = context;

@@ -40,7 +40,7 @@ public class UserTest1 extends TestBase {
 
 	public static void config(TableModel t) {
 		t.setTableName("table1");
-		t.column("user_name2").setColumnName("user_name3");
+		t.getColumn("user_name2").setColumnName("user_name3");
 	}
 
 	@Test

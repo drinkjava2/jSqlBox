@@ -29,6 +29,7 @@ public class SqlBoxContext extends DbPro {
 	private static String sqlBoxSuffixIdentity = "BX";
 	public static SqlBoxContext defaultContext = null;
 	private Dialect dialect;
+	private TableModel[] metaTableModels;
 
 	public SqlBoxContext() {
 		super();
@@ -37,21 +38,29 @@ public class SqlBoxContext extends DbPro {
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		this.dialect = Dialect.guessDialect(ds);
+		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, ConnectionManager cm) {
 		super(ds, cm);
 		dialect = Dialect.guessDialect(ds);
+		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, Dialect dialect) {
 		super(ds);
 		this.dialect = dialect;
+		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, Dialect dialect, ConnectionManager cm) {
 		super(ds, cm);
 		this.dialect = dialect;
+		refreshMetaData();
+	}
+
+	public void refreshMetaData() {
+		metaTableModels = SqlBoxContextUtils.metaDataToModels(this, dialect);
 	}
 
 	public static String getSqlBoxSuffixIdentity() {
@@ -96,9 +105,9 @@ public class SqlBoxContext extends DbPro {
 					box.setTableModel(model);
 				}
 				Method configMethod = null;
-				try {//NOSONAR
+				try {// NOSONAR
 					configMethod = boxClass.getMethod("config", TableModel.class);
-				} catch (Exception e) {//NOSONAR
+				} catch (Exception e) {// NOSONAR
 				}
 				if (configMethod != null)
 					configMethod.invoke(box, model);
@@ -113,13 +122,14 @@ public class SqlBoxContext extends DbPro {
 
 	// =============CRUD methods=====
 	public void insert(Object entity) {
-		SqlBoxContextUtility.insert(entity, this.findSqlBox(entity));
+		SqlBoxContextUtils.insert(entity, this.findSqlBox(entity));
 	}
 
 	public void update(Object entity) {
 	}
 
 	public void delete(Object entity) {
+
 	}
 
 	public <T> T load(Object entity, Object pkey) {
@@ -168,6 +178,14 @@ public class SqlBoxContext extends DbPro {
 
 	public static void setDefaultContext(SqlBoxContext defaultContext) {
 		SqlBoxContext.defaultContext = defaultContext;
+	}
+
+	public TableModel[] getMetaTableModels() {
+		return metaTableModels;
+	}
+
+	public void setMetaTableModels(TableModel[] metaTableModels) {
+		this.metaTableModels = metaTableModels;
 	}
 
 }

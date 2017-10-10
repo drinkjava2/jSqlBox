@@ -45,20 +45,20 @@ public class UserTest2 extends TestBase {
 
 	public static void config(TableModel t) {
 		t.setTableName("table2");
-		t.column("id").VARCHAR(32).pkey();
-		t.column("user_name2").setColumnName("user_name3");
+		t.addColumn("id").VARCHAR(32).pkey();
+		t.getColumn("user_name2").setColumnName("user_name3");
 	}
 
 	public static class UserTest2BX extends SqlBox {
 		{
 			TableModel t = DialectUtils.pojo2Model(UserTest2.class);
 			t.removeColumn("id");
-			t.column("user_name3").STRING(40).pkey().setColumnName("user_name4");
+			t.getColumn("user_name3").STRING(40).pkey().setColumnName("user_name4");
 			this.setTableModel(t);
 		}
 
 		public void config(TableModel t) {
-			t.column("newField").INTEGER();
+			t.addColumn("newField").INTEGER();
 		}
 	}
 
