@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.ClassCacheUtils;
 
 /**
- * Unit test for ClassCacheUtils
+ * Coverage unit test for ClassCacheUtils
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -52,7 +52,7 @@ public class ClassCacheUtilsTest {
 
 	@Test
 	public void cacheReadWriteMethodsTest() {
-		for (int i = 0; i < 1000000; i++) {
+		for (int i = 0; i < 10000; i++) {
 			int length = ClassCacheUtils.getClassReadMethods(BeanExample2.class).size();
 			Assert.assertTrue(length == 2);
 			length = ClassCacheUtils.getClassWriteMethods(BeanExample2.class).size();

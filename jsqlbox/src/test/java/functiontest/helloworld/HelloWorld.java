@@ -68,7 +68,7 @@ public class HelloWorld extends ActiveRecord {
 		u.setName("Tom");
 		u.insert();
 
-		Assert.assertEquals(2L, ctx.nQueryForObject("select count(*) from helloword"));
+		Assert.assertEquals(2L, ctx.nQueryForObject("select count(*) from helloworld"));
 		ds.close();
 	}
 

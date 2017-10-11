@@ -15,8 +15,14 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.jdialects.DialectException;
@@ -30,16 +36,16 @@ import com.github.drinkjava2.jdialects.DialectException;
 public abstract class ClassCacheUtils {
 	// To check if a class exist, if exist, cache it to avoid check again
 	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<String, Integer>();
-	private static Map<Class<?>, Map<String, Method>> classReadMethods = new HashMap<Class<?>, Map<String, Method>>();
-	private static Map<Class<?>, Map<String, Method>> classWriteMethods = new HashMap<Class<?>, Map<String, Method>>();
+	private static Map<Class<?>, Map<String, Method>> classReadMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
+	private static Map<Class<?>, Map<String, Method>> classWriteMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
 
 	/** * Check class if exist */
-	public static Class<?> checkSqlBoxClassExist(String className) {
+	public static Class<?> checkClassExist(String className) {
 		Integer i = classExistCache.get(className);
 		if (i == null)
 			try {
 				Class<?> clazz = Class.forName(className);
-				if (SqlBox.class.isAssignableFrom((Class<?>) clazz)) {
+				if (clazz != null) {
 					classExistCache.put(className, 1);
 					return clazz;
 				}
@@ -60,7 +66,21 @@ public abstract class ClassCacheUtils {
 		return null;
 	}
 
-	public synchronized static void cacheReadWriteMethods(Class<?> clazz) {
+	private static LinkedHashMap<String, Method> sortMap(Map<String, Method> map) {
+		List<Entry<String, Method>> list = new ArrayList<Entry<String, Method>>(map.entrySet());
+		Collections.sort(list, new Comparator<Entry<String, Method>>() {
+			public int compare(Entry<String, Method> o1, Entry<String, Method> o2) {
+				return o1.getKey().compareTo(o2.getKey());
+			}
+		});
+		LinkedHashMap<String, Method> result = new LinkedHashMap<String, Method>();
+		for (Entry<String, Method> entry : list) {
+			result.put(entry.getKey(), entry.getValue());
+		}
+		return result;
+	}
+
+	public static synchronized void cacheReadWriteMethods(Class<?> clazz) {
 		BeanInfo beanInfo = null;
 		PropertyDescriptor[] pds = null;
 		try {
@@ -74,13 +94,13 @@ public abstract class ClassCacheUtils {
 		Map<String, Method> writeMethods = new HashMap<String, Method>();
 		for (PropertyDescriptor pd : pds) {
 			String fieldName = pd.getName();
-			if (!"class".equals(fieldName)) {
-				readMethods.put(fieldName, pd.getReadMethod());
-				writeMethods.put(fieldName, pd.getWriteMethod());
-			}
+			if ("class".equals(fieldName) || "simpleName".equals(fieldName) || "canonicalName".equals(fieldName))
+				continue;
+			readMethods.put(fieldName, pd.getReadMethod());
+			writeMethods.put(fieldName, pd.getWriteMethod());
 		}
-		classReadMethods.put(clazz, readMethods);
-		classWriteMethods.put(clazz, writeMethods);
+		classReadMethods.put(clazz, sortMap(readMethods));
+		classWriteMethods.put(clazz, sortMap(writeMethods));
 	}
 
 	/** Return cached class read methods to avoid each time use reflect */

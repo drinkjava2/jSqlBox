@@ -50,20 +50,28 @@ public class TestBase {
 		SqlBoxContext.setDefaultContext(null);
 	}
 
-	/**
-	 * Drop and create database according given tableModels
-	 */
-	public void dropAndCreateDatabase(TableModel... tableModels) {
-		String[] ddls = dialect.toDropDDL(tableModels);
+	public void executeDDLs(String[] ddls) {
 		for (String sql : ddls)
 			try {
 				ctx.nExecute(sql);
 			} catch (Exception e) {
 			}
+	}
 
-		ddls = dialect.toCreateDDL(tableModels);
+	public void quietExecuteDDLs(String[] ddls) {
 		for (String sql : ddls)
 			ctx.nExecute(sql);
+	}
+ 
+	/**
+	 * Drop and create database according given tableModels
+	 */
+	public void dropAndCreateDatabase(TableModel... tableModels) {
+		String[] ddls = dialect.toDropDDL(tableModels);
+		quietExecuteDDLs(ddls);
+
+		ddls = dialect.toCreateDDL(tableModels);
+		executeDDLs(ddls);
 	}
 
 }

@@ -13,7 +13,7 @@ package functiontest.helloworld;
 
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.annotation.Column;
+import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;

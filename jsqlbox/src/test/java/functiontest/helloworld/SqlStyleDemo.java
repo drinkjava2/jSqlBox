@@ -19,8 +19,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.annotation.PKey;
-import com.github.drinkjava2.jdialects.annotation.Table;
+import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
+import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;

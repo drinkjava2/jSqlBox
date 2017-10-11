@@ -26,7 +26,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.0
  */
 public class SqlBoxContext extends DbPro {
-	private static String sqlBoxSuffixIdentity = "BX";
+	private static String sqlBoxSuffixIdentity = "SqlBox";
 	public static SqlBoxContext defaultContext = null;
 	private Dialect dialect;
 	private TableModel[] metaTableModels;
@@ -88,21 +88,21 @@ public class SqlBoxContext extends DbPro {
 		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
-			boxClass = ClassCacheUtils.checkSqlBoxClassExist(entityOrBoxClass.getName() + sqlBoxSuffixIdentity);
+			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + sqlBoxSuffixIdentity);
 		if (boxClass == null)
-			boxClass = ClassCacheUtils.checkSqlBoxClassExist(
+			boxClass = ClassCacheUtils.checkClassExist(
 					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + sqlBoxSuffixIdentity);
+		if (boxClass != null && !SqlBox.class.isAssignableFrom((Class<?>) boxClass))
+			boxClass = null;
 		SqlBox box = null;
 		if (boxClass == null) {
 			box = new SqlBox();
-			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass).newCopy());
 			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
 				TableModel model = box.getTableModel();
 				if (model == null) {
-					model = DialectUtils.pojo2Model(entityOrBoxClass).newCopy();
 					model = DialectUtils.pojo2Model(entityOrBoxClass);
 					box.setTableModel(model);
 				}
@@ -147,28 +147,16 @@ public class SqlBoxContext extends DbPro {
 
 	// ========Utils methods=====
 	// DDL about
-	public String[] pojos2CreateDDLs(Class<?> pojoClasses) {
+	public String[] pojos2CreateDDLs(Class<?>... pojoClasses) {
 		return dialect.toCreateDDL(pojoClasses);
 	}
 
-	public String[] pojos2DropAndCreateDDLs(Class<?> pojoClasses) {
+	public String[] pojos2DropAndCreateDDLs(Class<?>... pojoClasses) {
 		return dialect.toDropAndCreateDDL(pojoClasses);
 	}
 
-	public String[] pojo2DropDDL(Class<?> pojoClasses) {
+	public String[] pojos2DropDDL(Class<?>... pojoClasses) {
 		return dialect.toDropDDL(pojoClasses);
-	}
-
-	public String[] pojos2CreateDDLs(Object entity) {
-		return dialect.toCreateDDL(this.findSqlBox(entity).getTableModel());
-	}
-
-	public String[] pojos2DropAndCreateDDLs(Object entity) {
-		return dialect.toDropAndCreateDDL(this.findSqlBox(entity).getTableModel());
-	}
-
-	public String[] pojo2DropDDL(Object entity) {
-		return dialect.toDropDDL(this.findSqlBox(entity).getTableModel());
 	}
 
 	// getter & setter =======

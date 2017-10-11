@@ -81,14 +81,14 @@ public class DbMetaData {
 					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
 					try {
 						if (((Boolean) (true)).equals(rs.getBoolean("IS_AUTOINCREMENT")))
-							col.identity();
+							col.identityId();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 
 					try {
 						if ("YES".equalsIgnoreCase(rs.getString("IS_AUTOINCREMENT")))
-							col.identity();
+							col.identityId();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
