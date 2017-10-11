@@ -30,6 +30,9 @@ public interface ActiveRecordType {
 	/** @return TableModel instance binded in this entity */
 	public TableModel tableModel();
 
+	/** @return table name */
+	public String table();
+
 	/** @return SqlBoxContext instance */
 	public SqlBoxContext context();
 
@@ -42,7 +45,9 @@ public interface ActiveRecordType {
 	/** Delete entity in database */
 	public void delete();
 
-	/** Load entity from database by primary key, key can be single value or Map */
+	/**
+	 * Load entity from database by primary key, key can be single value or Map
+	 */
 	public <T> T load(Object pkey);
 
 	// =========For release to Java8==========

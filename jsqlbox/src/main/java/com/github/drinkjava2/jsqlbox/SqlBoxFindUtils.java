@@ -13,7 +13,6 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * SqlBoxUtility is utility class to store some public methods concern to SqlBox
@@ -21,10 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public abstract class SqlBoxUtility { 
-	// To check if a class exist, if exist, cache it to avoid check again
-	private static ConcurrentHashMap<String, Integer> classExistCache = new ConcurrentHashMap<String, Integer>();
-
+public abstract class SqlBoxFindUtils {  
 	/**
 	 * Store boxes binded to entities in a threadLocal Map
 	 */
@@ -56,34 +52,7 @@ public abstract class SqlBoxUtility {
 			return box;
 		return SqlBoxContext.defaultContext.findSqlBox(entity); 
 	}
-
-	/** * Check class if exist */
-	public static Class<?> checkSqlBoxClassExist(String className) {
-		Integer i = classExistCache.get(className);
-		if (i == null)
-			try {
-				Class<?> clazz = Class.forName(className);
-				if (SqlBox.class.isAssignableFrom((Class<?>) clazz)) {
-					classExistCache.put(className, 1);
-					return clazz;
-				}
-				classExistCache.put(className, 0);
-				return null;
-			} catch (Exception e) {
-				SqlBoxException.eatException(e);
-				classExistCache.put(className, 0);
-				return null;
-			}
-		if (1 == i) {
-			try {
-				return Class.forName(className);
-			} catch (Exception e) {
-				SqlBoxException.eatException(e);
-			}
-		}
-		return null;
-	}
-
+ 
 	/**
 	 * Bind a box to a bean, if box has no SqlBoxContext, use givenSqlBoxContext
 	 */

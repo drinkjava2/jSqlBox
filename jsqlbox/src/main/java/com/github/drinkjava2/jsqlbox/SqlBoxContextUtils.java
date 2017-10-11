@@ -16,9 +16,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
+import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.utils.DialectUtils;
@@ -53,24 +56,64 @@ public abstract class SqlBoxContextUtils {
 		return tableModels;
 	}
 
-	private static ColumnModel findMatchColumnForJavaField(String pojoField, List<ColumnModel> columns) {
+	private static ColumnModel findMatchColumnForJavaField(String pojoField, SqlBox box) {
+		TableModel beanTableModel = box.getTableModel();
+		ColumnModel col = findMatchColumnForJavaField(pojoField, beanTableModel);
+		if (col == null)
+			col = findMatchColumnForJavaField(pojoField,
+					box.getContext().getMetaTableModel(beanTableModel.getTableName()));
+		if (col == null)
+			throw new SqlBoxException("Can not find database column match entityBean field '" + pojoField + "'");
+		return col;
+	}
+
+	private static ColumnModel findMatchColumnForJavaField(String pojoField, TableModel tableModel) {
+		List<ColumnModel> columns = tableModel.getColumns();
 		ColumnModel result = null;
 		String underLineFieldName = SqlBoxStrUtils.camelToLowerCaseUnderline(pojoField);
-		for (ColumnModel columnModel : columns) {
-			String colName = columnModel.getColumnName();
-			if (colName.equalsIgnoreCase(pojoField) || colName.equalsIgnoreCase(underLineFieldName)) {
+		for (ColumnModel col : columns) {
+			if (pojoField.equalsIgnoreCase(col.getPojoField())
+					|| underLineFieldName.equalsIgnoreCase(col.getColumnName())) {
 				if (result != null)
 					throw new SqlBoxException("Field '" + pojoField + "' found duplicated columns definition");
-				result = columnModel;
+				result = col;
 			}
 		}
-		if (result != null && result.getTransientable())
-			return null;
 		return result;
 	}
 
 	/**
-	 * Insert entityBean into database
+	 * Delete entityBean in database according primary key value
+	 */
+	public static void delete(Object entityBean, SqlBox box) {
+		checkBeanAndBoxExist(entityBean, box);
+		TableModel tableModel = box.getTableModel();
+
+		List<Object> parameters = new ArrayList<Object>();
+		StringBuilder sb = new StringBuilder();
+		sb.append("delete from ").append(tableModel.getTableName()).append(" where ");
+		Map<String, Method> readMethods = ClassCacheUtils.getClassReadMethods(entityBean.getClass());
+		for (String fieldName : readMethods.keySet()) {
+			ColumnModel col = findMatchColumnForJavaField(fieldName, box);
+			if (col.getPkey()) {
+				Object value = readValueFromBeanField(entityBean, fieldName);
+				sb.append(col.getColumnName()).append("=?, ");
+				parameters.add(value);
+			}
+		}
+		sb.setLength(sb.length() - 2);// delete the last "," character
+		if (parameters.size() == 0)
+			throw new SqlBoxException("No primary key setting for entityBean");
+		int rowEffected = box.context.nExecute(sb.toString(), parameters.toArray(new Object[parameters.size()]));
+		if (rowEffected <= 0)
+			throw new SqlBoxException("No row be deleted for entityBean");
+		if (rowEffected > 1)
+			throw new SqlBoxException("Multiple rows be deleted for entityBean");
+	}
+
+	/**
+	 * Insert entityBean into database, and change ID fields to values generated
+	 * by IdGenerator (identity or sequence or UUID...)
 	 */
 	public static void insert(Object entityBean, SqlBox box) {
 		checkBeanAndBoxExist(entityBean, box);
@@ -78,45 +121,50 @@ public abstract class SqlBoxContextUtils {
 		TableModel tableModel = box.getTableModel();
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("insert into ").append(tableModel.getTableName()).append("(");
+		sb.append("insert into ").append(tableModel.getTableName()).append(" (");
 
 		List<Object> parameters = new ArrayList<Object>();
-		ColumnModel identityColumn = null;
-		for (ColumnModel col : tableModel.getColumns()) {
-			if (!col.getTransientable()) {
+		String identityColumn = null;
+		Type identityType = null;
+		Map<String, Method> readMethods = ClassCacheUtils.getClassReadMethods(entityBean.getClass());
+
+		for (String fieldName : readMethods.keySet()) {
+			ColumnModel col = findMatchColumnForJavaField(fieldName, box);
+			if (!col.getTransientable() && col.getInsertable()) {
 				IdGenerator idGen = col.getIdGenerator();
 				if (idGen != null) {
 					if (idGen.dependOnAutoIdGenerator()) {
 						if (identityColumn != null)
 							throw new SqlBoxException(
 									"More than 1 identity column found for table '" + tableModel.getTableName() + "'");
-						identityColumn = col;
+						identityColumn = fieldName;
 					} else {
-						sb.append("?,");
+						sb.append(col.getColumnName()).append(",");
 						Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
 						parameters.add(id);
-						writeValueToBeanField(entityBean, col, id);
+						writeValueToBeanField(entityBean, fieldName, id);
 					}
 				} else {
-					Object value = readValueFromBeanField(entityBean, col);
-					sb.append("?,");
+					Object value = readValueFromBeanField(entityBean, fieldName);
+					sb.append(col.getColumnName()).append(", ");
 					parameters.add(value);
 				}
 			}
 		}
-		sb.setLength(sb.length() - 1);// delete the last "," character
+		sb.setLength(sb.length() - 2);// delete the last ", " character
 		sb.append(") values(").append(SqlBoxStrUtils.getQuestionsStr(parameters.size())).append(")");
 		ctx.nExecute(sb.toString(), parameters.toArray(new Object[parameters.size()]));
 		if (identityColumn != null) {// write identity id to Bean field
-			Object identityId = identityColumn.getIdGenerator().getNextID(ctx, ctx.getDialect(),
-					identityColumn.getColumnType());
+			Object identityId = IdentityIdGenerator.INSTANCE.getNextID(ctx, ctx.getDialect(), identityType);
 			writeValueToBeanField(entityBean, identityColumn, identityId);
 		}
 	}
 
 	/** Read value from entityBean field */
-	private static Object readValueFromBeanField(Object entityBean, ColumnModel column) {
-		Method readMethod = column.getPojoReadMethod();
+	private static Object readValueFromBeanField(Object entityBean, String fieldName) {
+		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
+		if (readMethod == null)
+			throw new SqlBoxException("Can not find Java bean read method for column '" + fieldName + "'");
 		try {
 			return readMethod.invoke(entityBean);
 		} catch (Exception e) {
@@ -125,9 +173,12 @@ public abstract class SqlBoxContextUtils {
 	}
 
 	/** write value to entityBean field */
-	private static void writeValueToBeanField(Object entityBean, ColumnModel column, Object value) {
+	private static void writeValueToBeanField(Object entityBean, String fieldName, Object value) {
+		Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
+		if (writeMethod == null)
+			throw new SqlBoxException("Can not find Java bean read method for column '" + fieldName + "'");
 		try {
-			column.getPojoWriteMethod().invoke(entityBean, value);
+			writeMethod.invoke(entityBean, value);
 		} catch (Exception e) {
 			throw new SqlBoxException(e);
 		}
@@ -140,10 +191,6 @@ public abstract class SqlBoxContextUtils {
 		SqlBoxException.assureNotNull(box.getTableModel(), "Assert error, box's TableModel can not be null");
 		SqlBoxException.assureNotEmpty(box.getTableModel().getTableName(),
 				"Assert error, box's tableName can not be null");
-	}
-
-	public static void delete(Object entityBean, SqlBox box) {
-		checkBeanAndBoxExist(entityBean, box);
 	}
 
 }

@@ -9,8 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package functiontest.configuration;
+package functiontest.helloworld;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -24,7 +25,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.0
  */
 
-public class HelloWord extends ActiveRecord {
+public class HelloWorld extends ActiveRecord {
 	private String name;
 	private String address;
 
@@ -56,19 +57,19 @@ public class HelloWord extends ActiveRecord {
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		ctx.setAllowShowSQL(true);
-		String[] ddls = ctx.pojos2CreateDDLs(HelloWord.class);
+		String[] ddls = ctx.pojos2CreateDDLs(HelloWorld.class);
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
-		HelloWord u = new HelloWord();
+		HelloWorld u = new HelloWorld();
 		u.setName("Sam");
 		ctx.insert(u);
 
 		u.setName("Tom");
-		u.insert(); 
-		
-		System.out.println(ctx.nQueryForObject("select count(*) from helloword"));
-		ds.close(); 
+		u.insert();
+
+		Assert.assertEquals(2L, ctx.nQueryForObject("select count(*) from helloword"));
+		ds.close();
 	}
 
 }

@@ -29,10 +29,15 @@ public class SqlBox {
 	/** Bind to which entity Bean instance */
 	Object entityBean;
 
+	// Shortcut method
+	public String table() {
+		return tableModel.getTableName();
+	}
+
 	// getter & setter ========
 	public SqlBoxContext getContext() {
 		return context;
-	} 
+	}
 
 	public void setContext(SqlBoxContext context) {
 		this.context = context;

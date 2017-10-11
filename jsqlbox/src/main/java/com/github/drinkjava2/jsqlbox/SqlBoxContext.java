@@ -73,11 +73,11 @@ public class SqlBoxContext extends DbPro {
 
 	public SqlBox findSqlBox(Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
-		SqlBox box = SqlBoxUtility.getBindedBox(entity);
+		SqlBox box = SqlBoxFindUtils.getBindedBox(entity);
 		if (box != null)
 			return box;
 		box = createSqlBox(entity.getClass());
-		SqlBoxUtility.bindBoxToBean(box, entity, this);
+		SqlBoxFindUtils.bindBoxToBean(box, entity, this);
 		return box;
 	}
 
@@ -88,20 +88,22 @@ public class SqlBoxContext extends DbPro {
 		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
-			boxClass = SqlBoxUtility.checkSqlBoxClassExist(entityOrBoxClass.getName() + sqlBoxSuffixIdentity);
+			boxClass = ClassCacheUtils.checkSqlBoxClassExist(entityOrBoxClass.getName() + sqlBoxSuffixIdentity);
 		if (boxClass == null)
-			boxClass = SqlBoxUtility.checkSqlBoxClassExist(
+			boxClass = ClassCacheUtils.checkSqlBoxClassExist(
 					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + sqlBoxSuffixIdentity);
 		SqlBox box = null;
 		if (boxClass == null) {
 			box = new SqlBox();
 			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass).newCopy());
+			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
 				TableModel model = box.getTableModel();
 				if (model == null) {
 					model = DialectUtils.pojo2Model(entityOrBoxClass).newCopy();
+					model = DialectUtils.pojo2Model(entityOrBoxClass);
 					box.setTableModel(model);
 				}
 				Method configMethod = null;
@@ -120,6 +122,13 @@ public class SqlBoxContext extends DbPro {
 		return box;
 	}
 
+	public TableModel getMetaTableModel(String tableName) {
+		for (TableModel tableModel : metaTableModels)
+			if (tableName.equalsIgnoreCase(tableModel.getTableName()))
+				return tableModel;
+		return null;
+	}
+
 	// =============CRUD methods=====
 	public void insert(Object entity) {
 		SqlBoxContextUtils.insert(entity, this.findSqlBox(entity));
@@ -129,7 +138,7 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	public void delete(Object entity) {
-
+		SqlBoxContextUtils.delete(entity, this.findSqlBox(entity));
 	}
 
 	public <T> T load(Object entity, Object pkey) {

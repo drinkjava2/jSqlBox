@@ -1,4 +1,4 @@
-package functiontest.sql_styles;
+package functiontest.helloworld;
 
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.inline;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.inline0;
@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.annotation.Id;
+import com.github.drinkjava2.jdialects.annotation.PKey;
 import com.github.drinkjava2.jdialects.annotation.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -50,7 +50,7 @@ public class SqlStyleDemo {
 
 	@Table(name = "users")
 	public static class User extends ActiveRecord {
-		@Id
+		@PKey
 		String name;
 		String address;
 
@@ -155,8 +155,10 @@ public class SqlStyleDemo {
 		user.setAddress("Canada");
 		ctx.update(user);// update
 		User user2 = ctx.load(User.class, "Sam");// read
+		System.out.println(user2.getName());
+		System.out.println(user2.getAddress());
 		ctx.delete(user2);// delete
- 
+
 		System.out.println("=============== ActiveRecord style ================");
 		SqlBoxContext.setDefaultContext(ctx);
 		user.insert(); // insert

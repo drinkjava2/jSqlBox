@@ -9,11 +9,14 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package functiontest;
+package config;
 
 import org.junit.After;
 import org.junit.Before;
 
+import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -24,6 +27,8 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class TestBase {
 	protected HikariDataSource dataSource;
+	protected Dialect dialect;
+	protected SqlBoxContext ctx;
 
 	@Before
 	public void init() {
@@ -34,10 +39,31 @@ public class TestBase {
 		dataSource.setPassword("");
 		dataSource.setMaximumPoolSize(8);
 		dataSource.setConnectionTimeout(2000);
+		dialect = Dialect.guessDialect(dataSource);
+		ctx = new SqlBoxContext(dataSource);
+		SqlBoxContext.setDefaultContext(ctx);
 	}
 
 	@After
 	public void cleanUp() {
 		dataSource.close();
+		SqlBoxContext.setDefaultContext(null);
 	}
+
+	/**
+	 * Drop and create database according given tableModels
+	 */
+	public void dropAndCreateDatabase(TableModel... tableModels) {
+		String[] ddls = dialect.toDropDDL(tableModels);
+		for (String sql : ddls)
+			try {
+				ctx.nExecute(sql);
+			} catch (Exception e) {
+			}
+
+		ddls = dialect.toCreateDDL(tableModels);
+		for (String sql : ddls)
+			ctx.nExecute(sql);
+	}
+
 }

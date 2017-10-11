@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package functiontest.configuration;
+package functiontest.helloworld;
 
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
-import functiontest.TestBase;
+import config.TestBase;
 
 /**
  * Demo of jSqlBox configurations

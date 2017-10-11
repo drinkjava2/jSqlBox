@@ -37,12 +37,17 @@ public class ActiveRecord implements ActiveRecordType {
 
 	@Override
 	public SqlBox box() {
-		return SqlBoxUtility.findBox(this);
+		return SqlBoxFindUtils.findBox(this);
 	}
 
 	public TableModel tableModel() {
 		return box().getTableModel();
 	};
+
+	@Override
+	public String table() {
+		return box().getTableModel().getTableName();
+	}
 
 	@Override
 	public SqlBoxContext context() {
@@ -51,15 +56,15 @@ public class ActiveRecord implements ActiveRecordType {
 
 	@Override
 	public void insert() {
-		 context().insert(this);
+		context().insert(this);
 	}
 
 	@Override
-	public void update() { 
+	public void update() {
 	}
 
 	@Override
-	public void delete() { 
+	public void delete() {
 	}
 
 	@Override
