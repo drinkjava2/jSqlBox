@@ -14,14 +14,14 @@ package com.github.drinkjava2.jsqlbox;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * ActiveRecordType designed for Java8, in Java8 if a entity class implements
- * ActiveRecordType interface, it will have CRUD Method. To release
+ * IActiveRecord designed for Java8, in Java8 if a entity class implements
+ * IActiveRecord interface, it will have CRUD Method. To release
  * jSqlBox-x.x.x-java8.jar, need change source code of this class
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public interface ActiveRecordType {
+public interface IActiveRecord {
 
 	// =========For release to Java6==========
 	/** @return SqlBox instance binded in this entity */
@@ -50,7 +50,7 @@ public interface ActiveRecordType {
 	 */
 	public <T> T load(Object pkey);
 
-	// =========For release to Java8==========
+	// =========For release to Java8 need use below codes==========
 	// TODO: default methods for Java8
 
 }

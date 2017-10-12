@@ -33,7 +33,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class ActiveRecord implements ActiveRecordType {
+public class ActiveRecord implements IActiveRecord {
 
 	@Override
 	public SqlBox box() {
