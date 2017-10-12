@@ -20,7 +20,7 @@ import java.util.Map;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public abstract class SqlBoxFindUtils {  
+public abstract class SqlBoxBindUtils {  
 	/**
 	 * Store boxes binded to entities in a threadLocal Map
 	 */

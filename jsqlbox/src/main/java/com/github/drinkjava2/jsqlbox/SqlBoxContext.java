@@ -73,11 +73,11 @@ public class SqlBoxContext extends DbPro {
 
 	public SqlBox findSqlBox(Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
-		SqlBox box = SqlBoxFindUtils.getBindedBox(entity);
+		SqlBox box = SqlBoxBindUtils.getBindedBox(entity);
 		if (box != null)
 			return box;
 		box = createSqlBox(entity.getClass());
-		SqlBoxFindUtils.bindBoxToBean(box, entity, this);
+		SqlBoxBindUtils.bindBoxToBean(box, entity, this);
 		return box;
 	}
 
@@ -134,15 +134,16 @@ public class SqlBoxContext extends DbPro {
 		SqlBoxContextUtils.insert(entity, this.findSqlBox(entity));
 	}
 
-	public void update(Object entity) {
+	public int update(Object entity) {
+		return SqlBoxContextUtils.update(entity, this.findSqlBox(entity));
 	}
 
 	public void delete(Object entity) {
 		SqlBoxContextUtils.delete(entity, this.findSqlBox(entity));
 	}
 
-	public <T> T load(Object entity, Object pkey) {
-		return null;
+	public <T> T load(Class<?> entityClass, Object pkey) {
+		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}
 
 	// ========Utils methods=====

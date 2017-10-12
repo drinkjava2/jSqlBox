@@ -40,7 +40,7 @@ public interface IActiveRecord {
 	public void insert();
 
 	/** Update entity in database */
-	public void update();
+	public int update();
 
 	/** Delete entity in database */
 	public void delete();

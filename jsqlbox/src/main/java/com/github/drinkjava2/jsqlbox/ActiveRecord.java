@@ -37,7 +37,7 @@ public class ActiveRecord implements IActiveRecord {
 
 	@Override
 	public SqlBox box() {
-		return SqlBoxFindUtils.findBox(this);
+		return SqlBoxBindUtils.findBox(this);
 	}
 
 	public TableModel tableModel() {
@@ -60,16 +60,18 @@ public class ActiveRecord implements IActiveRecord {
 	}
 
 	@Override
-	public void update() {
+	public int update() {
+		return context().update(this);
 	}
 
 	@Override
 	public void delete() {
+		context().delete(this);
 	}
 
 	@Override
 	public <T> T load(Object pkey) {
-		return null;
+		return context().load(this.getClass(), pkey);
 	}
 
 }

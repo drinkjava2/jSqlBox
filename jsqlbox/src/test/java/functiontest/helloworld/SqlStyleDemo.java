@@ -154,6 +154,7 @@ public class SqlStyleDemo {
 		user.setName("Sam");
 		user.setAddress("Canada");
 		ctx.update(user);// update
+		
 		User user2 = ctx.load(User.class, "Sam");// read
 		System.out.println(user2.getName());
 		System.out.println(user2.getAddress());
