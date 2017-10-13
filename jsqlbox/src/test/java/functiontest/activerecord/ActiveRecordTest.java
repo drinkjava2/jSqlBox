@@ -52,7 +52,7 @@ public class ActiveRecordTest extends TestBase {
 	@Test
 	public void doText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		String[] ddls = ctx.pojos2CreateDDLs(UserDemo.class);
+		String[] ddls = ctx.getDialect().toCreateDDL(UserDemo.class);
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 

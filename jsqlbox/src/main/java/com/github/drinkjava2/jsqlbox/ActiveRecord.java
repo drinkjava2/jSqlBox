@@ -37,7 +37,7 @@ public class ActiveRecord implements IActiveRecord {
 
 	@Override
 	public SqlBox box() {
-		return SqlBoxBindUtils.findBox(this);
+		return SqlBoxUtils.findBox(this);
 	}
 
 	public TableModel tableModel() {

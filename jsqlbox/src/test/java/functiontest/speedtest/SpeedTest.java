@@ -1,4 +1,4 @@
-package functiontest.helloworld;
+package functiontest.speedtest;
 
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param0;
@@ -30,7 +30,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class SqlStyleDemo {
+public class SpeedTest {
 	protected HikariDataSource dataSource;
 
 	@Before
@@ -81,14 +81,82 @@ public class SqlStyleDemo {
 	@Test
 	public void executeTest() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		ctx.setAllowShowSQL(true);
+		ctx.setAllowShowSQL(false);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
 			try {
 				ctx.nExecute(ddl);
 			} catch (Exception e) {
 			}
 
-		System.out.println("==DbUtils old style, need close connection and catch SQLException===");
+		int repeatTime = 10000;
+		long start; 
+		long end;
+
+//		   start = System.currentTimeMillis();
+//		for (int i = 0; i < repeatTime; i++) {
+//			dbUtilsOldMethod1(ctx);
+//		}
+//		long end = System.currentTimeMillis();
+//		System.out.println("dbUtilsOldMethod1:" + (end - start) / 1000 + "ms");
+//
+//		start = System.currentTimeMillis();
+//		for (int i = 0; i < repeatTime; i++) {
+//			dbUtilsOldMethod2(ctx);
+//		}
+//		end = System.currentTimeMillis();
+//		System.out.println("dbUtilsOldMethod2:" + (end - start) / 1000 + "ms");
+//
+//		start = System.currentTimeMillis();
+//		for (int i = 0; i < repeatTime; i++) {
+//			nXxxJdbcStyle(ctx);
+//		}
+//		end = System.currentTimeMillis();
+//		System.out.println("nXxxJdbcStyle:" + (end - start) / 1000 + "ms");
+//
+//		start = System.currentTimeMillis();
+//		for (int i = 0; i < repeatTime; i++) {
+//			iXxxInlineStyle(ctx);
+//		}
+//		end = System.currentTimeMillis();
+//		System.out.println("iXxxInlineStyle:" + (end - start) / 1000 + "ms");
+//
+//		start = System.currentTimeMillis();
+//		for (int i = 0; i < repeatTime; i++) {
+//			tXxxTemplateStyle(ctx);
+//		}
+//		end = System.currentTimeMillis();
+//		System.out.println("tXxxTemplateStyle:" + (end - start) / 1000 + "ms");
+//
+//		start = System.currentTimeMillis();
+//		for (int i = 0; i < repeatTime; i++) {
+//			tXxxTemplateStyle2(ctx);
+//		}
+//		end = System.currentTimeMillis();
+//		System.out.println("tXxxTemplateStyle2:" + (end - start) / 1000 + "ms");
+//
+//		start = System.currentTimeMillis();
+//		for (int i = 0; i < repeatTime; i++) {
+//			dataMapperStyle(ctx);
+//		}
+//		end = System.currentTimeMillis();
+//		System.out.println("dataMapperStyle:" + (end - start) / 1000 + "ms");
+
+		start = System.currentTimeMillis();
+		for (int i = 0; i < repeatTime; i++) {
+			activeRecordStyle(ctx);
+		}
+		end = System.currentTimeMillis();
+		System.out.println("activeRecordStyle:" + (end - start) / 1000 + "ms");
+
+		start = System.currentTimeMillis();
+		for (int i = 0; i < repeatTime; i++) {
+			activeRecordStyle2(ctx);
+		}
+		end = System.currentTimeMillis();
+		System.out.println("activeRecordStyle2:" + (end - start) / 1000 + "ms");
+	}
+
+	private void dbUtilsOldMethod1(SqlBoxContext ctx) {
 		Connection conn = null;
 		try {
 			conn = ctx.prepareConnection();
@@ -106,8 +174,9 @@ public class SqlStyleDemo {
 				e.printStackTrace();
 			}
 		}
+	}
 
-		System.out.println("========= DbUtils old style, need catch SQLException========");
+	private void dbUtilsOldMethod2(SqlBoxContext ctx) {
 		try {
 			ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 			ctx.execute("update users set name=?, address=?", "Tom", "China");
@@ -117,15 +186,17 @@ public class SqlStyleDemo {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
 
-		System.out.println("=== nXxxx methods, New JDBC style, no need catch Exception ===");
+	private void nXxxJdbcStyle(SqlBoxContext ctx) {
 		ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 		ctx.nExecute("update users set name=?, address=?", "Tom", "China");
 		Assert.assertEquals(1L,
 				ctx.nQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
 		ctx.nExecute("delete from users where name=? or address=?", "Tom", "China");
+	}
 
-		System.out.println("============= Ixxx methods, In-line style===================");
+	private void iXxxInlineStyle(SqlBoxContext ctx) {
 		ctx.iExecute("insert into users (", //
 				" name ,", param0("Sam"), //
 				" address ", param("Canada"), //
@@ -135,11 +206,11 @@ public class SqlStyleDemo {
 		Assert.assertEquals(1L,
 				ctx.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
 		ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
+	}
 
+	private void tXxxTemplateStyle(SqlBoxContext ctx) {
 		User sam = new User("Sam", "Canada");
 		User tom = new User("Tom", "China");
-
-		System.out.println("========== Txxx methods, Template style ===================");
 		put0("user", sam);
 		ctx.tExecute("insert into users (name, address) values(#{user.name},#{user.address})");
 		put0("user", tom);
@@ -148,8 +219,11 @@ public class SqlStyleDemo {
 				ctx.tQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
 						put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
 		ctx.tExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
+	}
 
-		System.out.println("========== Txxx methods, Template style, another template Engine ===========");
+	private void tXxxTemplateStyle2(SqlBoxContext ctx) {
+		User sam = new User("Sam", "Canada");
+		User tom = new User("Tom", "China");
 		ctx.setSqlTemplateEngine(NamedParamSqlTemplate.instance());
 		put0("user", sam);
 		ctx.tExecute("insert into users (name, address) values(:user.name,:user.address)");
@@ -158,29 +232,34 @@ public class SqlStyleDemo {
 		Assert.assertEquals(1L, ctx.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
 				put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
 		ctx.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", tom));
+	}
 
-		System.out.println("================ Data Mapper style =================");
+	private void dataMapperStyle(SqlBoxContext ctx) {
+		User sam = new User("Sam", "Canada");
 		ctx.insert(sam);// insert
 		sam.setAddress("China");
 		ctx.update(sam);// update
 		User sam_1 = ctx.load(User.class, "Sam");// load
 		ctx.delete(sam_1);// delete
+	}
 
-		System.out.println("=============== ActiveRecord style ================");
-		User sam2 = new User("Sam", "Canada");
-		sam2.box().setContext(ctx); // set SqlBoxContent instance here
-		sam2.insert();
-		sam2.setAddress("China");
-		sam2.update();
-		User sam3 = sam2.load("Sam");
+	private void activeRecordStyle(SqlBoxContext ctx) {
+		User sam = new User("Sam", "Canada");
+		sam.box().setContext(ctx); // set SqlBoxContent instance here
+		sam.insert();
+		sam.setAddress("China");
+		sam.update();
+		User sam3 = sam.load("Sam");
 		sam3.delete();
+	}
 
-		System.out.println("========= ActiveRecord style but use default global SqlBoxContext instance========");
+	private void activeRecordStyle2(SqlBoxContext ctx) {
+
 		SqlBoxContext.setDefaultContext(ctx);
-		User sam4 = new User("Sam", "Canada");
-		sam4.insert();
-		sam4.setAddress("China");
-		sam4.update();
+		User sam = new User("Sam", "Canada");
+		sam.insert();
+		sam.setAddress("China");
+		sam.update();
 		User sam5 = ctx.load(User.class, "Sam");
 		sam5.delete();
 	}

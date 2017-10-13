@@ -31,7 +31,7 @@ import config.TestBase;
 /**
  * Unit test for SortedUUIDGenerator
  */
-public class UUIDTest2 extends TestBase {
+public class IdGeneratorTest2 extends TestBase {
 
 	public static class UUID25Pojo {
 		@GeneratedValue(strategy = GenerationType.UUID25)

@@ -57,7 +57,7 @@ public class HelloWorld extends ActiveRecord {
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		ctx.setAllowShowSQL(true);
-		String[] ddls = ctx.pojos2CreateDDLs(HelloWorld.class);
+		String[] ddls = ctx.getDialect().toCreateDDL(HelloWorld.class);
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 

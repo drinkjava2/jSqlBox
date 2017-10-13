@@ -12,14 +12,16 @@
 package com.github.drinkjava2.jsqlbox;
 
 /**
- * DebugUtils only for debug, will delete it
+ * This utility class store public static String methods for jSqlBox project
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 public abstract class SqlBoxStrUtils {
 
-	/** Camel string change to lower case underline string, "AbcDef" to "abc_def" */
+	/**
+	 * Camel string change to lower case underline string, "AbcDef" to "abc_def"
+	 */
 	public static String camelToLowerCaseUnderline(String name) {
 		StringBuilder sb = new StringBuilder();
 		if (name != null && name.length() > 0) {
@@ -37,6 +39,7 @@ public abstract class SqlBoxStrUtils {
 
 	/**
 	 * Build "?,?,?....?" String according given howmanyQuestions
+	 * 
 	 * @param howmanyQuestions
 	 * @return "?,?,?....?" String
 	 */
