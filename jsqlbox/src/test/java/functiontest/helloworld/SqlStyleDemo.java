@@ -96,7 +96,7 @@ public class SqlStyleDemo {
 			ctx.execute(conn, "update users set name=?, address=?", "Tom", "China");
 			Assert.assertEquals(1L,
 					ctx.queryForObject(conn, "select count(*) from users where name=? and address=?", "Tom", "China"));
-			ctx.execute(conn, "delete from users where name=? or address=?", "Toom", "China");
+			ctx.execute(conn, "delete from users where name=? or address=?", "Tom", "China");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

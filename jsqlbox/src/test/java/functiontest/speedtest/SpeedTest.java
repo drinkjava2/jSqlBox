@@ -9,7 +9,10 @@ import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put0;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.replace;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.After;
@@ -20,6 +23,7 @@ import org.junit.Test;
 import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
+import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
@@ -32,19 +36,49 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class SpeedTest {
 	protected HikariDataSource dataSource;
+	SqlBoxContext ctx;
 
 	@Before
 	public void init() {
 		dataSource = new HikariDataSource();
 		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		dataSource.setDriverClassName("org.h2.Driver");
-		dataSource.setUsername("sa");
+		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
+
+		// dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
+		// dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+		// dataSource.setUsername("root");// change to your user & password
+		// dataSource.setPassword("root888");
+
+		ctx = new SqlBoxContext(dataSource);
+		ctx.setAllowShowSQL(false);
+		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
+			try {
+				ctx.nExecute(ddl);
+			} catch (Exception e) {
+			}
 	}
 
 	@After
 	public void cleanUp() {
 		dataSource.close();
+	}
+
+	@Test
+	public void executeTest() throws Exception {
+		Long times = 20000L;
+		System.out.println("Compare method execute time for repeat " + times + " times:");
+		runMethod("pureJdbc", times);
+		runMethod("dbUtilsOldMethod1", times);
+		runMethod("dbUtilsOldMethod2", times);
+		runMethod("nXxxJdbcStyle", times);
+		runMethod("iXxxInlineStyle", times);
+		runMethod("tXxxTemplateStyle", times);
+		runMethod("tXxxTemplateStyle2", times);
+		runMethod("dataMapperStyle", times);
+		runMethod("activeRecordStyle", times);
+		runMethod("activeRecordStyle2", times);
 	}
 
 	@Table(name = "users")
@@ -78,190 +112,196 @@ public class SpeedTest {
 		}
 	}
 
-	@Test
-	public void executeTest() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		ctx.setAllowShowSQL(false);
-		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
-			try {
-				ctx.nExecute(ddl);
-			} catch (Exception e) {
-			}
-
-		int repeatTime = 10000;
-		long start; 
-		long end;
-
-//		   start = System.currentTimeMillis();
-//		for (int i = 0; i < repeatTime; i++) {
-//			dbUtilsOldMethod1(ctx);
-//		}
-//		long end = System.currentTimeMillis();
-//		System.out.println("dbUtilsOldMethod1:" + (end - start) / 1000 + "ms");
-//
-//		start = System.currentTimeMillis();
-//		for (int i = 0; i < repeatTime; i++) {
-//			dbUtilsOldMethod2(ctx);
-//		}
-//		end = System.currentTimeMillis();
-//		System.out.println("dbUtilsOldMethod2:" + (end - start) / 1000 + "ms");
-//
-//		start = System.currentTimeMillis();
-//		for (int i = 0; i < repeatTime; i++) {
-//			nXxxJdbcStyle(ctx);
-//		}
-//		end = System.currentTimeMillis();
-//		System.out.println("nXxxJdbcStyle:" + (end - start) / 1000 + "ms");
-//
-//		start = System.currentTimeMillis();
-//		for (int i = 0; i < repeatTime; i++) {
-//			iXxxInlineStyle(ctx);
-//		}
-//		end = System.currentTimeMillis();
-//		System.out.println("iXxxInlineStyle:" + (end - start) / 1000 + "ms");
-//
-//		start = System.currentTimeMillis();
-//		for (int i = 0; i < repeatTime; i++) {
-//			tXxxTemplateStyle(ctx);
-//		}
-//		end = System.currentTimeMillis();
-//		System.out.println("tXxxTemplateStyle:" + (end - start) / 1000 + "ms");
-//
-//		start = System.currentTimeMillis();
-//		for (int i = 0; i < repeatTime; i++) {
-//			tXxxTemplateStyle2(ctx);
-//		}
-//		end = System.currentTimeMillis();
-//		System.out.println("tXxxTemplateStyle2:" + (end - start) / 1000 + "ms");
-//
-//		start = System.currentTimeMillis();
-//		for (int i = 0; i < repeatTime; i++) {
-//			dataMapperStyle(ctx);
-//		}
-//		end = System.currentTimeMillis();
-//		System.out.println("dataMapperStyle:" + (end - start) / 1000 + "ms");
-
-		start = System.currentTimeMillis();
-		for (int i = 0; i < repeatTime; i++) {
-			activeRecordStyle(ctx);
-		}
-		end = System.currentTimeMillis();
-		System.out.println("activeRecordStyle:" + (end - start) / 1000 + "ms");
-
-		start = System.currentTimeMillis();
-		for (int i = 0; i < repeatTime; i++) {
-			activeRecordStyle2(ctx);
-		}
-		end = System.currentTimeMillis();
-		System.out.println("activeRecordStyle2:" + (end - start) / 1000 + "ms");
+	public void runMethod(String methodName, Long times) throws Exception {
+		Method m = ClassUtils.getMethod(this.getClass(), methodName, Long.class);
+		m.invoke(this, 500L);// warm up 200 times first
+		long start = System.currentTimeMillis();
+		m.invoke(this, times);
+		long end = System.currentTimeMillis();
+		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
+		System.out.println(String.format("%28s: %6s ms", methodName, timeused));
 	}
 
-	private void dbUtilsOldMethod1(SqlBoxContext ctx) {
-		Connection conn = null;
-		try {
-			conn = ctx.prepareConnection();
-			ctx.execute(conn, "insert into users (name,address) values(?,?)", "Sam", "Canada");
-			ctx.execute(conn, "update users set name=?, address=?", "Tom", "China");
-			Assert.assertEquals(1L,
-					ctx.queryForObject(conn, "select count(*) from users where name=? and address=?", "Tom", "China"));
-			ctx.execute(conn, "delete from users where name=? or address=?", "Toom", "China");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
+	public void pureJdbc(Long times) {
+		for (int i = 0; i < times; i++) {
+			Connection conn = null;
+			PreparedStatement pst = null;
+			ResultSet rs = null;
 			try {
-				ctx.close(conn);
+				conn = dataSource.getConnection();
+				pst = conn.prepareStatement("insert into users (name,address) values(?,?)");
+				pst.setString(1, "Sam");
+				pst.setString(2, "Canada");
+				pst.execute();
+
+				pst = conn.prepareStatement("update users set name=?, address=?");
+				pst.setString(1, "Tom");
+				pst.setString(2, "China");
+				pst.execute();
+
+				pst = conn.prepareStatement("select count(*) from users where name=? and address=?");
+				pst.setString(1, "Tom");
+				pst.setString(2, "China");
+				rs = pst.executeQuery();
+				rs.next();
+				Assert.assertEquals(1L, rs.getLong(1));
+
+				pst = conn.prepareStatement("delete from users where name=? or address=?");
+				pst.setString(1, "Tom");
+				pst.setString(2, "China");
+				pst.execute();
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			} finally {
+				if (rs != null)
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				if (pst != null)
+					try {
+						pst.close();
+					} catch (SQLException e) {
+					}
+				if (conn != null)
+					try {
+						conn.close();
+					} catch (SQLException e) {
+					}
+			}
+		}
+	}
+
+	public void dbUtilsOldMethod1(Long times) {
+		for (int i = 0; i < times; i++) {
+			Connection conn = null;
+			try {
+				conn = ctx.prepareConnection();
+				ctx.execute(conn, "insert into users (name,address) values(?,?)", "Sam", "Canada");
+				ctx.execute(conn, "update users set name=?, address=?", "Tom", "China");
+				Assert.assertEquals(1L, ctx.queryForObject(conn,
+						"select count(*) from users where name=? and address=?", "Tom", "China"));
+				ctx.execute(conn, "delete from users where name=? or address=?", "Tom", "China");
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					ctx.close(conn);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public void dbUtilsOldMethod2(Long times) {
+		for (int i = 0; i < times; i++) {
+			try {
+				ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
+				ctx.execute("update users set name=?, address=?", "Tom", "China");
+				Assert.assertEquals(1L,
+						ctx.queryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
+				ctx.execute("delete from users where name=? or address=?", "Tom", "China");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void dbUtilsOldMethod2(SqlBoxContext ctx) {
-		try {
-			ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
-			ctx.execute("update users set name=?, address=?", "Tom", "China");
+	public void nXxxJdbcStyle(Long times) {
+		for (int i = 0; i < times; i++) {
+			ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
+			ctx.nExecute("update users set name=?, address=?", "Tom", "China");
 			Assert.assertEquals(1L,
-					ctx.queryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
-			ctx.execute("delete from users where name=? or address=?", "Tom", "China");
-		} catch (SQLException e) {
-			e.printStackTrace();
+					ctx.nQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
+			ctx.nExecute("delete from users where name=? or address=?", "Tom", "China");
 		}
 	}
 
-	private void nXxxJdbcStyle(SqlBoxContext ctx) {
-		ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
-		ctx.nExecute("update users set name=?, address=?", "Tom", "China");
-		Assert.assertEquals(1L,
-				ctx.nQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
-		ctx.nExecute("delete from users where name=? or address=?", "Tom", "China");
+	public void iXxxInlineStyle(Long times) {
+		for (int i = 0; i < times; i++) {
+			ctx.iExecute("insert into users (", //
+					" name ,", param0("Sam"), //
+					" address ", param("Canada"), //
+					") ", valuesQuesions());
+			param0("Tom", "China");
+			ctx.iExecute("update users set name=?,address=?");
+			Assert.assertEquals(1L, ctx
+					.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
+			ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
+		}
 	}
 
-	private void iXxxInlineStyle(SqlBoxContext ctx) {
-		ctx.iExecute("insert into users (", //
-				" name ,", param0("Sam"), //
-				" address ", param("Canada"), //
-				") ", valuesQuesions());
-		param0("Tom", "China");
-		ctx.iExecute("update users set name=?,address=?");
-		Assert.assertEquals(1L,
-				ctx.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
-		ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
+	public void tXxxTemplateStyle(Long times) {
+		for (int i = 0; i < times; i++) {
+			User sam = new User("Sam", "Canada");
+			User tom = new User("Tom", "China");
+			put0("user", sam);
+			ctx.tExecute("insert into users (name, address) values(#{user.name},#{user.address})");
+			put0("user", tom);
+			ctx.tExecute("update users set name=#{user.name}, address=#{user.address}");
+			Assert.assertEquals(1L,
+					ctx.tQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
+							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
+			ctx.tExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
+		}
 	}
 
-	private void tXxxTemplateStyle(SqlBoxContext ctx) {
-		User sam = new User("Sam", "Canada");
-		User tom = new User("Tom", "China");
-		put0("user", sam);
-		ctx.tExecute("insert into users (name, address) values(#{user.name},#{user.address})");
-		put0("user", tom);
-		ctx.tExecute("update users set name=#{user.name}, address=#{user.address}");
-		Assert.assertEquals(1L,
-				ctx.tQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
-						put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-		ctx.tExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
+	public void tXxxTemplateStyle2(Long times) {
+		for (int i = 0; i < times; i++) {
+			User sam = new User("Sam", "Canada");
+			User tom = new User("Tom", "China");
+			ctx.setSqlTemplateEngine(NamedParamSqlTemplate.instance());
+			put0("user", sam);
+			ctx.tExecute("insert into users (name, address) values(:user.name,:user.address)");
+			put0("user", tom);
+			ctx.tExecute("update users set name=:user.name, address=:user.address");
+			Assert.assertEquals(1L,
+					ctx.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
+							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
+			ctx.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", tom));
+		}
 	}
 
-	private void tXxxTemplateStyle2(SqlBoxContext ctx) {
-		User sam = new User("Sam", "Canada");
-		User tom = new User("Tom", "China");
-		ctx.setSqlTemplateEngine(NamedParamSqlTemplate.instance());
-		put0("user", sam);
-		ctx.tExecute("insert into users (name, address) values(:user.name,:user.address)");
-		put0("user", tom);
-		ctx.tExecute("update users set name=:user.name, address=:user.address");
-		Assert.assertEquals(1L, ctx.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
-				put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-		ctx.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", tom));
+	public void dataMapperStyle(Long times) {
+		User sam = new User();
+		for (int i = 0; i < times; i++) {
+			sam.setName("Sam");
+			sam.setAddress("Canada");
+			ctx.insert(sam);// insert
+			sam.setAddress("China");
+			ctx.update(sam);// update
+			User sam2 = ctx.load(User.class, "Sam");// load
+			ctx.delete(sam2);// delete
+		}
 	}
 
-	private void dataMapperStyle(SqlBoxContext ctx) {
-		User sam = new User("Sam", "Canada");
-		ctx.insert(sam);// insert
-		sam.setAddress("China");
-		ctx.update(sam);// update
-		User sam_1 = ctx.load(User.class, "Sam");// load
-		ctx.delete(sam_1);// delete
+	public void activeRecordStyle(Long times) {
+		User sam = new User();
+		for (int i = 0; i < times; i++) {
+			sam.setName("Sam");
+			sam.setAddress("Canada");
+			sam.box().setContext(ctx); // set SqlBoxContent instance here
+			sam.insert();
+			sam.setAddress("China");
+			sam.update();
+			User sam2 = sam.load("Sam");
+			sam2.delete();
+		}
 	}
 
-	private void activeRecordStyle(SqlBoxContext ctx) {
-		User sam = new User("Sam", "Canada");
-		sam.box().setContext(ctx); // set SqlBoxContent instance here
-		sam.insert();
-		sam.setAddress("China");
-		sam.update();
-		User sam3 = sam.load("Sam");
-		sam3.delete();
-	}
-
-	private void activeRecordStyle2(SqlBoxContext ctx) {
-
+	public void activeRecordStyle2(Long times) {
 		SqlBoxContext.setDefaultContext(ctx);
-		User sam = new User("Sam", "Canada");
-		sam.insert();
-		sam.setAddress("China");
-		sam.update();
-		User sam5 = ctx.load(User.class, "Sam");
-		sam5.delete();
+		User sam = new User();
+		for (int i = 0; i < times; i++) {
+			sam.setName("Sam");
+			sam.setAddress("Canada");
+			sam.insert();
+			sam.setAddress("China");
+			sam.update();
+			User sam2 = ctx.load(User.class, "Sam");
+			sam2.delete();
+		}
 	}
 
 }
