@@ -264,15 +264,17 @@ public class SpeedTest {
 	}
 
 	public void dataMapperStyle(Long times) {
-		User sam = new User();
 		for (int i = 0; i < times; i++) {
+			User sam = new User();
 			sam.setName("Sam");
 			sam.setAddress("Canada");
-			ctx.insert(sam);// insert
+			ctx.insert(sam);
 			sam.setAddress("China");
-			ctx.update(sam);// update
-			User sam2 = ctx.load(User.class, "Sam");// load
-			ctx.delete(sam2);// delete
+			ctx.update(sam);
+			sam.box().unbind();
+			User sam2 = ctx.load(User.class, "Sam");
+			ctx.delete(sam2);
+			sam2.box().unbind();
 		}
 	}
 
@@ -286,7 +288,9 @@ public class SpeedTest {
 			sam.setAddress("China");
 			sam.update();
 			User sam2 = sam.load("Sam");
+			sam.box().unbind();
 			sam2.delete();
+			sam2.box().unbind();
 		}
 	}
 
@@ -299,8 +303,10 @@ public class SpeedTest {
 			sam.insert();
 			sam.setAddress("China");
 			sam.update();
+			sam.box().unbind();
 			User sam2 = ctx.load(User.class, "Sam");
 			sam2.delete();
+			sam2.box().unbind();
 		}
 	}
 

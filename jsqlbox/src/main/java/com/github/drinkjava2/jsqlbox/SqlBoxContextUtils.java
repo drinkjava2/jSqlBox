@@ -220,7 +220,14 @@ public abstract class SqlBoxContextUtils {
 			pkValueMap.put("ooxxooxx", pkeyValue);
 		}
 
-		SqlBox box = SqlBoxUtils.createSqlBox(ctx, entityClass);
+		Object entity = null;
+		try {
+			entity = entityClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+
+		SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, entity);
 		TableModel model = box.getTableModel();
 
 		StringBuilder sb = new StringBuilder("select ");
@@ -260,9 +267,7 @@ public abstract class SqlBoxContextUtils {
 			sb.append(col.getColumnName()).append("=? and ");
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
-		Object entity = null;
 		try {
-			entity = entityClass.newInstance();
 			Object[] values = (Object[]) ctx.nQuery(sb.toString(), new ArrayHandler(),
 					pkParams.toArray(new Object[pkParams.size()]));
 			for (int i = 0; i < values.length; i++) {
@@ -271,8 +276,7 @@ public abstract class SqlBoxContextUtils {
 			}
 		} catch (Exception e) {
 			throw new SqlBoxException(e);
-		}
-		SqlBoxUtils.bindBoxToBean(box, entity, ctx);
+		} 
 		return (T) entity;
 	}
 

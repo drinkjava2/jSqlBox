@@ -74,4 +74,8 @@ public class ActiveRecord implements IActiveRecord {
 		return context().load(this.getClass(), pkey);
 	}
 
+	public void unbind() {
+		SqlBoxUtils.unbind(this);
+	}
+
 }

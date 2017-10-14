@@ -45,6 +45,10 @@ public abstract class SqlBoxUtils {
 			return boxCache.get().get(bean);
 	}
 
+	public static void clearSqlBoxCache() {
+		boxCache.get().clear();
+	}
+
 	/**
 	 * Find a binded SqlBox for a bean, if no binded SqlBox found, create a new
 	 * one and bind it to bean
@@ -70,6 +74,15 @@ public abstract class SqlBoxUtils {
 			box.setContext(givenSqlBoxContext);
 		box.setEntityBean(entity);
 		boxCache.get().put(entity, box);
+	}
+
+	/**
+	 * Unbind a bean's box
+	 */
+	public static void unbind(Object entity) {
+		if (entity == null)
+			throw new SqlBoxException("Unbind box error, entity can not be null");
+		boxCache.get().remove(entity);
 	}
 
 	public static SqlBox findAndBindSqlBox(SqlBoxContext ctx, Object entity) {

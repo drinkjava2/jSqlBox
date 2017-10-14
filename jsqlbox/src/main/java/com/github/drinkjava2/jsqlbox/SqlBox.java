@@ -59,4 +59,7 @@ public class SqlBox {
 		this.tableModel = tableModel;
 	}
 
+	public void unbind() {
+		SqlBoxUtils.unbind(entityBean);
+	}
 }
