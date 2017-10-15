@@ -26,7 +26,7 @@ public class SqlBox {
 	/** A SqlBoxContext instance */
 	SqlBoxContext context;
 
-	/** Bind to which entity Bean instance */
+	/** Point to a entity bean instance */
 	Object entityBean;
 
 	// Shortcut method
@@ -57,9 +57,5 @@ public class SqlBox {
 
 	public void setTableModel(TableModel tableModel) {
 		this.tableModel = tableModel;
-	}
-
-	public void unbind() {
-		SqlBoxUtils.unbind(entityBean);
 	}
 }

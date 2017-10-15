@@ -23,9 +23,26 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  */
 public interface IActiveRecord {
 
-	// =========For release to Java6==========
-	/** @return SqlBox instance binded in this entity */
+	/**
+	 * @return the binded SqlBox instance
+	 */
+	public SqlBox bindedBox();
+
+	/**
+	 * @return the binded SqlBox instance, if no, create a new one and bind to
+	 *         entity
+	 */
 	public SqlBox box();
+
+	/**
+	 * Bind a SqlBox instance to entity
+	 */
+	public void bindBox(SqlBox box);
+
+	/**
+	 * Unbind SqlBox instance of entity
+	 */
+	public void unbindBox();
 
 	/** @return TableModel instance binded in this entity */
 	public TableModel tableModel();
@@ -49,8 +66,5 @@ public interface IActiveRecord {
 	 * Load entity from database by primary key, key can be single value or Map
 	 */
 	public <T> T load(Object pkey);
-
-	// =========For release to Java8 need use below codes==========
-	// TODO: default methods for Java8
 
 }

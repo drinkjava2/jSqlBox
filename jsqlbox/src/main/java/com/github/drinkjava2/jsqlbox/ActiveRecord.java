@@ -19,30 +19,62 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * database:
  * 
  * <pre>
- * ActiveRecord Entity:    
- *     SqlBoxContext.setDefaultContext(new SqlBoxContext(dataSource));           
- *     entity.insert(); 
+ * ActiveRecord style only works when a global defaultContext be set or set the
+ * SqlBoxContext binded with entity, for example:   
  * 
- * Non-ActiveRecord entity:   
- *     SqlBoxContext ctx=new SqlBoxContext(dataSource);
- *     ctx.insert(entity);
+ *    SqlBoxContext.setDefaultContext(new SqlBoxContext(dataSource));           
+ *    entity.insert(); 
+ * 
+ *    or 
+ *    
+ *    entity.box().setContext(new SqlBoxContext(dataSource))
+ *    entity.insert();
+ *    
+ * Non-ActiveRecord entity style (also called Data Mapper style):
+ *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
+ *    ctx.insert(entity);
  * </pre>
  * 
- * ActiveRecord only works when a global defaultContext be set.
+ *  
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 public class ActiveRecord implements IActiveRecord {
+	SqlBox box;
+
+	@Override
+	public SqlBox bindedBox() {
+		return box;
+	}
+
+	@Override
+	public void unbindBox() {
+		if (box != null) {
+			box.setEntityBean(null);
+			box = null;
+		}
+	}
+
+	@Override
+	public void bindBox(SqlBox box) {
+		if (box == null)
+			throw new SqlBoxException("Can not bind null SqlBox to entity");
+		box.setEntityBean(this);
+		this.box = box;
+	}
 
 	@Override
 	public SqlBox box() {
-		return SqlBoxUtils.findBox(this);
+		if (box == null)
+			this.bindBox(SqlBoxUtils.createSqlBox(SqlBoxContext.defaultContext, this.getClass()));
+		return box;
 	}
 
+	@Override
 	public TableModel tableModel() {
 		return box().getTableModel();
-	};
+	}
 
 	@Override
 	public String table() {
@@ -72,10 +104,6 @@ public class ActiveRecord implements IActiveRecord {
 	@Override
 	public <T> T load(Object pkey) {
 		return context().load(this.getClass(), pkey);
-	}
-
-	public void unbind() {
-		SqlBoxUtils.unbind(this);
 	}
 
 }

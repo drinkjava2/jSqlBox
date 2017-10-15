@@ -25,6 +25,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -67,7 +68,7 @@ public class SpeedTest {
 
 	@Test
 	public void executeTest() throws Exception {
-		Long times = 20000L;
+		Long times = 2000L;
 		System.out.println("Compare method execute time for repeat " + times + " times:");
 		runMethod("pureJdbc", times);
 		runMethod("dbUtilsOldMethod1", times);
@@ -79,6 +80,38 @@ public class SpeedTest {
 		runMethod("dataMapperStyle", times);
 		runMethod("activeRecordStyle", times);
 		runMethod("activeRecordStyle2", times);
+	}
+
+	@Table(name = "users")
+	public static class PojoUser {
+		@Id
+		String name;
+		String address;
+		SqlBox box;
+
+		public PojoUser() {
+		}
+
+		public PojoUser(String name, String address) {
+			this.name = name;
+			this.address = address;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
 	}
 
 	@Table(name = "users")
@@ -265,16 +298,14 @@ public class SpeedTest {
 
 	public void dataMapperStyle(Long times) {
 		for (int i = 0; i < times; i++) {
-			User sam = new User();
+			PojoUser sam = new PojoUser();
 			sam.setName("Sam");
 			sam.setAddress("Canada");
 			ctx.insert(sam);
 			sam.setAddress("China");
 			ctx.update(sam);
-			sam.box().unbind();
-			User sam2 = ctx.load(User.class, "Sam");
+			PojoUser sam2 = ctx.load(PojoUser.class, "Sam");
 			ctx.delete(sam2);
-			sam2.box().unbind();
 		}
 	}
 
@@ -288,9 +319,7 @@ public class SpeedTest {
 			sam.setAddress("China");
 			sam.update();
 			User sam2 = sam.load("Sam");
-			sam.box().unbind();
 			sam2.delete();
-			sam2.box().unbind();
 		}
 	}
 
@@ -303,10 +332,8 @@ public class SpeedTest {
 			sam.insert();
 			sam.setAddress("China");
 			sam.update();
-			sam.box().unbind();
 			User sam2 = ctx.load(User.class, "Sam");
 			sam2.delete();
-			sam2.box().unbind();
 		}
 	}
 

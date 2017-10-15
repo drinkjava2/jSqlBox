@@ -57,7 +57,7 @@ public class SqlBoxLogger {
 				System.err.println("SqlBoxLogger failed to load org.apache.commons.logging.LogFactory. Use JDK logger.");// NOSONAR
 			jdkLogger = Logger.getLogger(targetClass.getName());// use JDK log
 		} else if (firstRun)
-			System.out.println("org.apache.commons.logging.LogFactory loaded, DbProLogger use it as logger.");// NOSONAR
+			System.out.println("org.apache.commons.logging.LogFactory loaded, SqlBoxLogger use it as logger.");// NOSONAR
 	}
 
 	/**

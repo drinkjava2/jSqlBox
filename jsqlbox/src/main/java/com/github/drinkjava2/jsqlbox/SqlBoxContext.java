@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jdialects.utils.StrUtils;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -23,8 +24,9 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.0
  */
 public class SqlBoxContext extends DbPro {
-	public static String sqlBoxClassSuffix = "SqlBox";
-	public static SqlBoxContext defaultContext = null;
+	public static final SqlBoxLogger LOGGER = SqlBoxLogger.getLog(SqlBoxContext.class); 
+	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
+	public static SqlBoxContext defaultContext = null;// NOSONAR
 	private Dialect dialect;
 	private TableModel[] metaTableModels;
 
@@ -61,6 +63,8 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	public TableModel getMetaTableModel(String tableName) {
+		if (StrUtils.isEmpty(tableName))
+			return null;
 		for (TableModel tableModel : metaTableModels)
 			if (tableName.equalsIgnoreCase(tableModel.getTableName()))
 				return tableModel;
@@ -83,7 +87,10 @@ public class SqlBoxContext extends DbPro {
 	public <T> T load(Class<?> entityClass, Object pkey) {
 		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}
-  
+
+	public void unbind(Object entity) {
+		SqlBoxUtils.unbind(entity);
+	}
 	// getter & setter =======
 
 	public Dialect getDialect() {
