@@ -24,7 +24,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.0
  */
 public class SqlBoxContext extends DbPro {
-	public static final SqlBoxLogger LOGGER = SqlBoxLogger.getLog(SqlBoxContext.class); 
+	public static final SqlBoxLogger LOGGER = SqlBoxLogger.getLog(SqlBoxContext.class);
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	private Dialect dialect;
@@ -69,6 +69,10 @@ public class SqlBoxContext extends DbPro {
 			if (tableName.equalsIgnoreCase(tableModel.getTableName()))
 				return tableModel;
 		return null;
+	}
+
+	public String paginate(int pageNumber, int pageSize, String sql) {
+		return dialect.paginate(pageNumber, pageSize, sql);
 	}
 
 	// =============CRUD methods=====
