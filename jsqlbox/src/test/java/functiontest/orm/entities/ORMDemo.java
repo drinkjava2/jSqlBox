@@ -1,15 +1,10 @@
 package functiontest.orm.entities;
 
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.utils.DialectUtils;
-import com.github.drinkjava2.jsqlbox.net.EntityNet;
 
 import config.TestBase;
 
@@ -65,20 +60,20 @@ public class ORMDemo extends TestBase {
 		ctx.nExecute("insert into roleprivilege values('r3','p3')");
 		ctx.nExecute("insert into roleprivilege values('r4','p1')");
 	}
-
-	/**
-	 * 1 user has 1 address, 1 address has 1 user
-	 */
+ 
 	@Test
-	public void test() {
+	public void test() { 
 //		List<Map<String, Object>> listMapResult = ctx
 //				.nQuery("select u.**,e.** from users u, email e where u.id=e.userId", new MapListHandler());
-//		EntityNet net = ctx.weave(listMap, new User(), new Email());
+//		EntityNet net = ctx.weave(listMap, User.class, Email.class);
+//or	EntityNet net = ctx.weave(listMap, ctx.box(User.class).alias('u'), Email.class);
 //		List<User> users = net.getList(User.class);
 //		for (User user : users) {
 //			List<Email> emails = User.getChild(Email.class);
+//or		List<Email> emails = User.getChild(); //in only has 1 child		
 //			List<Email> emails = user.getRelated(Email.class);
-//			User u = email.getMaster(User.class); // or User u =email.getMaster();
+//or        List<Email> emails = user.getRelated(Path1.class,Path2.class,...,Email.class);		
+//			User u = email.getParent(User.class); // or User u =email.getMaster();
 //			List<User> users = email.getRelated(User.class);
 //		}
 	}

@@ -182,6 +182,8 @@ public abstract class SqlBoxUtils {
 		if (boxClass != null && !SqlBox.class.isAssignableFrom((Class<?>) boxClass))
 			boxClass = null;
 		SqlBox box = null;
+		
+		
 		if (boxClass == null) {
 			box = new SqlBox();
 			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));

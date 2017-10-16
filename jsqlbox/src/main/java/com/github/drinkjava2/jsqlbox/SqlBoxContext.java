@@ -71,6 +71,16 @@ public class SqlBoxContext extends DbPro {
 		return null;
 	}
 
+	/**
+	 * create a box for class
+	 */
+	public SqlBox box(Class<?> clazz) {
+		return SqlBoxUtils.createSqlBox(this, clazz);
+	}
+
+	/**
+	 * Equal to dialect's paginate method
+	 */
 	public String paginate(int pageNumber, int pageSize, String sql) {
 		return dialect.paginate(pageNumber, pageSize, sql);
 	}
