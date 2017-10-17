@@ -1,14 +1,19 @@
 package functiontest.orm.entities;
 
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.utils.DialectUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 
 import config.TestBase;
 
-public class ORMDemo extends TestBase {
+public class ORMTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
@@ -16,11 +21,11 @@ public class ORMDemo extends TestBase {
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
-		ctx.nExecute("insert into users values('u1','user1')");
-		ctx.nExecute("insert into users values('u2','user2')");
-		ctx.nExecute("insert into users values('u3','user3')");
-		ctx.nExecute("insert into users values('u4','user4')");
-		ctx.nExecute("insert into users values('u5','user5')");
+		ctx.nExecute("insert into usertb values('u1','user1')");
+		ctx.nExecute("insert into usertb values('u2','user2')");
+		ctx.nExecute("insert into usertb values('u3','user3')");
+		ctx.nExecute("insert into usertb values('u4','user4')");
+		ctx.nExecute("insert into usertb values('u5','user5')");
 
 		ctx.nExecute("insert into address values('a1','address1','u1')");
 		ctx.nExecute("insert into address values('a2','address2','u2')");
@@ -60,22 +65,34 @@ public class ORMDemo extends TestBase {
 		ctx.nExecute("insert into roleprivilege values('r3','p3')");
 		ctx.nExecute("insert into roleprivilege values('r4','p1')");
 	}
- 
+
 	@Test
-	public void test() { 
-//		List<Map<String, Object>> listMapResult = ctx
-//				.nQuery("select u.**,e.** from users u, email e where u.id=e.userId", new MapListHandler());
-//		EntityNet net = ctx.weave(listMap, User.class, Email.class);
-//or	EntityNet net = ctx.weave(listMap, ctx.box(User.class).alias('u'), Email.class);
-//		List<User> users = net.getList(User.class);
-//		for (User user : users) {
-//			List<Email> emails = User.getChild(Email.class);
-//or		List<Email> emails = User.getChild(); //in only has 1 child		
-//			List<Email> emails = user.getRelated(Email.class);
-//or        List<Email> emails = user.getRelated(Path1.class,Path2.class,...,Email.class);		
-//			User u = email.getParent(User.class); // or User u =email.getMaster();
-//			List<User> users = email.getRelated(User.class);
-//		}
+	public void test() {
+		System.out.println(SqlBoxContextUtils.explainDoubleStarSql(ctx,
+				"select u.**, e.** from usertb u, email e where u.id=e.userId"));
+
+		List<Map<String, Object>> listMap = ctx.nQuery("select u.**, e.** from usertb u, email e where u.id=e.userId",
+				new MapListHandler());
+		// Assert.assertEquals(5, listMap.size());
+		// EntityNet net = ctx.weave(listMap, User.class, Email.class);
+		// EntityNet net = ctx.weave(listMap, ctx.box(User.class).alias('u'),
+		// Email.class);
+		// List<User> users = net.getList(User.class);
+		// for (User user : users) {
+		// List<Email> emails = user.getChildEntities(Email.class);
+		// List<Email> emails = user.getChildEntities(); //if only have 1 child
+		// List<Email> emails = ctx.getChildEntities(user, Email.class);
+
+		// User u = email.getParentNode(User.class);
+		// User u = email.getParentNode() //if only have one master;
+
+		// List<Email> emails = User.getChildNodes(); //if only has 1 child
+		// List<Email> emails = user.getRelatedNodes(Email.class);
+		// List<Email> emails = user.getRelatedNodes("P", Path1.class, "C",
+		// Path2.class,...,"C",Email.class);
+
+		// List<User> users = email.getRelatedEntity(User.class);
+		// }
 	}
 
 }

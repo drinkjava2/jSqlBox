@@ -39,8 +39,7 @@ public abstract class DebugUtils {
 
 	public static String getTableModelDebugInfo(TableModel model) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\rtableName=" + model.getTableName()).append("\r");
-		sb.append("pojoClass=" + model.getPojoClass()).append("\r");
+		sb.append("\rtableName=" + model.getTableName()).append("\r"); 
 		List<ColumnModel> columns = model.getColumns();
 		for (ColumnModel column : columns)
 			sb.append(getColumnModelDebugInfo(column)).append("\r");

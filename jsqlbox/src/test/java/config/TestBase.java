@@ -14,10 +14,13 @@ package config;
 import org.junit.After;
 import org.junit.Before;
 
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
+
+import config.DataSourceConfig.H2DataSourceBox;
 
 /**
  * Base class of unit test
@@ -26,19 +29,22 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.0
  */
 public class TestBase {
-	protected HikariDataSource dataSource;
+	protected HikariDataSource  dataSource;
 	protected Dialect dialect;
 	protected SqlBoxContext ctx;
 
 	@Before
 	public void init() {
-		dataSource = new HikariDataSource();
-		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-		dataSource.setDriverClassName("org.h2.Driver");
-		dataSource.setUsername("sa");
-		dataSource.setPassword("");
-		dataSource.setMaximumPoolSize(8);
-		dataSource.setConnectionTimeout(2000);
+		dataSource=BeanBox.getBean(H2DataSourceBox.class);
+		//dataSource=BeanBox.getBean(MySqlDataSourceBox.class);
+		
+//		dataSource = new HikariDataSource();
+//		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+//		dataSource.setDriverClassName("org.h2.Driver");
+//		dataSource.setUsername("sa");
+//		dataSource.setPassword("");
+//		dataSource.setMaximumPoolSize(8);
+//		dataSource.setConnectionTimeout(2000);
 		dialect = Dialect.guessDialect(dataSource);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setDefaultContext(ctx);
@@ -46,7 +52,7 @@ public class TestBase {
 
 	@After
 	public void cleanUp() {
-		dataSource.close();
+		//dataSource.close();
 		SqlBoxContext.setDefaultContext(null);
 	}
 

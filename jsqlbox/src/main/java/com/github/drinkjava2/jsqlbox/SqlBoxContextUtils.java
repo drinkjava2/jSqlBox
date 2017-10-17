@@ -316,4 +316,78 @@ public abstract class SqlBoxContextUtils {
 				"Assert error, box's tableName can not be null");
 	}
 
+	private static boolean isNormalLetters(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_';
+	}
+
+	private static String replaceDoubleStartAliasToColumns(SqlBoxContext ctx, String sql, String alias,
+			String tableName) {
+		StringBuilder replace = new StringBuilder();
+		for (TableModel tb : ctx.getMetaTableModels()) {
+			if (tableName.equalsIgnoreCase(tb.getTableName())) {
+				for (ColumnModel col : tb.getColumns()) {
+					replace.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
+							.append("_").append(col.getColumnName()).append(", ");
+				}
+				break;
+			}
+		}
+		if (replace.length() == 0)
+			throw new SqlBoxException("Can not find columns in table +'" + tableName + "'");
+		replace.setLength(replace.length() - 2);
+		return StrUtils.replace(sql, alias + ".**", replace.toString());
+	}
+
+	/**
+	 * Explain SQL include "**", for example: <br/>
+	 * "select u.** from user u" to <br/>
+	 * "select u.userName as u_userName, u.address as u_address, ... from user u"
+	 */
+	public static String explainDoubleStarSql(SqlBoxContext ctx, String... SQLs) {
+		StringBuilder sb = new StringBuilder();
+		for (String str : SQLs)
+			sb.append(str);
+		String result = sb.toString();
+
+		int pos = result.indexOf(".**");
+		while (pos > -1) {
+			StringBuilder front = new StringBuilder();
+			for (int i = pos - 1; i >= 0; i--) {
+				if (isNormalLetters(result.charAt(i)))
+					front.insert(0, result.charAt(i));
+				else
+					break;
+			}
+			if (front.length() == 0)
+				throw new SqlBoxException(".** can not put at front");
+			String alias = front.toString();
+ 
+			int posAlias = (result + " ").indexOf(" " + alias + " ");
+			if (posAlias == -1)
+				posAlias = (result).indexOf(" " + alias + ",");
+			if (posAlias == -1)
+				posAlias = (result).indexOf(" " + alias + ")"); 
+			if (posAlias == -1)
+				posAlias = (result).indexOf(" " + alias + "\t");  
+			if (posAlias == -1)
+				throw new SqlBoxException("Alias '" + alias + "' not found");
+
+			StringBuilder tb = new StringBuilder();
+			for (int i = posAlias - 1; i >= 0; i--) {
+				char c = result.charAt(i);
+				if (isNormalLetters(c))
+					tb.insert(0, c);
+				else if (tb.length() > 0)
+					break;
+			}
+			if (tb.length() == 0)
+				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
+			String tbStr = tb.toString();
+
+			result = replaceDoubleStartAliasToColumns(ctx, result, alias, tbStr);
+			pos = result.indexOf(".**");
+		}
+		return result;
+	}
+
 }

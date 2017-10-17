@@ -11,9 +11,14 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
+import org.apache.commons.dbutils.ResultSetHandler;
+
 import com.github.drinkjava2.jdbpro.DbPro;
+import com.github.drinkjava2.jdbpro.DbRuntimeException;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.utils.StrUtils;
@@ -83,6 +88,23 @@ public class SqlBoxContext extends DbPro {
 	 */
 	public String paginate(int pageNumber, int pageSize, String sql) {
 		return dialect.paginate(pageNumber, pageSize, sql);
+	}
+
+	// =========== Query methods to support double star '**' =====
+
+	@Override
+	public <T> T nQuery(String sql, ResultSetHandler<T> rsh, Object... params) {
+		return super.nQuery(SqlBoxContextUtils.explainDoubleStarSql(this, sql), rsh, params);
+	}
+
+	@Override
+	public <T> T iQuery(ResultSetHandler<T> rsh, String... inlineSQL) {
+		return super.iQuery(rsh, SqlBoxContextUtils.explainDoubleStarSql(this, inlineSQL));
+	}
+
+	@Override
+	public <T> T tQuery(ResultSetHandler<T> rsh, String... templateSQL) {
+		return super.tQuery(rsh, SqlBoxContextUtils.explainDoubleStarSql(this, templateSQL));
 	}
 
 	// =============CRUD methods=====

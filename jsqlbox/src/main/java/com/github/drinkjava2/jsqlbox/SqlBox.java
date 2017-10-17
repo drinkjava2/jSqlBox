@@ -26,10 +26,10 @@ public class SqlBox {
 	/** A SqlBoxContext instance */
 	SqlBoxContext context;
 
-	/** Point to which entity Class */
+	/** Optional, map to which entity class */
 	Class<?> entityClass;
 
-	/** Point to a entity bean, this is called bind */
+	/** Optional, bind to a entity bean */
 	Object entityBean;
 
 	// Shortcut method
@@ -69,4 +69,5 @@ public class SqlBox {
 	public void setEntityClass(Class<?> entityClass) {
 		this.entityClass = entityClass;
 	}
+
 }

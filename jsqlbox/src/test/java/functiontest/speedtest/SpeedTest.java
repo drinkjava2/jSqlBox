@@ -68,7 +68,7 @@ public class SpeedTest {
 
 	@Test
 	public void executeTest() throws Exception {
-		Long times = 2000L;
+		Long times = 50L;
 		System.out.println("Compare method execute time for repeat " + times + " times:");
 		runMethod("pureJdbc", times);
 		runMethod("dbUtilsOldMethod1", times);
@@ -147,7 +147,7 @@ public class SpeedTest {
 
 	public void runMethod(String methodName, Long times) throws Exception {
 		Method m = ClassUtils.getMethod(this.getClass(), methodName, Long.class);
-		m.invoke(this, 500L);// warm up 200 times first
+		m.invoke(this, 5L);// warm up 500 times first
 		long start = System.currentTimeMillis();
 		m.invoke(this, times);
 		long end = System.currentTimeMillis();

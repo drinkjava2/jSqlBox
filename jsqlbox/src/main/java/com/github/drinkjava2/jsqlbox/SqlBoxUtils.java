@@ -151,6 +151,8 @@ public abstract class SqlBoxUtils {
 		if (box == null)
 			throw new SqlBoxException("Bind box error, box can not be null");
 		box.setEntityBean(entity);
+		if (box.getEntityClass() == null)
+			box.setEntityClass(entity.getClass());
 		if (entity instanceof ActiveRecord)
 			((ActiveRecord) entity).bindBox(box);
 		else
@@ -182,11 +184,11 @@ public abstract class SqlBoxUtils {
 		if (boxClass != null && !SqlBox.class.isAssignableFrom((Class<?>) boxClass))
 			boxClass = null;
 		SqlBox box = null;
-		
-		
+
 		if (boxClass == null) {
 			box = new SqlBox();
 			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
+			box.setEntityClass(entityOrBoxClass.getClass());
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
