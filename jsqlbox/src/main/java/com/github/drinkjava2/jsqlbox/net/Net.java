@@ -12,6 +12,7 @@
 package com.github.drinkjava2.jsqlbox.net;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,26 +20,25 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Net is an entity net created by queryNet method
+ * Net is an entity
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class EntityNet {
-	private SqlBoxContext ctx; 
-	 
+public class Net {
+	
+	private SqlBoxContext ctx;
+
 	private List<SqlBox> configBoxes = new ArrayList<SqlBox>();
 
-	/** The net */
-	private Map<Class<?>, List<Object>> net; 
+	/** The body of the net */
+	private Map<Class<?>, List<Object>> body = new HashMap<Class<?>, List<Object>>();
 
- 
-
-	public EntityNet(SqlBoxContext ctx, Class<?>... entityClasses) {
+	public Net(SqlBoxContext ctx, Class<?>... entityClasses) {
 		this.ctx = ctx;
 	}
-	
-	public EntityNet(SqlBoxContext ctx, SqlBox... sqlBoxes) {
+
+	public Net(SqlBoxContext ctx, SqlBox... sqlBoxes) {
 		this.ctx = ctx;
 	}
 

@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -18,7 +19,6 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.DbPro;
-import com.github.drinkjava2.jdbpro.DbRuntimeException;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.utils.StrUtils;
@@ -33,7 +33,9 @@ public class SqlBoxContext extends DbPro {
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	protected Dialect dialect;
-	private TableModel[] metaTableModels;
+	private SqlBox[] dbMetaBoxes;
+	protected static ThreadLocal<int[]> paginationCache = new ThreadLocal<int[]>();
+	protected static ThreadLocal<Object[]> netConfigCache = new ThreadLocal<Object[]>();
 
 	public SqlBoxContext() {
 		super();
@@ -62,19 +64,17 @@ public class SqlBoxContext extends DbPro {
 		this.dialect = dialect;
 		refreshMetaData();
 	}
-	
-	 
 
 	public void refreshMetaData() {
-		metaTableModels = SqlBoxContextUtils.metaDataToModels(this, dialect);
+		dbMetaBoxes = SqlBoxContextUtils.metaDataToModels(this, dialect);
 	}
 
 	public TableModel getMetaTableModel(String tableName) {
 		if (StrUtils.isEmpty(tableName))
 			return null;
-		for (TableModel tableModel : metaTableModels)
-			if (tableName.equalsIgnoreCase(tableModel.getTableName()))
-				return tableModel;
+		for (SqlBox box : dbMetaBoxes)
+			if (tableName.equalsIgnoreCase(box.getTableModel().getTableName()))
+				return box.getTableModel();
 		return null;
 	}
 
@@ -85,28 +85,85 @@ public class SqlBoxContext extends DbPro {
 		return SqlBoxUtils.createSqlBox(this, clazz);
 	}
 
+	// === Rewrite all query methods to support special Threadlocal variants
+	// explain ==
 	/**
-	 * Equal to dialect's paginate method
+	 * Return a empty "" String and save a Threadlocal pageNumber and pageSize
+	 * array in current thread, it will be used by SqlBoxContext's query
+	 * methods.
 	 */
-	public String paginate(int pageNumber, int pageSize, String sql) {
-		return dialect.paginate(pageNumber, pageSize, sql);
+	public static String pagin(int pageNumber, int pageSize) {
+		paginationCache.set(new int[] { pageNumber, pageSize });
+		return "";
 	}
 
-	// =========== Query methods to support double star '**' =====
+	/**
+	 * Return a empty "" String and save a Threadlocal netConfig object array in
+	 * current thread, it will be used by SqlBoxContext's query methods.
+	 */
+	public static String net(Object... netConfig) {
+		netConfigCache.set(netConfig);
+		return "";
+	}
+
+	@Override
+	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
+		try {
+			return super.query(conn, sql, rsh, params);
+		} finally {
+			paginationCache.set(null);
+			netConfigCache.set(null);
+		}
+	}
+
+	@Override
+	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh) throws SQLException {
+		try {
+			return super.query(conn, sql, rsh);
+		} finally {
+			paginationCache.set(null);
+			netConfigCache.set(null);
+		}
+	}
+
+	@Override
+	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) {
+		try {
+			return super.nQuery(SqlBoxContextUtils.explainThreadLocal(this, sql), rsh, params);
+		} finally {
+			paginationCache.set(null);
+			netConfigCache.set(null);
+		}
+	}
 
 	@Override
 	public <T> T nQuery(String sql, ResultSetHandler<T> rsh, Object... params) {
-		return super.nQuery(SqlBoxContextUtils.explainDoubleStarSql(this, sql), rsh, params);
+		try {
+			return super.nQuery(SqlBoxContextUtils.explainThreadLocal(this, sql), rsh, params);
+		} finally {
+			paginationCache.set(null);
+			netConfigCache.set(null);
+		}
 	}
 
 	@Override
 	public <T> T iQuery(ResultSetHandler<T> rsh, String... inlineSQL) {
-		return super.iQuery(rsh, SqlBoxContextUtils.explainDoubleStarSql(this, inlineSQL));
+		try {
+			return super.iQuery(rsh, SqlBoxContextUtils.explainThreadLocal(this, inlineSQL));
+		} finally {
+			paginationCache.set(null);
+			netConfigCache.set(null);
+		}
 	}
 
 	@Override
 	public <T> T tQuery(ResultSetHandler<T> rsh, String... templateSQL) {
-		return super.tQuery(rsh, SqlBoxContextUtils.explainDoubleStarSql(this, templateSQL));
+		try {
+			return super.tQuery(rsh, SqlBoxContextUtils.explainThreadLocal(this, templateSQL));
+		} finally {
+			paginationCache.set(null);
+			netConfigCache.set(null);
+		}
 	}
 
 	// =============CRUD methods=====
@@ -126,9 +183,6 @@ public class SqlBoxContext extends DbPro {
 		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}
 
-	public void unbind(Object entity) {
-		SqlBoxUtils.unbind(entity);
-	}
 	// getter & setter =======
 
 	public Dialect getDialect() {
@@ -147,12 +201,12 @@ public class SqlBoxContext extends DbPro {
 		SqlBoxContext.defaultContext = defaultContext;
 	}
 
-	public TableModel[] getMetaTableModels() {
-		return metaTableModels;
+	public SqlBox[] getDbMetaBoxes() {
+		return dbMetaBoxes;
 	}
 
-	public void setMetaTableModels(TableModel[] metaTableModels) {
-		this.metaTableModels = metaTableModels;
+	public void setDbMetaBoxes(SqlBox[] dbMetaBoxes) {
+		this.dbMetaBoxes = dbMetaBoxes;
 	}
 
 }

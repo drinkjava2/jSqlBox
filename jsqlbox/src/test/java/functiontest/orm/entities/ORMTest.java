@@ -1,15 +1,12 @@
 package functiontest.orm.entities;
 
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.*;
 
 import config.TestBase;
 
@@ -68,13 +65,18 @@ public class ORMTest extends TestBase {
 
 	@Test
 	public void test() {
-		System.out.println(SqlBoxContextUtils.explainDoubleStarSql(ctx,
-				"select u.**, e.** from usertb u, email e where u.id=e.userId"));
 
+		User u = new User();
+		u.box().getTableModel().setTableName("ttt");
+		u.box().getTableModel().getColumn("userName").setTransientable(true);
+		System.out.println(SqlBoxContextUtils.explainThreadLocal(ctx,
+				net(u, Email.class) + pagin(2, 20) + "select u.**, e.** from ttt u, email e where u.id=e.userId"));
+
+		//@formatter:off
 		//List<Map<String, Object>> listMap = ctx.nQuery(pagin(1,20)+"select u.**, e.** from usertb u, email e where u.id=e.userId",
 		//				new MapListHandler()); 
 		
-		//List<Map<String, Object>> listMap = ctx.nQuery(net(User.class,Email.class)+"select u.**, e.** from usertb u, email e where u.id=e.userId",
+		//List<Map<String, Object>> listMap = ctx.nQuery(Net.net(User.class,Email.class)+"select u.**, e.** from usertb u, email e where u.id=e.userId",
 		//				new MapListHandler()); 
 		// Net net = new Net(ctx, listMap);
 		// Net net = new Net(null, listMap, User.class, new Email()),
@@ -92,7 +94,9 @@ public class ORMTest extends TestBase {
 		// List<Email> emails = user.getRelatedNodes("parent",Path1.class, "child",Path1.class..., "parent", Email.class); 
 		// List<Email> emails = user.getRelatedNodes(Email.class); //if path can be guessed by computer 
 		// }
-		//Net net=u.getNet();
+		
+		//Net net=u.entityNet();
+		//Net net=Net.getEntityNet(u);
 		//net.remove(u);
 		//u.setAddress("new Address");
 		//net.update(u);
