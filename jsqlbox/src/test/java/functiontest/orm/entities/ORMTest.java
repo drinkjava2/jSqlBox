@@ -71,33 +71,36 @@ public class ORMTest extends TestBase {
 		System.out.println(SqlBoxContextUtils.explainDoubleStarSql(ctx,
 				"select u.**, e.** from usertb u, email e where u.id=e.userId"));
 
-		List<Map<String, Object>> listMap = ctx.nQuery("select u.**, e.** from usertb u, email e where u.id=e.userId",
-				new MapListHandler());
-		// Assert.assertEquals(5, listMap.size());
-		// EntityNet net = new EntityNet(ctx, User.class, Email.class);
-		// EntityNet net = new EntityNet(ctx, new SqlBox(User.class).alias("u"), Email.class);
-		//List<Map<String, Object>> listMap = net.nQuery("select u.**, e.** from usertb u, email e where u.id=e.userId", new MapListHandler());
-		// net.weave(listMap);
+		//List<Map<String, Object>> listMap = ctx.nQuery(pagin(1,20)+"select u.**, e.** from usertb u, email e where u.id=e.userId",
+		//				new MapListHandler()); 
 		
-		// EntityNet net = ctx.weave(listMap, User.class, Email.class);
-		// EntityNet net = ctx.weave(listMap, ctx.box(User.class).alias('u'),
-		// Email.class);
+		//List<Map<String, Object>> listMap = ctx.nQuery(net(User.class,Email.class)+"select u.**, e.** from usertb u, email e where u.id=e.userId",
+		//				new MapListHandler()); 
+		// Net net = new Net(ctx, listMap);
+		// Net net = new Net(null, listMap, User.class, new Email()),
+
 		// List<User> users = net.getList(User.class);
 		// for (User user : users) {
-		// List<Email> emails = user.getChildEntities(Email.class);
-		// List<Email> emails = user.getChildEntities(); //if only have 1 child
-		// List<Email> emails = ctx.getChildEntities(user, Email.class);
+		// List<Email> emails = user.getChildEntities(Email.class); 
+		          //Email.class can omit if search path no cause confuse, below methods same
+		// List<Email> emails = ctx.getChildEntities(user, Email.class); 
 
-		// User u = email.getParentNode(User.class);
-		// User u = email.getParentNode() //if only have one master;
-
-		// List<Email> emails = User.getChildNodes(); //if only has 1 child
-		// List<Email> emails = user.getRelatedNodes(Email.class);
-		// List<Email> emails = user.getRelatedNodes("P", Path1.class, "C",
-		// Path2.class,...,"C",Email.class);
-
-		// List<User> users = email.getRelatedEntity(User.class);
+		// User u = email.getParentEntity(User.class);
+		// User u = ctx.getParentEntity(email, User.class);  
+		// List<User> u = ctx.getParentEntities(emails, User.class); 
+ 
+		// List<Email> emails = user.getRelatedNodes("parent",Path1.class, "child",Path1.class..., "parent", Email.class); 
+		// List<Email> emails = user.getRelatedNodes(Email.class); //if path can be guessed by computer 
 		// }
+		//Net net=u.getNet();
+		//net.remove(u);
+		//u.setAddress("new Address");
+		//net.update(u);
+		//net.add(u);
+		//net.flush();
+		//ctx.flushEntityNet(net);
+		//net.setReadonlyAndCache(true)
+
 	}
 
 }

@@ -25,19 +25,20 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 1.0.0
  */
 public class EntityNet {
-
+	private SqlBoxContext ctx; 
+	 
 	private List<SqlBox> configBoxes = new ArrayList<SqlBox>();
 
 	/** The net */
 	private Map<Class<?>, List<Object>> net; 
 
-	private SqlBoxContext ctx;
+ 
 
 	public EntityNet(SqlBoxContext ctx, Class<?>... entityClasses) {
 		this.ctx = ctx;
 	}
 	
-	public EntityNet(SqlBoxContext ctx, SqlBox... configBoxes) {
+	public EntityNet(SqlBoxContext ctx, SqlBox... sqlBoxes) {
 		this.ctx = ctx;
 	}
 
