@@ -74,6 +74,11 @@ public class ORMTest extends TestBase {
 		List<Map<String, Object>> listMap = ctx.nQuery("select u.**, e.** from usertb u, email e where u.id=e.userId",
 				new MapListHandler());
 		// Assert.assertEquals(5, listMap.size());
+		// EntityNet net = new EntityNet(ctx, User.class, Email.class);
+		// EntityNet net = new EntityNet(ctx, new SqlBox(User.class).alias("u"), Email.class);
+		//List<Map<String, Object>> listMap = net.nQuery("select u.**, e.** from usertb u, email e where u.id=e.userId", new MapListHandler());
+		// net.weave(listMap);
+		
 		// EntityNet net = ctx.weave(listMap, User.class, Email.class);
 		// EntityNet net = ctx.weave(listMap, ctx.box(User.class).alias('u'),
 		// Email.class);

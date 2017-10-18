@@ -11,9 +11,11 @@
  */
 package com.github.drinkjava2.jsqlbox.net;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
@@ -24,14 +26,19 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  */
 public class EntityNet {
 
+	private List<SqlBox> configBoxes = new ArrayList<SqlBox>();
+
 	/** The net */
-	private Map<Class<?>, List<Object>> net;
+	private Map<Class<?>, List<Object>> net; 
 
-	private List<Object> configEntity;
+	private SqlBoxContext ctx;
 
-	private SqlBoxContext sqlBoxContext;
+	public EntityNet(SqlBoxContext ctx, Class<?>... entityClasses) {
+		this.ctx = ctx;
+	}
 	
-	public static List<Object> config(Object... entities){
-		return null;
-	} 
+	public EntityNet(SqlBoxContext ctx, SqlBox... configBoxes) {
+		this.ctx = ctx;
+	}
+
 }

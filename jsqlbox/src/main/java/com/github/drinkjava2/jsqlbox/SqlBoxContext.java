@@ -32,7 +32,7 @@ public class SqlBoxContext extends DbPro {
 	public static final SqlBoxLogger LOGGER = SqlBoxLogger.getLog(SqlBoxContext.class);
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
-	private Dialect dialect;
+	protected Dialect dialect;
 	private TableModel[] metaTableModels;
 
 	public SqlBoxContext() {
@@ -62,6 +62,8 @@ public class SqlBoxContext extends DbPro {
 		this.dialect = dialect;
 		refreshMetaData();
 	}
+	
+	 
 
 	public void refreshMetaData() {
 		metaTableModels = SqlBoxContextUtils.metaDataToModels(this, dialect);
