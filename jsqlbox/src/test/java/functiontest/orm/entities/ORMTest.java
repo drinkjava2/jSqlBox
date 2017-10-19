@@ -1,12 +1,18 @@
 package functiontest.orm.entities;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.net;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.pagin;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.*;
 
 import config.TestBase;
 
@@ -65,19 +71,10 @@ public class ORMTest extends TestBase {
 
 	@Test
 	public void test() {
-
-		User u = new User();
-		u.box().getTableModel().setTableName("ttt");
-		u.box().getTableModel().getColumn("userName").setTransientable(true);
-		System.out.println(SqlBoxContextUtils.explainThreadLocal(ctx,
-				net(u, Email.class) + pagin(2, 20) + "select u.**, e.** from ttt u, email e where u.id=e.userId"));
-
 		//@formatter:off
-		//List<Map<String, Object>> listMap = ctx.nQuery(pagin(1,20)+"select u.**, e.** from usertb u, email e where u.id=e.userId",
-		//				new MapListHandler()); 
-		
-		//List<Map<String, Object>> listMap = ctx.nQuery(Net.net(User.class,Email.class)+"select u.**, e.** from usertb u, email e where u.id=e.userId",
-		//				new MapListHandler()); 
+		List<Map<String, Object>> listMap = ctx.nQuery(net(new User(), Email.class) +"select ur.**, e.** from usertb ur, email e where ur.id=e.userId",
+						new MapListHandler()); 
+
 		// Net net = new Net(ctx, listMap);
 		// Net net = new Net(null, listMap, User.class, new Email()),
 

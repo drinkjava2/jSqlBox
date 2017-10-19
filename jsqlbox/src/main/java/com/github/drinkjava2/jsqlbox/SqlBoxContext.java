@@ -127,9 +127,9 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	@Override
-	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) {
+	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
-			return super.nQuery(SqlBoxContextUtils.explainThreadLocal(this, sql), rsh, params);
+			return super.query(SqlBoxContextUtils.explainThreadLocal(this, sql), rsh, params);
 		} finally {
 			paginationCache.set(null);
 			netConfigCache.set(null);
