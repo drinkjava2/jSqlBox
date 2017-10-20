@@ -17,6 +17,7 @@ package functiontest.idgenerator;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID36;
@@ -24,7 +25,6 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUIDAny;
 import com.github.drinkjava2.jdialects.annotation.jpa.GeneratedValue;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
 
 import config.TestBase;
 
@@ -33,7 +33,7 @@ import config.TestBase;
  */
 public class IdGeneratorTest2 extends TestBase {
 
-	public static class UUID25Pojo {
+	public static class UUID25Entity {
 		@GeneratedValue(strategy = GenerationType.UUID25)
 		private String id1;
 		@UUID25
@@ -74,12 +74,12 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUID25() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(DialectUtils.pojos2Models(UUID25Pojo.class));
-		UUID25Pojo pojo = new UUID25Pojo();
-		ctx.insert(pojo);
+		dropAndCreateDatabase(ModelUtils.oneEntity2Model(UUID25Entity.class));
+		UUID25Entity entity = new UUID25Entity();
+		ctx.insert(entity);
 	}
 
-	public static class UUID32Pojo {
+	public static class UUID32Entity {
 		@GeneratedValue(strategy = GenerationType.UUID32)
 		private String id1;
 		@UUID32
@@ -120,12 +120,12 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUID32() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(DialectUtils.pojos2Models(UUID32Pojo.class));
-		UUID32Pojo pojo = new UUID32Pojo();
-		ctx.insert(pojo);
+		dropAndCreateDatabase(ModelUtils.entity2Model(UUID32Entity.class));
+		UUID32Entity entity = new UUID32Entity();
+		ctx.insert(entity);
 	}
 
-	public static class UUID36Pojo {
+	public static class UUID36Entity {
 		@GeneratedValue(strategy = GenerationType.UUID36)
 		private String id1;
 		@UUID36
@@ -166,13 +166,13 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUID36() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(DialectUtils.pojos2Models(UUID36Pojo.class));
-		UUID36Pojo pojo = new UUID36Pojo();
-		ctx.insert(pojo);
+		dropAndCreateDatabase(ModelUtils.entity2Model(UUID36Entity.class));
+		UUID36Entity entity = new UUID36Entity();
+		ctx.insert(entity);
 	}
 
 	@UUIDAny(name = "uuidany10", length = 10)
-	public static class UUIDAnyPojo {
+	public static class UUIDAnyEntity {
 		@GeneratedValue(strategy = GenerationType.UUID_ANY, generator = "uuidany10")
 		private String id1;
 
@@ -214,8 +214,8 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUIDAny() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(DialectUtils.pojos2Models(UUIDAnyPojo.class));
-		UUIDAnyPojo pojo = new UUIDAnyPojo();
-		ctx.insert(pojo);
+		dropAndCreateDatabase(ModelUtils.entity2Model(UUIDAnyEntity.class));
+		UUIDAnyEntity entity = new UUIDAnyEntity();
+		ctx.insert(entity);
 	}
 }

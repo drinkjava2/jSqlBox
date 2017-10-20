@@ -22,18 +22,17 @@ import java.util.Map;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.ModelUtils;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
-import com.github.drinkjava2.jdialects.utils.StrUtils;
 
 /**
- * SqlBoxContextUtils is utility class store public static methods of
- * SqlBoxContext
+ * SqlBoxContextUtils is utility class store static methods about SqlBoxContext
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -46,7 +45,7 @@ public abstract class SqlBoxContextUtils {
 		SqlBox[] sqlBoxes = null;
 		try {
 			con = ctx.prepareConnection();
-			TableModel[] tableModels = DialectUtils.db2Models(con, dialect);
+			TableModel[] tableModels = ModelUtils.db2Model(con, dialect);
 			sqlBoxes = new SqlBox[tableModels.length];
 			for (int i = 0; i < tableModels.length; i++) {
 				SqlBox box = new SqlBox();
@@ -71,29 +70,29 @@ public abstract class SqlBoxContextUtils {
 		return sqlBoxes;
 	}
 
-	private static ColumnModel findMatchColumnForJavaField(String pojoField, SqlBox box) {
-		ColumnModel col = findMatchColumnForJavaField(pojoField, box.getTableModel());
+	private static ColumnModel findMatchColumnForJavaField(String entityField, SqlBox box) {
+		ColumnModel col = findMatchColumnForJavaField(entityField, box.getTableModel());
 		if (col == null) {
 			String tableName = box.getTableModel().getTableName();
 			TableModel metaTableModel = box.getContext().getMetaTableModel(tableName);
-			col = findMatchColumnForJavaField(pojoField, metaTableModel);
+			col = findMatchColumnForJavaField(entityField, metaTableModel);
 		}
 		if (col == null)
-			throw new SqlBoxException("Can not find database column match entity field '" + pojoField + "'");
+			throw new SqlBoxException("Can not find database column match entity field '" + entityField + "'");
 		return col;
 	}
 
-	private static ColumnModel findMatchColumnForJavaField(String pojoField, TableModel tableModel) {
+	private static ColumnModel findMatchColumnForJavaField(String entityField, TableModel tableModel) {
 		if (tableModel == null)
 			return null;
 		List<ColumnModel> columns = tableModel.getColumns();
 		ColumnModel result = null;
-		String underLineFieldName = SqlBoxStrUtils.camelToLowerCaseUnderline(pojoField);
+		String underLineFieldName = SqlBoxStrUtils.camelToLowerCaseUnderline(entityField);
 		for (ColumnModel col : columns) {
-			if (pojoField.equalsIgnoreCase(col.getPojoField())
+			if (entityField.equalsIgnoreCase(col.getEntityField())
 					|| underLineFieldName.equalsIgnoreCase(col.getColumnName())) {
 				if (result != null)
-					throw new SqlBoxException("Field '" + pojoField + "' found duplicated columns definition");
+					throw new SqlBoxException("Field '" + entityField + "' found duplicated columns definition");
 				result = col;
 			}
 		}
@@ -278,7 +277,7 @@ public abstract class SqlBoxContextUtils {
 		sb.setLength(sb.length() - 5);// delete the last " and "
 
 		try {
-			Object[] values = ctx.nQuery(sb.toString(), new ArrayHandler(),
+			Object[] values = ctx.nQuery(new ArrayHandler(), sb.toString(),  
 					pkParams.toArray(new Object[pkParams.size()]));
 			for (int i = 0; i < values.length; i++) {
 				Method writeMethod = writeMethods.get(allFieldNames.get(i));
@@ -321,137 +320,6 @@ public abstract class SqlBoxContextUtils {
 		SqlBoxException.assureNotNull(box.getTableModel(), "Assert error, box's TableModel can not be null");
 		SqlBoxException.assureNotEmpty(box.getTableModel().getTableName(),
 				"Assert error, box's tableName can not be null");
-	}
-
-	private static boolean isNormalLetters(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_';
-	}
-
-	public static String explainThreadLocal(SqlBoxContext ctx, String... SQLs) {
-		StringBuilder sb = new StringBuilder();
-		for (String str : SQLs)
-			sb.append(str);
-		String resultSql = sb.toString();
-		int[] pagins = SqlBoxContext.paginationCache.get();
-		resultSql = explainNetConfig(ctx, resultSql);
-		if (pagins != null)
-			resultSql = ctx.getDialect().paginate(pagins[0], pagins[1], resultSql);
-		return resultSql;
-	}
-
-	/**
-	 * Transfer Object[] to SqlBox[], object can be:
-	 * 
-	 * <pre>
-	 * 1. if is SqlBox instance, directly add into array,
-	 * 2. if is a Class, will call SqlBoxUtils.createSqlBox() to create a SqlBox instance,
-	 * 3. else will call SqlBoxUtils.findAndBindSqlBox() to create a SqlBox instance
-	 * </pre>
-	 */
-	public static SqlBox[] objectArrayToSqlBoxArray(SqlBoxContext ctx, Object[] netConfigs) {
-		if (netConfigs == null || netConfigs.length == 0)
-			return null;
-		SqlBox[] result = new SqlBox[netConfigs.length];
-		for (int i = 0; i < result.length; i++) {
-			Object obj = netConfigs[i];
-			if (obj == null)
-				throw new SqlBoxException("Can not convert null to SqlBox instance");
-			if (obj instanceof SqlBox)
-				result[i] = (SqlBox) obj;
-			else if (obj instanceof Class)
-				result[i] = SqlBoxUtils.createSqlBox(ctx, (Class<?>) obj);
-			else {
-				result[i] = SqlBoxUtils.findAndBindSqlBox(ctx, obj);
-			}
-		}
-
-		return result;
-	}
-
-	/**
-	 * Replace u.** to u.userName as u_userName, u.address as u_address...
-	 * 
-	 * <pre>
-	 * netConfig:
-	 * null: use MetaTableModels, select all columns and db table name should  same as given table name
-	 * not null: change the Object[] to a Sqlbox[], according the SqlBox[]'s setting to select columns which not transient
-	 * 
-	 * </pre>
-	 */
-	private static String replaceStarStarToColumn(SqlBoxContext ctx, String sql, String alias, String tableName,
-			SqlBox[] netConfig) {
-		StringBuilder replace = new StringBuilder();
-		if (netConfig != null && netConfig.length > 0) {
-			for (SqlBox box : netConfig) {
-				TableModel tb = box.getTableModel();
-				if (tableName.equalsIgnoreCase(tb.getTableName())) {
-					for (ColumnModel col : tb.getColumns()) {
-						if (!col.getTransientable())
-							replace.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
-					}
-					break;
-				}
-			}
-		}
-		if (replace.length() == 0)
-			throw new SqlBoxException("Can not find columns in table +'" + tableName + "'");
-		replace.setLength(replace.length() - 2);
-		return StrUtils.replace(sql, alias + ".**", replace.toString());
-	}
-
-	/**
-	 * Explain SQL include "**", for example: <br/>
-	 * "select u.** from user u" to <br/>
-	 * "select u.userName as u_userName, u.address as u_address from user u"
-	 */
-	public static String explainNetConfig(SqlBoxContext ctx, String thesql) {
-		String sql = thesql;
-		int pos = sql.indexOf(".**");
-		if (pos < 0)
-			return sql;
-		SqlBox[] netCfg = objectArrayToSqlBoxArray(ctx, SqlBoxContext.netConfigCache.get());
-		if (netCfg == null || netCfg.length == 0)
-			netCfg = ctx.getDbMetaBoxes();
-		while (pos > -1) {
-			StringBuilder alias_ = new StringBuilder();
-			for (int i = pos - 1; i >= 0; i--) {
-				if (isNormalLetters(sql.charAt(i)))
-					alias_.insert(0, sql.charAt(i));
-				else
-					break;
-			}
-			if (alias_.length() == 0)
-				throw new SqlBoxException(".** can not put at front");
-			String alias = alias_.toString();
-
-			int posAlias = (sql + " ").indexOf(" " + alias + " ");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" " + alias + ",");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" " + alias + ")");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" " + alias + "\t");
-			if (posAlias == -1)
-				throw new SqlBoxException("Alias '" + alias + "' not found");
-
-			StringBuilder tbStr_ = new StringBuilder();
-			for (int i = posAlias - 1; i >= 0; i--) {
-				char c = sql.charAt(i);
-				if (isNormalLetters(c))
-					tbStr_.insert(0, c);
-				else if (tbStr_.length() > 0)
-					break;
-			}
-			if (tbStr_.length() == 0)
-				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
-			String tbStr = tbStr_.toString();
-
-			// now alias="u", tbStr="users"
-			sql = replaceStarStarToColumn(ctx, sql, alias, tbStr, netCfg);
-			pos = sql.indexOf(".**");
-		}
-		return sql;
 	}
 
 }

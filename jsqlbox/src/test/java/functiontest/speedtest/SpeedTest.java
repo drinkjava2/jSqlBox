@@ -46,12 +46,6 @@ public class SpeedTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-
-		// dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
-		// dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		// dataSource.setUsername("root");// change to your user & password
-		// dataSource.setPassword("root888");
-
 		ctx = new SqlBoxContext(dataSource);
 		ctx.setAllowShowSQL(false);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
@@ -71,28 +65,28 @@ public class SpeedTest {
 		Long times = 50L;
 		System.out.println("Compare method execute time for repeat " + times + " times:");
 		runMethod("pureJdbc", times);
-		runMethod("dbUtilsOldMethod1", times);
-		runMethod("dbUtilsOldMethod2", times);
+		runMethod("dbUtilsWithConnMethod", times);
+		runMethod("dbUtilsNoConnMethod", times);
 		runMethod("nXxxJdbcStyle", times);
 		runMethod("iXxxInlineStyle", times);
 		runMethod("tXxxTemplateStyle", times);
-		runMethod("tXxxTemplateStyle2", times);
+		runMethod("tXxxTemplateColonStyle", times);
 		runMethod("dataMapperStyle", times);
 		runMethod("activeRecordStyle", times);
-		runMethod("activeRecordStyle2", times);
+		runMethod("activeRecordDefaultContext", times);
 	}
 
 	@Table(name = "users")
-	public static class PojoUser {
+	public static class UserEntity {
 		@Id
 		String name;
 		String address;
 		SqlBox box;
 
-		public PojoUser() {
+		public UserEntity() {
 		}
 
-		public PojoUser(String name, String address) {
+		public UserEntity(String name, String address) {
 			this.name = name;
 			this.address = address;
 		}
@@ -205,7 +199,7 @@ public class SpeedTest {
 		}
 	}
 
-	public void dbUtilsOldMethod1(Long times) {
+	public void dbUtilsWithConnMethod(Long times) {
 		for (int i = 0; i < times; i++) {
 			Connection conn = null;
 			try {
@@ -227,7 +221,7 @@ public class SpeedTest {
 		}
 	}
 
-	public void dbUtilsOldMethod2(Long times) {
+	public void dbUtilsNoConnMethod(Long times) {
 		for (int i = 0; i < times; i++) {
 			try {
 				ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
@@ -280,7 +274,7 @@ public class SpeedTest {
 		}
 	}
 
-	public void tXxxTemplateStyle2(Long times) {
+	public void tXxxTemplateColonStyle(Long times) {
 		for (int i = 0; i < times; i++) {
 			User sam = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
@@ -298,23 +292,23 @@ public class SpeedTest {
 
 	public void dataMapperStyle(Long times) {
 		for (int i = 0; i < times; i++) {
-			PojoUser sam = new PojoUser();
+			UserEntity sam = new UserEntity();
 			sam.setName("Sam");
 			sam.setAddress("Canada");
 			ctx.insert(sam);
 			sam.setAddress("China");
 			ctx.update(sam);
-			PojoUser sam2 = ctx.load(PojoUser.class, "Sam");
+			UserEntity sam2 = ctx.load(UserEntity.class, "Sam");
 			ctx.delete(sam2);
 		}
 	}
 
 	public void activeRecordStyle(Long times) {
 		User sam = new User();
+		sam.box().setContext(ctx); // set SqlBoxContent
 		for (int i = 0; i < times; i++) {
 			sam.setName("Sam");
 			sam.setAddress("Canada");
-			sam.box().setContext(ctx); // set SqlBoxContent instance here
 			sam.insert();
 			sam.setAddress("China");
 			sam.update();
@@ -323,8 +317,8 @@ public class SpeedTest {
 		}
 	}
 
-	public void activeRecordStyle2(Long times) {
-		SqlBoxContext.setDefaultContext(ctx);
+	public void activeRecordDefaultContext(Long times) {
+		SqlBoxContext.setDefaultContext(ctx);// use global default context
 		User sam = new User();
 		for (int i = 0; i < times; i++) {
 			sam.setName("Sam");

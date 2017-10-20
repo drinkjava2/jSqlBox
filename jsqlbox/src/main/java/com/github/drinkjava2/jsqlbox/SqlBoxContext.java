@@ -20,8 +20,8 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.StrUtils;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -34,8 +34,6 @@ public class SqlBoxContext extends DbPro {
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	protected Dialect dialect;
 	private SqlBox[] dbMetaBoxes;
-	protected static ThreadLocal<int[]> paginationCache = new ThreadLocal<int[]>();
-	protected static ThreadLocal<Object[]> netConfigCache = new ThreadLocal<Object[]>();
 
 	public SqlBoxContext() {
 		super();
@@ -85,84 +83,76 @@ public class SqlBoxContext extends DbPro {
 		return SqlBoxUtils.createSqlBox(this, clazz);
 	}
 
-	// === Rewrite all query methods to support special Threadlocal variants
-	// explain ==
+	// ================================================================
+	// To support special in-line methods like pagin() method which utilize
+	// ThreadLocad variant, here have to override base class QueryRunner's 4
+	// query methods, because a main query method in commons-DbUtils is private,
+	// hope it can change to protected in future
+
 	/**
-	 * Return a empty "" String and save a Threadlocal pageNumber and pageSize
+	 * Return a empty "" String and save a ThreadLocal pageNumber and pageSize
 	 * array in current thread, it will be used by SqlBoxContext's query
 	 * methods.
 	 */
 	public static String pagin(int pageNumber, int pageSize) {
-		paginationCache.set(new int[] { pageNumber, pageSize });
+		SpecialSqlUtils.paginationCache.set(new int[] { pageNumber, pageSize });
 		return "";
 	}
 
 	/**
-	 * Return a empty "" String and save a Threadlocal netConfig object array in
+	 * Return a empty "" String and save a ThreadLocal netConfig object array in
 	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String net(Object... netConfig) {
-		netConfigCache.set(netConfig);
+		SpecialSqlUtils.netObjectConfigCache.set(netConfig);
 		return "";
 	}
 
 	@Override
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
+		SpecialSqlUtils.cleanLastNetBoxCache();
 		try {
-			return super.query(conn, sql, rsh, params);
+			T t = super.query(conn, SpecialSqlUtils.explainSpecialSql(this, sql), rsh, params);
+			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
+			return t;
 		} finally {
-			paginationCache.set(null);
-			netConfigCache.set(null);
+			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
 		}
 	}
 
 	@Override
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh) throws SQLException {
+		SpecialSqlUtils.cleanLastNetBoxCache();
 		try {
-			return super.query(conn, sql, rsh);
+			T t = super.query(conn, SpecialSqlUtils.explainSpecialSql(this, sql), rsh);
+			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
+			return t;
 		} finally {
-			paginationCache.set(null);
-			netConfigCache.set(null);
+			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
 		}
 	}
 
 	@Override
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
+		SpecialSqlUtils.cleanLastNetBoxCache();
 		try {
-			return super.query(SqlBoxContextUtils.explainThreadLocal(this, sql), rsh, params);
+			T t = super.query(SpecialSqlUtils.explainSpecialSql(this, sql), rsh, params);
+			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
+			return t;
 		} finally {
-			paginationCache.set(null);
-			netConfigCache.set(null);
+			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
 		}
 	}
 
 	@Override
-	public <T> T nQuery(String sql, ResultSetHandler<T> rsh, Object... params) {
+	public <T> T query(String sql, ResultSetHandler<T> rsh) throws SQLException {
+		SpecialSqlUtils.cleanLastNetBoxCache();
 		try {
-			return super.nQuery(SqlBoxContextUtils.explainThreadLocal(this, sql), rsh, params);
+			T t = super.query(SpecialSqlUtils.explainSpecialSql(this, sql), rsh);
+			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
+			return t;
 		} finally {
-			paginationCache.set(null);
-			netConfigCache.set(null);
-		}
-	}
-
-	@Override
-	public <T> T iQuery(ResultSetHandler<T> rsh, String... inlineSQL) {
-		try {
-			return super.iQuery(rsh, SqlBoxContextUtils.explainThreadLocal(this, inlineSQL));
-		} finally {
-			paginationCache.set(null);
-			netConfigCache.set(null);
-		}
-	}
-
-	@Override
-	public <T> T tQuery(ResultSetHandler<T> rsh, String... templateSQL) {
-		try {
-			return super.tQuery(rsh, SqlBoxContextUtils.explainThreadLocal(this, templateSQL));
-		} finally {
-			paginationCache.set(null);
-			netConfigCache.set(null);
+			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
 		}
 	}
 

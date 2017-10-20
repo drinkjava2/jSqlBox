@@ -52,4 +52,8 @@ public abstract class SqlBoxStrUtils {
 			sb.setLength(sb.length() - 1);
 		return sb.toString();
 	}
+
+	public static boolean isNormalLetters(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_';
+	}
 }

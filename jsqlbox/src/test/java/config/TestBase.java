@@ -29,22 +29,21 @@ import config.DataSourceConfig.H2DataSourceBox;
  * @since 1.0.0
  */
 public class TestBase {
-	protected HikariDataSource  dataSource;
+	protected HikariDataSource dataSource;
 	protected Dialect dialect;
 	protected SqlBoxContext ctx;
 
 	@Before
 	public void init() {
-		dataSource=BeanBox.getBean(H2DataSourceBox.class);
-		//dataSource=BeanBox.getBean(MySqlDataSourceBox.class);
-		
-//		dataSource = new HikariDataSource();
-//		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-//		dataSource.setDriverClassName("org.h2.Driver");
-//		dataSource.setUsername("sa");
-//		dataSource.setPassword("");
-//		dataSource.setMaximumPoolSize(8);
-//		dataSource.setConnectionTimeout(2000);
+		dataSource = BeanBox.getBean(H2DataSourceBox.class);
+
+		// dataSource = new HikariDataSource();
+		// dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		// dataSource.setDriverClassName("org.h2.Driver");
+		// dataSource.setUsername("sa");
+		// dataSource.setPassword("");
+		// dataSource.setMaximumPoolSize(8);
+		// dataSource.setConnectionTimeout(2000);
 		dialect = Dialect.guessDialect(dataSource);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setDefaultContext(ctx);
@@ -52,7 +51,7 @@ public class TestBase {
 
 	@After
 	public void cleanUp() {
-		//dataSource.close();
+		// dataSource.close();
 		SqlBoxContext.setDefaultContext(null);
 	}
 
@@ -68,7 +67,7 @@ public class TestBase {
 		for (String sql : ddls)
 			ctx.nExecute(sql);
 	}
- 
+
 	/**
 	 * Drop and create database according given tableModels
 	 */

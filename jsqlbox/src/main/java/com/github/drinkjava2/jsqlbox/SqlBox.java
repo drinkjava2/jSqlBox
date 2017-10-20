@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * SqlBox is the configuration of a POJO class
+ * SqlBox is the configuration of a Entity class
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0

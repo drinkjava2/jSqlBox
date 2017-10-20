@@ -6,6 +6,7 @@ public class Email extends ActiveRecord {
 	String id;
 	String emailName;
 	String userId;
+	
 
 	public String getId() {
 		return id;

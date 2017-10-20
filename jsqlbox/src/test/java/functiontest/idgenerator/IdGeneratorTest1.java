@@ -22,6 +22,7 @@ import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.valuesQuesio
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
@@ -33,7 +34,6 @@ import com.github.drinkjava2.jdialects.id.UUID25Generator;
 import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jdialects.id.UUID36Generator;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
 
 import config.TestBase;
 
@@ -42,7 +42,7 @@ import config.TestBase;
  */
 public class IdGeneratorTest1 extends TestBase {
 	
-	public static class pkeyPOJO {
+	public static class PkeyEntity {
 		@Id
 		private String id1;
 
@@ -68,7 +68,7 @@ public class IdGeneratorTest1 extends TestBase {
 
 	@Test
 	public void testPKey() {// nextID
-		TableModel t = DialectUtils.pojo2Model(pkeyPOJO.class);
+		TableModel t = ModelUtils.oneEntity2Model(PkeyEntity.class); 
 		Assert.assertTrue(t.column("id1").getPkey());
 		Assert.assertTrue(t.column("id2").getPkey());
 	}

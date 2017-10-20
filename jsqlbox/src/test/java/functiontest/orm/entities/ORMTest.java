@@ -1,7 +1,6 @@
 package functiontest.orm.entities;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.net;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.pagin;
 
 import java.util.List;
 import java.util.Map;
@@ -10,9 +9,9 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.EntityNet;
 
 import config.TestBase;
 
@@ -20,7 +19,7 @@ public class ORMTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
-		TableModel[] models = DialectUtils.pojos2Models(User.class, Email.class, Address.class, Role.class,
+		TableModel[] models = ModelUtils.entity2Model(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
@@ -71,12 +70,13 @@ public class ORMTest extends TestBase {
 
 	@Test
 	public void test() {
-		//@formatter:off
-		List<Map<String, Object>> listMap = ctx.nQuery(net(new User(), Email.class) +"select ur.**, e.** from usertb ur, email e where ur.id=e.userId",
-						new MapListHandler()); 
+		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
+				net(User.class, Email.class) + "select ur.**, e.** from usertb ur, email e where ur.id=e.userId");
 
-		// Net net = new Net(ctx, listMap);
-		// Net net = new Net(null, listMap, User.class, new Email()),
+		EntityNet net = new EntityNet(ctx, listMap);
+
+		//@formatter:off
+		// EntityNet net = new EntityNet(null, listMap, User.class, new Email()),
 
 		// List<User> users = net.getList(User.class);
 		// for (User user : users) {
@@ -92,8 +92,8 @@ public class ORMTest extends TestBase {
 		// List<Email> emails = user.getRelatedNodes(Email.class); //if path can be guessed by computer 
 		// }
 		
-		//Net net=u.entityNet();
-		//Net net=Net.getEntityNet(u);
+		//EntityNet net=u.entityNet();
+		//EntityNet net=Net.getEntityNet(u);
 		//net.remove(u);
 		//u.setAddress("new Address");
 		//net.update(u);
@@ -101,7 +101,6 @@ public class ORMTest extends TestBase {
 		//net.flush();
 		//ctx.flushEntityNet(net);
 		//net.setReadonlyAndCache(true)
-
 	}
 
 }

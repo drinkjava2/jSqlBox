@@ -146,7 +146,7 @@ public abstract class ClassCacheUtils {
 
 	/**
 	 * Return field box, this method is used for jSqlBox to directly access box
-	 * field to bind SqlBox instance to a POJO with box field
+	 * field to bind SqlBox instance to a entity with its box field
 	 */
 	public static Field getBoxField(Class<?> clazz) {
 		Map<String, Method> writeMethods = classWriteMethods.get(clazz);

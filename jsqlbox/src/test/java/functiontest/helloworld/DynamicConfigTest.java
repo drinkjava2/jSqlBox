@@ -14,10 +14,10 @@ package functiontest.helloworld;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
@@ -63,7 +63,7 @@ public class DynamicConfigTest extends TestBase {
 
 	public static class UserDemoSqlBox extends SqlBox {
 		{
-			TableModel t = DialectUtils.pojo2Model(UserDemo.class);
+			TableModel t = ModelUtils.oneEntity2Model(UserDemo.class);
 			t.addColumn("anotherColumn").STRING(40);
 			this.setTableModel(t);
 		}

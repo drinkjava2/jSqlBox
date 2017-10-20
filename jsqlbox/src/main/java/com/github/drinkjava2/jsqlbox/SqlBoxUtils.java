@@ -16,9 +16,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
-import com.github.drinkjava2.jdialects.utils.DialectUtils;
 
 /**
  * SqlBoxUtils is utility class to bind SqlBox instance to a entity bean, there
@@ -32,9 +32,9 @@ import com.github.drinkjava2.jdialects.utils.DialectUtils;
  *    A good practice in Java8 is: implement IActiveRecord interface and write the default interface methods, this will create 
  *    a "non-invasion interface", it's useful when entity already extended from other class.
  * 
- * 3. For POJO with a "public SqlBox box;" field, jSqlBox will directly access this field to store SqlBox instance.
+ * 3. For Entity with a "public SqlBox box;" field, jSqlBox will directly access this field to store SqlBox instance.
  * 
- * 4. For POJO without box field, will use a threadLocal Map cache to store SqlBox instance, and make the key
+ * 4. For Entity without box field, will use a threadLocal Map cache to store SqlBox instance, and make the key
  *    point to entity, value point to SqlBox instance. 
  *    
  * Note: Method 4 is not recommended because if do batch insert like 100000 times may cause out of memory error, because 
@@ -45,7 +45,7 @@ import com.github.drinkjava2.jdialects.utils.DialectUtils;
  * @since 1.0.0
  */
 public abstract class SqlBoxUtils {
-	private static boolean pojoHaveNoBoxFieldWarning = false;
+	private static boolean EntityHaveNoBoxFieldWarning = false;
 
 	/**
 	 * Store boxes binded to entities in a threadLocal Map
@@ -57,8 +57,8 @@ public abstract class SqlBoxUtils {
 		}
 	};
 
-	private static void logoutPojoHaveNoBoxFieldWarning(Class<?> clazz) {
-		pojoHaveNoBoxFieldWarning = true;
+	private static void logoutEntityHaveNoBoxFieldWarning(Class<?> clazz) {
+		EntityHaveNoBoxFieldWarning = true;
 		SqlBoxContext.LOGGER.warn("For entity class '" + clazz.getName()
 				+ "', suggest extends from ActiveRecord or put a \"SqlBox box;\" field to improve batch insert performacne.");
 	}
@@ -68,8 +68,8 @@ public abstract class SqlBoxUtils {
 		if (boxField != null)
 			ReflectionUtils.setField(boxField, entity, box);
 		else {
-			if (!pojoHaveNoBoxFieldWarning)
-				logoutPojoHaveNoBoxFieldWarning(entity.getClass());
+			if (!EntityHaveNoBoxFieldWarning)
+				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
 			boxCache.get().put(entity, box);
 		}
 	}
@@ -79,8 +79,8 @@ public abstract class SqlBoxUtils {
 		if (boxField != null)
 			return (SqlBox) ReflectionUtils.getField(boxField, entity);
 		else {
-			if (!pojoHaveNoBoxFieldWarning)
-				logoutPojoHaveNoBoxFieldWarning(entity.getClass());
+			if (!EntityHaveNoBoxFieldWarning)
+				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
 			return boxCache.get().get(entity);
 		}
 	}
@@ -92,8 +92,8 @@ public abstract class SqlBoxUtils {
 			box.setEntityBean(null);
 			ReflectionUtils.setField(boxField, entity, null);
 		} else {
-			if (!pojoHaveNoBoxFieldWarning)
-				logoutPojoHaveNoBoxFieldWarning(entity.getClass());
+			if (!EntityHaveNoBoxFieldWarning)
+				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
 			SqlBox box = boxCache.get().get(entity);
 			if (box != null) {
 				box.setEntityBean(null);
@@ -187,14 +187,14 @@ public abstract class SqlBoxUtils {
 
 		if (boxClass == null) {
 			box = new SqlBox();
-			box.setTableModel(DialectUtils.pojo2Model(entityOrBoxClass));
+			box.setTableModel(ModelUtils.oneEntity2Model(entityOrBoxClass));
 			box.setEntityClass(entityOrBoxClass.getClass());
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
 				TableModel model = box.getTableModel();
 				if (model == null) {
-					model = DialectUtils.pojo2Model(entityOrBoxClass);
+					model = ModelUtils.oneEntity2Model(entityOrBoxClass);
 					box.setTableModel(model);
 				}
 				Method configMethod = null;

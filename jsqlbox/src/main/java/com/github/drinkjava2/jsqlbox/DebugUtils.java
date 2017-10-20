@@ -33,13 +33,13 @@ public abstract class DebugUtils {
 		if (c.getLengths() != null)
 			for (Integer length : c.getLengths())
 				sb.append(length).append(", ");
-		sb.append("pojoField=" + c.getPojoField());
+		sb.append("entityField=" + c.getEntityField());
 		return sb.toString();
 	}
 
 	public static String getTableModelDebugInfo(TableModel model) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\rtableName=" + model.getTableName()).append("\r"); 
+		sb.append("\rtableName=" + model.getTableName()).append("\r");
 		List<ColumnModel> columns = model.getColumns();
 		for (ColumnModel column : columns)
 			sb.append(getColumnModelDebugInfo(column)).append("\r");

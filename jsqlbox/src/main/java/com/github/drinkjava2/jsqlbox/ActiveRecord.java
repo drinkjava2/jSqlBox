@@ -15,7 +15,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * Entity class extended from ActiveRecord will get CRUD methods, see below
- * difference in jSqlBox to save ActiveRecord entity and POJO entity into
+ * difference in jSqlBox to save ActiveRecord entity and normal entity into
  * database:
  * 
  * <pre>
