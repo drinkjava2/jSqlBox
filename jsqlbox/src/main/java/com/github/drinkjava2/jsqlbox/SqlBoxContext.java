@@ -83,10 +83,30 @@ public class SqlBoxContext extends DbPro {
 		return SqlBoxUtils.createSqlBox(this, clazz);
 	}
 
+	/**
+	 * Mark a point at current thread, from now all insert/update/delete method
+	 * will be cached for batchFlush() method use
+	 */
+	public void batchBegin() {
+
+	}
+
+	/**
+	 * Execute the cached SQL and parameters in current thread
+	 */
+	public void batchExecute() {
+
+	}
+
+	/** Cancel and clear all cached SQL and parameters in cache */
+	public void batchCancel() {
+
+	}
+
 	// ================================================================
-	// To support special in-line methods like pagin() method which utilize
+	// To support special in-line methods like pagin(), net() methods which utilize
 	// ThreadLocad variant, here have to override base class QueryRunner's 4
-	// query methods, because a main query method in commons-DbUtils is private,
+	// query methods, because some important methods in commons-DbUtils is private,
 	// hope it can change to protected in future
 
 	/**
@@ -158,15 +178,15 @@ public class SqlBoxContext extends DbPro {
 
 	// =============CRUD methods=====
 	public void insert(Object entity) {
-		SqlBoxContextUtils.insert(entity, SqlBoxUtils.findAndBindSqlBox(this, entity));
+		SqlBoxContextUtils.insert(this, entity);
 	}
 
 	public int update(Object entity) {
-		return SqlBoxContextUtils.update(entity, SqlBoxUtils.findAndBindSqlBox(this, entity));
+		return SqlBoxContextUtils.update(this, entity);
 	}
 
 	public void delete(Object entity) {
-		SqlBoxContextUtils.delete(entity, SqlBoxUtils.findAndBindSqlBox(this, entity));
+		SqlBoxContextUtils.delete(this, entity);
 	}
 
 	public <T> T load(Class<?> entityClass, Object pkey) {

@@ -7,7 +7,7 @@ import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.question0;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.valuesQuesions;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put0;
-import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.replace;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -135,9 +135,16 @@ public class SqlStyleDemo {
 		Assert.assertEquals(1L,
 				ctx.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
 		ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
-
+		
 		User sam = new User("Sam", "Canada");
 		User tom = new User("Tom", "China");
+		
+		System.out.println("========== Another demo of In-line style=======================");
+		ctx.iExecute("insert into users (", inline0(sam, "", ", ") + ") ", valuesQuesions());
+		ctx.iExecute("update users set ", inline0(sam, "=?", ", "));
+		Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where ", inline0(sam, "=?", " and ")));
+		ctx.iExecute(param0(), "delete from users where ", inline(sam, "=?", " or "));
+ 
 
 		System.out.println("========== Txxx methods, Template style ===================");
 		put0("user", sam);

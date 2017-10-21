@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Method;
+
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -35,12 +37,14 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  *    ctx.insert(entity);
  * </pre>
  * 
- *  
+ * 
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 public class ActiveRecord implements IActiveRecord {
+	private static ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
+
 	SqlBox box;
 
 	@Override
@@ -104,6 +108,45 @@ public class ActiveRecord implements IActiveRecord {
 	@Override
 	public <T> T load(Object pkey) {
 		return context().load(this.getClass(), pkey);
+	}
+
+	@Override
+	public IActiveRecord put(Object... fieldAndValues) {
+		for (int i = 0; i < fieldAndValues.length / 2; i++) {
+			String field = (String) fieldAndValues[i * 2];
+			Object value = fieldAndValues[i * 2 + 1];
+			Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(this.getClass(), field);
+			try {
+				writeMethod.invoke(this, value);
+			} catch (Exception e) {
+				throw new SqlBoxException(e);
+			}
+		}
+		return this;
+	}
+
+	@Override
+	public IActiveRecord putFields(String... fieldNames) {
+		lastTimePutFieldsCache.set(fieldNames);
+		return this;
+	}
+
+	@Override
+	public IActiveRecord putValues(Object... values) {
+		String[] fields = lastTimePutFieldsCache.get();
+		if (values.length == 0 || fields == null || fields.length == 0)
+			throw new SqlBoxException("putValues fields or values can not be empty");
+		if (values.length != fields.length)
+			throw new SqlBoxException("putValues fields and values number not match");
+		for (int i = 0; i < fields.length; i++) {
+			Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(this.getClass(), fields[i]);
+			try {
+				writeMethod.invoke(this, values[i]);
+			} catch (Exception e) {
+				throw new SqlBoxException(e);
+			}
+		}
+		return this;
 	}
 
 }

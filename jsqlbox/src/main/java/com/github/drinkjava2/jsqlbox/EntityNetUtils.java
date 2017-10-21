@@ -11,11 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * EntityNetUtils is utility class store static methods about EntityNet
  * 
@@ -24,10 +19,10 @@ import java.util.Map;
  */
 public class EntityNetUtils {
 
-	public static void weave(EntityNet net, List<Map<String, Object>> listMap) {
-		SqlBox[] boxes = net.getConfigBoxes();
-		if (boxes == null || boxes.length == 0)
-			throw new SqlBoxException("Can not weave EntityNet with empty config parameters");
+	public static void weave(EntityNet net) {
+//		SqlBox[] boxes = net.get();
+//		if (boxes == null || boxes.length == 0)
+//			throw new SqlBoxException("Can not weave EntityNet with empty config parameters");
 		
 
 	}

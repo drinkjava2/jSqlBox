@@ -134,7 +134,7 @@ public abstract class ClassCacheUtils {
 		Map<String, Method> writeMethods = classWriteMethods.get(clazz);
 		if (writeMethods == null) {
 			cacheReadWriteMethodsAndBoxField(clazz);
-			return classReadMethods.get(clazz);
+			return classWriteMethods.get(clazz);
 		} else
 			return writeMethods;
 	}

@@ -67,4 +67,20 @@ public interface IActiveRecord {
 	 */
 	public <T> T load(Object pkey);
 
+	/**
+	 * Link style set values for entity field like:
+	 * user.set("id","id1").set("name","Sam").set("address","Beijing","phone","12345",
+	 * "email","abc@123.com")
+	 */
+	public IActiveRecord put(Object... fieldAndValues);
+
+	/** Cache a field array in ThreadLocal for putValues method use */
+	public IActiveRecord putFields(String... fieldNames);
+
+	/**
+	 * Put values for entity fields, field names should be cached by call
+	 * putFields method first
+	 */
+	public IActiveRecord putValues(Object... values);
+
 }

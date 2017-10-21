@@ -103,11 +103,10 @@ public abstract class SqlBoxContextUtils {
 	 * Insert entityBean into database, and change ID fields to values generated
 	 * by IdGenerator (identity or sequence or UUID...)
 	 */
-	public static void insert(Object entityBean, SqlBox box) {
+	public static void insert(SqlBoxContext ctx, Object entityBean) {
+		SqlBox box=SqlBoxUtils.findAndBindSqlBox(ctx, entityBean);
 		checkBeanAndBoxExist(entityBean, box);
-		SqlBoxContext ctx = box.getContext();
 		TableModel tableModel = box.getTableModel();
-
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(tableModel.getTableName()).append(" (");
 
@@ -151,7 +150,8 @@ public abstract class SqlBoxContextUtils {
 		}
 	}
 
-	public static int update(Object entityBean, SqlBox box) {
+	public static int update(SqlBoxContext ctx, Object entityBean) {
+		SqlBox box=SqlBoxUtils.findAndBindSqlBox(ctx, entityBean);
 		checkBeanAndBoxExist(entityBean, box);
 		TableModel tableModel = box.getTableModel();
 
@@ -189,7 +189,8 @@ public abstract class SqlBoxContextUtils {
 	/**
 	 * Delete entityBean in database according primary key value
 	 */
-	public static void delete(Object entityBean, SqlBox box) {
+	public static void delete(SqlBoxContext ctx, Object entityBean) {
+		SqlBox box=SqlBoxUtils.findAndBindSqlBox(ctx, entityBean);
 		checkBeanAndBoxExist(entityBean, box);
 		TableModel tableModel = box.getTableModel();
 

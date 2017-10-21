@@ -19,61 +19,77 @@ public class ORMTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
+		// ctx.setAllowShowSQL(true);
 		TableModel[] models = ModelUtils.entity2Model(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
-		ctx.nExecute("insert into usertb values('u1','user1')");
-		ctx.nExecute("insert into usertb values('u2','user2')");
-		ctx.nExecute("insert into usertb values('u3','user3')");
-		ctx.nExecute("insert into usertb values('u4','user4')");
-		ctx.nExecute("insert into usertb values('u5','user5')");
+		//@formatter:off
+		new User().put("id","u1").put("userName","user1").insert();
+		new User().put("id","u2").put("userName","user2").insert();
+		new User().put("id","u3").put("userName","user3").insert();
+		new User().put("id","u4").put("userName","user4").insert();
+		new User().put("id","u5").put("userName","user5").insert();
+		
+		new Address().put("id","a1","addressName","address1","userId","u1").insert();
+		new Address().put("id","a2","addressName","address2","userId","u2").insert();
+		new Address().put("id","a3","addressName","address3","userId","u3").insert();
+		new Address().put("id","a4","addressName","address4","userId","u4").insert();
+		new Address().put("id","a5","addressName","address5","userId","u5").insert();
 
-		ctx.nExecute("insert into address values('a1','address1','u1')");
-		ctx.nExecute("insert into address values('a2','address2','u2')");
-		ctx.nExecute("insert into address values('a3','address3','u3')");
-		ctx.nExecute("insert into address values('a4','address4','u4')");
-		ctx.nExecute("insert into address values('a5','address5','u5')");
+		new Email().putFields("id","emailName","userId");
+		new Email().putValues("e1","email1","u1").insert();
+		new Email().putValues("e2","email2","u1").insert();
+		new Email().putValues("e3","email3","u2").insert();
+		new Email().putValues("e4","email4","u2").insert();
+		new Email().putValues("e5","email5","u3").insert();
+		
+		Role r=new Role();
+		r.setId("r1");r.setRoleName("role1");r.insert();
+		r.setId("r2");r.setRoleName("role2");r.insert();
+		r.setId("r3");r.setRoleName("role3");r.insert();
+		r.setId("r4");r.setRoleName("role4");r.insert();
+		r.setId("r5");r.setRoleName("role5");r.insert();
+		
+		Privilege p=new Privilege();
+		p.setId("p1");p.setPrivilegeName("privilege1");p.insert();
+		p.setId("p2");p.setPrivilegeName("privilege2");p.insert();
+		p.setId("p3");p.setPrivilegeName("privilege3");p.insert();
+		p.setId("p4");p.setPrivilegeName("privilege4");p.insert();
+		p.setId("p5");p.setPrivilegeName("privilege5");p.insert();
 
-		ctx.nExecute("insert into email values('e1','email1','u1')");
-		ctx.nExecute("insert into email values('e2','email2','u1')");
-		ctx.nExecute("insert into email values('e3','email3','u2')");
-		ctx.nExecute("insert into email values('e4','email4','u2')");
-		ctx.nExecute("insert into email values('e5','email5','u3')");
+        UserRole ur=new UserRole();
+        ur.setUserId("u1");ur.setRid("r1");ur.insert();
+        ur.setUserId("u2");ur.setRid("r1");ur.insert();
+        ur.setUserId("u2");ur.setRid("r2");ur.insert();
+        ur.setUserId("u2");ur.setRid("r3");ur.insert();
+        ur.setUserId("u3");ur.setRid("r4");ur.insert();
+        ur.setUserId("u4");ur.setRid("r1");ur.insert();
 
-		ctx.nExecute("insert into roles values('r1','role1')");
-		ctx.nExecute("insert into roles values('r2','role2')");
-		ctx.nExecute("insert into roles values('r3','role3')");
-		ctx.nExecute("insert into roles values('r4','role4')");
-		ctx.nExecute("insert into roles values('r5','role5')");
-
-		ctx.nExecute("insert into privilegetb values('p1','privilege1')");
-		ctx.nExecute("insert into privilegetb values('p2','privilege2')");
-		ctx.nExecute("insert into privilegetb values('p3','privilege3')");
-		ctx.nExecute("insert into privilegetb values('p4','privilege4')");
-		ctx.nExecute("insert into privilegetb values('p5','privilege5')");
-
-		ctx.nExecute("insert into userroletb values('u1','r1')");
-		ctx.nExecute("insert into userroletb values('u2','r1')");
-		ctx.nExecute("insert into userroletb values('u2','r2')");
-		ctx.nExecute("insert into userroletb values('u2','r3')");
-		ctx.nExecute("insert into userroletb values('u3','r4')");
-		ctx.nExecute("insert into userroletb values('u4','r1')");
-
-		ctx.nExecute("insert into roleprivilege values('r1','p1')");
-		ctx.nExecute("insert into roleprivilege values('r2','p1')");
-		ctx.nExecute("insert into roleprivilege values('r2','p2')");
-		ctx.nExecute("insert into roleprivilege values('r2','p3')");
-		ctx.nExecute("insert into roleprivilege values('r3','p3')");
-		ctx.nExecute("insert into roleprivilege values('r4','p1')");
+		ctx.nExecute("insert into roleprivilege (rid, pid) values('r1','p1')");
+		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p1')");
+		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p2')");
+		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p3')");
+		ctx.nExecute("insert into roleprivilege (rid, pid) values('r3','p3')");
+		ctx.nExecute("insert into roleprivilege (rid, pid) values('r4','p1')");
+		//@formatter:on
 	}
 
 	@Test
-	public void test() {
+	public void test1() { 
+		
+		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(),
+				net(UserRole.class, Role.class) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
+
 		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
-				net(User.class, Email.class) + "select ur.**, e.** from usertb ur, email e where ur.id=e.userId");
+				net(User.class, Email.class) + "select u.**, e.** from usertb u, email e where u.id=e.userId");
+
+		System.out.println("size2=" + listMap2.size());
 
 		EntityNet net = new EntityNet(ctx, listMap);
+		net.join(listMap2);
+		System.out.println(net.getListMaps().get(0).size());
+		System.out.println(net.getListMaps().get(1).size());
 
 		//@formatter:off
 		// EntityNet net = new EntityNet(null, listMap, User.class, new Email()),

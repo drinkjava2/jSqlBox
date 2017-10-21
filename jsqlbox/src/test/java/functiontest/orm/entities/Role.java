@@ -3,7 +3,7 @@ package functiontest.orm.entities;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
-@Table(name="roles")
+@Table(name="rolestb")
 public class Role extends ActiveRecord {
 	String id;
 	String roleName;

@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,30 +24,65 @@ import java.util.Map;
  */
 public class EntityNet {
 
+	private Boolean weaved = false;
+
 	private SqlBoxContext ctx;
 
-	private SqlBox[] configBoxes;
+	private Map<Class<?>, SqlBox> boxConfigMap = new HashMap<Class<?>, SqlBox>();
+
+	private List<List<Map<String, Object>>> listMaps = new ArrayList<List<Map<String, Object>>>();
 
 	/** The body of the net */
 	private Map<Class<?>, List<Object>> body = new HashMap<Class<?>, List<Object>>();
 
 	public EntityNet(SqlBoxContext ctx, List<Map<String, Object>> listMap, Object... netConfigs) {
+		this.ctx = ctx;
+		join(listMap, netConfigs);
+	}
+
+	public void join(List<Map<String, Object>> listMap, Object... netConfigs) {
+		weaved = false;
 		try {
+			if (listMap == null)
+				throw new SqlBoxException("Can not build EntityNet for null listMap");
 			if (netConfigs != null && netConfigs.length > 0) {
-				configBoxes = SpecialSqlUtils.netConfigsToSqlBoxes(ctx, netConfigs);
+				SqlBox[] boxes = SpecialSqlUtils.netConfigsToSqlBoxes(ctx, netConfigs);
+				for (SqlBox box : boxes)
+					boxConfigMap.put(box.getEntityClass(), box);
 			} else {
 				SqlBox[] thdCachedBoxes = SpecialSqlUtils.netBoxConfigBindedToObject.get().get(listMap);
-				if (thdCachedBoxes != null && thdCachedBoxes.length > 0)
-					configBoxes = thdCachedBoxes;
+				if (thdCachedBoxes != null && thdCachedBoxes.length > 0) {
+					SqlBox[] boxes = thdCachedBoxes;
+					for (SqlBox box : boxes)
+						boxConfigMap.put(box.getEntityClass(), box);
+				}
 			}
-			this.ctx = ctx;
+			this.listMaps.add(listMap);
 		} finally {
 			SpecialSqlUtils.netBoxConfigBindedToObject.get().remove(listMap);
 		}
-		EntityNetUtils.weave(this, listMap);
+	}
+
+	public void weave() {
+		EntityNetUtils.weave(this);
+		weaved = true;
+	}
+
+	public List<Object> get(Class<?> entityClass) {
+		if (!weaved)
+			weave();
+		return new ArrayList<Object>();
 	}
 
 	// ======getter & setter =======
+	public Boolean getWeaved() {
+		return weaved;
+	}
+
+	public void setWeaved(Boolean weaved) {
+		this.weaved = weaved;
+	}
+
 	public SqlBoxContext getCtx() {
 		return ctx;
 	}
@@ -55,12 +91,20 @@ public class EntityNet {
 		this.ctx = ctx;
 	}
 
-	public SqlBox[] getConfigBoxes() {
-		return configBoxes;
+	public Map<Class<?>, SqlBox> getBoxConfigMap() {
+		return boxConfigMap;
 	}
 
-	public void setConfigBoxes(SqlBox[] configBoxes) {
-		this.configBoxes = configBoxes;
+	public void setBoxConfigMap(Map<Class<?>, SqlBox> boxConfigMap) {
+		this.boxConfigMap = boxConfigMap;
+	}
+
+	public List<List<Map<String, Object>>> getListMaps() {
+		return listMaps;
+	}
+
+	public void setListMaps(List<List<Map<String, Object>>> listMaps) {
+		this.listMaps = listMaps;
 	}
 
 	public Map<Class<?>, List<Object>> getBody() {
