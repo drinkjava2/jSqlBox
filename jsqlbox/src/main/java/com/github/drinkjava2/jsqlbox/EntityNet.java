@@ -30,7 +30,7 @@ public class EntityNet {
 
 	private Map<Class<?>, SqlBox> boxConfigMap = new HashMap<Class<?>, SqlBox>();
 
-	private List<List<Map<String, Object>>> listMaps = new ArrayList<List<Map<String, Object>>>();
+	private  List<Map<String, Object>> listMaps = new ArrayList<Map<String,Object>>();
 
 	/** The body of the net */
 	private Map<Class<?>, List<Object>> body = new HashMap<Class<?>, List<Object>>();
@@ -44,7 +44,7 @@ public class EntityNet {
 		weaved = false;
 		try {
 			if (listMap == null)
-				throw new SqlBoxException("Can not build EntityNet for null listMap");
+				throw new SqlBoxException("Can not join null listMap");
 			if (netConfigs != null && netConfigs.length > 0) {
 				SqlBox[] boxes = SpecialSqlUtils.netConfigsToSqlBoxes(ctx, netConfigs);
 				for (SqlBox box : boxes)
@@ -57,7 +57,9 @@ public class EntityNet {
 						boxConfigMap.put(box.getEntityClass(), box);
 				}
 			}
-			this.listMaps.add(listMap);
+			for (Map<String, Object> map : listMap) {
+				listMaps.add(map);
+			}
 		} finally {
 			SpecialSqlUtils.netBoxConfigBindedToObject.get().remove(listMap);
 		}

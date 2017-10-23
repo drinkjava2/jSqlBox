@@ -20,10 +20,11 @@ package com.github.drinkjava2.jsqlbox;
 public class EntityNetUtils {
 
 	public static void weave(EntityNet net) {
-//		SqlBox[] boxes = net.get();
-//		if (boxes == null || boxes.length == 0)
-//			throw new SqlBoxException("Can not weave EntityNet with empty config parameters");
-		
+		// SqlBox[] boxes = net.get();
+		// if (boxes == null || boxes.length == 0)
+		// throw new SqlBoxException("Can not weave EntityNet with empty config
+		// parameters");
+		//
 
 	}
 	 

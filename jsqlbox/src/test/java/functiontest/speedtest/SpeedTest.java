@@ -62,7 +62,7 @@ public class SpeedTest {
 
 	@Test
 	public void executeTest() throws Exception {
-		Long times = 50L;
+		Long times = 500L;
 		System.out.println("Compare method execute time for repeat " + times + " times:");
 		runMethod("pureJdbc", times);
 		runMethod("dbUtilsWithConnMethod", times);
@@ -146,7 +146,7 @@ public class SpeedTest {
 		m.invoke(this, times);
 		long end = System.currentTimeMillis();
 		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
-		System.out.println(String.format("%28s: %6s ms", methodName, timeused));
+		System.out.println(String.format("%28s: %6s s", methodName, timeused));
 	}
 
 	public void pureJdbc(Long times) {

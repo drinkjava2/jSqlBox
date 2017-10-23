@@ -82,27 +82,7 @@ public class SqlBoxContext extends DbPro {
 	public SqlBox box(Class<?> clazz) {
 		return SqlBoxUtils.createSqlBox(this, clazz);
 	}
-
-	/**
-	 * Mark a point at current thread, from now all insert/update/delete method
-	 * will be cached for batchFlush() method use
-	 */
-	public void batchBegin() {
-
-	}
-
-	/**
-	 * Execute the cached SQL and parameters in current thread
-	 */
-	public void batchExecute() {
-
-	}
-
-	/** Cancel and clear all cached SQL and parameters in cache */
-	public void batchCancel() {
-
-	}
-
+ 
 	// ================================================================
 	// To support special in-line methods like pagin(), net() methods which utilize
 	// ThreadLocad variant, here have to override base class QueryRunner's 4

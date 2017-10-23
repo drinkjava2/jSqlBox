@@ -1,4 +1,4 @@
-package functiontest.orm.entities;
+package functiontest.orm;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.net;
 
@@ -14,17 +14,26 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityNet;
 
 import config.TestBase;
+import functiontest.orm.entities.Address;
+import functiontest.orm.entities.Email;
+import functiontest.orm.entities.Privilege;
+import functiontest.orm.entities.Role;
+import functiontest.orm.entities.RolePrivilege;
+import functiontest.orm.entities.User;
+import functiontest.orm.entities.UserRole;
 
 public class ORMTest extends TestBase {
 	@Before
 	public void init() {
-		super.init();
-		// ctx.setAllowShowSQL(true);
+		super.init(); 
 		TableModel[] models = ModelUtils.entity2Model(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
+		
 		//@formatter:off
+		//ctx.setAllowShowSQL(true);
+		ctx.nBatchBegin(); //Batch insert enabled 
 		new User().put("id","u1").put("userName","user1").insert();
 		new User().put("id","u2").put("userName","user2").insert();
 		new User().put("id","u3").put("userName","user3").insert();
@@ -65,32 +74,32 @@ public class ORMTest extends TestBase {
         ur.setUserId("u2");ur.setRid("r3");ur.insert();
         ur.setUserId("u3");ur.setRid("r4");ur.insert();
         ur.setUserId("u4");ur.setRid("r1");ur.insert();
-
+        ctx.nBatchEnd(); //Disable batch execute
+        
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r1','p1')");
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p1')");
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p2')");
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p3')");
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r3','p3')");
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r4','p1')");
+		 
 		//@formatter:on
 	}
 
 	@Test
-	public void test1() { 
-		
+	public void test1() {   
 		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(),
 				net(UserRole.class, Role.class) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
 
 		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
 				net(User.class, Email.class) + "select u.**, e.** from usertb u, email e where u.id=e.userId");
 
-		System.out.println("size2=" + listMap2.size());
-
-		EntityNet net = new EntityNet(ctx, listMap);
+  		EntityNet net = new EntityNet(ctx, listMap);
 		net.join(listMap2);
 		System.out.println(net.getListMaps().get(0).size());
 		System.out.println(net.getListMaps().get(1).size());
 
+		
 		//@formatter:off
 		// EntityNet net = new EntityNet(null, listMap, User.class, new Email()),
 
