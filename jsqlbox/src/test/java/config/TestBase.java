@@ -35,8 +35,7 @@ public class TestBase {
 
 	@Before
 	public void init() {
-		dataSource = BeanBox.getBean(DataSourceBox.class);
-
+		dataSource = BeanBox.getBean(DataSourceBox.class); 
 		// dataSource = new HikariDataSource();
 		// dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		// dataSource.setDriverClassName("org.h2.Driver");
@@ -57,11 +56,8 @@ public class TestBase {
 	}
 
 	public void executeDDLs(String[] ddls) {
-		for (String sql : ddls)
-			try {
-				ctx.nExecute(sql);
-			} catch (Exception e) {
-			}
+		for (String sql : ddls) 
+				ctx.nExecute(sql); 
 	}
 
 	public void quietExecuteDDLs(String[] ddls) {
@@ -74,7 +70,7 @@ public class TestBase {
 	 */
 	public void dropAndCreateDatabase(TableModel... tableModels) {
 		String[] ddls = dialect.toDropDDL(tableModels);
-		executeDDLs(ddls);
+		quietExecuteDDLs(ddls);
 
 		ddls = dialect.toCreateDDL(tableModels);
 		executeDDLs(ddls);

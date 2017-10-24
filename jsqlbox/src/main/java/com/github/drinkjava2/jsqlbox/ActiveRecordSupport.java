@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -46,6 +47,9 @@ public interface ActiveRecordSupport {
 
 	/** @return TableModel instance binded in this entity */
 	public TableModel tableModel();
+	
+	/** @return binded TableModel's columnModel by given columnName */
+	public ColumnModel columnModel(String columnName);
 
 	/** @return table name */
 	public String table();

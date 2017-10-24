@@ -13,6 +13,9 @@ package com.github.drinkjava2.jsqlbox;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.RowProcessor;
+
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -28,7 +31,7 @@ public class SqlBoxContext extends DbPro {
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	private Dialect dialect; // dialect
-	private SqlBox[] dbMetaData;// Meta data of database
+	private SqlBox[] dbMetaBoxes;// Meta data of database
 
 	public SqlBoxContext() {
 		super();
@@ -63,13 +66,13 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	public void refreshMetaData() {
-		dbMetaData = SqlBoxContextUtils.metaDataToModels(this, dialect);
+		dbMetaBoxes = SqlBoxContextUtils.metaDataToModels(this, dialect);
 	}
 
 	public TableModel getMetaTableModel(String tableName) {
 		if (StrUtils.isEmpty(tableName))
 			return null;
-		for (SqlBox box : dbMetaData)
+		for (SqlBox box : dbMetaBoxes)
 			if (tableName.equalsIgnoreCase(box.getTableModel().getTableName()))
 				return box.getTableModel();
 		return null;
@@ -86,16 +89,20 @@ public class SqlBoxContext extends DbPro {
 	// To support special in-line methods like net() methods which utilize
 	// ThreadLocad variant, here have to override base class QueryRunner's 4
 	// query methods, because some important methods in commons-DbUtils is
-	// private,
-	// hope it can change to protected in future
+	// private, hope it can change to protected in future
 
 	/**
-	 * Return a empty "" String and save a ThreadLocal netConfig object array in
+	 * Return an empty "" String and save a ThreadLocal netConfig object array in
 	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String net(Object... netConfig) {
-		getCurrentExplainers().add(new NetSqlExplainer());
+		getCurrentExplainers().add(new NetSqlExplainer(netConfig));
 		return "";
+	}
+
+	public static RowProcessor netProcessor(Object... netConfig) {
+		getCurrentExplainers().add(new NetSqlExplainer(netConfig));
+		return new BasicRowProcessor();
 	}
 
 	// =============CRUD methods=====
@@ -135,11 +142,11 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	public SqlBox[] getDbMetaBoxes() {
-		return dbMetaData;
+		return dbMetaBoxes;
 	}
 
 	public void setDbMetaBoxes(SqlBox[] dbMetaBoxes) {
-		this.dbMetaData = dbMetaBoxes;
+		this.dbMetaBoxes = dbMetaBoxes;
 	}
 
 }

@@ -38,7 +38,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public abstract class SqlBoxContextUtils {
-
 	/**
 	 * Read database Meta info into SqlBox[]
 	 */
@@ -164,24 +163,26 @@ public abstract class SqlBoxContextUtils {
 		StringBuilder sb = new StringBuilder();
 		sb.append("update ").append(tableModel.getTableName()).append(" set ");
 
-		List<Object> allParams = new ArrayList<Object>();
+		List<Object> normalParams = new ArrayList<Object>();
+		List<Object> pkeyParams = new ArrayList<Object>();
 		List<ColumnModel> pkeyColumns = new ArrayList<ColumnModel>();
 
 		Map<String, Method> readMethods = ClassCacheUtils.getClassReadMethods(entityBean.getClass());
-		boolean hasNormalColumn = false;
 		for (String fieldName : readMethods.keySet()) {
 			ColumnModel col = findMatchColumnForJavaField(fieldName, box);
 			if (!col.getTransientable()) {
 				Object value = readValueFromBeanField(entityBean, fieldName);
-				allParams.add(value);
+
 				if (!col.getPkey()) {
-					hasNormalColumn = true;
+					normalParams.add(value);
 					sb.append(col.getColumnName()).append("=?, ");
-				} else
+				} else {
+					pkeyParams.add(value);
 					pkeyColumns.add(col);
+				}
 			}
 		}
-		if (hasNormalColumn)
+		if (!normalParams.isEmpty())
 			sb.setLength(sb.length() - 2);// delete the last ", " characters
 		if (pkeyColumns.isEmpty())
 			throw new SqlBoxException("No primary column setting found for entityBean");
@@ -189,7 +190,9 @@ public abstract class SqlBoxContextUtils {
 		for (ColumnModel col : pkeyColumns)
 			sb.append(col.getColumnName()).append("=? and ");
 		sb.setLength(sb.length() - 5);// delete the last " and " characters
-		return box.context.nUpdate(sb.toString(), allParams.toArray(new Object[allParams.size()]));
+		for (Object pkeyParam : pkeyParams)
+			normalParams.add(pkeyParam);// join PKey values
+		return box.context.nUpdate(sb.toString(), normalParams.toArray(new Object[normalParams.size()]));
 	}
 
 	/**

@@ -64,7 +64,7 @@ public class DynamicConfigTest extends TestBase {
 	public static class UserDemoSqlBox extends SqlBox {
 		{
 			TableModel t = ModelUtils.oneEntity2Model(UserDemo.class);
-			t.addColumn("anotherColumn").STRING(40);
+			t.addColumn("anotherColumn1").STRING(40);
 			this.setTableModel(t);
 		}
 	}
@@ -73,15 +73,24 @@ public class DynamicConfigTest extends TestBase {
 	public void doTest() {
 		ctx.setAllowShowSQL(true);
 		UserDemo u = new UserDemo();
-		dropAndCreateDatabase(new UserDemoSqlBox().getTableModel());
+		u.columnModel("id").pkey();
+		TableModel[] t1 = ModelUtils.entity2Model(UserDemo.class);
+		dropAndCreateDatabase(t1);
 
+		TableModel t2 = new UserDemoSqlBox().getTableModel();
+		t2.addColumn("anotherColumn2").VARCHAR(10);
+		//if uncomment below line will create a real PKEY in database
+		// t2.getColumn("id").pkey();  
+		dropAndCreateDatabase(t2);
+
+		u.columnModel("id").pkey();// Cheat system id is a PKey although in database is not
 		u.setUserName("Sam");
 		ctx.insert(u);
 
 		u.setUserName("Tom");
-		u.insert();
+		u.update();
 
-		Assert.assertEquals(2l, ctx.nQueryForObject("select count(*) from table2"));
+		Assert.assertEquals(1L, ctx.nQueryForObject("select count(*) from table2"));
 	}
 
 }

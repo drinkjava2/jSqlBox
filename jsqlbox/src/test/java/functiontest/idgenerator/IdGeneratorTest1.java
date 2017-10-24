@@ -240,8 +240,9 @@ public class IdGeneratorTest1 extends TestBase {
 
 	@Test
 	public void testIdentityGenerator() {
+		ctx.setAllowShowSQL(true);
 		TableModel table = new TableModel("testIdentity");
-		table.column("id").INTEGER().identityId();
+		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);
 		dropAndCreateDatabase(table);
 

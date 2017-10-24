@@ -2,11 +2,13 @@ package functiontest.orm;
 
 import static com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner.pagin;
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.net;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -75,7 +77,7 @@ public class ORMTest extends TestBase {
         ur.setUserId("u2");ur.setRid("r3");ur.insert();
         ur.setUserId("u3");ur.setRid("r4");ur.insert();
         ur.setUserId("u4");ur.setRid("r1");ur.insert();
-        ctx.nBatchEnd(); //Disable batch execute
+        ctx.nBatchEnd(); //Batch insert end
         
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r1','p1')");
 		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p1')");
@@ -88,43 +90,57 @@ public class ORMTest extends TestBase {
 	}
 
 	@Test
-	public void test1() {
-		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(), net(UserRole.class, Role.class)
-				+ pagin(1, 3) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
-
-		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
-				net(User.class, Email.class) + "select u.**, e.** from usertb u, email e where u.id=e.userId");
-
-		EntityNet net = new EntityNet(ctx, listMap);
-		net.join(listMap2);
+	public void testLoadAllAsEntityNet() {
+		EntityNet net = EntityNet.loadAll(ctx, User.class, Email.class, Address.class, Role.class, Privilege.class,
+				UserRole.class, RolePrivilege.class); 
 		System.out.println(net.getListMaps().size());
-
-		//@formatter:off
-		// EntityNet net = new EntityNet(null, listMap, User.class, new Email()),
-
-		// List<User> users = net.getList(User.class);
-		// for (User user : users) {
-		// List<Email> emails = user.getChildEntities(Email.class); 
-		          //Email.class can omit if search path no cause confuse, below methods same
-		// List<Email> emails = ctx.getChildEntities(user, Email.class); 
-
-		// User u = email.getParentEntity(User.class);
-		// User u = ctx.getParentEntity(email, User.class);  
-		// List<User> u = ctx.getParentEntities(emails, User.class); 
- 
-		// List<Email> emails = user.getRelatedNodes("parent",Path1.class, "child",Path1.class..., "parent", Email.class); 
-		// List<Email> emails = user.getRelatedNodes(Email.class); //if path can be guessed by computer 
-		// }
-		
-		//EntityNet net=u.entityNet();
-		//EntityNet net=Net.getEntityNet(u);
-		//net.remove(u);
-		//u.setAddress("new Address");
-		//net.update(u);
-		//net.add(u);
-		//net.flush();
-		//ctx.flushEntityNet(net);
-		//net.setReadonlyAndCache(true)
 	}
+
+	@Test
+	public void testManualLoadAndJoin() {
+		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(), net(UserRole.class, Role.class)
+				+ pagin(2, 3) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
+
+		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Email.class)),
+				"select u.**, e.** from usertb u, email e where u.id=e.userId");
+
+		List<Map<String, Object>> mapList3 = ctx.nQuery(new MapListHandler(netProcessor()),
+				"select u.**, e.** from usertb u, email e where u.id=e.userId");
+		List<Map<String, Object>> mapList4 = ctx.nQuery(new MapListHandler(),
+				net() + "select u.**, e.** from usertb u, email e where u.id=e.userId");
+
+		EntityNet net = new EntityNet(mapList1, User.class, Email.class, UserRole.class, Role.class);
+		net.joinList(mapList2);
+		net.joinList(mapList3);
+		net.joinList(mapList4);
+		Assert.assertEquals(18, net.getListMaps().size());
+		System.out.println(net.getListMaps().size()); 
+	}
+	
+	//@formatter:off
+	 		// List<User> users = net.getList(User.class);
+			// for (User user : users) {
+			// List<Email> emails = user.getChildEntities(Email.class); 
+			          //Email.class can omit if search path no cause confuse, below methods same
+			// List<Email> emails = ctx.getChildEntities(user, Email.class); 
+
+			// User u = email.getParentEntity(User.class);
+			// User u = ctx.getParentEntity(email, User.class);  
+			// List<User> u = ctx.getParentEntities(emails, User.class); 
+	 
+			// List<Email> emails = user.getRelatedNodes("parent",Path1.class, "child",Path1.class..., "parent", Email.class); 
+			// List<Email> emails = user.getRelatedNodes(Email.class); //if path can be guessed by computer 
+			// }
+			
+			//EntityNet net=u.entityNet();
+			//EntityNet net=Net.getEntityNet(u);
+			//net.remove(u);
+			//u.setAddress("new Address");
+			//net.update(u);
+			//net.add(u);
+			//net.flush();
+			//ctx.flushEntityNet(net);
+			//net.setReadonlyAndCache(true)
+	
 
 }

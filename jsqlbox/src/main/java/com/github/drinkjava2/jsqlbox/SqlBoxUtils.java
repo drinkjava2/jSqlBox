@@ -43,7 +43,7 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
  * @since 1.0.0
  */
 public abstract class SqlBoxUtils {
-	private static boolean EntityHaveNoBoxFieldWarning = false;
+	private static boolean printWarningIfEntityIsNotActiveRecord = true;
 
 	/**
 	 * Store boxes binded to entities in a threadLocal Map
@@ -56,9 +56,9 @@ public abstract class SqlBoxUtils {
 	};
 
 	private static void logoutEntityHaveNoBoxFieldWarning(Class<?> clazz) {
-		EntityHaveNoBoxFieldWarning = true;
+		printWarningIfEntityIsNotActiveRecord = false; // only print at first time
 		SqlBoxContext.LOGGER.warn("For entity class '" + clazz.getName()
-				+ "', suggest extends from ActiveRecord or put a \"SqlBox box;\" field to improve batch insert performacne.");
+				+ "', suggest extends from ActiveRecord or put a \"SqlBox box\" field to improve performacne.");
 	}
 
 	private static void bindNonActiveRecordBox(Object entity, SqlBox box) {
@@ -66,7 +66,7 @@ public abstract class SqlBoxUtils {
 		if (boxField != null)
 			ReflectionUtils.setField(boxField, entity, box);
 		else {
-			if (!EntityHaveNoBoxFieldWarning)
+			if (printWarningIfEntityIsNotActiveRecord)
 				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
 			boxCache.get().put(entity, box);
 		}
@@ -77,7 +77,7 @@ public abstract class SqlBoxUtils {
 		if (boxField != null)
 			return (SqlBox) ReflectionUtils.getField(boxField, entity);
 		else {
-			if (!EntityHaveNoBoxFieldWarning)
+			if (printWarningIfEntityIsNotActiveRecord)
 				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
 			return boxCache.get().get(entity);
 		}
@@ -90,7 +90,7 @@ public abstract class SqlBoxUtils {
 			box.setEntityBean(null);
 			ReflectionUtils.setField(boxField, entity, null);
 		} else {
-			if (!EntityHaveNoBoxFieldWarning)
+			if (printWarningIfEntityIsNotActiveRecord)
 				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
 			SqlBox box = boxCache.get().get(entity);
 			if (box != null) {
@@ -101,8 +101,8 @@ public abstract class SqlBoxUtils {
 	}
 
 	/**
-	 * Get a SqlBox instance binded for a entity bean, if no, create a new one
-	 * and bind to entity
+	 * Get a SqlBox instance binded for a entity bean, if no, create a new one and
+	 * bind to entity
 	 */
 	public static SqlBox getBindedBox(Object entity) {
 		if (entity == null)
@@ -116,8 +116,8 @@ public abstract class SqlBoxUtils {
 	}
 
 	/**
-	 * Find a binded SqlBox for a bean, if no binded SqlBox found, create a new
-	 * one based on SqlBoxContext.defaultContext and bind it to bean
+	 * Find a binded SqlBox for a bean, if no binded SqlBox found, create a new one
+	 * based on SqlBoxContext.defaultContext and bind it to bean
 	 */
 	public static SqlBox findBox(Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");

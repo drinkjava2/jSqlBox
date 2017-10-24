@@ -11,9 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.improve.SqlExplainSupport;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -28,45 +25,20 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public class NetSqlExplainer implements SqlExplainSupport {
+	private Object[] configObjects;
 
-	protected static ThreadLocal<Object[]> netObjectConfigCache = new ThreadLocal<Object[]>();
-	protected static ThreadLocal<SqlBox[]> netSqlBoxCache = new ThreadLocal<SqlBox[]>();
-
-	/**
-	 * Store SqlBox array binded to ListMaps
-	 */
-	protected static ThreadLocal<Map<Object, SqlBox[]>> netBoxConfigBindedToObject = new ThreadLocal<Map<Object, SqlBox[]>>() {
-		@Override
-		protected Map<Object, SqlBox[]> initialValue() {
-			return new HashMap<Object, SqlBox[]>();
-		}
-	};
+	public NetSqlExplainer(Object... configObjects) {
+		this.configObjects = configObjects;
+	}
 
 	@Override
 	public String explainSql(ImprovedQueryRunner query, String sql, int paramType, Object paramOrParams) {
-		return explainNetConfig((SqlBoxContext)query, sql);
+		return explainNetQuery((SqlBoxContext) query, sql);
 	}
-	
+
 	@Override
-	public Object explainResult(Object result) { 
-		NetSqlExplainer.bindSqlBoxConfigToObject(result);
+	public Object explainResult(Object result) {
 		return result;
-	} 
- 
-	protected static void cleanLastNetBoxCache() {
-		NetSqlExplainer.netSqlBoxCache.set(null);
-	}
-
-	/** Clean ThreadLocal variants which should only used for 1 SQL each time */
-	protected static void cleanThreadLocalShouldOnlyUseOneTime() {
-		NetSqlExplainer.netSqlBoxCache.set(null);
-		NetSqlExplainer.netObjectConfigCache.set(null);
-	}
-
-	protected static <T> void bindSqlBoxConfigToObject(T t) {
-		SqlBox[] boxes = NetSqlExplainer.netSqlBoxCache.get();
-		if (boxes != null && boxes.length > 0)
-			NetSqlExplainer.netBoxConfigBindedToObject.get().put(t, boxes);
 	}
 
 	/**
@@ -107,8 +79,7 @@ public class NetSqlExplainer implements SqlExplainSupport {
 	 * 
 	 * </pre>
 	 */
-	private static String replaceStarStarToColumn(SqlBoxContext ctx, String sql, String alias, String tableName,
-			SqlBox[] netConfig) {
+	private static String replaceStarStarToColumn(String sql, String alias, String tableName, SqlBox[] netConfig) {
 		StringBuilder replace = new StringBuilder();
 		if (netConfig != null && netConfig.length > 0) {
 			for (SqlBox box : netConfig) {
@@ -124,41 +95,47 @@ public class NetSqlExplainer implements SqlExplainSupport {
 			}
 		}
 		if (replace.length() == 0)
-			throw new SqlBoxException("Can not find columns in table +'" + tableName + "'");
+			throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
 		replace.setLength(replace.length() - 2);
 		return StrUtils.replace(sql, alias + ".**", replace.toString());
 	}
 
 	/**
-	 * Explain SQL include "**", for example: <br/>
-	 * "select u.** from user u" to <br/>
+	 * Explain SQL include ".**", for example: <br/>
+	 * "select u.** from user u" will be explain to <br/>
 	 * "select u.userName as u_userName, u.address as u_address from user u"
 	 */
-	public static String explainNetConfig(SqlBoxContext ctx, String thesql) {
+	public String explainNetQuery(SqlBoxContext ctx, String thesql) {
 		String sql = thesql;
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
 			return sql;
-		SqlBox[] configBoxes = netConfigsToSqlBoxes(ctx, netObjectConfigCache.get());
-		// Cache the SqlBox[] for EntityNet use
-		if (configBoxes != null && configBoxes.length > 0)
-			NetSqlExplainer.netSqlBoxCache.set(configBoxes);
-		else
+		SqlBox[] configBoxes = netConfigsToSqlBoxes(ctx, configObjects);
+		// if no configObjects found, use database's meta data
+		if (configBoxes == null && configObjects.length == 0)
 			configBoxes = ctx.getDbMetaBoxes();
 
 		while (pos > -1) {
-			StringBuilder alias_ = new StringBuilder();
+			StringBuilder aliasSB = new StringBuilder();
 			for (int i = pos - 1; i >= 0; i--) {
 				if (SqlBoxStrUtils.isNormalLetters(sql.charAt(i)))
-					alias_.insert(0, sql.charAt(i));
+					aliasSB.insert(0, sql.charAt(i));
 				else
 					break;
 			}
-			if (alias_.length() == 0)
+			if (aliasSB.length() == 0)
 				throw new SqlBoxException(".** can not put at front");
-			String alias = alias_.toString();
+			String alias = aliasSB.toString();
 
-			int posAlias = (sql + " ").indexOf(" " + alias + " ");
+			int posAlias = (sql + " ").indexOf(" as " + alias + " ");
+			if (posAlias == -1)
+				posAlias = (sql).indexOf(" as " + alias + ",");
+			if (posAlias == -1)
+				posAlias = (sql).indexOf(" as " + alias + ")");
+			if (posAlias == -1)
+				posAlias = (sql).indexOf(" as " + alias + "\t");
+			if (posAlias == -1)
+				posAlias = (sql + " ").indexOf(" " + alias + " ");
 			if (posAlias == -1)
 				posAlias = (sql).indexOf(" " + alias + ",");
 			if (posAlias == -1)
@@ -168,25 +145,23 @@ public class NetSqlExplainer implements SqlExplainSupport {
 			if (posAlias == -1)
 				throw new SqlBoxException("Alias '" + alias + "' not found");
 
-			StringBuilder tbStr_ = new StringBuilder();
+			StringBuilder tableSB = new StringBuilder();
 			for (int i = posAlias - 1; i >= 0; i--) {
 				char c = sql.charAt(i);
 				if (SqlBoxStrUtils.isNormalLetters(c))
-					tbStr_.insert(0, c);
-				else if (tbStr_.length() > 0)
+					tableSB.insert(0, c);
+				else if (tableSB.length() > 0)
 					break;
 			}
-			if (tbStr_.length() == 0)
+			if (tableSB.length() == 0)
 				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
-			String tbStr = tbStr_.toString();
+			String tbStr = tableSB.toString();
 
 			// now alias="u", tbStr="users"
-			sql = replaceStarStarToColumn(ctx, sql, alias, tbStr, configBoxes);
+			sql = replaceStarStarToColumn(sql, alias, tbStr, configBoxes);
 			pos = sql.indexOf(".**");
 		}
 		return sql;
 	}
-
- 
 
 }

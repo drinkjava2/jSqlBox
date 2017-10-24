@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -78,6 +79,10 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public TableModel tableModel() {
 		return box().getTableModel();
+	}
+
+	public ColumnModel columnModel(String columnName) {
+		return box().getTableModel().getColumn(columnName);
 	}
 
 	@Override

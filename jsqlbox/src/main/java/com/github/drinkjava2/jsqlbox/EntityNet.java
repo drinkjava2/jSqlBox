@@ -11,10 +11,17 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.dbutils.handlers.MapListHandler;
+
+import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * EntityNet is a entity net
@@ -25,54 +32,63 @@ import java.util.Map;
 public class EntityNet {
 
 	private Boolean weaved = false;
-
-	private SqlBoxContext ctx;
-
-	private Map<Class<?>, SqlBox> boxConfigMap = new HashMap<Class<?>, SqlBox>();
+	private Object[] netConfigs;
 
 	private List<Map<String, Object>> listMaps = new ArrayList<Map<String, Object>>();
 
 	/** The body of the net */
 	private Map<Class<?>, List<Object>> body = new HashMap<Class<?>, List<Object>>();
 
-	public EntityNet(SqlBoxContext ctx, List<Map<String, Object>> listMap, Object... netConfigs) {
-		this.ctx = ctx;
-		join(listMap, netConfigs);
+	public EntityNet(List<Map<String, Object>> listMap, Object... netConfigs) {
+		joinList(listMap, netConfigs);
 	}
 
-	public void join(List<Map<String, Object>> listMap, Object... netConfigs) {
+	/**
+	 * Load all rows in database tables listed in configs as EntityNet, usage
+	 * example: loadAll(ctx, User.class, Email.class); <br/>
+	 * or loadAll(ctx, new User(), new Email());
+	 */
+	public static EntityNet loadAll(SqlBoxContext ctx, Object... configs) {
+		EntityNet net = new EntityNet(new ArrayList<Map<String, Object>>(), configs);
+		SqlBox[] boxes = NetSqlExplainer.netConfigsToSqlBoxes(ctx, configs);
+		for (SqlBox box : boxes) {
+			TableModel t = box.getTableModel();
+			List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(configs)),
+					"select " + t.getTableName() + ".** from " + t.getTableName() + " as " + t.getTableName());
+			net.joinList(mapList1, configs);
+		}
+		return net;
+	}
+
+	private static Object[] concatArray(Object[] first, Object[] second) {
+		Object[] result = Arrays.copyOf(first, first.length + second.length);
+		System.arraycopy(second, 0, result, first.length, second.length);
+		return result;
+	}
+
+	public void joinList(List<Map<String, Object>> listMap, Object... configs) {
 		weaved = false;
-		try {
-			if (listMap == null)
-				throw new SqlBoxException("Can not join null listMap");
-			if (netConfigs != null && netConfigs.length > 0) {
-				SqlBox[] boxes = NetSqlExplainer.netConfigsToSqlBoxes(ctx, netConfigs);
-				for (SqlBox box : boxes)
-					boxConfigMap.put(box.getEntityClass(), box);
-			} else {
-				SqlBox[] thdCachedBoxes = NetSqlExplainer.netBoxConfigBindedToObject.get().get(listMap);
-				if (thdCachedBoxes != null && thdCachedBoxes.length > 0) {
-					SqlBox[] boxes = thdCachedBoxes;
-					for (SqlBox box : boxes)
-						boxConfigMap.put(box.getEntityClass(), box);
-				}
-			}
-			for (Map<String, Object> map : listMap) {
-				listMaps.add(map);
-			}
-		} finally {
-			NetSqlExplainer.netBoxConfigBindedToObject.get().remove(listMap);
+		if (listMap == null)
+			throw new SqlBoxException("Can not join null listMap");
+		if (configs != null && configs.length > 0) {
+			if (netConfigs == null)
+				netConfigs = configs;
+			else
+				netConfigs = concatArray(netConfigs, configs);
+		}
+		for (Map<String, Object> map : listMap) {
+			listMaps.add(map);
 		}
 	}
 
 	public void weave() {
 		EntityNetUtils.weave(this);
-		weaved = true;
 	}
 
 	public List<Object> get(Class<?> entityClass) {
 		if (!weaved)
 			weave();
+		//TODO work at here
 		return new ArrayList<Object>();
 	}
 
@@ -85,20 +101,12 @@ public class EntityNet {
 		this.weaved = weaved;
 	}
 
-	public SqlBoxContext getCtx() {
-		return ctx;
+	public Object[] getNetConfigs() {
+		return netConfigs;
 	}
 
-	public void setCtx(SqlBoxContext ctx) {
-		this.ctx = ctx;
-	}
-
-	public Map<Class<?>, SqlBox> getBoxConfigMap() {
-		return boxConfigMap;
-	}
-
-	public void setBoxConfigMap(Map<Class<?>, SqlBox> boxConfigMap) {
-		this.boxConfigMap = boxConfigMap;
+	public void setNetConfigs(Object... netConfigs) {
+		this.netConfigs = netConfigs;
 	}
 
 	public List<Map<String, Object>> getListMaps() {
