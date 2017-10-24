@@ -28,9 +28,7 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
  * 1. For ActiveRecord child class, jSqlBox bind SqlBox by call its bindBox() method and 
  *    store SqlBox instance in its box field;
  * 
- * 2. For instance implemented IActiveRecord, bind SqlBox buy call its bindBox() method, 
- *    A good practice in Java8 is: implement IActiveRecord interface and write the default interface methods, this will create 
- *    a "non-invasion interface", it's useful when entity already extended from other class.
+ * 2. For instance implemented ActiveRecordSupport, bind SqlBox buy call its bindBox() method
  * 
  * 3. For Entity with a "public SqlBox box;" field, jSqlBox will directly access this field to store SqlBox instance.
  * 
@@ -103,23 +101,23 @@ public abstract class SqlBoxUtils {
 	}
 
 	/**
-	 * Get a SqlBox instance binded for a entity bean, if no, create a new one and
-	 * bind to entity
+	 * Get a SqlBox instance binded for a entity bean, if no, create a new one
+	 * and bind to entity
 	 */
 	public static SqlBox getBindedBox(Object entity) {
 		if (entity == null)
 			throw new SqlBoxException("Can not find SqlBox for null entity");
 		else {
-			if (entity instanceof IActiveRecord)
-				return ((IActiveRecord) entity).bindedBox();
+			if (entity instanceof ActiveRecordSupport)
+				return ((ActiveRecordSupport) entity).bindedBox();
 			else
 				return findNonActiveRecordBox(entity);
 		}
 	}
 
 	/**
-	 * Find a binded SqlBox for a bean, if no binded SqlBox found, create a new one
-	 * based on SqlBoxContext.defaultContext and bind it to bean
+	 * Find a binded SqlBox for a bean, if no binded SqlBox found, create a new
+	 * one based on SqlBoxContext.defaultContext and bind it to bean
 	 */
 	public static SqlBox findBox(Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
@@ -135,8 +133,8 @@ public abstract class SqlBoxUtils {
 	public static void unbind(Object entity) {
 		if (entity == null)
 			throw new SqlBoxException("Unbind box error, entity can not be null");
-		if (entity instanceof IActiveRecord) {
-			IActiveRecord ac = (IActiveRecord) entity;
+		if (entity instanceof ActiveRecordSupport) {
+			ActiveRecordSupport ac = (ActiveRecordSupport) entity;
 			ac.unbindBox();
 		} else
 			unbindNonActiveRecordBox(entity);
@@ -155,6 +153,8 @@ public abstract class SqlBoxUtils {
 			box.setEntityClass(entity.getClass());
 		if (entity instanceof ActiveRecord)
 			((ActiveRecord) entity).bindBox(box);
+		else if (entity instanceof ActiveRecordSupport)
+			((ActiveRecordSupport) entity).bindBox(box);
 		else
 			bindNonActiveRecordBox(entity, box);
 	}

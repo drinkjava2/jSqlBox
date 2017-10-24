@@ -14,14 +14,14 @@ package com.github.drinkjava2.jsqlbox;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * IActiveRecord designed for Java8, in Java8 if a entity class implements
- * IActiveRecord interface, it will have CRUD Method. To release
+ * ActiveRecordSupport designed for Java8, in Java8 if a entity class implements
+ * ActiveRecordSupport interface, it will have CRUD Method. To release
  * jSqlBox-x.x.x-java8.jar, need change source code of this class
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public interface IActiveRecord {
+public interface ActiveRecordSupport {
 
 	/**
 	 * @return the binded SqlBox instance
@@ -72,15 +72,15 @@ public interface IActiveRecord {
 	 * user.set("id","id1").set("name","Sam").set("address","Beijing","phone","12345",
 	 * "email","abc@123.com")
 	 */
-	public IActiveRecord put(Object... fieldAndValues);
+	public ActiveRecordSupport put(Object... fieldAndValues);
 
 	/** Cache a field array in ThreadLocal for putValues method use */
-	public IActiveRecord putFields(String... fieldNames);
+	public ActiveRecordSupport putFields(String... fieldNames);
 
 	/**
 	 * Put values for entity fields, field names should be cached by call
 	 * putFields method first
 	 */
-	public IActiveRecord putValues(Object... values);
+	public ActiveRecordSupport putValues(Object... values);
 
 }

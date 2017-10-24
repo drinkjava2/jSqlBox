@@ -30,7 +30,7 @@ public class EntityNet {
 
 	private Map<Class<?>, SqlBox> boxConfigMap = new HashMap<Class<?>, SqlBox>();
 
-	private  List<Map<String, Object>> listMaps = new ArrayList<Map<String,Object>>();
+	private List<Map<String, Object>> listMaps = new ArrayList<Map<String, Object>>();
 
 	/** The body of the net */
 	private Map<Class<?>, List<Object>> body = new HashMap<Class<?>, List<Object>>();
@@ -46,11 +46,11 @@ public class EntityNet {
 			if (listMap == null)
 				throw new SqlBoxException("Can not join null listMap");
 			if (netConfigs != null && netConfigs.length > 0) {
-				SqlBox[] boxes = SpecialSqlUtils.netConfigsToSqlBoxes(ctx, netConfigs);
+				SqlBox[] boxes = NetSqlExplainer.netConfigsToSqlBoxes(ctx, netConfigs);
 				for (SqlBox box : boxes)
 					boxConfigMap.put(box.getEntityClass(), box);
 			} else {
-				SqlBox[] thdCachedBoxes = SpecialSqlUtils.netBoxConfigBindedToObject.get().get(listMap);
+				SqlBox[] thdCachedBoxes = NetSqlExplainer.netBoxConfigBindedToObject.get().get(listMap);
 				if (thdCachedBoxes != null && thdCachedBoxes.length > 0) {
 					SqlBox[] boxes = thdCachedBoxes;
 					for (SqlBox box : boxes)
@@ -61,7 +61,7 @@ public class EntityNet {
 				listMaps.add(map);
 			}
 		} finally {
-			SpecialSqlUtils.netBoxConfigBindedToObject.get().remove(listMap);
+			NetSqlExplainer.netBoxConfigBindedToObject.get().remove(listMap);
 		}
 	}
 
@@ -101,11 +101,11 @@ public class EntityNet {
 		this.boxConfigMap = boxConfigMap;
 	}
 
-	public List<List<Map<String, Object>>> getListMaps() {
+	public List<Map<String, Object>> getListMaps() {
 		return listMaps;
 	}
 
-	public void setListMaps(List<List<Map<String, Object>>> listMaps) {
+	public void setListMaps(List<Map<String, Object>> listMaps) {
 		this.listMaps = listMaps;
 	}
 

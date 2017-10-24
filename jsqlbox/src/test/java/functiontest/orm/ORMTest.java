@@ -1,5 +1,6 @@
 package functiontest.orm;
 
+import static com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner.pagin;
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.net;
 
 import java.util.List;
@@ -25,12 +26,12 @@ import functiontest.orm.entities.UserRole;
 public class ORMTest extends TestBase {
 	@Before
 	public void init() {
-		super.init(); 
+		super.init();
 		TableModel[] models = ModelUtils.entity2Model(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
-		
+
 		//@formatter:off
 		//ctx.setAllowShowSQL(true);
 		ctx.nBatchBegin(); //Batch insert enabled 
@@ -87,19 +88,17 @@ public class ORMTest extends TestBase {
 	}
 
 	@Test
-	public void test1() {   
-		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(),
-				net(UserRole.class, Role.class) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
+	public void test1() {
+		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(), net(UserRole.class, Role.class)
+				+ pagin(1, 3) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
 
 		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
 				net(User.class, Email.class) + "select u.**, e.** from usertb u, email e where u.id=e.userId");
 
-  		EntityNet net = new EntityNet(ctx, listMap);
+		EntityNet net = new EntityNet(ctx, listMap);
 		net.join(listMap2);
-		System.out.println(net.getListMaps().get(0).size());
-		System.out.println(net.getListMaps().get(1).size());
+		System.out.println(net.getListMaps().size());
 
-		
 		//@formatter:off
 		// EntityNet net = new EntityNet(null, listMap, User.class, new Email()),
 

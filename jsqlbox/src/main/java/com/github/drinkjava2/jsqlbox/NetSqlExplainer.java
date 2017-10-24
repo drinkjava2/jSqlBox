@@ -14,22 +14,23 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.improve.SqlExplainSupport;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * SpecialSqlUtils is utility class store static methods to explain special SQL
- * which has special method like pagin(), net() .....
+ * NetSqlExplainer is utility class store static methods to explain net() method
+ * in SQL
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class SpecialSqlUtils {
+public class NetSqlExplainer implements SqlExplainSupport {
 
 	protected static ThreadLocal<Object[]> netObjectConfigCache = new ThreadLocal<Object[]>();
 	protected static ThreadLocal<SqlBox[]> netSqlBoxCache = new ThreadLocal<SqlBox[]>();
-	protected static ThreadLocal<int[]> paginationCache = new ThreadLocal<int[]>();
 
 	/**
 	 * Store SqlBox array binded to ListMaps
@@ -41,37 +42,31 @@ public class SpecialSqlUtils {
 		}
 	};
 
-	/**
-	 * Explain special SQL to standard SQL, special SQL utilize ThreadLocal
-	 * variants to implement some special method like pagin(), net()...
-	 */
-	public static String explainSpecialSql(SqlBoxContext ctx, String... SQLs) {
-		StringBuilder sb = new StringBuilder();
-		for (String str : SQLs)
-			sb.append(str);
-		String resultSql = sb.toString();
-		int[] pagins = paginationCache.get();
-		resultSql = SpecialSqlUtils.explainNetConfig(ctx, resultSql);
-		if (pagins != null)
-			resultSql = ctx.getDialect().paginate(pagins[0], pagins[1], resultSql);
-		return resultSql;
+	@Override
+	public String explainSql(ImprovedQueryRunner query, String sql, int paramType, Object paramOrParams) {
+		return explainNetConfig((SqlBoxContext)query, sql);
 	}
-
+	
+	@Override
+	public Object explainResult(Object result) { 
+		NetSqlExplainer.bindSqlBoxConfigToObject(result);
+		return result;
+	} 
+ 
 	protected static void cleanLastNetBoxCache() {
-		SpecialSqlUtils.netSqlBoxCache.set(null);
+		NetSqlExplainer.netSqlBoxCache.set(null);
 	}
 
 	/** Clean ThreadLocal variants which should only used for 1 SQL each time */
 	protected static void cleanThreadLocalShouldOnlyUseOneTime() {
-		SpecialSqlUtils.netSqlBoxCache.set(null);
-		SpecialSqlUtils.netObjectConfigCache.set(null);
-		paginationCache.set(null);
+		NetSqlExplainer.netSqlBoxCache.set(null);
+		NetSqlExplainer.netObjectConfigCache.set(null);
 	}
 
 	protected static <T> void bindSqlBoxConfigToObject(T t) {
-		SqlBox[] boxes = SpecialSqlUtils.netSqlBoxCache.get();
+		SqlBox[] boxes = NetSqlExplainer.netSqlBoxCache.get();
 		if (boxes != null && boxes.length > 0)
-			SpecialSqlUtils.netBoxConfigBindedToObject.get().put(t, boxes);
+			NetSqlExplainer.netBoxConfigBindedToObject.get().put(t, boxes);
 	}
 
 	/**
@@ -147,7 +142,7 @@ public class SpecialSqlUtils {
 		SqlBox[] configBoxes = netConfigsToSqlBoxes(ctx, netObjectConfigCache.get());
 		// Cache the SqlBox[] for EntityNet use
 		if (configBoxes != null && configBoxes.length > 0)
-			SpecialSqlUtils.netSqlBoxCache.set(configBoxes);
+			NetSqlExplainer.netSqlBoxCache.set(configBoxes);
 		else
 			configBoxes = ctx.getDbMetaBoxes();
 
@@ -191,5 +186,7 @@ public class SpecialSqlUtils {
 		}
 		return sql;
 	}
+
+ 
 
 }

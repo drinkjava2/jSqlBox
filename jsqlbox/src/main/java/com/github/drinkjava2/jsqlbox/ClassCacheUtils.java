@@ -105,7 +105,7 @@ public abstract class ClassCacheUtils {
 		}
 		classReadMethods.put(clazz, sortMap(readMethods));
 		classWriteMethods.put(clazz, sortMap(writeMethods));
-		if (!IActiveRecord.class.isAssignableFrom(clazz)) {
+		if (!ActiveRecordSupport.class.isAssignableFrom(clazz)) {
 			Field boxField = ReflectionUtils.findField(clazz, "box");
 			if (boxField != null) {
 				ReflectionUtils.makeAccessible(boxField);

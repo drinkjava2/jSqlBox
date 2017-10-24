@@ -11,12 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
-import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
@@ -32,8 +27,8 @@ public class SqlBoxContext extends DbPro {
 	public static final SqlBoxLogger LOGGER = SqlBoxLogger.getLog(SqlBoxContext.class);
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
-	protected Dialect dialect;
-	private SqlBox[] dbMetaBoxes;
+	private Dialect dialect; // dialect
+	private SqlBox[] dbMetaData;// Meta data of database
 
 	public SqlBoxContext() {
 		super();
@@ -42,35 +37,39 @@ public class SqlBoxContext extends DbPro {
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		this.dialect = Dialect.guessDialect(ds);
+		this.setPaginator(this.dialect);
 		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, ConnectionManager cm) {
 		super(ds, cm);
 		dialect = Dialect.guessDialect(ds);
+		this.setPaginator(this.dialect);
 		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, Dialect dialect) {
 		super(ds);
 		this.dialect = dialect;
+		this.setPaginator(dialect);
 		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, Dialect dialect, ConnectionManager cm) {
 		super(ds, cm);
 		this.dialect = dialect;
+		this.setPaginator(dialect);
 		refreshMetaData();
 	}
 
 	public void refreshMetaData() {
-		dbMetaBoxes = SqlBoxContextUtils.metaDataToModels(this, dialect);
+		dbMetaData = SqlBoxContextUtils.metaDataToModels(this, dialect);
 	}
 
 	public TableModel getMetaTableModel(String tableName) {
 		if (StrUtils.isEmpty(tableName))
 			return null;
-		for (SqlBox box : dbMetaBoxes)
+		for (SqlBox box : dbMetaData)
 			if (tableName.equalsIgnoreCase(box.getTableModel().getTableName()))
 				return box.getTableModel();
 		return null;
@@ -82,78 +81,21 @@ public class SqlBoxContext extends DbPro {
 	public SqlBox box(Class<?> clazz) {
 		return SqlBoxUtils.createSqlBox(this, clazz);
 	}
- 
-	// ================================================================
-	// To support special in-line methods like pagin(), net() methods which utilize
-	// ThreadLocad variant, here have to override base class QueryRunner's 4
-	// query methods, because some important methods in commons-DbUtils is private,
-	// hope it can change to protected in future
 
-	/**
-	 * Return a empty "" String and save a ThreadLocal pageNumber and pageSize
-	 * array in current thread, it will be used by SqlBoxContext's query
-	 * methods.
-	 */
-	public static String pagin(int pageNumber, int pageSize) {
-		SpecialSqlUtils.paginationCache.set(new int[] { pageNumber, pageSize });
-		return "";
-	}
+	// ================================================================
+	// To support special in-line methods like net() methods which utilize
+	// ThreadLocad variant, here have to override base class QueryRunner's 4
+	// query methods, because some important methods in commons-DbUtils is
+	// private,
+	// hope it can change to protected in future
 
 	/**
 	 * Return a empty "" String and save a ThreadLocal netConfig object array in
 	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String net(Object... netConfig) {
-		SpecialSqlUtils.netObjectConfigCache.set(netConfig);
+		getCurrentExplainers().add(new NetSqlExplainer());
 		return "";
-	}
-
-	@Override
-	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-		SpecialSqlUtils.cleanLastNetBoxCache();
-		try {
-			T t = super.query(conn, SpecialSqlUtils.explainSpecialSql(this, sql), rsh, params);
-			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
-			return t;
-		} finally {
-			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
-		}
-	}
-
-	@Override
-	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh) throws SQLException {
-		SpecialSqlUtils.cleanLastNetBoxCache();
-		try {
-			T t = super.query(conn, SpecialSqlUtils.explainSpecialSql(this, sql), rsh);
-			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
-			return t;
-		} finally {
-			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
-		}
-	}
-
-	@Override
-	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-		SpecialSqlUtils.cleanLastNetBoxCache();
-		try {
-			T t = super.query(SpecialSqlUtils.explainSpecialSql(this, sql), rsh, params);
-			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
-			return t;
-		} finally {
-			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
-		}
-	}
-
-	@Override
-	public <T> T query(String sql, ResultSetHandler<T> rsh) throws SQLException {
-		SpecialSqlUtils.cleanLastNetBoxCache();
-		try {
-			T t = super.query(SpecialSqlUtils.explainSpecialSql(this, sql), rsh);
-			SpecialSqlUtils.bindSqlBoxConfigToObject(t);
-			return t;
-		} finally {
-			SpecialSqlUtils.cleanThreadLocalShouldOnlyUseOneTime();
-		}
 	}
 
 	// =============CRUD methods=====
@@ -181,6 +123,7 @@ public class SqlBoxContext extends DbPro {
 
 	public void setDialect(Dialect dialect) {
 		this.dialect = dialect;
+		this.setPaginator(dialect);
 	}
 
 	public static SqlBoxContext getDefaultContext() {
@@ -192,11 +135,11 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	public SqlBox[] getDbMetaBoxes() {
-		return dbMetaBoxes;
+		return dbMetaData;
 	}
 
 	public void setDbMetaBoxes(SqlBox[] dbMetaBoxes) {
-		this.dbMetaBoxes = dbMetaBoxes;
+		this.dbMetaData = dbMetaBoxes;
 	}
 
 }

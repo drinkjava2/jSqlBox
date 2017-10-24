@@ -42,7 +42,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class ActiveRecord implements IActiveRecord {
+public class ActiveRecord implements ActiveRecordSupport {
 	private static ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 
 	SqlBox box;
@@ -111,7 +111,7 @@ public class ActiveRecord implements IActiveRecord {
 	}
 
 	@Override
-	public IActiveRecord put(Object... fieldAndValues) {
+	public ActiveRecordSupport put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {
 			String field = (String) fieldAndValues[i * 2];
 			Object value = fieldAndValues[i * 2 + 1];
@@ -126,13 +126,13 @@ public class ActiveRecord implements IActiveRecord {
 	}
 
 	@Override
-	public IActiveRecord putFields(String... fieldNames) {
+	public ActiveRecordSupport putFields(String... fieldNames) {
 		lastTimePutFieldsCache.set(fieldNames);
 		return this;
 	}
 
 	@Override
-	public IActiveRecord putValues(Object... values) {
+	public ActiveRecordSupport putValues(Object... values) {
 		String[] fields = lastTimePutFieldsCache.get();
 		if (values.length == 0 || fields == null || fields.length == 0)
 			throw new SqlBoxException("putValues fields or values can not be empty");
