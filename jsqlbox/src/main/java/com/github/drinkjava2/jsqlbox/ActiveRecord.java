@@ -18,24 +18,27 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * Entity class extended from ActiveRecord will get CRUD methods, see below
- * difference in jSqlBox to save ActiveRecord entity and normal entity into
- * database:
+ * difference in jSqlBox to save ActiveRecord entity and normal entity(POJO)
+ * into database:
  * 
  * <pre>
- * ActiveRecord style only works when a global defaultContext be set or set the
- * SqlBoxContext binded with entity, for example:   
+ * ActiveRecord style:   
  * 
- *    SqlBoxContext.setDefaultContext(new SqlBoxContext(dataSource));           
+ *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
+ *    SqlBoxContext.setDefaultContext(ctx);           
  *    entity.insert(); 
  * 
  *    or 
  *    
- *    entity.box().setContext(new SqlBoxContext(dataSource))
+ *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
+ *    entity.box().setContext(ctx);
  *    entity.insert();
  *    
- * Non-ActiveRecord entity style (also called Data Mapper style):
+ *    
+ * Data Mapper style (for POJO entity): * 
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
  *    ctx.insert(entity);
+ *    
  * </pre>
  * 
  * 
@@ -55,17 +58,13 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public void unbindBox() {
-		if (box != null) {
-			box.setEntityBean(null);
 			box = null;
-		}
 	}
 
 	@Override
 	public void bindBox(SqlBox box) {
 		if (box == null)
 			throw new SqlBoxException("Can not bind null SqlBox to entity");
-		box.setEntityBean(this);
 		this.box = box;
 	}
 

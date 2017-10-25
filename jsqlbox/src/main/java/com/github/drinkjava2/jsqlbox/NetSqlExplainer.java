@@ -18,8 +18,7 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * NetSqlExplainer is utility class store static methods to explain net() method
- * in SQL
+ * NetSqlExplainer is the SqlExplainer to explain net() method 
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0

@@ -23,6 +23,12 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
+ * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
+ * this way SqlBoxContext have all JDBC methods of QueryRunner and DbPro. <br/>
+ * 
+ * As a ORM tool, SqlBoxContext only focus on ORM methods like entity bean's
+ * CRUD methods.
+ * 
  * @author Yong Zhu
  * @since 1.0.0
  */
@@ -92,8 +98,8 @@ public class SqlBoxContext extends DbPro {
 	// private, hope it can change to protected in future
 
 	/**
-	 * Return an empty "" String and save a ThreadLocal netConfig object array in
-	 * current thread, it will be used by SqlBoxContext's query methods.
+	 * Return an empty "" String and save a ThreadLocal netConfig object array
+	 * in current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String net(Object... netConfig) {
 		getCurrentExplainers().add(new NetSqlExplainer(netConfig));

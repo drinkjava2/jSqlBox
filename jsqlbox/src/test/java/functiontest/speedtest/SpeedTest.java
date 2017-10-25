@@ -261,9 +261,9 @@ public class SpeedTest {
 
 	public void tXxxTemplateStyle(Long times) {
 		for (int i = 0; i < times; i++) {
-			User sam = new User("Sam", "Canada");
+			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
-			put0("user", sam);
+			put0("user", user);
 			ctx.tExecute("insert into users (name, address) values(#{user.name},#{user.address})");
 			put0("user", tom);
 			ctx.tExecute("update users set name=#{user.name}, address=#{user.address}");
@@ -276,13 +276,12 @@ public class SpeedTest {
 
 	public void tXxxTemplateColonStyle(Long times) {
 		for (int i = 0; i < times; i++) {
-			User sam = new User("Sam", "Canada");
+			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
 			ctx.setSqlTemplateEngine(NamedParamSqlTemplate.instance());
-			put0("user", sam);
+			put0("user", user);
 			ctx.tExecute("insert into users (name, address) values(:user.name,:user.address)");
-			put0("user", tom);
-			ctx.tExecute("update users set name=:user.name, address=:user.address");
+			ctx.tExecute("update users set name=:user.name, address=:user.address"+put0("user",tom));
 			Assert.assertEquals(1L,
 					ctx.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
 							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
@@ -292,42 +291,42 @@ public class SpeedTest {
 
 	public void dataMapperStyle(Long times) {
 		for (int i = 0; i < times; i++) {
-			UserEntity sam = new UserEntity();
-			sam.setName("Sam");
-			sam.setAddress("Canada");
-			ctx.insert(sam);
-			sam.setAddress("China");
-			ctx.update(sam);
+			UserEntity  user = new  UserEntity();
+			user.setName("Sam");
+			user.setAddress("Canada");
+			ctx.insert(user);
+			user.setAddress("China");
+			ctx.update(user);
 			UserEntity sam2 = ctx.load(UserEntity.class, "Sam");
 			ctx.delete(sam2);
 		}
 	}
 
 	public void activeRecordStyle(Long times) {
-		User sam = new User();
-		sam.box().setContext(ctx); // set SqlBoxContent
+		User user = new User();
+		user.box().setContext(ctx); // set SqlBoxContent
 		for (int i = 0; i < times; i++) {
-			sam.setName("Sam");
-			sam.setAddress("Canada");
-			sam.insert();
-			sam.setAddress("China");
-			sam.update();
-			User sam2 = sam.load("Sam");
-			sam2.delete();
+			user.setName("Sam");
+			user.setAddress("Canada");
+			user.insert();
+			user.setAddress("China");
+			user.update();
+			User user2 = user.load("Sam");
+			user2.delete();
 		}
 	}
 
 	public void activeRecordDefaultContext(Long times) {
 		SqlBoxContext.setDefaultContext(ctx);// use global default context
-		User sam = new User();
+		User user = new User();
 		for (int i = 0; i < times; i++) {
-			sam.setName("Sam");
-			sam.setAddress("Canada");
-			sam.insert();
-			sam.setAddress("China");
-			sam.update();
-			User sam2 = ctx.load(User.class, "Sam");
-			sam2.delete();
+			user.setName("Sam");
+			user.setAddress("Canada");
+			user.insert();
+			user.setAddress("China");
+			user.update();
+			User user2 = ctx.load(User.class, "Sam");
+			user2.delete();
 		}
 	}
 

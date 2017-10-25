@@ -30,7 +30,8 @@ import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 
 /**
- * SqlBoxUtility is utility class to store some public methods concern to SqlBox
+ * ClassCacheUtils is utility class to cache some info of classes read and write
+ * method
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -150,7 +151,7 @@ public abstract class ClassCacheUtils {
 	 */
 	public static Field getBoxField(Class<?> clazz) {
 		Map<String, Method> writeMethods = classWriteMethods.get(clazz);
-		if (writeMethods == null)  
+		if (writeMethods == null)
 			cacheReadWriteMethodsAndBoxField(clazz);
 		return boxFieldCache.get(clazz);
 	}

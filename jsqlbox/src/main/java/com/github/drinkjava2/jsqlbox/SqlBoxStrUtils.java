@@ -53,6 +53,9 @@ public abstract class SqlBoxStrUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Check if a String only have a-z,A-Z,0-9,"_" characters
+	 */
 	public static boolean isNormalLetters(char c) {
 		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_';
 	}

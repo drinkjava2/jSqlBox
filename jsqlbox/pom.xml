@@ -48,7 +48,7 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
-		<!-- I like develop on Java8 so can use SONAR, but release 2 verisons: Java6 & Java8 -->
+		<!-- I like develop on Java8 so can use SONAR, but release on Java6 -->
         <version.java>1.6</version.java>
         <version.javadoc>6</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
@@ -86,11 +86,11 @@
 	 </dependency>
 
 
-    <!-- ================================================================================================== -->
-    <!-- Below dependencies are for unit test only, scope be set to "test"                                  -->
-    <!-- jSqlBox only test on H2, MySql5, MSSQL2012 and Oracle11g                                           -->  
-    <!-- Note: Oracle11g JDBC driver need installed manually by yourself                                    -->  	
-    <!-- ================================================================================================== --> 
+    <!-- ==================================================================================================  -->
+    <!-- Below dependencies are for unit test only, scope be set to "test"                                   -->
+    <!-- jSqlBox only test on H2, MySql5, MSSQL2012 and Oracle11g although it should support many databases  -->  
+    <!-- Note: Oracle11g JDBC driver need installed manually by yourself                                     -->  	
+    <!-- ==================================================================================================  --> 
     
     <!-- jBeanBox is a small IOC/AOP tool, in this project used to do some unit test configuration  -->
     <dependency>

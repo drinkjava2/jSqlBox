@@ -15,9 +15,8 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * ActiveRecordSupport designed for Java8, in Java8 if a entity class implements
- * ActiveRecordSupport interface, it will have CRUD Method. To release
- * jSqlBox-x.x.x-java8.jar, need change source code of this class
+ * If a entity class implements ActiveRecordSupport interface, it will have CRUD
+ * Method.  
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -47,7 +46,7 @@ public interface ActiveRecordSupport {
 
 	/** @return TableModel instance binded in this entity */
 	public TableModel tableModel();
-	
+
 	/** @return binded TableModel's columnModel by given columnName */
 	public ColumnModel columnModel(String columnName);
 

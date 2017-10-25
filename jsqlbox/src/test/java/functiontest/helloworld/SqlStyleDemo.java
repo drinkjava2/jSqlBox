@@ -88,7 +88,7 @@ public class SqlStyleDemo {
 			} catch (Exception e) {
 			}
 
-		System.out.println("==DbUtils old style, need close connection and catch SQLException===");
+		System.out.println("=== DbUtils old style, need close connection and catch SQLException  ===");
 		Connection conn = null;
 		try {
 			conn = ctx.prepareConnection();
@@ -107,7 +107,7 @@ public class SqlStyleDemo {
 			}
 		}
 
-		System.out.println("========= DbUtils old style, need catch SQLException========");
+		System.out.println("=== DbUtils old style, need catch SQLException  ===");
 		try {
 			ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 			ctx.execute("update users set name=?, address=?", "Tom", "China");
@@ -118,14 +118,14 @@ public class SqlStyleDemo {
 			e.printStackTrace();
 		}
 
-		System.out.println("=== nXxxx methods, New JDBC style, no need catch Exception ===");
+		System.out.println("=== nXxxx new style, no need catch Exception  ===");
 		ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 		ctx.nExecute("update users set name=?, address=?", "Tom", "China");
 		Assert.assertEquals(1L,
 				ctx.nQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
 		ctx.nExecute("delete from users where name=? or address=?", "Tom", "China");
 
-		System.out.println("============= Ixxx methods, In-line style===================");
+		System.out.println("=== Ixxx methods, In-line style ===");
 		ctx.iExecute("insert into users (", //
 				" name ,", param0("Sam"), //
 				" address ", param("Canada"), //
@@ -135,61 +135,64 @@ public class SqlStyleDemo {
 		Assert.assertEquals(1L,
 				ctx.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
 		ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
-		
-		User sam = new User("Sam", "Canada");
-		User tom = new User("Tom", "China");
-		
-		System.out.println("========== Another demo of In-line style=======================");
-		ctx.iExecute("insert into users (", inline0(sam, "", ", ") + ") ", valuesQuesions());
-		ctx.iExecute("update users set ", inline0(sam, "=?", ", "));
-		Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where ", inline0(sam, "=?", " and ")));
-		ctx.iExecute(param0(), "delete from users where ", inline(sam, "=?", " or "));
- 
 
-		System.out.println("========== Txxx methods, Template style ===================");
-		put0("user", sam);
+		System.out.println("=== Another demo of In-line style ===");
+		User user = new User("Sam", "Canada");
+		user.setName("Sam");
+		user.setAddress("Canada");
+		ctx.iExecute("insert into users (", inline0(user, "", ", ") + ") ", valuesQuesions());
+		user.setAddress("China");
+		ctx.iExecute("update users set ", inline0(user, "=?", ", "));
+		Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where ", inline0(user, "=?", " and ")));
+		ctx.iExecute(param0(), "delete from users where ", inline(user, "=?", " or "));
+
+		System.out.println("=== Txxx methods, Template style  ===");
+		user = new User("Sam", "Canada");
+		put0("user", user);
 		ctx.tExecute("insert into users (name, address) values(#{user.name},#{user.address})");
-		put0("user", tom);
-		ctx.tExecute("update users set name=#{user.name}, address=#{user.address}");
+		user.setAddress("China");
+		ctx.tExecute("update users set name=#{user.name}, address=#{user.address}" + put0("user", user));
 		Assert.assertEquals(1L,
 				ctx.tQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
-						put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-		ctx.tExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
+						put0("name", "Sam"), put("addr", "China"), replace("col", "name")));
+		ctx.tExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", user));
 
-		System.out.println("========== Txxx methods, Template style, another template Engine ===========");
+		System.out.println("=== Txxx methods, Template style, another template Engine  ===");
+		user = new User("Sam", "Canada");
 		ctx.setSqlTemplateEngine(NamedParamSqlTemplate.instance());
-		put0("user", sam);
+		put0("user", user);
 		ctx.tExecute("insert into users (name, address) values(:user.name,:user.address)");
-		put0("user", tom);
-		ctx.tExecute("update users set name=:user.name, address=:user.address");
+		user.setAddress("China");
+		ctx.tExecute("update users set name=:user.name, address=:user.address" + put0("user", user));
 		Assert.assertEquals(1L, ctx.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
-				put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-		ctx.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", tom));
+				put0("name", "Sam"), put("addr", "China"), replace("col", "name")));
+		ctx.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", user));
 
-		System.out.println("================ Data Mapper style =================");
-		ctx.insert(sam);// insert
-		sam.setAddress("China");
-		ctx.update(sam);// update
-		User sam_1 = ctx.load(User.class, "Sam");// load
-		ctx.delete(sam_1);// delete
+		System.out.println("=== Data Mapper style  ===");
+		user = new User("Sam", "Canada");
+		ctx.insert(user);
+		user.setAddress("China");
+		ctx.update(user);
+		User user2 = ctx.load(User.class, "Sam");
+		ctx.delete(user2);
 
-		System.out.println("=============== ActiveRecord style ================");
-		User sam2 = new User("Sam", "Canada");
-		sam2.box().setContext(ctx); // set SqlBoxContent instance here
-		sam2.insert();
-		sam2.setAddress("China");
-		sam2.update();
-		User sam3 = sam2.load("Sam");
-		sam3.delete();
+		System.out.println("=== ActiveRecord style  ===");
+		user = new User("Sam", "Canada");
+		user.box().setContext(ctx);// set a SqlBoxContext to entity
+		user.insert();
+		user.setAddress("China");
+		user.update();
+		user2 = user.load("Sam");
+		user2.delete();
 
-		System.out.println("========= ActiveRecord style but use default global SqlBoxContext instance========");
-		SqlBoxContext.setDefaultContext(ctx);
-		User sam4 = new User("Sam", "Canada");
-		sam4.insert();
-		sam4.setAddress("China");
-		sam4.update();
-		User sam5 = ctx.load(User.class, "Sam");
-		sam5.delete();
+		System.out.println("=== ActiveRecord style but use default global SqlBoxContext instance ===");
+		SqlBoxContext.setDefaultContext(ctx); // Global SqlBoxContext
+		user = new User();
+		user.put("name", "Sam").put("address", "Canada").insert();
+		user.setAddress("China");
+		user.update();
+		user2 = user.load("Sam");
+		user2.delete();
 	}
 
 }

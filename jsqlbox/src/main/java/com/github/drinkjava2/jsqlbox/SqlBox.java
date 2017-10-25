@@ -14,7 +14,8 @@ package com.github.drinkjava2.jsqlbox;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * SqlBox is the configuration of a Entity class
+ * SqlBox is the configuration object, the most important part is "tableModel",
+ * it represents a virtual model to database table
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -29,9 +30,6 @@ public class SqlBox {
 	/** Optional, map to which entity class */
 	Class<?> entityClass;
 
-	/** Optional, bind to a entity bean */
-	Object entityBean;
-
 	// Shortcut method
 	public String table() {
 		return tableModel.getTableName();
@@ -44,14 +42,6 @@ public class SqlBox {
 
 	public void setContext(SqlBoxContext context) {
 		this.context = context;
-	}
-
-	public Object getEntityBean() {
-		return entityBean;
-	}
-
-	public void setEntityBean(Object entityBean) {
-		this.entityBean = entityBean;
 	}
 
 	public TableModel getTableModel() {

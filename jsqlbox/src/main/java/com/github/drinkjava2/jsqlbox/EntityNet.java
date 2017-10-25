@@ -88,7 +88,7 @@ public class EntityNet {
 	public List<Object> get(Class<?> entityClass) {
 		if (!weaved)
 			weave();
-		//TODO work at here
+		// TODO work at here
 		return new ArrayList<Object>();
 	}
 
