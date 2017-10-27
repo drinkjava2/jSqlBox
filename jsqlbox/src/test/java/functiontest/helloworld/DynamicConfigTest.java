@@ -72,18 +72,14 @@ public class DynamicConfigTest extends TestBase {
 	@Test
 	public void doTest() {
 		ctx.setAllowShowSQL(true);
+
+		TableModel t = new UserDemoSqlBox().getTableModel();
+		t.addColumn("anotherColumn2").VARCHAR(10); // A new column dynamically
+													// created
+		dropAndCreateDatabase(t);
+
 		UserDemo u = new UserDemo();
-		u.columnModel("id").pkey();
-		TableModel[] t1 = ModelUtils.entity2Model(UserDemo.class);
-		dropAndCreateDatabase(t1);
-
-		TableModel t2 = new UserDemoSqlBox().getTableModel();
-		t2.addColumn("anotherColumn2").VARCHAR(10);
-		//if uncomment below line will create a real PKEY in database
-		// t2.getColumn("id").pkey();  
-		dropAndCreateDatabase(t2);
-
-		u.columnModel("id").pkey();// Cheat system id is a PKey although in database is not
+		u.columnModel("id").pkey(); // A Fake PKey dynamically cretated
 		u.setUserName("Sam");
 		ctx.insert(u);
 

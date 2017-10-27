@@ -9,9 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
-
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
+package com.github.drinkjava2.jentitynet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,9 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.dbutils.handlers.MapListHandler;
-
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * EntityNet is a entity net
@@ -32,33 +29,20 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public class EntityNet {
 
 	private Boolean weaved = false;
-	private Object[] netConfigs;
+	
+	private TableModel[] netConfigs;
 
 	private List<Map<String, Object>> listMaps = new ArrayList<Map<String, Object>>();
 
 	/** The body of the net */
 	private Map<Class<?>, List<Object>> body = new HashMap<Class<?>, List<Object>>();
-
-	public EntityNet(List<Map<String, Object>> listMap, Object... netConfigs) {
+	
+	
+	public EntityNet(List<Map<String, Object>> listMap, TableModel... configs) {
 		joinList(listMap, netConfigs);
 	}
 
-	/**
-	 * Load all rows in database tables listed in configs as EntityNet, usage
-	 * example: loadAll(ctx, User.class, Email.class); <br/>
-	 * or loadAll(ctx, new User(), new Email());
-	 */
-	public static EntityNet loadAll(SqlBoxContext ctx, Object... configs) {
-		EntityNet net = new EntityNet(new ArrayList<Map<String, Object>>(), configs);
-		SqlBox[] boxes = NetSqlExplainer.netConfigsToSqlBoxes(ctx, configs);
-		for (SqlBox box : boxes) {
-			TableModel t = box.getTableModel();
-			List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(configs)),
-					"select " + t.getTableName() + ".** from " + t.getTableName() + " as " + t.getTableName());
-			net.joinList(mapList1, configs);
-		}
-		return net;
-	}
+
 
 	private static Object[] concatArray(Object[] first, Object[] second) {
 		Object[] result = Arrays.copyOf(first, first.length + second.length);
@@ -66,7 +50,7 @@ public class EntityNet {
 		return result;
 	}
 
-	public void joinList(List<Map<String, Object>> listMap, Object... configs) {
+	public void joinList(List<Map<String, Object>> listMap, TableModel... configs) {
 		weaved = false;
 		if (listMap == null)
 			throw new SqlBoxException("Can not join null listMap");

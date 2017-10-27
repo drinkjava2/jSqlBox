@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.EntityNet;
+import com.github.drinkjava2.jentitynet.EntityNet;
 
 import config.TestBase;
 import functiontest.orm.entities.Address;

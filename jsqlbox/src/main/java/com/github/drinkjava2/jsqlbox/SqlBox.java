@@ -27,12 +27,30 @@ public class SqlBox {
 	/** A SqlBoxContext instance */
 	SqlBoxContext context;
 
-	/** Optional, map to which entity class */
-	Class<?> entityClass;
-
 	// Shortcut method
 	public String table() {
+		if (tableModel == null)
+			return null;
 		return tableModel.getTableName();
+	}
+
+	/**
+	 * @return tableModel's entityClass
+	 */
+	public Class<?> getEntityClass() {
+		if (tableModel == null)
+			return null;
+		else
+			return tableModel.getEntityClass();
+	}
+
+	/**
+	 * Set tableModel's entityClass
+	 */
+	public void setEntityClass(Class<?> entityClass) {
+		if (tableModel == null)
+			throw new SqlBoxException("Can not set entityClass on null tableModel");
+		tableModel.setEntityClass(entityClass);
 	}
 
 	// getter & setter ========
@@ -50,14 +68,6 @@ public class SqlBox {
 
 	public void setTableModel(TableModel tableModel) {
 		this.tableModel = tableModel;
-	}
-
-	public Class<?> getEntityClass() {
-		return entityClass;
-	}
-
-	public void setEntityClass(Class<?> entityClass) {
-		this.entityClass = entityClass;
 	}
 
 }
