@@ -15,10 +15,11 @@ import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.improve.SqlExplainSupport;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * NetSqlExplainer is the SqlExplainer to explain net() method 
+ * NetSqlExplainer is the SqlExplainer to explain net() method
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -41,62 +42,99 @@ public class NetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Transfer Object[] to SqlBox[], object can be:
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
+	 * or entity Bean
 	 * 
 	 * <pre>
-	 * 1. if is SqlBox instance, directly add into array,
-	 * 2. if is a Class, will call SqlBoxUtils.createSqlBox() to create a SqlBox instance,
-	 * 3. else will call SqlBoxUtils.findAndBindSqlBox() to create a SqlBox instance
+	 * 1. SqlBox instance, will use its tableModel
+	 * 2. Class, will call ctx.createSqlBox() to create a SqlBox instance and use its tableModel
+	 * 3. Object, will call SqlBoxUtils.findAndBindSqlBox() to create a SqlBox instance
 	 * </pre>
 	 */
-	public static SqlBox[] netConfigsToSqlBoxes(SqlBoxContext ctx, Object[] netConfigs) {
+	public static TableModel[] objectConfigsToModels(SqlBoxContext ctx, Object[] netConfigs) {
 		if (netConfigs == null || netConfigs.length == 0)
-			return null;
-		SqlBox[] result = new SqlBox[netConfigs.length];
-		for (int i = 0; i < result.length; i++) {
+			return new TableModel[0];
+		TableModel[] result = new TableModel[netConfigs.length];
+		for (int i = 0; i < netConfigs.length; i++) {
 			Object obj = netConfigs[i];
 			if (obj == null)
 				throw new SqlBoxException("Can not convert null to SqlBox instance");
 			if (obj instanceof SqlBox)
-				result[i] = (SqlBox) obj;
+				result[i] = ((SqlBox) obj).getTableModel();
 			else if (obj instanceof Class)
-				result[i] = SqlBoxUtils.createSqlBox(ctx, (Class<?>) obj);
+				result[i] = ctx.box((Class<?>) obj).getTableModel();
 			else {
-				result[i] = SqlBoxUtils.findAndBindSqlBox(ctx, obj);
+				result[i] = SqlBoxUtils.findAndBindSqlBox(ctx, obj).getTableModel();
 			}
 		}
 		return result;
 	}
 
 	/**
-	 * Replace u.** to u.userName as u_userName, u.address as u_address...
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only
 	 * 
 	 * <pre>
-	 * netConfig:
-	 * null: use MetaTableModels, select all columns and db table name should  same as given table name
-	 * not null: change the Object[] to a Sqlbox[], according the SqlBox[]'s setting to select columns which not transient
+	 * For example
+	 * Replace u.** to u.id as u_id, u.userName as u_userName, u.address as u_address...
+	 * Replace u.##  to u.id as u_id
 	 * 
 	 * </pre>
 	 */
-	private static String replaceStarStarToColumn(String sql, String alias, String tableName, SqlBox[] netConfig) {
-		StringBuilder replace = new StringBuilder();
-		if (netConfig != null && netConfig.length > 0) {
-			for (SqlBox box : netConfig) {
-				TableModel tb = box.getTableModel();
-				if (tableName.equalsIgnoreCase(tb.getTableName())) {
-					for (ColumnModel col : tb.getColumns()) {
-						if (!col.getTransientable())
-							replace.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
+	private static String replaceStarStarToColumn(String sql, String alias, String tableName, TableModel[] models) {
+		String result = sql;
+		if (sql.contains(alias + ".**")) {
+			StringBuilder sb = new StringBuilder();
+			if (models != null && models.length > 0) {
+				for (TableModel tb : models) {
+					if (tableName.equalsIgnoreCase(tb.getTableName())) {
+						for (ColumnModel col : tb.getColumns()) {  
+							if (!col.getTransientable())
+								sb.append(alias).append(".").append(col.getColumnName()).append(" as ")
+										.append(alias).append("_").append(col.getColumnName()).append(", ");
+						}
+						break;
 					}
-					break;
 				}
 			}
+			if (sb.length() == 0)
+				throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
+			sb.setLength(sb.length() - 2);
+			result = StrUtils.replace(sql, alias + ".**", sb.toString());
 		}
-		if (replace.length() == 0)
-			throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
-		replace.setLength(replace.length() - 2);
-		return StrUtils.replace(sql, alias + ".**", replace.toString());
+
+		if (sql.contains(alias + ".##")) {// Pkey and Fkey only
+			StringBuilder sb = new StringBuilder();
+			if (models != null && models.length > 0) {
+				for (TableModel tb : models) {
+					if (tableName.equalsIgnoreCase(tb.getTableName())) {
+						for (ColumnModel col : tb.getColumns()) {
+							boolean found = false;
+							if (!col.getTransientable()) {
+								if (col.getPkey())
+									found = true;
+								else {
+									for (FKeyModel tableModel : tb.getFkeyConstraints()) {
+										if (tableModel.getColumnNames().contains(col.getColumnName())) {
+											found = true;
+											break;
+										}
+									}
+								}
+							}
+							if (found)
+								sb.append(alias).append(".").append(col.getColumnName()).append(" as ")
+										.append(alias).append("_").append(col.getColumnName()).append(", ");
+						}
+						break;
+					}
+				}
+			}
+			if (sb.length() == 0)
+				throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
+			sb.setLength(sb.length() - 2);
+			result = StrUtils.replace(sql, alias + ".**", sb.toString());
+		}
+		return result;
 	}
 
 	/**
@@ -109,11 +147,10 @@ public class NetSqlExplainer implements SqlExplainSupport {
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
 			return sql;
-		SqlBox[] configBoxes = netConfigsToSqlBoxes(ctx, configObjects);
-		// if no configObjects found, use database's meta data
-		if (configBoxes == null && configObjects.length == 0)
-			configBoxes = ctx.getDbMetaBoxes();
-
+		TableModel[] configModels = objectConfigsToModels(ctx, configObjects);
+		// if no configObjects found, use database's meta data 
+		if (configModels == null || configModels.length == 0) 
+			configModels = ctx.getDbMetaTableModels();  
 		while (pos > -1) {
 			StringBuilder aliasSB = new StringBuilder();
 			for (int i = pos - 1; i >= 0; i--) {
@@ -155,9 +192,9 @@ public class NetSqlExplainer implements SqlExplainSupport {
 			if (tableSB.length() == 0)
 				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
 			String tbStr = tableSB.toString();
-
-			// now alias="u", tbStr="users"
-			sql = replaceStarStarToColumn(sql, alias, tbStr, configBoxes);
+ 
+			// now alias="u", tbStr="users" 
+			sql = replaceStarStarToColumn(sql, alias, tbStr, configModels);
 			pos = sql.indexOf(".**");
 		}
 		return sql;

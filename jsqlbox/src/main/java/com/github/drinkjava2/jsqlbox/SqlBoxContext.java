@@ -11,15 +11,20 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.RowProcessor;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jentitynet.EntityNet;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -37,7 +42,7 @@ public class SqlBoxContext extends DbPro {
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	private Dialect dialect; // dialect
-	private SqlBox[] dbMetaBoxes;// Meta data of database
+	private TableModel[] dbMetaTableModels;// Meta data of database
 
 	public SqlBoxContext() {
 		super();
@@ -72,15 +77,15 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	public void refreshMetaData() {
-		dbMetaBoxes = SqlBoxContextUtils.metaDataToModels(this, dialect);
+		dbMetaTableModels = SqlBoxContextUtils.loadMetaTableModels(this, dialect);
 	}
 
 	public TableModel getMetaTableModel(String tableName) {
-		if (StrUtils.isEmpty(tableName))
+		if (dbMetaTableModels == null)
 			return null;
-		for (SqlBox box : dbMetaBoxes)
-			if (tableName.equalsIgnoreCase(box.getTableModel().getTableName()))
-				return box.getTableModel();
+		for (TableModel model : dbMetaTableModels)
+			if (tableName.equalsIgnoreCase(model.getTableName()))
+				return model;
 		return null;
 	}
 
@@ -98,8 +103,8 @@ public class SqlBoxContext extends DbPro {
 	// private, hope it can change to protected in future
 
 	/**
-	 * Return an empty "" String and save a ThreadLocal netConfig object array
-	 * in current thread, it will be used by SqlBoxContext's query methods.
+	 * Return an empty "" String and save a ThreadLocal netConfig object array in
+	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String net(Object... netConfig) {
 		getCurrentExplainers().add(new NetSqlExplainer(netConfig));
@@ -109,6 +114,32 @@ public class SqlBoxContext extends DbPro {
 	public static RowProcessor netProcessor(Object... netConfig) {
 		getCurrentExplainers().add(new NetSqlExplainer(netConfig));
 		return new BasicRowProcessor();
+	}
+
+	/** Load EntityNet from database */
+	public EntityNet loadNet(Object... netConfigs) {
+		if (netConfigs == null || netConfigs.length == 0)
+			throw new SqlBoxException("LoadNet() does not support empty netConfigs parameter");
+		TableModel[] models = NetSqlExplainer.objectConfigsToModels(this, netConfigs);
+		EntityNet net = new EntityNet(new ArrayList<Map<String, Object>>(), models);
+		for (TableModel t : models) {
+			List<Map<String, Object>> mapList = this.nQuery(new MapListHandler(netProcessor(netConfigs)),
+					"select " + t.getTableName() + ".** from " + t.getTableName() + " as " + t.getTableName());
+			net.joinList(mapList);
+		}
+		return net;
+	}
+
+	/** Build a EntityNet from given list and netConfigs */
+	public EntityNet buildNet(List<Map<String, Object>> listMap, Object... netConfigs) {
+		if (netConfigs == null || netConfigs.length == 0)
+			throw new SqlBoxException("buildNet() does not support empty netConfigs parameter");
+		return new EntityNet(listMap, NetSqlExplainer.objectConfigsToModels(this, netConfigs));
+	}
+
+	/** Join list and netConfigs to existed EntityNet */
+	public EntityNet joinNet(EntityNet net, List<Map<String, Object>> listMap, Object... netConfigs) {
+		return net.joinList(listMap, NetSqlExplainer.objectConfigsToModels(this, netConfigs));
 	}
 
 	// =============CRUD methods=====
@@ -147,12 +178,12 @@ public class SqlBoxContext extends DbPro {
 		SqlBoxContext.defaultContext = defaultContext;
 	}
 
-	public SqlBox[] getDbMetaBoxes() {
-		return dbMetaBoxes;
+	public TableModel[] getDbMetaTableModels() {
+		return dbMetaTableModels;
 	}
 
-	public void setDbMetaBoxes(SqlBox[] dbMetaBoxes) {
-		this.dbMetaBoxes = dbMetaBoxes;
+	public void setDbMetaTableModels(TableModel[] dbMetaTableModels) {
+		this.dbMetaTableModels = dbMetaTableModels;
 	}
 
 }

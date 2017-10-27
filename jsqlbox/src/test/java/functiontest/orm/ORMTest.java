@@ -91,32 +91,34 @@ public class ORMTest extends TestBase {
 
 	@Test
 	public void testLoadAllAsEntityNet() {
-		EntityNet net = EntityNet.loadAll(ctx, User.class, Email.class, Address.class, Role.class, Privilege.class,
-				UserRole.class, RolePrivilege.class); 
+		EntityNet net = ctx.loadNet(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
+				RolePrivilege.class);
 		System.out.println(net.getListMaps().size());
 	}
 
 	@Test
 	public void testManualLoadAndJoin() {
-		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(), net(UserRole.class, Role.class)
-				+ pagin(2, 3) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
+
+		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(),
+				net() + pagin(2, 3) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
 
 		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Email.class)),
 				"select u.**, e.** from usertb u, email e where u.id=e.userId");
 
-		List<Map<String, Object>> mapList3 = ctx.nQuery(new MapListHandler(netProcessor()),
+		List<Map<String, Object>> mapList3 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Email.class)),
 				"select u.**, e.** from usertb u, email e where u.id=e.userId");
 		List<Map<String, Object>> mapList4 = ctx.nQuery(new MapListHandler(),
 				net() + "select u.**, e.** from usertb u, email e where u.id=e.userId");
 
-		EntityNet net = new EntityNet(mapList1, User.class, Email.class, UserRole.class, Role.class);
-		net.joinList(mapList2);
+		EntityNet net = ctx.buildNet(mapList1, new User(), Email.class, UserRole.class, Role.class);
+		ctx.joinNet(net, mapList2, User.class, Email.class);
 		net.joinList(mapList3);
 		net.joinList(mapList4);
 		Assert.assertEquals(18, net.getListMaps().size());
-		System.out.println(net.getListMaps().size()); 
+		System.out.println(net.getListMaps().size());
+
 	}
-	
+
 	//@formatter:off
 	 		// List<User> users = net.getList(User.class);
 			// for (User user : users) {

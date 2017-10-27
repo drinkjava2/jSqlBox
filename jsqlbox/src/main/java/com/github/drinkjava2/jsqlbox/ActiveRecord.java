@@ -113,7 +113,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public <T> T load(Object pkey) {
 		return context().load(this.getClass(), pkey);
 	}
-
+ 
 	@Override
 	public ActiveRecordSupport put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {

@@ -12,13 +12,11 @@
 package com.github.drinkjava2.jentitynet;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * EntityNet is a entity net
@@ -29,51 +27,77 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class EntityNet {
 
 	private Boolean weaved = false;
-	
-	private TableModel[] netConfigs;
 
+	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
+
+	/* A backup copy of map list */
 	private List<Map<String, Object>> listMaps = new ArrayList<Map<String, Object>>();
 
 	/** The body of the net */
 	private Map<Class<?>, List<Object>> body = new HashMap<Class<?>, List<Object>>();
-	
-	
-	public EntityNet(List<Map<String, Object>> listMap, TableModel... configs) {
-		joinList(listMap, netConfigs);
+
+	public EntityNet(List<Map<String, Object>> listMap, TableModel... models) {
+		joinList(listMap, models);
 	}
 
-
-
-	private static Object[] concatArray(Object[] first, Object[] second) {
-		Object[] result = Arrays.copyOf(first, first.length + second.length);
-		System.arraycopy(second, 0, result, first.length, second.length);
-		return result;
-	}
-
-	public void joinList(List<Map<String, Object>> listMap, TableModel... configs) {
+	public EntityNet joinList(List<Map<String, Object>> listMap, TableModel... models) {
 		weaved = false;
 		if (listMap == null)
-			throw new SqlBoxException("Can not join null listMap");
-		if (configs != null && configs.length > 0) {
-			if (netConfigs == null)
-				netConfigs = configs;
-			else
-				netConfigs = concatArray(netConfigs, configs);
+			throw new EntityNetException("Can not join null listMap");
+		if (models != null && models.length > 0) {
+			for (TableModel tableModel : models) {
+				if (tableModel.getEntityClass() == null)
+					throw new EntityNetException("Can not join tableModel with null entityClass");
+				this.configModels.put(tableModel.getEntityClass(), tableModel);
+			}
 		}
 		for (Map<String, Object> map : listMap) {
 			listMaps.add(map);
+			addOneRow(map);
+		}
+		return this;
+	}
+
+	public Object[] transferOneRowToEntityArray(Map<String, Object> oneRow) {
+		// TODO
+		return null;
+	}
+
+	/**
+	 * Add one Map<String, Object> row to EntityNet, this method will analyse and
+	 * transfer row to Entity Objects, then add these objects into EntityNet body
+	 */
+	public void addOneRow(Map<String, Object> oneRow) {
+		Object[] entities = transferOneRowToEntityArray(oneRow);
+		for (Object entity : entities) {
+			addEntity(entity);
 		}
 	}
 
-	public void weave() {
-		EntityNetUtils.weave(this);
+	/**
+	 * Add an entity to EntityNet, if already have same PKEY entity exist, use new
+	 * added one replace, usually they should be same entity but some times not.
+	 */
+	public void addEntity(Object entity) {
+		// TODO
 	}
 
-	public List<Object> get(Class<?> entityClass) {
-		if (!weaved)
-			weave();
+	/**
+	 * In EntityNet, find target entities by given source entities and target class
+	 */
+	public Object[] find(Object[] source, Class<?> targetEntityClass) {
 		// TODO work at here
-		return new ArrayList<Object>();
+		return null;
+	}
+
+	/**
+	 * In EntityNet, find target entities by given source entities and target class
+	 * and a full path format like: "P", Email.class,"C",Role.class..., here "P"
+	 * means parent node, "C" means child node
+	 */
+	public Object[] findWithPath(Object[] source, Class<?> targetEntityClass) {
+		// TODO work at here
+		return null;
 	}
 
 	// ======getter & setter =======
@@ -85,12 +109,12 @@ public class EntityNet {
 		this.weaved = weaved;
 	}
 
-	public Object[] getNetConfigs() {
-		return netConfigs;
+	public Map<Class<?>, TableModel> getConfigModels() {
+		return configModels;
 	}
 
-	public void setNetConfigs(Object... netConfigs) {
-		this.netConfigs = netConfigs;
+	public void setConfigModels(Map<Class<?>, TableModel> configModels) {
+		this.configModels = configModels;
 	}
 
 	public List<Map<String, Object>> getListMaps() {

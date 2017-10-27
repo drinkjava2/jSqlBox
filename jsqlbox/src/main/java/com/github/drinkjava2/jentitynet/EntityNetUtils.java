@@ -11,19 +11,6 @@
  */
 package com.github.drinkjava2.jentitynet;
 
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.dbutils.handlers.MapListHandler;
-
-import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.NetSqlExplainer;
-import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-
 /**
  * EntityNetUtils is utility class store static methods about EntityNet
  * 
@@ -31,22 +18,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 1.0.0
  */
 public class EntityNetUtils {
-	/**
-	 * Load all rows in database tables listed in configs as EntityNet, usage
-	 * example: loadAll(ctx, User.class, Email.class); <br/>
-	 * or loadAll(ctx, new User(), new Email());
-	 */
-	public static EntityNet loadAll(SqlBoxContext ctx, Object... configs) {
-		EntityNet net = new EntityNet(new ArrayList<Map<String, Object>>(), configs);
-		SqlBox[] boxes = NetSqlExplainer.netConfigsToSqlBoxes(ctx, configs);
-		for (SqlBox box : boxes) {
-			TableModel t = box.getTableModel();
-			List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(configs)),
-					"select " + t.getTableName() + ".** from " + t.getTableName() + " as " + t.getTableName());
-			net.joinList(mapList1, configs);
-		}
-		return net;
-	}
 
 	public static void weave(EntityNet net) {
 		//TODO work at here
