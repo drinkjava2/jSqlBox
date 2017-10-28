@@ -24,10 +24,10 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class NetSqlExplainer implements SqlExplainSupport {
+public class EntityNetSqlExplainer implements SqlExplainSupport {
 	private Object[] configObjects;
 
-	public NetSqlExplainer(Object... configObjects) {
+	public EntityNetSqlExplainer(Object... configObjects) {
 		this.configObjects = configObjects;
 	}
 
@@ -42,8 +42,8 @@ public class NetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
-	 * or entity Bean
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance,
+	 * entityClass or entity Bean
 	 * 
 	 * <pre>
 	 * 1. SqlBox instance, will use its tableModel
@@ -71,13 +71,12 @@ public class NetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
+	 * for example:
 	 * 
 	 * <pre>
-	 * For example
-	 * Replace u.** to u.id as u_id, u.userName as u_userName, u.address as u_address...
-	 * Replace u.##  to u.id as u_id
-	 * 
+	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
+	 * u.##  ==> u.id as u_id
 	 * </pre>
 	 */
 	private static String replaceStarStarToColumn(String sql, String alias, String tableName, TableModel[] models) {
@@ -87,10 +86,10 @@ public class NetSqlExplainer implements SqlExplainSupport {
 			if (models != null && models.length > 0) {
 				for (TableModel tb : models) {
 					if (tableName.equalsIgnoreCase(tb.getTableName())) {
-						for (ColumnModel col : tb.getColumns()) {  
+						for (ColumnModel col : tb.getColumns()) {
 							if (!col.getTransientable())
-								sb.append(alias).append(".").append(col.getColumnName()).append(" as ")
-										.append(alias).append("_").append(col.getColumnName()).append(", ");
+								sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
+										.append("_").append(col.getColumnName()).append(", ");
 						}
 						break;
 					}
@@ -122,8 +121,8 @@ public class NetSqlExplainer implements SqlExplainSupport {
 								}
 							}
 							if (found)
-								sb.append(alias).append(".").append(col.getColumnName()).append(" as ")
-										.append(alias).append("_").append(col.getColumnName()).append(", ");
+								sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
+										.append("_").append(col.getColumnName()).append(", ");
 						}
 						break;
 					}
@@ -132,26 +131,32 @@ public class NetSqlExplainer implements SqlExplainSupport {
 			if (sb.length() == 0)
 				throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
 			sb.setLength(sb.length() - 2);
-			result = StrUtils.replace(sql, alias + ".**", sb.toString());
+			result = StrUtils.replace(sql, alias + ".##", sb.toString());
 		}
 		return result;
 	}
 
 	/**
-	 * Explain SQL include ".**", for example: <br/>
-	 * "select u.** from user u" will be explain to <br/>
-	 * "select u.userName as u_userName, u.address as u_address from user u"
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
+	 * for example:
+	 * 
+	 * <pre>
+	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
+	 * u.##  ==> u.id as u_id
+	 * </pre>
 	 */
 	public String explainNetQuery(SqlBoxContext ctx, String thesql) {
 		String sql = thesql;
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
+			pos = sql.indexOf(".##");
+		if (pos < 0)
 			return sql;
 		TableModel[] configModels = objectConfigsToModels(ctx, configObjects);
-		// if no configObjects found, use database's meta data 
-		if (configModels == null || configModels.length == 0) 
-			configModels = ctx.getDbMetaTableModels();  
-		while (pos > -1) {
+		// if no configObjects found, use database's meta data
+		if (configModels == null || configModels.length == 0)
+			configModels = ctx.getDbMetaTableModels();
+		while (pos >= 0) {
 			StringBuilder aliasSB = new StringBuilder();
 			for (int i = pos - 1; i >= 0; i--) {
 				if (SqlBoxStrUtils.isNormalLetters(sql.charAt(i)))
@@ -192,10 +197,12 @@ public class NetSqlExplainer implements SqlExplainSupport {
 			if (tableSB.length() == 0)
 				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
 			String tbStr = tableSB.toString();
- 
-			// now alias="u", tbStr="users" 
+
+			// now alias="u", tbStr="users"
 			sql = replaceStarStarToColumn(sql, alias, tbStr, configModels);
 			pos = sql.indexOf(".**");
+			if (pos < 0)
+				pos = sql.indexOf(".##");
 		}
 		return sql;
 	}

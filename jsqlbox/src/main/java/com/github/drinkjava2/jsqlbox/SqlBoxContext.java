@@ -107,12 +107,12 @@ public class SqlBoxContext extends DbPro {
 	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String net(Object... netConfig) {
-		getCurrentExplainers().add(new NetSqlExplainer(netConfig));
+		getCurrentExplainers().add(new EntityNetSqlExplainer(netConfig));
 		return "";
 	}
 
 	public static RowProcessor netProcessor(Object... netConfig) {
-		getCurrentExplainers().add(new NetSqlExplainer(netConfig));
+		getCurrentExplainers().add(new EntityNetSqlExplainer(netConfig));
 		return new BasicRowProcessor();
 	}
 
@@ -120,7 +120,7 @@ public class SqlBoxContext extends DbPro {
 	public EntityNet loadNet(Object... netConfigs) {
 		if (netConfigs == null || netConfigs.length == 0)
 			throw new SqlBoxException("LoadNet() does not support empty netConfigs parameter");
-		TableModel[] models = NetSqlExplainer.objectConfigsToModels(this, netConfigs);
+		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(this, netConfigs);
 		EntityNet net = new EntityNet(new ArrayList<Map<String, Object>>(), models);
 		for (TableModel t : models) {
 			List<Map<String, Object>> mapList = this.nQuery(new MapListHandler(netProcessor(netConfigs)),
@@ -134,12 +134,12 @@ public class SqlBoxContext extends DbPro {
 	public EntityNet buildNet(List<Map<String, Object>> listMap, Object... netConfigs) {
 		if (netConfigs == null || netConfigs.length == 0)
 			throw new SqlBoxException("buildNet() does not support empty netConfigs parameter");
-		return new EntityNet(listMap, NetSqlExplainer.objectConfigsToModels(this, netConfigs));
+		return new EntityNet(listMap, EntityNetSqlExplainer.objectConfigsToModels(this, netConfigs));
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
 	public EntityNet joinNet(EntityNet net, List<Map<String, Object>> listMap, Object... netConfigs) {
-		return net.joinList(listMap, NetSqlExplainer.objectConfigsToModels(this, netConfigs));
+		return net.joinList(listMap, EntityNetSqlExplainer.objectConfigsToModels(this, netConfigs));
 	}
 
 	// =============CRUD methods=====

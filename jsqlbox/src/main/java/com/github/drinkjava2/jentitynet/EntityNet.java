@@ -16,7 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * EntityNet is a entity net
@@ -58,32 +62,76 @@ public class EntityNet {
 		return this;
 	}
 
-	public Object[] transferOneRowToEntityArray(Map<String, Object> oneRow) {
-		// TODO
-		return null;
+	private Object createNewEntity(Class<?> entityClass) {
+		try {
+			return entityClass.newInstance();
+		} catch (Exception e) {
+			throw new EntityNetException(e);
+		}
 	}
 
 	/**
-	 * Add one Map<String, Object> row to EntityNet, this method will analyse and
-	 * transfer row to Entity Objects, then add these objects into EntityNet body
+	 * Assembly Map List data to Entities, according current configModels
+	 */
+	public Object[] assemblyMapListToEntities(Map<String, Object> oneRow) {
+		List<Object> resultList = new ArrayList<Object>();
+
+		for (TableModel model : configModels.values()) {
+			Object obj = null;
+			for (String alaisColumname : oneRow.keySet()) { // u_userName
+				String alias = model.getAlias();
+				if (StrUtils.isEmpty(alias))
+					alias = model.getTableName();
+				for (ColumnModel col : model.getColumns()) {
+					if (alaisColumname.equalsIgnoreCase(alias + "_" + col.getColumnName())) {
+						if (obj == null)
+							obj = createNewEntity(model.getEntityClass());
+						//TODO here
+					}
+				}
+			}
+		}
+
+		// if (models != null && models.length > 0) {
+		// for (TableModel tb : models) {
+		// if (tableName.equalsIgnoreCase(tb.getTableName())) {
+		// for (ColumnModel col : tb.getColumns()) {
+		// if (!col.getTransientable())
+		// sb.append(alias).append(".").append(col.getColumnName()).append(" as
+		// ").append(alias)
+		// .append("_").append(col.getColumnName()).append(", ");
+		// }
+		// break;
+		// }
+		// }
+		// }
+		return resultList.toArray(new Object[resultList.size()]);
+	}
+
+	/**
+	 * Add one Map<String, Object> row to EntityNet, this method will analyse
+	 * and transfer row to Entity Objects, then add these objects into EntityNet
+	 * body
 	 */
 	public void addOneRow(Map<String, Object> oneRow) {
-		Object[] entities = transferOneRowToEntityArray(oneRow);
+		Object[] entities = assemblyMapListToEntities(oneRow);
 		for (Object entity : entities) {
 			addEntity(entity);
 		}
 	}
 
 	/**
-	 * Add an entity to EntityNet, if already have same PKEY entity exist, use new
-	 * added one replace, usually they should be same entity but some times not.
+	 * Add an entity to EntityNet, if already have same PKEY entity exist, use
+	 * new added one replace, usually they should be same entity but some times
+	 * not.
 	 */
 	public void addEntity(Object entity) {
 		// TODO
 	}
 
 	/**
-	 * In EntityNet, find target entities by given source entities and target class
+	 * In EntityNet, find target entities by given source entities and target
+	 * class
 	 */
 	public Object[] find(Object[] source, Class<?> targetEntityClass) {
 		// TODO work at here
@@ -91,9 +139,9 @@ public class EntityNet {
 	}
 
 	/**
-	 * In EntityNet, find target entities by given source entities and target class
-	 * and a full path format like: "P", Email.class,"C",Role.class..., here "P"
-	 * means parent node, "C" means child node
+	 * In EntityNet, find target entities by given source entities and target
+	 * class and a full path format like: "P", Email.class,"C",Role.class...,
+	 * here "P" means parent node, "C" means child node
 	 */
 	public Object[] findWithPath(Object[] source, Class<?> targetEntityClass) {
 		// TODO work at here
