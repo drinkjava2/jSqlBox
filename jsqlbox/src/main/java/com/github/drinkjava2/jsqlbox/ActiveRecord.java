@@ -38,7 +38,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * Data Mapper style (for POJO entity): * 
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
  *    ctx.insert(entity);
- *    
+ * 
  * </pre>
  * 
  * 
@@ -58,7 +58,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public void unbindBox() {
-			box = null;
+		box = null;
 	}
 
 	@Override
@@ -90,13 +90,15 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public SqlBoxContext context() { 
-		//TODO: if context is null, use global one
-		return box().getContext();
+	public SqlBoxContext context() {
+		SqlBox box = box();
+		if (box.getContext() == null)
+			box.setContext(SqlBoxContext.defaultContext);
+		return box.getContext();
 	}
 
 	@Override
-	public void insert() { 
+	public void insert() {
 		context().insert(this);
 	}
 
@@ -114,7 +116,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public <T> T load(Object pkey) {
 		return context().load(this.getClass(), pkey);
 	}
- 
+
 	@Override
 	public ActiveRecordSupport put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {

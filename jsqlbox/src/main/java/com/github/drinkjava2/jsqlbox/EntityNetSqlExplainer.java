@@ -21,6 +21,11 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 
 /**
  * NetSqlExplainer is the SqlExplainer to explain net() method
@@ -31,7 +36,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public class EntityNetSqlExplainer implements SqlExplainSupport {
 	private Object[] netConfigObjects;
 	private TableModel[] generatedTableModels;
-	protected static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
+	private static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
 		@Override
 		protected Map<Object, Object> initialValue() {
 			return new HashMap<Object, Object>();
@@ -55,6 +60,14 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 			netConfigBindToListCache.get().put(result, generatedTableModels);
 		}
 		return result;
+	}
+
+	public static TableModel[] getBindedTableModel(List<?> listMap) {
+		return (TableModel[]) netConfigBindToListCache.get().get(listMap);
+	}
+
+	public static void removeBindedTableModel(List<?> listMap) {
+		netConfigBindToListCache.get().remove(listMap);
 	}
 
 	/**
@@ -123,11 +136,12 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 			if (sb.length() == 0)
 				throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
 			sb.setLength(sb.length() - 2);
-			result = StrUtils.replace(sql, alias + ".**", sb.toString());
+			result = StrUtils.replaceFirst(sql, alias + ".**", sb.toString());
+			return result;
 		}
 
 		if (sql.contains(alias + ".##")) {// Pkey and Fkey only
-			StringBuilder sb = new StringBuilder();  
+			StringBuilder sb = new StringBuilder();
 			if (models != null && models.length > 0) {
 				for (TableModel tb : models) {
 					if (tableName.equalsIgnoreCase(tb.getTableName())) {
@@ -160,9 +174,10 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 				}
 			}
 			if (sb.length() == 0)
-				throw new SqlBoxException("In SQL '" + sql + "', Can not find key columns in table '" + tableName + "'");
+				throw new SqlBoxException(
+						"In SQL '" + sql + "', Can not find key columns in table '" + tableName + "'");
 			sb.setLength(sb.length() - 2);
-			result = StrUtils.replace(result, alias + ".##", sb.toString());
+			result = StrUtils.replaceFirst(result, alias + ".##", sb.toString());
 		}
 		return result;
 	}

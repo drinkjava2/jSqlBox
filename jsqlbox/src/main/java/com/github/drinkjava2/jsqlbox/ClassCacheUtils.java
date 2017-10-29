@@ -180,4 +180,16 @@ public abstract class ClassCacheUtils {
 		}
 	}
 
+	/**
+	 * Create a new Object by given entityClass, if any exception happen, throw
+	 * {@link SqlBoxException}
+	 */
+	public static Object createNewEntity(Class<?> entityClass) {
+		try {
+			return entityClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+	}
+
 }

@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jentitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.EntityNet;
 
 import config.TestBase;
 import functiontest.orm.entities.Address;
@@ -89,6 +89,7 @@ public class ORMTest extends TestBase {
 		//@formatter:on
 	}
 
+	@Test
 	public void testloadNet() {
 		EntityNet net = ctx.loadNet(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
 				RolePrivilege.class);
@@ -96,6 +97,7 @@ public class ORMTest extends TestBase {
 		System.out.println(net.getBody().size());
 	}
 
+	@Test
 	public void testloadKeyNet() {
 		EntityNet net = ctx.loadKeyNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
@@ -104,26 +106,24 @@ public class ORMTest extends TestBase {
 	}
 
 	@Test
-	public void testManualLoadAndJoin() {
-		ctx.setAllowShowSQL(true);
+	public void testManualLoadAndJoin() { 
 		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
 		EntityNet net = ctx.buildNet(mapList1);
 		System.out.println(net.getBody().size());
-
-		ctx.setAllowShowSQL(true);
+		Assert.assertEquals(10, net.getBody().size());
+ 
 		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
 				net(Email.class) + "select e.** from emailtb as e");
-		ctx.joinNet(net, mapList2);
+		ctx.joinList(net, mapList2);
 		System.out.println(net.getBody().size());
+		Assert.assertEquals(15, net.getBody().size());
 
 		List<Map<String, Object>> mapList3 = ctx.nQuery(
 				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
-				"select r.**, ur.**, rp.*, p.* from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
-		System.out.println("map3 size=" + mapList3.size());
-		net.joinList(mapList3);
+				"select r.**, rp.**,p.**,ur.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
+  		net.joinList(mapList3);
 		System.out.println(net.getBody().size());
-
 		Assert.assertEquals(37, net.getBody().size());
 	}
 
