@@ -90,12 +90,13 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public SqlBoxContext context() {
+	public SqlBoxContext context() { 
+		//TODO: if context is null, use global one
 		return box().getContext();
 	}
 
 	@Override
-	public void insert() {
+	public void insert() { 
 		context().insert(this);
 	}
 

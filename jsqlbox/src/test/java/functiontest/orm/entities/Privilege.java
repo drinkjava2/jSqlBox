@@ -1,10 +1,12 @@
 package functiontest.orm.entities;
 
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "privilegetb")
 public class Privilege extends ActiveRecord {
+	@Id
 	String id;
 	String privilegeName;
 

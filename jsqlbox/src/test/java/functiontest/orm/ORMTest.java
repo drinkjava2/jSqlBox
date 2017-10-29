@@ -1,6 +1,5 @@
 package functiontest.orm;
 
-import static com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner.pagin;
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.net;
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
 
@@ -29,13 +28,13 @@ public class ORMTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
+		// ctx.setAllowShowSQL(true);
 		TableModel[] models = ModelUtils.entity2Model(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
 
-		//@formatter:off
-		//ctx.setAllowShowSQL(true);
+		//@formatter:off 
 		ctx.nBatchBegin(); //Batch insert enabled 
 		new User().put("id","u1").put("userName","user1").insert();
 		new User().put("id","u2").put("userName","user2").insert();
@@ -76,47 +75,56 @@ public class ORMTest extends TestBase {
         ur.setUserId("u2");ur.setRid("r2");ur.insert();
         ur.setUserId("u2");ur.setRid("r3");ur.insert();
         ur.setUserId("u3");ur.setRid("r4");ur.insert();
-        ur.setUserId("u4");ur.setRid("r1");ur.insert();
-        ctx.nBatchEnd(); //Batch insert end
-        
-		ctx.nExecute("insert into roleprivilege (rid, pid) values('r1','p1')");
-		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p1')");
-		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p2')");
-		ctx.nExecute("insert into roleprivilege (rid, pid) values('r2','p3')");
-		ctx.nExecute("insert into roleprivilege (rid, pid) values('r3','p3')");
-		ctx.nExecute("insert into roleprivilege (rid, pid) values('r4','p1')");
-		 
+        ur.setUserId("u4");ur.setRid("r1");ur.insert();        
+         
+		new RolePrivilege().putFields("rid","pid"); 
+		new RolePrivilege().putValues("r1","p1").insert();
+		new RolePrivilege().putValues("r2","p1").insert();		
+		new RolePrivilege().putValues("r2","p2").insert();		 
+		new RolePrivilege().putValues("r2","p3").insert();	
+		new RolePrivilege().putValues("r3","p3").insert();
+		new RolePrivilege().putValues("r4","p1").insert();
+		
+		ctx.nBatchEnd(); //Batch insert end
 		//@formatter:on
 	}
 
-	@Test
-	public void testLoadAllAsEntityNet() {
+	public void testloadNet() {
 		EntityNet net = ctx.loadNet(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
 				RolePrivilege.class);
-		System.out.println(net.getListMaps().size());
+		Assert.assertEquals(37, net.getBody().size());
+		System.out.println(net.getBody().size());
+	}
+
+	public void testloadKeyNet() {
+		EntityNet net = ctx.loadKeyNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+				UserRole.class, RolePrivilege.class);
+		Assert.assertEquals(37, net.getBody().size());
+		System.out.println(net.getBody().size());
 	}
 
 	@Test
 	public void testManualLoadAndJoin() {
+		ctx.setAllowShowSQL(true);
+		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
+				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
+		EntityNet net = ctx.buildNet(mapList1);
+		System.out.println(net.getBody().size());
 
-		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(),
-				net() + pagin(2, 3) + "select ur.**, r.** from userroletb ur, rolestb r where ur.rid=r.id");
+		ctx.setAllowShowSQL(true);
+		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
+				net(Email.class) + "select e.** from emailtb as e");
+		ctx.joinNet(net, mapList2);
+		System.out.println(net.getBody().size());
 
-		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Email.class)),
-				"select u.**, e.** from usertb u, email e where u.id=e.userId");
-
-		List<Map<String, Object>> mapList3 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Email.class)),
-				"select u.**, e.** from usertb u, email e where u.id=e.userId");
-		List<Map<String, Object>> mapList4 = ctx.nQuery(new MapListHandler(),
-				net() + "select u.**, e.** from usertb u, email e where u.id=e.userId");
-
-		EntityNet net = ctx.buildNet(mapList1, new User(), Email.class, UserRole.class, Role.class);
-		ctx.joinNet(net, mapList2, User.class, Email.class);
+		List<Map<String, Object>> mapList3 = ctx.nQuery(
+				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
+				"select r.**, ur.**, rp.*, p.* from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
+		System.out.println("map3 size=" + mapList3.size());
 		net.joinList(mapList3);
-		net.joinList(mapList4);
-		Assert.assertEquals(18, net.getListMaps().size());
-		System.out.println(net.getListMaps().size());
+		System.out.println(net.getBody().size());
 
+		Assert.assertEquals(37, net.getBody().size());
 	}
 
 	//@formatter:off

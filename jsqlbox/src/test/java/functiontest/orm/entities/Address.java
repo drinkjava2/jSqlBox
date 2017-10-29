@@ -1,11 +1,18 @@
 package functiontest.orm.entities;
 
+import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-
+ 
+@Table(name = "addresstb")
 public class Address extends ActiveRecord {
+	@Id
 	String id;
 	String addressName;
-	String userId; 
+
+	@SingleFKey(refs = {"usertb","id"})
+	String userId;
 
 	public String getId() {
 		return id;

@@ -11,6 +11,10 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.improve.SqlExplainSupport;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -25,10 +29,17 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public class EntityNetSqlExplainer implements SqlExplainSupport {
-	private Object[] configObjects;
+	private Object[] netConfigObjects;
+	private TableModel[] generatedTableModels;
+	protected static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
+		@Override
+		protected Map<Object, Object> initialValue() {
+			return new HashMap<Object, Object>();
+		}
+	};
 
-	public EntityNetSqlExplainer(Object... configObjects) {
-		this.configObjects = configObjects;
+	public EntityNetSqlExplainer(Object... netConfigObjects) {
+		this.netConfigObjects = netConfigObjects;
 	}
 
 	@Override
@@ -38,17 +49,23 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 
 	@Override
 	public Object explainResult(Object result) {
+		if (result != null && result instanceof List<?>) {
+			if (generatedTableModels == null)
+				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
+			netConfigBindToListCache.get().put(result, generatedTableModels);
+		}
 		return result;
 	}
 
 	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance,
-	 * entityClass or entity Bean
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
+	 * or entity Bean
 	 * 
 	 * <pre>
-	 * 1. SqlBox instance, will use its tableModel
-	 * 2. Class, will call ctx.createSqlBox() to create a SqlBox instance and use its tableModel
-	 * 3. Object, will call SqlBoxUtils.findAndBindSqlBox() to create a SqlBox instance
+	 * 1. TableModel instance, will use it
+	 * 2. SqlBox instance, will use its tableModel
+	 * 3. Class, will call ctx.createSqlBox() to create a SqlBox instance and use its tableModel
+	 * 4. Object, will call SqlBoxUtils.findAndBindSqlBox() to create a SqlBox instance
 	 * </pre>
 	 */
 	public static TableModel[] objectConfigsToModels(SqlBoxContext ctx, Object[] netConfigs) {
@@ -59,7 +76,9 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 			Object obj = netConfigs[i];
 			if (obj == null)
 				throw new SqlBoxException("Can not convert null to SqlBox instance");
-			if (obj instanceof SqlBox)
+			if (obj instanceof TableModel)
+				result[i] = (TableModel) obj;
+			else if (obj instanceof SqlBox)
 				result[i] = ((SqlBox) obj).getTableModel();
 			else if (obj instanceof Class)
 				result[i] = ctx.box((Class<?>) obj).getTableModel();
@@ -71,8 +90,8 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -86,6 +105,12 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 			if (models != null && models.length > 0) {
 				for (TableModel tb : models) {
 					if (tableName.equalsIgnoreCase(tb.getTableName())) {
+						if (StrUtils.isEmpty(tb.getAlias()))
+							tb.setAlias(alias);
+						else {
+							if (!alias.equalsIgnoreCase(tb.getAlias()))
+								throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias");
+						}
 						for (ColumnModel col : tb.getColumns()) {
 							if (!col.getTransientable())
 								sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
@@ -102,10 +127,16 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 		}
 
 		if (sql.contains(alias + ".##")) {// Pkey and Fkey only
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();  
 			if (models != null && models.length > 0) {
 				for (TableModel tb : models) {
 					if (tableName.equalsIgnoreCase(tb.getTableName())) {
+						if (StrUtils.isEmpty(tb.getAlias()))
+							tb.setAlias(alias);
+						else {
+							if (!alias.equalsIgnoreCase(tb.getAlias()))
+								throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias");
+						}
 						for (ColumnModel col : tb.getColumns()) {
 							boolean found = false;
 							if (!col.getTransientable()) {
@@ -129,16 +160,16 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 				}
 			}
 			if (sb.length() == 0)
-				throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
+				throw new SqlBoxException("In SQL '" + sql + "', Can not find key columns in table '" + tableName + "'");
 			sb.setLength(sb.length() - 2);
-			result = StrUtils.replace(sql, alias + ".##", sb.toString());
+			result = StrUtils.replace(result, alias + ".##", sb.toString());
 		}
 		return result;
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -152,8 +183,8 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 			pos = sql.indexOf(".##");
 		if (pos < 0)
 			return sql;
-		TableModel[] configModels = objectConfigsToModels(ctx, configObjects);
-		// if no configObjects found, use database's meta data
+		TableModel[] configModels = objectConfigsToModels(ctx, netConfigObjects);
+		// if no netConfigObjects found, use database's meta data
 		if (configModels == null || configModels.length == 0)
 			configModels = ctx.getDbMetaTableModels();
 		while (pos >= 0) {
@@ -204,6 +235,7 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 			if (pos < 0)
 				pos = sql.indexOf(".##");
 		}
+		generatedTableModels = configModels;
 		return sql;
 	}
 

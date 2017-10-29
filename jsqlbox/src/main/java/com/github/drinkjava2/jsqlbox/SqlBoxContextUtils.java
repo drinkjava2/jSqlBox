@@ -121,10 +121,10 @@ public abstract class SqlBoxContextUtils {
 						sb.append(col.getColumnName()).append(", ");
 						Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
 						params.add(id);
-						writeValueToBeanField(entityBean, fieldName, id);
+						ClassCacheUtils.writeValueToBeanField(entityBean, fieldName, id);
 					}
 				} else {
-					Object value = readValueFromBeanField(entityBean, fieldName);
+					Object value = ClassCacheUtils.readValueFromBeanField(entityBean, fieldName);
 					sb.append(col.getColumnName()).append(", ");
 					params.add(value);
 				}
@@ -140,7 +140,7 @@ public abstract class SqlBoxContextUtils {
 			throw new SqlBoxException(result + " row record be inserted.");
 		if (identityFieldName != null) {// write identity id to Bean field
 			Object identityId = IdentityIdGenerator.INSTANCE.getNextID(ctx, ctx.getDialect(), identityType);
-			writeValueToBeanField(entityBean, identityFieldName, identityId);
+			ClassCacheUtils.writeValueToBeanField(entityBean, identityFieldName, identityId);
 		}
 	}
 
@@ -161,7 +161,7 @@ public abstract class SqlBoxContextUtils {
 		for (String fieldName : readMethods.keySet()) {
 			ColumnModel col = findMatchColumnForJavaField(fieldName, box);
 			if (!col.getTransientable() && col.getUpdatable()) {
-				Object value = readValueFromBeanField(entityBean, fieldName);
+				Object value = ClassCacheUtils.readValueFromBeanField(entityBean, fieldName);
 				if (!col.getPkey()) {
 					normalParams.add(value);
 					sb.append(col.getColumnName()).append("=?, ");
@@ -199,7 +199,7 @@ public abstract class SqlBoxContextUtils {
 		for (String fieldName : readMethods.keySet()) {
 			ColumnModel col = findMatchColumnForJavaField(fieldName, box);
 			if (!col.getTransientable() && col.getPkey()) {
-				Object value = readValueFromBeanField(entityBean, fieldName);
+				Object value = ClassCacheUtils.readValueFromBeanField(entityBean, fieldName);
 				sb.append(col.getColumnName()).append("=?, ");
 				pkeyParameters.add(value);
 			}
@@ -287,30 +287,6 @@ public abstract class SqlBoxContextUtils {
 			throw new SqlBoxException(e);
 		}
 		return (T) entity;
-	}
-
-	/** Read value from entityBean field */
-	private static Object readValueFromBeanField(Object entityBean, String fieldName) {
-		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
-		if (readMethod == null)
-			throw new SqlBoxException("Can not find Java bean read method for column '" + fieldName + "'");
-		try {
-			return readMethod.invoke(entityBean);
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
-	}
-
-	/** write value to entityBean field */
-	private static void writeValueToBeanField(Object entityBean, String fieldName, Object value) {
-		Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
-		if (writeMethod == null)
-			throw new SqlBoxException("Can not find Java bean read method for column '" + fieldName + "'");
-		try {
-			writeMethod.invoke(entityBean, value);
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
 	}
 
 	private static void checkBeanAndBoxExist(Object entityBean, SqlBox box) {

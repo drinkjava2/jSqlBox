@@ -155,5 +155,29 @@ public abstract class ClassCacheUtils {
 			cacheReadWriteMethodsAndBoxField(clazz);
 		return boxFieldCache.get(clazz);
 	}
+	
+	/** Read value from entityBean field */
+	public static Object readValueFromBeanField(Object entityBean, String fieldName) {
+		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
+		if (readMethod == null)
+			throw new SqlBoxException("Can not find Java bean read method for column '" + fieldName + "'");
+		try {
+			return readMethod.invoke(entityBean);
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+	}
+
+	/** write value to entityBean field */
+	public static void writeValueToBeanField(Object entityBean, String fieldName, Object value) {
+		Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
+		if (writeMethod == null)
+			throw new SqlBoxException("Can not find Java bean read method for column '" + fieldName + "'");
+		try {
+			writeMethod.invoke(entityBean, value);
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+	}
 
 }

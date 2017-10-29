@@ -142,9 +142,7 @@ public abstract class SqlBoxUtils {
 		if (entity == null)
 			throw new SqlBoxException("Bind box error, entity can not be null");
 		if (box == null)
-			throw new SqlBoxException("Bind box error, box can not be null");
-		if (box.getEntityClass() == null)
-			box.setEntityClass(entity.getClass());
+			throw new SqlBoxException("Bind box error, box can not be null"); 
 		if (entity instanceof ActiveRecord)
 			((ActiveRecord) entity).bindBox(box);
 		else if (entity instanceof ActiveRecordSupport)
@@ -189,7 +187,7 @@ public abstract class SqlBoxUtils {
 		if (boxClass == null) {
 			box = new SqlBox();
 			box.setTableModel(ModelUtils.oneEntity2Model(entityOrBoxClass));
-			box.setEntityClass(entityOrBoxClass.getClass());
+			box.setEntityClass(entityOrBoxClass);
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();

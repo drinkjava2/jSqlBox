@@ -11,9 +11,10 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
@@ -23,6 +24,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jentitynet.EntityNet;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -116,30 +118,109 @@ public class SqlBoxContext extends DbPro {
 		return new BasicRowProcessor();
 	}
 
-	/** Load EntityNet from database */
-	public EntityNet loadNet(Object... netConfigs) {
+	private EntityNet loadKeyOrFullNet(boolean loadKeyOnly, Object... netConfigs) {
 		if (netConfigs == null || netConfigs.length == 0)
 			throw new SqlBoxException("LoadNet() does not support empty netConfigs parameter");
 		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(this, netConfigs);
-		EntityNet net = new EntityNet(new ArrayList<Map<String, Object>>(), models);
+		EntityNet net = new EntityNet();
+		String starOrSharp = loadKeyOnly ? ".##" : ".**";
 		for (TableModel t : models) {
-			List<Map<String, Object>> mapList = this.nQuery(new MapListHandler(netProcessor(netConfigs)),
-					"select " + t.getTableName() + ".** from " + t.getTableName() + " as " + t.getTableName());
-			net.joinList(mapList);
+			List<Map<String, Object>> mapList = null;
+			String alias = t.getAlias();
+			if (StrUtils.isEmpty(alias))
+				alias = t.getTableName();
+			try {
+				mapList = this.nQuery(new MapListHandler(netProcessor(t)),
+						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
+			} finally {
+				EntityNetSqlExplainer.netConfigBindToListCache.get().remove(mapList);
+			}
+			net.joinList(mapList, t);
 		}
 		return net;
 	}
 
+	/** Load EntityNet from database */
+	public EntityNet loadKeyNet(Object... netConfigs) {
+		return loadKeyOrFullNet(true, netConfigs);
+	}
+
+	/** Load EntityNet from database */
+	public EntityNet loadNet(Object... netConfigs) {
+		return loadKeyOrFullNet(false, netConfigs);
+	}
+
 	/** Build a EntityNet from given list and netConfigs */
 	public EntityNet buildNet(List<Map<String, Object>> listMap, Object... netConfigs) {
-		if (netConfigs == null || netConfigs.length == 0)
-			throw new SqlBoxException("buildNet() does not support empty netConfigs parameter");
-		return new EntityNet(listMap, EntityNetSqlExplainer.objectConfigsToModels(this, netConfigs));
+		try {
+			TableModel[] result = joinConfigsIntoModels(listMap, netConfigs);
+			if(result==null||result.length==0)
+				throw new SqlBoxException("No entity class config found");
+			return new EntityNet(listMap, result);
+		} finally {
+			EntityNetSqlExplainer.netConfigBindToListCache.get().remove(listMap);
+		}
+	}
+
+	private TableModel[] joinConfigsIntoModels(List<Map<String, Object>> listMap, Object... netConfigs) {
+		// bindeds: tableModels entityClass and alias may be empty
+		// setted: tableModels should have entityClass, alias may be null
+		TableModel[] bindeds = (TableModel[]) EntityNetSqlExplainer.netConfigBindToListCache.get().get(listMap);
+		if (bindeds == null || bindeds.length == 0)
+			bindeds = new TableModel[0];
+
+		TableModel[] setteds;
+		if (netConfigs != null && netConfigs.length > 0)
+			setteds = EntityNetSqlExplainer.objectConfigsToModels(this, netConfigs);
+		else
+			setteds = new TableModel[0];
+
+		// check setted to avoid user set empty value to TableModel
+		Map<String, TableModel> uses = new HashMap<String, TableModel>();
+		for (TableModel tb : setteds) {
+			SqlBoxException.assureNotNull(tb.getEntityClass(),
+					"EntityClass setting can not be null for '" + tb.getTableName() + "'");
+			SqlBoxException.assureNotEmpty(tb.getTableName(),
+					"TableName setting can not be empty for '" + tb.getTableName() + "'");
+			uses.put(tb.getTableName().toLowerCase(), tb);
+		}
+
+		for (TableModel tb : bindeds) {
+			SqlBoxException.assureNotEmpty(tb.getTableName(),
+					"TableName setting can not be empty for '" + tb.getTableName() + "'");
+			TableModel exist = uses.get(tb.getTableName().toLowerCase());
+			if (tb.getEntityClass() != null) {// it's binded by has entityClass
+				if (exist == null)
+					uses.put(tb.getTableName().toLowerCase(), tb);
+				else // exist and current tb both can use, duplicated
+					throw new SqlBoxException("Duplicated entityClass setting for '" + tb.getTableName() + "'");
+			}
+		}
+
+		for (TableModel tb : bindeds) { // use alias to fill
+			TableModel exist = uses.get(tb.getTableName().toLowerCase());
+			if (exist != null && tb.getEntityClass() == null) {// it's binded by has entityClass
+				String alias = tb.getAlias();
+				if (!StrUtils.isEmpty(alias) && StrUtils.isEmpty(exist.getAlias()))
+					exist.setAlias(alias);
+			}
+		}
+		TableModel[] result = new TableModel[uses.size()];
+		int i = 0;
+		for (Entry<String, TableModel> entry : uses.entrySet()) {
+			result[i++] = entry.getValue();
+		}
+		return result;
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
 	public EntityNet joinNet(EntityNet net, List<Map<String, Object>> listMap, Object... netConfigs) {
-		return net.joinList(listMap, EntityNetSqlExplainer.objectConfigsToModels(this, netConfigs));
+		try {
+			TableModel[] result = joinConfigsIntoModels(listMap, netConfigs);
+			return net.joinList(listMap, result);
+		} finally {
+			EntityNetSqlExplainer.netConfigBindToListCache.get().remove(listMap);
+		}
 	}
 
 	// =============CRUD methods=====

@@ -11,9 +11,11 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -36,15 +38,37 @@ public abstract class DebugUtils {
 		sb.append("getEntityField=" + c.getEntityField());
 		return sb.toString();
 	}
+	
+	public static String getFkeyDebugInfo(TableModel t) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Fkeys:\r");
+		for (FKeyModel k : t.getFkeyConstraints()) {
+			sb.append("FkeyName="+k.getFkeyName());
+			sb.append(", ColumnNames="+k.getColumnNames());
+			sb.append(", RefTableAndColumns="+  Arrays.deepToString(k.getRefTableAndColumns()) );
+			sb.append("\r");
+		}  
+		return sb.toString();
+	}
 
 	public static String getTableModelDebugInfo(TableModel model) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\rtableName=" + model.getTableName()).append("\r");
 		sb.append("getEntityClass=" + model.getEntityClass()).append("\r");
+		sb.append("getAlias=" + model.getAlias()).append("\r");
+		sb.append(getFkeyDebugInfo(model));
 		List<ColumnModel> columns = model.getColumns();
 		for (ColumnModel column : columns)
 			sb.append(getColumnModelDebugInfo(column)).append("\r");
-		return sb.toString();
-
+		 
+		return sb.toString(); 
+	}
+	
+	public static String getTableModelsDebugInfo(TableModel[] models) {
+		StringBuilder sb = new StringBuilder();
+		for (TableModel model : models) {
+			sb.append(getTableModelDebugInfo(model));
+		}		  
+		return sb.toString(); 
 	}
 }
