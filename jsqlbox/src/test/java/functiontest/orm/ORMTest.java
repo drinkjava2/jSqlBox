@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.EntityNet;
+import com.github.drinkjava2.jnetwk.EntityNet;
 
 import config.TestBase;
 import functiontest.orm.entities.Address;
@@ -95,6 +95,9 @@ public class ORMTest extends TestBase {
 				RolePrivilege.class);
 		Assert.assertEquals(37, net.getBody().size());
 		System.out.println(net.getBody().size());
+
+		List<User> users = net.getEntityList(User.class);
+		Assert.assertEquals(5, users.size());
 	}
 
 	@Test
@@ -106,13 +109,14 @@ public class ORMTest extends TestBase {
 	}
 
 	@Test
-	public void testManualLoadAndJoin() { 
+	public void testManualLoadAndJoin() {
+		ctx.setAllowShowSQL(true);
 		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
 		EntityNet net = ctx.buildNet(mapList1);
 		System.out.println(net.getBody().size());
 		Assert.assertEquals(10, net.getBody().size());
- 
+
 		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
 				net(Email.class) + "select e.** from emailtb as e");
 		ctx.joinList(net, mapList2);
@@ -121,8 +125,11 @@ public class ORMTest extends TestBase {
 
 		List<Map<String, Object>> mapList3 = ctx.nQuery(
 				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
-				"select r.**, rp.**,p.**,ur.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
-  		net.joinList(mapList3);
+				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
+		System.out.println(mapList3.size());
+		Assert.assertEquals(900, mapList3.size());
+
+		ctx.joinList(net, mapList3);
 		System.out.println(net.getBody().size());
 		Assert.assertEquals(37, net.getBody().size());
 	}

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.StrUtils;

@@ -9,15 +9,17 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jnetwk;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -29,9 +31,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public class EntityNet {
-	public static final String KeySep = "_";
-
-	private Boolean weaved = false;
+	public static final String KeySeparator = "_";
 
 	/**
 	 * configModels has entityClass, it means it know which entity be mapped, but
@@ -40,7 +40,7 @@ public class EntityNet {
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
 	/** The body of the net */
-	private Map<String, Object> body = new HashMap<String, Object>();
+	private Map<String, EntityNode> body = new LinkedHashMap<String, EntityNode>();
 
 	public EntityNet() {
 	}
@@ -52,19 +52,14 @@ public class EntityNet {
 	/** Join another LisMap to current EntityNet, modelConfigs is optional */
 	public EntityNet joinList(List<Map<String, Object>> listMap, TableModel... modelConfigs) {
 		TableModel[] models = modelConfigs;
-		if (EntityNetSqlExplainer.getBindedTableModel(listMap) != null && (models == null || models.length == 0)) {
-			models = EntityNetUtils.joinConfigsIntoModels(null, listMap);
-			EntityNetSqlExplainer.removeBindedTableModel(listMap);
-		}
 		EntityNetUtils.checkModelHasEntityClassAndAlias(models);
-		weaved = false;
 		if (listMap == null)
-			throw new SqlBoxException("Can not join null listMap");
+			throw new EntityNetException("Can not join null listMap");
 		if (models != null && models.length > 0)// Join models
 			for (TableModel tb : models) {
 				if (tb.getEntityClass() == null) {
 					if (StrUtils.isEmpty(tb.getAlias()))
-						throw new SqlBoxException("TableModel bot entityClass and alias are not set");
+						throw new EntityNetException("TableModel bot entityClass and alias are not set");
 				} else {
 					this.configModels.put(tb.getEntityClass(), tb);
 				}
@@ -84,21 +79,21 @@ public class EntityNet {
 			Object entity = null;
 			String alias = model.getAlias();
 			if (StrUtils.isEmpty(alias))
-				throw new SqlBoxException("No alias found for table '" + model.getTableName() + "'");
+				throw new EntityNetException("No alias found for table '" + model.getTableName() + "'");
 
 			for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 				for (ColumnModel col : model.getColumns()) {
 					if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
 						if (entity == null)
 							entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-						SqlBoxException.assureNotEmpty(col.getEntityField(),
+						EntityNetException.assureNotEmpty(col.getEntityField(),
 								"EntityField not found for column '" + col.getColumnName() + "'");
 						ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
 					}
 				}
 			}
 			if (entity != null)
-				addEntity(entity);
+				addEntityAsNode(model, entity);
 		}
 		return resultList.toArray(new Object[resultList.size()]);
 	}
@@ -107,43 +102,59 @@ public class EntityNet {
 	 * Add or join an entity into EntityNet body, if entity already exist, fill
 	 * not-null values and add parentEntityIDs
 	 */
-	public void addOrJoinOneEntity(SqlBox box, Object entity, String entityID, Set<String> parentEntityIDs) {
-		Object oldEntity = body.get(entityID);
-		TableModel newTable = box.getTableModel();
+	public void addOrJoinOneNode(TableModel model, EntityNode node) {
+		EntityNode oldEntity = body.get(node.getId());
 		if (oldEntity != null) {// fill non-null values
-			SqlBox oldBox = SqlBoxUtils.findBox(oldEntity);
-			for (ColumnModel newCol : newTable.getColumns()) {
-				SqlBoxException.assureNotEmpty(newCol.getEntityField(),
+			for (ColumnModel newCol : model.getColumns()) {
+				EntityNetException.assureNotEmpty(newCol.getEntityField(),
 						"EntityField not found for new Entity column '" + newCol.getColumnName() + "'");
-				Object newValue = ClassCacheUtils.readValueFromBeanField(entity, newCol.getEntityField());
+				Object newValue = ClassCacheUtils.readValueFromBeanField(node.getEntity(), newCol.getEntityField());
 				if (newValue != null) {// fill new values from new Entity
-					String oldEntityField = oldBox.getTableModel().getColumn(newCol.getColumnName()).getEntityField();
+					String oldEntityField = model.getColumn(newCol.getColumnName()).getEntityField();
 					if (!newCol.getEntityField().equals(oldEntityField))
-						throw new SqlBoxException(
+						throw new EntityNetException(
 								"Old entity and new entity has same entitID but has different field name");
-					ClassCacheUtils.writeValueToBeanField(oldEntity, newCol.getEntityField(), newValue);
+					ClassCacheUtils.writeValueToBeanField(oldEntity.getEntity(), newCol.getEntityField(), newValue);
 				}
 			}
-			Set<String> oldParents = oldBox.getParentEntityIDs();
+			Set<String> oldParents = oldEntity.getParentIDs();
 			if (oldParents != null)
-				oldParents.addAll(parentEntityIDs);
+				oldParents.addAll(node.getParentIDs());
 		} else {
-			box.setEntityID(entityID);
-			box.setParentEntityIDs(parentEntityIDs);
-			body.put(entityID, entity);
+			body.put(node.getId(), node);
 		}
-
 	}
 
 	/**
 	 * Add an entity to EntityNet, if already have same PKEY entity exist, if old
 	 * entity field is null, will new new entity's value fill in
 	 */
-	public void addEntity(Object entity) {
-		SqlBox box = SqlBoxUtils.findAndBindSqlBox(null, entity);
-		String entityID = EntityNetUtils.transferPKeyToString(box, entity);
-		Set<String> parentEntityIDs = EntityNetUtils.transferFKeysToString(box, entity);
-		addOrJoinOneEntity(box, entity, entityID, parentEntityIDs);
+	private void addEntityAsNode(TableModel model, Object entity) {
+		String id = EntityNetUtils.transferPKeyToNodeID(model, entity);
+		Set<String> parentIDs = EntityNetUtils.transferFKeysToParentIDs(model, entity);
+		EntityNode node = new EntityNode(id, entity, parentIDs);
+		addOrJoinOneNode(model, node);
+	}
+
+	public List<EntityNode> getEntityNodeList(Class<?> entityClass) {
+		List<EntityNode> result = new ArrayList<EntityNode>();
+		for (Entry<String, EntityNode> entry : body.entrySet()) {
+			Object entity = entry.getValue().getEntity();
+			if (entityClass.isInstance(entity))
+				result.add(entry.getValue());
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> List<T> getEntityList(Class<T> entityClass) {
+		List<T> result = new ArrayList<T>();
+		for (Entry<String, EntityNode> entry : body.entrySet()) {
+			Object entity = entry.getValue().getEntity();
+			if (entityClass.isInstance(entity))
+				result.add((T) entity);
+		}
+		return result;
 	}
 
 	/**
@@ -161,18 +172,10 @@ public class EntityNet {
 	 * and a full search path EntityNetPath
 	 */
 	public <T> T[] findRelated(Object[] sourceEntity, Class<T> targetEntityClass, EntitySearchPath path) {
-		return null; // TODO work at here
+		return EntityNetUtils.findRelated(this, sourceEntity, targetEntityClass, path);
 	}
 
 	// ======getter & setter =======
-	public Boolean getWeaved() {
-		return weaved;
-	}
-
-	public void setWeaved(Boolean weaved) {
-		this.weaved = weaved;
-	}
-
 	public Map<Class<?>, TableModel> getConfigModels() {
 		return configModels;
 	}
@@ -181,11 +184,12 @@ public class EntityNet {
 		this.configModels = configModels;
 	}
 
-	public Map<String, Object> getBody() {
+	public Map<String, EntityNode> getBody() {
 		return body;
 	}
 
-	public void setBody(Map<String, Object> body) {
+	public void setBody(Map<String, EntityNode> body) {
 		this.body = body;
 	}
+
 }

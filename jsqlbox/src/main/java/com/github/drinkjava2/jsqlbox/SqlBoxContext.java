@@ -22,6 +22,7 @@ import org.apache.commons.dbutils.RowProcessor;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jnetwk.EntityNet;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -113,35 +114,38 @@ public class SqlBoxContext extends DbPro {
 		return new BasicRowProcessor();
 	}
 
-	/** Load EntityNet from database */
+	/**
+	 * Load EntityNet from database, but only load PKey and FKeys values into
+	 * entities
+	 */
 	public EntityNet loadKeyNet(Object... netConfigs) {
-		return EntityNetUtils.loadKeyOrFullNet(this, true, netConfigs);
+		return EntityNetBuilder.loadKeyOrFullNet(this, true, netConfigs);
 	}
 
 	/** Load EntityNet from database */
 	public EntityNet loadNet(Object... netConfigs) {
-		return EntityNetUtils.loadKeyOrFullNet(this, false, netConfigs);
+		return EntityNetBuilder.loadKeyOrFullNet(this, false, netConfigs);
 	}
 
 	/** Build a EntityNet from given list and netConfigs */
 	public EntityNet buildNet(List<Map<String, Object>> listMap, Object... netConfigs) {
 		try {
-			TableModel[] result = EntityNetUtils.joinConfigsIntoModels(this, listMap, netConfigs);
+			TableModel[] result = EntityNetBuilder.joinConfigsIntoModels(this, listMap, netConfigs);
 			if (result == null || result.length == 0)
 				throw new SqlBoxException("No entity class config found");
 			return new EntityNet(listMap, result);
 		} finally {
-			EntityNetSqlExplainer.removeBindedTableModel(listMap);
+			EntityNetBuilder.removeBindedTableModel(listMap);
 		}
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
 	public EntityNet joinList(EntityNet net, List<Map<String, Object>> listMap, Object... netConfigs) {
 		try {
-			TableModel[] result = EntityNetUtils.joinConfigsIntoModels(this, listMap, netConfigs);
+			TableModel[] result = EntityNetBuilder.joinConfigsIntoModels(this, listMap, netConfigs);
 			return net.joinList(listMap, result);
 		} finally {
-			EntityNetSqlExplainer.removeBindedTableModel(listMap);
+			EntityNetBuilder.removeBindedTableModel(listMap);
 		}
 	}
 

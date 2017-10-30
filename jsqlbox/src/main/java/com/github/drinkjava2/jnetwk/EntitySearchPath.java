@@ -9,10 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jnetwk;
 
 /**
- * EntitySearchPath is a POJO store a search Path for EntityNet
+ * SearchPath is a POJO store a search Path who to search nodes in EntityNet
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0

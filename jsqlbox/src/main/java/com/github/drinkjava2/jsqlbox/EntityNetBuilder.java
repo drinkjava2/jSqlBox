@@ -12,40 +12,20 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jnetwk.EntityNet;
 
 /**
- * EntityNetUtils is utility class store public static methods about EntityNet
- * 
- * @author Yong Zhu (Yong9981@gmail.com)
- * @since 1.0.0
+ * This is a helper class store public static methods concern to build EntityNet
  */
-public class EntityNetUtils {
-
-	/**
-	 * Search in EntityNet, return qualified entities
-	 * 
-	 * @param net The EntityNet
-	 * @param sourceEntity The source entities
-	 * @param targetEntityClass The target entity class
-	 * @param path The EntitySearchPath
-	 * @return qualified entities
-	 */
-	public static <T> T[] findRelated(EntityNet net, Object[] sourceEntity, Class<T> targetEntityClass,
-			EntitySearchPath path) {
-		return null;// TODO here
-	}
+public class EntityNetBuilder {
 
 	/**
 	 * After a query, listMap may binded a threadLocal type TableModel[] netConfigs,
@@ -56,7 +36,7 @@ public class EntityNetUtils {
 			Object... netConfigs) {
 		// bindeds: tableModels entityClass and alias may be empty
 		// given: tableModels should have entityClass, alias may be null
-		TableModel[] bindeds = EntityNetSqlExplainer.getBindedTableModel(listMap);
+		TableModel[] bindeds = EntityNetBuilder.getBindedTableModel(listMap);
 		if (bindeds == null || bindeds.length == 0)
 			bindeds = new TableModel[0];
 
@@ -109,7 +89,7 @@ public class EntityNetUtils {
 	 * load PKey/FKey columns
 	 * 
 	 * @param ctx Current SqlBoxContext
-	 * @param loadKeyOnly If true will only loadKey
+	 * @param loadKeyOnly If true will only load PKey and FKeys field
 	 * @param netConfigs netConfigs array, can be entity class, entity, SqlBox or
 	 *            TableModel
 	 * @return The EntityNet
@@ -129,69 +109,18 @@ public class EntityNetUtils {
 				mapList = ctx.nQuery(new MapListHandler(SqlBoxContext.netProcessor(t)),
 						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
 			} finally {
-				EntityNetSqlExplainer.removeBindedTableModel(mapList);
+				EntityNetBuilder.removeBindedTableModel(mapList);
 			}
 			net.joinList(mapList, t);
 		}
 		return net;
 	}
 
-	/**
-	 * Check if each TableModel has entityClass and Alias, if no, throw exception
-	 */
-	public static void checkModelHasEntityClassAndAlias(TableModel... models) {
-		if (models != null && models.length > 0)// Join models
-			for (TableModel tb : models) {
-				if (tb.getEntityClass() == null)
-					throw new SqlBoxException("TableModel entityClass not set for table '" + tb.getTableName() + "'");
-				if (StrUtils.isEmpty(tb.getAlias()))
-					throw new SqlBoxException("TableModel alias not set for table '" + tb.getTableName() + "'");
-			}
-
+	public static TableModel[] getBindedTableModel(List<?> listMap) {
+		return (TableModel[]) EntityNetSqlExplainer.netConfigBindToListCache.get().get(listMap);
 	}
 
-	/**
-	 * Transfer PKey values to a entityID String, format:
-	 * tablename_id1value_id2value
-	 */
-	public static String transferPKeyToString(SqlBox box, Object entity) {
-		StringBuilder sb = new StringBuilder();
-		for (ColumnModel col : box.getTableModel().getColumns()) {
-			if (col.getPkey()) {
-				SqlBoxException.assureNotEmpty(col.getEntityField(),
-						"EntityField not found for FKey column '" + col.getColumnName() + "'");
-				sb.append(EntityNet.KeySep)
-						.append(ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField()));
-			}
-		}
-		if (sb.length() == 0)
-			throw new SqlBoxException("Table '" + box.table() + "' no Prime Key columns set");
-		return box.table() + sb.toString();
+	public static void removeBindedTableModel(List<?> listMap) {
+		EntityNetSqlExplainer.netConfigBindToListCache.get().remove(listMap);
 	}
-
-	/**
-	 * Transfer FKey values to String set, format: table1_id1value_id2value,
-	 * table2_id1_id2... <br/>
-	 */
-	public static Set<String> transferFKeysToString(SqlBox box, Object entity) {
-		Set<String> result = new HashSet<String>();
-		TableModel tb = box.getTableModel();
-		for (FKeyModel fkey : tb.getFkeyConstraints()) {
-			String fTable = fkey.getRefTableAndColumns()[0];
-			String fkeyEntitID = fTable;
-			for (String colNames : fkey.getColumnNames()) {
-				String entityField = tb.getColumn(colNames).getEntityField();
-				Object fKeyValue = ClassCacheUtils.readValueFromBeanField(entity, entityField);
-				if (StrUtils.isEmpty(fKeyValue)) {
-					fkeyEntitID = null;
-					break;
-				}
-				fkeyEntitID += EntityNet.KeySep + fKeyValue;
-			}
-			if (!StrUtils.isEmpty(fkeyEntitID))
-				result.add(fkeyEntitID);
-		}
-		return result;
-	}
-
 }

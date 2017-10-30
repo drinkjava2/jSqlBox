@@ -28,7 +28,12 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 
 /**
- * NetSqlExplainer is the SqlExplainer to explain net() method
+ * EntityNetSqlExplainer is the SqlExplainer to explain net() method to help build a
+ * EntityNet
+ * 
+ * "SqlExplainSupport" interface is defined in jDbPro project, an explainer
+ * works like a intercepter, it has few callback methods to deal with SQL and
+ * query result
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -36,7 +41,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 public class EntityNetSqlExplainer implements SqlExplainSupport {
 	private Object[] netConfigObjects;
 	private TableModel[] generatedTableModels;
-	private static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
+	static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
 		@Override
 		protected Map<Object, Object> initialValue() {
 			return new HashMap<Object, Object>();
@@ -60,14 +65,6 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 			netConfigBindToListCache.get().put(result, generatedTableModels);
 		}
 		return result;
-	}
-
-	public static TableModel[] getBindedTableModel(List<?> listMap) {
-		return (TableModel[]) netConfigBindToListCache.get().get(listMap);
-	}
-
-	public static void removeBindedTableModel(List<?> listMap) {
-		netConfigBindToListCache.get().remove(listMap);
 	}
 
 	/**
