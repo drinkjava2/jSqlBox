@@ -9,30 +9,31 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jentitynet;
+package com.github.drinkjava2.jtinynet;
 
 /**
- * This SqlBoxException used to wrap exception to a Runtime type Exception
+ * This Exception class used to wrap all exceptions to a Runtime type
+ * TinyNetException
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class EntityNetException extends RuntimeException {
+public class TinyNetException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	public EntityNetException() {
+	public TinyNetException() {
 		super();
 	}
 
-	public EntityNetException(Throwable cause) {
+	public TinyNetException(Throwable cause) {
 		super(cause);
 	}
 
-	public EntityNetException(String msg) {
+	public TinyNetException(String msg) {
 		super(msg);
 	}
 
-	public EntityNetException(String msg, Throwable cause) {
+	public TinyNetException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -44,14 +45,14 @@ public class EntityNetException extends RuntimeException {
 	/** Assure object not null, optionMessages is optional */
 	public static void assureNotNull(Object obj, String... optionMessages) {
 		if (obj == null)
-			throw new EntityNetException(
+			throw new TinyNetException(
 					optionMessages.length == 0 ? "Assert error, Parameter can not be null" : optionMessages[0]);
 	}
 
 	/** Assure String not Empty, optionMessages is optional */
 	public static void assureNotEmpty(String str, String... optionMessages) {
 		if (str == null || str.length() == 0)
-			throw new EntityNetException(
+			throw new TinyNetException(
 					optionMessages.length == 0 ? "Assert error, String parameter can not be empty" : optionMessages[0]);
 	}
 

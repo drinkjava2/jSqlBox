@@ -22,8 +22,6 @@ import org.apache.commons.dbutils.RowProcessor;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jentitynet.EntityNet;
-import com.github.drinkjava2.jentitynet.EntityNetUtils;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -42,6 +40,7 @@ public class SqlBoxContext extends DbPro {
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	private Dialect dialect; // dialect
 	private TableModel[] dbMetaTableModels;// Meta data of database
+	private EntityNetBuilder entityNetBuilder = TinyNetBuilder.instance;
 
 	public SqlBoxContext() {
 		super();
@@ -102,10 +101,10 @@ public class SqlBoxContext extends DbPro {
 	// private, hope it can change to protected in future
 
 	/**
-	 * Return an empty "" String and save a ThreadLocal netConfig object array
-	 * in current thread, it will be used by SqlBoxContext's query methods.
+	 * Return an empty "" String and save a ThreadLocal netConfig object array in
+	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
-	public static String net(Object... netConfig) {
+	public static String netConfig(Object... netConfig) {
 		getCurrentExplainers().add(new EntityNetSqlExplainer(netConfig));
 		return "";
 	}
@@ -115,34 +114,35 @@ public class SqlBoxContext extends DbPro {
 		return new BasicRowProcessor();
 	}
 
-	/** Load EntityNet from database */
-	public EntityNet loadNet(Object... configObjects) {
-		return EntityNetBuilder.loadKeyOrAllColumnsNet(this, false, configObjects);
+	/**
+	 * Create a EntityNet instance, load all columns
+	 */
+	public EntityNet createEntityNet(Object... configObjects) {
+		return entityNetBuilder.createEntityNet(this, false, configObjects);
 	}
 
 	/**
-	 * Load EntityNet from database, but only load PKey and FKeys columns into
-	 * entity
+	 * Create a EntityNet instance but only load PKey and FKeys columns into entity
 	 */
-	public EntityNet lazyLoadNet(Object... configObjects) {
-		return EntityNetBuilder.loadKeyOrAllColumnsNet(this, true, configObjects);
+	public EntityNet lazyCreateEntityNet(Object... configObjects) {
+		return entityNetBuilder.createEntityNet(this, true, configObjects);
 	}
 
-	/** Build a EntityNet from given list and netConfigs */
-	public EntityNet buildNet(List<Map<String, Object>> listMap, Object... configObjects) {
-		TableModel[] result = EntityNetBuilder.joinConfigsModels(this, listMap, configObjects);
+	/** Create a EntityNet by given list and netConfigs */
+	public EntityNet createEntityNet(List<Map<String, Object>> listMap, Object... configObjects) {
+		TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
 		if (result == null || result.length == 0)
 			throw new SqlBoxException("No entity class config found");
-		return new EntityNet(listMap, result);
+		return entityNetBuilder.createEntityNet(listMap, result);
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
 	public EntityNet joinList(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
 		try {
-			TableModel[] result = EntityNetBuilder.joinConfigsModels(this, listMap, configObjects);
-			return net.joinList(listMap, result);
+			TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
+			return net.addMapList(listMap, result);
 		} finally {
-			EntityNetUtils.removeBindedTableModel(listMap);
+			EntityNetSqlExplainer.removeBindedTableModel(listMap);
 		}
 	}
 

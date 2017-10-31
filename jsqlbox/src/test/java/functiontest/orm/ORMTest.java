@@ -1,6 +1,6 @@
 package functiontest.orm;
 
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.net;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jentitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.EntityNet;
 
 import config.TestBase;
 import functiontest.orm.entities.Address;
@@ -90,22 +90,29 @@ public class ORMTest extends TestBase {
 	}
 
 	@Test
-	public void testloadNet() {
-		EntityNet net = ctx.loadNet(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
-				RolePrivilege.class);
-		Assert.assertEquals(37, net.getBody().size());
-		System.out.println(net.getBody().size());
+	public void testCreateEntityNet() {
+		EntityNet net = ctx.createEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+				UserRole.class, RolePrivilege.class);
+		Assert.assertEquals(37, net.size());
+		System.out.println(net.size());
 
 		List<User> users = net.getEntityList(User.class);
 		Assert.assertEquals(5, users.size());
+		Assert.assertEquals("user1", users.get(0).getUserName());
+		System.out.println(users.get(0).getUserName());
 	}
 
 	@Test
-	public void testloadKeyNet() {
-		EntityNet net = ctx.lazyLoadNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+	public void testLazyCreateEntityNet() {
+		EntityNet net = ctx.lazyCreateEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
-		Assert.assertEquals(37, net.getBody().size());
-		System.out.println(net.getBody().size());
+		Assert.assertEquals(37, net.size());
+		System.out.println(net.size());
+
+		List<User> users = net.getEntityList(User.class);
+		Assert.assertEquals(5, users.size());
+		Assert.assertEquals(null, users.get(0).getUserName());
+		System.out.println(users.get(0).getUserName());
 	}
 
 	@Test
@@ -113,15 +120,15 @@ public class ORMTest extends TestBase {
 		ctx.setAllowShowSQL(true);
 		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
-		EntityNet net = ctx.buildNet(mapList1);
-		System.out.println(net.getBody().size());
-		Assert.assertEquals(10, net.getBody().size());
+		EntityNet net = ctx.createEntityNet(mapList1);
+		System.out.println(net.size());
+		Assert.assertEquals(10, net.size());
 
 		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
-				net(Email.class) + "select e.** from emailtb as e");
+				netConfig(Email.class) + "select e.** from emailtb as e");
 		ctx.joinList(net, mapList2);
-		System.out.println(net.getBody().size());
-		Assert.assertEquals(15, net.getBody().size());
+		System.out.println(net.size());
+		Assert.assertEquals(15, net.size());
 
 		List<Map<String, Object>> mapList3 = ctx.nQuery(
 				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
@@ -129,9 +136,9 @@ public class ORMTest extends TestBase {
 		System.out.println(mapList3.size());
 		Assert.assertEquals(900, mapList3.size());
 
-		net.joinList(mapList3);
-		System.out.println(net.getBody().size());
-		Assert.assertEquals(37, net.getBody().size());
+		ctx.joinList(net, mapList3);
+		System.out.println(net.size());
+		Assert.assertEquals(37, net.size());
 	}
 
 	//@formatter:off

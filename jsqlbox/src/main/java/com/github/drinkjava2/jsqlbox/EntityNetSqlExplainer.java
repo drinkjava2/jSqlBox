@@ -11,7 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.improve.SqlExplainSupport;
@@ -19,7 +21,6 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jentitynet.EntityNetUtils;
 
 /**
  * EntityNetSqlExplainer is the SqlExplainer to explain net() method to help
@@ -35,6 +36,12 @@ import com.github.drinkjava2.jentitynet.EntityNetUtils;
 public class EntityNetSqlExplainer implements SqlExplainSupport {
 	private Object[] netConfigObjects;
 	private TableModel[] generatedTableModels;
+	public static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
+		@Override
+		protected Map<Object, Object> initialValue() {
+			return new HashMap<Object, Object>();
+		}
+	};
 
 	public EntityNetSqlExplainer(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
@@ -50,7 +57,7 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 		if (result != null && result instanceof List<?>) {
 			if (generatedTableModels == null)
 				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
-			EntityNetUtils.bindTableModel(result, generatedTableModels);
+			EntityNetSqlExplainer.bindTableModel(result, generatedTableModels);
 		}
 		return result;
 	}
@@ -237,6 +244,18 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 		}
 		generatedTableModels = configModels;
 		return sql;
+	}
+
+	public static void removeBindedTableModel(List<?> listMap) {
+		netConfigBindToListCache.get().remove(listMap);
+	}
+
+	public static TableModel[] getBindedTableModel(List<?> listMap) {
+		return (TableModel[]) netConfigBindToListCache.get().get(listMap);
+	}
+
+	public static void bindTableModel(Object listMap, TableModel[] tableModels) {
+		netConfigBindToListCache.get().put(listMap, tableModels);
 	}
 
 }
