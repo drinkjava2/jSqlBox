@@ -22,6 +22,7 @@ import org.apache.commons.dbutils.RowProcessor;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jtinynet.TinyEntityNetBuilder;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -40,7 +41,7 @@ public class SqlBoxContext extends DbPro {
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	private Dialect dialect; // dialect
 	private TableModel[] dbMetaTableModels;// Meta data of database
-	private EntityNetBuilder entityNetBuilder = TinyNetBuilder.instance;
+	private EntityNetBuilder entityNetBuilder = TinyEntityNetBuilder.instance;
 
 	public SqlBoxContext() {
 		super();

@@ -38,9 +38,6 @@ public class Node {
 	/** Label is not unique, many nodes can have same label name */
 	String label;
 
-	/** Point to parent nodes' id, a node can have many parents */
-	Set<String> parentIDs = new HashSet<String>();
-
 	public Node(String id, Object entity) {
 		this.id = id;
 		this.entity = entity;
@@ -50,7 +47,6 @@ public class Node {
 
 	public Node(String id, Object entity, Set<String> parentIDs) {
 		this(id, entity);
-		this.parentIDs = parentIDs;
 	}
 
 	public String getId() {
@@ -67,14 +63,6 @@ public class Node {
 
 	public void setEntity(Object entity) {
 		this.entity = entity;
-	}
-
-	public Set<String> getParentIDs() {
-		return parentIDs;
-	}
-
-	public void setParentIDs(Set<String> parentIDs) {
-		this.parentIDs = parentIDs;
 	}
 
 	public Object getEntityClass() {

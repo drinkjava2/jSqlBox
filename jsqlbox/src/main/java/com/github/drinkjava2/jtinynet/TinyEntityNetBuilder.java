@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jtinynet;
 
 import java.util.List;
 import java.util.Map;
@@ -18,13 +18,17 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jtinynet.TinyNet;
+import com.github.drinkjava2.jsqlbox.EntityNet;
+import com.github.drinkjava2.jsqlbox.EntityNetBuilder;
+import com.github.drinkjava2.jsqlbox.EntityNetSqlExplainer;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * This is a helper class store public static methods concern to build EntityNet
  */
-public class TinyNetBuilder implements EntityNetBuilder {
-	public static final TinyNetBuilder instance = new TinyNetBuilder();
+public class TinyEntityNetBuilder implements EntityNetBuilder {
+	public static final TinyEntityNetBuilder instance = new TinyEntityNetBuilder();
 
 	@Override
 	public EntityNet createEntityNet() {

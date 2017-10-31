@@ -30,13 +30,13 @@ public interface EntityNet {
 	 *
 	 * @param listMap
 	 * @param modelConfigs
-	 * @return TinyNet it self
+	 * @return EntityNet it self
 	 */
 	public EntityNet addMapList(List<Map<String, Object>> listMap, TableModel... modelConfigs);
 
 	/** Return total how many nodes in entity net */
 	public int size();
 
-	/** Return entity list in TinyNet which type is entityClass */
+	/** Return entity list in EntityNet which type is entityClass */
 	public <T> List<T> getEntityList(Class<T> entityClass);
 }

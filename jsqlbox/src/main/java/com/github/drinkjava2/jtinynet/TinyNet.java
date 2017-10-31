@@ -34,12 +34,28 @@ public class TinyNet implements EntityNet {
 	public static final String KeySeparator = "_";
 
 	/**
-	 * configModels has entityClass, it means it know which entity be mapped, but
-	 * the shortage is it often have no alias name be set
+	 * configModels has entityClass, it means it know which entity be mapped,
+	 * but the shortage is it often have no alias name be set
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
+
+	/**
+	 * Parents of node, 4 dimensions determine a parent: selfNodeID,
+	 * fkeyColumnNames, parentClass, parentNodeID, for example: <br/>
+	 * user1ID, teacherColumnName, TeacherClass, teacher5ID <br/>
+	 * user1ID, teacherColumnName, SuperTeacherClass, superTeacher9ID <br/>
+	 */
+	private Map<String, Map<String, Map<Class<?>, String>>> parents;
+
+	/**
+	 * Children of node, 4 dimensions determine a child: selfNodeID, childClass,
+	 * fkeyColumnNames, childNodeId like: <br/>
+	 * tercher5ID, User.class, teacherColumnName, user1ID <br/>
+	 * user1ID, teacherColumnName, SuperTeacherClass, superTeacher9ID <br/>
+	 */
+	private Map<String, Map<String, Map<Class<?>, String>>> childs;
 
 	public TinyNet() {
 	}
@@ -49,8 +65,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to current
-	 * Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to
+	 * current Net, modelConfigs parameter is optional
 	 */
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
 		if (listMap == null)
@@ -112,9 +128,10 @@ public class TinyNet implements EntityNet {
 					ClassCacheUtils.writeValueToBeanField(oldEntity.getEntity(), newCol.getEntityField(), newValue);
 				}
 			}
-			Set<String> oldParents = oldEntity.getParentIDs();
-			if (oldParents != null)
-				oldParents.addAll(node.getParentIDs());
+			//TODO
+//			Set<String> oldParents = oldEntity.getParentIDs();
+//			if (oldParents != null)
+//				oldParents.addAll(node.getParentIDs());
 		} else {
 			this.addNode(node);
 		}
@@ -156,7 +173,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * In TinyNet, find target node list by given source nodeList and search path
+	 * In TinyNet, find target node list by given source nodeList and search
+	 * path
 	 */
 	public List<Node> findNodeList(List<Node> nodeList, SearchPath path) {
 		return TinyNetUtils.findRelated(this, nodeList, path);
