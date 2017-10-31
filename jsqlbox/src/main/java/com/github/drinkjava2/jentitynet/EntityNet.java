@@ -9,14 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jnetwk;
+package com.github.drinkjava2.jentitynet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
@@ -25,7 +24,8 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * EntityNet is a entity net
+ * EntityNet is an entity net, it's a memory graph structure, simlar concept can
+ * see Neo4j,
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -34,14 +34,16 @@ public class EntityNet {
 	public static final String KeySeparator = "_";
 
 	/**
-	 * configModels has entityClass, it means it know which entity be mapped, but
-	 * the shortage is it often have no alias name be set
+	 * configModels has entityClass, it means it know which entity be mapped,
+	 * but the shortage is it often have no alias name be set
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
 	/** The body of the net */
 	private Map<String, EntityNode> body = new LinkedHashMap<String, EntityNode>();
-
+ 
+	private Map<String, Map<Class<?>, Set<String>>> childs; 
+	
 	public EntityNet() {
 	}
 
@@ -49,60 +51,40 @@ public class EntityNet {
 		joinList(listMap, models);
 	}
 
-	/** Join another LisMap to current EntityNet, modelConfigs is optional */
+	/**
+	 * Join another LisMap to current EntityNet, modelConfigs parameter is
+	 * optional
+	 */
 	public EntityNet joinList(List<Map<String, Object>> listMap, TableModel... modelConfigs) {
-		TableModel[] models = modelConfigs;
-		EntityNetUtils.checkModelHasEntityClassAndAlias(models);
 		if (listMap == null)
 			throw new EntityNetException("Can not join null listMap");
-		if (models != null && models.length > 0)// Join models
-			for (TableModel tb : models) {
+		TableModel[] bindeds = EntityNetUtils.getBindedTableModel(listMap);
+		EntityNetUtils.removeBindedTableModel(listMap);
+		if (bindeds == null || bindeds.length == 0)
+			bindeds = new TableModel[0];
+		TableModel[] configs = EntityNetUtils.jointConfigModels(bindeds, modelConfigs);
+		EntityNetUtils.checkModelHasEntityClassAndAlias(configs);
+		if (configs != null && configs.length > 0)// Join models
+			for (TableModel tb : configs) {
 				if (tb.getEntityClass() == null) {
 					if (StrUtils.isEmpty(tb.getAlias()))
-						throw new EntityNetException("TableModel bot entityClass and alias are not set");
+						throw new EntityNetException(
+								"TableModel of '" + tb.getTableName() + "' entityClass and alias are not set");
 				} else {
 					this.configModels.put(tb.getEntityClass(), tb);
 				}
 			}
 		for (Map<String, Object> map : listMap) {// join map list
-			assemblyOneRowToEntities(map);
+			EntityNetUtils.assemblyOneRowToEntities(this, map);
 		}
 		return this;
 	}
 
 	/**
-	 * Assembly Map List data to Entities, according current configModels
+	 * Add or join an node into EntityNet body, if node ID already exist, fill
+	 * not-null values of entity and add parentEntityIDs
 	 */
-	private Object[] assemblyOneRowToEntities(Map<String, Object> oneRow) {
-		List<Object> resultList = new ArrayList<Object>();
-		for (TableModel model : configModels.values()) {
-			Object entity = null;
-			String alias = model.getAlias();
-			if (StrUtils.isEmpty(alias))
-				throw new EntityNetException("No alias found for table '" + model.getTableName() + "'");
-
-			for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
-				for (ColumnModel col : model.getColumns()) {
-					if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
-						if (entity == null)
-							entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-						EntityNetException.assureNotEmpty(col.getEntityField(),
-								"EntityField not found for column '" + col.getColumnName() + "'");
-						ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
-					}
-				}
-			}
-			if (entity != null)
-				addEntityAsNode(model, entity);
-		}
-		return resultList.toArray(new Object[resultList.size()]);
-	}
-
-	/**
-	 * Add or join an entity into EntityNet body, if entity already exist, fill
-	 * not-null values and add parentEntityIDs
-	 */
-	public void addOrJoinOneNode(TableModel model, EntityNode node) {
+	protected void addOrJoinOneNode(TableModel model, EntityNode node) {
 		EntityNode oldEntity = body.get(node.getId());
 		if (oldEntity != null) {// fill non-null values
 			for (ColumnModel newCol : model.getColumns()) {
@@ -126,53 +108,45 @@ public class EntityNet {
 	}
 
 	/**
-	 * Add an entity to EntityNet, if already have same PKEY entity exist, if old
-	 * entity field is null, will new new entity's value fill in
+	 * Add an entity to EntityNet, if already have same PKEY entity exist, if
+	 * old entity field is null, will new new entity's value fill in
 	 */
-	private void addEntityAsNode(TableModel model, Object entity) {
+	protected void addEntityAsNode(EntityNet net, TableModel model, Object entity) {
 		String id = EntityNetUtils.transferPKeyToNodeID(model, entity);
 		Set<String> parentIDs = EntityNetUtils.transferFKeysToParentIDs(model, entity);
 		EntityNode node = new EntityNode(id, entity, parentIDs);
 		addOrJoinOneNode(model, node);
 	}
 
-	public List<EntityNode> getEntityNodeList(Class<?> entityClass) {
+	/** Return EntityNode list in EntityNet which type is entityClass */
+	public List<EntityNode> getNodeList(Class<?> entityClass) {
 		List<EntityNode> result = new ArrayList<EntityNode>();
-		for (Entry<String, EntityNode> entry : body.entrySet()) {
-			Object entity = entry.getValue().getEntity();
-			if (entityClass.isInstance(entity))
-				result.add(entry.getValue());
-		}
+		for (EntityNode node : body.values())
+			if (node.getClass() != null && node.getClass().equals(entityClass))
+				result.add(node);
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
+	/** Return entity list in EntityNet which type is entityClass */
 	public <T> List<T> getEntityList(Class<T> entityClass) {
-		List<T> result = new ArrayList<T>();
-		for (Entry<String, EntityNode> entry : body.entrySet()) {
-			Object entity = entry.getValue().getEntity();
-			if (entityClass.isInstance(entity))
-				result.add((T) entity);
-		}
-		return result;
+		return EntityNetUtils.nodeList2EntityList(getNodeList(entityClass));
 	}
 
 	/**
-	 * Find target entities related for given sourceEntities, no need give path,
-	 * computer will guess the path, if more than 1 path exist, computer just use
-	 * the first found path, if want manually assign a path, should give a
-	 * EntitySearchPath parameter.
+	 * In EntityNet, find target node list by given source nodeList and search
+	 * path
 	 */
-	public <T> T[] findRelated(Object[] sourceEntities, Class<T> targetEntityClass) {
-		return findRelated(sourceEntities, targetEntityClass);
+	public List<EntityNode> findNodeList(List<EntityNode> nodeList, SearchPath path) {
+		return EntityNetUtils.findRelated(this, nodeList, path);
 	}
 
 	/**
-	 * In EntityNet, find target entities by given source entities and target class
-	 * and a full search path EntityNetPath
+	 * In EntityNet, find target entity list by given source entityList and
+	 * search path
 	 */
-	public <T> T[] findRelated(Object[] sourceEntity, Class<T> targetEntityClass, EntitySearchPath path) {
-		return EntityNetUtils.findRelated(this, sourceEntity, targetEntityClass, path);
+	public <T> List<T> findEntityList(List<Object> entityList, SearchPath path) {
+		List<EntityNode> nodeList = EntityNetUtils.entityList2NodeList(this, entityList);
+		return EntityNetUtils.nodeList2EntityList(findNodeList(nodeList, path));
 	}
 
 	// ======getter & setter =======

@@ -16,7 +16,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * If a entity class implements ActiveRecordSupport interface, it will have CRUD
- * Method.  
+ * Method.
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -71,7 +71,7 @@ public interface ActiveRecordSupport {
 	public <T> T load(Object pkey);
 
 	/**
-	 * Link style set values for entity field like:
+	 * Link style set values for entity field, format like:
 	 * user.set("id","id1").set("name","Sam").set("address","Beijing","phone","12345",
 	 * "email","abc@123.com")
 	 */

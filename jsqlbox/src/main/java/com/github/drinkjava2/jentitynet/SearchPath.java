@@ -9,7 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jnetwk;
+package com.github.drinkjava2.jentitynet;
+
+import java.util.List;
 
 /**
  * SearchPath is a POJO store a search Path who to search nodes in EntityNet
@@ -17,18 +19,14 @@ package com.github.drinkjava2.jnetwk;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class EntitySearchPath {
-	public static final EntitySearchPath GUESS_PATH = new EntitySearchPath("GUESS_PATH");
-	public static final EntitySearchPath PARENT_PATH = new EntitySearchPath("PARENT_PATH");
-	public static final EntitySearchPath CHILD_PATH = new EntitySearchPath("CHILD_PATH");
-	public static final EntitySearchPath TOP_PARENT_PATH = new EntitySearchPath("TOP_PARENT_PATH");
-	public static final EntitySearchPath ALL_CHILD_PATH = new EntitySearchPath("ALL_CHILD_PATH");
-
-	public EntitySearchPath() {
+public class SearchPath {
+	private List<SearchPath> childPath;
+	
+	public SearchPath() {
 
 	}
 
-	public EntitySearchPath(Object... paths) {
+	public SearchPath(Object... paths) {
 
 	}
 

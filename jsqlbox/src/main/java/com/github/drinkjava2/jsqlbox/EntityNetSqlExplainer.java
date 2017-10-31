@@ -11,9 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.improve.SqlExplainSupport;
@@ -21,15 +19,11 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
+import com.github.drinkjava2.jentitynet.EntityNetUtils;
 
 /**
- * EntityNetSqlExplainer is the SqlExplainer to explain net() method to help build a
- * EntityNet
+ * EntityNetSqlExplainer is the SqlExplainer to explain net() method to help
+ * build a EntityNet
  * 
  * "SqlExplainSupport" interface is defined in jDbPro project, an explainer
  * works like a intercepter, it has few callback methods to deal with SQL and
@@ -41,12 +35,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 public class EntityNetSqlExplainer implements SqlExplainSupport {
 	private Object[] netConfigObjects;
 	private TableModel[] generatedTableModels;
-	static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
-		@Override
-		protected Map<Object, Object> initialValue() {
-			return new HashMap<Object, Object>();
-		}
-	};
 
 	public EntityNetSqlExplainer(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
@@ -62,14 +50,14 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 		if (result != null && result instanceof List<?>) {
 			if (generatedTableModels == null)
 				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
-			netConfigBindToListCache.get().put(result, generatedTableModels);
+			EntityNetUtils.bindTableModel(result, generatedTableModels);
 		}
 		return result;
 	}
 
 	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
-	 * or entity Bean
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance,
+	 * entityClass or entity Bean
 	 * 
 	 * <pre>
 	 * 1. TableModel instance, will use it
@@ -100,8 +88,8 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -180,8 +168,8 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...

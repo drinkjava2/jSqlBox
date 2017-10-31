@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jnetwk.EntityNet;
+import com.github.drinkjava2.jentitynet.EntityNet;
 
 import config.TestBase;
 import functiontest.orm.entities.Address;
@@ -102,7 +102,7 @@ public class ORMTest extends TestBase {
 
 	@Test
 	public void testloadKeyNet() {
-		EntityNet net = ctx.loadKeyNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+		EntityNet net = ctx.lazyLoadNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.getBody().size());
 		System.out.println(net.getBody().size());
@@ -129,7 +129,7 @@ public class ORMTest extends TestBase {
 		System.out.println(mapList3.size());
 		Assert.assertEquals(900, mapList3.size());
 
-		ctx.joinList(net, mapList3);
+		net.joinList(mapList3);
 		System.out.println(net.getBody().size());
 		Assert.assertEquals(37, net.getBody().size());
 	}
