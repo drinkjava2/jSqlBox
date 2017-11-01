@@ -41,19 +41,20 @@ public class TinyNet implements EntityNet {
 
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
-	/**
-	 * Parents of node, 4 dimensions determine a parent: selfNodeID,
-	 * fkeyColumnNames, parentClass, parentNodeID, for example: <br/>
-	 * user1ID, teacherColumnName, TeacherClass, teacher5ID <br/>
-	 * user1ID, teacherColumnName, SuperTeacherClass, superTeacher9ID <br/>
-	 */
-	private Map<String, Map<String, Map<Class<?>, String>>> parents;
+//	/**
+//	 * Parents of node, 4 dimensions determine a parent: selfNodeID,
+//	 * fkeyColumnNames, parentClass, parentNodeID, for example: <br/>
+//	 * user1ID, teacherColumnName, TeacherClass, teacher5ID <br/>
+//	 * user1ID, teacherColumnName, SuperTeacherClass, superTeacher9ID <br/>
+//	 */
+//	
+//	private Map<String, Map<String, Map<Class<?>, String>>> parents;
+	//TODO: will move parents to node
 
 	/**
 	 * Children of node, 4 dimensions determine a child: selfNodeID, childClass,
 	 * fkeyColumnNames, childNodeId like: <br/>
 	 * tercher5ID, User.class, teacherColumnName, user1ID <br/>
-	 * user1ID, teacherColumnName, SuperTeacherClass, superTeacher9ID <br/>
 	 */
 	private Map<String, Map<String, Map<Class<?>, String>>> childs;
 
