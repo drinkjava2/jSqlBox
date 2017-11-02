@@ -16,16 +16,25 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityNet;
 
 /**
- * TinyNet is an entity net, it's a memory based graph structure
+ * jTinyNet is the default implementation of EntityNet in jSqlBox, it's a memory
+ * based entity net, can be called "graph structure". Not like Neoj4 can write
+ * to disk file, jTinyNet is a pure memory based entity net, it's 1:1 mapping to
+ * one or more relationship databases, the relationship in Neoj4 is call "Edge",
+ * but in jTinyNet it's called foreign keys, yes, exactly use the existed
+ * database's foreign keys.
+ * 
+ * There are 2 benefits to use a graph/Net type database:<br/>
+ * 1) Much quick browse between connected nodes, no need write complicated SQLs.
+ * 2) Work in memory, can be used as a cache.
+ * 
+ * TinyNet is not thread safe. If want use it as a global Cache, programmer need
+ * use some synchronization methods to serialize access it.
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -37,15 +46,14 @@ public class TinyNet implements EntityNet {
 	 * will get a exception because it should never happen
 	 */
 	public static final String COMPOUND_COLUMNNAME_SEPARATOR = "_CmPdIdSpr_";
-	
+
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdIdSpr_";
-	
 
 	/**
-	 * Each entity class has a TableModel model as configuration, this configuration
-	 * store important O-R mapping info, TableModel is a virtual model can
-	 * represents dbMetaStructure, Entity Structure and store PKey and FKey
-	 * constraints
+	 * Each entity class has a TableModel model as configuration, this
+	 * configuration store important O-R mapping info, TableModel is a virtual
+	 * model can represents dbMetaStructure, Entity Structure and store PKey and
+	 * FKey constraints
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -53,16 +61,14 @@ public class TinyNet implements EntityNet {
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
 	/**
-	 * childCache cache child nodes , 4 facts determine a child node: parentNodeID,
-	 * childClass, childTablefkeyColumnNames, childNodeId, for example: teachId005,
-	 * Student.class, teach_id_column, studentID001
+	 * childCache cache child nodes , 4 facts determine a child node:
+	 * currentNodeId, childClass, childTablefkeyColumnNames, childNodeId, for
+	 * example: teachId005, Student.class, teach_id_column, studentID001
 	 * 
-	 * childCache will not be filled only after do search operation, this is called
-	 * "delay cache", by this way can greatly improve EntityNet loading speed, first
-	 * time to search child nodes take time, but after that will be much quicker
-	 * because now we have cache can use
+	 * childCache will not be filled until do a search operation and parents are
+	 * just in search path, this is called "delay cached"
 	 * 
-	 * Change of EntityNet may cause partial or all childCache be cleared
+	 * Write to EntityNet may cause childCache be cleared
 	 */
 	private Map<String, Map<String, Map<Class<?>, String>>> childCache;
 
@@ -74,8 +80,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to current
-	 * Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to
+	 * current Net, modelConfigs parameter is optional
 	 */
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
 		if (listMap == null)
@@ -125,8 +131,6 @@ public class TinyNet implements EntityNet {
 	protected void addOrJoinOneNode(TableModel model, Node node) {
 		Node oldEntity = getExistedNode(node);
 		if (oldEntity != null) {// will not update fields, but joint parents
-			
-  
 			// Set<String> oldParents = oldEntity.getParentIDs();
 			// if (oldParents != null)
 			// oldParents.addAll(node.getParentIDs());
@@ -142,9 +146,10 @@ public class TinyNet implements EntityNet {
 	 */
 	public void addEntityAsNode(TableModel model, Object entity) {
 		String id = TinyNetUtils.transferPKeyToNodeID(model, entity);
-		List<Object[]> parentIds= TinyNetUtils.transferFKeysToParentIDs(model, entity);
-		Node node = new Node(id, entity, parentIds);
-		addOrJoinOneNode(model, node);
+		List<Object[]> parentIds = TinyNetUtils.transferFKeysToParentIDs(model, entity);
+		//TODO here
+		//Node node = new Node(id, entity, parentIds);
+		//addOrJoinOneNode(model, node);
 	}
 
 	// ============== query methods ================================
@@ -172,7 +177,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * In TinyNet, find target node list by given source nodeList and search path
+	 * In TinyNet, find target node list by given source nodeList and search
+	 * path
 	 */
 	public List<Node> findNodeList(List<Node> nodeList, SearchPath path) {
 		return TinyNetUtils.findRelated(this, nodeList, path);
