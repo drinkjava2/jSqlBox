@@ -31,32 +31,40 @@ import com.github.drinkjava2.jsqlbox.EntityNet;
  * @since 1.0.0
  */
 public class TinyNet implements EntityNet {
-	public static final String KeySeparator = "_";
+	/**
+	 * Seperator used to combine compound column values into a single String ID,
+	 * please note if a column value include this separator string '_CmPdIdSpr_'
+	 * will get a exception because it should never happen
+	 */
+	public static final String COMPOUND_COLUMNNAME_SEPARATOR = "_CmPdIdSpr_";
+	
+	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdIdSpr_";
+	
 
 	/**
-	 * configModels has entityClass, it means it know which entity be mapped,
-	 * but the shortage is it often have no alias name be set
+	 * Each entity class has a TableModel model as configuration, this configuration
+	 * store important O-R mapping info, TableModel is a virtual model can
+	 * represents dbMetaStructure, Entity Structure and store PKey and FKey
+	 * constraints
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
+	/** The body of the EntityNet */
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
-//	/**
-//	 * Parents of node, 4 dimensions determine a parent: selfNodeID,
-//	 * fkeyColumnNames, parentClass, parentNodeID, for example: <br/>
-//	 * user1ID, teacherColumnName, TeacherClass, teacher5ID <br/>
-//	 * user1ID, teacherColumnName, SuperTeacherClass, superTeacher9ID <br/>
-//	 */
-//	
-//	private Map<String, Map<String, Map<Class<?>, String>>> parents;
-	//TODO: will move parents to node
-
 	/**
-	 * Children of node, 4 dimensions determine a child: selfNodeID, childClass,
-	 * fkeyColumnNames, childNodeId like: <br/>
-	 * tercher5ID, User.class, teacherColumnName, user1ID <br/>
+	 * childCache cache child nodes , 4 facts determine a child node: parentNodeID,
+	 * childClass, childTablefkeyColumnNames, childNodeId, for example: teachId005,
+	 * Student.class, teach_id_column, studentID001
+	 * 
+	 * childCache will not be filled only after do search operation, this is called
+	 * "delay cache", by this way can greatly improve EntityNet loading speed, first
+	 * time to search child nodes take time, but after that will be much quicker
+	 * because now we have cache can use
+	 * 
+	 * Change of EntityNet may cause partial or all childCache be cleared
 	 */
-	private Map<String, Map<String, Map<Class<?>, String>>> childs;
+	private Map<String, Map<String, Map<Class<?>, String>>> childCache;
 
 	public TinyNet() {
 	}
@@ -66,8 +74,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to
-	 * current Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to current
+	 * Net, modelConfigs parameter is optional
 	 */
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
 		if (listMap == null)
@@ -116,26 +124,16 @@ public class TinyNet implements EntityNet {
 	 */
 	protected void addOrJoinOneNode(TableModel model, Node node) {
 		Node oldEntity = getExistedNode(node);
-		if (oldEntity != null) {// fill non-null values
-			for (ColumnModel newCol : model.getColumns()) {
-				TinyNetException.assureNotEmpty(newCol.getEntityField(),
-						"EntityField not found for new Entity column '" + newCol.getColumnName() + "'");
-				Object newValue = ClassCacheUtils.readValueFromBeanField(node.getEntity(), newCol.getEntityField());
-				if (newValue != null) {// fill new values from new Entity
-					String oldEntityField = model.getColumn(newCol.getColumnName()).getEntityField();
-					if (!newCol.getEntityField().equals(oldEntityField))
-						throw new TinyNetException(
-								"Old entity and new entity has same entitID but has different field name");
-					ClassCacheUtils.writeValueToBeanField(oldEntity.getEntity(), newCol.getEntityField(), newValue);
-				}
-			}
-			//TODO
-//			Set<String> oldParents = oldEntity.getParentIDs();
-//			if (oldParents != null)
-//				oldParents.addAll(node.getParentIDs());
+		if (oldEntity != null) {// will not update fields, but joint parents
+			
+  
+			// Set<String> oldParents = oldEntity.getParentIDs();
+			// if (oldParents != null)
+			// oldParents.addAll(node.getParentIDs());
 		} else {
 			this.addNode(node);
 		}
+
 	}
 
 	/**
@@ -144,8 +142,8 @@ public class TinyNet implements EntityNet {
 	 */
 	public void addEntityAsNode(TableModel model, Object entity) {
 		String id = TinyNetUtils.transferPKeyToNodeID(model, entity);
-		Set<String> parentIDs = TinyNetUtils.transferFKeysToParentIDs(model, entity);
-		Node node = new Node(id, entity, parentIDs);
+		List<Object[]> parentIds= TinyNetUtils.transferFKeysToParentIDs(model, entity);
+		Node node = new Node(id, entity, parentIds);
 		addOrJoinOneNode(model, node);
 	}
 
@@ -174,8 +172,7 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * In TinyNet, find target node list by given source nodeList and search
-	 * path
+	 * In TinyNet, find target node list by given source nodeList and search path
 	 */
 	public List<Node> findNodeList(List<Node> nodeList, SearchPath path) {
 		return TinyNetUtils.findRelated(this, nodeList, path);
@@ -196,6 +193,14 @@ public class TinyNet implements EntityNet {
 
 	public void setBody(Map<Class<?>, LinkedHashMap<String, Node>> body) {
 		this.body = body;
+	}
+
+	public Map<String, Map<String, Map<Class<?>, String>>> getChildCache() {
+		return childCache;
+	}
+
+	public void setChildCache(Map<String, Map<String, Map<Class<?>, String>>> childCache) {
+		this.childCache = childCache;
 	}
 
 }

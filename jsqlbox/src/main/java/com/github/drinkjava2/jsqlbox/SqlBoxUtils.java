@@ -59,7 +59,7 @@ public abstract class SqlBoxUtils {
 	private static void logoutEntityHaveNoBoxFieldWarning(Class<?> clazz) {
 		printWarningIfEntityIsNotActiveRecord = false; // only print at first
 														// time
-		SqlBoxContext.LOGGER.warn("For entity class '" + clazz.getName()
+		SqlBoxContext.log.warn("For entity class '" + clazz.getName()
 				+ "', suggest extends from ActiveRecord or put a \"SqlBox box\" field to improve performacne.");
 	}
 

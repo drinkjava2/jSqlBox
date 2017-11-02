@@ -67,27 +67,31 @@ public class TinyNetUtils {
 	public static String transferPKeyToNodeID(TableModel model, Object entity) {
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : model.getColumns()) {
-			if (col.getPkey()) {
+			if (col.getPkey() && !col.getTransientable()) {
 				TinyNetException.assureNotEmpty(col.getEntityField(),
 						"EntityField not found for FKey column '" + col.getColumnName() + "'");
-				sb.append(TinyNet.KeySeparator)
-						.append(ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField()));
+				if (sb.length() > 0)
+					sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
+				sb.append(ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField()));
 			}
 		}
 		if (sb.length() == 0)
 			throw new TinyNetException("Table '" + model.getTableName() + "' no Prime Key columns set");
-		return model.getTableName() + sb.toString();
+		return sb.toString();
 	}
 
 	/**
 	 * Transfer FKey values to String set, format: table1_id1value_id2value,
 	 * table2_id1_id2... <br/>
 	 */
-	public static Set<String> transferFKeysToParentIDs(TableModel model, Object entity) {
+	public static List<Object[]> transferFKeysToParentIDs(TableModel model, Object entity) {
+		List<Object[]> resultList = null;
+
 		Set<String> result = new HashSet<String>();
 		for (FKeyModel fkey : model.getFkeyConstraints()) {
 			String fTable = fkey.getRefTableAndColumns()[0];
-			String fkeyEntitID = fTable;
+			String fkeyEntitID = "";
+			String fkeyCol = "";
 			for (String colNames : fkey.getColumnNames()) {
 				String entityField = model.getColumn(colNames).getEntityField();
 				Object fKeyValue = ClassCacheUtils.readValueFromBeanField(entity, entityField);
@@ -95,12 +99,14 @@ public class TinyNetUtils {
 					fkeyEntitID = null;
 					break;
 				}
-				fkeyEntitID += TinyNet.KeySeparator + fKeyValue;
+				if (fkeyEntitID.length() > 0)
+					fkeyEntitID += TinyNet.COMPOUND_VALUE_SEPARATOR;
+				fkeyEntitID += fKeyValue;// NOSONAR
 			}
 			if (!StrUtils.isEmpty(fkeyEntitID))
-				result.add(fkeyEntitID);
+				resultList.add(new Object[] {    });//TODO: work at here
 		}
-		return result;
+		return resultList;
 	}
 
 	/**
@@ -138,25 +144,5 @@ public class TinyNetUtils {
 			result.add((T) node.getEntity());
 		return result;
 	}
-
-	// /** In a EntityNet convert a Entity list to Node List */
-	// public static List<EntityNode> entityList2NodeList(EntityNet net,
-	// List<Object> entityList) {
-	// List<EntityNode> result = new ArrayList<EntityNode>();
-	// for (Object entity : entityList) {
-	// boolean found = false;
-	// for (EntityNode node : net.getBody().values())
-	// if (entity != null && entity == node.getEntity()) {
-	// found = true;
-	// result.add(node);
-	// break;
-	// }
-	// if (!found)
-	// throw new EntityNetException("Can not find a node for an entity in
-	// entityList");
-	// }
-	// return result;
-	//
-	// }
 
 }

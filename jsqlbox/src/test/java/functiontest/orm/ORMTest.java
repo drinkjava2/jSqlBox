@@ -104,7 +104,7 @@ public class ORMTest extends TestBase {
 
 	@Test
 	public void testLazyCreateEntityNet() {
-		EntityNet net = ctx.lazyCreateEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+		EntityNet net = ctx.createKeyEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());

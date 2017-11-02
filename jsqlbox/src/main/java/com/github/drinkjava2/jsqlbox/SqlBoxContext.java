@@ -36,7 +36,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.0
  */
 public class SqlBoxContext extends DbPro {
-	public static final SqlBoxLogger LOGGER = SqlBoxLogger.getLog(SqlBoxContext.class);
+	public static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 	private Dialect dialect; // dialect
@@ -125,7 +125,7 @@ public class SqlBoxContext extends DbPro {
 	/**
 	 * Create a EntityNet instance but only load PKey and FKeys columns into entity
 	 */
-	public EntityNet lazyCreateEntityNet(Object... configObjects) {
+	public EntityNet createKeyEntityNet(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, true, configObjects);
 	}
 
