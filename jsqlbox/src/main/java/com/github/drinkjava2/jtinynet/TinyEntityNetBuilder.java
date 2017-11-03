@@ -22,10 +22,10 @@ import com.github.drinkjava2.jsqlbox.EntityNet;
 import com.github.drinkjava2.jsqlbox.EntityNetBuilder;
 import com.github.drinkjava2.jsqlbox.EntityNetSqlExplainer;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * This is a helper class store public static methods concern to build EntityNet
+ * This is a EntityNetBuilder implementation to let jSqlBox know how to build
+ * TinyNet
  */
 public class TinyEntityNetBuilder implements EntityNetBuilder {
 	public static final TinyEntityNetBuilder instance = new TinyEntityNetBuilder();
@@ -43,7 +43,7 @@ public class TinyEntityNetBuilder implements EntityNetBuilder {
 	@Override
 	public EntityNet createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
 		if (configObjects == null || configObjects.length == 0)
-			throw new SqlBoxException("LoadNet() does not support empty netConfigs parameter");
+			throw new TinyNetException("LoadNet() does not support empty netConfigs parameter");
 		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
 		EntityNet net = new TinyNet();
 		String starOrSharp = loadKeyOnly ? ".##" : ".**";
@@ -61,6 +61,6 @@ public class TinyEntityNetBuilder implements EntityNetBuilder {
 			net.addMapList(mapList, t);
 		}
 		return net;
-	} 
-	
+	}
+
 }

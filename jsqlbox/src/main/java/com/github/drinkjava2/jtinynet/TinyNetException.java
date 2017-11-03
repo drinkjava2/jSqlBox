@@ -12,8 +12,7 @@
 package com.github.drinkjava2.jtinynet;
 
 /**
- * This Exception class used to wrap all exceptions to a Runtime type
- * TinyNetException
+ * This TinyNetException used to wrap all exceptions to runtime Exception
  * 
  * @author Yong Zhu
  * @since 1.0.0

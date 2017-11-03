@@ -12,27 +12,27 @@
 package com.github.drinkjava2.jtinynet;
 
 /**
- * Parents of node determined by 3 dimensions: fkNames, parentClass, parentId
+ * Parents of node determined by 3 dimensions: fkeyColumNames, parentClass, parentId
  * 
  * For example: <br/>
- * teacher_firstName_lastname, sam_zhu , Teacher.class <br/>
- * teacher_firstName_lastname, sam_zhu , SuperTeacher.class <br/>
- * teacher_firstName_lastname, tom_li , SuperTeacher.class <br/>
+ * teacher_firstName_lastname, Sam_Zhu , Teacher.class <br/>
+ * teacher_firstName_lastname, Tom_Li , SuperTeacher.class <br/>
+ * teacher_firstName_lastname, Jeff_Wang , SuperTeacher.class <br/>
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class ParentNode {
-	String fkNames;
+public class ParentRelation {
+	String fkeyColumNames;
 	Class<?> parentClass;
-	String parentId; 
-	
-	public String getFkNames() {
-		return fkNames;
+	String parentId;
+
+	public String getFkeyColumNames() {
+		return fkeyColumNames;
 	}
 
-	public void setFkNames(String fkNames) {
-		this.fkNames = fkNames;
+	public void setFkeyColumNames(String fkeyColumNames) {
+		this.fkeyColumNames = fkeyColumNames;
 	}
 
 	public Class<?> getParentClass() {

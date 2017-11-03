@@ -11,8 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.util.Set;
-
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -28,12 +26,6 @@ public class SqlBox {
 
 	/** Optional, a SqlBoxContext instance, usually used for ActiveRecord entity */
 	SqlBoxContext context;
-
-	/** Cache a Entity ID, format: tablename_id1value_id2value */
-	String entityID;
-
-	/** Cache parent's Entity IDs, format: tablename_id1value_id2value */
-	Set<String> parentEntityIDs;
 
 	// Shortcut method
 	public String table() {
@@ -76,22 +68,6 @@ public class SqlBox {
 
 	public void setTableModel(TableModel tableModel) {
 		this.tableModel = tableModel;
-	}
-
-	public Set<String> getParentEntityIDs() {
-		return parentEntityIDs;
-	}
-
-	public void setParentEntityIDs(Set<String> parentEntityIDs) {
-		this.parentEntityIDs = parentEntityIDs;
-	}
-
-	public String getEntityID() {
-		return entityID;
-	}
-
-	public void setEntityID(String entityID) {
-		this.entityID = entityID;
 	}
 
 }
