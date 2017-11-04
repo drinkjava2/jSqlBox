@@ -64,7 +64,7 @@ public class TinyNetUtils {
 	 * Transfer PKey values to a entityID String, format:
 	 * tablename_id1value_id2value
 	 */
-	public static String transferPKeyToNodeID(TableModel model, Object entity) {
+	public static String transferPKeysToID(TableModel model, Object entity) {
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : model.getColumns()) {
 			if (col.getPkey() && !col.getTransientable()) {
@@ -107,35 +107,7 @@ public class TinyNetUtils {
 				resultList.add(new Object[] {    });//TODO: work at here
 		}
 		return resultList;
-	}
-
-	/**
-	 * Assembly one row of Map List to Entities, according net's configModels
-	 */
-	public static Object[] assemblyOneRowToEntities(TinyNet net, Map<String, Object> oneRow) {
-		List<Object> resultList = new ArrayList<Object>();
-		for (TableModel model : net.getConfigModels().values()) {
-			Object entity = null;
-			String alias = model.getAlias();
-			if (StrUtils.isEmpty(alias))
-				throw new TinyNetException("No alias found for table '" + model.getTableName() + "'");
-
-			for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
-				for (ColumnModel col : model.getColumns()) {
-					if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
-						if (entity == null)
-							entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-						TinyNetException.assureNotEmpty(col.getEntityField(),
-								"EntityField not found for column '" + col.getColumnName() + "'");
-						ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
-					}
-				}
-			}
-			if (entity != null)
-				net.addEntityAsNode(model, entity);
-		}
-		return resultList.toArray(new Object[resultList.size()]);
-	}
+	} 
 
 	/** Convert a Node list to Entity List */
 	public static <T> List<T> nodeList2EntityList(List<Node> nodeList) {

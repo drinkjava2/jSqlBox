@@ -16,8 +16,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.annotation.jdia.FKey;
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityNet;
 
@@ -28,18 +32,20 @@ import com.github.drinkjava2.jsqlbox.EntityNet;
  * it's 1:1 mapping to relationship database's tables, the relationship in Neoj4
  * is call "Edge", but in jTinyNet it's called relationship, just exactly use
  * the existed database's foreign key constraints. If want create relationship
- * between nodes but do not want make real FKey constraint in database, can
- * build a fake FKeyModel by setting "dll=false" (see jDialects project).
+ * between nodes but do not want output FKey constraint DDL, can build a fake
+ * FKeyModel by setting "ddl=false" (see jDialects project).
  * 
- * There are some benefits to use a graph/Net type database:<br/>
+ * There are some benefits to use a graph database:<br/>
  * 1) Much quicker browse speed between connected nodes than database. <br/>
  * 2) Works in memory, can be used as query cache. <br/>
- * 3) No need write SQLs. In jTinyNet, do complicated search still use pure Java
- * language, jTinyNet does not support Cypher language because I think it's a
- * little complicated.<br/>
+ * 3) No need write SQLs. <br/>
+ * 
+ * In jTinyNet, do complicated search still use pure Java language, jTinyNet
+ * does not support Cypher language because I think it's too complicated and too
+ * hard to me.<br/>
  * 
  * TinyNet class is not thread safe. If want use it as a global Cache,
- * programmer need use synchronised method to serialise access it, like use a
+ * programmer need use synchronized methods to serialize access it, like use a
  * HashMap in multiple thread program.
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
@@ -52,17 +58,19 @@ public class TinyNet implements EntityNet {
 	/** Used to combine compound key column values into a single String */
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdValSpr_";
 
-	/** ConfigModels is virtual meta data of database and store O-R mapping info */
+	/**
+	 * ConfigModels is virtual meta data of database and store O-R mapping info
+	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
 	/** The body of the EntityNet */
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
 	/**
-	 * childCache cache ChildRelations. To improve loading speed, ChildCache will
-	 * not be filled until do a search and parent nodes are just in search path,
-	 * this is called "delay cached". Write to EntityNet may cause partial or whole
-	 * childCache be cleared
+	 * childCache cache ChildRelations. To improve loading speed, ChildCache
+	 * will not be filled until do a search and parent nodes are just in search
+	 * path, this is called "delay cached". Write to EntityNet may cause partial
+	 * or whole childCache be cleared
 	 */
 	private Map<String, List<ChildRelation>> childCache;
 
@@ -74,8 +82,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to current
-	 * Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to
+	 * current Net, modelConfigs parameter is optional
 	 */
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
 		if (listMap == null)
@@ -92,9 +100,49 @@ public class TinyNet implements EntityNet {
 				}
 			}
 		for (Map<String, Object> map : listMap) {// join map list
-			TinyNetUtils.assemblyOneRowToEntities(this, map);
+			assemblyOneRowToEntities(map);
 		}
 		return this;
+	}
+
+	/**
+	 * Assembly one row of Map List to Entities, according net's configModels
+	 */
+	public void assemblyOneRowToEntities(Map<String, Object> oneRow) {
+		for (TableModel model : this.getConfigModels().values()) {
+			Object entity = null;
+			String alias = model.getAlias();
+			if (StrUtils.isEmpty(alias))
+				throw new TinyNetException("No alias found for table '" + model.getTableName() + "'");
+
+			for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
+				for (ColumnModel col : model.getColumns()) {
+					if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
+						if (entity == null)
+							entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
+						TinyNetException.assureNotEmpty(col.getEntityField(),
+								"EntityField not found for column '" + col.getColumnName() + "'");
+						ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
+					}
+				}
+			}
+			if (entity != null)
+				this.addEntityAsNode(model, entity);
+		}
+	}
+
+	/**
+	 * Add an entity to TinyNet, if already have same PKEY entity exist, if old
+	 * entity field is null, will new new entity's value fill in
+	 */
+	public void addEntityAsNode(TableModel model, Object entity) {
+		String id = TinyNetUtils.transferPKeysToID(model, entity);
+		System.out.println("ID="+id);
+		List<ParentRelation> parentIds = TinyNetUtils.transferFKeysToParentIDs(model, entity);
+		System.out.println("ID="+id);
+		// TODO here
+		// Node node = new Node(id, entity, parentIds);
+		// addOrJoinOneNode(model, node);
 	}
 
 	protected Node getExistedNode(Node node) {
@@ -135,18 +183,6 @@ public class TinyNet implements EntityNet {
 
 	}
 
-	/**
-	 * Add an entity to TinyNet, if already have same PKEY entity exist, if old
-	 * entity field is null, will new new entity's value fill in
-	 */
-	public void addEntityAsNode(TableModel model, Object entity) {
-		String id = TinyNetUtils.transferPKeyToNodeID(model, entity);
-		List<Object[]> parentIds = TinyNetUtils.transferFKeysToParentIDs(model, entity);
-		// TODO here
-		// Node node = new Node(id, entity, parentIds);
-		// addOrJoinOneNode(model, node);
-	}
-
 	// ============== query methods ================================
 
 	/** Return total how many nodes */
@@ -172,7 +208,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * In TinyNet, find target node list by given source nodeList and search path
+	 * In TinyNet, find target node list by given source nodeList and search
+	 * path
 	 */
 	public List<Node> findNodeList(List<Node> nodeList, SearchPath path) {
 		return TinyNetUtils.findRelated(this, nodeList, path);
