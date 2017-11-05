@@ -12,11 +12,7 @@
 package com.github.drinkjava2.jtinynet;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -42,7 +38,7 @@ public class TinyNetUtils {
 	 * @param path The EntitySearchPath
 	 * @return qualified entities
 	 */
-	public static List<Node> findRelated(TinyNet net, List<Node> nodeList, SearchPath path) {
+	public static List<Node> findRelated(TinyNet net, List<Node> nodeList, Search path) {
 		return null;// TODO here
 	}
 
@@ -57,14 +53,12 @@ public class TinyNetUtils {
 				if (StrUtils.isEmpty(tb.getAlias()))
 					throw new TinyNetException("TableModel alias not set for table '" + tb.getTableName() + "'");
 			}
-
 	}
 
 	/**
-	 * Transfer PKey values to a entityID String, format:
-	 * tablename_id1value_id2value
+	 * Join PKey values into one String, used for node ID
 	 */
-	public static String transferPKeysToID(TableModel model, Object entity) {
+	public static String joinPKeyValues(TableModel model, Object entity) {
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : model.getColumns()) {
 			if (col.getPkey() && !col.getTransientable()) {
@@ -81,33 +75,37 @@ public class TinyNetUtils {
 	}
 
 	/**
-	 * Transfer FKey values to String set, format: table1_id1value_id2value,
-	 * table2_id1_id2... <br/>
+	 * Transfer FKey values to ParentRelation list
 	 */
-	public static List<Object[]> transferFKeysToParentIDs(TableModel model, Object entity) {
-		List<Object[]> resultList = null;
-
-		Set<String> result = new HashSet<String>();
+	public static List<ParentRelation> transferFKeysToParentRelations(TableModel model, Object entity) {
+		List<ParentRelation> resultList = null;
 		for (FKeyModel fkey : model.getFkeyConstraints()) {
-			String fTable = fkey.getRefTableAndColumns()[0];
-			String fkeyEntitID = "";
-			String fkeyCol = "";
+			String refTable = fkey.getRefTableAndColumns()[0];
+			String fkeyValues = "";
+			String fkeyColumns = "";
 			for (String colNames : fkey.getColumnNames()) {
 				String entityField = model.getColumn(colNames).getEntityField();
 				Object fKeyValue = ClassCacheUtils.readValueFromBeanField(entity, entityField);
 				if (StrUtils.isEmpty(fKeyValue)) {
-					fkeyEntitID = null;
+					fkeyValues = null;
 					break;
 				}
-				if (fkeyEntitID.length() > 0)
-					fkeyEntitID += TinyNet.COMPOUND_VALUE_SEPARATOR;
-				fkeyEntitID += fKeyValue;// NOSONAR
+				if (fkeyValues.length() > 0)
+					fkeyValues += TinyNet.COMPOUND_VALUE_SEPARATOR;
+				fkeyValues += fKeyValue;// NOSONAR
+				
+				if (fkeyColumns.length() > 0)
+					fkeyColumns += TinyNet.COMPOUND_COLUMNNAME_SEPARATOR;
+				fkeyColumns += colNames;// NOSONAR 
 			}
-			if (!StrUtils.isEmpty(fkeyEntitID))
-				resultList.add(new Object[] {    });//TODO: work at here
+			if (!StrUtils.isEmpty(fkeyColumns) && !StrUtils.isEmpty(fkeyValues) && !StrUtils.isEmpty(refTable)) {
+				if (resultList == null)
+					resultList = new ArrayList<ParentRelation>();
+				resultList.add(new ParentRelation(fkeyColumns, fkeyValues, refTable));
+			}
 		}
 		return resultList;
-	} 
+	}
 
 	/** Convert a Node list to Entity List */
 	public static <T> List<T> nodeList2EntityList(List<Node> nodeList) {

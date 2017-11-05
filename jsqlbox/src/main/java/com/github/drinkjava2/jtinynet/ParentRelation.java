@@ -12,7 +12,8 @@
 package com.github.drinkjava2.jtinynet;
 
 /**
- * Parents of node determined by 3 dimensions: fkeyColumNames, parentClass, parentId
+ * ParentRelationShip of node determined by 3 dimensions: fkeyColumns, refId,
+ * refTable
  * 
  * For example: <br/>
  * teacher_firstName_lastname, Sam_Zhu , Teacher.class <br/>
@@ -23,24 +24,31 @@ package com.github.drinkjava2.jtinynet;
  * @since 1.0.0
  */
 public class ParentRelation {
-	String fkeyColumNames;
-	Class<?> parentClass;
+	String columns;
+	String parentTable;
 	String parentId;
 
-	public String getFkeyColumNames() {
-		return fkeyColumNames;
+	public ParentRelation(String columns, String parentId, String parentTable) {
+		TinyNetException.assureNotEmpty(columns, "In ParentRelation, columns can not be empty");
+		TinyNetException.assureNotEmpty(parentId, "In ParentRelation, parentId can not be empty");
+		TinyNetException.assureNotEmpty(parentTable, "In ParentRelation, parentTable can not be empty");
+		this.columns = columns;
+		this.parentId = parentId;
+		this.parentTable = parentTable;
 	}
 
-	public void setFkeyColumNames(String fkeyColumNames) {
-		this.fkeyColumNames = fkeyColumNames;
+	public boolean sameas(ParentRelation p) {
+		return this.columns.equalsIgnoreCase(p.getColumns())
+				&& this.getParentTable().equalsIgnoreCase(p.getParentTable())
+				&& this.parentId.equalsIgnoreCase(p.getParentId());
 	}
 
-	public Class<?> getParentClass() {
-		return parentClass;
+	public String getColumns() {
+		return columns;
 	}
 
-	public void setParentClass(Class<?> parentClass) {
-		this.parentClass = parentClass;
+	public void setColumns(String columns) {
+		this.columns = columns;
 	}
 
 	public String getParentId() {
@@ -49,6 +57,14 @@ public class ParentRelation {
 
 	public void setParentId(String parentId) {
 		this.parentId = parentId;
+	}
+
+	public String getParentTable() {
+		return parentTable;
+	}
+
+	public void setParentTable(String parentTable) {
+		this.parentTable = parentTable;
 	}
 
 }

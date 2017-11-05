@@ -90,12 +90,19 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return box().getTableModel().getTableName();
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T alias(String alias) {
+		box().getTableModel().setAlias(alias);
+		return (T)this;
+	}
+
 	@Override
 	public SqlBoxContext context() {
-		SqlBox box = box();
-		if (box.getContext() == null)
-			box.setContext(SqlBoxContext.defaultContext);
-		return box.getContext();
+		SqlBox theBox = box();
+		if (theBox.getContext() == null)
+			theBox.setContext(SqlBoxContext.defaultContext);
+		return theBox.getContext();
 	}
 
 	@Override

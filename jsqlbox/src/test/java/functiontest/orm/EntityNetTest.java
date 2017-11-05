@@ -14,6 +14,8 @@ import org.junit.Test;
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityNet;
+import com.github.drinkjava2.jtinynet.Node;
+import com.github.drinkjava2.jtinynet.TinyNet;
 
 import config.TestBase;
 import functiontest.orm.entities.Address;
@@ -24,7 +26,7 @@ import functiontest.orm.entities.RolePrivilege;
 import functiontest.orm.entities.User;
 import functiontest.orm.entities.UserRole;
 
-public class ORMTest extends TestBase {
+public class EntityNetTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
@@ -90,8 +92,43 @@ public class ORMTest extends TestBase {
 	}
 
 	@Test
+	public void testJoinFields() {
+		EntityNet net = ctx.loadKeyEntityNet(User.class);
+		Assert.assertEquals(5, net.size());
+		List<User> users = net.getEntityList(User.class);
+		Assert.assertNull(users.get(0).getUserName());
+
+		User u = new User();
+		u.tableModel().setAlias("u");
+		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
+				netConfig(u) + "select u.id as u_id, u.userName as u_userName from usertb as u");
+		ctx.joinList(net, listMap);
+
+		Assert.assertEquals(5, net.size());
+		users = net.getEntityList(User.class);
+		Assert.assertNotNull(users.get(0).getUserName());
+	}
+
+	@Test
+	public void testJoinParents() {
+		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
+				netConfig(new Email().alias("e")) + "select e.id as e_id from emailtb e");
+		TinyNet net = (TinyNet) ctx.createEntityNet(listMap);
+		Assert.assertEquals(5, net.size());
+		Node e1 = net.getBody().get(Email.class).get("e1");
+		Assert.assertNull(e1.getParentRelations());
+
+		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(),
+				netConfig(Email.class) + "select e.** from emailtb e");
+		ctx.joinList(net, listMap2);
+		Assert.assertEquals(5, net.size()); 
+		e1 = net.getBody().get(Email.class).get("e1");
+		Assert.assertNotNull(e1.getParentRelations());
+	}
+
+	@Test
 	public void testCreateEntityNet() {
-		EntityNet net = ctx.createEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+		EntityNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
@@ -103,8 +140,8 @@ public class ORMTest extends TestBase {
 	}
 
 	@Test
-	public void testLazyCreateEntityNet() {
-		EntityNet net = ctx.createKeyEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+	public void testLoadKeyEntityNet() {
+		EntityNet net = ctx.loadKeyEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
@@ -112,7 +149,6 @@ public class ORMTest extends TestBase {
 		List<User> users = net.getEntityList(User.class);
 		Assert.assertEquals(5, users.size());
 		Assert.assertEquals(null, users.get(0).getUserName());
-		System.out.println(users.get(0).getUserName());
 	}
 
 	@Test
@@ -121,23 +157,18 @@ public class ORMTest extends TestBase {
 		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
 		EntityNet net = ctx.createEntityNet(mapList1);
-		System.out.println(net.size());
 		Assert.assertEquals(10, net.size());
 
 		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
 				netConfig(Email.class) + "select e.** from emailtb as e");
 		ctx.joinList(net, mapList2);
-		System.out.println(net.size());
 		Assert.assertEquals(15, net.size());
 
 		List<Map<String, Object>> mapList3 = ctx.nQuery(
 				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
 				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
-		System.out.println(mapList3.size());
 		Assert.assertEquals(900, mapList3.size());
-
 		ctx.joinList(net, mapList3);
-		System.out.println(net.size());
 		Assert.assertEquals(37, net.size());
 	}
 

@@ -13,14 +13,15 @@ package com.github.drinkjava2.jtinynet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.annotation.jdia.FKey;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityNet;
@@ -28,12 +29,12 @@ import com.github.drinkjava2.jsqlbox.EntityNet;
 /**
  * jTinyNet project is the default implementation of EntityNet in jSqlBox, it's
  * a memory based entity net, can be called "graph database". Not like Neo4j can
- * write to disk file, jTinyNet is only a pure and simple memory graph database,
- * it's 1:1 mapping to relationship database's tables, the relationship in Neoj4
- * is call "Edge", but in jTinyNet it's called relationship, just exactly use
- * the existed database's foreign key constraints. If want create relationship
- * between nodes but do not want output FKey constraint DDL, can build a fake
- * FKeyModel by setting "ddl=false" (see jDialects project).
+ * write to disk file, jTinyNet is only a pure memory graph database, it's 1:1
+ * mapping to relationship database's tables, the relationship in Neoj4 is call
+ * "Edge", but in jTinyNet is still called relationship, just exactly use the
+ * existed relationship database's foreign key constraints. If want create
+ * relationship between nodes but do not want output FKey constraint DDL, can
+ * build a fake FKeyModel by setting "ddl=false" (see jDialects project).
  * 
  * There are some benefits to use a graph database:<br/>
  * 1) Much quicker browse speed between connected nodes than database. <br/>
@@ -41,11 +42,11 @@ import com.github.drinkjava2.jsqlbox.EntityNet;
  * 3) No need write SQLs. <br/>
  * 
  * In jTinyNet, do complicated search still use pure Java language, jTinyNet
- * does not support Cypher language because I think it's too complicated and too
- * hard to me.<br/>
+ * does not support Cypher language because it's too complicated and too hard to
+ * me, another reason is cypher does not support refactoring.
  * 
  * TinyNet class is not thread safe. If want use it as a global Cache,
- * programmer need use synchronized methods to serialize access it, like use a
+ * programmer need use synchronized method to serialize access it, like use a
  * HashMap in multiple thread program.
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
@@ -59,7 +60,8 @@ public class TinyNet implements EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of database and store O-R mapping info
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
+	 * info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -67,12 +69,23 @@ public class TinyNet implements EntityNet {
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
 	/**
-	 * childCache cache ChildRelations. To improve loading speed, ChildCache
-	 * will not be filled until do a search and parent nodes are just in search
-	 * path, this is called "delay cached". Write to EntityNet may cause partial
-	 * or whole childCache be cleared
+	 * childCache cache Child RelationShips, Child determined by 4 facts: selfID,
+	 * childClass, child's fkeyColumns, child's ID is the target need to cache
+	 * 
+	 * For example, a User "Sam" many have below 4 ChildRelationShips to another
+	 * user Tom, it means Sam is Tom's teacher, father, driver and boss:<br/>
+	 * 
+	 * <Sam, <student_tb, <teacher_fisrtName+lastName, Tom_li> <br/>
+	 * <Sam, <student_tb, <father_fisrtName+lastName, Tom_li> <br/>
+	 * <Sam, <user_tb, <driver_fisrtName+lastName, Tom_li> <br/>
+	 * <Sam, <employee_tb, <boss_fisrtName+lastName, Tom_li> <br/>
+	 * 
+	 * To improve EntityNet initialisation speed, ChildCache will not be filled
+	 * until do a entity search and also parent nodes need exact in search path,
+	 * this is called "Delay Cache". Write to EntityNet may cause partial or whole
+	 * cache be cleared.
 	 */
-	private Map<String, List<ChildRelation>> childCache;
+	private Map<String, Map<String, Map<String, String>>> childCache = new HashMap<String, Map<String, Map<String, String>>>();
 
 	public TinyNet() {
 	}
@@ -82,9 +95,10 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to
-	 * current Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to current
+	 * Net, modelConfigs parameter is optional
 	 */
+	@Override
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
 		if (listMap == null)
 			throw new TinyNetException("Can not join null listMap");
@@ -100,7 +114,7 @@ public class TinyNet implements EntityNet {
 				}
 			}
 		for (Map<String, Object> map : listMap) {// join map list
-			assemblyOneRowToEntities(map);
+			addOneRowMapList(map);
 		}
 		return this;
 	}
@@ -108,13 +122,13 @@ public class TinyNet implements EntityNet {
 	/**
 	 * Assembly one row of Map List to Entities, according net's configModels
 	 */
-	public void assemblyOneRowToEntities(Map<String, Object> oneRow) {
+	protected void addOneRowMapList(Map<String, Object> oneRow) {
 		for (TableModel model : this.getConfigModels().values()) {
 			Object entity = null;
 			String alias = model.getAlias();
 			if (StrUtils.isEmpty(alias))
 				throw new TinyNetException("No alias found for table '" + model.getTableName() + "'");
-
+			Set<String> loadedFields = new HashSet<String>();
 			for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 				for (ColumnModel col : model.getColumns()) {
 					if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
@@ -123,29 +137,90 @@ public class TinyNet implements EntityNet {
 						TinyNetException.assureNotEmpty(col.getEntityField(),
 								"EntityField not found for column '" + col.getColumnName() + "'");
 						ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
+						loadedFields.add(col.getEntityField());
 					}
 				}
 			}
 			if (entity != null)
-				this.addEntityAsNode(model, entity);
+				this.addOrJoinEntity(model, entity, loadedFields);
 		}
 	}
 
 	/**
 	 * Add an entity to TinyNet, if already have same PKEY entity exist, if old
-	 * entity field is null, will new new entity's value fill in
+	 * entity field is never loaded from database, will put new entity's value
 	 */
-	public void addEntityAsNode(TableModel model, Object entity) {
-		String id = TinyNetUtils.transferPKeysToID(model, entity);
-		System.out.println("ID="+id);
-		List<ParentRelation> parentIds = TinyNetUtils.transferFKeysToParentIDs(model, entity);
-		System.out.println("ID="+id);
-		// TODO here
-		// Node node = new Node(id, entity, parentIds);
-		// addOrJoinOneNode(model, node);
+	protected void addOrJoinEntity(TableModel model, Object entity, Set<String> loadedFields) {
+		String id = TinyNetUtils.joinPKeyValues(model, entity);
+		List<ParentRelation> parentRelations = TinyNetUtils.transferFKeysToParentRelations(model, entity);
+		Node node = new Node();
+		node.setEntity(entity);
+		node.setParentRelations(parentRelations);
+		node.setId(id);
+		node.setLoadedFields(loadedFields);
+		addOrJoinOneNodeToBody(node);
 	}
 
-	protected Node getExistedNode(Node node) {
+	/**
+	 * Add or join an node into TinyNet body, if old node with same ID already
+	 * exist, join loaded fields and ParentRelation
+	 */
+	protected void addOrJoinOneNodeToBody(Node node) {
+		Node oldNode = findIfNodeAlreadyExist(node);
+		if (oldNode == null)
+			this.addNode(node);
+		else {
+			// join loaded fields
+			Set<String> newFields = node.getLoadedFields();
+			if (newFields == null || newFields.isEmpty())
+				return;
+			Set<String> oldFields = oldNode.getLoadedFields();
+			if (oldFields == null) {
+				oldFields = new HashSet<String>();
+				oldNode.setLoadedFields(oldFields);
+			}
+			for (String newField : newFields)
+				if (!oldFields.contains(newField)) {
+					oldFields.add(newField);
+					Object newValue = ClassCacheUtils.readValueFromBeanField(node.getEntity(), newField);
+					ClassCacheUtils.writeValueToBeanField(oldNode.getEntity(), newField, newValue);
+				}
+
+			// join parentRelations
+			List<ParentRelation> newParentRelations = node.getParentRelations();
+			if (newParentRelations == null || newParentRelations.isEmpty())
+				return;
+			List<ParentRelation> oldParentRelations = oldNode.getParentRelations();
+
+			if (oldParentRelations == null) {
+				oldParentRelations = new ArrayList<ParentRelation>();
+				oldNode.setParentRelations(oldParentRelations);
+			}
+			for (ParentRelation newP : newParentRelations) {
+				for (ParentRelation oldP : oldParentRelations) {
+					if (newP.equals(oldP))
+						break;
+				}
+				oldParentRelations.add(newP);
+			}
+		}
+	}
+
+	/** Add one node into EntityNet body */
+	protected void addNode(Node node) {
+		TinyNetException.assureNotNull(node, "Can not add null node");
+		TinyNetException.assureNotNull(node.getEntity(), "Can not add node with null entity");
+		Class<?> entityClass = node.getEntity().getClass();
+		LinkedHashMap<String, Node> nodeMap = body.get(entityClass);
+		if (nodeMap == null) {
+			nodeMap = new LinkedHashMap<String, Node>();
+			body.put(entityClass, nodeMap);
+		}
+		nodeMap.put(node.getId(), node);
+	}
+
+	// ===============MISC. utils methods============
+	private Node findIfNodeAlreadyExist(Node node) {
 		if (node == null || node.getEntity() == null)
 			return null;
 		LinkedHashMap<String, Node> nodes = body.get(node.getEntity().getClass());
@@ -154,38 +229,10 @@ public class TinyNet implements EntityNet {
 		return nodes.get(node.getId());
 	}
 
-	protected void addNode(Node node) {
-		TinyNetException.assureNotNull(node, "Can not add null node");
-		TinyNetException.assureNotNull(node.getEntity(), "Can not add node with null entity");
-		Class<?> entityClass = node.getEntity().getClass();
-		LinkedHashMap<String, Node> nodes = body.get(entityClass);
-		if (nodes == null) {
-			nodes = new LinkedHashMap<String, Node>();
-			body.put(entityClass, nodes);
-		}
-		nodes.put(node.getId(), node);
-	}
-
-	/**
-	 * Add or join an node into TinyNet body, if node ID already exist, fill
-	 * not-null values of entity and add parentEntityIDs
-	 */
-	protected void addOrJoinOneNode(TableModel model, Node node) {
-		Node oldEntity = getExistedNode(node);
-		if (oldEntity != null) {// will not update fields, but joint parents
-			// TODO here
-			// Set<String> oldParents = oldEntity.getParentIDs();
-			// if (oldParents != null)
-			// oldParents.addAll(node.getParentIDs());
-		} else {
-			this.addNode(node);
-		}
-
-	}
-
 	// ============== query methods ================================
 
 	/** Return total how many nodes */
+	@Override
 	public int size() {
 		int size = 0;
 		for (LinkedHashMap<String, Node> map : body.values()) {
@@ -203,19 +250,21 @@ public class TinyNet implements EntityNet {
 	}
 
 	/** Return entity list in TinyNet which type is entityClass */
+	@Override
 	public <T> List<T> getEntityList(Class<T> entityClass) {
 		return TinyNetUtils.nodeList2EntityList(getNodeList(entityClass));
 	}
 
+	// ============= Find methods=============================
 	/**
-	 * In TinyNet, find target node list by given source nodeList and search
-	 * path
+	 * In TinyNet, find target node list by given source nodeList and search path
 	 */
-	public List<Node> findNodeList(List<Node> nodeList, SearchPath path) {
+	public List<Node> findNodes(List<Node> nodeList, Search path) {
 		return TinyNetUtils.findRelated(this, nodeList, path);
 	}
 
 	// ======getter & setter =======
+
 	public Map<Class<?>, TableModel> getConfigModels() {
 		return configModels;
 	}
@@ -230,6 +279,14 @@ public class TinyNet implements EntityNet {
 
 	public void setBody(Map<Class<?>, LinkedHashMap<String, Node>> body) {
 		this.body = body;
+	}
+
+	public Map<String, Map<String, Map<String, String>>> getChildCache() {
+		return childCache;
+	}
+
+	public void setChildCache(Map<String, Map<String, Map<String, String>>> childCache) {
+		this.childCache = childCache;
 	}
 
 }

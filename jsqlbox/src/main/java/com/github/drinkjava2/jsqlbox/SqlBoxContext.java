@@ -118,14 +118,14 @@ public class SqlBoxContext extends DbPro {
 	/**
 	 * Create a EntityNet instance, load all columns
 	 */
-	public EntityNet createEntityNet(Object... configObjects) {
+	public EntityNet loadEntityNet(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, false, configObjects);
 	}
 
 	/**
 	 * Create a EntityNet instance but only load PKey and FKeys columns into entity
 	 */
-	public EntityNet createKeyEntityNet(Object... configObjects) {
+	public EntityNet loadKeyEntityNet(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, true, configObjects);
 	}
 

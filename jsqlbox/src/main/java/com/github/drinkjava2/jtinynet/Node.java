@@ -11,11 +11,13 @@
  */
 package com.github.drinkjava2.jtinynet;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Node is a POJO represents a Node in entity net, Node allow have many parents,
- * but Node do not allow have child node, so "Many to one" is the only
+ * Node is the basic unit of entity net, a node allow have many parent nodes,
+ * but node do not allow have child node, so "Many to one" is the only
  * relationship allowed in EntityNet system, exact like Relational Database, so
  * it's easy to translate a Relational Database into an EntityNet.
  * 
@@ -31,17 +33,13 @@ public class Node {
 	/** The entity instance */
 	Object entity;
 
-	private List<ParentRelation> parentNodes;
+	/** How many fields loaded from database */
+	Set<String> loadedFields = new HashSet<String>();
 
-	public Node(String id, Object entity) {
-		this.id = id;
-		this.entity = entity;
-	}
+	/// ** Mark how many fields be modified */
+	// Set<String> modifiedFields;
 
-	public Node(String id, Object entity, List<ParentRelation> parentNodes) {
-		this(id, entity);
-		this.parentNodes = parentNodes;
-	}
+	private List<ParentRelation> parentRelations;
 
 	public String getId() {
 		return id;
@@ -59,12 +57,20 @@ public class Node {
 		this.entity = entity;
 	}
 
-	public List<ParentRelation> getParentNodes() {
-		return parentNodes;
+	public List<ParentRelation> getParentRelations() {
+		return parentRelations;
 	}
 
-	public void setParentNodes(List<ParentRelation> parentNodes) {
-		this.parentNodes = parentNodes;
+	public void setParentRelations(List<ParentRelation> parentRelations) {
+		this.parentRelations = parentRelations;
+	}
+
+	public Set<String> getLoadedFields() {
+		return loadedFields;
+	}
+
+	public void setLoadedFields(Set<String> loadedFields) {
+		this.loadedFields = loadedFields;
 	}
 
 }

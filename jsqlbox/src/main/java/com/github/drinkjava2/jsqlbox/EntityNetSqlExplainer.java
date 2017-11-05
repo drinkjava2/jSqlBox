@@ -63,8 +63,8 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance,
-	 * entityClass or entity Bean
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
+	 * or entity Bean
 	 * 
 	 * <pre>
 	 * 1. TableModel instance, will use it
@@ -95,8 +95,8 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -175,8 +175,8 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -185,15 +185,13 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	 */
 	public String explainNetQuery(SqlBoxContext ctx, String thesql) {
 		String sql = thesql;
-		int pos = sql.indexOf(".**");
-		if (pos < 0)
-			pos = sql.indexOf(".##");
-		if (pos < 0)
-			return sql;
 		TableModel[] configModels = objectConfigsToModels(ctx, netConfigObjects);
 		// if no netConfigObjects found, use database's meta data
 		if (configModels == null || configModels.length == 0)
 			configModels = ctx.getDbMetaTableModels();
+		int pos = sql.indexOf(".**");
+		if (pos < 0)
+			pos = sql.indexOf(".##");
 		while (pos >= 0) {
 			StringBuilder aliasSB = new StringBuilder();
 			for (int i = pos - 1; i >= 0; i--) {
