@@ -54,8 +54,8 @@ public class SqlBoxLogger {
 
 		if (commonLogger == null || commonLoggerWarnMethod == null) {
 			if (firstRun)
-				System.err
-						.println("SqlBoxLogger failed to load org.apache.commons.logging.LogFactory. Use JDK logger.");// NOSONAR
+				System.err// NOSONAR
+						.println("SqlBoxLogger failed to load org.apache.commons.logging.LogFactory. Use JDK logger.");
 			jdkLogger = Logger.getLogger(targetClass.getName());// use JDK log
 		} else if (firstRun)
 			System.out.println("org.apache.commons.logging.LogFactory loaded, SqlBoxLogger use it as logger.");// NOSONAR

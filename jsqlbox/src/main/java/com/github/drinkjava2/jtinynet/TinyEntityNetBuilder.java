@@ -27,21 +27,22 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * This is a EntityNetBuilder implementation to let jSqlBox know how to build
  * TinyNet
  */
+@SuppressWarnings("unchecked")
 public class TinyEntityNetBuilder implements EntityNetBuilder {
 	public static final TinyEntityNetBuilder instance = new TinyEntityNetBuilder();
 
 	@Override
-	public EntityNet createEntityNet() {
-		return new TinyNet();
+	public <T> T createEntityNet() {
+		return (T) (new TinyNet());
 	}
 
 	@Override
-	public EntityNet createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
-		return new TinyNet(listMap, configs);
+	public <T> T createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
+		return (T) (new TinyNet(listMap, configs));
 	}
 
 	@Override
-	public EntityNet createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
+	public <T> T createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
 		if (configObjects == null || configObjects.length == 0)
 			throw new TinyNetException("LoadNet() does not support empty netConfigs parameter");
 		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
@@ -60,7 +61,7 @@ public class TinyEntityNetBuilder implements EntityNetBuilder {
 			}
 			net.addMapList(mapList, t);
 		}
-		return net;
+		return (T) net;
 	}
 
 }

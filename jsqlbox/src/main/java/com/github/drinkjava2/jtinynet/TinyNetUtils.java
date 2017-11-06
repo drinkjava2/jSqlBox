@@ -29,18 +29,8 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 @SuppressWarnings("unchecked")
 public class TinyNetUtils {
 
-	/**
-	 * Search in EntityNet, return qualified entities
-	 * 
-	 * @param net The EntityNet
-	 * @param sourceEntity The source entities
-	 * @param targetEntityClass The target entity class
-	 * @param path The EntitySearchPath
-	 * @return qualified entities
-	 */
-	public static List<Node> findRelated(TinyNet net, List<Node> nodeList, Search path) {
-		return null;// TODO here
-	}
+ 
+ 
 
 	/**
 	 * Check if each TableModel has entityClass and Alias, if no, throw exception

@@ -22,10 +22,10 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public interface EntityNetBuilder {
 
 	/** Create a EntityNet instance */
-	public EntityNet createEntityNet();
+	public <T> T createEntityNet();
 
 	/** Create a EntityNet instance by given listMap and configs */
-	public EntityNet createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs);
+	public <T> T createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs);
 
 	/**
 	 * Create a EntityNet instance, load data from database buy given loadKeyOnly
@@ -38,5 +38,5 @@ public interface EntityNetBuilder {
 	 *            TableModel instance
 	 * @return The EntityNet
 	 */
-	public EntityNet createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects);
+	public <T> T createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects);
 }

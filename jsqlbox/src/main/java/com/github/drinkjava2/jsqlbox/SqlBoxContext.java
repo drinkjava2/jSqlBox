@@ -118,19 +118,19 @@ public class SqlBoxContext extends DbPro {
 	/**
 	 * Create a EntityNet instance, load all columns
 	 */
-	public EntityNet loadEntityNet(Object... configObjects) {
+	public <T> T loadEntityNet(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, false, configObjects);
 	}
 
 	/**
 	 * Create a EntityNet instance but only load PKey and FKeys columns into entity
 	 */
-	public EntityNet loadKeyEntityNet(Object... configObjects) {
+	public <T> T loadKeyEntityNet(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, true, configObjects);
 	}
 
 	/** Create a EntityNet by given list and netConfigs */
-	public EntityNet createEntityNet(List<Map<String, Object>> listMap, Object... configObjects) {
+	public <T> T createEntityNet(List<Map<String, Object>> listMap, Object... configObjects) {
 		TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
 		if (result == null || result.length == 0)
 			throw new SqlBoxException("No entity class config found");
@@ -138,10 +138,11 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
-	public EntityNet joinList(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
+	@SuppressWarnings("unchecked")
+	public <T> T joinList(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
 		try {
 			TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
-			return net.addMapList(listMap, result);
+			return (T)net.addMapList(listMap, result);
 		} finally {
 			EntityNetSqlExplainer.removeBindedTableModel(listMap);
 		}
@@ -189,6 +190,14 @@ public class SqlBoxContext extends DbPro {
 
 	public void setDbMetaTableModels(TableModel[] dbMetaTableModels) {
 		this.dbMetaTableModels = dbMetaTableModels;
+	}
+
+	public EntityNetBuilder getEntityNetBuilder() {
+		return entityNetBuilder;
+	}
+
+	public void setEntityNetBuilder(EntityNetBuilder entityNetBuilder) {
+		this.entityNetBuilder = entityNetBuilder;
 	}
 
 }

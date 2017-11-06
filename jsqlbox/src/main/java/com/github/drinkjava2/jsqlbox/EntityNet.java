@@ -17,16 +17,15 @@ import java.util.Map;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * Net represents a graph structure
+ * EntityNet represents a graph structure
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
 public interface EntityNet {
-
 	/**
-	 * Add a List<Map<String, Object>> list to current entity net, modelConfigs
-	 * parameter is optional
+	 * Add a List<Map<String, Object>> list to entity net, modelConfigs parameter is
+	 * optional
 	 *
 	 * @param listMap
 	 * @param modelConfigs
@@ -34,9 +33,4 @@ public interface EntityNet {
 	 */
 	public EntityNet addMapList(List<Map<String, Object>> listMap, TableModel... modelConfigs);
 
-	/** Return total how many nodes in entity net */
-	public int size();
-
-	/** Return entity list in EntityNet which type is entityClass */
-	public <T> List<T> getEntityList(Class<T> entityClass);
 }

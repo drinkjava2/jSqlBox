@@ -36,7 +36,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public class EntityNetSqlExplainer implements SqlExplainSupport {
 	private Object[] netConfigObjects;
 	private TableModel[] generatedTableModels;
-	public static ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
+	public static final ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
 		@Override
 		protected Map<Object, Object> initialValue() {
 			return new HashMap<Object, Object>();

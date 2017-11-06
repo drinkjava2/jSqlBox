@@ -219,7 +219,7 @@ public class TinyNet implements EntityNet {
 		nodeMap.put(node.getId(), node);
 	}
 
-	// ===============MISC. utils methods============
+	// ===============MISC methods============
 	private Node findIfNodeAlreadyExist(Node node) {
 		if (node == null || node.getEntity() == null)
 			return null;
@@ -229,10 +229,7 @@ public class TinyNet implements EntityNet {
 		return nodes.get(node.getId());
 	}
 
-	// ============== query methods ================================
-
 	/** Return total how many nodes */
-	@Override
 	public int size() {
 		int size = 0;
 		for (LinkedHashMap<String, Node> map : body.values()) {
@@ -250,17 +247,22 @@ public class TinyNet implements EntityNet {
 	}
 
 	/** Return entity list in TinyNet which type is entityClass */
-	@Override
 	public <T> List<T> getEntityList(Class<T> entityClass) {
 		return TinyNetUtils.nodeList2EntityList(getNodeList(entityClass));
 	}
 
 	// ============= Find methods=============================
 	/**
-	 * In TinyNet, find target node list by given source nodeList and search path
+	 * According given nodeList and Search condition, find related nodes
+	 * 
+	 * @param net The EntityNet
+	 * @param sourceEntity The source entities
+	 * @param targetEntityClass The target entity class
+	 * @param path The EntitySearchPath
+	 * @return qualified entities
 	 */
-	public List<Node> findNodes(List<Node> nodeList, Search path) {
-		return TinyNetUtils.findRelated(this, nodeList, path);
+	public List<Node> findNodes(List<Node> nodeList, Condition... checks) {
+		return null;
 	}
 
 	// ======getter & setter =======
