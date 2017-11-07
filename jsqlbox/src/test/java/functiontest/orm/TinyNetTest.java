@@ -176,7 +176,11 @@ public class TinyNetTest extends TestBase {
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
-
+		
+		User u= new User();
+		u.setId("u1");
+		
+		net.findEntityList(srcEntityList, conditions);//TODO here
 		
 	}
 
