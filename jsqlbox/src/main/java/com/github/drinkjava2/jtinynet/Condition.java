@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jtinynet;
 
+import com.github.drinkjava2.jdialects.StrUtils;
+
 /**
  * Condition store search condition <br/>
  * 
@@ -22,15 +24,18 @@ package com.github.drinkjava2.jtinynet;
  */
 public class Condition {
 	/**
-	 * Can only be "C" or "P" or "O" <br/>
-	 * C:Child<br/>
-	 * P:Parent<br/>
-	 * O:Other<br/>
+	 * Can only be "C" or "P", C:Child P:Parent<br/>
 	 */
 	protected String type;
 
-	/** The reference table name */
+	/** The reference table name, if set table, then no need set entityClass */
 	protected String table;
+
+	/**
+	 * The reference table corresponding entity class, if set entityClass , then
+	 * no need set table
+	 */
+	protected Class<?> entityClass;
 
 	/** The fkey column names */
 	protected String columns;
@@ -38,7 +43,8 @@ public class Condition {
 	/** allowed keep in result list */
 	protected Boolean keep = true;
 
-	protected Condition[] subConditions;
+	/** Next condition, used for build a linked conditions chain */
+	protected Condition nextCondition;
 
 	public Condition() {
 	}
@@ -56,38 +62,65 @@ public class Condition {
 		this.keep = keep;
 	}
 
-	/**
-	 * add a subCondition into existed condition's subConditions, and return
-	 * subCondition just added, not the current condition
-	 */
-	public Condition link(Condition condition) {
-		TinyNetException.assureNotNull(condition, "condition can not be null");
-		if (subConditions == null) {
-			subConditions = new Condition[] { condition };
-		} else {
-			int length = subConditions.length;
-			Condition[] newArray = new Condition[length + 1];
-			System.arraycopy(subConditions, 0, newArray, 0, length);
-			newArray[length] = condition;
-			subConditions = newArray;
-		}
-		return condition;
+	/** Shortcut link style method to set type to "C" Child */
+	public Condition c() {
+		this.type = "C";
+		return this;
+	}
+
+	/** Shortcut link style method to set type to "P" Parent */
+	public Condition p() {
+		this.type = "p";
+		return this;
 	}
 
 	/**
-	 * add a subCondition into subConditions
+	 * Shortcut link style method to set target class
+	 * 
+	 * @param table
+	 *            The table name
+	 * @return self
 	 */
-	public void add(Condition condition) {
-		TinyNetException.assureNotNull(condition, "condition can not be null");
-		if (subConditions == null) {
-			subConditions = new Condition[] { condition };
-		} else {
-			int length = subConditions.length;
-			Condition[] newArray = new Condition[length + 1];
-			System.arraycopy(subConditions, 0, newArray, 0, length);
-			newArray[length] = condition;
-			subConditions = newArray;
+	public Condition target(String table) {
+		this.table = table;
+		return this;
+	}
+
+	/**
+	 * Shortcut link style method to set target class
+	 * 
+	 * @param entityClass
+	 *            The target entity class
+	 * @return self
+	 */
+	public Condition target(Class<?> entityClass) {
+		this.entityClass = entityClass;
+		return this;
+	}
+
+	/** Shortcut link style method to set FKey Column Names */
+	public Condition col(String... fkeyColumnNames) {
+		for (String colName : fkeyColumnNames) {
+			if (!StrUtils.isEmpty(this.getColumns()))
+				this.columns += TinyNet.COMPOUND_COLUMNNAME_SEPARATOR;
+			else
+				this.columns = colName;
+			this.columns += colName;
 		}
+		return this;
+	}
+
+	/**
+	 * Set the next condition, after this condition be executed, query will run
+	 * based on next condition
+	 */
+	/**
+	 * @param nextCondition
+	 * @return nextCondition
+	 */
+	public Condition link(Condition nextCondition) {
+		this.nextCondition = nextCondition;
+		return nextCondition;
 	}
 
 	/**
@@ -96,9 +129,10 @@ public class Condition {
 	 */
 	public boolean check(Node node) {
 		return true;
-	};
+	}
 
 	// getter & setter======
+
 	public String getType() {
 		return type;
 	}
@@ -115,6 +149,14 @@ public class Condition {
 		this.table = table;
 	}
 
+	public Class<?> getEntityClass() {
+		return entityClass;
+	}
+
+	public void setEntityClass(Class<?> entityClass) {
+		this.entityClass = entityClass;
+	}
+
 	public String getColumns() {
 		return columns;
 	}
@@ -123,12 +165,19 @@ public class Condition {
 		this.columns = columns;
 	}
 
-	public Condition[] getSubConditions() {
-		return subConditions;
+	public Boolean getKeep() {
+		return keep;
 	}
 
-	public void setSubConditions(Condition[] subConditions) {
-		this.subConditions = subConditions;
+	public void setKeep(Boolean keep) {
+		this.keep = keep;
 	}
 
+	public Condition getNextCondition() {
+		return nextCondition;
+	}
+
+	public void setNextCondition(Condition nextCondition) {
+		this.nextCondition = nextCondition;
+	}
 }

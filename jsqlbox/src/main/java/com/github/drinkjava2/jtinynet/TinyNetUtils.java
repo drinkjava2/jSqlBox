@@ -29,11 +29,24 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 @SuppressWarnings("unchecked")
 public class TinyNetUtils {
 
- 
- 
+	/**
+	 * According given inputList and Search condition, find related nodes and
+	 * add them in resultList
+	 * 
+	 * @param inputList
+	 *            The source node list
+	 * @param condition
+	 *            The search condition, note one condition many link another
+	 *            condition, it's called condition chain
+	 * @return The target node list
+	 */
+	public static void findNodes(TinyNet net, List<Node> inputList, List<Node> resultList, Condition condition) {
+
+	}
 
 	/**
-	 * Check if each TableModel has entityClass and Alias, if no, throw exception
+	 * Check if each TableModel has entityClass and Alias, if no, throw
+	 * exception
 	 */
 	public static void checkModelHasEntityClassAndAlias(TableModel... models) {
 		if (models != null && models.length > 0)// Join models
@@ -83,10 +96,10 @@ public class TinyNetUtils {
 				if (fkeyValues.length() > 0)
 					fkeyValues += TinyNet.COMPOUND_VALUE_SEPARATOR;
 				fkeyValues += fKeyValue;// NOSONAR
-				
+
 				if (fkeyColumns.length() > 0)
 					fkeyColumns += TinyNet.COMPOUND_COLUMNNAME_SEPARATOR;
-				fkeyColumns += colNames;// NOSONAR 
+				fkeyColumns += colNames;// NOSONAR
 			}
 			if (!StrUtils.isEmpty(fkeyColumns) && !StrUtils.isEmpty(fkeyValues) && !StrUtils.isEmpty(refTable)) {
 				if (resultList == null)
@@ -103,6 +116,11 @@ public class TinyNetUtils {
 		for (Node node : nodeList)
 			result.add((T) node.getEntity());
 		return result;
+	}
+
+	/** Convert a Entity list to Node List */
+	public static <T> List<Node> entityList2NodeList(TinyNet net, List<T> entityList) {
+		return null;//TODO here
 	}
 
 }

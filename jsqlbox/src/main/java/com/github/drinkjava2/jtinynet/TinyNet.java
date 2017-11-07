@@ -60,8 +60,8 @@ public class TinyNet implements EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
-	 * info related to database
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R
+	 * mapping info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -69,8 +69,9 @@ public class TinyNet implements EntityNet {
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
 	/**
-	 * childCache cache Child RelationShips, Child determined by 4 facts: selfID,
-	 * childClass, child's fkeyColumns, child's ID is the target need to cache
+	 * childCache cache Child RelationShips, Child determined by 4 facts:
+	 * selfID, childClass, child's fkeyColumns, child's ID is the target need to
+	 * cache
 	 * 
 	 * For example, a User "Sam" many have below 4 ChildRelationShips to another
 	 * user Tom, it means Sam is Tom's teacher, father, driver and boss:<br/>
@@ -82,8 +83,8 @@ public class TinyNet implements EntityNet {
 	 * 
 	 * To improve EntityNet initialisation speed, ChildCache will not be filled
 	 * until do a entity search and also parent nodes need exact in search path,
-	 * this is called "Delay Cache". Write to EntityNet may cause partial or whole
-	 * cache be cleared.
+	 * this is called "Delay Cache". Write to EntityNet may cause partial or
+	 * whole cache be cleared.
 	 */
 	private Map<String, Map<String, Map<String, String>>> childCache = new HashMap<String, Map<String, Map<String, String>>>();
 
@@ -95,8 +96,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to current
-	 * Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to
+	 * current Net, modelConfigs parameter is optional
 	 */
 	@Override
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
@@ -252,17 +253,39 @@ public class TinyNet implements EntityNet {
 	}
 
 	// ============= Find methods=============================
+	public <T> List<T> findEntityList(List<T> srcEntityList, Condition... conditions) {
+		List<Node> srcNodeList = TinyNetUtils.entityList2NodeList(this, srcEntityList);
+		List<Node> resultNodeList = findNodes(srcNodeList, conditions);
+		return TinyNetUtils.nodeList2EntityList(resultNodeList);//TODO here
+	}
+
 	/**
-	 * According given nodeList and Search condition, find related nodes
+	 * According given nodeList and Search condition, find related nodes,
+	 * multiple conditions will execute multiple path searches, result list will
+	 * be the union of each search
 	 * 
-	 * @param net The EntityNet
-	 * @param sourceEntity The source entities
-	 * @param targetEntityClass The target entity class
-	 * @param path The EntitySearchPath
-	 * @return qualified entities
+	 * @param inputList
+	 *            The source node list
+	 * @param conditions
+	 *            The search condition
+	 * @return The target node list
 	 */
-	public List<Node> findNodes(List<Node> nodeList, Condition... checks) {
-		return null;
+	public List<Node> findNodes(List<Node> inputList, Condition... conditions) {
+		if (conditions == null || conditions.length == 0)
+			throw new TinyNetException("Search condition can not be null");
+		if (inputList == null || inputList.size() == 0)
+			return new ArrayList<Node>();
+		if (conditions.length == 1) {
+			List<Node> resultList = new ArrayList<Node>();
+			TinyNetUtils.findNodes(this, inputList, resultList, conditions[0]);
+			return resultList;
+		}
+		List<Node> summaryResultList = new ArrayList<Node>();
+		for (Condition condition : conditions) {
+			List<Node> oneSearchResult = findNodes(inputList, condition);
+			summaryResultList.addAll(oneSearchResult);
+		}
+		return summaryResultList;
 	}
 
 	// ======getter & setter =======

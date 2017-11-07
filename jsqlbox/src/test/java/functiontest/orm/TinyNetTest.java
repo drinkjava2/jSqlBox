@@ -126,7 +126,7 @@ public class TinyNetTest extends TestBase {
 	}
 
 	@Test
-	public void testCreateTinyNet() {
+	public void testloadEntityNet() {
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
@@ -139,7 +139,7 @@ public class TinyNetTest extends TestBase {
 	}
 
 	@Test
-	public void testLoadKeyTinyNet() {
+	public void testloadKeyEntityNet() {
 		TinyNet net = ctx.loadKeyEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
@@ -169,6 +169,15 @@ public class TinyNetTest extends TestBase {
 		Assert.assertEquals(900, mapList3.size());
 		ctx.joinList(net, mapList3);
 		Assert.assertEquals(37, net.size());
+	}
+
+	@Test
+	public void testFindNodes() {
+		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+				UserRole.class, RolePrivilege.class);
+		Assert.assertEquals(37, net.size());
+
+		
 	}
 
 	//@formatter:off
