@@ -61,7 +61,7 @@ public class TestBase {
 	}
 
 	public void quietExecuteDDLs(String[] ddls) {
-		for (String sql : ddls) { 
+		for (String sql : ddls) {
 			try {
 				ctx.nExecute(sql);
 			} catch (Exception e) {

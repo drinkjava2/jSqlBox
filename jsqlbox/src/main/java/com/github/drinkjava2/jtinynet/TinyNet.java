@@ -28,26 +28,27 @@ import com.github.drinkjava2.jsqlbox.EntityNet;
 
 /**
  * jTinyNet project is the default implementation of EntityNet in jSqlBox, it's
- * a memory based entity net, can be called "graph database". Not like Neo4j can
- * write to disk file, jTinyNet is only a pure memory graph database, it's 1:1
- * mapping to relationship database's tables, the relationship in Neoj4 is call
- * "Edge", but in jTinyNet is still called relationship, just exactly use the
- * existed relationship database's foreign key constraints. If want create
- * relationship between nodes but do not want output FKey constraint DDL, can
- * build a fake FKeyModel by setting "ddl=false" (see jDialects project).
+ * a memory based Object net, can kind of be called "Graph Database". Not like
+ * Neo4j can write to disk file, jTinyNet is only a memory graph 1:1 mapping to
+ * relational database's tables, the relationship in Neo4j is call "Edge", but
+ * in jTinyNet is still called relationship, just exactly use the existed
+ * relational database's foreign key constraints. If want use jTinyNet but don't
+ * want output FKey constraint in DDL, can build fake FKeyModels by setting
+ * "ddl=false" (see jDialects project).
  * 
- * There are some benefits to use a graph database:<br/>
- * 1) Much quicker browse speed between connected nodes than database. <br/>
- * 2) Works in memory, can be used as query cache. <br/>
- * 3) No need write SQLs. <br/>
+ * Some benefits to use a graph database than relational database:<br/>
+ * 1) No need write complicated join SQLs. <br/>
+ * 2) Working in memory, much quicker browse speed between connected nodes than
+ * traditional database. <br/>
+ * 3) Can use pure Java language do query operation, detail see "Path" query.
  * 
- * In jTinyNet, do complicated search still use pure Java language, jTinyNet
- * does not support Cypher language because it's too complicated and too hard to
- * me, another reason is cypher does not support refactoring.
+ * jTinyNet does not support Cypher language because Cypher is designed for huge
+ * graph structure data, but jTinyNet is designed for regular relational
+ * database with usually no more than hundreds tables.
  * 
- * TinyNet class is not thread safe. If want use it as a global Cache,
+ * TinyNet class is not thread safe. If want use it as a global cache,
  * programmer need use synchronized method to serialize access it, like use a
- * HashMap in multiple thread program.
+ * HashMap in multiple thread environment.
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -60,8 +61,8 @@ public class TinyNet implements EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of EntityNet, and also store O-R
-	 * mapping info related to database
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
+	 * info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -69,26 +70,16 @@ public class TinyNet implements EntityNet {
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
 	/**
-	 * childCache cache Child nodes, Child determined by 4 facts: selfID,
-	 * childClass, child's fkeyColumns, child's ID is the target need to cache
+	 * childCache cache Child nodes<br/>
 	 * 
-	 * For example, a User "Sam" many have below 4 ChildRelationShips to another
-	 * user Tom, it means Sam is Tom's teacher, father, driver and boss:<br/>
+	 * To improve EntityNet loading speed, ChildCache will not be filled until: 1)Do
+	 * a search operation 2) Parent nodes exact in search path 3)Path has a unique
+	 * ID which get by path.getUniqueIdString() method
 	 * 
-	 * <Sam, <student_tb, <teacher_fisrtName+lastName, Tom_li> <br/>
-	 * <Sam, <student_tb, <father_fisrtName+lastName, Tom_li> <br/>
-	 * <Sam, <user_tb, <driver_fisrtName+lastName, Tom_li> <br/>
-	 * <Sam, <employee_tb, <boss_fisrtName+lastName, Tom_li> <br/>
-	 * 
-	 * To improve EntityNet initialisation speed, ChildCache will not be filled
-	 * until do a entity search and also parent nodes need exact in search path,
-	 * this is called "Delay Cache". Write to EntityNet may cause partial or
-	 * whole cache be cleared.
+	 * Write to EntityNet may cause partial or whole query cache be cleared.
 	 */
+	// NodeId , PathId, ChildNodeIDs
 	private Map<String, Map<String, Map<String, String>>> childCache = new HashMap<String, Map<String, Map<String, String>>>();
-	
-	//           id , pathName, childIDs       
-	private Map<String, Map<String, Map<String, String>>> pathCaches = new HashMap<String, Map<String, Map<String, String>>>();
 
 	public TinyNet() {
 	}
@@ -98,8 +89,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to
-	 * current Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to current
+	 * Net, modelConfigs parameter is optional
 	 */
 	@Override
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
@@ -268,14 +259,12 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * According given nodeList and Search condition, find related nodes,
-	 * multiple conditions will execute multiple path searches, result list will
-	 * be the union of each search
+	 * According given nodeList and Search condition, find related nodes, multiple
+	 * conditions will execute multiple path searches, result list will be the union
+	 * of each search
 	 * 
-	 * @param inputList
-	 *            The source node list
-	 * @param conditions
-	 *            The search condition
+	 * @param inputList The source node list
+	 * @param conditions The search condition
 	 * @return The target node list
 	 */
 	public List<Node> findNodes(List<Node> inputList, Path... conditions) {

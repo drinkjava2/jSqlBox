@@ -180,7 +180,7 @@ public class TinyNetTest extends TestBase {
 
 		User u = new User();
 		u.setId("u1");
-		net.findEntityList(u, new Path(Email.class));
+		net.findEntityList(u, new Path("C", Email.class));
 	}
 
 	//@formatter:off
