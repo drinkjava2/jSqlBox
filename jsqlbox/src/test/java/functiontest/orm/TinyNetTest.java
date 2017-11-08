@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.Node;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
@@ -176,12 +177,10 @@ public class TinyNetTest extends TestBase {
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
-		
-		User u= new User();
+
+		User u = new User();
 		u.setId("u1");
-		
-		net.findEntityList(srcEntityList, conditions);//TODO here
-		
+		net.findEntityList(u, new Path(Email.class));
 	}
 
 	//@formatter:off

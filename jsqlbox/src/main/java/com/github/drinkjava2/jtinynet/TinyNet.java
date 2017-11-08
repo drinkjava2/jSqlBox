@@ -69,9 +69,8 @@ public class TinyNet implements EntityNet {
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
 	/**
-	 * childCache cache Child RelationShips, Child determined by 4 facts:
-	 * selfID, childClass, child's fkeyColumns, child's ID is the target need to
-	 * cache
+	 * childCache cache Child nodes, Child determined by 4 facts: selfID,
+	 * childClass, child's fkeyColumns, child's ID is the target need to cache
 	 * 
 	 * For example, a User "Sam" many have below 4 ChildRelationShips to another
 	 * user Tom, it means Sam is Tom's teacher, father, driver and boss:<br/>
@@ -87,6 +86,9 @@ public class TinyNet implements EntityNet {
 	 * whole cache be cleared.
 	 */
 	private Map<String, Map<String, Map<String, String>>> childCache = new HashMap<String, Map<String, Map<String, String>>>();
+	
+	//           id , pathName, childIDs       
+	private Map<String, Map<String, Map<String, String>>> pathCaches = new HashMap<String, Map<String, Map<String, String>>>();
 
 	public TinyNet() {
 	}
@@ -253,10 +255,16 @@ public class TinyNet implements EntityNet {
 	}
 
 	// ============= Find methods=============================
-	public <T> List<T> findEntityList(List<T> srcEntityList, Condition... conditions) {
+	public <T> List<T> findEntityList(Object entity, Path... conditions) {
+		List<Node> srcNodeList = TinyNetUtils.entity2NodeList(this, entity);
+		List<Node> resultNodeList = findNodes(srcNodeList, conditions);
+		return TinyNetUtils.nodeList2EntityList(resultNodeList);
+	}
+
+	public <T> List<T> findEntityList(List<T> srcEntityList, Path... conditions) {
 		List<Node> srcNodeList = TinyNetUtils.entityList2NodeList(this, srcEntityList);
 		List<Node> resultNodeList = findNodes(srcNodeList, conditions);
-		return TinyNetUtils.nodeList2EntityList(resultNodeList);//TODO here
+		return TinyNetUtils.nodeList2EntityList(resultNodeList);
 	}
 
 	/**
@@ -270,7 +278,7 @@ public class TinyNet implements EntityNet {
 	 *            The search condition
 	 * @return The target node list
 	 */
-	public List<Node> findNodes(List<Node> inputList, Condition... conditions) {
+	public List<Node> findNodes(List<Node> inputList, Path... conditions) {
 		if (conditions == null || conditions.length == 0)
 			throw new TinyNetException("Search condition can not be null");
 		if (inputList == null || inputList.size() == 0)
@@ -281,7 +289,7 @@ public class TinyNet implements EntityNet {
 			return resultList;
 		}
 		List<Node> summaryResultList = new ArrayList<Node>();
-		for (Condition condition : conditions) {
+		for (Path condition : conditions) {
 			List<Node> oneSearchResult = findNodes(inputList, condition);
 			summaryResultList.addAll(oneSearchResult);
 		}

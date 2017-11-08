@@ -40,8 +40,8 @@ public class TinyNetUtils {
 	 *            condition, it's called condition chain
 	 * @return The target node list
 	 */
-	public static void findNodes(TinyNet net, List<Node> inputList, List<Node> resultList, Condition condition) {
-
+	public static void findNodes(TinyNet net, List<Node> inputList, List<Node> resultList, Path condition) {
+		// TODO here
 	}
 
 	/**
@@ -119,8 +119,13 @@ public class TinyNetUtils {
 	}
 
 	/** Convert a Entity list to Node List */
+	public static <T> List<Node> entity2NodeList(TinyNet net, Object entity) {
+		return null;// TODO here
+	}
+
+	/** Convert a Entity list to Node List */
 	public static <T> List<Node> entityList2NodeList(TinyNet net, List<T> entityList) {
-		return null;//TODO here
+		return null;// TODO here
 	}
 
 }
