@@ -46,36 +46,38 @@ public class Path {
 	private Path nextPath;
 
 	/** Not allow cache */
-	private Boolean notCache;
+	private Boolean cacheable = true;
 
 	private void validParam() {
 		if (!("C".equalsIgnoreCase(type) || "P".equalsIgnoreCase(type)))
-			throw new TinyNetException("Type can only be 'C' or 'P', means child or parent path");
-		if (target == null)
-			throw new TinyNetException("Target can not be null");
+			throw new TinyNetException("Type can only be 'C' or 'P', 'C' means child, 'P' means parent path");
+		if (target == null || "".equals(target))
+			throw new TinyNetException("Target can not be null or empty");
 		if (input == null || output == null)
 			throw new TinyNetException("input or output can not be null, need be Boolean type");
 	}
 
 	public Path(String type, Object target, Boolean input, Boolean output, Object checker, String... columns) {
-		validParam();
 		this.type = type;
 		this.target = target;
 		this.input = input;
 		this.output = output;
 		this.checker = checker;
 		this.columns = columns;
+		validParam();
 	}
 
 	public Path(String type, Object target, String... columns) {
 		this.type = type;
 		this.target = target;
 		this.columns = columns;
+		validParam();
 	}
 
 	public Path(String type, Object target) {
 		this.type = type;
 		this.target = target;
+		validParam();
 	}
 
 	public String getUniqueIdString() {
@@ -85,7 +87,7 @@ public class Path {
 			if (StrUtils.isEmpty(next))
 				return null;
 		}
-		if (notCache)
+		if (!cacheable)
 			return null;
 		if (checker != null && checker instanceof Checker)
 			return null;
@@ -187,12 +189,12 @@ public class Path {
 		return this;
 	}
 
-	public Boolean getNotCache() {
-		return notCache;
+	public Boolean getCacheable() {
+		return cacheable;
 	}
 
-	public Path setNotCache(Boolean notCache) {
-		this.notCache = notCache;
+	public Path setCacheable(Boolean cacheable) {
+		this.cacheable = cacheable;
 		return this;
 	}
 

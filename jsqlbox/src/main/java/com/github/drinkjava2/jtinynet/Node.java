@@ -33,7 +33,7 @@ public class Node {
 	/** The entity instance */
 	Object entity;
 
-	/** How many fields loaded from database */
+	/** Mark how many fields loaded from database */
 	Set<String> loadedFields = new HashSet<String>();
 
 	/// ** Mark how many fields be modified */

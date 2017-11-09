@@ -12,9 +12,11 @@
 package com.github.drinkjava2.jtinynet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,8 +63,8 @@ public class TinyNet implements EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
-	 * info related to database
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R
+	 * mapping info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -72,14 +74,23 @@ public class TinyNet implements EntityNet {
 	/**
 	 * childCache cache Child nodes<br/>
 	 * 
-	 * To improve EntityNet loading speed, ChildCache will not be filled until: 1)Do
-	 * a search operation 2) Parent nodes exact in search path 3)Path has a unique
-	 * ID which get by path.getUniqueIdString() method
+	 * To improve EntityNet loading speed, ChildCache will not be filled until:
+	 * <br/>
+	 * 1)Do a search operation, and <br/>
+	 * 2) Parent nodes exact in search path, and <br/>
+	 * 3)Path has a unique ID which get by path.getUniqueIdString() method
 	 * 
 	 * Write to EntityNet may cause partial or whole query cache be cleared.
 	 */
 	// NodeId , PathId, ChildNodeIDs
-	private Map<String, Map<String, Map<String, String>>> childCache = new HashMap<String, Map<String, Map<String, String>>>();
+	private Map<String, Map<Integer, String>> childCache = new HashMap<String, Map<Integer, String>>();
+
+	/**
+	 * Use a Integer to replace String as path id can save memory
+	 */
+	private int currentPathId = 1;
+
+	private Map<String, Integer> pathIdCache = new HashMap<String, Integer>();
 
 	public TinyNet() {
 	}
@@ -89,8 +100,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to current
-	 * Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to
+	 * current Net, modelConfigs parameter is optional
 	 */
 	@Override
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
@@ -246,9 +257,9 @@ public class TinyNet implements EntityNet {
 	}
 
 	// ============= Find methods=============================
-	public <T> List<T> findEntityList(Object entity, Path... conditions) {
-		List<Node> srcNodeList = TinyNetUtils.entity2NodeList(this, entity);
-		List<Node> resultNodeList = findNodes(srcNodeList, conditions);
+	public <T> Set<T> findEntitySet(Object entity, Path... conditions) {
+		Set<Node> srcNodeList = TinyNetUtils.entity2NodeSet(this, entity);
+		Set<Node> resultNodeList = findNodes(srcNodeList, conditions);
 		return TinyNetUtils.nodeList2EntityList(resultNodeList);
 	}
 
@@ -259,30 +270,22 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * According given nodeList and Search condition, find related nodes, multiple
-	 * conditions will execute multiple path searches, result list will be the union
-	 * of each search
+	 * According given nodeList and Search condition, find related nodes,
+	 * multiple conditions will execute multiple path searches, result list will
+	 * be the union of each search
 	 * 
-	 * @param inputList The source node list
-	 * @param conditions The search condition
+	 * @param inputList
+	 *            The source node list
+	 * @param paths
+	 *            The search paths
 	 * @return The target node list
 	 */
-	public List<Node> findNodes(List<Node> inputList, Path... conditions) {
-		if (conditions == null || conditions.length == 0)
-			throw new TinyNetException("Search condition can not be null");
+	public Set<Node> findNodes(Collection<Node> inputList, Path path) {
+		if (path == null)
+			throw new TinyNetException("Search path can not be null");
 		if (inputList == null || inputList.size() == 0)
-			return new ArrayList<Node>();
-		if (conditions.length == 1) {
-			List<Node> resultList = new ArrayList<Node>();
-			TinyNetUtils.findNodes(this, inputList, resultList, conditions[0]);
-			return resultList;
-		}
-		List<Node> summaryResultList = new ArrayList<Node>();
-		for (Path condition : conditions) {
-			List<Node> oneSearchResult = findNodes(inputList, condition);
-			summaryResultList.addAll(oneSearchResult);
-		}
-		return summaryResultList;
+			return new LinkedHashSet<Node>();
+		return TinyNetUtils.findNodes(this, inputList, path);
 	}
 
 	// ======getter & setter =======
@@ -303,11 +306,11 @@ public class TinyNet implements EntityNet {
 		this.body = body;
 	}
 
-	public Map<String, Map<String, Map<String, String>>> getChildCache() {
+	public Map<String, Map<Integer, String>> getChildCache() {
 		return childCache;
 	}
 
-	public void setChildCache(Map<String, Map<String, Map<String, String>>> childCache) {
+	public void setChildCache(Map<String, Map<Integer, String>> childCache) {
 		this.childCache = childCache;
 	}
 

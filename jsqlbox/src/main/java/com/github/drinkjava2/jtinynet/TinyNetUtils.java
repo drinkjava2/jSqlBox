@@ -13,6 +13,7 @@ package com.github.drinkjava2.jtinynet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -35,13 +36,14 @@ public class TinyNetUtils {
 	 * 
 	 * @param inputList
 	 *            The source node list
-	 * @param condition
-	 *            The search condition, note one condition many link another
-	 *            condition, it's called condition chain
+	 * @param path
+	 *            The search path, one path can link another path to build a
+	 *            path chain
 	 * @return The target node list
 	 */
-	public static void findNodes(TinyNet net, List<Node> inputList, List<Node> resultList, Path condition) {
+	public static Set<Node> findNodes(TinyNet net, List<Node> inputList, List<Node> resultList, Path path) {
 		// TODO here
+		return null;
 	}
 
 	/**

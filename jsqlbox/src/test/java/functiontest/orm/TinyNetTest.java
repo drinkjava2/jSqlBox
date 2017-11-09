@@ -86,7 +86,6 @@ public class TinyNetTest extends TestBase {
 		new RolePrivilege().putValues("r2","p3").insert();	
 		new RolePrivilege().putValues("r3","p3").insert();
 		new RolePrivilege().putValues("r4","p1").insert();
-		
 		ctx.nBatchEnd(); //Batch insert end
 		//@formatter:on
 	}
@@ -180,7 +179,7 @@ public class TinyNetTest extends TestBase {
 
 		User u = new User();
 		u.setId("u1");
-		net.findEntityList(u, new Path("C", Email.class));
+		net.findEntityList(u, new Path("C", Email.class).nextPath("P", Address.class));
 	}
 
 	//@formatter:off
