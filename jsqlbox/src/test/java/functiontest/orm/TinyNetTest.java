@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.Node;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
@@ -94,7 +93,7 @@ public class TinyNetTest extends TestBase {
 	public void testJoinFields() {
 		TinyNet net = ctx.loadKeyEntityNet(User.class);
 		Assert.assertEquals(5, net.size());
-		List<User> users = net.getEntityList(User.class);
+		List<User> users = net.getAllEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
 		User u = new User();
@@ -104,7 +103,7 @@ public class TinyNetTest extends TestBase {
 		ctx.joinList(net, listMap);
 
 		Assert.assertEquals(5, net.size());
-		users = net.getEntityList(User.class);
+		users = net.getAllEntityList(User.class);
 		Assert.assertNotNull(users.get(0).getUserName());
 	}
 
@@ -132,7 +131,7 @@ public class TinyNetTest extends TestBase {
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 
-		List<User> users = net.getEntityList(User.class);
+		List<User> users = net.getAllEntityList(User.class);
 		Assert.assertEquals(5, users.size());
 		Assert.assertEquals("user1", users.get(0).getUserName());
 		System.out.println(users.get(0).getUserName());
@@ -145,7 +144,7 @@ public class TinyNetTest extends TestBase {
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 
-		List<User> users = net.getEntityList(User.class);
+		List<User> users = net.getAllEntityList(User.class);
 		Assert.assertEquals(5, users.size());
 		Assert.assertEquals(null, users.get(0).getUserName());
 	}
@@ -179,7 +178,8 @@ public class TinyNetTest extends TestBase {
 
 		User u = new User();
 		u.setId("u1");
-		net.findEntityList(u, new Path("C", Email.class).nextPath("P", Address.class));
+		// net.findNodeSet(u, new Path("C", Email.class).nextPath("P",
+		// Address.class));
 	}
 
 	//@formatter:off

@@ -24,7 +24,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * @since 1.0.0
  */
 public class Path {
-	/** Can only be "C":Child or "P".:Parent */
+	/** Can only be "S":Self, "C":Child, "P".:Parent */
 	private String type;
 
 	/** The reference table name or entity class */
@@ -50,7 +50,7 @@ public class Path {
 
 	private void validParam() {
 		if (!("C".equalsIgnoreCase(type) || "P".equalsIgnoreCase(type)))
-			throw new TinyNetException("Type can only be 'C' or 'P', 'C' means child, 'P' means parent path");
+			throw new TinyNetException("Type can only be 'S': Start, 'C':Child, 'P'.:Parent");
 		if (target == null || "".equals(target))
 			throw new TinyNetException("Target can not be null or empty");
 		if (input == null || output == null)

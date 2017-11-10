@@ -12,6 +12,8 @@
 package com.github.drinkjava2.jtinynet;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,22 +33,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public class TinyNetUtils {
 
 	/**
-	 * According given inputList and Search condition, find related nodes and
-	 * add them in resultList
-	 * 
-	 * @param inputList
-	 *            The source node list
-	 * @param path
-	 *            The search path, one path can link another path to build a
-	 *            path chain
-	 * @return The target node list
-	 */
-	public static Set<Node> findNodes(TinyNet net, List<Node> inputList, List<Node> resultList, Path path) {
-		// TODO here
-		return null;
-	}
-
-	/**
 	 * Check if each TableModel has entityClass and Alias, if no, throw
 	 * exception
 	 */
@@ -63,7 +49,14 @@ public class TinyNetUtils {
 	/**
 	 * Join PKey values into one String, used for node ID
 	 */
-	public static String joinPKeyValues(TableModel model, Object entity) {
+	public static String buildNodeId(TinyNet net, Object entity) {
+		return buildNodeId(net.getConfigModels().get(entity.getClass()), entity);
+	}
+
+	/**
+	 * Join PKey values into one String, used for node ID
+	 */
+	public static String buildNodeId(TableModel model, Object entity) {
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : model.getColumns()) {
 			if (col.getPkey() && !col.getTransientable()) {
@@ -112,22 +105,23 @@ public class TinyNetUtils {
 		return resultList;
 	}
 
-	/** Convert a Node list to Entity List */
-	public static <T> List<T> nodeList2EntityList(List<Node> nodeList) {
-		List<T> result = new ArrayList<T>();
-		for (Node node : nodeList)
+	/** Convert a Entity list to Node List */
+	public static Node entity2Node(TinyNet net, Object entity) {
+		return net.getBody().get(entity.getClass()).get(buildNodeId(net, entity));
+	}
+
+	public static <T> Set<T> nodes2EntitySet(Collection<Node> nodes) {
+		Set<T> result = new LinkedHashSet<T>();
+		for (Node node : nodes)
 			result.add((T) node.getEntity());
 		return result;
 	}
 
-	/** Convert a Entity list to Node List */
-	public static <T> List<Node> entity2NodeList(TinyNet net, Object entity) {
-		return null;// TODO here
-	}
-
-	/** Convert a Entity list to Node List */
-	public static <T> List<Node> entityList2NodeList(TinyNet net, List<T> entityList) {
-		return null;// TODO here
+	public static <T> List<T> nodes2EntityList(Collection<Node> nodes) {
+		List<T> result = new ArrayList<T>();
+		for (Node node : nodes)
+			result.add((T) node.getEntity());
+		return result;
 	}
 
 }
