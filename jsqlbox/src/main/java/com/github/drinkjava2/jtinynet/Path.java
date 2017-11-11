@@ -17,14 +17,14 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * Path store search condition path, one path can link to another path to build
  * a path chain <br/>
  * 
- * Sub class override check method can do a Java Native check for a Node to
- * determine if node can keep in result list
- * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
 public class Path {
-	/** Can only be "S":Self, "C":Child, "P".:Parent */
+	/**
+	 * Can only be "S": Self, "C":child, "P":parent, "P*":all parents, "C*":all
+	 * childs
+	 */
 	private String type;
 
 	/** The reference table name or entity class */
@@ -36,7 +36,10 @@ public class Path {
 	/** allowed keep in output list */
 	private Boolean output = true;
 
-	/** Checker class or Checker instance */
+	/**
+	 * Checker class or Checker instance, used to check if a node can be
+	 * selected
+	 */
 	private Object checker;
 
 	/** The fkey column names */
@@ -48,13 +51,16 @@ public class Path {
 	/** Not allow cache */
 	private Boolean cacheable = true;
 
-	private void validParam() {
-		if (!("C".equalsIgnoreCase(type) || "P".equalsIgnoreCase(type)))
-			throw new TinyNetException("Type can only be 'S': Start, 'C':Child, 'P'.:Parent");
-		if (target == null || "".equals(target))
-			throw new TinyNetException("Target can not be null or empty");
-		if (input == null || output == null)
-			throw new TinyNetException("input or output can not be null, need be Boolean type");
+	// ==================inside used fields======================
+	private Boolean checkerObjBuilt = false;
+
+	private Checker checkerObj;
+
+	private void validateType() {
+		if (!("S".equalsIgnoreCase(type) || "C".equalsIgnoreCase(type) || "P".equalsIgnoreCase(type)
+				|| "C*".equalsIgnoreCase(type) || "P*".equalsIgnoreCase(type)))
+			throw new TinyNetException(
+					"Type can only be 'S': Self, 'C':Child, 'P':Parent, 'C*':all childs, 'P*': all parents");
 	}
 
 	public Path(String type, Object target, Boolean input, Boolean output, Object checker, String... columns) {
@@ -64,33 +70,39 @@ public class Path {
 		this.output = output;
 		this.checker = checker;
 		this.columns = columns;
-		validParam();
+		validateType();
 	}
 
 	public Path(String type, Object target, String... columns) {
 		this.type = type;
 		this.target = target;
 		this.columns = columns;
-		validParam();
+		validateType();
 	}
 
 	public Path(String type, Object target) {
 		this.type = type;
 		this.target = target;
-		validParam();
+		validateType();
+	}
+
+	public Path(Object target) {
+		this.type = "S";
+		this.target = target;
+		validateType();
 	}
 
 	public String getUniqueIdString() {
 		String next = null;
+		if (!cacheable)
+			return null;
+		if (checker != null && checker instanceof Checker)
+			return null;
 		if (nextPath != null) {
 			next = nextPath.getUniqueIdString();
 			if (StrUtils.isEmpty(next))
 				return null;
 		}
-		if (!cacheable)
-			return null;
-		if (checker != null && checker instanceof Checker)
-			return null;
 		StringBuilder sb = new StringBuilder()//
 				.append("type:").append(type)//
 				.append(",target:").append(target)//
@@ -125,6 +137,23 @@ public class Path {
 		return next;
 	}
 
+	public Path nextPath(Object target) {
+		Path next = new Path(target);
+		this.setNextPath(next);
+		return next;
+	}
+
+	/** Get Checker instance */
+	public Checker getCheckerInstance() {
+		if (checkerObjBuilt)
+			return checkerObj;
+		else {
+			checkerObj = TinyNetUtils.getOrBuildChecker(checker);
+			checkerObjBuilt = true;
+			return checkerObj;
+		}
+	}
+
 	// =====Getter & Setter ==============
 	public String getType() {
 		return type;
@@ -132,6 +161,7 @@ public class Path {
 
 	public Path setType(String type) {
 		this.type = type;
+		this.validateType();
 		return this;
 	}
 

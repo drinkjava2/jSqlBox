@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
@@ -50,6 +51,10 @@ public class TinyNetUtils {
 	 * Join PKey values into one String, used for node ID
 	 */
 	public static String buildNodeId(TinyNet net, Object entity) {
+		if (entity == null)
+			return null;
+		if (net.getConfigModels() == null)
+			return null;
 		return buildNodeId(net.getConfigModels().get(entity.getClass()), entity);
 	}
 
@@ -57,6 +62,8 @@ public class TinyNetUtils {
 	 * Join PKey values into one String, used for node ID
 	 */
 	public static String buildNodeId(TableModel model, Object entity) {
+		if (model == null || entity == null)
+			return null;
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : model.getColumns()) {
 			if (col.getPkey() && !col.getTransientable()) {
@@ -105,20 +112,70 @@ public class TinyNetUtils {
 		return resultList;
 	}
 
-	/** Convert a Entity list to Node List */
-	public static Node entity2Node(TinyNet net, Object entity) {
-		return net.getBody().get(entity.getClass()).get(buildNodeId(net, entity));
+	public static Checker getOrBuildChecker(Object checker) {
+		if (checker == null)
+			return null;
+		if (checker instanceof Checker)
+			return (Checker) checker;
+		Class<Checker> c = (Class<Checker>) checker;
+		try {
+			return c.newInstance();
+		} catch (Exception e) {
+			throw new TinyNetException("Can not create instance of checker class " + checker);
+		}
 	}
 
-	public static <T> Set<T> nodes2EntitySet(Collection<Node> nodes) {
+	/** Convert a Entity list to Node List */
+	public static Node entity2Node(TinyNet net, Object entity) {
+		if (entity == null)
+			return null;
+		Map<String, Node> map = net.getBody().get(entity.getClass());
+		if (map == null)
+			return null;
+		return map.get(buildNodeId(net, entity));
+	}
+
+	/** Convert entity array to Node set */
+	public static Set<Node> entityArray2NodeSet(TinyNet net, Object... entities) {
+		Set<Node> result = new LinkedHashSet<Node>();
+		if (entities == null)
+			return result;
+		for (Object entity : entities) {
+			Node node = entity2Node(net, entity);
+			if (node != null)
+				result.add(node);
+		}
+		return result;
+	}
+
+	/** Convert entity array to Node set */
+	public static Set<Node> entityCollection2NodeSet(TinyNet net, Collection<Object> entities) {
+		Set<Node> result = new LinkedHashSet<Node>();
+		if (entities == null)
+			return result;
+		for (Object entity : entities) {
+			Node node = entity2Node(net, entity);
+			if (node != null)
+				result.add(node);
+		}
+		return result;
+	}
+
+	/** Convert a node collection to entity set */
+	public static <T> Set<T> nodeCollection2EntitySet(Collection<Node> nodes) {
 		Set<T> result = new LinkedHashSet<T>();
+		if (nodes == null)
+			return result;
 		for (Node node : nodes)
 			result.add((T) node.getEntity());
 		return result;
 	}
 
-	public static <T> List<T> nodes2EntityList(Collection<Node> nodes) {
+	/** Convert a node collection to entity list */
+	public static <T> List<T> nodeCollection2EntityList(Collection<Node> nodes) {
 		List<T> result = new ArrayList<T>();
+		if (nodes == null)
+			return result;
 		for (Node node : nodes)
 			result.add((T) node.getEntity());
 		return result;

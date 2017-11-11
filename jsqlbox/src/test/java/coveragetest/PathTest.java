@@ -11,6 +11,8 @@
  */
 package coveragetest;
 
+import java.util.Collection;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,15 +32,10 @@ public class PathTest {
 	private static class ChildChecker extends Checker {
 
 		@Override
-		public Boolean input(TinyNet tinyNet, Node node) {
+		public boolean check(TinyNet tinyNet, Node node, int level, Collection<Node> inputList,
+				Collection<Node> outputList) {
 			return true;
 		}
-
-		@Override
-		public Boolean output(TinyNet tinyNet, Node node) {
-			return true;
-		}
-
 	}
 
 	@Test
@@ -63,7 +60,6 @@ public class PathTest {
 				.nextPath("C", "bbb").nextPath("P", "ccc").setChecker(new ChildChecker());
 		System.out.println(p.getUniqueIdString());
 		Assert.assertNull(p.getUniqueIdString());
-
 	}
 
 }

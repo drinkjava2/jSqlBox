@@ -5,6 +5,7 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtinynet.Node;
+import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
 import config.TestBase;
@@ -178,6 +180,8 @@ public class TinyNetTest extends TestBase {
 
 		User u = new User();
 		u.setId("u1");
+		Set<User> users = net.findEntitySet(new Path(User.class));
+		System.out.println(users.size());
 		// net.findNodeSet(u, new Path("C", Email.class).nextPath("P",
 		// Address.class));
 	}

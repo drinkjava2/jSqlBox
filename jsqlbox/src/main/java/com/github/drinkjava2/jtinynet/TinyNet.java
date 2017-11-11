@@ -12,7 +12,6 @@
 package com.github.drinkjava2.jtinynet;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +69,7 @@ public class TinyNet implements EntityNet {
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
 	/** The body of the EntityNet */
+	// entityClass, nodeID, node
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
 	/** Enable query cache */
@@ -257,47 +257,111 @@ public class TinyNet implements EntityNet {
 
 	/** Return entity list in TinyNet which type is entityClass */
 	public <T> List<T> getAllEntityList(Class<T> entityClass) {
-		return TinyNetUtils.nodes2EntityList(getAllNodeCollection(entityClass));
+		return TinyNetUtils.nodeCollection2EntityList(getAllNodeCollection(entityClass));
 	}
 
 	/** Return entity set in TinyNet which type is entityClass */
 	public <T> Set<T> getAllEntitySet(Class<T> entityClass) {
-		return TinyNetUtils.nodes2EntitySet(getAllNodeCollection(entityClass));
+		return TinyNetUtils.nodeCollection2EntitySet(getAllNodeCollection(entityClass));
 	}
 
 	// ============= Find methods=============================
-	public Set<Node> findNodeSet(Object entity, Path path) {
-		if (entity == null)
-			return new LinkedHashSet<Node>();
-		Node node = TinyNetUtils.entity2Node(this, entity);
-		return findNodeSet(new LinkedHashSet<Node>(Arrays.asList(node)), path);
+	/** According given entity array, find related entity set */
+	public <T> Set<T> findEntitySet(Path path, Object... entities) {
+		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entities);
+		Set<Node> output = findNodeSet(path, input, null);
+		return TinyNetUtils.nodeCollection2EntitySet(output);
 	}
 
-	public Set<Node> findEntityNodeSet(Collection<Object> entities, Path path) {
-		Set<Node> nodeSrc = new LinkedHashSet<Node>();
-		for (Object entity : entities) {
+	/** According given entity collection, find related entity set */
+	public <T> Set<T> findEntitySet(Path path, Collection<Object> entityCollection) {
+		Set<Node> inputNodeSet = new LinkedHashSet<Node>();
+		for (Object entity : entityCollection) {
 			Node node = TinyNetUtils.entity2Node(this, entity);
 			if (node != null)
-				nodeSrc.add(node);
+				inputNodeSet.add(node);
 		}
-		return findNodeSet(nodeSrc, path);
+		Set<Node> nodeSet = findNodeSet(path, inputNodeSet, null);
+		return TinyNetUtils.nodeCollection2EntitySet(nodeSet);
 	}
 
+	/** The search level */
+	private int level = 0;
+
 	/**
-	 * According given nodeList and Search path, find related nodes
+	 * According given path and input Node Set, find related node set
 	 * 
-	 * @param src
-	 *            The source input list
-	 * @param paths
-	 *            The result node set
-	 * @return The target node set
+	 * @param path
+	 *            The Path
+	 * @param input
+	 *            The input node collection
+	 * @param output
+	 *            The output node collection
+	 * @return Related node set
 	 */
-	public Set<Node> findNodeSet(Collection<Node> nodeSrc, Path path) {
-		return null;
+	public Set<Node> findNodeSet(Path path, Collection<Node> input, Collection<Node> output) {
+		try {
+			level++;
+			if (path == null)
+				throw new TinyNetException("path can not be null.");
+			if (path.getTarget() == null || StrUtils.isEmpty(path.getTarget()))
+				throw new TinyNetException("In path, target can not be empty.");
+
+			TableModel model = null;
+			if (path.getTarget() instanceof String) {
+				String tbName = (String) path.getTarget();
+				for (Entry<Class<?>, TableModel> entry : configModels.entrySet()) {
+					TableModel mod = entry.getValue();
+					if (mod != null && tbName.equalsIgnoreCase(mod.getTableName())) {
+						model = mod;
+						break;
+					}
+				}
+			} else {// target is Class
+				if (!(path.getTarget() instanceof Class))
+					throw new TinyNetException("In path, target can only be table name string or entity class.");
+				model = this.configModels.get((Class<?>) path.getTarget());
+			}
+			if (model == null)
+				return new LinkedHashSet<Node>();// not found tableModel
+
+			if ("S".equalsIgnoreCase(path.getType())) {
+				if (level != 1)
+					throw new TinyNetException("'S' type can only be used on path start");
+				Set<Node> selected = new LinkedHashSet<Node>();
+				Collection<Node> nodesToCheck = getAllNodeCollection(model.getClass());
+				
+				//TODO Work at here
+				
+				
+				Checker checker = path.getCheckerInstance();
+				if (checker == null)
+					checker = DefaultChecker.instance;
+				for (Node node : nodesToCheck) {
+					if (checker.check(this, node, level, input, output)) {
+						selected.add(node);
+						if (input != null && path.getInput())
+							input.add(node);
+						if (output != null && path.getOutput())
+							output.add(node);
+					}
+				}
+				
+ 
+				return selected; 
+			}
+
+			else {
+
+			}
+
+			return null;
+		} finally {
+			level--;
+		}
 	}
 
 	// ======getter & setter =======
-
 	public Map<Class<?>, TableModel> getConfigModels() {
 		return configModels;
 	}
@@ -314,12 +378,36 @@ public class TinyNet implements EntityNet {
 		this.body = body;
 	}
 
-	public Map<String, Map<Integer, String>> getChildCache() {
+	public Boolean getCacheable() {
+		return cacheable;
+	}
+
+	public void setCacheable(Boolean cacheable) {
+		this.cacheable = cacheable;
+	}
+
+	public Map<String, Map<Integer, String>> getQueryCache() {
 		return queryCache;
 	}
 
-	public void setChildCache(Map<String, Map<Integer, String>> childCache) {
-		this.queryCache = childCache;
+	public void setQueryCache(Map<String, Map<Integer, String>> queryCache) {
+		this.queryCache = queryCache;
+	}
+
+	public int getCurrentPathId() {
+		return currentPathId;
+	}
+
+	public void setCurrentPathId(int currentPathId) {
+		this.currentPathId = currentPathId;
+	}
+
+	public Map<String, Integer> getPathIdCache() {
+		return pathIdCache;
+	}
+
+	public void setPathIdCache(Map<String, Integer> pathIdCache) {
+		this.pathIdCache = pathIdCache;
 	}
 
 }

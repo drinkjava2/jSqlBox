@@ -11,22 +11,27 @@
  */
 package com.github.drinkjava2.jtinynet;
 
+import java.util.Collection;
+
 /**
- * Checker used to check if a node can be put into input list and output list in
- * a Path query
- * 
+ * DefaultChecker always allow a node to put into input list or output list
+ *
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
 public class DefaultChecker extends Checker {
+	public static final Checker instance = new DefaultChecker();
 
 	@Override
-	public Boolean input(TinyNet tinyNet, Node node) {
+	public boolean check(TinyNet tinyNet, Node node, int level, Collection<Node> inputList,
+			Collection<Node> outputList) {
+		if (level > 500)
+			throw new TinyNetException("Search level beyond 500, this may caused by a circular reference path chain.");
+		if (inputList != null && inputList.size() > 100000)
+			throw new TinyNetException("Input list size >100000, this may often caused by careless programming.");
+		if (outputList != null && outputList.size() > 100000)
+			throw new TinyNetException("Output list size >100000, this may often caused by careless programming.");
 		return true;
 	}
 
-	@Override
-	public Boolean output(TinyNet tinyNet, Node node) {
-		return true;
-	}
 }

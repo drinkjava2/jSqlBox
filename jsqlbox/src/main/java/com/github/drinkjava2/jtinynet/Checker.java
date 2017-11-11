@@ -11,16 +11,27 @@
  */
 package com.github.drinkjava2.jtinynet;
 
+import java.util.Collection;
+
 /**
- * Checker used to check if a node can be put into input list and output list in
- * a Path query
+ * Checker used to check if a node allowed to be put into input list or output
+ * list
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
 public abstract class Checker {
 
-	public abstract Boolean input(TinyNet tinyNet, Node node);
+	/**
+	 * Check if a node allowed to be put into input list or output list, if
+	 * allowed, then determined by Path's input & output property
+	 * 
+	 * @param tinyNet
+	 * @param node
+	 * @param level
+	 * @param inputList
+	 * @param outputList
+	 */
+	public abstract boolean check(TinyNet tinyNet, Node node, int level, Collection<Node> inputList, Collection<Node> outputList);
 
-	public abstract Boolean output(TinyNet tinyNet, Node node);
 }
