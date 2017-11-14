@@ -112,12 +112,12 @@ public class TinyNetUtils {
 		return resultList;
 	}
 
-	public static Checker getOrBuildChecker(Object checker) {
+	public static BeanValidator getOrBuildChecker(Object checker) {
 		if (checker == null)
 			return null;
-		if (checker instanceof Checker)
-			return (Checker) checker;
-		Class<Checker> c = (Class<Checker>) checker;
+		if (checker instanceof BeanValidator)
+			return (BeanValidator) checker;
+		Class<BeanValidator> c = (Class<BeanValidator>) checker;
 		try {
 			return c.newInstance();
 		} catch (Exception e) {
@@ -146,7 +146,7 @@ public class TinyNetUtils {
 				result.add(node);
 		}
 		return result;
-	}
+	} 
 
 	/** Convert entity array to Node set */
 	public static Set<Node> entityCollection2NodeSet(TinyNet net, Collection<Object> entities) {

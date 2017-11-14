@@ -22,7 +22,7 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import config.TestBase;
 
 /**
- * Coverage unit test for ClassCacheUtils
+ * Coverage unit test for bind a box to PojoClass 
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0

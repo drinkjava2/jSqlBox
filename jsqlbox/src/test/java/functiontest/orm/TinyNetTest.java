@@ -43,7 +43,7 @@ public class TinyNetTest extends TestBase {
 		new User().put("id","u2").put("userName","user2").insert();
 		new User().put("id","u3").put("userName","user3").insert();
 		new User().put("id","u4").put("userName","user4").insert();
-		new User().put("id","u5").put("userName","user5").insert();
+		new User().put("id","u5").put("userName","user5").insert(); 
 		
 		new Address().put("id","a1","addressName","address1","userId","u1").insert();
 		new Address().put("id","a2","addressName","address2","userId","u2").insert();
@@ -173,43 +173,67 @@ public class TinyNetTest extends TestBase {
 	}
 
 	@Test
-	public void testFindNodes() {
+	public void testFindS() {
+		for (int i = 10; i < 500; i++) {
+			new User().put("id", "u" + i).put("userName", "user" + i).insert();
+		}
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
-		Assert.assertEquals(37, net.size());
 
-		User u = new User();
-		u.setId("u1");
-		Set<User> users = net.findEntitySet(new Path(User.class));
-		System.out.println(users.size());
-		// net.findNodeSet(u, new Path("C", Email.class).nextPath("P",
-		// Address.class));
+		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
+		Assert.assertEquals(0, users2.size());
+
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < 2000; i++) {
+			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(false));
+			Assert.assertTrue(users.size() > 0);
+		}
+		long end = System.currentTimeMillis();
+		System.out.println(
+				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
+
+		start = System.currentTimeMillis();
+		for (int i = 0; i < 2000; i++) {
+			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(true));
+			Assert.assertTrue(users.size() > 0);
+		}
+		end = System.currentTimeMillis();
+		System.out.println(
+				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
 	}
 
-	//@formatter:off
-	 		// List<User> users = net.getList(User.class);
-			// for (User user : users) {
-			// List<Email> emails = user.getChildEntities(Email.class); 
-			          //Email.class can omit if search path no cause confuse, below methods same
-			// List<Email> emails = ctx.getChildEntities(user, Email.class); 
+	@Test
+	public void testFindC() {
+		for (int i = 10; i < 5000; i++) {
+			new User().put("id", "u" + i).put("userName", "user" + i).insert();
+			for (int j = 0; j < 500; j++)
+				new Email().put("id", "e" + j, "userId", "u" + i).insert();
+		}
+		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
+				UserRole.class, RolePrivilege.class);
 
-			// User u = email.getParentEntity(User.class);
-			// User u = ctx.getParentEntity(email, User.class);  
-			// List<User> u = ctx.getParentEntities(emails, User.class); 
-	 
-			// List<Email> emails = user.getRelatedNodes("parent",Path1.class, "child",Path1.class..., "parent", Email.class); 
-			// List<Email> emails = user.getRelatedNodes(Email.class); //if path can be guessed by computer 
-			// }
-			
-			//TinyNet net=u.entityNet();
-			//TinyNet net=Net.getTinyNet(u);
-			//net.remove(u);
-			//u.setAddress("new Address");
-			//net.update(u);
-			//net.add(u);
-			//net.flush();
-			//ctx.flushTinyNet(net);
-			//net.setReadonlyAndCache(true)
-	
+		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
+		Assert.assertEquals(0, users2.size());
 
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < 2000; i++) {
+			net.findNodeSetForEntities(new Path("S+", User.class).setCacheable(false));
+		}
+		long end = System.currentTimeMillis();
+		System.out.println(
+				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
+
+		start = System.currentTimeMillis();
+		for (int i = 0; i < 2000; i++) {
+			net.findNodeSetForEntities(new Path("S+", User.class).setCacheable(true));
+		}
+		end = System.currentTimeMillis();
+		System.out.println(
+				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
+	}
+
+	//@formatter:off  
+			//net.remove(u);  
+			//net.add(u); 
+	        //net.update(u); //user new u to replace old u 
 }

@@ -22,23 +22,29 @@ import com.github.drinkjava2.jdialects.StrUtils;
  */
 public class Path {
 	/**
-	 * Can only be "S": Self, "C":child, "P":parent, "P*":all parents, "C*":all
-	 * childs
+	 * Can only be
+	 * 
+	 * <pre>
+	 *    "S+": Start nodes,
+	 *    "S-": Start nodes, but not put found nodes into result,
+	 *    "C+":child nodes, 
+	 *    "C-":child nodes, but not put found nodes into result,
+	 *    "P+":parent 
+	 *    "P-":parent nodes, but not put found nodes into result,
+	 *    "P*":all parents
+	 *	  "C*":all childs
+	 * </pre>
 	 */
 	private String type;
 
 	/** The reference table name or entity class */
 	private Object target;
 
-	/** allowed keep in input list */
-	private Boolean input = true;
-
-	/** allowed keep in output list */
-	private Boolean output = true;
+	/** A String expression condition should return true or false */
+	private String where;
 
 	/**
-	 * Checker class or Checker instance, used to check if a node can be
-	 * selected
+	 * Checker class or Checker instance, used to check if a node can be selected
 	 */
 	private Object checker;
 
@@ -53,21 +59,27 @@ public class Path {
 
 	// ==================inside used fields======================
 	private Boolean checkerObjBuilt = false;
+	private BeanValidator checkerObj;
 
-	private Checker checkerObj;
+	private Boolean uniqueStringBuilt = false;
+	private String uniqueStringCached;
 
 	private void validateType() {
-		if (!("S".equalsIgnoreCase(type) || "C".equalsIgnoreCase(type) || "P".equalsIgnoreCase(type)
-				|| "C*".equalsIgnoreCase(type) || "P*".equalsIgnoreCase(type)))
-			throw new TinyNetException(
-					"Type can only be 'S': Self, 'C':Child, 'P':Parent, 'C*':all childs, 'P*': all parents");
+		if (type == null || type.length() != 2)
+			throw new TinyNetException("Illegal type charactors: '" + type + "'");
+		String s0 = type.substring(0, 1);
+		if (!("S".equalsIgnoreCase(s0) || "C".equalsIgnoreCase(s0) || "P".equalsIgnoreCase(s0)
+				|| "C*".equalsIgnoreCase(s0) || "P*".equalsIgnoreCase(s0)))
+			throw new TinyNetException("Illegal type charactor: '" + s0 + "'");
+
+		String s1 = type.substring(1, 2);
+		if (!("+".equals(s1) || "-".equals(s1) || "*".equals(s1)))
+			throw new TinyNetException("Illegal type charactor: '" + s1 + "'");
 	}
 
-	public Path(String type, Object target, Boolean input, Boolean output, Object checker, String... columns) {
+	public Path(String type, Object target, Object checker, String... columns) {
 		this.type = type;
 		this.target = target;
-		this.input = input;
-		this.output = output;
 		this.checker = checker;
 		this.columns = columns;
 		validateType();
@@ -93,10 +105,14 @@ public class Path {
 	}
 
 	public String getUniqueIdString() {
+		if (uniqueStringBuilt)
+			return uniqueStringCached;
+		uniqueStringCached = null;
+		uniqueStringBuilt = true;
 		String next = null;
 		if (!cacheable)
 			return null;
-		if (checker != null && checker instanceof Checker)
+		if (checker != null && checker instanceof BeanValidator)
 			return null;
 		if (nextPath != null) {
 			next = nextPath.getUniqueIdString();
@@ -106,8 +122,7 @@ public class Path {
 		StringBuilder sb = new StringBuilder()//
 				.append("type:").append(type)//
 				.append(",target:").append(target)//
-				.append(",input:").append(input)//
-				.append(",output:").append(output)//
+				.append(",where:").append(where)//
 				.append(",checker:").append(checker);
 		if (columns != null) {
 			sb.append(",columns:");
@@ -116,11 +131,12 @@ public class Path {
 		}
 		if (!StrUtils.isEmpty(next))
 			sb.append(",Next:").append(next);
-		return sb.toString();
+		uniqueStringCached = sb.toString();
+		return uniqueStringCached;
 	}
 
-	public Path nextPath(String type, Object target, Boolean input, Boolean output, Object checker, String... columns) {
-		Path next = new Path(type, target, input, output, checker, columns);
+	public Path nextPath(String type, Object target, Object checker, String... columns) {
+		Path next = new Path(type, target, checker, columns);
 		this.setNextPath(next);
 		return next;
 	}
@@ -144,7 +160,7 @@ public class Path {
 	}
 
 	/** Get Checker instance */
-	public Checker getCheckerInstance() {
+	public BeanValidator getCheckerInstance() {
 		if (checkerObjBuilt)
 			return checkerObj;
 		else {
@@ -152,6 +168,11 @@ public class Path {
 			checkerObjBuilt = true;
 			return checkerObj;
 		}
+	}
+
+	public Path where(String where) {
+		this.where = where;
+		return this;
 	}
 
 	// =====Getter & Setter ==============
@@ -162,24 +183,6 @@ public class Path {
 	public Path setType(String type) {
 		this.type = type;
 		this.validateType();
-		return this;
-	}
-
-	public Boolean getInput() {
-		return input;
-	}
-
-	public Path setInput(Boolean input) {
-		this.input = input;
-		return this;
-	}
-
-	public Boolean getOutput() {
-		return output;
-	}
-
-	public Path setOutput(Boolean output) {
-		this.output = output;
 		return this;
 	}
 
@@ -225,6 +228,15 @@ public class Path {
 
 	public Path setCacheable(Boolean cacheable) {
 		this.cacheable = cacheable;
+		return this;
+	}
+
+	public String getWhere() {
+		return where;
+	}
+
+	public Path setWhere(String where) {
+		this.where = where;
 		return this;
 	}
 
