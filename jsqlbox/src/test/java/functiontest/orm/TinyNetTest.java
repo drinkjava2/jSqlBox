@@ -173,7 +173,7 @@ public class TinyNetTest extends TestBase {
 	}
 
 	@Test
-	public void testFindS() {
+	public void testFindSelf() {
 		for (int i = 10; i < 500; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
@@ -188,52 +188,41 @@ public class TinyNetTest extends TestBase {
 			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(false));
 			Assert.assertTrue(users.size() > 0);
 		}
-		long end = System.currentTimeMillis();
-		System.out.println(
-				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
+		System.out.println(String.format("%28s: %6s s", "NoCache", "" + (System.currentTimeMillis() - start) / 1000.0));
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < 2000; i++) {
 			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(true));
 			Assert.assertTrue(users.size() > 0);
 		}
-		end = System.currentTimeMillis();
-		System.out.println(
-				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
+		System.out.println(String.format("%28s: %6s s", "NoCache", "" + (System.currentTimeMillis() - start) / 1000.0));
 	}
 
 	@Test
-	public void testFindC() {
+	public void testFindChild() {
 		for (int i = 10; i < 5000; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 			for (int j = 0; j < 500; j++)
 				new Email().put("id", "e" + j, "userId", "u" + i).insert();
 		}
-		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
-				UserRole.class, RolePrivilege.class);
-
-		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
-		Assert.assertEquals(0, users2.size());
+		TinyNet net = ctx.loadEntityNet(new User(), Email.class);
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < 2000; i++) {
-			net.findNodeSetForEntities(new Path("S+", User.class).setCacheable(false));
+			net.findNodeSetForEntities(new Path("S-", User.class).setCacheable(false));
 		}
-		long end = System.currentTimeMillis();
-		System.out.println(
-				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
+		System.out.println(String.format("%28s: %6s s", "NoCache", "" + (System.currentTimeMillis() - start) / 1000.0));
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < 2000; i++) {
 			net.findNodeSetForEntities(new Path("S+", User.class).setCacheable(true));
 		}
-		end = System.currentTimeMillis();
-		System.out.println(
-				String.format("%28s: %6s s", "NoCache", "" + (end - start) / 1000 + "." + (end - start) % 1000));
+		System.out.println(String.format("%28s: %6s s", "NoCache", "" + (System.currentTimeMillis() - start) / 1000.0));
 	}
 
 	//@formatter:off  
 			//net.remove(u);  
 			//net.add(u); 
 	        //net.update(u); //user new u to replace old u 
+	 
 }
