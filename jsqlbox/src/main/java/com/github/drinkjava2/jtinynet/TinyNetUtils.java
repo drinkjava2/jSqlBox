@@ -34,8 +34,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public class TinyNetUtils {
 
 	/**
-	 * Check if each TableModel has entityClass and Alias, if no, throw
-	 * exception
+	 * Check if each TableModel has entityClass and Alias, if no, throw exception
 	 */
 	public static void checkModelHasEntityClassAndAlias(TableModel... models) {
 		if (models != null && models.length > 0)// Join models
@@ -76,6 +75,19 @@ public class TinyNetUtils {
 		}
 		if (sb.length() == 0)
 			throw new TinyNetException("Table '" + model.getTableName() + "' no Prime Key columns set");
+		return sb.toString();
+	}
+
+	/**
+	 * Join fkey column names into one String, used for reference ID
+	 */
+	public static String buildJoinedColumns(String... columns) {
+		StringBuilder sb = new StringBuilder();
+		for (String columnName : columns) {
+			if (sb.length() > 0)
+				sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
+			sb.append(columnName);
+		}
 		return sb.toString();
 	}
 
@@ -146,7 +158,7 @@ public class TinyNetUtils {
 				result.add(node);
 		}
 		return result;
-	} 
+	}
 
 	/** Convert entity array to Node set */
 	public static Set<Node> entityCollection2NodeSet(TinyNet net, Collection<Object> entities) {

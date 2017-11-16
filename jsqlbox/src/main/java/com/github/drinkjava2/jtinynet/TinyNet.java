@@ -28,9 +28,6 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityNet;
 
-import functiontest.helloworld.SqlStyleDemo.User;
-import functiontest.orm.entities.Email;
-
 /**
  * jTinyNet project is the default implementation of EntityNet in jSqlBox, it's
  * a memory based Object net, can kind of be called "Graph Database" or "NoSQL
@@ -62,8 +59,8 @@ public class TinyNet implements EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of EntityNet, and also store O-R
-	 * mapping info related to database
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
+	 * info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -103,8 +100,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to
-	 * current Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to current
+	 * Net, modelConfigs parameter is optional
 	 */
 	@Override
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
@@ -303,8 +300,7 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * According given entityClass, path, entity collection, find related entity
-	 * set
+	 * According given entityClass, path, entity collection, find related entity set
 	 */
 	public Map<Class<?>, Set<Node>> findNodeSetForEntities(Path path, Collection<Object> entityCollection) {
 		Set<Node> input = new LinkedHashSet<Node>();
@@ -318,49 +314,26 @@ public class TinyNet implements EntityNet {
 
 	public Map<Class<?>, Set<Node>> findNodeSetforNodes(Path path, Collection<Node> input) {
 		Map<Class<?>, Set<Node>> result = new HashMap<Class<?>, Set<Node>>();
-		findNodeSetforNodes(0, path.getTopPath(), input, result);
+		Path topPath = path.getTopPath();
+		topPath.initializeTargetAndColumns(this);
+		findNodeSetforNodes(0, topPath, input, result);
 		return result;
 	}
 
 	/**
 	 * According given path and input Node Set, find related node set
 	 * 
-	 * @param level
-	 *            search level, start from 0
-	 * @param path
-	 *            The Path
-	 * @param input
-	 *            The input node collection
-	 * @param output
-	 *            The output node collection
+	 * @param level search level, start from 0
+	 * @param path The Path
+	 * @param input The input node collection
+	 * @param output The output node collection
 	 * @return Related node set
 	 */
 	private void findNodeSetforNodes(Integer level, Path path, Collection<Node> input,
 			Map<Class<?>, Set<Node>> result) {
-		if (path == null)
-			throw new TinyNetException("path can not be null.");
-		if (path.getTarget() == null || StrUtils.isEmpty(path.getTarget()))
-			throw new TinyNetException("In path, target can not be empty.");
 		if (level > 1000)
 			throw new TinyNetException("Search level beyond 1000, this may caused by a circular reference path chain.");
-		TableModel model = null;
-		// target is a String represented Class name
-		if (path.getTarget() instanceof String) {
-			String tbName = (String) path.getTarget();
-			for (Entry<Class<?>, TableModel> entry : configModels.entrySet()) {
-				TableModel mod = entry.getValue();
-				if (mod != null && tbName.equalsIgnoreCase(mod.getTableName())) {
-					model = mod;
-					break;
-				}
-			}
-		} else {// target is Class type
-			if (!(path.getTarget() instanceof Class))
-				throw new TinyNetException("In path, target can only be table name string or entity class.");
-			model = this.configModels.get((Class<?>) path.getTarget());
-		}
-		if (model == null)
-			throw new TinyNetException("Can not find target model for target '" + path.getTarget() + "'");
+		TableModel model = path.getTargetModel();
 		String type0 = path.getType().substring(0, 1);
 		String type1 = path.getType().substring(1, 2);
 		Class<?> targetClass = model.getEntityClass();
@@ -370,9 +343,8 @@ public class TinyNet implements EntityNet {
 		if ("S".equalsIgnoreCase(type0)) {
 			if (level != 0)
 				throw new TinyNetException("'S' type can only be used on path start");
-			if (this.allowQueryCache && path.getCacheable() && pathId != null) { // check
-																					// if
-																					// cached
+			// Check if cached
+			if (this.allowQueryCache && path.getCacheable() && pathId != null) {
 				Map<Integer, Set<Node>> rootCache = queryCache.get("ROOT");
 				if (rootCache != null) {
 					Set<Node> cachedNodes = rootCache.get(pathId);
@@ -388,18 +360,12 @@ public class TinyNet implements EntityNet {
 				}
 			}
 		} else if ("C".equalsIgnoreCase(type0) && input != null && !input.isEmpty()) {
-			System.out.println("in c");
-			System.out.println("level=" + level);
 			for (Node inputNode : input) {
-				if (this.allowQueryCache && path.getCacheable() && pathId != null) { // check
-																						// if
-																						// cached
-					Map<Integer, Set<Node>> childCache = queryCache.get(inputNode.getId());
-					if (childCache != null) {
+				Map<Integer, Set<Node>> childCache = queryCache.get(inputNode.getId());
+				if (this.allowQueryCache && path.getCacheable() && pathId != null && childCache != null) { 
 						Set<Node> cachedNodes = childCache.get(pathId);
 						if (cachedNodes != null)
-							selected.addAll(cachedNodes);
-					}
+							selected.addAll(cachedNodes); 
 				} else {
 					// Find childNodes meat class/columns/id condition
 					Set<Node> nodesToCheck = new LinkedHashSet<Node>();
@@ -407,8 +373,8 @@ public class TinyNet implements EntityNet {
 						List<ParentRelation> prs = cNode.getValue().getParentRelations();
 						if (prs != null)
 							for (ParentRelation pr : prs) {
-								System.out.println("now compare");
-								if (inputNode.equals(pr.getParentId()) && pr.getColumns().equals(path.getColumns())) {
+								if (inputNode.getId().equals(pr.getParentId())
+										&& pr.getRefColumns().equals(path.getRefColumns())) {
 									nodesToCheck.add(cNode.getValue());
 									break;
 								}
@@ -425,28 +391,21 @@ public class TinyNet implements EntityNet {
 			}
 
 		}
-
-		if ("+".equals(type1)) {
-			Set<Node> nodes = result.get(targetClass);
-			if (nodes == null) {
-				nodes = new LinkedHashSet<Node>();
-				result.put(targetClass, nodes);
-			}
-			nodes.addAll(selected);
+		Set<Node> nodes = result.get(targetClass);
+		if (nodes == null) {
+			nodes = new LinkedHashSet<Node>();
+			result.put(targetClass, nodes);
 		}
+
+		if ("+".equals(type1))
+			nodes.addAll(selected);
 
 		if (!(path.getCacheable() && StrUtils.isEmpty(path.getUniqueIdString()))) {
 			if (selected.size() > 100000)
 				throw new TinyNetException(
 						"Query result return more than 100000 records to cache in memory, this may caused by careless programming.");
 		}
-		System.out.println();
-		System.out.println("Type=" + path.getType());
-		System.out.println("selected size=" + selected.size());
-		System.out.println("User result=" + result.get(User.class));
-		System.out.println("Email result=" + result.get(Email.class));
-		System.out.println();
-		if (path.getNextPath() != null) { 
+		if (path.getNextPath() != null) {
 			findNodeSetforNodes(level + 1, path.getNextPath(), selected, result);
 		}
 	}

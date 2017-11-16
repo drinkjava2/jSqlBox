@@ -24,7 +24,7 @@ package com.github.drinkjava2.jtinynet;
  * @since 1.0.0
  */
 public class ParentRelation {
-	String columns;
+	String refColumns;
 	String parentTable;
 	String parentId;
 
@@ -32,23 +32,23 @@ public class ParentRelation {
 		TinyNetException.assureNotEmpty(columns, "In ParentRelation, columns can not be empty");
 		TinyNetException.assureNotEmpty(parentId, "In ParentRelation, parentId can not be empty");
 		TinyNetException.assureNotEmpty(parentTable, "In ParentRelation, parentTable can not be empty");
-		this.columns = columns;
+		this.refColumns = columns;
 		this.parentId = parentId;
 		this.parentTable = parentTable;
 	}
 
 	public boolean sameas(ParentRelation p) {
-		return this.columns.equalsIgnoreCase(p.getColumns())
+		return this.refColumns.equalsIgnoreCase(p.getRefColumns())
 				&& this.getParentTable().equalsIgnoreCase(p.getParentTable())
 				&& this.parentId.equalsIgnoreCase(p.getParentId());
 	}
 
-	public String getColumns() {
-		return columns;
+	public String getRefColumns() {
+		return refColumns;
 	}
 
-	public void setColumns(String columns) {
-		this.columns = columns;
+	public void setRefColumns(String refColumns) {
+		this.refColumns = refColumns;
 	}
 
 	public String getParentId() {
