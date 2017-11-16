@@ -174,11 +174,10 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testFindSelf() {
-		for (int i = 10; i < 500; i++) {
+		for (int i = 1000; i < 5000; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
-		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
-				UserRole.class, RolePrivilege.class);
+		TinyNet net = ctx.loadEntityNet(new User(), Email.class);
 
 		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
 		Assert.assertEquals(0, users2.size());
@@ -200,24 +199,25 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testFindChild() {
-		for (int i = 10; i < 5000; i++) {
+		int sampleSize = 20;
+		int queyrTimes = 20;
+		for (int i = 10; i < sampleSize; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
-			for (int j = 0; j < 500; j++)
-				new Email().put("id", "e" + j, "userId", "u" + i).insert();
+			for (int j = 10; j < sampleSize; j++)
+				new Email().put("id", "u" + i + "e" + j, "userId", "u" + i).insert();
 		}
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class);
 
+		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
-		for (int i = 0; i < 2000; i++) {
-			net.findNodeSetForEntities(new Path("S-", User.class).setCacheable(false));
+		for (int i = 0; i < queyrTimes; i++) {
+			result = net
+					.findNodeSetForEntities(new Path("S+", User.class).setCacheable(false).nextPath("C+", Email.class));
 		}
 		System.out.println(String.format("%28s: %6s s", "NoCache", "" + (System.currentTimeMillis() - start) / 1000.0));
+		System.out.println("user selected:" + result.get(User.class).size());
+		System.out.println("email selected:" + result.get(Email.class).size());
 
-		start = System.currentTimeMillis();
-		for (int i = 0; i < 2000; i++) {
-			net.findNodeSetForEntities(new Path("S+", User.class).setCacheable(true));
-		}
-		System.out.println(String.format("%28s: %6s s", "NoCache", "" + (System.currentTimeMillis() - start) / 1000.0));
 	}
 
 	//@formatter:off  

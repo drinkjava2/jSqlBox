@@ -44,7 +44,8 @@ public class Path {
 	private String where;
 
 	/**
-	 * Checker class or Checker instance, used to check if a node can be selected
+	 * Checker class or Checker instance, used to check if a node can be
+	 * selected
 	 */
 	private Object checker;
 
@@ -53,6 +54,8 @@ public class Path {
 
 	/** Next Path, used for build a linked path chain */
 	private Path nextPath;
+
+	private Path fatherPath;
 
 	/** Not allow cache */
 	private Boolean cacheable = true;
@@ -98,12 +101,6 @@ public class Path {
 		validateType();
 	}
 
-	public Path(Object target) {
-		this.type = "S";
-		this.target = target;
-		validateType();
-	}
-
 	public String getUniqueIdString() {
 		if (uniqueStringBuilt)
 			return uniqueStringCached;
@@ -137,25 +134,22 @@ public class Path {
 
 	public Path nextPath(String type, Object target, Object checker, String... columns) {
 		Path next = new Path(type, target, checker, columns);
-		this.setNextPath(next);
+		next.fatherPath = this;
+		this.nextPath = next;
 		return next;
 	}
 
 	public Path nextPath(String type, Object target, String... columns) {
 		Path next = new Path(type, target, columns);
-		this.setNextPath(next);
+		next.fatherPath = this;
+		this.nextPath = next;
 		return next;
 	}
 
 	public Path nextPath(String type, Object target) {
 		Path next = new Path(type, target);
-		this.setNextPath(next);
-		return next;
-	}
-
-	public Path nextPath(Object target) {
-		Path next = new Path(target);
-		this.setNextPath(next);
+		next.fatherPath = this;
+		this.nextPath = next;
 		return next;
 	}
 
@@ -173,6 +167,13 @@ public class Path {
 	public Path where(String where) {
 		this.where = where;
 		return this;
+	}
+
+	public Path getTopPath() {
+		if (this.fatherPath == null)
+			return this;
+		else
+			return fatherPath.getTopPath();
 	}
 
 	// =====Getter & Setter ==============
