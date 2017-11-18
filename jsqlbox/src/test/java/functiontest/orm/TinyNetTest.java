@@ -36,7 +36,9 @@ public class TinyNetTest extends TestBase {
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
+	}
 
+	private void insertDemoData() {
 		//@formatter:off 
 		ctx.nBatchBegin(); //Batch insert enabled 
 		new User().put("id","u1").put("userName","user1").insert();
@@ -93,6 +95,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testJoinFields() {
+		insertDemoData();
 		TinyNet net = ctx.loadKeyEntityNet(User.class);
 		Assert.assertEquals(5, net.size());
 		List<User> users = net.getAllEntityList(User.class);
@@ -111,6 +114,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testJoinParents() {
+		insertDemoData();
 		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
 				netConfig(new Email().alias("e")) + "select e.id as e_id from emailtb e");
 		TinyNet net = (TinyNet) ctx.createEntityNet(listMap);
@@ -128,6 +132,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testloadEntityNet() {
+		insertDemoData();
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
@@ -141,6 +146,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testloadKeyEntityNet() {
+		insertDemoData();
 		TinyNet net = ctx.loadKeyEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
@@ -153,7 +159,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testManualLoadAndJoin() {
-		ctx.setAllowShowSQL(true);
+		insertDemoData();
 		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
 		TinyNet net = ctx.createEntityNet(mapList1);
@@ -174,7 +180,9 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testFindSelf() {
-		for (int i = 10; i < 12; i++) {
+		int sampleSize = 500;
+		int queyrTimes = 100;
+		for (int i = 1; i <= sampleSize; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class);
@@ -183,7 +191,7 @@ public class TinyNetTest extends TestBase {
 		Assert.assertEquals(0, users2.size());
 
 		long start = System.currentTimeMillis();
-		for (int i = 0; i < 2000; i++) {
+		for (int i = 0; i < queyrTimes; i++) {
 			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(false));
 			Assert.assertTrue(users.size() > 0);
 		}
@@ -191,7 +199,7 @@ public class TinyNetTest extends TestBase {
 				.println(String.format("%28s: %6s s", "No Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
 
 		start = System.currentTimeMillis();
-		for (int i = 0; i < 2000; i++) {
+		for (int i = 0; i < queyrTimes; i++) {
 			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(true));
 			Assert.assertTrue(users.size() > 0);
 		}
@@ -201,36 +209,38 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testFindChild() {
-		int sampleSize = 50;
-		int queyrTimes = 10;
-
+		int sampleSize = 70;
+		int queyrTimes = 70;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
-			for (int j = 10; j < sampleSize; j++)
+			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
 		TinyNet net = ctx.loadEntityNet(new User(), Email.class);
 
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
+
+		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeSetForEntities(new Path("S-", User.class).setCacheable(false)
+			result = net.findNodeSetForEntities(new Path("S+", User.class).setCacheable(false)
 					.nextPath("C+", Email.class, "userId").setCacheable(false));
 		}
 		System.out
 				.println(String.format("%28s: %6s s", "No Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
-		System.out.println("user selected:" + result.get(User.class).size());
-		System.out.println("email selected:" + result.get(Email.class).size());
+		System.out.println("user selected2:" + result.get(User.class).size());
+		System.out.println("email selected2:" + result.get(Email.class).size());
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
 			result = net.findNodeSetForEntities(
-					new Path("S-", User.class).setCacheable(true).nextPath("C+", Email.class, "userId"));
+					new Path("S+", User.class).setCacheable(true).nextPath("C+", Email.class, "userId"));
 		}
 		System.out.println(
 				String.format("%28s: %6s s", "With Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
-		System.out.println("user selected:" + result.get(User.class).size());
-		System.out.println("email selected:" + result.get(Email.class).size());
+
+		System.out.println("user selected2:" + result.get(User.class).size());
+		System.out.println("email selected2:" + result.get(Email.class).size());
 	}
 
 	//@formatter:off  

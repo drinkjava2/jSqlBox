@@ -344,13 +344,11 @@ public class TinyNet implements EntityNet {
 			if (level != 0)
 				throw new TinyNetException("'S' type can only be used on path start");
 			// Check if cached
-			if (this.allowQueryCache && path.getCacheable() && pathId != null) {
-				Map<Integer, Set<Node>> rootCache = queryCache.get("ROOT");
-				if (rootCache != null) {
-					Set<Node> cachedNodes = rootCache.get(pathId);
-					if (cachedNodes != null)
-						selected = cachedNodes;
-				}
+			Map<Integer, Set<Node>> rootCache = queryCache.get("ROOT");
+			if (this.allowQueryCache && path.getCacheable() && pathId != null && (rootCache != null)) {
+				Set<Node> cachedNodes = rootCache.get(pathId);
+				if (cachedNodes != null)
+					selected = cachedNodes;
 			} else {
 				Collection<Node> nodesToCheck = getAllNodeSet(targetClass);
 				validateSelected(level, path, selected, nodesToCheck);
@@ -362,10 +360,10 @@ public class TinyNet implements EntityNet {
 		} else if ("C".equalsIgnoreCase(type0) && input != null && !input.isEmpty()) {
 			for (Node inputNode : input) {
 				Map<Integer, Set<Node>> childCache = queryCache.get(inputNode.getId());
-				if (this.allowQueryCache && path.getCacheable() && pathId != null && childCache != null) { 
-						Set<Node> cachedNodes = childCache.get(pathId);
-						if (cachedNodes != null)
-							selected.addAll(cachedNodes); 
+				if (this.allowQueryCache && path.getCacheable() && pathId != null && childCache != null) {
+					Set<Node> cachedNodes = childCache.get(pathId);
+					if (cachedNodes != null)
+						selected.addAll(cachedNodes);
 				} else {
 					// Find childNodes meat class/columns/id condition
 					Set<Node> nodesToCheck = new LinkedHashSet<Node>();
@@ -424,18 +422,18 @@ public class TinyNet implements EntityNet {
 	}
 
 	private void cacheSelected(String nodeId, String pathUniqueString, Set<Node> selected) {
-		Integer pathId = currentPathId + 1;
+		currentPathId++;
+		Integer pathId = currentPathId;
 		pathIdCache.put(pathUniqueString, pathId);
 		Map<Integer, Set<Node>> rootCache = queryCache.get(nodeId);
 		if (rootCache == null) {
 			rootCache = new HashMap<Integer, Set<Node>>();
-			queryCache.put("ROOT", rootCache);
+			queryCache.put(nodeId, rootCache);
 		}
 		rootCache.put(pathId, selected);
 	}
 
-	// ======getter & setter =======
-
+	// getter & setter=======
 	public Map<Class<?>, TableModel> getConfigModels() {
 		return configModels;
 	}
@@ -459,5 +457,33 @@ public class TinyNet implements EntityNet {
 	public void setAllowQueryCache(Boolean allowQueryCache) {
 		this.allowQueryCache = allowQueryCache;
 	}
+
+	public Map<String, Map<Integer, Set<Node>>> getQueryCache() {
+		return queryCache;
+	}
+
+	public void setQueryCache(Map<String, Map<Integer, Set<Node>>> queryCache) {
+		this.queryCache = queryCache;
+	}
+
+	public int getCurrentPathId() {
+		return currentPathId;
+	}
+
+	public void setCurrentPathId(int currentPathId) {
+		this.currentPathId = currentPathId;
+	}
+
+	public Map<String, Integer> getPathIdCache() {
+		return pathIdCache;
+	}
+
+	public void setPathIdCache(Map<String, Integer> pathIdCache) {
+		this.pathIdCache = pathIdCache;
+	}
+
+ 
+
+ 
 
 }
