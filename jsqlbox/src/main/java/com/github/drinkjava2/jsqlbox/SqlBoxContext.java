@@ -116,21 +116,22 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	/**
-	 * Create a EntityNet instance, load all columns
+	 * Create a EntityNet by given configurations, load all columns
 	 */
-	public <T> T loadEntityNet(Object... configObjects) {
+	public <T> T netLoad(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, false, configObjects);
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns into entity
+	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
+	 * loading speed
 	 */
-	public <T> T loadKeyEntityNet(Object... configObjects) {
+	public <T> T netLoadSketch(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, true, configObjects);
 	}
 
 	/** Create a EntityNet by given list and netConfigs */
-	public <T> T createEntityNet(List<Map<String, Object>> listMap, Object... configObjects) {
+	public <T> T netCreate(List<Map<String, Object>> listMap, Object... configObjects) {
 		TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
 		if (result == null || result.length == 0)
 			throw new SqlBoxException("No entity class config found");
@@ -139,13 +140,37 @@ public class SqlBoxContext extends DbPro {
 
 	/** Join list and netConfigs to existed EntityNet */
 	@SuppressWarnings("unchecked")
-	public <T> T joinList(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
+	public <T> T netJoinList(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
 		try {
 			TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
-			return (T)net.addMapList(listMap, result);
+			return (T) net.addMapList(listMap, result);
 		} finally {
 			EntityNetSqlExplainer.removeBindedTableModel(listMap);
 		}
+	}
+
+	/** Add an entity to existed EntityNet */
+	public void netAddEntity(EntityNet net, Object entity) {
+		SqlBox box = SqlBoxUtils.getBindedBox(entity);
+		if (box == null)
+			box = SqlBoxUtils.createSqlBox(this, entity.getClass());
+		net.addEntity(entity, box.getTableModel());
+	}
+
+	/** Remove an entity from EntityNet */
+	public void netRemoveEntity(EntityNet net, Object entity) {
+		SqlBox box = SqlBoxUtils.getBindedBox(entity);
+		if (box == null)
+			box = SqlBoxUtils.createSqlBox(this, entity.getClass());
+		net.removeEntity(entity, box.getTableModel());
+	}
+
+	/** Update an entity in EntityNet */
+	public void netUpdateEntity(EntityNet net, Object entity) {
+		SqlBox box = SqlBoxUtils.getBindedBox(entity);
+		if (box == null)
+			box = SqlBoxUtils.createSqlBox(this, entity.getClass());
+		net.updateEntity(entity, box.getTableModel());
 	}
 
 	// =============CRUD methods=====

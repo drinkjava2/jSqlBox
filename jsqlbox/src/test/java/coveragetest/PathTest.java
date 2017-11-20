@@ -15,13 +15,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jtinynet.BeanValidator;
-import com.github.drinkjava2.jtinynet.DefaultBeanValidator;
-import com.github.drinkjava2.jtinynet.Node;
 import com.github.drinkjava2.jtinynet.Path;
-import com.github.drinkjava2.jtinynet.TinyNet;
 
 /**
- * Coverage unit test for Path 
+ * Coverage test for Path
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -29,33 +26,33 @@ import com.github.drinkjava2.jtinynet.TinyNet;
 public class PathTest {
 	private static class ChildChecker extends BeanValidator {
 
-		@Override
-		public boolean validateNode(TinyNet tinyNet, Node node, int level, int selectedSize) {
-			return true;
-		}
-
 	}
 
+	/**
+	 * If Path has a non-empty uniqueIdString, the query result will be cached (by
+	 * default), so it's important to test it, only unchangeable Path instance can
+	 * allow have non-empty uniqueIdString
+	 */
 	@Test
 	public void testPath() {
-		Path p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setChecker(new DefaultBeanValidator());
+		Path p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setValidator(new BeanValidator());
 		System.out.println(p.getUniqueIdString());
 		Assert.assertNull(p.getUniqueIdString());
 
-		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setChecker(DefaultBeanValidator.class);
+		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setValidator(BeanValidator.class);
 		System.out.println(p.getUniqueIdString());
 		Assert.assertNotNull(p.getUniqueIdString());
 
-		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setChecker(new ChildChecker());
+		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setValidator(new ChildChecker());
 		System.out.println(p.getUniqueIdString());
 		Assert.assertNull(p.getUniqueIdString());
 
-		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setChecker(ChildChecker.class);
+		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setValidator(ChildChecker.class);
 		System.out.println(p.getUniqueIdString());
 		Assert.assertNotNull(p.getUniqueIdString());
 
-		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setChecker(ChildChecker.class).nextPath("C+", "aaa")
-				.nextPath("C+", "bbb").nextPath("P+", "ccc").setChecker(new ChildChecker());
+		p = new Path("C+", "someTable1").nextPath("P+", "someTable2").setValidator(ChildChecker.class)
+				.nextPath("C+", "aaa").nextPath("C+", "bbb").nextPath("P+", "ccc").setValidator(new ChildChecker());
 		System.out.println(p.getUniqueIdString());
 		Assert.assertNull(p.getUniqueIdString());
 	}

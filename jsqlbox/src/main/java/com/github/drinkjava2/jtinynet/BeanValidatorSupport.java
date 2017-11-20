@@ -11,42 +11,28 @@
  */
 package com.github.drinkjava2.jtinynet;
 
-import com.github.drinkjava2.jdialects.StrUtils;
-
 /**
- * DefaultExpressionAnalyzer is the default expression analyzer in jTinyNet
- * project, it only support below keywords:
- * 
- * <pre>
- * 
-* >
-* <
-* =
-* >=
-* <=
-* 
-* equals 
-* equalsIgnoreCase 
-* contains
-* startWith
-* endWith  
-* notContains
-* notStartWith
-* notEndWith  
-* 
-* or
-* and
- * 
- * </pre>
+ * Checker used to check if a node allowed to be put into input list or output
+ * list
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class DefaultExpressionAnalyzer {
+public interface BeanValidatorSupport {
 
-	public static boolean anlyze(Object bean, String expression, int selectedSize) {
-		if (StrUtils.isEmpty(expression))
-			return true;
-		return false;
-	}
+	/**
+	 * Validate if a bean allow be selected
+	 */
+	public abstract boolean validateBean(Object entity);
+
+	/**
+	 * Check if a node allow be selected
+	 */
+	public abstract boolean validateNode(Node node, int level, int selectedSize, Path path);
+
+	/**
+	 * Check if a node allow be selected
+	 */
+	public abstract boolean validateExpression(Object bean, String expression, int selectedSize, Path path);
+
 }

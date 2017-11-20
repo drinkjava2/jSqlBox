@@ -68,7 +68,7 @@ public class TinyNet implements EntityNet {
 	// entityClass, nodeID, node
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
-	/** Enable query cache */
+	/** Enable child query cache */
 	private Boolean allowQueryCache = true;
 
 	/**
@@ -80,7 +80,7 @@ public class TinyNet implements EntityNet {
 	 * 3)Path's checker should be null or a Checker class <br/>
 	 * 4)For Path Chain, all child Paths should cacheable
 	 * 
-	 * Write to EntityNet may cause partial or whole queryCache be cleared.
+	 * Any writing to EntityNet will cause all queryCache be cleared.
 	 */
 	// NodeId , PathId, ChildNodeIDs
 	private Map<String, Map<Integer, Set<Node>>> queryCache = new HashMap<String, Map<Integer, Set<Node>>>();
@@ -142,6 +142,8 @@ public class TinyNet implements EntityNet {
 			if (StrUtils.isEmpty(alias))
 				throw new TinyNetException("No alias found for table '" + model.getTableName() + "'");
 			Set<String> loadedFields = new HashSet<String>();
+
+			// create new Entity
 			for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 				for (ColumnModel col : model.getColumns()) {
 					if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
@@ -155,17 +157,39 @@ public class TinyNet implements EntityNet {
 				}
 			}
 			if (entity != null)
-				this.addOrJoinEntity(model, entity, loadedFields);
+				this.addOrJoinEntity(entity, model, loadedFields);
 		}
+	}
+
+	@Override
+	public void addEntity(Object entity, TableModel tableModel) {
+		cleanAllQueryCaches();
+		Set<String> loadedFields = new HashSet<String>();
+		for (ColumnModel col : tableModel.getColumns())
+			loadedFields.add(col.getEntityField());
+		addOrJoinEntity(entity, tableModel, loadedFields);
+	}
+
+	@Override
+	public void removeEntity(Object entity, TableModel tableModel) {
+		cleanAllQueryCaches();
+		String id = TinyNetUtils.buildNodeId(tableModel, entity);
+		body.get(entity.getClass()).remove(id);
+	}
+
+	@Override
+	public void updateEntity(Object entity, TableModel tableModel) {
+		removeEntity(entity, tableModel);
+		addEntity(entity, tableModel);
 	}
 
 	/**
 	 * Add an entity to TinyNet, if already have same PKEY entity exist, if old
 	 * entity field is never loaded from database, will put new entity's value
 	 */
-	protected void addOrJoinEntity(TableModel model, Object entity, Set<String> loadedFields) {
-		String id = TinyNetUtils.buildNodeId(model, entity);
-		List<ParentRelation> parentRelations = TinyNetUtils.transferFKeysToParentRelations(model, entity);
+	protected void addOrJoinEntity(Object entity, TableModel tableModel, Set<String> loadedFields) {
+		String id = TinyNetUtils.buildNodeId(tableModel, entity);
+		List<ParentRelation> parentRelations = TinyNetUtils.transferFKeysToParentRelations(tableModel, entity);
 		Node node = new Node();
 		node.setEntity(entity);
 		node.setParentRelations(parentRelations);
@@ -251,6 +275,23 @@ public class TinyNet implements EntityNet {
 		return size;
 	}
 
+	/** Return a Node by given entityClass and nodeId */
+	public Node getOneNode(Class<?> entityClass, String nodeId) {
+		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
+		if (nodesMap == null)
+			return null;
+		return nodesMap.get(nodeId);
+	}
+
+	/** Return a entity by given entityClass and nodeId */
+	@SuppressWarnings("unchecked")
+	public <T> T getOneEntity(Class<?> entityClass, String nodeId) {
+		Node node = getOneNode(entityClass, nodeId);
+		if (node == null)
+			return null;
+		return (T) node.getEntity();
+	}
+
 	/** Return EntityNode list in TinyNet which type is entityClass */
 	public Set<Node> getAllNodeSet(Class<?> entityClass) {
 		Set<Node> result = new LinkedHashSet<Node>();
@@ -272,13 +313,19 @@ public class TinyNet implements EntityNet {
 	}
 
 	// ============= Find methods=============================
-	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Object... entities) {
-		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entities);
+	/**
+	 * Find entity set in TinyNet by given path and entity input array
+	 */
+	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Object... entityInput) {
+		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entityInput);
 		Map<Class<?>, Set<Node>> nodeMapSet = findNodeSetforNodes(path, input);
 		Set<Node> nodeSet = nodeMapSet.get(targetEntityClass);
 		return TinyNetUtils.nodeCollection2EntitySet(nodeSet);
 	}
 
+	/**
+	 * Find entity set in TinyNet by given path and entity input collection
+	 */
 	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Collection<Object> entityCollection) {
 		Set<Node> input = new LinkedHashSet<Node>();
 		for (Object entity : entityCollection) {
@@ -292,15 +339,15 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * According given entityClass, path, entity array, find related entity set
+	 * Find node set in TinyNet by given path and entity input array
 	 */
-	public Map<Class<?>, Set<Node>> findNodeSetForEntities(Path path, Object... entities) {
-		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entities);
+	public Map<Class<?>, Set<Node>> findNodeSetForEntities(Path path, Object... entityInput) {
+		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entityInput);
 		return findNodeSetforNodes(path, input);
 	}
 
 	/**
-	 * According given entityClass, path, entity collection, find related entity set
+	 * Find node set in TinyNet by given path and entity input collection
 	 */
 	public Map<Class<?>, Set<Node>> findNodeSetForEntities(Path path, Collection<Object> entityCollection) {
 		Set<Node> input = new LinkedHashSet<Node>();
@@ -337,9 +384,11 @@ public class TinyNet implements EntityNet {
 		String type0 = path.getType().substring(0, 1);
 		String type1 = path.getType().substring(1, 2);
 		Class<?> targetClass = model.getEntityClass();
+
 		Set<Node> selected = new LinkedHashSet<Node>();
 		String pathUniqueString = path.getUniqueIdString();
 		Integer pathId = pathIdCache.get(pathUniqueString);
+
 		if ("S".equalsIgnoreCase(type0)) {
 			if (level != 0)
 				throw new TinyNetException("'S' type can only be used on path start");
@@ -349,7 +398,7 @@ public class TinyNet implements EntityNet {
 				Set<Node> cachedNodes = rootCache.get(pathId);
 				if (cachedNodes != null)
 					selected = cachedNodes;
-			} else {
+			} else {// check all targetClass
 				Collection<Node> nodesToCheck = getAllNodeSet(targetClass);
 				validateSelected(level, path, selected, nodesToCheck);
 				// cache it if allow cache
@@ -387,6 +436,29 @@ public class TinyNet implements EntityNet {
 					}
 				}
 			}
+		} else if ("P".equalsIgnoreCase(type0) && input != null && !input.isEmpty()) {
+			String targetTableName = model.getTableName();
+			TinyNetException.assureNotEmpty(targetTableName, "targetTableName can not be null");
+			for (Node inputNode : input) {
+				// Find parent nodes meat tableName/refColumns/nodeId condition
+				Set<Node> nodesToCheck = new LinkedHashSet<Node>();
+				List<ParentRelation> prs = inputNode.getParentRelations();
+
+				for (ParentRelation pr : prs) {
+					if (targetTableName.equalsIgnoreCase(pr.getParentTable())
+							&& path.getRefColumns().equalsIgnoreCase(pr.getRefColumns())) {
+						Node node = this.getOneNode(targetClass, pr.getParentId());
+						if (node != null)
+							nodesToCheck.add(node);
+					}
+				}
+				validateSelected(level, path, selected, nodesToCheck);
+
+				// now cached childNodes on parentNode
+				if (this.allowQueryCache && path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
+					cacheSelected(inputNode.getId(), pathUniqueString, selected);
+				}
+			}
 
 		}
 		Set<Node> nodes = result.get(targetClass);
@@ -409,13 +481,13 @@ public class TinyNet implements EntityNet {
 	}
 
 	private void validateSelected(Integer level, Path path, Set<Node> selected, Collection<Node> nodesToCheck) {
-		BeanValidator checker = path.getCheckerInstance();
+		BeanValidatorSupport checker = path.getValidatorInstance();
 		if (checker == null)
-			checker = DefaultBeanValidator.instance;
+			checker = BeanValidator.instance;
 
 		for (Node node : nodesToCheck) {
-			if (checker.validateNode(this, node, level, selected.size())
-					&& checker.validateExpression(node.getEntity(), path.getWhere(), selected.size())) {
+			if (checker.validateNode(node, level, selected.size(), path)
+					&& checker.validateExpression(node.getEntity(), path.getExpression(), selected.size(), path)) {
 				selected.add(node);
 			}
 		}
@@ -434,20 +506,12 @@ public class TinyNet implements EntityNet {
 	}
 
 	// getter & setter=======
-	public Map<Class<?>, TableModel> getConfigModels() {
+	protected Map<Class<?>, TableModel> getConfigModels() {
 		return configModels;
 	}
 
-	public void setConfigModels(Map<Class<?>, TableModel> configModels) {
-		this.configModels = configModels;
-	}
-
-	public Map<Class<?>, LinkedHashMap<String, Node>> getBody() {
+	protected Map<Class<?>, LinkedHashMap<String, Node>> getBody() {
 		return body;
-	}
-
-	public void setBody(Map<Class<?>, LinkedHashMap<String, Node>> body) {
-		this.body = body;
 	}
 
 	public Boolean getAllowQueryCache() {
@@ -455,35 +519,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	public void setAllowQueryCache(Boolean allowQueryCache) {
+		this.cleanAllQueryCaches();
 		this.allowQueryCache = allowQueryCache;
 	}
-
-	public Map<String, Map<Integer, Set<Node>>> getQueryCache() {
-		return queryCache;
-	}
-
-	public void setQueryCache(Map<String, Map<Integer, Set<Node>>> queryCache) {
-		this.queryCache = queryCache;
-	}
-
-	public int getCurrentPathId() {
-		return currentPathId;
-	}
-
-	public void setCurrentPathId(int currentPathId) {
-		this.currentPathId = currentPathId;
-	}
-
-	public Map<String, Integer> getPathIdCache() {
-		return pathIdCache;
-	}
-
-	public void setPathIdCache(Map<String, Integer> pathIdCache) {
-		this.pathIdCache = pathIdCache;
-	}
-
- 
-
- 
 
 }

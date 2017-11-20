@@ -1,7 +1,6 @@
 package functiontest.orm;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jtinynet.BeanValidator;
 import com.github.drinkjava2.jtinynet.Node;
 import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
@@ -38,66 +38,12 @@ public class TinyNetTest extends TestBase {
 		ctx.refreshMetaData();
 	}
 
-	private void insertDemoData() {
-		//@formatter:off 
-		ctx.nBatchBegin(); //Batch insert enabled 
-		new User().put("id","u1").put("userName","user1").insert();
-		new User().put("id","u2").put("userName","user2").insert();
-		new User().put("id","u3").put("userName","user3").insert();
-		new User().put("id","u4").put("userName","user4").insert();
-		new User().put("id","u5").put("userName","user5").insert(); 
-		
-		new Address().put("id","a1","addressName","address1","userId","u1").insert();
-		new Address().put("id","a2","addressName","address2","userId","u2").insert();
-		new Address().put("id","a3","addressName","address3","userId","u3").insert();
-		new Address().put("id","a4","addressName","address4","userId","u4").insert();
-		new Address().put("id","a5","addressName","address5","userId","u5").insert();
-
-		new Email().putFields("id","emailName","userId");
-		new Email().putValues("e1","email1","u1").insert();
-		new Email().putValues("e2","email2","u1").insert();
-		new Email().putValues("e3","email3","u2").insert();
-		new Email().putValues("e4","email4","u2").insert();
-		new Email().putValues("e5","email5","u3").insert();
-		
-		Role r=new Role();
-		r.setId("r1");r.setRoleName("role1");r.insert();
-		r.setId("r2");r.setRoleName("role2");r.insert();
-		r.setId("r3");r.setRoleName("role3");r.insert();
-		r.setId("r4");r.setRoleName("role4");r.insert();
-		r.setId("r5");r.setRoleName("role5");r.insert();
-		
-		Privilege p=new Privilege();
-		p.setId("p1");p.setPrivilegeName("privilege1");p.insert();
-		p.setId("p2");p.setPrivilegeName("privilege2");p.insert();
-		p.setId("p3");p.setPrivilegeName("privilege3");p.insert();
-		p.setId("p4");p.setPrivilegeName("privilege4");p.insert();
-		p.setId("p5");p.setPrivilegeName("privilege5");p.insert();
-
-        UserRole ur=new UserRole();
-        ur.setUserId("u1");ur.setRid("r1");ur.insert();
-        ur.setUserId("u2");ur.setRid("r1");ur.insert();
-        ur.setUserId("u2");ur.setRid("r2");ur.insert();
-        ur.setUserId("u2");ur.setRid("r3");ur.insert();
-        ur.setUserId("u3");ur.setRid("r4");ur.insert();
-        ur.setUserId("u4");ur.setRid("r1");ur.insert();        
-         
-		new RolePrivilege().putFields("rid","pid"); 
-		new RolePrivilege().putValues("r1","p1").insert();
-		new RolePrivilege().putValues("r2","p1").insert();		
-		new RolePrivilege().putValues("r2","p2").insert();		 
-		new RolePrivilege().putValues("r2","p3").insert();	
-		new RolePrivilege().putValues("r3","p3").insert();
-		new RolePrivilege().putValues("r4","p1").insert();
-		ctx.nBatchEnd(); //Batch insert end
-		//@formatter:on
-	}
-
 	@Test
 	public void testJoinFields() {
-		insertDemoData();
-		TinyNet net = ctx.loadKeyEntityNet(User.class);
-		Assert.assertEquals(5, net.size());
+		new User().put("id", "u1").put("userName", "user1").insert();
+		new User().put("id", "u2").put("userName", "user2").insert();
+		TinyNet net = ctx.netLoadSketch(User.class);
+		Assert.assertEquals(2, net.size());
 		List<User> users = net.getAllEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
@@ -105,87 +51,44 @@ public class TinyNetTest extends TestBase {
 		u.tableModel().setAlias("u");
 		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
 				netConfig(u) + "select u.id as u_id, u.userName as u_userName from usertb as u");
-		ctx.joinList(net, listMap);
+		ctx.netJoinList(net, listMap);// not userName be joined
 
-		Assert.assertEquals(5, net.size());
+		Assert.assertEquals(2, net.size());
 		users = net.getAllEntityList(User.class);
 		Assert.assertNotNull(users.get(0).getUserName());
 	}
 
 	@Test
 	public void testJoinParents() {
-		insertDemoData();
+		new User().put("id", "u1").put("userName", "user1").insert();
+		new User().put("id", "u2").put("userName", "user2").insert();
+		new Email().putFields("id", "emailName", "userId");
+		new Email().putValues("e1", "email1", "u1").insert();
+		new Email().putValues("e2", "email2", "u1").insert();
 		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
 				netConfig(new Email().alias("e")) + "select e.id as e_id from emailtb e");
-		TinyNet net = (TinyNet) ctx.createEntityNet(listMap);
-		Assert.assertEquals(5, net.size());
-		Node e1 = net.getBody().get(Email.class).get("e1");
-		Assert.assertNull(e1.getParentRelations());
+		TinyNet net = (TinyNet) ctx.netCreate(listMap);
+		Assert.assertEquals(2, net.size());
+		Node emailNode = net.getOneNode(Email.class, "e1");
+		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId field
 
 		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(),
 				netConfig(Email.class) + "select e.** from emailtb e");
-		ctx.joinList(net, listMap2);
-		Assert.assertEquals(5, net.size());
-		e1 = net.getBody().get(Email.class).get("e1");
-		Assert.assertNotNull(e1.getParentRelations());
-	}
+		ctx.netJoinList(net, listMap2);
 
-	@Test
-	public void testloadEntityNet() {
-		insertDemoData();
-		TinyNet net = ctx.loadEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
-				UserRole.class, RolePrivilege.class);
-		Assert.assertEquals(37, net.size());
-		System.out.println(net.size());
-
-		List<User> users = net.getAllEntityList(User.class);
-		Assert.assertEquals(5, users.size());
-		Assert.assertEquals("user1", users.get(0).getUserName());
-		System.out.println(users.get(0).getUserName());
-	}
-
-	@Test
-	public void testloadKeyEntityNet() {
-		insertDemoData();
-		TinyNet net = ctx.loadKeyEntityNet(new User(), Email.class, Address.class, new Role(), Privilege.class,
-				UserRole.class, RolePrivilege.class);
-		Assert.assertEquals(37, net.size());
-		System.out.println(net.size());
-
-		List<User> users = net.getAllEntityList(User.class);
-		Assert.assertEquals(5, users.size());
-		Assert.assertEquals(null, users.get(0).getUserName());
-	}
-
-	@Test
-	public void testManualLoadAndJoin() {
-		insertDemoData();
-		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
-				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
-		TinyNet net = ctx.createEntityNet(mapList1);
-		Assert.assertEquals(10, net.size());
-
-		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
-				netConfig(Email.class) + "select e.** from emailtb as e");
-		ctx.joinList(net, mapList2);
-		Assert.assertEquals(15, net.size());
-
-		List<Map<String, Object>> mapList3 = ctx.nQuery(
-				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
-				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
-		Assert.assertEquals(900, mapList3.size());
-		ctx.joinList(net, mapList3);
-		Assert.assertEquals(37, net.size());
+		Assert.assertEquals(2, net.size());
+		emailNode = net.getOneNode(Email.class, "e1");
+		Assert.assertNotNull(emailNode.getParentRelations());
 	}
 
 	@Test
 	public void testFindSelf() {
 		int sampleSize = 500;
-		int queyrTimes = 100;
+		int queyrTimes = 200;
 		for (int i = 1; i <= sampleSize; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
-		TinyNet net = ctx.loadEntityNet(new User(), Email.class);
+		TinyNet net = ctx.netLoad(new User(), Email.class);
 
 		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
 		Assert.assertEquals(0, users2.size());
@@ -209,14 +112,14 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testFindChild() {
-		int sampleSize = 70;
-		int queyrTimes = 70;
+		int sampleSize = 30;
+		int queyrTimes = 20;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		TinyNet net = ctx.loadEntityNet(new User(), Email.class);
+		TinyNet net = ctx.netLoad(new User(), Email.class);
 
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
@@ -243,9 +146,106 @@ public class TinyNetTest extends TestBase {
 		System.out.println("email selected2:" + result.get(Email.class).size());
 	}
 
-	//@formatter:off  
-			//net.remove(u);  
-			//net.add(u); 
-	        //net.update(u); //user new u to replace old u 
-	 
+	@Test
+	public void testValidateByBean() {
+		new User().put("id", "u1").put("userName", "user1").insert();
+		new User().put("id", "u2").put("userName", "user2").insert();
+		new Email().putFields("id", "emailName", "userId");
+		new Email().putValues("e1", "email1", "u1").insert();
+		new Email().putValues("e2", "email2", "u1").insert();
+		new Email().putValues("e3", "email3", "u2").insert();
+		TinyNet net = ctx.netLoad(User.class, Email.class);
+		Set<Email> emails = net.findEntitySet(Email.class,
+				new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(new BeanValidator() {
+					@Override
+					public boolean validateBean(Object entity) {
+						if (((Email) entity).getEmailName().equals("email2"))
+							return true;
+						return false;
+					}
+
+				}));
+		Assert.assertEquals(1, emails.size());
+	}
+
+	@Test
+	public void testValidateByExpression() {
+		new User().put("id", "u1").put("userName", "user1").insert();
+		new User().put("id", "u2").put("userName", "user2").insert();
+		new Email().putFields("id", "emailName", "userId");
+		new Email().putValues("e1", "email1", "u1").insert();
+		new Email().putValues("e2", "email2", "u1").insert();
+		new Email().putValues("e3", "email3", "u2").insert();
+		TinyNet net = ctx.netLoad(User.class, Email.class);
+		Set<Email> emails = net.findEntitySet(Email.class, new Path("S-", User.class)
+				.nextPath("C+", Email.class, "userId").where("emailName='email2' or id='e3'"));
+		Assert.assertEquals(2, emails.size());
+	}
+
+	@Test
+	public void testFindParent() {
+		int sampleSize = 20;
+		int queyrTimes = 10;
+		for (int i = 0; i < sampleSize; i++) {
+			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
+			for (int j = 0; j < sampleSize; j++)
+				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
+		}
+		TinyNet net = ctx.netLoad(new User(), Email.class);
+		Map<Class<?>, Set<Node>> result = null;
+		long start = System.currentTimeMillis();
+
+		start = System.currentTimeMillis();
+		for (int i = 0; i < queyrTimes; i++) {
+			result = net.findNodeSetForEntities(new Path("S+", Email.class).nextPath("P+", User.class, "userId"));
+		}
+		System.out.println(
+				String.format("%28s: %6s s", "Time used:", "" + (System.currentTimeMillis() - start) / 1000.0));
+		System.out.println("user selected2:" + result.get(User.class).size());
+		System.out.println("email selected2:" + result.get(Email.class).size());
+	}
+
+	@Test
+	public void testAddEntity() {
+		new User().put("id", "u1").put("userName", "user1").insert();
+		TinyNet net = ctx.netLoad(User.class);
+		Assert.assertEquals(1, net.size());
+
+		User u2 = new User();
+		u2.setId("u2");
+		u2.setUserName("user2");
+		u2.insert();
+		ctx.netAddEntity(net, u2);
+
+		Assert.assertEquals(2, net.size());
+
+		User u = net.getOneEntity(User.class, "u2");
+		Assert.assertEquals("user2", u.getUserName());
+	}
+
+	@Test
+	public void testRemoveEntity() {
+		new User().put("id", "u1").put("userName", "user1").insert();
+		new User().put("id", "u2").put("userName", "user2").insert();
+		TinyNet net = ctx.netLoad(User.class);
+		Assert.assertEquals(2, net.size());
+		User u2 = net.getOneEntity(User.class, "u2");
+		ctx.netRemoveEntity(net, u2);
+		Assert.assertEquals(1, net.size());
+	}
+
+	@Test
+	public void testUpdateEntity() {
+		new User().put("id", "u1").put("userName", "user1").insert();
+		new User().put("id", "u2").put("userName", "user2").insert();
+		TinyNet net = ctx.netLoad(User.class);
+		Assert.assertEquals(2, net.size());
+		User u2 = net.getOneEntity(User.class, "u2");
+		u2.setUserName("newName");
+		ctx.netUpdateEntity(net, u2);
+
+		u2 = net.getOneEntity(User.class, "u2");
+		Assert.assertEquals("newName", u2.getUserName());
+	}
+
 }

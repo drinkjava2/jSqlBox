@@ -12,23 +12,45 @@
 package com.github.drinkjava2.jtinynet;
 
 /**
- * DefaultBeanValidator always allow a node to put into input list or output
+ * Checker used to check if a node allowed to be put into input list or output
  * list
- *
+ * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class DefaultBeanValidator extends BeanValidator {
-	public static final BeanValidator instance = new DefaultBeanValidator();
-
-	@Override
-	public boolean validateNode(TinyNet tinyNet, Node node, int level, int selectedSize) {
+public class SimpleExpressionParser {
+	 
+	/**
+	 * In SimpleExpressionParser, the parser method only allow below keywords:
+	 * 
+	 * <pre>
+	 *  
+	 * >
+	 * <
+	 * =
+	 * >=
+	 * <= 
+	 * 
+	 * equals 
+	 * equalsIgnoreCase 
+	 * contains
+	 * startWith
+	 * endWith
+	 * 
+	 * or
+	 * and 
+	 * not
+	 * 
+	 * (
+	 * )
+	 * 
+	 * '
+	 * \'
+	 * 
+	 * </pre>
+	 */
+	public static boolean parser(String expression) {
 		return true;
 	}
-
-	@Override
-	public boolean validateExpression(Object bean, String Expression, int selectedSize) {
-		return true;
-	}
-
+	
 }

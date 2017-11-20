@@ -12,29 +12,28 @@
 package com.github.drinkjava2.jtinynet;
 
 /**
- * Checker used to check if a node allowed to be put into input list or output
- * list
- * 
+ * BeanValidator is the default implementation of BeanValidatorSupport, it
+ * always allow bean validated, it has a simple
+ *
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public abstract class BeanValidator {
-	/**
-	 * Check if a node allow be selected
-	 * 
-	 * @param tinyNet
-	 * @param node
-	 * @param level
-	 * @param inputList
-	 * @param outputList
-	 */
-	public abstract boolean validateNode(TinyNet tinyNet, Node node, int level, int selectedSize);
+public class BeanValidator implements BeanValidatorSupport {
+	public static final BeanValidatorSupport instance = new BeanValidator();
 
-	/**
-	 * Check if a node allow be selected
-	 */
-	public boolean validateExpression(Object bean, String expression, int selectedSize) {
-		return DefaultExpressionAnalyzer.anlyze(bean, expression, selectedSize);
-	};
+	@Override
+	public boolean validateBean(Object entity) {
+		return true;
+	}
+
+	@Override
+	public boolean validateNode(Node node, int level, int selectedSize, Path path) {
+		return validateBean(node.getEntity());
+	}
+
+	@Override
+	public boolean validateExpression(Object bean, String expression, int selectedSize, Path path) {
+		return SimpleExpressionParser.parser(expression);
+	}
 
 }

@@ -45,12 +45,12 @@ public class Path {
 	private Object target;
 
 	/** A String expression condition should return true or false */
-	private String where;
+	private String expression;
 
 	/**
-	 * Checker class or Checker instance, used to check if a node can be selected
+	 * BeanValidator class or instance, used to check if a node can be selected
 	 */
-	private Object checker;
+	private Object validator;
 
 	/** The reference column names or entity field names */
 	private String[] refs;
@@ -64,7 +64,7 @@ public class Path {
 	// ==================inside used fields======================
 	// Initialize some fields to improve speed
 	private Boolean checkerInitialized = false;
-	private BeanValidator checkerInstance;
+	private BeanValidatorSupport validatorInstance;
 
 	private Boolean uniqueStringInitialized = false;
 	private String uniqueStringId;
@@ -81,7 +81,7 @@ public class Path {
 	public Path(String type, Object target, Object checker, String... refs) {
 		this.type = type;
 		this.target = target;
-		this.checker = checker;
+		this.validator = checker;
 		this.refs = refs;
 		validateType();
 	}
@@ -152,11 +152,15 @@ public class Path {
 
 		if (refs == null)
 			this.refColumns = null;
-		else { // compare tableModel to determine refs are field names or column names
+		else {
+			TableModel childOrParentModelOrSelf = this.targetModel;
+			if ("P".equalsIgnoreCase(this.getType().substring(0, 1)))
+				childOrParentModelOrSelf = this.fatherPath.targetModel;
+			// compare tableModel to determine refs are field names or column names
 			StringBuilder sb = new StringBuilder();
 			for (String ref : refs) {
 				boolean found = false;
-				for (ColumnModel col : model.getColumns()) {
+				for (ColumnModel col : childOrParentModelOrSelf.getColumns()) {
 					if (ref.equalsIgnoreCase(col.getEntityField())) {
 						if (found)
 							throw new TinyNetException("Can't judge '" + ref + "' is a field or a column name.");
@@ -220,7 +224,7 @@ public class Path {
 		String next = null;
 		if (!cacheable)
 			return null;
-		if (checker != null && checker instanceof BeanValidator)
+		if (validator != null && validator instanceof BeanValidatorSupport)
 			return null;
 		if (nextPath != null) {
 			next = nextPath.getUniqueIdString();
@@ -230,8 +234,8 @@ public class Path {
 		StringBuilder sb = new StringBuilder()//
 				.append("type:").append(type)//
 				.append(",target:").append(target)//
-				.append(",where:").append(where)//
-				.append(",checker:").append(checker);
+				.append(",exp:").append(expression)//
+				.append(",validator:").append(validator);
 		if (refs != null) {
 			sb.append(",columns:");
 			for (String colName : refs)
@@ -243,14 +247,14 @@ public class Path {
 		return uniqueStringId;
 	}
 
-	/** Get Checker instance */
-	public BeanValidator getCheckerInstance() {
+	/** Get Validator instance */
+	public BeanValidatorSupport getValidatorInstance() {
 		if (checkerInitialized)
-			return checkerInstance;
+			return validatorInstance;
 		else {
-			checkerInstance = TinyNetUtils.getOrBuildChecker(checker);
+			validatorInstance = TinyNetUtils.getOrBuildChecker(validator);
 			checkerInitialized = true;
-			return checkerInstance;
+			return validatorInstance;
 		}
 	}
 
@@ -264,9 +268,9 @@ public class Path {
 		}
 	}
 
-	public Path where(String where) {
+	public Path where(String expression) {
 		checkInitialized();
-		this.where = where;
+		this.expression = expression;
 		return this;
 	}
 
@@ -325,14 +329,14 @@ public class Path {
 		return this;
 	}
 
-	public Object getChecker() {
-		return checker;
+	public Object getValidator() {
+		return validator;
 	}
 
-	/** Set a Checker instance or Checker class before query */
-	public Path setChecker(Object checker) {
+	/** Set a BeanValidator instance or class before query */
+	public Path setValidator(Object validator) {
 		checkInitialized();
-		this.checker = checker;
+		this.validator = validator;
 		return this;
 	}
 
@@ -346,12 +350,12 @@ public class Path {
 		return this;
 	}
 
-	public String getWhere() {
-		return where;
+	public String getExpression() {
+		return expression;
 	}
 
-	public Path setWhere(String where) {
-		this.where = where;
+	public Path setExpression(String expression) {
+		this.expression = expression;
 		return this;
 	}
 
