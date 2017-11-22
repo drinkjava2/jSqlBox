@@ -70,7 +70,8 @@ public class TinyNetTest extends TestBase {
 		TinyNet net = (TinyNet) ctx.netCreate(listMap);
 		Assert.assertEquals(2, net.size());
 		Node emailNode = net.getOneNode(Email.class, "e1");
-		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId field
+		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId
+															// field
 
 		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(),
 				netConfig(Email.class) + "select e.** from emailtb e");
@@ -112,7 +113,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testFindChild() {
-		int sampleSize = 30;
+		int sampleSize = 70;
 		int queyrTimes = 20;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
@@ -136,8 +137,7 @@ public class TinyNetTest extends TestBase {
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeSetForEntities(
-					new Path("S+", User.class).setCacheable(true).nextPath("C+", Email.class, "userId"));
+			result = net.findNodeSetForEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
 		}
 		System.out.println(
 				String.format("%28s: %6s s", "With Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
@@ -146,40 +146,79 @@ public class TinyNetTest extends TestBase {
 		System.out.println("email selected2:" + result.get(Email.class).size());
 	}
 
-	@Test
-	public void testValidateByBean() {
-		new User().put("id", "u1").put("userName", "user1").insert();
-		new User().put("id", "u2").put("userName", "user2").insert();
-		new Email().putFields("id", "emailName", "userId");
-		new Email().putValues("e1", "email1", "u1").insert();
-		new Email().putValues("e2", "email2", "u1").insert();
-		new Email().putValues("e3", "email3", "u2").insert();
-		TinyNet net = ctx.netLoad(User.class, Email.class);
-		Set<Email> emails = net.findEntitySet(Email.class,
-				new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(new BeanValidator() {
-					@Override
-					public boolean validateBean(Object entity) {
-						if (((Email) entity).getEmailName().equals("email2"))
-							return true;
-						return false;
-					}
+	public static class MyBeanValidator extends BeanValidator {
+		@Override
+		public boolean validateBean(Object entity) {
+			if (!((Email) entity).getId().equals("NotExist"))
+				return true;
+			return false;
+		}
+	}
 
-				}));
-		Assert.assertEquals(1, emails.size());
+	@Test
+	public void testValidateByBeanValidator() {// no cache
+		int sampleSize = 60;
+		int queyrTimes = 60;
+		for (int i = 0; i < sampleSize; i++) {
+			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
+			for (int j = 0; j < sampleSize; j++)
+				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
+		}
+		TinyNet net = ctx.netLoad(User.class, Email.class);
+		long start = System.currentTimeMillis();
+		Set<Email> emails = null;
+		// Set validator instance will not cache query result
+		Path p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(new MyBeanValidator());
+		for (int i = 0; i < queyrTimes; i++) {
+			emails = net.findEntitySet(Email.class, p);
+		}
+		System.out.println(String.format("%28s: %6s s", "Bean Validator instance:",
+				"" + (System.currentTimeMillis() - start) / 1000.0));
+		Assert.assertEquals(sampleSize * sampleSize, emails.size());
+
+		// Set validator class will cache query result
+		start = System.currentTimeMillis();
+		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(MyBeanValidator.class);
+		for (int i = 0; i < queyrTimes; i++) {
+			emails = net.findEntitySet(Email.class, p);
+		}
+		System.out.println(String.format("%28s: %6s s", "Bean Validator class:",
+				"" + (System.currentTimeMillis() - start) / 1000.0));
+		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 	}
 
 	@Test
 	public void testValidateByExpression() {
-		new User().put("id", "u1").put("userName", "user1").insert();
-		new User().put("id", "u2").put("userName", "user2").insert();
-		new Email().putFields("id", "emailName", "userId");
-		new Email().putValues("e1", "email1", "u1").insert();
-		new Email().putValues("e2", "email2", "u1").insert();
-		new Email().putValues("e3", "email3", "u2").insert();
+		// no cache
+		int sampleSize = 60;
+		int queyrTimes = 60;
+		for (int i = 0; i < sampleSize; i++) {
+			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
+			for (int j = 0; j < sampleSize; j++)
+				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
+		}
 		TinyNet net = ctx.netLoad(User.class, Email.class);
-		Set<Email> emails = net.findEntitySet(Email.class, new Path("S-", User.class)
-				.nextPath("C+", Email.class, "userId").where("emailName='email2' or id='e3'"));
-		Assert.assertEquals(2, emails.size());
+		long start = System.currentTimeMillis();
+		Set<Email> emails = null;
+		// Set expression query parameters will not cache query result
+		Path p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").where("id=? or emailName=?", "Foo",
+				"Bar");
+		for (int i = 0; i < queyrTimes; i++) {
+			emails = net.findEntitySet(Email.class, p);
+		}
+		System.out.println(String.format("%28s: %6s s", "Bean Validator instance:",
+				"" + (System.currentTimeMillis() - start) / 1000.0));
+		Assert.assertEquals(sampleSize * sampleSize, emails.size());
+
+		// Do not have query parameters will cause query result be cached
+		start = System.currentTimeMillis();
+		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").where("id='Foo' or emailName='Bar'");
+		for (int i = 0; i < queyrTimes; i++) {
+			emails = net.findEntitySet(Email.class, p);
+		}
+		System.out.println(String.format("%28s: %6s s", "Bean Validator class:",
+				"" + (System.currentTimeMillis() - start) / 1000.0));
+		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 	}
 
 	@Test

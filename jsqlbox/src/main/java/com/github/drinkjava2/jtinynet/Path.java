@@ -61,6 +61,8 @@ public class Path {
 	/** Not allow cache */
 	private Boolean cacheable = true;
 
+	private Object[] queryParams;
+
 	// ==================inside used fields======================
 	// Initialize some fields to improve speed
 	private Boolean checkerInitialized = false;
@@ -156,7 +158,8 @@ public class Path {
 			TableModel childOrParentModelOrSelf = this.targetModel;
 			if ("P".equalsIgnoreCase(this.getType().substring(0, 1)))
 				childOrParentModelOrSelf = this.fatherPath.targetModel;
-			// compare tableModel to determine refs are field names or column names
+			// compare tableModel to determine refs are field names or column
+			// names
 			StringBuilder sb = new StringBuilder();
 			for (String ref : refs) {
 				boolean found = false;
@@ -213,8 +216,9 @@ public class Path {
 	}
 
 	/**
-	 * Get a unique Id String represent this path if it will never change, otherwise
-	 * return null, this id will be used as query cache key
+	 * Get a unique Id String represent this path if it's a "FIXED" path, the id
+	 * will be used as query cache key Return null if the path is not a "FIXED"
+	 * type, for example it has query parameters.
 	 */
 	public String getUniqueIdString() {
 		if (uniqueStringInitialized)
@@ -231,6 +235,8 @@ public class Path {
 			if (StrUtils.isEmpty(next))
 				return null;
 		}
+		if (queryParams != null)
+			return null;
 		StringBuilder sb = new StringBuilder()//
 				.append("type:").append(type)//
 				.append(",target:").append(target)//
@@ -268,9 +274,10 @@ public class Path {
 		}
 	}
 
-	public Path where(String expression) {
+	public Path where(String expression, Object... queryParams) {
 		checkInitialized();
 		this.expression = expression;
+		this.queryParams = queryParams;
 		return this;
 	}
 
@@ -283,7 +290,7 @@ public class Path {
 
 	public void checkInitialized() {
 		if (this.uniqueStringInitialized)
-			throw new TinyNetException("Can change path setting after query");
+			throw new TinyNetException("It's not allowed to change path after it be initialized");
 	}
 
 	// =====Getter & Setter ==============
@@ -357,6 +364,14 @@ public class Path {
 	public Path setExpression(String expression) {
 		this.expression = expression;
 		return this;
+	}
+
+	public Object[] getQueryParams() {
+		return queryParams;
+	}
+
+	public void setQueryParams(Object[] queryParams) {
+		this.queryParams = queryParams;
 	}
 
 }
