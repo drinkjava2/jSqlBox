@@ -33,6 +33,6 @@ public interface BeanValidatorSupport {
 	/**
 	 * Check if a node allow be selected
 	 */
-	public abstract boolean validateExpression(Object bean, String expression, int selectedSize, Path path);
+	public abstract boolean validateExpression(Node node, int level, int selectedSize, Path path);
 
 }

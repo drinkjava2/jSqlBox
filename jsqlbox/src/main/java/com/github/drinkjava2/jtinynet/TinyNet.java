@@ -59,8 +59,8 @@ public class TinyNet implements EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CmPdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of EntityNet, and also store O-R
-	 * mapping info related to database
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
+	 * info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -100,8 +100,8 @@ public class TinyNet implements EntityNet {
 	}
 
 	/**
-	 * Transfer List<Map<String, Object>> instance to entities and add to
-	 * current Net, modelConfigs parameter is optional
+	 * Transfer List<Map<String, Object>> instance to entities and add to current
+	 * Net, modelConfigs parameter is optional
 	 */
 	@Override
 	public TinyNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
@@ -370,14 +370,10 @@ public class TinyNet implements EntityNet {
 	/**
 	 * According given path and input Node Set, find related node set
 	 * 
-	 * @param level
-	 *            search level, start from 0
-	 * @param path
-	 *            The Path
-	 * @param input
-	 *            The input node collection
-	 * @param output
-	 *            The output node collection
+	 * @param level search level, start from 0
+	 * @param path The Path
+	 * @param input The input node collection
+	 * @param output The output node collection
 	 * @return Related node set
 	 */
 	private void findNodeSetforNodes(Integer level, Path path, Collection<Node> input,
@@ -467,7 +463,7 @@ public class TinyNet implements EntityNet {
 				if (this.allowQueryCache && path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
 					cacheSelected(inputNode.getId(), pathUniqueString, selected);
 				}
-			} 
+			}
 		}
 		Set<Node> nodes = result.get(targetClass);
 		if (nodes == null) {
@@ -495,7 +491,7 @@ public class TinyNet implements EntityNet {
 
 		for (Node node : nodesToCheck) {
 			if (checker.validateNode(node, level, selected.size(), path)
-					&& checker.validateExpression(node.getEntity(), path.getExpression(), selected.size(), path)) {
+					&& checker.validateExpression(node, level, selected.size(), path)) {
 				selected.add(node);
 			}
 		}

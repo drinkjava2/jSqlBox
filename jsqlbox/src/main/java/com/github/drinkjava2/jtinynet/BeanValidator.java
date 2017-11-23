@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jtinynet;
 
+import com.github.drinkjava2.jtinynet.parser.SimpleExpressionParser;
+
 /**
  * BeanValidator is the default implementation of BeanValidatorSupport, it
  * always allow bean validated, it has a simple
@@ -32,8 +34,9 @@ public class BeanValidator implements BeanValidatorSupport {
 	}
 
 	@Override
-	public boolean validateExpression(Object bean, String expression, int selectedSize, Path path) {
-		return SimpleExpressionParser.parser(expression);
+	public boolean validateExpression(Node node, int level, int selectedSize, Path path) {
+		return SimpleExpressionParser.parse(node.getEntity(), level, selectedSize, path.getExpression(),
+				path.getexpressionParams());
 	}
 
 }

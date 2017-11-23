@@ -283,6 +283,7 @@ public class Path {
 	 */
 	public Path where(String expression, Object... expressionParams) {
 		checkInitialized();
+		this.expression = expression;
 		this.expressionParams = expressionParams;
 		return this;
 	}
