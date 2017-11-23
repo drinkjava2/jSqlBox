@@ -12,45 +12,49 @@
 package com.github.drinkjava2.jtinynet;
 
 /**
- * Checker used to check if a node allowed to be put into input list or output
- * list
+ * SimpleExpressionParser parser a String, return true or false
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
 public class SimpleExpressionParser {
-	 
+
 	/**
 	 * In SimpleExpressionParser, the parser method only allow below keywords:
 	 * 
 	 * <pre>
-	 *  
+	 * ==========Math======== 
 	 * >
 	 * <
 	 * =
 	 * >=
 	 * <= 
 	 * 
+	 * ==========String========
 	 * equals 
 	 * equalsIgnoreCase 
 	 * contains
 	 * startWith
 	 * endWith
+	 * '
+	 * \'  
 	 * 
+	 * ==========Logic========
 	 * or
 	 * and 
-	 * not
-	 * 
+	 * not 
 	 * (
 	 * )
+	 * if(condition,doTrue,doFalse}
 	 * 
-	 * '
-	 * \'
+	 * ==========Parameter=========
+	 * ?
+	 * 
 	 * 
 	 * </pre>
 	 */
 	public static boolean parser(String expression) {
 		return true;
 	}
-	
+
 }

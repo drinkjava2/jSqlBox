@@ -14,6 +14,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -62,18 +64,19 @@ public class SpeedTest {
 
 	@Test
 	public void executeTest() throws Exception {
-		Long times = 100L;
+		Long times = 10000L;
 		System.out.println("Compare method execute time for repeat " + times + " times:");
 		runMethod("pureJdbc", times);
 		runMethod("dbUtilsWithConnMethod", times);
 		runMethod("dbUtilsNoConnMethod", times);
 		runMethod("nXxxJdbcStyle", times);
 		runMethod("iXxxInlineStyle", times);
-		runMethod("tXxxTemplateStyle", times);
-		runMethod("tXxxTemplateColonStyle", times);
+		runMethod("tXxxTemplateStyle", times);		
+		runMethod("tXxxTemplateAndInlineStyle", times);
+		runMethod("tXxxNamingParamTemplateStyle", times);
 		runMethod("dataMapperStyle", times);
 		runMethod("activeRecordStyle", times);
-		runMethod("activeRecordDefaultContext", times);
+		runMethod("activeRecordDefaultContext", times); 
 	}
 
 	@Table(name = "users")
@@ -260,6 +263,26 @@ public class SpeedTest {
 	}
 
 	public void tXxxTemplateStyle(Long times) {
+		Map<String, Object> params=new HashMap<String, Object>();
+		for (int i = 0; i < times; i++) {
+			User sam = new User("Sam", "Canada");
+			User tom = new User("Tom", "China");
+			params.put("user", sam);
+			ctx.tExecute(params,"insert into users (name, address) values(#{user.name},#{user.address})");
+			params.put("user", tom); 
+			ctx.tExecute(params,"update users set name=#{user.name}, address=#{user.address}");
+			params.clear();
+			params.put("name", "Tom");
+			params.put("addr", "China");
+			Assert.assertEquals(1L,
+					ctx.tQueryForObject(params,"select count(*) from users where name=#{name} and address=#{addr}")); 
+			params.put("u", tom);
+			ctx.tExecute(params, "delete from users where name=#{u.name} or address=#{u.address}");
+		}
+	}
+	
+
+	public void tXxxTemplateAndInlineStyle(Long times) {
 		for (int i = 0; i < times; i++) {
 			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
@@ -274,7 +297,7 @@ public class SpeedTest {
 		}
 	}
 
-	public void tXxxTemplateColonStyle(Long times) {
+	public void tXxxNamingParamTemplateStyle(Long times) {
 		for (int i = 0; i < times; i++) {
 			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");

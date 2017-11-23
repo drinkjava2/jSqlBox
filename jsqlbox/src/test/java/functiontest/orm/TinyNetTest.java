@@ -190,8 +190,8 @@ public class TinyNetTest extends TestBase {
 	@Test
 	public void testValidateByExpression() {
 		// no cache
-		int sampleSize = 60;
-		int queyrTimes = 60;
+		int sampleSize =80;
+		int queyrTimes = 20;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
 			for (int j = 0; j < sampleSize; j++)
@@ -206,7 +206,7 @@ public class TinyNetTest extends TestBase {
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
-		System.out.println(String.format("%28s: %6s s", "Bean Validator instance:",
+		System.out.println(String.format("%28s: %6s s", "Validate by expression with parameters:",
 				"" + (System.currentTimeMillis() - start) / 1000.0));
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 
@@ -216,7 +216,7 @@ public class TinyNetTest extends TestBase {
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
-		System.out.println(String.format("%28s: %6s s", "Bean Validator class:",
+		System.out.println(String.format("%28s: %6s s", "Validate by expression no parameters:",
 				"" + (System.currentTimeMillis() - start) / 1000.0));
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 	}

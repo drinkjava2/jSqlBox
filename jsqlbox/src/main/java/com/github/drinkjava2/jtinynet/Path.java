@@ -47,6 +47,8 @@ public class Path {
 	/** A String expression condition should return true or false */
 	private String expression;
 
+	private Object[] expressionParams;
+
 	/**
 	 * BeanValidator class or instance, used to check if a node can be selected
 	 */
@@ -60,8 +62,6 @@ public class Path {
 
 	/** Not allow cache */
 	private Boolean cacheable = true;
-
-	private Object[] queryParams;
 
 	// ==================inside used fields======================
 	// Initialize some fields to improve speed
@@ -235,7 +235,7 @@ public class Path {
 			if (StrUtils.isEmpty(next))
 				return null;
 		}
-		if (queryParams != null)
+		if (expressionParams != null && expressionParams.length > 0)
 			return null;
 		StringBuilder sb = new StringBuilder()//
 				.append("type:").append(type)//
@@ -274,10 +274,16 @@ public class Path {
 		}
 	}
 
-	public Path where(String expression, Object... queryParams) {
+	/**
+	 * Set a SQL style like search condition expression
+	 * 
+	 * @param expression
+	 * @param expressionParams
+	 * @return current Path
+	 */
+	public Path where(String expression, Object... expressionParams) {
 		checkInitialized();
-		this.expression = expression;
-		this.queryParams = queryParams;
+		this.expressionParams = expressionParams;
 		return this;
 	}
 
@@ -362,16 +368,19 @@ public class Path {
 	}
 
 	public Path setExpression(String expression) {
+		checkInitialized();
 		this.expression = expression;
 		return this;
 	}
 
-	public Object[] getQueryParams() {
-		return queryParams;
+	public Object[] getexpressionParams() {
+		return expressionParams;
 	}
 
-	public void setQueryParams(Object[] queryParams) {
-		this.queryParams = queryParams;
+	public Path setExpressionParams(Object[] expressionParams) {
+		checkInitialized();
+		this.expressionParams = expressionParams;
+		return this;
 	}
 
 }
