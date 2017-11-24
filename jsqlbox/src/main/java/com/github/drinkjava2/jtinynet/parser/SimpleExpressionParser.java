@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jtinynet.parser;
 
+import java.util.List;
+
 import com.github.drinkjava2.jdialects.StrUtils;
 
 /**
@@ -58,7 +60,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * 
  * </pre>
  * 
- * For example: "userName startWith ? and not(age<10 or age>?) or address
+ * For example: "userName startWith ? and not(-age*10 -age>?) or address
  * contains if(age>?,'FOO','BAR')
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
@@ -81,6 +83,13 @@ public class SimpleExpressionParser {
 		if (StrUtils.isEmpty(expression))
 			return true;
 		return false;
+	}
+	private static class Item{
+		private char type;//O:operator, V:value, I:items
+		private int operatorPriority;
+		private Object value;
+		private char valueType; //S:String, B:Boolean, L: Long, D:Double 
+		private List<Item> subItem;
 	}
 
 }
