@@ -11,9 +11,14 @@
  */
 package com.github.drinkjava2.jtinynet.parser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jtinynet.TinyNetException;
 
 /**
  * SimpleExpressionParser parse a String, return true or false
@@ -21,42 +26,36 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * In SimpleExpressionParser, the parse method only support below keywords:
  * 
  * <pre>
- * ==========Math======== 
- * >
- * <
- * =
- * >=
- * <=
- * +
- * -
- * *
- * / 
- * 
- * ==========String========
- * equals 
- * equalsIgnoreCase 
- * contains
- * containsIgnoreCase 
- * startWith
- * startWithIgnoreCase
- * endWith
- * endWithIgnoreCase
- * '
- * 
- * ==========Logic========
- * or
- * and 
- * not 
- * (
- * )
- * if(condition, doTrue, doFalse)
- * 
- * ==========Parameter=========
- * ?
- * 
- * ========= Other ==========
- * &#64;selectedSize 
- * &#64;level
+>
+<
+=
+>=
+<=
++
+-
+*
+/ 
+equals 
+equalsIgnoreCase 
+contains
+containsIgnoreCase 
+startWith
+startWithIgnoreCase
+endWith
+endWithIgnoreCase
+or
+and
+not 
+
+
+' 
+()
+? 
+0~9
+
+beanFields
+selectedSize 
+level
  * 
  * </pre>
  * 
@@ -67,6 +66,31 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * @since 1.0.0
  */
 public class SimpleExpressionParser {
+	private static final Map<String, Func> FUNCTIONMAP = new HashMap<String, Func>();
+	static {
+		FUNCTIONMAP.put("*", new Func(3, 2));
+		FUNCTIONMAP.put("/", new Func(3, 2));
+		FUNCTIONMAP.put("+", new Func(4, 2));
+		FUNCTIONMAP.put("-", new Func(4, 2));
+		FUNCTIONMAP.put("not", new Func(5, 1));
+		FUNCTIONMAP.put("equals", new Func(6, 2));
+		FUNCTIONMAP.put("equalsIgnoreCase", new Func(6, 2));
+		FUNCTIONMAP.put("contains", new Func(6, 2));
+		FUNCTIONMAP.put("containsIgnoreCase", new Func(6, 2));
+		FUNCTIONMAP.put("startWith", new Func(6, 2));
+		FUNCTIONMAP.put("startWithIgnoreCase", new Func(6, 2));
+		FUNCTIONMAP.put("endWith", new Func(6, 2));
+		FUNCTIONMAP.put("endWithIgnoreCase", new Func(6, 2));
+		FUNCTIONMAP.put(">", new Func(8, 2));
+		FUNCTIONMAP.put("<", new Func(8, 2));
+		FUNCTIONMAP.put("=", new Func(8, 2));
+		FUNCTIONMAP.put(">=", new Func(8, 2));
+		FUNCTIONMAP.put("<=", new Func(8, 2));
+		FUNCTIONMAP.put("<>", new Func(8, 2));
+		FUNCTIONMAP.put("or", new Func(10, 2));
+		FUNCTIONMAP.put("and", new Func(10, 2));
+	}
+	private static final Set<String> FUNCTIONNAMES = FUNCTIONMAP.keySet();
 
 	/**
 	 * Parse a expression String, return true if pass validate, false if failed for
@@ -82,14 +106,154 @@ public class SimpleExpressionParser {
 	public static boolean parse(Object bean, int level, int selectedSize, String expression, Object... params) {
 		if (StrUtils.isEmpty(expression))
 			return true;
-		return false;
+		return true;
 	}
-	private static class Item{
-		private char type;//O:operator, V:value, I:items
-		private int operatorPriority;
+
+	public static class Func {
+		public int priority;
+		public int operatorQTY;
+
+		public Func(int priority, int operatorQTY) {
+			this.priority = priority;
+			this.operatorQTY = operatorQTY;
+		}
+	}
+
+	public static class Item {
+		private int priority;
 		private Object value;
-		private char valueType; //S:String, B:Boolean, L: Long, D:Double 
+		private char type; // S:String, B:Boolean, L: Long, D:Double, P:parameter, I:items,
+							// U:Unknow_Function_Or_Variant
 		private List<Item> subItem;
+
+		public String getDebugInfo() {
+			String result = "\rItemValue=";
+			if (value != null)
+				result += value;
+			if (subItem != null) {
+				for (Item Item : subItem) {
+					result += " " + Item.getDebugInfo();
+				}
+			}
+			return result;
+		}
+	}
+
+	public static class keywordResult {
+	}
+
+	public static class SearchResult {
+		private Item item;
+		private int leftStart;
+		private int leftEnd;
+
+		private SearchResult(Item item, int leftStart, int leftEnd) {
+			this.item = item;
+			this.leftStart = leftStart;
+			this.leftEnd = leftEnd;
+		}
+	}
+
+	private static boolean isLetterNumber(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '.';
+	}
+
+	public static SearchResult findFirstResult(char[] chars, int start, int end) {
+		if (start > end)
+			return null;
+		boolean letters = false;
+		StringBuilder sb = new StringBuilder();
+		for (int i = start; i <= end; i++) {
+			if (!letters) {// no letters found
+				if (chars[i] == '?') {
+					Item item = new Item();
+					item.type = 'V';
+					item.value = "?";
+					return new SearchResult(item, i + 1, end);
+				} else if (chars[i] == '\'') {
+					for (int j = i + 1; j <= end; j++) {
+						if (chars[j] == '\'' && chars[j - 1] != '\\') {
+							Item item = new Item();
+							item.type = 'S';
+							item.value = sb.toString();
+							return new SearchResult(item, j + 1, end);
+						} else
+							sb.append(chars[j]);
+					}
+					throw new TinyNetException("Miss right ' charactor in expression.");
+				} else if (chars[i] == '(') {
+					int count = 1;
+					boolean inString = false;
+					for (int j = i + 1; j <= end; j++) {
+						if (!inString) {
+							if (chars[j] == '(')
+								count++;
+							else if (chars[j] == ')') {
+								count--;
+								if (count == 0) {
+									List<Item> subItems = seperateCharsToItems(chars, i + 1, j - 1);
+									Item item = new Item();
+									item.type = 'I';
+									item.subItem = subItems;
+									return new SearchResult(item, j + 1, end);
+								}
+							} else if (chars[j] == '\'') {
+								inString = true;
+							}
+						} else {
+							if (chars[j] == '\'' && chars[j - 1] != '\\') {
+								inString = false;
+							}
+						}
+					}
+					throw new TinyNetException("Miss right ) charactor in expression.");
+				} else if (chars[i] > ' ') {
+					letters = true;
+					sb.append(chars[i]);
+				}
+			} else {// letters found
+				if (chars[i] == '?' || chars[i] == '\'' || chars[i] == '(' || chars[i] <= ' '
+						|| isLetterNumber(chars[i]) != isLetterNumber(chars[i - 1])) {
+					Item item = new Item();
+					item.type = 'U';
+					item.value = sb.toString();
+					return new SearchResult(item, i, end);
+				} else {
+					sb.append(chars[i]);
+				}
+			}
+		}
+		if (sb.length() > 0) {
+			Item item = new Item();
+			item.type = 'U';
+			item.value = sb.toString();
+			return new SearchResult(item, end + 1, end);
+		} else
+			return null;
+	}
+
+	public static List<Item> seperateCharsToItems(char[] chars, int start, int end) {
+		List<Item> items = new ArrayList<Item>();
+		SearchResult result = findFirstResult(chars, start, end);
+		while (result != null) {
+			items.add(result.item);
+			result = findFirstResult(chars, result.leftStart, result.leftEnd);
+		}
+		return items;
+	}
+
+	public static Object doParse(String expression) {
+		char[] chars = (" " + expression + " ").toCharArray();
+		List<Item> items = seperateCharsToItems(chars, 1, chars.length - 2);
+		for (Item item : items) {
+			System.out.print(item.getDebugInfo());
+		}
+		return null;
+	}
+
+	public static void main(String[] args) { 
+		String s = "35*(24 -6*)+7/(4-6)";
+		doParse(s);
 	}
 
 }
