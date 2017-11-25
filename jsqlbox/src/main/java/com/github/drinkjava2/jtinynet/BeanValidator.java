@@ -35,7 +35,7 @@ public class BeanValidator implements BeanValidatorSupport {
 
 	@Override
 	public boolean validateExpression(Node node, int level, int selectedSize, Path path) {
-		return SimpleExpressionParser.parse(node.getEntity(), level, selectedSize, path.getExpression(),
+		return SimpleExpressionParser.instance.parse(node.getEntity(), level, selectedSize, path.getExpression(),
 				path.getexpressionParams());
 	}
 

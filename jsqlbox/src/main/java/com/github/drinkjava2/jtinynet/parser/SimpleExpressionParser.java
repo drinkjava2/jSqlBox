@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jtinynet.TinyNetException;
@@ -66,21 +65,23 @@ level
  * @since 1.0.0
  */
 public class SimpleExpressionParser {
-	private static final Map<String, Func> FUNCTIONMAP = new HashMap<String, Func>();
-	static {
+	public static SimpleExpressionParser instance = new SimpleExpressionParser();
+
+	private Map<String, Func> FUNCTIONMAP = new HashMap<String, Func>();
+	{
 		FUNCTIONMAP.put("*", new Func(3, 2));
 		FUNCTIONMAP.put("/", new Func(3, 2));
 		FUNCTIONMAP.put("+", new Func(4, 2));
 		FUNCTIONMAP.put("-", new Func(4, 2));
 		FUNCTIONMAP.put("not", new Func(5, 1));
 		FUNCTIONMAP.put("equals", new Func(6, 2));
-		FUNCTIONMAP.put("equalsIgnoreCase", new Func(6, 2));
+		FUNCTIONMAP.put("equalsignorecase", new Func(6, 2));
 		FUNCTIONMAP.put("contains", new Func(6, 2));
-		FUNCTIONMAP.put("containsIgnoreCase", new Func(6, 2));
-		FUNCTIONMAP.put("startWith", new Func(6, 2));
-		FUNCTIONMAP.put("startWithIgnoreCase", new Func(6, 2));
-		FUNCTIONMAP.put("endWith", new Func(6, 2));
-		FUNCTIONMAP.put("endWithIgnoreCase", new Func(6, 2));
+		FUNCTIONMAP.put("containsignorecase", new Func(6, 2));
+		FUNCTIONMAP.put("startwith", new Func(6, 2));
+		FUNCTIONMAP.put("startwithignorecase", new Func(6, 2));
+		FUNCTIONMAP.put("endwith", new Func(6, 2));
+		FUNCTIONMAP.put("endwithignorecase", new Func(6, 2));
 		FUNCTIONMAP.put(">", new Func(8, 2));
 		FUNCTIONMAP.put("<", new Func(8, 2));
 		FUNCTIONMAP.put("=", new Func(8, 2));
@@ -90,20 +91,24 @@ public class SimpleExpressionParser {
 		FUNCTIONMAP.put("or", new Func(10, 2));
 		FUNCTIONMAP.put("and", new Func(10, 2));
 	}
-	private static final Set<String> FUNCTIONNAMES = FUNCTIONMAP.keySet();
 
 	/**
-	 * Parse a expression String, return true if pass validate, false if failed for
-	 * validate
+	 * Parse a expression String, return true if pass validate, false if failed
+	 * for validate
 	 * 
-	 * @param bean The bean be validated
-	 * @param level Current search level
-	 * @param selectedSize Current selected Node QTY
-	 * @param expression The expression
-	 * @param params The expression parameter array
+	 * @param bean
+	 *            The bean be validated
+	 * @param level
+	 *            Current search level
+	 * @param selectedSize
+	 *            Current selected Node QTY
+	 * @param expression
+	 *            The expression
+	 * @param params
+	 *            The expression parameter array
 	 * @return true if pass validate, false if failed for validate
 	 */
-	public static boolean parse(Object bean, int level, int selectedSize, String expression, Object... params) {
+	public boolean parse(Object bean, int level, int selectedSize, String expression, Object... params) {
 		if (StrUtils.isEmpty(expression))
 			return true;
 		return true;
@@ -122,7 +127,8 @@ public class SimpleExpressionParser {
 	public static class Item {
 		private int priority;
 		private Object value;
-		private char type; // S:String, B:Boolean, L: Long, D:Double, P:parameter, I:items,
+		private char type; // S:String, B:Boolean, L: Long, D:Double,
+							// P:parameter, I:items,
 							// U:Unknow_Function_Or_Variant
 		private List<Item> subItem;
 
@@ -137,9 +143,6 @@ public class SimpleExpressionParser {
 			}
 			return result;
 		}
-	}
-
-	public static class keywordResult {
 	}
 
 	public static class SearchResult {
@@ -158,7 +161,7 @@ public class SimpleExpressionParser {
 		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '.';
 	}
 
-	public static SearchResult findFirstResult(char[] chars, int start, int end) {
+	public SearchResult findFirstResult(char[] chars, int start, int end) {
 		if (start > end)
 			return null;
 		boolean letters = false;
@@ -232,7 +235,7 @@ public class SimpleExpressionParser {
 			return null;
 	}
 
-	public static List<Item> seperateCharsToItems(char[] chars, int start, int end) {
+	public List<Item> seperateCharsToItems(char[] chars, int start, int end) {
 		List<Item> items = new ArrayList<Item>();
 		SearchResult result = findFirstResult(chars, start, end);
 		while (result != null) {
@@ -242,7 +245,7 @@ public class SimpleExpressionParser {
 		return items;
 	}
 
-	public static Object doParse(String expression) {
+	public Object doParse(String expression) {
 		char[] chars = (" " + expression + " ").toCharArray();
 		List<Item> items = seperateCharsToItems(chars, 1, chars.length - 2);
 		for (Item item : items) {
@@ -251,9 +254,9 @@ public class SimpleExpressionParser {
 		return null;
 	}
 
-	public static void main(String[] args) { 
-		String s = "35*(24 -6*)+7/(4-6)";
-		doParse(s);
+	public static void main(String[] args) {
+		String s = "35*(24 -6*(2+ 56))+7/(4-6)";
+		instance.doParse(s);
 	}
 
 }
