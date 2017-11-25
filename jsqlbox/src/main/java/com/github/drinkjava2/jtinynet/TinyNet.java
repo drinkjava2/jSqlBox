@@ -485,7 +485,7 @@ public class TinyNet implements EntityNet {
 	}
 
 	private void validateSelected(Integer level, Path path, Set<Node> selected, Collection<Node> nodesToCheck) {
-		BeanValidatorSupport checker = path.getValidatorInstance();
+		NodeValidator checker = path.getValidatorInstance();
 		if (checker == null)
 			checker = BeanValidator.instance;
 

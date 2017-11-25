@@ -66,7 +66,7 @@ public class Path {
 	// ==================inside used fields======================
 	// Initialize some fields to improve speed
 	private Boolean checkerInitialized = false;
-	private BeanValidatorSupport validatorInstance;
+	private NodeValidator validatorInstance;
 
 	private Boolean uniqueStringInitialized = false;
 	private String uniqueStringId;
@@ -228,7 +228,7 @@ public class Path {
 		String next = null;
 		if (!cacheable)
 			return null;
-		if (validator != null && validator instanceof BeanValidatorSupport)
+		if (validator != null && validator instanceof NodeValidator)
 			return null;
 		if (nextPath != null) {
 			next = nextPath.getUniqueIdString();
@@ -254,7 +254,7 @@ public class Path {
 	}
 
 	/** Get Validator instance */
-	public BeanValidatorSupport getValidatorInstance() {
+	public NodeValidator getValidatorInstance() {
 		if (checkerInitialized)
 			return validatorInstance;
 		else {

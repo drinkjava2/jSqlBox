@@ -18,12 +18,7 @@ package com.github.drinkjava2.jtinynet;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public interface BeanValidatorSupport {
-
-	/**
-	 * Validate if a bean allow be selected
-	 */
-	public abstract boolean validateBean(Object entity);
+public interface NodeValidator {
 
 	/**
 	 * Check if a node allow be selected

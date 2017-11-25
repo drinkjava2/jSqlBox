@@ -11,55 +11,25 @@
  */
 package com.github.drinkjava2.jtinynet.parser;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jtinynet.TinyNetException;
 
 /**
  * SimpleExpressionParser parse a String, return true or false
  * 
- * In SimpleExpressionParser, the parse method only support below keywords:
+ * Here the parse method only support very few keywords: * > < = >= <= + - /
+ * equals equalsIgnoreCase contains containsIgnoreCase startWith
+ * startWithIgnoreCase endWith endWithIgnoreCase or and not ' () ? 0~9
+ * SELECTLEVEL SELECTSIZE beanFields
  * 
- * <pre>
->
-<
-=
->=
-<=
-+
--
-*
-/ 
-equals 
-equalsIgnoreCase 
-contains
-containsIgnoreCase 
-startWith
-startWithIgnoreCase
-endWith
-endWithIgnoreCase
-or
-and
-not 
-
-
-' 
-()
-? 
-0~9
-
-beanFields
-selectedSize 
-level
  * 
- * </pre>
- * 
- * For example: "userName startWith ? and not(-age*10 -age>?) or address
- * contains if(age>?,'FOO','BAR')
+ * For example: "userName startWith ? and not(age*(10+2) -age>?)"
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -67,101 +37,191 @@ level
 public class SimpleExpressionParser {
 	public static SimpleExpressionParser instance = new SimpleExpressionParser();
 
-	private Map<String, Func> FUNCTIONMAP = new HashMap<String, Func>();
+	Map<String, Integer> functionMap = new HashMap<String, Integer>();
 	{
-		FUNCTIONMAP.put("*", new Func(3, 2));
-		FUNCTIONMAP.put("/", new Func(3, 2));
-		FUNCTIONMAP.put("+", new Func(4, 2));
-		FUNCTIONMAP.put("-", new Func(4, 2));
-		FUNCTIONMAP.put("not", new Func(5, 1));
-		FUNCTIONMAP.put("equals", new Func(6, 2));
-		FUNCTIONMAP.put("equalsignorecase", new Func(6, 2));
-		FUNCTIONMAP.put("contains", new Func(6, 2));
-		FUNCTIONMAP.put("containsignorecase", new Func(6, 2));
-		FUNCTIONMAP.put("startwith", new Func(6, 2));
-		FUNCTIONMAP.put("startwithignorecase", new Func(6, 2));
-		FUNCTIONMAP.put("endwith", new Func(6, 2));
-		FUNCTIONMAP.put("endwithignorecase", new Func(6, 2));
-		FUNCTIONMAP.put(">", new Func(8, 2));
-		FUNCTIONMAP.put("<", new Func(8, 2));
-		FUNCTIONMAP.put("=", new Func(8, 2));
-		FUNCTIONMAP.put(">=", new Func(8, 2));
-		FUNCTIONMAP.put("<=", new Func(8, 2));
-		FUNCTIONMAP.put("<>", new Func(8, 2));
-		FUNCTIONMAP.put("or", new Func(10, 2));
-		FUNCTIONMAP.put("and", new Func(10, 2));
+		functionMap.put("*", 2);
+		functionMap.put("/", 2);
+		functionMap.put("+", 4);
+		functionMap.put("-", 4);
+		functionMap.put("EQUALS", 6);
+		functionMap.put("EQUALSIGNORECASE", 6);
+		functionMap.put("CONTAINS", 6);
+		functionMap.put("CONTAINSIGNORECASE", 6);
+		functionMap.put("STARTWITH", 6);
+		functionMap.put("STARTWITHIGNORECASE", 6);
+		functionMap.put("ENDWITH", 6);
+		functionMap.put("ENDWITHIGNORECASE", 6);
+		functionMap.put(">", 8);
+		functionMap.put("<", 8);
+		functionMap.put("=", 8);
+		functionMap.put(">=", 8);
+		functionMap.put("<=", 8);
+		functionMap.put("<>", 8);
+		functionMap.put("NOT", 10);
+		functionMap.put("AND", 12);
+		functionMap.put("OR", 14);
 	}
 
 	/**
-	 * Parse a expression String, return true if pass validate, false if failed
-	 * for validate
+	 * Item type can be: <br/>
+	 * S:String, B:Boolean, L: Long, D:Double, F:function, N:Null, (:sub items,
+	 * U:Unknow(need correct), P:parameter(need correct)
 	 * 
-	 * @param bean
-	 *            The bean be validated
-	 * @param level
-	 *            Current search level
-	 * @param selectedSize
-	 *            Current selected Node QTY
-	 * @param expression
-	 *            The expression
-	 * @param params
-	 *            The expression parameter array
-	 * @return true if pass validate, false if failed for validate
+	 * @author Yong Zhu
+	 * @since 1.7.0
 	 */
-	public boolean parse(Object bean, int level, int selectedSize, String expression, Object... params) {
-		if (StrUtils.isEmpty(expression))
-			return true;
-		return true;
-	}
-
-	public static class Func {
-		public int priority;
-		public int operatorQTY;
-
-		public Func(int priority, int operatorQTY) {
-			this.priority = priority;
-			this.operatorQTY = operatorQTY;
-		}
-	}
-
 	public static class Item {
-		private int priority;
-		private Object value;
-		private char type; // S:String, B:Boolean, L: Long, D:Double,
-							// P:parameter, I:items,
-							// U:Unknow_Function_Or_Variant
-		private List<Item> subItem;
+		char type;
+		int priority;
+		Object value;
 
-		public String getDebugInfo() {
-			String result = "\rItemValue=";
+		List<Item> subItems;
+
+		void setTypeAndValue(char type, Object value) {
+			this.type = type;
+			this.value = value;
+		}
+
+		void guess(Object obj) {
+			value = obj;
+			if (obj == null)
+				type = 'N';
+			else if (obj instanceof String)
+				type = 'S';
+			else if (obj instanceof Boolean)
+				type = 'B';
+			else if (obj instanceof Long)
+				type = 'L';
+			else if (obj instanceof Integer) {
+				type = 'L';
+				value = (long) (Integer) value;
+			} else if (obj instanceof Byte) {
+				type = 'L';
+				value = (long) (Byte) value;
+			} else if (obj instanceof Double)
+				type = 'D';
+			else if (obj instanceof Float) {
+				type = 'D';
+				value = (double) (Float) value;
+			} else
+				throw new TinyNetException("Unrecognized expression datat type for '" + obj + "'");
+		}
+
+		String getDebugInfo(int include) {
+			String result = "\r";
+			for (int i = 0; i < include; i++) {
+				result += "     ";
+			}
+			result += type + " ";
 			if (value != null)
 				result += value;
-			if (subItem != null) {
-				for (Item Item : subItem) {
-					result += " " + Item.getDebugInfo();
+			if (subItems != null) {
+				for (Item Item : subItems) {
+					result += Item.getDebugInfo(include + 1);
 				}
 			}
 			return result;
 		}
 	}
 
-	public static class SearchResult {
-		private Item item;
-		private int leftStart;
-		private int leftEnd;
+	static class SearchResult {
+		Item item;
+		int leftStart;
+		int leftEnd;
 
-		private SearchResult(Item item, int leftStart, int leftEnd) {
+		SearchResult(Item item, int leftStart, int leftEnd) {
 			this.item = item;
 			this.leftStart = leftStart;
 			this.leftEnd = leftEnd;
 		}
 	}
 
-	private static boolean isLetterNumber(char c) {
+	static class ParamPosition {
+		int position = 0;
+	}
+
+	/**
+	 * Parse a expression String, return an object result
+	 * 
+	 * @param bean Expression allow direct use only 1 bean's fields
+	 * @param presetValues The preset values
+	 * @param expression The expression
+	 * @param params The expression parameter array
+	 * @return an object result
+	 */
+	public Object doParse(Object bean, Map<String, Object> presetValues, String expression, Object... params) {
+		char[] chars = (" " + expression + " ").toCharArray();
+		List<Item> items = seperateCharsToItems(chars, 1, chars.length - 2);
+		ParamPosition paramPosition = new ParamPosition();
+		for (Item item : items) {
+			correctType(item, bean, presetValues, paramPosition, params);
+		}
+		for (Item item : items) {
+			System.out.print(item.getDebugInfo(0));
+		}
+		Item item = calculate(items);
+		System.out.println("\r====================");
+		System.out.println(item.getDebugInfo(0));
+		return item.value;
+	}
+
+	List<Item> seperateCharsToItems(char[] chars, int start, int end) {
+		List<Item> items = new ArrayList<Item>();
+		SearchResult result = findFirstResult(chars, start, end);
+		while (result != null) {
+			items.add(result.item);
+			result = findFirstResult(chars, result.leftStart, result.leftEnd);
+		}
+		return items;
+	}
+
+	/** if is U type, use this method to correct type */
+	void correctType(Item item, Object bean, Map<String, Object> presetValues, ParamPosition paramPostion,
+			Object... params) {
+		if (item.type == 'P') {
+			item.guess(params[paramPostion.position++]);
+		} else if (item.type == 'U') {// correct Unknown type to other type
+			String valueStr = (String) item.value;
+			String valueUpcase = valueStr.toUpperCase();
+			// check is function
+			if (functionMap.containsKey(valueUpcase)) {
+				item.type = 'F';
+				item.value = valueUpcase;
+				item.priority = functionMap.get(valueUpcase);
+			} else if (presetValues != null && presetValues.containsKey(valueUpcase)) {// is presetValues?
+				item.guess(presetValues.get(valueUpcase));
+			} else if (bean != null) {// check is bean fields
+				Map<String, Method> readMethods = ClassCacheUtils.getClassReadMethods(bean.getClass());
+				if (readMethods.containsKey(valueStr))
+					item.guess(ClassCacheUtils.readValueFromBeanField(bean, valueStr));
+			}
+			if (item.type == 'U')// still not found
+				try { // is Long able?
+					item.setTypeAndValue('L', Long.parseLong(valueUpcase));
+				} catch (NumberFormatException e) {
+					try {// is Double able?
+						item.setTypeAndValue('D', Double.parseDouble(valueUpcase));
+					} catch (NumberFormatException e1) { // is Boolean able?
+						if ("TRUE".equalsIgnoreCase(valueUpcase)) {
+							item.setTypeAndValue('B', true);
+						} else if ("FALSE".equalsIgnoreCase(valueUpcase)) {
+							item.setTypeAndValue('B', false);
+						}
+					}
+				}
+			if (item.type == 'U')// still not found
+				throw new TinyNetException("Unrecognized expression near '" + valueStr + "'");
+		}
+		if (item.subItems != null)
+			for (Item t : item.subItems)
+				correctType(t, bean, presetValues, paramPostion, params);
+	}
+
+	static boolean isLetterNumber(char c) {
 		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '.';
 	}
 
-	public SearchResult findFirstResult(char[] chars, int start, int end) {
+	SearchResult findFirstResult(char[] chars, int start, int end) {
 		if (start > end)
 			return null;
 		boolean letters = false;
@@ -170,7 +230,7 @@ public class SimpleExpressionParser {
 			if (!letters) {// no letters found
 				if (chars[i] == '?') {
 					Item item = new Item();
-					item.type = 'V';
+					item.type = 'P';
 					item.value = "?";
 					return new SearchResult(item, i + 1, end);
 				} else if (chars[i] == '\'') {
@@ -196,8 +256,8 @@ public class SimpleExpressionParser {
 								if (count == 0) {
 									List<Item> subItems = seperateCharsToItems(chars, i + 1, j - 1);
 									Item item = new Item();
-									item.type = 'I';
-									item.subItem = subItems;
+									item.type = '(';
+									item.subItems = subItems;
 									return new SearchResult(item, j + 1, end);
 								}
 							} else if (chars[j] == '\'') {
@@ -235,28 +295,76 @@ public class SimpleExpressionParser {
 			return null;
 	}
 
-	public List<Item> seperateCharsToItems(char[] chars, int start, int end) {
-		List<Item> items = new ArrayList<Item>();
-		SearchResult result = findFirstResult(chars, start, end);
-		while (result != null) {
-			items.add(result.item);
-			result = findFirstResult(chars, result.leftStart, result.leftEnd);
-		}
-		return items;
-	}
-
-	public Object doParse(String expression) {
-		char[] chars = (" " + expression + " ").toCharArray();
-		List<Item> items = seperateCharsToItems(chars, 1, chars.length - 2);
+	/** Calculate items list into one item */
+	Item calculate(List<Item> items) {
 		for (Item item : items) {
-			System.out.print(item.getDebugInfo());
+			if (item.subItems != null) {
+				Item newSubItem = calculate(item.subItems);
+				item.type = newSubItem.type;
+				item.value = newSubItem.value;
+				item.subItems = null;
+			}
+		} // now there is no subItems
+
+		// find highest priority function
+		int functionPos;
+		functionPos = -1;
+		int priority = 100;
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).type == 'F' && items.get(i).priority < priority) {
+				functionPos = i;
+				priority = items.get(i).priority;
+			}
 		}
-		return null;
+		while (functionPos != -1) {
+			doCalculate(items, functionPos);
+			System.out.println("\rvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+			for (Item item : items) {
+				System.out.print(item.getDebugInfo(0));
+			}
+			System.out.println("\r^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+			functionPos = -1;
+			priority = 100;
+			for (int i = 0; i < items.size(); i++) {
+				if (items.get(i).type == 'F' && items.get(i).priority < priority) {
+					functionPos = i;
+					priority = items.get(i).priority;
+				}
+			}
+		} // until all function be calculated
+
+		int found = 0;
+		Item result = null;
+		for (Item item : items) {
+			if (item.type != '0') {
+				result = item;
+				if (++found > 1)
+					throw new TinyNetException("More than 1  calculated result found");
+			}
+		}
+		if (result == null)
+			throw new TinyNetException("No calculated result found");
+		return result;
+
 	}
 
-	public static void main(String[] args) {
-		String s = "35*(24 -6*(2+ 56))+7/(4-6)";
-		instance.doParse(s);
+	/** Execute the function and mark some items to '0' means deleted it */
+	void doCalculate(List<Item> items, int functionPos) {
+		Item lastItem = null;
+		Item nextItem = null;
+		for (int i = functionPos - 1; i >= 0; i--) {
+			if (items.get(i).type != '0') {
+				lastItem = items.get(i);
+				break;
+			}
+		}
+		for (int i = functionPos + 1; i < items.size(); i++) {
+			if (items.get(i).type != '0') {
+				nextItem = items.get(i);
+				break;
+			}
+		}
+		SimpleExpressionParserUtils.doTheMath(items.get(functionPos), lastItem, nextItem);
 	}
 
 }

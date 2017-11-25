@@ -11,6 +11,9 @@
  */
 package com.github.drinkjava2.jtinynet;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.github.drinkjava2.jtinynet.parser.SimpleExpressionParser;
 
 /**
@@ -20,10 +23,9 @@ import com.github.drinkjava2.jtinynet.parser.SimpleExpressionParser;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class BeanValidator implements BeanValidatorSupport {
-	public static final BeanValidatorSupport instance = new BeanValidator();
+public class BeanValidator implements NodeValidator {
+	public static final NodeValidator instance = new BeanValidator();
 
-	@Override
 	public boolean validateBean(Object entity) {
 		return true;
 	}
@@ -35,7 +37,10 @@ public class BeanValidator implements BeanValidatorSupport {
 
 	@Override
 	public boolean validateExpression(Node node, int level, int selectedSize, Path path) {
-		return SimpleExpressionParser.instance.parse(node.getEntity(), level, selectedSize, path.getExpression(),
+		Map<String, Object> presetValues = new HashMap<String, Object>();
+		presetValues.put("SELECT_LEVEL", level);
+		presetValues.put("SELECT_SIZE", selectedSize);
+		return (Boolean) SimpleExpressionParser.instance.doParse(node.getEntity(), presetValues, path.getExpression(),
 				path.getexpressionParams());
 	}
 

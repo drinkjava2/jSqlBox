@@ -124,12 +124,12 @@ public class TinyNetUtils {
 		return resultList;
 	}
 
-	public static BeanValidatorSupport getOrBuildChecker(Object checker) {
+	public static NodeValidator getOrBuildChecker(Object checker) {
 		if (checker == null)
 			return null;
-		if (checker instanceof BeanValidatorSupport)
-			return (BeanValidatorSupport) checker;
-		Class<BeanValidatorSupport> c = (Class<BeanValidatorSupport>) checker;
+		if (checker instanceof NodeValidator)
+			return (NodeValidator) checker;
+		Class<NodeValidator> c = (Class<NodeValidator>) checker;
 		try {
 			return c.newInstance();
 		} catch (Exception e) {
