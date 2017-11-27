@@ -12,6 +12,7 @@ public class User extends ActiveRecord {
  
 	String teatherId; 
 	String bossId;
+	Integer age;
 
 	public String getId() {
 		return id;
@@ -43,6 +44,14 @@ public class User extends ActiveRecord {
 
 	public void setBossId(String bossId) {
 		this.bossId = bossId;
+	}
+
+	public Integer getAge() {
+		return age;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
 	}
 
 }

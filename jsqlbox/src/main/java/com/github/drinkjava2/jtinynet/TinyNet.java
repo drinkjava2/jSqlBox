@@ -316,9 +316,9 @@ public class TinyNet implements EntityNet {
 	/**
 	 * Find entity set in TinyNet by given path and entity input array
 	 */
-	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Object... entityInput) {
-		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entityInput);
-		Map<Class<?>, Set<Node>> nodeMapSet = findNodeSetforNodes(path, input);
+	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Object... entities) {
+		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entities);
+		Map<Class<?>, Set<Node>> nodeMapSet = findNodeMapByNodeCollection(path, input);
 		Set<Node> nodeSet = nodeMapSet.get(targetEntityClass);
 		return TinyNetUtils.nodeCollection2EntitySet(nodeSet);
 	}
@@ -333,36 +333,44 @@ public class TinyNet implements EntityNet {
 			if (node != null)
 				input.add(node);
 		}
-		Map<Class<?>, Set<Node>> nodeMapSet = findNodeSetforNodes(path, input);
+		Map<Class<?>, Set<Node>> nodeMapSet = findNodeMapByNodeCollection(path, input);
 		Set<Node> nodeSet = nodeMapSet.get(targetEntityClass);
 		return TinyNetUtils.nodeCollection2EntitySet(nodeSet);
 	}
 
 	/**
+	 * Find entity set map in TinyNet by given path and entity input array
+	 */
+	public Map<Class<?>, Set<Object>> findEntityMap(Path path, Object... entities) {
+		Map<Class<?>, Set<Node>> nodeMap = findNodeMapByEntities(path, entities);
+		return TinyNetUtils.nodeSetMapToEntitySetMap(nodeMap);
+	}
+
+	/**
 	 * Find node set in TinyNet by given path and entity input array
 	 */
-	public Map<Class<?>, Set<Node>> findNodeSetForEntities(Path path, Object... entityInput) {
-		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entityInput);
-		return findNodeSetforNodes(path, input);
+	public Map<Class<?>, Set<Node>> findNodeMapByEntities(Path path, Object... entities) {
+		Set<Node> input = TinyNetUtils.entityArray2NodeSet(this, entities);
+		return findNodeMapByNodeCollection(path, input);
 	}
 
 	/**
 	 * Find node set in TinyNet by given path and entity input collection
 	 */
-	public Map<Class<?>, Set<Node>> findNodeSetForEntities(Path path, Collection<Object> entityCollection) {
+	public Map<Class<?>, Set<Node>> findNodeMapByEntityCollection(Path path, Collection<Object> entityCollection) {
 		Set<Node> input = new LinkedHashSet<Node>();
 		for (Object entity : entityCollection) {
 			Node node = TinyNetUtils.entity2Node(this, entity);
 			if (node != null)
 				input.add(node);
 		}
-		return findNodeSetforNodes(path, input);
+		return findNodeMapByNodeCollection(path, input);
 	}
 
-	public Map<Class<?>, Set<Node>> findNodeSetforNodes(Path path, Collection<Node> input) {
+	public Map<Class<?>, Set<Node>> findNodeMapByNodeCollection(Path path, Collection<Node> input) {
 		Map<Class<?>, Set<Node>> result = new HashMap<Class<?>, Set<Node>>();
-		Path topPath = path.getTopPath();
-		topPath.initializeTargetAndColumns(this);
+		Path topPath = path.getTopPath(); 
+		topPath.initializePath(this);
 		findNodeSetforNodes(0, topPath, input, result);
 		return result;
 	}
@@ -485,16 +493,12 @@ public class TinyNet implements EntityNet {
 	}
 
 	private void validateSelected(Integer level, Path path, Set<Node> selected, Collection<Node> nodesToCheck) {
-		NodeValidator checker = path.getValidatorInstance();
+		NodeValidator checker = path.getNodeValidator();
 		if (checker == null)
-			checker = BeanValidator.instance;
-
-		for (Node node : nodesToCheck) {
-			if (checker.validateNode(node, level, selected.size(), path)
-					&& checker.validateExpression(node, level, selected.size(), path)) {
+			checker = DefaultNodeValidator.instance;
+		for (Node node : nodesToCheck)
+			if (checker.validateNode(node, level, selected.size(), path))
 				selected.add(node);
-			}
-		}
 	}
 
 	private void cacheSelected(String nodeId, String pathUniqueString, Set<Node> selected) {

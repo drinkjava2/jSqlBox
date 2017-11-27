@@ -39,46 +39,45 @@ public class Path {
 	 *	  "C*":all childs
 	 * </pre>
 	 */
-	private String type;
+	String type;
 
 	/** The reference table name or entity class */
-	private Object target;
+	Object target;
 
 	/** A String expression condition should return true or false */
-	private String expression;
+	String expression;
 
-	private Object[] expressionParams;
+	Object[] expressionParams;
 
 	/**
 	 * BeanValidator class or instance, used to check if a node can be selected
 	 */
-	private Object validator;
+	Object validator;
 
 	/** The reference column names or entity field names */
-	private String[] refs;
+	String[] refs;
 
 	/** Next Path, used for build a linked path chain */
-	private Path nextPath;
+	Path nextPath;
 
 	/** Not allow cache */
-	private Boolean cacheable = true;
+	Boolean cacheable = true;
 
 	// ==================inside used fields======================
 	// Initialize some fields to improve speed
-	private Boolean checkerInitialized = false;
-	private NodeValidator validatorInstance;
+	Boolean initialized = false;
+	NodeValidator validatorInstance;
 
-	private Boolean uniqueStringInitialized = false;
-	private String uniqueStringId;
+	String uniqueStringId;
+	String joinedColumns;
 
-	private Boolean joinColumnsInitialized = false;
-	private String joinedColumns;
+	TableModel targetModel;
+	String refColumns;
 
-	private TableModel targetModel = null;
-	private String refColumns;
+	Object autoPathTarget;
 
 	/** When path linked, this field store father Path */
-	private Path fatherPath;
+	Path fatherPath;
 
 	public Path(String type, Object target, Object checker, String... refs) {
 		this.type = type;
@@ -102,23 +101,35 @@ public class Path {
 	}
 
 	public Path nextPath(String type, Object target, Object checker, String... refs) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		Path next = new Path(type, target, checker, refs);
 		next.fatherPath = this;
 		this.nextPath = next;
 		return next;
 	}
 
+	/** Set the next part */
 	public Path nextPath(String type, Object target, String... refs) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		Path next = new Path(type, target, refs);
 		next.fatherPath = this;
 		this.nextPath = next;
 		return next;
 	}
 
+	/**
+	 * Give target table or class, Let computer to automatically build the chain,
+	 * note this method only works correct if there is only 1 way can reach to the
+	 * target
+	 */
+	public Path autoPath(Object target) {
+		checkIfModifyInitialized();
+		this.autoPathTarget = target;
+		return this;
+	}
+
 	public Path nextPath(String type, Object target) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		Path next = new Path(type, target);
 		next.fatherPath = this;
 		this.nextPath = next;
@@ -129,7 +140,10 @@ public class Path {
 	 * In query method will call this method to determine the real target and
 	 * columns
 	 */
-	public void initializeTargetAndColumns(TinyNet net) {
+	public void initializePath(TinyNet net) {
+		if (initialized)
+			return;
+		PathCalculateUtils.calculateAutoPath(this, net);
 		if (target == null || StrUtils.isEmpty(target))
 			throw new TinyNetException("In path, target can not be null or empty.");
 		TableModel model = null;
@@ -187,8 +201,13 @@ public class Path {
 			}
 			this.refColumns = sb.toString();
 		}
+		validatorInstance = TinyNetUtils.getOrBuildChecker(validator);
+		if (refs != null)
+			joinedColumns = TinyNetUtils.buildJoinedColumns(refs);
+		initialized = true;
 		if (this.getNextPath() != null)
-			this.getNextPath().initializeTargetAndColumns(net);
+			this.getNextPath().initializePath(net);
+		initializeUniqueIdString();
 	}
 
 	/** return target model, note different query may change tableModel */
@@ -202,7 +221,7 @@ public class Path {
 	}
 
 	/* Check if type setting right */
-	private void validateType() {
+	void validateType() {
 		if (type == null || type.length() != 2)
 			throw new TinyNetException("Illegal type charactors: '" + type + "'");
 		String s0 = type.substring(0, 1);
@@ -220,23 +239,20 @@ public class Path {
 	 * will be used as query cache key Return null if the path is not a "FIXED"
 	 * type, for example it has query parameters.
 	 */
-	public String getUniqueIdString() {
-		if (uniqueStringInitialized)
-			return uniqueStringId;
+	public void initializeUniqueIdString() {
 		uniqueStringId = null;
-		uniqueStringInitialized = true;
 		String next = null;
 		if (!cacheable)
-			return null;
+			return;
 		if (validator != null && validator instanceof NodeValidator)
-			return null;
+			return;
 		if (nextPath != null) {
 			next = nextPath.getUniqueIdString();
 			if (StrUtils.isEmpty(next))
-				return null;
+				return;
 		}
 		if (expressionParams != null && expressionParams.length > 0)
-			return null;
+			return;
 		StringBuilder sb = new StringBuilder()//
 				.append("type:").append(type)//
 				.append(",target:").append(target)//
@@ -250,28 +266,6 @@ public class Path {
 		if (!StrUtils.isEmpty(next))
 			sb.append(",Next:").append(next);
 		uniqueStringId = sb.toString();
-		return uniqueStringId;
-	}
-
-	/** Get Validator instance */
-	public NodeValidator getValidatorInstance() {
-		if (checkerInitialized)
-			return validatorInstance;
-		else {
-			validatorInstance = TinyNetUtils.getOrBuildChecker(validator);
-			checkerInitialized = true;
-			return validatorInstance;
-		}
-	}
-
-	public String getJoinedColumns() {
-		if (joinColumnsInitialized)
-			return joinedColumns;
-		else {
-			joinedColumns = TinyNetUtils.buildJoinedColumns(refs);
-			joinColumnsInitialized = true;
-			return joinedColumns;
-		}
 	}
 
 	/**
@@ -282,7 +276,7 @@ public class Path {
 	 * @return current Path
 	 */
 	public Path where(String expression, Object... expressionParams) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.expression = expression;
 		this.expressionParams = expressionParams;
 		return this;
@@ -295,9 +289,30 @@ public class Path {
 			return fatherPath.getTopPath();
 	}
 
-	public void checkInitialized() {
-		if (this.uniqueStringInitialized)
-			throw new TinyNetException("It's not allowed to change path after it be initialized");
+	public void checkIfModifyInitialized() {
+		if (initialized)
+			throw new TinyNetException("It's not allowed to change path setting after it be initialized");
+	}
+
+	public String getJoinedColumns() {
+		if (initialized)
+			return joinedColumns;
+		else
+			throw new TinyNetException("Try to get JoinedColumns on a Path not initialized");
+	}
+
+	public NodeValidator getNodeValidator() {
+		if (initialized)
+			return validatorInstance;
+		else
+			throw new TinyNetException("Try to get NodeValidator on a Path not initialized");
+	}
+
+	public String getUniqueIdString() {
+		if (initialized)
+			return uniqueStringId;
+		else
+			throw new TinyNetException("Try to get UniqueIdString on a Path not initialized");
 	}
 
 	// =====Getter & Setter ==============
@@ -306,7 +321,7 @@ public class Path {
 	}
 
 	public Path setType(String type) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.type = type;
 		validateType();
 		return this;
@@ -318,7 +333,7 @@ public class Path {
 
 	/** Set a Checker instance or Checker class before query */
 	public Path setNextPath(Path nextPath) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.nextPath = nextPath;
 		return this;
 	}
@@ -328,7 +343,7 @@ public class Path {
 	}
 
 	public Path setRefs(String... refs) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.refs = refs;
 		return this;
 	}
@@ -338,7 +353,7 @@ public class Path {
 	}
 
 	public Path setTarget(Object target) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.target = target;
 		return this;
 	}
@@ -349,7 +364,7 @@ public class Path {
 
 	/** Set a BeanValidator instance or class before query */
 	public Path setValidator(Object validator) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.validator = validator;
 		return this;
 	}
@@ -359,7 +374,7 @@ public class Path {
 	}
 
 	public Path setCacheable(Boolean cacheable) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.cacheable = cacheable;
 		return this;
 	}
@@ -369,7 +384,7 @@ public class Path {
 	}
 
 	public Path setExpression(String expression) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.expression = expression;
 		return this;
 	}
@@ -379,7 +394,7 @@ public class Path {
 	}
 
 	public Path setExpressionParams(Object[] expressionParams) {
-		checkInitialized();
+		checkIfModifyInitialized();
 		this.expressionParams = expressionParams;
 		return this;
 	}

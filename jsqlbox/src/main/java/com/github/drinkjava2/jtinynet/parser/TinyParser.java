@@ -18,10 +18,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
-import com.github.drinkjava2.jtinynet.TinyNetException;
+import com.github.drinkjava2.jdialects.StrUtils;
 
 /**
- * SimpleExpressionParser parse a String, return true or false
+ * TinyParser parse an expression, return type can be Boolean, String, Long,
+ * Double, null
  * 
  * Here the parse method only support very few keywords: * > < = >= <= + - /
  * equals equalsIgnoreCase contains containsIgnoreCase startWith
@@ -34,9 +35,10 @@ import com.github.drinkjava2.jtinynet.TinyNetException;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class SimpleExpressionParser {
-	public static SimpleExpressionParser instance = new SimpleExpressionParser();
+public class TinyParser {
+	public static final TinyParser instance = new TinyParser();
 
+	/** Registered functions, key is function name, value is function priority */
 	Map<String, Integer> functionMap = new HashMap<String, Integer>();
 	{
 		functionMap.put("*", 2);
@@ -51,6 +53,7 @@ public class SimpleExpressionParser {
 		functionMap.put("STARTWITHIGNORECASE", 6);
 		functionMap.put("ENDWITH", 6);
 		functionMap.put("ENDWITHIGNORECASE", 6);
+		functionMap.put("IS", 6);
 		functionMap.put(">", 8);
 		functionMap.put("<", 8);
 		functionMap.put("=", 8);
@@ -94,17 +97,17 @@ public class SimpleExpressionParser {
 				type = 'L';
 			else if (obj instanceof Integer) {
 				type = 'L';
-				value = (long) (Integer) value;
+				value = (long) (Integer) value;// NOSONAR
 			} else if (obj instanceof Byte) {
 				type = 'L';
-				value = (long) (Byte) value;
+				value = (long) (Byte) value;// NOSONAR
 			} else if (obj instanceof Double)
 				type = 'D';
 			else if (obj instanceof Float) {
 				type = 'D';
-				value = (double) (Float) value;
+				value = (double) (Float) value;// NOSONAR
 			} else
-				throw new TinyNetException("Unrecognized expression datat type for '" + obj + "'");
+				throw new TinyParserException("Unrecognized expression datat type for '" + obj + "'");
 		}
 
 		String getDebugInfo(int include) {
@@ -150,21 +153,19 @@ public class SimpleExpressionParser {
 	 * @return an object result
 	 */
 	public Object doParse(Object bean, Map<String, Object> presetValues, String expression, Object... params) {
+		if (StrUtils.isEmpty(expression))
+			return null;
 		char[] chars = (" " + expression + " ").toCharArray();
 		List<Item> items = seperateCharsToItems(chars, 1, chars.length - 2);
 		ParamPosition paramPosition = new ParamPosition();
 		for (Item item : items) {
 			correctType(item, bean, presetValues, paramPosition, params);
 		}
-		for (Item item : items) {
-			System.out.print(item.getDebugInfo(0));
-		}
 		Item item = calculate(items);
-		System.out.println("\r====================");
-		System.out.println(item.getDebugInfo(0));
 		return item.value;
 	}
 
+	/** Separate chars to Items list */
 	List<Item> seperateCharsToItems(char[] chars, int start, int end) {
 		List<Item> items = new ArrayList<Item>();
 		SearchResult result = findFirstResult(chars, start, end);
@@ -206,21 +207,22 @@ public class SimpleExpressionParser {
 							item.setTypeAndValue('B', true);
 						} else if ("FALSE".equalsIgnoreCase(valueUpcase)) {
 							item.setTypeAndValue('B', false);
+						} else if ("NULL".equalsIgnoreCase(valueUpcase)) {
+							item.setTypeAndValue('N', null);
 						}
 					}
 				}
 			if (item.type == 'U')// still not found
-				throw new TinyNetException("Unrecognized expression near '" + valueStr + "'");
+				throw new TinyParserException("Unrecognized expression near '" + valueStr + "'");
 		}
 		if (item.subItems != null)
 			for (Item t : item.subItems)
 				correctType(t, bean, presetValues, paramPostion, params);
 	}
 
-	static boolean isLetterNumber(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '.';
-	}
-
+	/**
+	 * Find first item and store left start and left end position in SearchResult
+	 */
 	SearchResult findFirstResult(char[] chars, int start, int end) {
 		if (start > end)
 			return null;
@@ -243,7 +245,7 @@ public class SimpleExpressionParser {
 						} else
 							sb.append(chars[j]);
 					}
-					throw new TinyNetException("Miss right ' charactor in expression.");
+					throw new TinyParserException("Miss right ' charactor in expression.");
 				} else if (chars[i] == '(') {
 					int count = 1;
 					boolean inString = false;
@@ -269,14 +271,14 @@ public class SimpleExpressionParser {
 							}
 						}
 					}
-					throw new TinyNetException("Miss right ) charactor in expression.");
+					throw new TinyParserException("Miss right ) charactor in expression.");
 				} else if (chars[i] > ' ') {
 					letters = true;
 					sb.append(chars[i]);
 				}
 			} else {// letters found
 				if (chars[i] == '?' || chars[i] == '\'' || chars[i] == '(' || chars[i] <= ' '
-						|| isLetterNumber(chars[i]) != isLetterNumber(chars[i - 1])) {
+						|| TinyParserUtils.isLetterNumber(chars[i]) != TinyParserUtils.isLetterNumber(chars[i - 1])) {
 					Item item = new Item();
 					item.type = 'U';
 					item.value = sb.toString();
@@ -318,11 +320,6 @@ public class SimpleExpressionParser {
 		}
 		while (functionPos != -1) {
 			doCalculate(items, functionPos);
-			System.out.println("\rvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
-			for (Item item : items) {
-				System.out.print(item.getDebugInfo(0));
-			}
-			System.out.println("\r^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 			functionPos = -1;
 			priority = 100;
 			for (int i = 0; i < items.size(); i++) {
@@ -339,11 +336,11 @@ public class SimpleExpressionParser {
 			if (item.type != '0') {
 				result = item;
 				if (++found > 1)
-					throw new TinyNetException("More than 1  calculated result found");
+					throw new TinyParserException("More than 1  calculated result found");
 			}
 		}
 		if (result == null)
-			throw new TinyNetException("No calculated result found");
+			throw new TinyParserException("No calculated result found");
 		return result;
 
 	}
@@ -364,7 +361,7 @@ public class SimpleExpressionParser {
 				break;
 			}
 		}
-		SimpleExpressionParserUtils.doTheMath(items.get(functionPos), lastItem, nextItem);
+		TinyParserUtils.doTheMath(items.get(functionPos), lastItem, nextItem);
 	}
 
 }

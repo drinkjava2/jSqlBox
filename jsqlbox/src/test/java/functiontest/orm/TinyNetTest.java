@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jtinynet.BeanValidator;
+import com.github.drinkjava2.jtinynet.DefaultNodeValidator;
 import com.github.drinkjava2.jtinynet.Node;
 import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
@@ -40,6 +40,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testJoinFields() {
+		System.out.println("==============testJoinFields================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
 		TinyNet net = ctx.netLoadSketch(User.class);
@@ -60,6 +61,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testJoinParents() {
+		System.out.println("==============testJoinParents================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
 		new Email().putFields("id", "emailName", "userId");
@@ -84,6 +86,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testFindSelf() {
+		System.out.println("==============testFindSelf================ ");
 		int sampleSize = 500;
 		int queyrTimes = 200;
 		for (int i = 1; i <= sampleSize; i++) {
@@ -99,21 +102,20 @@ public class TinyNetTest extends TestBase {
 			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(false));
 			Assert.assertTrue(users.size() > 0);
 		}
-		System.out
-				.println(String.format("%28s: %6s s", "No Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
+		printTimeUsed(start, "Find self No Cache");
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
 			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(true));
 			Assert.assertTrue(users.size() > 0);
 		}
-		System.out.println(
-				String.format("%28s: %6s s", "With Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
+		printTimeUsed(start, "Find self With Cache");
 	}
 
 	@Test
 	public void testFindChild() {
-		int sampleSize = 70;
+		System.out.println("==============testFindChild================ ");
+		int sampleSize = 30;
 		int queyrTimes = 20;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
@@ -127,26 +129,25 @@ public class TinyNetTest extends TestBase {
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeSetForEntities(new Path("S+", User.class).setCacheable(false)
+			result = net.findNodeMapByEntities(new Path("S+", User.class).setCacheable(false)
 					.nextPath("C+", Email.class, "userId").setCacheable(false));
 		}
-		System.out
-				.println(String.format("%28s: %6s s", "No Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
+		printTimeUsed(start, "Find Childs no Cache");
+
 		System.out.println("user selected2:" + result.get(User.class).size());
 		System.out.println("email selected2:" + result.get(Email.class).size());
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeSetForEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
+			result = net.findNodeMapByEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
 		}
-		System.out.println(
-				String.format("%28s: %6s s", "With Cache", "" + (System.currentTimeMillis() - start) / 1000.0));
+		printTimeUsed(start, "Find Childs with Cache");
 
 		System.out.println("user selected2:" + result.get(User.class).size());
 		System.out.println("email selected2:" + result.get(Email.class).size());
 	}
 
-	public static class MyBeanValidator extends BeanValidator {
+	public static class MyBeanValidator extends DefaultNodeValidator {
 		@Override
 		public boolean validateBean(Object entity) {
 			if (!((Email) entity).getId().equals("NotExist"))
@@ -157,7 +158,8 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testValidateByBeanValidator() {// no cache
-		int sampleSize = 60;
+		System.out.println("==============testValidateByBeanValidator================ ");
+		int sampleSize = 30;
 		int queyrTimes = 60;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
@@ -172,8 +174,7 @@ public class TinyNetTest extends TestBase {
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
-		System.out.println(String.format("%28s: %6s s", "Bean Validator instance:",
-				"" + (System.currentTimeMillis() - start) / 1000.0));
+		printTimeUsed(start, "Bean Validator instance (No Cache)");
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 
 		// Set validator class will cache query result
@@ -182,15 +183,15 @@ public class TinyNetTest extends TestBase {
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
-		System.out.println(String.format("%28s: %6s s", "Bean Validator class:",
-				"" + (System.currentTimeMillis() - start) / 1000.0));
+		printTimeUsed(start, "Bean Validator instance (Has Cache)");
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 	}
 
 	@Test
 	public void testValidateByExpression() {
+		System.out.println("==============testValidateByExpression================ ");
 		// no cache
-		int sampleSize =80;
+		int sampleSize = 20;
 		int queyrTimes = 20;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
@@ -201,28 +202,28 @@ public class TinyNetTest extends TestBase {
 		long start = System.currentTimeMillis();
 		Set<Email> emails = null;
 		// Set expression query parameters will not cache query result
-		Path p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").where("id=? or emailName=?", "Foo",
-				"Bar");
+		Path p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").where("id startwith ? or emailName=?",
+				"email1", "Bar");
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
-		System.out.println(String.format("%28s: %6s s", "Validate by expression with parameters:",
-				"" + (System.currentTimeMillis() - start) / 1000.0));
-		Assert.assertEquals(sampleSize * sampleSize, emails.size());
+		printTimeUsed(start, "Validate by expression with parameters");
+		Assert.assertEquals(220, emails.size());
 
 		// Do not have query parameters will cause query result be cached
 		start = System.currentTimeMillis();
-		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").where("id='Foo' or emailName='Bar'");
+		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId")
+				.where("id startwith 'email1' or emailName='Bar'");
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
-		System.out.println(String.format("%28s: %6s s", "Validate by expression no parameters:",
-				"" + (System.currentTimeMillis() - start) / 1000.0));
-		Assert.assertEquals(sampleSize * sampleSize, emails.size());
+		printTimeUsed(start, "Validate by expression no parameters");
+		Assert.assertEquals(220, emails.size());
 	}
 
 	@Test
 	public void testFindParent() {
+		System.out.println("==============testFindParent================ ");
 		int sampleSize = 20;
 		int queyrTimes = 10;
 		for (int i = 0; i < sampleSize; i++) {
@@ -236,16 +237,16 @@ public class TinyNetTest extends TestBase {
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeSetForEntities(new Path("S+", Email.class).nextPath("P+", User.class, "userId"));
+			result = net.findNodeMapByEntities(new Path("S+", Email.class).nextPath("P+", User.class, "userId"));
 		}
-		System.out.println(
-				String.format("%28s: %6s s", "Time used:", "" + (System.currentTimeMillis() - start) / 1000.0));
+		printTimeUsed(start, "Find parent (no cache)");
 		System.out.println("user selected2:" + result.get(User.class).size());
 		System.out.println("email selected2:" + result.get(Email.class).size());
 	}
 
 	@Test
 	public void testAddEntity() {
+		System.out.println("==============testAddEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		TinyNet net = ctx.netLoad(User.class);
 		Assert.assertEquals(1, net.size());
@@ -264,6 +265,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testRemoveEntity() {
+		System.out.println("==============testRemoveEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
 		TinyNet net = ctx.netLoad(User.class);
@@ -275,6 +277,7 @@ public class TinyNetTest extends TestBase {
 
 	@Test
 	public void testUpdateEntity() {
+		System.out.println("==============testUpdateEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
 		TinyNet net = ctx.netLoad(User.class);

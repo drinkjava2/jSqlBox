@@ -5,6 +5,7 @@ import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
 import config.TestBase;
@@ -91,10 +93,34 @@ public class TinyNetDemo extends TestBase {
 	}
 
 	@Test
+	public void testPathFind() {
+		insertDemoData();
+		TinyNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
+				new Path("S-", User.class).where("id='u1' or id='u2'").nextPath("C-", UserRole.class, "userId")
+						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
+						.nextPath("P+", Privilege.class, "pid"));
+		for (Privilege privilege : privileges) {
+			System.out.println(privilege.getPrivilegeName());
+		}
+	}
+
+	@Test
+	public void testAutoPath() {
+		insertDemoData();
+		TinyNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
+				new Path("S-", User.class).where("id='u1' or id='u2' or age>0").autoPath(Privilege.class));
+		for (Privilege privilege : privileges) {
+			System.out.println(privilege.getPrivilegeName());
+		}
+	}
+
+	@Test
 	public void testloadEntityNet() {
 		insertDemoData();
-		TinyNet net = ctx.netLoad(new User(), Email.class, Address.class, new Role(), Privilege.class,
-				UserRole.class, RolePrivilege.class);
+		TinyNet net = ctx.netLoad(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
+				RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 

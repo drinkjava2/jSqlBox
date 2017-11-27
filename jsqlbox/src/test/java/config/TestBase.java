@@ -81,4 +81,8 @@ public class TestBase {
 		executeDDLs(ddls);
 	}
 
+	public static void printTimeUsed(long startTimeMillis, String msg) {
+		System.out
+				.println(String.format("%50s: %7s s", msg,  (System.currentTimeMillis() - startTimeMillis) /1000.0));
+	}
 }

@@ -13,10 +13,12 @@ package com.github.drinkjava2.jtinynet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -181,6 +183,19 @@ public class TinyNetUtils {
 		for (Node node : nodes)
 			result.add((T) node.getEntity());
 		return result;
+	}
+
+	/** Convert a Node Set Map to an entity set map */
+	public static Map<Class<?>, Set<Object>> nodeSetMapToEntitySetMap(Map<Class<?>, Set<Node>> nodeMap) {
+		Map<Class<?>, Set<Object>> resultMap = new HashMap<Class<?>, Set<Object>>();
+		for (Entry<Class<?>, Set<Node>> entry : nodeMap.entrySet()) {
+			Set<Object> set = new LinkedHashSet<Object>();
+			for (Object obj : entry.getValue()) {
+				set.add(obj);
+			}
+			resultMap.put(entry.getKey(), set);
+		}
+		return resultMap;
 	}
 
 	/** Convert a node collection to entity list */
