@@ -11,10 +11,7 @@
  */
 package com.github.drinkjava2.jtinynet;
 
-import java.util.Map.Entry;
-
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -118,9 +115,9 @@ public class Path {
 	}
 
 	/**
-	 * Give target table or class, Let computer to automatically build the chain,
-	 * note this method only works correct if there is only 1 way can reach to the
-	 * target
+	 * Give target table or class, Let computer to automatically build the
+	 * chain, note this method only works correct if there is only 1 way can
+	 * reach to the target
 	 */
 	public Path autoPath(Object target) {
 		checkIfModifyInitialized();
@@ -143,63 +140,18 @@ public class Path {
 	public void initializePath(TinyNet net) {
 		if (initialized)
 			return;
-		PathCalculateUtils.calculateAutoPath(this, net);
+		PathUtils.calculateAutoPath(this, net);
 		if (target == null || StrUtils.isEmpty(target))
 			throw new TinyNetException("In path, target can not be null or empty.");
-		TableModel model = null;
-		// if target is a String represented Class name?
-		if (this.getTarget() instanceof String) {
-			String tbName = (String) this.getTarget();
-			for (Entry<Class<?>, TableModel> entry : net.getConfigModels().entrySet()) {
-				TableModel mod = entry.getValue();
-				if (mod != null && tbName.equalsIgnoreCase(mod.getTableName())) {
-					model = mod;
-					break;
-				}
-			}
-		} else {// target is Class type
-			if (!(this.getTarget() instanceof Class))
-				throw new TinyNetException("In path, target can only be table name string or entity class.");
-			model = net.getConfigModels().get((Class<?>) this.getTarget());
-		}
-		if (model == null)
+		Class<?> theTargetClass = PathUtils.findClassByTarget(net, this.target);
+		this.targetModel = net.getConfigModels().get(theTargetClass);
+		if (this.targetModel == null)
 			throw new TinyNetException("Can not find target model for target '" + this.getTarget() + "'");
-		this.targetModel = model;
 
 		if (refs == null)
 			this.refColumns = null;
 		else {
-			TableModel childOrParentModelOrSelf = this.targetModel;
-			if ("P".equalsIgnoreCase(this.getType().substring(0, 1)))
-				childOrParentModelOrSelf = this.fatherPath.targetModel;
-			// compare tableModel to determine refs are field names or column
-			// names
-			StringBuilder sb = new StringBuilder();
-			for (String ref : refs) {
-				boolean found = false;
-				for (ColumnModel col : childOrParentModelOrSelf.getColumns()) {
-					if (ref.equalsIgnoreCase(col.getEntityField())) {
-						if (found)
-							throw new TinyNetException("Can't judge '" + ref + "' is a field or a column name.");
-						found = true;
-						if (sb.length() > 0)
-							sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
-						sb.append(col.getColumnName());
-					} else if (ref.equalsIgnoreCase(col.getColumnName())) {
-						if (ref.equalsIgnoreCase(col.getEntityField())) {
-							if (found)
-								throw new TinyNetException("Can't judge '" + ref + "' is a field or a column name.");
-							found = true;
-							if (sb.length() > 0)
-								sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
-							sb.append(ref);
-						}
-					}
-				}
-				if (!found)
-					throw new TinyNetException("Can't find reference column name for '" + ref + "'  ");
-			}
-			this.refColumns = sb.toString();
+			this.refColumns = PathUtils.calculateRefColumns(this);
 		}
 		validatorInstance = TinyNetUtils.getOrBuildChecker(validator);
 		if (refs != null)
