@@ -115,9 +115,9 @@ public class Path {
 	}
 
 	/**
-	 * Give target table or class, Let computer to automatically build the
-	 * chain, note this method only works correct if there is only 1 way can
-	 * reach to the target
+	 * Give target table or class, Let computer to automatically build the chain,
+	 * note this method only works correct if there is only 1 way can reach to the
+	 * target
 	 */
 	public Path autoPath(Object target) {
 		checkIfModifyInitialized();
@@ -140,7 +140,7 @@ public class Path {
 	public void initializePath(TinyNet net) {
 		if (initialized)
 			return;
-		PathUtils.calculateAutoPath(this, net);
+		PathUtils.calculateAutoPath(net, this);
 		if (target == null || StrUtils.isEmpty(target))
 			throw new TinyNetException("In path, target can not be null or empty.");
 		Class<?> theTargetClass = PathUtils.findClassByTarget(net, this.target);

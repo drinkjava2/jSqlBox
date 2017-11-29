@@ -20,12 +20,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-
-import functiontest.orm.entities.Privilege;
-import functiontest.orm.entities.User;
 
 /**
  * This class store public static methods concern to Path
@@ -72,17 +70,14 @@ public class PathUtils {
 	}
 
 	/**
-	 * If has autoPathTarget, this method calculate and build a path chain point
-	 * to target, and set the top of the chain as nextPath
+	 * If has autoPathTarget, this method calculate and build a path chain point to
+	 * target, and set the top of the chain as nextPath
 	 * 
-	 * @param path
-	 *            The start path
-	 * @param target
-	 *            The target table name or target class
-	 * @param net
-	 *            The TinyNet instance
+	 * @param path The start path
+	 * @param target The target table name or target class
+	 * @param net The TinyNet instance
 	 */
-	public static void calculateAutoPath(Path path, TinyNet net) {
+	public static void calculateAutoPath(TinyNet net, Path path) {
 		if (path.autoPathTarget == null)
 			return;
 		if (path.nextPath != null)
@@ -92,11 +87,61 @@ public class PathUtils {
 		Map<Class<?>, TableModel> models = net.getConfigModels();
 		if (models == null || models.isEmpty())
 			throw new TinyNetException("To calculate auto path, TinyNet's configModels can not be empty");
-		Set<Class<?>> autoPath = searchNodePath(models, User.class, Privilege.class);
-		Path p;
-		for (Class<?> clz : autoPath) {
-			// if(p==null)p=new path
+		Class<?> from = findClassByTarget(net, path.getTarget());
+		Class<?> to = findClassByTarget(net, path.autoPathTarget);
+		TinyNetException.assureNotNull(from, "Can not find 'From' target when calculate auto path");
+		TinyNetException.assureNotNull(from, "Can not find 'To' target when calculate auto path");
+		LinkedHashSet<Class<?>> classChain = searchNodePath(models, from, to);
+		for (Class<?> clz : classChain) {
+			System.out.println(clz);
 		}
+		Path PathChain = classChainTOPathChain(net, classChain);
+	}
+
+	public static Path classChainTOPathChain(TinyNet net, LinkedHashSet<Class<?>> classChain) {
+		Class<?> from = null;
+		Path path = null;
+		int i = 0;
+		for (Class<?> clazz : classChain) {
+			i++;
+			if (i == 1) {
+				from = clazz;
+			} else {
+				if (i == 2)
+					path = buildPathByFromAndTo(net, from, clazz);
+				if (i == classChain.size()) {
+					path.type = StrUtils.replace(path.type, "-", "+");// last will select
+				}
+			}
+		}
+		return null;
+	}
+ 
+	static class ClassRelation{
+		Boolean toIsFromsParent;//true, false, null
+		
+	}
+	
+ public static Path buildPathByFromAndTo(TinyNet net, Class<?> from, Class<?> to) {
+//		TableModel fromModel=net.getConfigModels().get(from);//User
+//		TableModel toModel=net.getConfigModels().get(to); //UserRole
+//		List<FKeyModel> fkeyList = fromModel.getFkeyConstraints();
+//		for (FKeyModel fKeyModel : fkeyList) {
+//			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
+//			Class<?> p = findClassByTableName(net.getConfigModels(), parentTableName);
+//			if (!checked.contains(c) && p != null && p.equals(last)) {
+//				foundClass = c;
+//				break;
+//			} else if (!checked.contains(p) && c.equals(last)) {
+//				foundClass = p;
+//				break;
+//			}
+//			if (foundClass != null)
+//				break;
+//		}
+//		return null;
+//	
+	 return null;
 	}
 
 	/** Find the target class by given target table name or target class */
@@ -117,6 +162,7 @@ public class PathUtils {
 		}
 	}
 
+	/** Find the target class by given table name */
 	public static Class<?> findClassByTableName(Map<Class<?>, TableModel> models, String tableName) {
 		if (models == null || models.isEmpty())
 			return null;
@@ -127,7 +173,13 @@ public class PathUtils {
 		return null;
 	}
 
-	static Set<Class<?>> searchNodePath(Map<Class<?>, TableModel> models, Class<?> from, Class<?> to) {// NOSONAR
+	/**
+	 * @param models
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	static LinkedHashSet<Class<?>> searchNodePath(Map<Class<?>, TableModel> models, Class<?> from, Class<?> to) {// NOSONAR
 		Set<Class<?>> checked = new HashSet<Class<?>>();
 		checked.add(from);
 		Set<Class<?>> result = new LinkedHashSet<Class<?>>();
@@ -136,7 +188,7 @@ public class PathUtils {
 		List<Set<Class<?>>> paths = new ArrayList<Set<Class<?>>>();
 		paths.add(result);
 		int i = 0;
-		Set<Class<?>> newPath = null;
+		LinkedHashSet<Class<?>> newPath = null;
 		do {
 			i++;
 			Class<?> foundClass;
