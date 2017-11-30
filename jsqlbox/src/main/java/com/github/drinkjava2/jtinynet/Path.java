@@ -240,6 +240,13 @@ public class Path {
 		else
 			return fatherPath.getTopPath();
 	}
+	
+	public Path getBottomPath() {
+		if (this.getNextPath() == null)
+			return this;
+		else
+			return this.getNextPath();
+	}
 
 	public void checkIfModifyInitialized() {
 		if (initialized)
@@ -287,6 +294,7 @@ public class Path {
 	public Path setNextPath(Path nextPath) {
 		checkIfModifyInitialized();
 		this.nextPath = nextPath;
+		nextPath.fatherPath = this;
 		return this;
 	}
 

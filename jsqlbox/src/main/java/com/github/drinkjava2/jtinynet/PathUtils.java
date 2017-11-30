@@ -70,18 +70,19 @@ public class PathUtils {
 	}
 
 	/**
-	 * If has autoPathTarget, this method calculate and build a path chain point to
-	 * target, and set the top of the chain as nextPath
+	 * If has autoPathTarget, this method calculate and build a path chain point
+	 * to target, and set the top of the chain as nextPath
 	 * 
-	 * @param path The start path
-	 * @param target The target table name or target class
-	 * @param net The TinyNet instance
+	 * @param path
+	 *            The start path
+	 * @param target
+	 *            The target table name or target class
+	 * @param net
+	 *            The TinyNet instance
 	 */
 	public static void calculateAutoPath(TinyNet net, Path path) {
 		if (path.autoPathTarget == null)
 			return;
-		if (path.nextPath != null)
-			throw new TinyNetException("Not allow set autoPath for a path which already have nextPath");
 		if (net == null)
 			throw new TinyNetException("To calculate auto path, TinyNet instance can not be null");
 		Map<Class<?>, TableModel> models = net.getConfigModels();
@@ -95,53 +96,85 @@ public class PathUtils {
 		for (Class<?> clz : classChain) {
 			System.out.println(clz);
 		}
-		Path PathChain = classChainTOPathChain(net, classChain);
+		Path pathChain = classChainTOPathChain(net, classChain);
+		Path oldNextPath = path.getNextPath();
+		path.setNextPath(pathChain);
+		if (oldNextPath != null)
+			path.getBottomPath().setNextPath(oldNextPath);
 	}
 
 	public static Path classChainTOPathChain(TinyNet net, LinkedHashSet<Class<?>> classChain) {
 		Class<?> from = null;
 		Path path = null;
 		int i = 0;
-		for (Class<?> clazz : classChain) {
+		for (Class<?> to : classChain) {
 			i++;
 			if (i == 1) {
-				from = clazz;
+				from = to;
 			} else {
+				Path thisPath = buildPathByFromAndTo(net, from, to);
+				if (i == classChain.size())
+					thisPath.type = StrUtils.replace(thisPath.type, "-", "+");// last
 				if (i == 2)
-					path = buildPathByFromAndTo(net, from, clazz);
-				if (i == classChain.size()) {
-					path.type = StrUtils.replace(path.type, "-", "+");// last will select
+					path = thisPath;
+				else {
+					path.setNextPath(thisPath);
+					path = thisPath;
 				}
 			}
 		}
-		return null;
+		return path.getTopPath();
 	}
- 
-	static class ClassRelation{
-		Boolean toIsFromsParent;//true, false, null
-		
+
+	public static Path buildPathByFromAndTo(TinyNet net, Class<?> from, Class<?> to) {
+		Object[] r = getRelationShip(net, from, to);
+		return new Path((String) r[0], r[1], (String[]) r[2]);
 	}
-	
- public static Path buildPathByFromAndTo(TinyNet net, Class<?> from, Class<?> to) {
-//		TableModel fromModel=net.getConfigModels().get(from);//User
-//		TableModel toModel=net.getConfigModels().get(to); //UserRole
-//		List<FKeyModel> fkeyList = fromModel.getFkeyConstraints();
-//		for (FKeyModel fKeyModel : fkeyList) {
-//			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
-//			Class<?> p = findClassByTableName(net.getConfigModels(), parentTableName);
-//			if (!checked.contains(c) && p != null && p.equals(last)) {
-//				foundClass = c;
-//				break;
-//			} else if (!checked.contains(p) && c.equals(last)) {
-//				foundClass = p;
-//				break;
-//			}
-//			if (foundClass != null)
-//				break;
-//		}
-//		return null;
-//	
-	 return null;
+
+	private static Object[] getRelationShip(TinyNet net, Class<?> from, Class<?> to) {
+		TableModel fromModel = net.getConfigModels().get(from);
+		String fromTable = fromModel.getTableName();
+		TableModel toModel = net.getConfigModels().get(to);
+		String toTable = toModel.getTableName();
+		Object[] result = null;
+		// assume fromModel is child
+		for (FKeyModel fKeyModel : fromModel.getFkeyConstraints()) {
+			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
+			if (toTable.equalsIgnoreCase(parentTableName)) {
+				if (result != null)
+					throw new TinyNetException(
+							"Auto path can not determined, multiple relationships found between class " + from + " and "
+									+ to);
+				result = new Object[3];
+				result[0] = "P-";
+				result[1] = to;
+				String[] refs = new String[fKeyModel.getRefTableAndColumns().length - 1];
+				for (int i = 1; i < refs.length; i++)
+					refs[i] = fKeyModel.getRefTableAndColumns()[i];
+				result[2] = refs;
+				return result;
+			}
+		}
+		// assume toModel is child
+		for (FKeyModel fKeyModel : toModel.getFkeyConstraints()) {
+			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
+			if (fromTable.equalsIgnoreCase(parentTableName)) {
+				if (result != null)
+					throw new TinyNetException(
+							"Auto path can not determined, found multiple relationship between class " + from + " and "
+									+ to);
+				result = new Object[3];
+				result[0] = "C-";
+				result[1] = to;
+				String[] refs = new String[fKeyModel.getRefTableAndColumns().length - 1];
+				for (int i = 1; i < refs.length; i++)
+					refs[i] = fKeyModel.getRefTableAndColumns()[i];
+				result[2] = refs;
+				return result;
+			}
+		}
+		throw new TinyNetException(
+				"Auto path can not determined, no relationship found between class " + from + " and " + to);
 	}
 
 	/** Find the target class by given target table name or target class */
@@ -229,7 +262,7 @@ public class PathUtils {
 				if (newPath != null)
 					paths.add(newPath);
 			} while (foundClass != null);
-		} while (i < 100);
+		} while (i < 200);
 		throw new TinyNetException("Not found availible auto path");
 	}
 
