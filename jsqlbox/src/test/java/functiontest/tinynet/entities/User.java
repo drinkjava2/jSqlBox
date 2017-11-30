@@ -1,4 +1,4 @@
-package functiontest.orm.entities;
+package functiontest.tinynet.entities;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;

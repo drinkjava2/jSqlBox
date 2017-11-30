@@ -94,7 +94,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public <T> T alias(String alias) {
 		box().getTableModel().setAlias(alias);
-		return (T)this;
+		return (T) this;
 	}
 
 	@Override
@@ -155,6 +155,9 @@ public class ActiveRecord implements ActiveRecordSupport {
 			throw new SqlBoxException("putValues fields and values number not match");
 		for (int i = 0; i < fields.length; i++) {
 			Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(this.getClass(), fields[i]);
+			if (writeMethod == null)
+				throw new SqlBoxException(
+						"Not found writeMethod for '" + this.getClass() + "' class's method '" + fields[i] + "'");
 			try {
 				writeMethod.invoke(this, values[i]);
 			} catch (Exception e) {

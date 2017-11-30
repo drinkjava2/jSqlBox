@@ -1,14 +1,14 @@
-package functiontest.orm.entities;
+package functiontest.tinynet.entities;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
-@Table(name="roletb")
-public class Role extends ActiveRecord {
+@Table(name = "privilegetb")
+public class Privilege extends ActiveRecord {
 	@Id
 	String id;
-	String roleName;
+	String privilegeName;
 
 	public String getId() {
 		return id;
@@ -18,12 +18,12 @@ public class Role extends ActiveRecord {
 		this.id = id;
 	}
 
-	public String getRoleName() {
-		return roleName;
+	public String getPrivilegeName() {
+		return privilegeName;
 	}
 
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
+	public void setPrivilegeName(String privilegeName) {
+		this.privilegeName = privilegeName;
 	}
 
 }

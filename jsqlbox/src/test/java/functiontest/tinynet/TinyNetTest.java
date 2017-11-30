@@ -1,4 +1,4 @@
-package functiontest.orm;
+package functiontest.tinynet;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
 
@@ -19,13 +19,13 @@ import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
 import config.TestBase;
-import functiontest.orm.entities.Address;
-import functiontest.orm.entities.Email;
-import functiontest.orm.entities.Privilege;
-import functiontest.orm.entities.Role;
-import functiontest.orm.entities.RolePrivilege;
-import functiontest.orm.entities.User;
-import functiontest.orm.entities.UserRole;
+import functiontest.tinynet.entities.Address;
+import functiontest.tinynet.entities.Email;
+import functiontest.tinynet.entities.Privilege;
+import functiontest.tinynet.entities.Role;
+import functiontest.tinynet.entities.RolePrivilege;
+import functiontest.tinynet.entities.User;
+import functiontest.tinynet.entities.UserRole;
 
 public class TinyNetTest extends TestBase {
 	@Before
@@ -194,7 +194,7 @@ public class TinyNetTest extends TestBase {
 		int sampleSize = 20;
 		int queyrTimes = 20;
 		for (int i = 0; i < sampleSize; i++) {
-			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
+			new User().put("id", "usr" + i).put("userName", "user" + i).put("age", i).insert();
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
@@ -202,23 +202,23 @@ public class TinyNetTest extends TestBase {
 		long start = System.currentTimeMillis();
 		Set<Email> emails = null;
 		// Set expression query parameters will not cache query result
-		Path p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").where("id startwith ? or emailName=?",
-				"email1", "Bar");
+		Path p = new Path("S-", User.class).where("age>?", 10).nextPath("C+", Email.class, "userId")
+				.where("id startwith ? or emailName=?", "email1", "Bar");
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
 		printTimeUsed(start, "Validate by expression with parameters");
-		Assert.assertEquals(220, emails.size());
+		Assert.assertEquals(180, emails.size());
 
 		// Do not have query parameters will cause query result be cached
 		start = System.currentTimeMillis();
-		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId")
+		p = new Path("S-", User.class).where("age>10").nextPath("C+", Email.class, "userId")
 				.where("id startwith 'email1' or emailName='Bar'");
 		for (int i = 0; i < queyrTimes; i++) {
 			emails = net.findEntitySet(Email.class, p);
 		}
 		printTimeUsed(start, "Validate by expression no parameters");
-		Assert.assertEquals(220, emails.size());
+		Assert.assertEquals(180, emails.size());
 	}
 
 	@Test

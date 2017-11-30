@@ -29,6 +29,6 @@ public interface NodeValidator {
 	 * @param path Current path
 	 * @return True or false depends validate result
 	 */
-	public abstract boolean validateNode(Node node, int selectLevel, int selectedSize, Path path);
+	public abstract boolean validateNode(Node node, int selectLevel, int selectSize, Path path);
 
 }

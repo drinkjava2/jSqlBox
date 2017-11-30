@@ -1,5 +1,6 @@
-package functiontest.orm.entities;
+package functiontest.tinynet.entities;
 
+import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -8,12 +9,23 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
 public class TreeNode extends ActiveRecord {
 	@Id
 	String id;
-	String comments;
+
+	@SingleFKey(ddl = false, refs = { "treenodetb", "id" })
 	String pid;
+
+	String comments;
 	Integer line;
-	Integer level;
+	Integer treeLevel;
 	Integer tempno;
 	Integer temporder;
+
+	public TreeNode() {
+		// default public constructor
+	}
+
+	public TreeNode(String id) {
+		this.id = id;
+	}
 
 	public String getId() {
 		return id;
@@ -47,12 +59,12 @@ public class TreeNode extends ActiveRecord {
 		this.line = line;
 	}
 
-	public Integer getLevel() {
-		return level;
+	public Integer getTreeLevel() {
+		return treeLevel;
 	}
 
-	public void setLevel(Integer level) {
-		this.level = level;
+	public void setTreeLevel(Integer treeLevel) {
+		this.treeLevel = treeLevel;
 	}
 
 	public Integer getTempno() {

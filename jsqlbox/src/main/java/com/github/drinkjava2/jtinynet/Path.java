@@ -32,8 +32,8 @@ public class Path {
 	 *    "C-":child nodes, but not put found nodes into result,
 	 *    "P+":parent 
 	 *    "P-":parent nodes, but not put found nodes into result,
-	 *    "P*":all parents
-	 *	  "C*":all childs
+	 *    "P*":all parents, used for search tree
+	 *	  "C*":all childs, used for search tree
 	 * </pre>
 	 */
 	String type;
@@ -97,6 +97,12 @@ public class Path {
 		validateType();
 	}
 
+	public Path(Object target) {
+		this.type = "S-";
+		this.target = target;
+		validateType();
+	}
+
 	public Path nextPath(String type, Object target, Object checker, String... refs) {
 		checkIfModifyInitialized();
 		Path next = new Path(type, target, checker, refs);
@@ -107,6 +113,8 @@ public class Path {
 
 	/** Set the next part */
 	public Path nextPath(String type, Object target, String... refs) {
+		if (refs == null || refs.length == 0)
+			throw new TinyNetException("For nextPath method, ref columns can not ignore");
 		checkIfModifyInitialized();
 		Path next = new Path(type, target, refs);
 		next.fatherPath = this;
@@ -123,14 +131,6 @@ public class Path {
 		checkIfModifyInitialized();
 		this.autoPathTarget = target;
 		return this;
-	}
-
-	public Path nextPath(String type, Object target) {
-		checkIfModifyInitialized();
-		Path next = new Path(type, target);
-		next.fatherPath = this;
-		this.nextPath = next;
-		return next;
 	}
 
 	/**
@@ -156,10 +156,10 @@ public class Path {
 		validatorInstance = TinyNetUtils.getOrBuildChecker(validator);
 		if (refs != null)
 			joinedColumns = TinyNetUtils.buildJoinedColumns(refs);
-		initialized = true;
 		if (this.getNextPath() != null)
 			this.getNextPath().initializePath(net);
 		initializeUniqueIdString();
+		initialized = true;
 	}
 
 	/** return target model, note different query may change tableModel */
@@ -197,6 +197,8 @@ public class Path {
 		if (!cacheable)
 			return;
 		if (validator != null && validator instanceof NodeValidator)
+			return;
+		if ("C*".equalsIgnoreCase(type) || "P*".equalsIgnoreCase(type))
 			return;
 		if (nextPath != null) {
 			next = nextPath.getUniqueIdString();
@@ -240,7 +242,7 @@ public class Path {
 		else
 			return fatherPath.getTopPath();
 	}
-	
+
 	public Path getBottomPath() {
 		if (this.getNextPath() == null)
 			return this;
@@ -359,4 +361,20 @@ public class Path {
 		return this;
 	}
 
+	public String getDebugInfo(int level) {
+		String sp = "";
+		for (int i = 0; i < level; i++)
+			sp += "    ";
+		StringBuilder sb = new StringBuilder();
+		sb.append("\r" + sp + "Type=" + this.type);
+		sb.append("\r" + sp + "target=" + this.target);
+		if (refs != null) {
+			sb.append("\r" + sp + "refs=");
+			for (String ref : refs)
+				sb.append(ref + ",");
+		}
+		if (this.nextPath != null)
+			sb.append(nextPath.getDebugInfo(level + 1));
+		return sb.toString();
+	}
 }

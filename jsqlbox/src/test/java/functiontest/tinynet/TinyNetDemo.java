@@ -1,4 +1,4 @@
-package functiontest.orm;
+package functiontest.tinynet;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
@@ -14,17 +14,18 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jtinynet.DefaultNodeValidator;
 import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
 import config.TestBase;
-import functiontest.orm.entities.Address;
-import functiontest.orm.entities.Email;
-import functiontest.orm.entities.Privilege;
-import functiontest.orm.entities.Role;
-import functiontest.orm.entities.RolePrivilege;
-import functiontest.orm.entities.User;
-import functiontest.orm.entities.UserRole;
+import functiontest.tinynet.entities.Address;
+import functiontest.tinynet.entities.Email;
+import functiontest.tinynet.entities.Privilege;
+import functiontest.tinynet.entities.Role;
+import functiontest.tinynet.entities.RolePrivilege;
+import functiontest.tinynet.entities.User;
+import functiontest.tinynet.entities.UserRole;
 
 public class TinyNetDemo extends TestBase {
 	@Before
@@ -100,17 +101,40 @@ public class TinyNetDemo extends TestBase {
 				new Path("S-", User.class).where("id='u1' or id='u2'").nextPath("C-", UserRole.class, "userId")
 						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
 						.nextPath("P+", Privilege.class, "pid"));
-		for (Privilege privilege : privileges) {
-			System.out.println(privilege.getPrivilegeName());
-		}
+		for (Privilege privilege : privileges)
+			System.out.println(privilege.getId());
+		Assert.assertEquals(3, privileges.size());
 	}
 
 	@Test
 	public void testAutoPath() {
 		insertDemoData();
-		TinyNet net = ctx.netLoad(User.class, Role.class, Email.class, new Role(), Privilege.class, UserRole.class,
+		TinyNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
+				new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class));
+		for (Privilege privilege : privileges)
+			System.out.println(privilege.getId());
+		Assert.assertEquals(3, privileges.size());
+	}
+
+	@Test
+	public void testAutoPath2() {
+		insertDemoData();
+		TinyNet net = ctx.netLoad(new Email(), new User(), new Role(), Privilege.class, UserRole.class,
 				RolePrivilege.class);
-		net.findEntitySet(Email.class, new Path("S-", Email.class).autoPath(Privilege.class));
+		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
+				new Path(Email.class).setValidator(new EmailValidator()).autoPath(Privilege.class));
+		for (Privilege privilege : privileges)
+			System.out.println(privilege.getId());
+		Assert.assertEquals(1, privileges.size());
+	}
+
+	public static class EmailValidator extends DefaultNodeValidator {
+		@Override
+		public boolean validateBean(Object entity) {
+			Email e = (Email) entity;
+			return ("e1".equals(e.getId()) || "e5".equals(e.getId())) ? true : false;
+		}
 	}
 
 	@Test

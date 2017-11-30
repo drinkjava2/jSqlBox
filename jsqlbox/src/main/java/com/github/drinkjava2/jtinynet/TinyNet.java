@@ -369,7 +369,7 @@ public class TinyNet implements EntityNet {
 
 	public Map<Class<?>, Set<Node>> findNodeMapByNodeCollection(Path path, Collection<Node> input) {
 		Map<Class<?>, Set<Node>> result = new HashMap<Class<?>, Set<Node>>();
-		Path topPath = path.getTopPath(); 
+		Path topPath = path.getTopPath();
 		topPath.initializePath(this);
 		findNodeSetforNodes(0, topPath, input, result);
 		return result;
@@ -432,7 +432,7 @@ public class TinyNet implements EntityNet {
 						if (prs != null)
 							for (ParentRelation pr : prs) {
 								if (inputNode.getId().equals(pr.getParentId())
-										&& pr.getRefColumns().equals(path.getRefColumns())) {
+										&& pr.getRefColumns().equalsIgnoreCase(path.getRefColumns())) {
 									nodesToCheck.add(cNode.getValue());
 									break;
 								}
@@ -456,17 +456,16 @@ public class TinyNet implements EntityNet {
 				// Find parent nodes meat tableName/refColumns/nodeId condition
 				Set<Node> nodesToCheck = new LinkedHashSet<Node>();
 				List<ParentRelation> prs = inputNode.getParentRelations();
-
-				for (ParentRelation pr : prs) {
-					if (targetTableName.equalsIgnoreCase(pr.getParentTable())
-							&& path.getRefColumns().equalsIgnoreCase(pr.getRefColumns())) {
-						Node node = this.getOneNode(targetClass, pr.getParentId());
-						if (node != null)
-							nodesToCheck.add(node);
+				if (prs != null)
+					for (ParentRelation pr : prs) {
+						if (targetTableName.equalsIgnoreCase(pr.getParentTable())
+								&& path.getRefColumns().equalsIgnoreCase(pr.getRefColumns())) {
+							Node node = this.getOneNode(targetClass, pr.getParentId());
+							if (node != null)
+								nodesToCheck.add(node);
+						}
 					}
-				}
 				validateSelected(level, path, selected, nodesToCheck);
-
 				// now cached childNodes on parentNode
 				if (this.allowQueryCache && path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
 					cacheSelected(inputNode.getId(), pathUniqueString, selected);
@@ -479,7 +478,7 @@ public class TinyNet implements EntityNet {
 			result.put(targetClass, nodes);
 		}
 
-		if ("+".equals(type1))
+		if ("+".equals(type1) || "*".equals(type1))
 			nodes.addAll(selected);
 
 		if (!(path.getCacheable() && StrUtils.isEmpty(path.getUniqueIdString()))) {
@@ -487,6 +486,13 @@ public class TinyNet implements EntityNet {
 				throw new TinyNetException(
 						"Query result return more than 100000 records to cache in memory, this may caused by careless programming.");
 		}
+
+		if (level > 10000)
+			throw new TinyNetException("Search depth >10000, this may caused by careless programming.");
+
+		if ("*".equals(type1) && !selected.isEmpty())
+			findNodeSetforNodes(level + 1, path, selected, result);
+
 		if (path.getNextPath() != null) {
 			findNodeSetforNodes(level + 1, path.getNextPath(), selected, result);
 		}

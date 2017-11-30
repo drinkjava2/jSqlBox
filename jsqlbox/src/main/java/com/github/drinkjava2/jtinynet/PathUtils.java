@@ -36,7 +36,7 @@ public class PathUtils {
 	/**
 	 * Calculate path's Ref Columns and join it to one String
 	 */
-	public static String calculateRefColumns(Path path) {
+	static String calculateRefColumns(Path path) {
 		TableModel childOrParentModelOrSelf = path.targetModel;
 		if ("P".equalsIgnoreCase(path.getType().substring(0, 1)))
 			childOrParentModelOrSelf = path.fatherPath.targetModel;
@@ -45,14 +45,14 @@ public class PathUtils {
 		for (String ref : path.refs) {
 			boolean found = false;
 			for (ColumnModel col : childOrParentModelOrSelf.getColumns()) {
-				if (ref.equalsIgnoreCase(col.getEntityField())) {
+				if (ref != null && ref.equalsIgnoreCase(col.getEntityField())) {
 					if (found)
 						throw new TinyNetException("Can't judge '" + ref + "' is a field or a column name.");
 					found = true;
 					if (sb.length() > 0)
 						sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
 					sb.append(col.getColumnName());
-				} else if (ref.equalsIgnoreCase(col.getColumnName())) {
+				} else if (ref != null && ref.equalsIgnoreCase(col.getColumnName())) {
 					if (ref.equalsIgnoreCase(col.getEntityField())) {
 						if (found)
 							throw new TinyNetException("Can't judge '" + ref + "' is a field or a column name.");
@@ -70,17 +70,14 @@ public class PathUtils {
 	}
 
 	/**
-	 * If has autoPathTarget, this method calculate and build a path chain point
-	 * to target, and set the top of the chain as nextPath
+	 * If has autoPathTarget, this method calculate and build a path chain point to
+	 * target, and set the top of the chain as nextPath
 	 * 
-	 * @param path
-	 *            The start path
-	 * @param target
-	 *            The target table name or target class
-	 * @param net
-	 *            The TinyNet instance
+	 * @param path The start path
+	 * @param target The target table name or target class
+	 * @param net The TinyNet instance
 	 */
-	public static void calculateAutoPath(TinyNet net, Path path) {
+	static void calculateAutoPath(TinyNet net, Path path) {
 		if (path.autoPathTarget == null)
 			return;
 		if (net == null)
@@ -92,10 +89,7 @@ public class PathUtils {
 		Class<?> to = findClassByTarget(net, path.autoPathTarget);
 		TinyNetException.assureNotNull(from, "Can not find 'From' target when calculate auto path");
 		TinyNetException.assureNotNull(from, "Can not find 'To' target when calculate auto path");
-		LinkedHashSet<Class<?>> classChain = searchNodePath(models, from, to);
-		for (Class<?> clz : classChain) {
-			System.out.println(clz);
-		}
+		Set<Class<?>> classChain = searchNodePath(models, from, to);
 		Path pathChain = classChainTOPathChain(net, classChain);
 		Path oldNextPath = path.getNextPath();
 		path.setNextPath(pathChain);
@@ -103,41 +97,42 @@ public class PathUtils {
 			path.getBottomPath().setNextPath(oldNextPath);
 	}
 
-	public static Path classChainTOPathChain(TinyNet net, LinkedHashSet<Class<?>> classChain) {
+	static Path classChainTOPathChain(TinyNet net, Set<Class<?>> classChain) {
 		Class<?> from = null;
 		Path path = null;
 		int i = 0;
 		for (Class<?> to : classChain) {
 			i++;
-			if (i == 1) {
-				from = to;
-			} else {
+			if (i >= 2) {
 				Path thisPath = buildPathByFromAndTo(net, from, to);
 				if (i == classChain.size())
-					thisPath.type = StrUtils.replace(thisPath.type, "-", "+");// last
+					thisPath.type = StrUtils.replaceFirst(thisPath.type, "-", "+");// last
 				if (i == 2)
 					path = thisPath;
 				else {
-					path.setNextPath(thisPath);
+					path.setNextPath(thisPath);// NOSONAR
 					path = thisPath;
 				}
+
 			}
+			from = to;
 		}
-		return path.getTopPath();
+		return path.getTopPath();// NOSONAR
 	}
 
-	public static Path buildPathByFromAndTo(TinyNet net, Class<?> from, Class<?> to) {
+	static Path buildPathByFromAndTo(TinyNet net, Class<?> from, Class<?> to) {
 		Object[] r = getRelationShip(net, from, to);
 		return new Path((String) r[0], r[1], (String[]) r[2]);
 	}
 
-	private static Object[] getRelationShip(TinyNet net, Class<?> from, Class<?> to) {
+	/** The the relationship between from and to */
+	static Object[] getRelationShip(TinyNet net, Class<?> from, Class<?> to) {
 		TableModel fromModel = net.getConfigModels().get(from);
 		String fromTable = fromModel.getTableName();
 		TableModel toModel = net.getConfigModels().get(to);
 		String toTable = toModel.getTableName();
 		Object[] result = null;
-		// assume fromModel is child
+		// assume from is child, like from is RoleUser, to is User
 		for (FKeyModel fKeyModel : fromModel.getFkeyConstraints()) {
 			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
 			if (toTable.equalsIgnoreCase(parentTableName)) {
@@ -148,37 +143,33 @@ public class PathUtils {
 				result = new Object[3];
 				result[0] = "P-";
 				result[1] = to;
-				String[] refs = new String[fKeyModel.getRefTableAndColumns().length - 1];
-				for (int i = 1; i < refs.length; i++)
-					refs[i] = fKeyModel.getRefTableAndColumns()[i];
+				String[] refs = fKeyModel.getColumnNames().toArray(new String[fKeyModel.getColumnNames().size()]);
 				result[2] = refs;
-				return result;
 			}
 		}
-		// assume toModel is child
+		// assume to is child, like from is User, to is UserRole
 		for (FKeyModel fKeyModel : toModel.getFkeyConstraints()) {
 			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
 			if (fromTable.equalsIgnoreCase(parentTableName)) {
 				if (result != null)
 					throw new TinyNetException(
-							"Auto path can not determined, found multiple relationship between class " + from + " and "
+							"Auto path can not determined, multiple relationships found between class " + from + " and "
 									+ to);
 				result = new Object[3];
 				result[0] = "C-";
 				result[1] = to;
-				String[] refs = new String[fKeyModel.getRefTableAndColumns().length - 1];
-				for (int i = 1; i < refs.length; i++)
-					refs[i] = fKeyModel.getRefTableAndColumns()[i];
+				String[] refs = fKeyModel.getColumnNames().toArray(new String[fKeyModel.getColumnNames().size()]);
 				result[2] = refs;
-				return result;
 			}
 		}
+		if (result != null)
+			return result;
 		throw new TinyNetException(
 				"Auto path can not determined, no relationship found between class " + from + " and " + to);
 	}
 
 	/** Find the target class by given target table name or target class */
-	public static Class<?> findClassByTarget(TinyNet net, Object target) {
+	static Class<?> findClassByTarget(TinyNet net, Object target) {
 		if (target instanceof String) {
 			String tbName = (String) target;
 			for (Entry<Class<?>, TableModel> entry : net.getConfigModels().entrySet()) {
@@ -196,7 +187,7 @@ public class PathUtils {
 	}
 
 	/** Find the target class by given table name */
-	public static Class<?> findClassByTableName(Map<Class<?>, TableModel> models, String tableName) {
+	static Class<?> findClassByTableName(Map<Class<?>, TableModel> models, String tableName) {
 		if (models == null || models.isEmpty())
 			return null;
 		for (Entry<Class<?>, TableModel> entry : models.entrySet()) {
@@ -206,13 +197,9 @@ public class PathUtils {
 		return null;
 	}
 
-	/**
-	 * @param models
-	 * @param from
-	 * @param to
-	 * @return
-	 */
-	static LinkedHashSet<Class<?>> searchNodePath(Map<Class<?>, TableModel> models, Class<?> from, Class<?> to) {// NOSONAR
+	/** Search Node path from from to to */
+	@SuppressWarnings("all")
+	static Set<Class<?>> searchNodePath(Map<Class<?>, TableModel> models, Class<?> from, Class<?> to) {
 		Set<Class<?>> checked = new HashSet<Class<?>>();
 		checked.add(from);
 		Set<Class<?>> result = new LinkedHashSet<Class<?>>();
@@ -228,9 +215,9 @@ public class PathUtils {
 			do {
 				foundClass = null;
 				for (Set<Class<?>> subSet : paths) {
-					if (subSet.size() == i) {// NOSONAR
+					if (subSet.size() == i) {
 						Class<?> last = getLastElement(subSet);
-						for (Entry<Class<?>, TableModel> entry : models.entrySet()) {// NOSONAR
+						for (Entry<Class<?>, TableModel> entry : models.entrySet()) {
 							Class<?> c = entry.getKey();
 							List<FKeyModel> fkeyList = entry.getValue().getFkeyConstraints();
 							for (FKeyModel fKeyModel : fkeyList) {
@@ -250,7 +237,7 @@ public class PathUtils {
 								break;
 						}
 					}
-					if (foundClass != null) {// NOSONAR
+					if (foundClass != null) {
 						newPath = new LinkedHashSet<Class<?>>(subSet);
 						newPath.add(foundClass);
 						if (foundClass.equals(to))

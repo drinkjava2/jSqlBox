@@ -52,10 +52,10 @@ public class DefaultNodeValidator implements NodeValidator {
 	}
 
 	@Override
-	public boolean validateNode(Node node, int selectLevel, int selectedSize, Path path) {
+	public boolean validateNode(Node node, int selectLevel, int selectSize, Path path) {
 		Map<String, Object> presetValues = new HashMap<String, Object>();
-		presetValues.put("SELECT_LEVEL", selectLevel);
-		presetValues.put("SELECTED_SIZE", selectedSize);
+		presetValues.put("SELECTLEVEL", selectLevel);
+		presetValues.put("SELECTSIZE", selectSize);
 		return validateBean(node.getEntity())
 				&& validateExpression(node.getEntity(), presetValues, path.getExpression(), path.getexpressionParams());
 	}

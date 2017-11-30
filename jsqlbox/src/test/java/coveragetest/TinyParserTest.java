@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jtinynet.parser.TinyParser;
 
-import functiontest.orm.entities.User;
+import functiontest.tinynet.entities.User;
 
 /**
  * Coverage test for TinyParser
