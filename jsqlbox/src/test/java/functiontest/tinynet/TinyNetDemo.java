@@ -102,7 +102,7 @@ public class TinyNetDemo extends TestBase {
 						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
 						.nextPath("P+", Privilege.class, "pid"));
 		for (Privilege privilege : privileges)
-			System.out.println(privilege.getId());
+			System.out.print(privilege.getId()+" ");
 		Assert.assertEquals(3, privileges.size());
 	}
 
@@ -113,7 +113,7 @@ public class TinyNetDemo extends TestBase {
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class));
 		for (Privilege privilege : privileges)
-			System.out.println(privilege.getId());
+			System.out.print(privilege.getId()+" ");
 		Assert.assertEquals(3, privileges.size());
 	}
 
@@ -152,7 +152,7 @@ public class TinyNetDemo extends TestBase {
 	}
 
 	@Test
-	public void testloadKeyEntityNet() {
+	public void testNetLoadSketch() {
 		insertDemoData();
 		TinyNet net = ctx.netLoadSketch(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);

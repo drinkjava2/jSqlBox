@@ -1,5 +1,7 @@
 package functiontest.helloworld;
 
+import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.inline;
+import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.inline0;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param0;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.question;
@@ -7,10 +9,12 @@ import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.question0;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.valuesQuesions;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put0;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.*;
+import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.replace;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -147,6 +151,22 @@ public class SqlStyleDemo {
 		ctx.iExecute(param0(), "delete from users where ", inline(user, "=?", " or "));
 
 		System.out.println("=== Txxx methods, Template style  ===");
+		Map<String, Object> params=new HashMap<String, Object>();
+		User sam = new User("Sam", "Canada");
+		User tom = new User("Tom", "China");
+		params.put("user", sam);
+		ctx.tExecute(params,"insert into users (name, address) values(#{user.name},#{user.address})");
+		params.put("user", tom); 
+		ctx.tExecute(params,"update users set name=#{user.name}, address=#{user.address}");
+		params.clear();
+		params.put("name", "Tom");
+		params.put("addr", "China");
+		Assert.assertEquals(1L,
+				ctx.tQueryForObject(params,"select count(*) from users where name=#{name} and address=#{addr}")); 
+		params.put("u", tom);
+		ctx.tExecute(params, "delete from users where name=#{u.name} or address=#{u.address}");
+		
+		System.out.println("=== Txxx methods, Template + Inline style  ===");
 		user = new User("Sam", "Canada");
 		put0("user", user);
 		ctx.tExecute("insert into users (name, address) values(#{user.name},#{user.address})");

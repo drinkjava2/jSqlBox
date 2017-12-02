@@ -11,7 +11,7 @@
  
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
- <version>1.0.2.JRE6</version>
+ <version>1.0.0</version>
  <packaging>jar</packaging> 
  
  <name>jSQLBox</name>
@@ -48,7 +48,7 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
-		<!-- I like develop on Java8 so can use SONAR, but release on Java6 -->
+		<!-- I develop in Java8, but release on Java6 -->
         <version.java>1.6</version.java>
         <version.javadoc>6</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>

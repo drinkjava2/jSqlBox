@@ -11,10 +11,10 @@
  */
 package functiontest.helloworld;
 
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -25,9 +25,8 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.0
  */
 
-public class HelloWorld extends ActiveRecord {
+public class HelloWorld {
 	private String name;
-	private String address;
 
 	public String getName() {
 		return name;
@@ -35,14 +34,6 @@ public class HelloWorld extends ActiveRecord {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
 	}
 
 	@Test
@@ -61,15 +52,10 @@ public class HelloWorld extends ActiveRecord {
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
-		HelloWorld u = new HelloWorld();
-		u.setName("Sam");
-		ctx.insert(u);
-
-		u.setName("Tom");
-		u.insert();
-
-		Assert.assertEquals(2L, ctx.nQueryForObject("select count(*) from helloworld"));
+		HelloWorld hello = new HelloWorld();
+		hello.setName("Demo");
+		ctx.insert(hello);
+		Assert.assertEquals("Demo", ctx.nQueryForObject("select name from helloworld"));
 		ds.close();
 	}
-
 }
