@@ -64,7 +64,7 @@ public class SpeedTest {
 
 	@Test
 	public void executeTest() throws Exception {
-		Long times = 100L;
+		Long times = 10000L;
 		System.out.println("Compare method execute time for repeat " + times + " times:");
 		runMethod("pureJdbc", times);
 		runMethod("dbUtilsWithConnMethod", times);
