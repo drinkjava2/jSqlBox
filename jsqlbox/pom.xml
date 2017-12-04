@@ -48,7 +48,7 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
-		<!-- I develop in Java8, but release on Java6 -->
+		<!-- Release on Java6 -->
         <version.java>1.6</version.java>
         <version.javadoc>6</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
@@ -61,14 +61,6 @@
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
     </properties>
-
-   <!-- If download jdialects SNAPSHOT version by Maven, it's necessary to add this snapshots repository  -->
-   <repositories>	 
-     <repository>
-       <id>oss</id>
-       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-     </repository>
-   </repositories> 
    
  <dependencies>   
     <!-- jSqlBox depends on jDialects, jDialects is a database dialect tool support ~70 dialects' pagination & DDL -->
@@ -254,15 +246,15 @@
                                 </goals>
                             </execution>
                         </executions>
-						<configuration>
+                        <configuration>
                             <links>
                                 <link>http://docs.oracle.com/javase/${version.javadoc}/docs/api</link>
                             </links>
-							<!-- To close doc lint check for JAVA7, need set  <properties><javadoc.opts>-Xdoclint:none</javadoc.opts></properties>  -->
-							<!--properties> <javadoc.opts>-Xdoclint:none</javadoc.opts> </properties-->
-							
-							<!-- To close doc lint check for JAVA8, need set <additionalparam>-Xdoclint:none</additionalparam>  -->
-							<additionalparam>-Xdoclint:none</additionalparam>
+							<!-- close doc line check, for Java6,7 only, if run on Java8 will get a Javadoc-plugin error -->
+							<properties>
+								<javadoc.opts>-Xdoclint:none</javadoc.opts>
+							</properties>
+							<!-- close doc lint check for JAVA8 is additionalparam>-Xdoclint:none</additionalparam-->
                         </configuration>
                     </plugin>
                     <plugin>

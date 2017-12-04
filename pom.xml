@@ -22,7 +22,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <artifactId>jsqlbox-package</artifactId>
 
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <name>jsqlbox-package</name>
 
