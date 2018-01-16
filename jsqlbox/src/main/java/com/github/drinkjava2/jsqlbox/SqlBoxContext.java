@@ -35,13 +35,11 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class SqlBoxContext extends DbPro {
-	public static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxContext.class);
+public class SqlBoxContext extends DbPro { 
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
-	private Dialect dialect; // dialect
-	private TableModel[] dbMetaTableModels;// Meta data of database
-	private EntityNetBuilder entityNetBuilder = TinyEntityNetBuilder.instance;
+	protected TableModel[] dbMetaTableModels;// Meta data of database
+	protected EntityNetBuilder entityNetBuilder = TinyEntityNetBuilder.instance;
 
 	public SqlBoxContext() {
 		super();
@@ -50,28 +48,24 @@ public class SqlBoxContext extends DbPro {
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		this.dialect = Dialect.guessDialect(ds);
-		this.setPaginator(this.dialect);
 		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, ConnectionManager cm) {
 		super(ds, cm);
 		dialect = Dialect.guessDialect(ds);
-		this.setPaginator(this.dialect);
 		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, Dialect dialect) {
 		super(ds);
 		this.dialect = dialect;
-		this.setPaginator(dialect);
 		refreshMetaData();
 	}
 
 	public SqlBoxContext(DataSource ds, Dialect dialect, ConnectionManager cm) {
 		super(ds, cm);
 		this.dialect = dialect;
-		this.setPaginator(dialect);
 		refreshMetaData();
 	}
 
@@ -79,7 +73,7 @@ public class SqlBoxContext extends DbPro {
 		dbMetaTableModels = SqlBoxContextUtils.loadMetaTableModels(this, dialect);
 	}
 
-	public TableModel getMetaTableModel(String tableName) {
+	protected TableModel getMetaTableModel(String tableName) {
 		if (dbMetaTableModels == null)
 			return null;
 		for (TableModel model : dbMetaTableModels)
@@ -191,15 +185,7 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	// getter & setter =======
-
-	public Dialect getDialect() {
-		return dialect;
-	}
-
-	public void setDialect(Dialect dialect) {
-		this.dialect = dialect;
-		this.setPaginator(dialect);
-	}
+ 
 
 	public static SqlBoxContext getDefaultContext() {
 		return defaultContext;
@@ -209,11 +195,11 @@ public class SqlBoxContext extends DbPro {
 		SqlBoxContext.defaultContext = defaultContext;
 	}
 
-	public TableModel[] getDbMetaTableModels() {
+	protected TableModel[] getDbMetaTableModels() {
 		return dbMetaTableModels;
 	}
 
-	public void setDbMetaTableModels(TableModel[] dbMetaTableModels) {
+	protected void setDbMetaTableModels(TableModel[] dbMetaTableModels) {
 		this.dbMetaTableModels = dbMetaTableModels;
 	}
 

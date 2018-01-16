@@ -11,7 +11,6 @@
  */
 package functiontest.helloworld;
 
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -55,7 +54,7 @@ public class HelloWorld {
 		HelloWorld hello = new HelloWorld();
 		hello.setName("Demo");
 		ctx.insert(hello);
-		Assert.assertEquals("Demo", ctx.nQueryForObject("select name from helloworld"));
+		Assert.assertEquals("Demo", ctx.nQueryForString("select name from helloworld"));
 		ds.close();
 	}
 }

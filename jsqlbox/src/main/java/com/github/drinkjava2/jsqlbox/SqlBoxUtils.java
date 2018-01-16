@@ -43,7 +43,8 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public abstract class SqlBoxUtils {
+public abstract class SqlBoxUtils {//NOSONAR
+	public static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxUtils.class);
 	private static boolean printWarningIfEntityIsNotActiveRecord = true;
 
 	/**
@@ -59,7 +60,7 @@ public abstract class SqlBoxUtils {
 	private static void logoutEntityHaveNoBoxFieldWarning(Class<?> clazz) {
 		printWarningIfEntityIsNotActiveRecord = false; // only print at first
 														// time
-		SqlBoxContext.log.warn("For entity class '" + clazz.getName()
+		log.warn("For entity class '" + clazz.getName()
 				+ "', suggest extends from ActiveRecord or put a \"SqlBox box\" field to improve performacne.");
 	}
 

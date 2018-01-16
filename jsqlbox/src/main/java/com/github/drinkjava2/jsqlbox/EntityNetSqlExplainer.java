@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
-import com.github.drinkjava2.jdbpro.improve.SqlExplainSupport;
+import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
@@ -33,7 +33,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
-public class EntityNetSqlExplainer implements SqlExplainSupport {
+public class EntityNetSqlExplainer implements SqlInterceptor {
 	private Object[] netConfigObjects;
 	private TableModel[] generatedTableModels;
 	public static final ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
@@ -46,14 +46,14 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	public EntityNetSqlExplainer(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
 	}
-
+ 
 	@Override
-	public String explainSql(ImprovedQueryRunner query, String sql, int paramType, Object paramOrParams) {
+	public String handleSql(ImprovedQueryRunner query, String sql, int paramType, Object paramOrParams) {
 		return explainNetQuery((SqlBoxContext) query, sql);
 	}
 
 	@Override
-	public Object explainResult(Object result) {
+	public Object handleResult(Object result) {
 		if (result != null && result instanceof List<?>) {
 			if (generatedTableModels == null)
 				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
@@ -255,5 +255,6 @@ public class EntityNetSqlExplainer implements SqlExplainSupport {
 	public static void bindTableModel(Object listMap, TableModel[] tableModels) {
 		netConfigBindToListCache.get().put(listMap, tableModels);
 	}
+ 
 
 }

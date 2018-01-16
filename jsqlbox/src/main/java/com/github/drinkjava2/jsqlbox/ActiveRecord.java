@@ -107,22 +107,35 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public void insert() {
-		context().insert(this);
+		SqlBoxContext ctx = context();
+		if (ctx == null)
+			throw new SqlBoxException(
+					"No default global SqlBoxContext be set,  please use method SqlBoxContext.setDefaultContext(new SqlBoxContext(dataSource)) to set a global default SqlBoxContext instance");
+		ctx.insert(this);
 	}
 
 	@Override
 	public int update() {
-		return context().update(this);
+		SqlBoxContext ctx = context();
+		if (ctx == null)
+			throw new SqlBoxException("No default global SqlBoxContext be set.");
+		return ctx.update(this);
 	}
 
 	@Override
 	public void delete() {
-		context().delete(this);
+		SqlBoxContext ctx = context();
+		if (ctx == null)
+			throw new SqlBoxException("No default global SqlBoxContext be set. ");
+		ctx.delete(this);
 	}
 
 	@Override
 	public <T> T load(Object pkey) {
-		return context().load(this.getClass(), pkey);
+		SqlBoxContext ctx = context();
+		if (ctx == null)
+			throw new SqlBoxException("No default global SqlBoxContext be set.  ");
+		return ctx.load(this.getClass(), pkey);
 	}
 
 	@Override
