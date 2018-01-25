@@ -89,7 +89,7 @@ public class Demo {
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setDefaultContext(ctx);
-		ctx.setAllowShowSQL(true);
+		ctx.setGlobalAllowShowSQL(true);
 
 		String[] ddlArray = ctx.getDialect().toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)

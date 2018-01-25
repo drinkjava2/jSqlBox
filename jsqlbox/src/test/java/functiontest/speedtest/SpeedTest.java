@@ -49,7 +49,7 @@ public class SpeedTest {
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
 		ctx = new SqlBoxContext(dataSource);
-		ctx.setAllowShowSQL(false);
+		ctx.setGlobalAllowShowSQL(false);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
 			try {
 				ctx.nExecute(ddl);
@@ -71,12 +71,12 @@ public class SpeedTest {
 		runMethod("dbUtilsNoConnMethod", times);
 		runMethod("nXxxJdbcStyle", times);
 		runMethod("iXxxInlineStyle", times);
-		runMethod("tXxxTemplateStyle", times);		
+		runMethod("tXxxTemplateStyle", times);
 		runMethod("tXxxTemplateAndInlineStyle", times);
 		runMethod("tXxxNamingParamTemplateStyle", times);
 		runMethod("dataMapperStyle", times);
 		runMethod("activeRecordStyle", times);
-		runMethod("activeRecordDefaultContext", times); 
+		runMethod("activeRecordDefaultContext", times);
 	}
 
 	@Table(name = "users")
@@ -263,24 +263,23 @@ public class SpeedTest {
 	}
 
 	public void tXxxTemplateStyle(Long times) {
-		Map<String, Object> params=new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<String, Object>();
 		for (int i = 0; i < times; i++) {
 			User sam = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
 			params.put("user", sam);
-			ctx.tExecute(params,"insert into users (name, address) values(#{user.name},#{user.address})");
-			params.put("user", tom); 
-			ctx.tExecute(params,"update users set name=#{user.name}, address=#{user.address}");
+			ctx.tExecute(params, "insert into users (name, address) values(#{user.name},#{user.address})");
+			params.put("user", tom);
+			ctx.tExecute(params, "update users set name=#{user.name}, address=#{user.address}");
 			params.clear();
 			params.put("name", "Tom");
 			params.put("addr", "China");
 			Assert.assertEquals(1L,
-					ctx.tQueryForObject(params,"select count(*) from users where name=#{name} and address=#{addr}")); 
+					ctx.tQueryForObject(params, "select count(*) from users where name=#{name} and address=#{addr}"));
 			params.put("u", tom);
 			ctx.tExecute(params, "delete from users where name=#{u.name} or address=#{u.address}");
 		}
 	}
-	
 
 	public void tXxxTemplateAndInlineStyle(Long times) {
 		for (int i = 0; i < times; i++) {
@@ -298,23 +297,23 @@ public class SpeedTest {
 	}
 
 	public void tXxxNamingParamTemplateStyle(Long times) {
+		SqlBoxContext ctx2 = new SqlBoxContext(ctx.getDataSource(), NamedParamSqlTemplate.instance());
 		for (int i = 0; i < times; i++) {
 			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
-			ctx.setSqlTemplateEngine(NamedParamSqlTemplate.instance());
 			put0("user", user);
-			ctx.tExecute("insert into users (name, address) values(:user.name,:user.address)");
-			ctx.tExecute("update users set name=:user.name, address=:user.address"+put0("user",tom));
+			ctx2.tExecute("insert into users (name, address) values(:user.name,:user.address)");
+			ctx2.tExecute("update users set name=:user.name, address=:user.address" + put0("user", tom));
 			Assert.assertEquals(1L,
-					ctx.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
+					ctx2.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
 							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-			ctx.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", tom));
+			ctx2.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", tom));
 		}
 	}
 
 	public void dataMapperStyle(Long times) {
 		for (int i = 0; i < times; i++) {
-			UserEntity  user = new  UserEntity();
+			UserEntity user = new UserEntity();
 			user.setName("Sam");
 			user.setAddress("Canada");
 			ctx.insert(user);

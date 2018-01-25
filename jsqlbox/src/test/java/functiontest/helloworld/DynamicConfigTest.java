@@ -71,7 +71,7 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		ctx.setAllowShowSQL(true);
+		ctx.setGlobalAllowShowSQL(true);
 
 		TableModel t = new UserDemoSqlBox().getTableModel();
 		t.addColumn("anotherColumn2").VARCHAR(10); // A new column dynamically

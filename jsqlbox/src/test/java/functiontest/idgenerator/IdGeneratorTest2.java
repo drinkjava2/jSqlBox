@@ -73,7 +73,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUID25() {
-		ctx.setAllowShowSQL(true);
+		ctx.setGlobalAllowShowSQL(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID25Entity.class));
 		UUID25Entity entity = new UUID25Entity();
 		ctx.insert(entity);
@@ -119,7 +119,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUID32() {
-		ctx.setAllowShowSQL(true);
+		ctx.setGlobalAllowShowSQL(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID32Entity.class));
 		UUID32Entity entity = new UUID32Entity();
 		ctx.insert(entity);
@@ -165,7 +165,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUID36() {
-		ctx.setAllowShowSQL(true);
+		ctx.setGlobalAllowShowSQL(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID36Entity.class));
 		UUID36Entity entity = new UUID36Entity();
 		ctx.insert(entity);
@@ -213,7 +213,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUIDAny() {
-		ctx.setAllowShowSQL(true);
+		ctx.setGlobalAllowShowSQL(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUIDAnyEntity.class));
 		UUIDAnyEntity entity = new UUIDAnyEntity();
 		ctx.insert(entity);

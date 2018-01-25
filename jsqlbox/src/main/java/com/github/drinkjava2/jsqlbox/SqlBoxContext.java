@@ -20,6 +20,9 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.RowProcessor;
 
 import com.github.drinkjava2.jdbpro.DbPro;
+import com.github.drinkjava2.jdbpro.DbProLogger;
+import com.github.drinkjava2.jdbpro.DbProRuntimeException;
+import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtinynet.TinyEntityNetFactory;
@@ -37,7 +40,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 public class SqlBoxContext extends DbPro {// NOSONAR
 	/** sqlBoxClassSuffix use to identify the SqlBox configuration class */
-	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
+	public static final String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 
 	/**
 	 * defaultContext is a public static global SqlBoxContext instance, usually
@@ -51,32 +54,35 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** The default EntityNetFactory instance */
 	protected EntityNetFactory entityNetBuilder = TinyEntityNetFactory.instance;
 
+	/**
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
+	 * use setDialect() method to change to other dialect, to keep thread-safe, only
+	 * subclass can access this variant
+	 */
+	protected Dialect dialect;
+
 	public SqlBoxContext() {
 		super();
 	}
 
-	public SqlBoxContext(DataSource ds) {
+	public SqlBoxContext(SqlTemplateEngine templateEngine) {
+		super(templateEngine);
+	}
+
+	public SqlBoxContext(DataSource ds, Object... args) {
 		super(ds);
-		this.dialect = Dialect.guessDialect(ds);
-		refreshMetaData();
-	}
-
-	public SqlBoxContext(DataSource ds, ConnectionManager cm) {
-		super(ds, cm);
-		dialect = Dialect.guessDialect(ds);
-		refreshMetaData();
-	}
-
-	public SqlBoxContext(DataSource ds, Dialect dialect) {
-		super(ds);
-		this.dialect = dialect;
-		refreshMetaData();
-	}
-
-	public SqlBoxContext(DataSource ds, Dialect dialect, ConnectionManager cm) {
-		super(ds, cm);
-		this.dialect = dialect;
-		refreshMetaData();
+		for (Object arg : args) {
+			if (arg instanceof ConnectionManager)
+				this.connectionManager = (ConnectionManager) arg;
+			else if (arg instanceof SqlTemplateEngine)
+				this.sqlTemplateEngine = (SqlTemplateEngine) arg;
+			else if (arg instanceof Dialect)
+				this.dialect = (Dialect) arg;
+			else if (arg instanceof DbProLogger)
+				this.logger = (DbProLogger) arg;
+		}
+		if (dialect == null)
+			dialect = Dialect.guessDialect(ds);
 	}
 
 	/** Refresh database's meta data based on current dataSource and dialect */
@@ -98,6 +104,66 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 */
 	public SqlBox box(Class<?> clazz) {
 		return SqlBoxUtils.createSqlBox(this, clazz);
+	}
+
+	// ========== Dialect shortcut methods ===============
+	private void assertDialectNotNull() {
+		if (dialect == null)
+			throw new DbProRuntimeException("Try use a dialect method but dialect is null");
+	}
+
+	/** Shortcut call to dialect.paginate method */
+	public String paginate(int pageNumber, int pageSize, String sql) {
+		assertDialectNotNull();
+		return dialect.paginate(pageNumber, pageSize, sql);
+	}
+
+	/** Shortcut call to dialect.translate method */
+	public String translate(String sql) {
+		assertDialectNotNull();
+		return dialect.translate(sql);
+	}
+
+	/** Shortcut call to dialect.paginAndTrans method */
+	public String paginAndTrans(int pageNumber, int pageSize, String sql) {
+		assertDialectNotNull();
+		return dialect.paginAndTrans(pageNumber, pageSize, sql);
+	}
+
+	/** Shortcut call to dialect.toCreateDDL method */
+	public String[] toCreateDDL(Class<?>... entityClasses) {
+		assertDialectNotNull();
+		return dialect.toCreateDDL(entityClasses);
+	}
+
+	/** Shortcut call to dialect.toDropDDL method */
+	public String[] toDropDDL(Class<?>... entityClasses) {
+		assertDialectNotNull();
+		return dialect.toDropDDL(entityClasses);
+	}
+
+	/** Shortcut call to dialect.toDropAndCreateDDL method */
+	public String[] toDropAndCreateDDL(Class<?>... entityClasses) {
+		assertDialectNotNull();
+		return dialect.toDropAndCreateDDL(entityClasses);
+	}
+
+	/** Shortcut call to dialect.toCreateDDL method */
+	public String[] toCreateDDL(TableModel... tables) {
+		assertDialectNotNull();
+		return dialect.toCreateDDL(tables);
+	}
+
+	/** Shortcut call to dialect.toDropDDL method */
+	public String[] toDropDDL(TableModel... tables) {
+		assertDialectNotNull();
+		return dialect.toDropDDL(tables);
+	}
+
+	/** Shortcut call to dialect.toDropAndCreateDDL method */
+	public String[] toDropAndCreateDDL(TableModel... tables) {
+		assertDialectNotNull();
+		return dialect.toDropAndCreateDDL(tables);
 	}
 
 	// ================================================================
@@ -204,16 +270,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return dbMetaTableModels;
 	}
 
-	protected void setDbMetaTableModels(TableModel[] dbMetaTableModels) {
-		this.dbMetaTableModels = dbMetaTableModels;
-	}
-
 	public EntityNetFactory getEntityNetBuilder() {
 		return entityNetBuilder;
 	}
 
-	public void setEntityNetBuilder(EntityNetFactory entityNetBuilder) {
-		this.entityNetBuilder = entityNetBuilder;
+	public Dialect getDialect() {
+		return dialect;
 	}
 
 }

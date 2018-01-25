@@ -46,7 +46,7 @@ public class HelloWorld {
 		ds.setConnectionTimeout(2000);
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		ctx.setAllowShowSQL(true);
+		ctx.setGlobalAllowShowSQL(true);
 		String[] ddls = ctx.getDialect().toCreateDDL(HelloWorld.class);
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
