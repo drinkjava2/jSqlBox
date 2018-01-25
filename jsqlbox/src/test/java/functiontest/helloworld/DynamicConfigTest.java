@@ -14,7 +14,7 @@ package functiontest.helloworld;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.ModelUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -63,7 +63,7 @@ public class DynamicConfigTest extends TestBase {
 
 	public static class UserDemoSqlBox extends SqlBox {
 		{
-			TableModel t = ModelUtils.oneEntity2Model(UserDemo.class);
+			TableModel t = TableModelUtils.entity2Model(UserDemo.class);
 			t.addColumn("anotherColumn1").STRING(40);
 			this.setTableModel(t);
 		}

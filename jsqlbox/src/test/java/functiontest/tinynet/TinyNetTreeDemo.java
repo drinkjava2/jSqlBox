@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.ModelUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtinynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
@@ -19,7 +19,7 @@ public class TinyNetTreeDemo extends TestBase {
 	public void init() {
 		super.init();
 		// ctx.setAllowShowSQL(true);
-		TableModel[] models = ModelUtils.entity2Model(TreeNode.class);
+		TableModel[] models = TableModelUtils.entity2Models(TreeNode.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();
 		new TreeNode().putFields("id", "comments", "pid");

@@ -17,7 +17,7 @@ package functiontest.idgenerator;
 
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.ModelUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID36;
@@ -74,7 +74,7 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUID25() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(ModelUtils.oneEntity2Model(UUID25Entity.class));
+		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID25Entity.class));
 		UUID25Entity entity = new UUID25Entity();
 		ctx.insert(entity);
 	}
@@ -120,7 +120,7 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUID32() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(ModelUtils.entity2Model(UUID32Entity.class));
+		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID32Entity.class));
 		UUID32Entity entity = new UUID32Entity();
 		ctx.insert(entity);
 	}
@@ -166,7 +166,7 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUID36() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(ModelUtils.entity2Model(UUID36Entity.class));
+		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID36Entity.class));
 		UUID36Entity entity = new UUID36Entity();
 		ctx.insert(entity);
 	}
@@ -214,7 +214,7 @@ public class IdGeneratorTest2 extends TestBase {
 	@Test
 	public void testUUIDAny() {
 		ctx.setAllowShowSQL(true);
-		dropAndCreateDatabase(ModelUtils.entity2Model(UUIDAnyEntity.class));
+		dropAndCreateDatabase(TableModelUtils.entity2Model(UUIDAnyEntity.class));
 		UUIDAnyEntity entity = new UUIDAnyEntity();
 		ctx.insert(entity);
 	}

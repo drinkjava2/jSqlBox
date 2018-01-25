@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
-import com.github.drinkjava2.jdialects.ModelUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 
@@ -188,14 +188,14 @@ public abstract class SqlBoxUtils {//NOSONAR
 
 		if (boxClass == null) {
 			box = new SqlBox();
-			box.setTableModel(ModelUtils.oneEntity2Model(entityOrBoxClass));
+			box.setTableModel(TableModelUtils.entity2Model(entityOrBoxClass));
 			box.setEntityClass(entityOrBoxClass);
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
 				TableModel model = box.getTableModel();
 				if (model == null) {
-					model = ModelUtils.oneEntity2Model(entityOrBoxClass);
+					model = TableModelUtils.entity2Model(entityOrBoxClass);
 					box.setTableModel(model);
 				}
 				Method configMethod = null;

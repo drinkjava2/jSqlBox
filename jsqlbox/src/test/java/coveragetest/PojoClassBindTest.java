@@ -14,7 +14,7 @@ package coveragetest;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.ModelUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBox;
@@ -48,7 +48,7 @@ public class PojoClassBindTest extends TestBase {
 	@Test
 	public void pojoBindTest() {
 		ctx.setAllowShowSQL(true);
-		TableModel[] tables = ModelUtils.entity2Model(PojoBeanSample.class);
+		TableModel[] tables = TableModelUtils.entity2Models(PojoBeanSample.class);
 		dropAndCreateDatabase(tables);
 		PojoBeanSample pojo = new PojoBeanSample();
 		pojo.setField1("test");

@@ -11,7 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.ModelUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtinynet.DefaultNodeValidator;
 import com.github.drinkjava2.jtinynet.Node;
@@ -32,7 +32,7 @@ public class TinyNetTest extends TestBase {
 	public void init() {
 		super.init();
 		// ctx.setAllowShowSQL(true);
-		TableModel[] models = ModelUtils.entity2Model(User.class, Email.class, Address.class, Role.class,
+		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
 		ctx.refreshMetaData();

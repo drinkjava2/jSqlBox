@@ -68,8 +68,8 @@ public class TinyNet implements EntityNet {
 	// entityClass, nodeID, node
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
-	/** Enable child query cache */
-	private Boolean allowQueryCache = true;
+	/** Default query cache in TinyNet is disabled */
+	private Boolean allowQueryCache = false;
 
 	/**
 	 * queryCache cache search result after do a path serach <br/>

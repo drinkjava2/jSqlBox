@@ -22,7 +22,7 @@ import org.apache.commons.dbutils.RowProcessor;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jtinynet.TinyEntityNetBuilder;
+import com.github.drinkjava2.jtinynet.TinyEntityNetFactory;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -35,11 +35,21 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class SqlBoxContext extends DbPro { 
+public class SqlBoxContext extends DbPro {// NOSONAR
+	/** sqlBoxClassSuffix use to identify the SqlBox configuration class */
 	public static String sqlBoxClassSuffix = "SqlBox";// NOSONAR
+
+	/**
+	 * defaultContext is a public static global SqlBoxContext instance, usually
+	 * should be set at the beginning
+	 */
 	public static SqlBoxContext defaultContext = null;// NOSONAR
+
+	/** Database's metaData, stored as virtual TableModel array */
 	protected TableModel[] dbMetaTableModels;// Meta data of database
-	protected EntityNetBuilder entityNetBuilder = TinyEntityNetBuilder.instance;
+
+	/** The default EntityNetFactory instance */
+	protected EntityNetFactory entityNetBuilder = TinyEntityNetFactory.instance;
 
 	public SqlBoxContext() {
 		super();
@@ -69,6 +79,7 @@ public class SqlBoxContext extends DbPro {
 		refreshMetaData();
 	}
 
+	/** Refresh database's meta data based on current dataSource and dialect */
 	public void refreshMetaData() {
 		dbMetaTableModels = SqlBoxContextUtils.loadMetaTableModels(this, dialect);
 	}
@@ -90,11 +101,6 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	// ================================================================
-	// To support special in-line methods like net() methods which utilize
-	// ThreadLocad variant, here have to override base class QueryRunner's 4
-	// query methods, because some important methods in commons-DbUtils is
-	// private, hope it can change to protected in future
-
 	/**
 	 * Return an empty "" String and save a ThreadLocal netConfig object array in
 	 * current thread, it will be used by SqlBoxContext's query methods.
@@ -185,7 +191,6 @@ public class SqlBoxContext extends DbPro {
 	}
 
 	// getter & setter =======
- 
 
 	public static SqlBoxContext getDefaultContext() {
 		return defaultContext;
@@ -203,11 +208,11 @@ public class SqlBoxContext extends DbPro {
 		this.dbMetaTableModels = dbMetaTableModels;
 	}
 
-	public EntityNetBuilder getEntityNetBuilder() {
+	public EntityNetFactory getEntityNetBuilder() {
 		return entityNetBuilder;
 	}
 
-	public void setEntityNetBuilder(EntityNetBuilder entityNetBuilder) {
+	public void setEntityNetBuilder(EntityNetFactory entityNetBuilder) {
 		this.entityNetBuilder = entityNetBuilder;
 	}
 

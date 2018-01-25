@@ -33,7 +33,9 @@ import com.zaxxer.hikari.HikariDataSource;
  * 
  * @author Yong Zhu
  * @since 1.7.0
+ * @deprecated Use SpeedTest replace
  */
+@Deprecated
 public class SqlStyleDemo {
 	protected HikariDataSource dataSource;
 
@@ -151,21 +153,21 @@ public class SqlStyleDemo {
 		ctx.iExecute(param0(), "delete from users where ", inline(user, "=?", " or "));
 
 		System.out.println("=== Txxx methods, Template style  ===");
-		Map<String, Object> params=new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<String, Object>();
 		User sam = new User("Sam", "Canada");
 		User tom = new User("Tom", "China");
 		params.put("user", sam);
-		ctx.tExecute(params,"insert into users (name, address) values(#{user.name},#{user.address})");
-		params.put("user", tom); 
-		ctx.tExecute(params,"update users set name=#{user.name}, address=#{user.address}");
+		ctx.tExecute(params, "insert into users (name, address) values(#{user.name},#{user.address})");
+		params.put("user", tom);
+		ctx.tExecute(params, "update users set name=#{user.name}, address=#{user.address}");
 		params.clear();
 		params.put("name", "Tom");
 		params.put("addr", "China");
 		Assert.assertEquals(1L,
-				ctx.tQueryForObject(params,"select count(*) from users where name=#{name} and address=#{addr}")); 
+				ctx.tQueryForObject(params, "select count(*) from users where name=#{name} and address=#{addr}"));
 		params.put("u", tom);
 		ctx.tExecute(params, "delete from users where name=#{u.name} or address=#{u.address}");
-		
+
 		System.out.println("=== Txxx methods, Template + Inline style  ===");
 		user = new User("Sam", "Canada");
 		put0("user", user);

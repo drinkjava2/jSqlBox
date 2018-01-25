@@ -17,9 +17,9 @@ import java.util.Map;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * This is a helper class store public static methods concern to build EntityNet
+ * Subclass of EntityNetFactory will in charge of create EntityNet
  */
-public interface EntityNetBuilder {
+public interface EntityNetFactory {
 
 	/** Create a EntityNet instance */
 	public <T> T createEntityNet();

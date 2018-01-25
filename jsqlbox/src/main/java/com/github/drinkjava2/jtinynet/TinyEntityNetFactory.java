@@ -19,17 +19,16 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityNet;
-import com.github.drinkjava2.jsqlbox.EntityNetBuilder;
+import com.github.drinkjava2.jsqlbox.EntityNetFactory;
 import com.github.drinkjava2.jsqlbox.EntityNetSqlExplainer;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * This is a EntityNetBuilder implementation to let jSqlBox know how to build
- * TinyNet
+ * This is a EntityNetFactory implementation to create a TinyEntityNet
  */
 @SuppressWarnings("unchecked")
-public class TinyEntityNetBuilder implements EntityNetBuilder {
-	public static final TinyEntityNetBuilder instance = new TinyEntityNetBuilder();
+public class TinyEntityNetFactory implements EntityNetFactory {
+	public static final TinyEntityNetFactory instance = new TinyEntityNetFactory();
 
 	@Override
 	public <T> T createEntityNet() {

@@ -23,8 +23,8 @@ import org.apache.commons.dbutils.handlers.ArrayHandler;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.ModelUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
@@ -38,7 +38,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public abstract class SqlBoxContextUtils {
+public abstract class SqlBoxContextUtils {// NOSONAR
 	/**
 	 * Read database Meta info into SqlBox[]
 	 */
@@ -47,7 +47,7 @@ public abstract class SqlBoxContextUtils {
 		SQLException sqlException = null;
 		try {
 			con = ctx.prepareConnection();
-			return ModelUtils.db2Model(con, dialect);
+			return TableModelUtils.db2Models(con, dialect);
 		} catch (SQLException e) {
 			sqlException = e;
 		} finally {
