@@ -53,22 +53,23 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {
 
 	public DbPro(DataSource ds) {
 		super(ds);
-	}
-
-	public DbPro(DataSource ds, ConnectionManager cm) {
-		super(ds, cm);
-	}
+	} 
 
 	public DbPro(SqlTemplateEngine templateEngine) {
 		super(templateEngine);
 	}
-
-	public DbPro(DataSource ds, SqlTemplateEngine templateEngine) {
-		super(ds, templateEngine);
-	}
-
-	public DbPro(DataSource ds, ConnectionManager cm, SqlTemplateEngine templateEngine) {
-		super(ds, cm, templateEngine);
+ 
+	
+	public DbPro(DataSource ds, Object... args) {
+		super(ds);
+		for (Object arg : args) {
+			if (arg instanceof ConnectionManager)
+				this.connectionManager = (ConnectionManager) arg;
+			else if (arg instanceof SqlTemplateEngine)
+				this.sqlTemplateEngine = (SqlTemplateEngine) arg; 
+			else if (arg instanceof DbProLogger)
+				this.logger = (DbProLogger) arg;
+		} 
 	}
 
 	/**

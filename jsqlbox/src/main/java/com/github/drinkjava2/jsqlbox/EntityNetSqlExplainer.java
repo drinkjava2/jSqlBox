@@ -186,9 +186,6 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 	public String explainNetQuery(SqlBoxContext ctx, String thesql) {
 		String sql = thesql;
 		TableModel[] configModels = objectConfigsToModels(ctx, netConfigObjects);
-		// if no netConfigObjects found, use database's meta data
-		if (configModels == null || configModels.length == 0)
-			configModels = ctx.getDbMetaTableModels();
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
 			pos = sql.indexOf(".##");

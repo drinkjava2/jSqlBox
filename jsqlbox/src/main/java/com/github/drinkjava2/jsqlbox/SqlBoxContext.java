@@ -43,21 +43,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public static final String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 
 	/**
-	 * defaultContext is a public static global SqlBoxContext instance, usually
-	 * should be set at the beginning
+	 * defaultContext is a public static global SqlBoxContext instance, should
+	 * only be set once at the beginning
 	 */
 	public static SqlBoxContext defaultContext = null;// NOSONAR
-
-	/** Database's metaData, stored as virtual TableModel array */
-	protected TableModel[] dbMetaTableModels;// Meta data of database
 
 	/** The default EntityNetFactory instance */
 	protected EntityNetFactory entityNetBuilder = TinyEntityNetFactory.instance;
 
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
-	 * use setDialect() method to change to other dialect, to keep thread-safe, only
-	 * subclass can access this variant
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
+	 * can use setDialect() method to change to other dialect, to keep
+	 * thread-safe, only subclass can access this variant
 	 */
 	protected Dialect dialect;
 
@@ -65,38 +62,36 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		super();
 	}
 
-	public SqlBoxContext(SqlTemplateEngine templateEngine) {
-		super(templateEngine);
+	public SqlBoxContext(DataSource ds) {
+		super(ds);
+		dialect = Dialect.guessDialect(ds);
 	}
 
-	public SqlBoxContext(DataSource ds, Object... args) {
+	public SqlBoxContext(Config config) {
+		super();
+		this.connectionManager = config.getConnectionManager();
+		this.dialect = config.getDialect();
+		this.sqlTemplateEngine = config.getTemplateEngine();
+		this.allowShowSQL = config.getAllowSqlSql();
+		this.logger = config.getLogger();
+		this.batchSize = config.getBatchSize();
+	}
+
+	public SqlBoxContext(DataSource ds, Config config) {
 		super(ds);
-		for (Object arg : args) {
-			if (arg instanceof ConnectionManager)
-				this.connectionManager = (ConnectionManager) arg;
-			else if (arg instanceof SqlTemplateEngine)
-				this.sqlTemplateEngine = (SqlTemplateEngine) arg;
-			else if (arg instanceof Dialect)
-				this.dialect = (Dialect) arg;
-			else if (arg instanceof DbProLogger)
-				this.logger = (DbProLogger) arg;
-		}
+		this.connectionManager = config.getConnectionManager();
+		this.dialect = config.getDialect();
+		this.sqlTemplateEngine = config.getTemplateEngine();
+		this.allowShowSQL = config.getAllowSqlSql();
+		this.logger = config.getLogger();
+		this.batchSize = config.getBatchSize();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
 	}
 
 	/** Refresh database's meta data based on current dataSource and dialect */
-	public void refreshMetaData() {
-		dbMetaTableModels = SqlBoxContextUtils.loadMetaTableModels(this, dialect);
-	}
-
-	protected TableModel getMetaTableModel(String tableName) {
-		if (dbMetaTableModels == null)
-			return null;
-		for (TableModel model : dbMetaTableModels)
-			if (tableName.equalsIgnoreCase(model.getTableName()))
-				return model;
-		return null;
+	public TableModel[] queryDbMetaData() {
+		return SqlBoxContextUtils.loadMetaTableModels(this, dialect);
 	}
 
 	/**
@@ -168,8 +163,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	// ================================================================
 	/**
-	 * Return an empty "" String and save a ThreadLocal netConfig object array in
-	 * current thread, it will be used by SqlBoxContext's query methods.
+	 * Return an empty "" String and save a ThreadLocal netConfig object array
+	 * in current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String netConfig(Object... netConfig) {
 		getCurrentExplainers().add(new EntityNetSqlExplainer(netConfig));
@@ -189,8 +184,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
-	 * loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to
+	 * improve loading speed
 	 */
 	public <T> T netLoadSketch(Object... configObjects) {
 		return entityNetBuilder.createEntityNet(this, true, configObjects);
@@ -266,9 +261,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContext.defaultContext = defaultContext;
 	}
 
-	protected TableModel[] getDbMetaTableModels() {
-		return dbMetaTableModels;
-	}
+	// protected TableModel[] getDbMetaTableModels() {
+	// return dbMetaTableModels;
+	// }
 
 	public EntityNetFactory getEntityNetBuilder() {
 		return entityNetBuilder;

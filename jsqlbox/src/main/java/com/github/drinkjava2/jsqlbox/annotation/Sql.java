@@ -13,21 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro;
+package com.github.drinkjava2.jsqlbox.annotation;
 
-import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.AbstractListHandler;
-import org.apache.commons.dbutils.handlers.MapListHandler;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * TextSupport is base class for Java text support (multiple line Strings).
- * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * Specifies a SQL String on a method.
  */
-public class TextSupport {
-	public static void main(String[] args) {
-		MapListHandler a;
-		AbstractListHandler b;
-		ResultSetHandler c ;
-	}
+@Target({ METHOD })
+@Retention(RUNTIME)
+
+public @interface Sql {
+	/**
+	 * (Optional) The value String of the SQL
+	 */
+	String[] value() default {};
 }

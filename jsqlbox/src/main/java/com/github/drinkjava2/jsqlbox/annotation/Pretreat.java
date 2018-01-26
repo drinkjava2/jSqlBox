@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro;
+package com.github.drinkjava2.jsqlbox.annotation;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -22,14 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a SQL on a method.
+ * Specifies a SQL Pretreat Class on a method
  */
 @Target({ METHOD })
 @Retention(RUNTIME)
 
-public @interface SQL {
+public @interface Pretreat{
 	/**
-	 * (Optional) The value String of the SQL
+	 * (Optional) The handler Class to handle the query result
 	 */
-	String[] value() default {};
+	Class<?> value() default Object.class;
 }

@@ -65,11 +65,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	private static ColumnModel findMatchColumnForJavaField(String entityField, SqlBox box) {
 		ColumnModel col = findMatchColumnForJavaField(entityField, box.getTableModel());
-		if (col == null) {
-			String tableName = box.getTableModel().getTableName();
-			TableModel metaTableModel = box.getContext().getMetaTableModel(tableName);
-			col = findMatchColumnForJavaField(entityField, metaTableModel);
-		}
+//		if (col == null) {
+//			String tableName = box.getTableModel().getTableName();
+//			TableModel metaTableModel = box.getContext().getMetaTableModel(tableName);
+//			col = findMatchColumnForJavaField(entityField, metaTableModel);
+//		}
 		if (col == null)
 			throw new SqlBoxException("Can not find database column match entity field '" + entityField + "'");
 		return col;

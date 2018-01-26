@@ -31,7 +31,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import com.github.drinkjava2.jdbpro.DbProLogger;
 import com.github.drinkjava2.jdbpro.inline.InlineQueryRunner;
 import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
-import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**

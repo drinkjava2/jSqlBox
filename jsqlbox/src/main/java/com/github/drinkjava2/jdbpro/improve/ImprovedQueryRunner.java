@@ -54,36 +54,34 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
-	private static final DbProLogger defaultlogger = DbProLogger.getLog(ImprovedQueryRunner.class);
+	public static final DbProLogger defaultlogger = DbProLogger.getLog(ImprovedQueryRunner.class);
 	/**
 	 * The ConnectionManager determine how to get and release connections from
-	 * DataSource or ThreadLocal. To keep thread-safe, only subclass can access this
-	 * variant
+	 * DataSource or ThreadLocal. To keep thread-safe, only subclass can access
+	 * this variant
 	 */
 	protected ConnectionManager connectionManager;
 
 	/**
-	 * If set true will output SQL and parameters in logger, to keep thread-safe,
-	 * only subclass can access this variant
+	 * If set true will output SQL and parameters in logger, to keep
+	 * thread-safe, only subclass can access this variant
 	 */
 	protected Boolean allowShowSQL = false;
 
 	/**
-	 * Logger of current ImprovedQueryRunner, to keep thread-safe, only subclass can
-	 * access this variant
+	 * Logger of current ImprovedQueryRunner, to keep thread-safe, only subclass
+	 * can access this variant
 	 */
 	protected DbProLogger logger = defaultlogger;
 
 	/** Default Batch Size, current fixed to 100 */
 	protected Integer batchSize = 100;
 
- 
-
 	/**
-	 * A ThreadLocal type cache to store SqlInterceptor instances, all instance will
-	 * be cleaned after this thread close
+	 * A ThreadLocal type cache to store SqlInterceptor instances, all instance
+	 * will be cleaned after this thread close
 	 */
-	private static ThreadLocal<ArrayList<SqlInterceptor>> explainerSupportCache = new ThreadLocal<ArrayList<SqlInterceptor>>() {
+	private static ThreadLocal<ArrayList<SqlInterceptor>> sqlInterceptorCache = new ThreadLocal<ArrayList<SqlInterceptor>>() {
 		@Override
 		protected ArrayList<SqlInterceptor> initialValue() {
 			return new ArrayList<SqlInterceptor>();
@@ -116,12 +114,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	public ImprovedQueryRunner(DataSource ds) {
-		super(ds); 
+		super(ds);
 	}
 
 	public ImprovedQueryRunner(DataSource ds, ConnectionManager cm) {
 		super(ds);
-		this.connectionManager = cm; 
+		this.connectionManager = cm;
 	}
 
 	@Override
@@ -161,12 +159,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 		super.fillStatement(stmt, params);
 	}
 
-
-
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to customise
-	 * SQL format
+	 * Format SQL for logger output, subClass can override this method to
+	 * customise SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -184,7 +180,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Add a explainer
 	 */
 	public static ArrayList<SqlInterceptor> getCurrentExplainers() {
-		return explainerSupportCache.get();
+		return sqlInterceptorCache.get();
 	}
 
 	/**
@@ -636,20 +632,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Set if allow log output SQL and parameters, Note: this is not a thread-safe
-	 * method, should only call once at start of program
+	 * Set if allow log output SQL and parameters, Note: this is not a
+	 * thread-safe method, should only call once at start of program
 	 */
 	public void setGlobalAllowShowSQL(Boolean allowShowSQL) {
 		this.allowShowSQL = allowShowSQL;
 	}
- 
+
 	public DbProLogger getLogger() {
 		return logger;
 	}
 
 	/**
-	 * Set the global logger, Note: this is not a thread-safe method, should only
-	 * call once at start of program
+	 * Set the global logger, Note: this is not a thread-safe method, should
+	 * only call once at start of program
 	 */
 	public void setGlobalLogger(DbProLogger logger) {
 		this.logger = logger;

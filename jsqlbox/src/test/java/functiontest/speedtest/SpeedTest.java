@@ -27,9 +27,12 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
+
+import textsample.TextSample;
 
 /**
  * Different SQL style demo
@@ -49,6 +52,10 @@ public class SpeedTest {
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
 		ctx = new SqlBoxContext(dataSource);
+
+		TextSample t = null;
+		ctx.nQueryForLongValue("" + t.doSomeThing(), null, null);
+
 		ctx.setGlobalAllowShowSQL(false);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
 			try {
@@ -297,7 +304,8 @@ public class SpeedTest {
 	}
 
 	public void tXxxNamingParamTemplateStyle(Long times) {
-		SqlBoxContext ctx2 = new SqlBoxContext(ctx.getDataSource(), NamedParamSqlTemplate.instance());
+		SqlBoxContext ctx2 = new SqlBoxContext(ctx.getDataSource(),
+				new Config().setTemplateEngine(NamedParamSqlTemplate.instance()));
 		for (int i = 0; i < times; i++) {
 			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");

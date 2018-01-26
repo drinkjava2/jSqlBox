@@ -36,7 +36,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  *    entity.insert();
  *    
  *    
- * Data Mapper style (for POJO entity): * 
+ * Data Mapper style (for POJO entity):   
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
  *    ctx.insert(entity);
  * 

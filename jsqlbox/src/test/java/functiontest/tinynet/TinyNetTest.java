@@ -34,8 +34,7 @@ public class TinyNetTest extends TestBase {
 		// ctx.setAllowShowSQL(true);
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
-		dropAndCreateDatabase(models);
-		ctx.refreshMetaData();
+		dropAndCreateDatabase(models); 
 	}
 
 	@Test

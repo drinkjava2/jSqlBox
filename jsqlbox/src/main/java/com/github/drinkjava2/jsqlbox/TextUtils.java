@@ -13,15 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro;
+package com.github.drinkjava2.jsqlbox;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 
@@ -32,7 +32,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  */
 public abstract class TextUtils {// NOSONAR
 
-	private static final Map<Class<?>, String> javaFileCache = new HashMap<Class<?>, String>();
+	private static final Map<Class<?>, String> javaFileCache = new ConcurrentHashMap<Class<?>, String>();
 
 	@SuppressWarnings("all")
 	public static String getJavaSourceCodeUTF8(Class<?> clazz) {
@@ -49,7 +49,7 @@ public abstract class TextUtils {// NOSONAR
 		InputStream inputStream = null;
 		try {
 			inputStream = TextUtils.class.getResourceAsStream(fileName);
-			if (inputStream == null) {// Not found, it means in eclipse environment
+			if (inputStream == null) {// Not found, it means in eclipse
 				File file = new File(clazz.getResource(classPathName + ".class").getFile());
 				String absPath = file.getAbsolutePath();
 				absPath = StrUtils.replace(absPath, "\\", "/");
@@ -64,7 +64,7 @@ public abstract class TextUtils {// NOSONAR
 					throw new IOException("Can not find '" + realFile + "' in resources folder");
 				inputStream = new FileInputStream(file);
 				if (inputStream == null)
-					throw new IOException("Error happen when open '" + realFile + "'");
+					throw new IOException("Error happen when open file '" + realFile + "'");
 			}
 			ByteArrayOutputStream result = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];
