@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 
+import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -98,7 +99,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public SqlBoxContext context() {
+	public SqlBoxContext ctx() {
 		SqlBox theBox = box();
 		if (theBox.getContext() == null)
 			theBox.setContext(SqlBoxContext.defaultContext);
@@ -107,7 +108,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public void insert() {
-		SqlBoxContext ctx = context();
+		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(
 					"No default global SqlBoxContext be set,  please use method SqlBoxContext.setDefaultContext(new SqlBoxContext(dataSource)) to set a global default SqlBoxContext instance");
@@ -116,7 +117,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public int update() {
-		SqlBoxContext ctx = context();
+		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException("No default global SqlBoxContext be set.");
 		return ctx.update(this);
@@ -124,7 +125,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public void delete() {
-		SqlBoxContext ctx = context();
+		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException("No default global SqlBoxContext be set. ");
 		ctx.delete(this);
@@ -132,7 +133,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public <T> T load(Object pkey) {
-		SqlBoxContext ctx = context();
+		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException("No default global SqlBoxContext be set.  ");
 		return ctx.load(this.getClass(), pkey);
@@ -178,6 +179,35 @@ public class ActiveRecord implements ActiveRecordSupport {
 			}
 		}
 		return this;
+	}
+
+	/**
+	 * Run current SQL based on current method @Sql annotated String or Text
+	 * String and parameters, return execute or query result
+	 */
+	public <T> T run(Object... params) {
+		return null;
+	}
+
+	/**
+	 * Run current Template SQL based on current method @Sql annotated String or
+	 * Text String and parameters, return execute or query result
+	 */
+	public <T> T tRun(Object... params) {
+		return null;
+	}
+
+	/** Return current method @Sql annotated String or Text String */
+	public String sql() {
+		return null;
+	}
+
+	/**
+	 * Return SqlAndParams object created based on current method @Sql annotated
+	 * String or Text String and parameters
+	 */
+	public SqlAndParams sqlAndParams(Object... params) {
+		return null;
 	}
 
 }

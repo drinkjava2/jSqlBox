@@ -56,8 +56,8 @@ public interface ActiveRecordSupport {
 	/** @return table name */
 	public String table();
 
-	/** @return SqlBoxContext instance */
-	public SqlBoxContext context();
+	/** @return current SqlBoxContext instance */
+	public SqlBoxContext ctx();
 
 	/** Insert entity to database */
 	public void insert();
