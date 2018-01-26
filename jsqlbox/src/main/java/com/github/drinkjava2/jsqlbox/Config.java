@@ -11,8 +11,11 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.List;
+
 import com.github.drinkjava2.jdbpro.DbProLogger;
 import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
@@ -31,6 +34,7 @@ public class Config {
 	private Dialect dialect = null;
 	private Integer batchSize = 100;
 	private ConnectionManager connectionManager = null;
+	private List<SqlInterceptor> interceptors = null;
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -83,6 +87,15 @@ public class Config {
 
 	public Config setConnectionManager(ConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
+		return this;
+	}
+
+	public List<SqlInterceptor> getInterceptors() {
+		return interceptors;
+	}
+
+	public Config setInterceptors(List<SqlInterceptor> interceptors) {
+		this.interceptors = interceptors;
 		return this;
 	}
 

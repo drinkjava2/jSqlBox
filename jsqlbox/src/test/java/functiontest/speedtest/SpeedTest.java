@@ -32,8 +32,6 @@ import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
-import textsample.TextSample;
-
 /**
  * Different SQL style demo
  * 
@@ -52,9 +50,6 @@ public class SpeedTest {
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
 		ctx = new SqlBoxContext(dataSource);
-
-		TextSample t = null;
-		ctx.nQueryForLongValue("" + t.doSomeThing(), null, null);
 
 		ctx.setGlobalAllowShowSQL(false);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))

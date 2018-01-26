@@ -20,13 +20,10 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.RowProcessor;
 
 import com.github.drinkjava2.jdbpro.DbPro;
-import com.github.drinkjava2.jdbpro.DbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
-import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtinynet.TinyEntityNetFactory;
-import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
  * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
@@ -49,7 +46,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public static SqlBoxContext defaultContext = null;// NOSONAR
 
 	/** The default EntityNetFactory instance */
-	protected EntityNetFactory entityNetBuilder = TinyEntityNetFactory.instance;
+	protected EntityNetFactory entityNetFactory = TinyEntityNetFactory.instance;
 
 	/**
 	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
@@ -75,6 +72,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
+		this.sqlInterceptors=config.getInterceptors();
 	}
 
 	public SqlBoxContext(DataSource ds, Config config) {
@@ -85,6 +83,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
+		this.sqlInterceptors=config.getInterceptors();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
 	}
@@ -167,12 +166,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * in current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String netConfig(Object... netConfig) {
-		getCurrentExplainers().add(new EntityNetSqlExplainer(netConfig));
+		getThreadedSqlInterceptors().add(new EntityNetSqlExplainer(netConfig));
 		return "";
 	}
 
 	public static RowProcessor netProcessor(Object... netConfig) {
-		getCurrentExplainers().add(new EntityNetSqlExplainer(netConfig));
+		getThreadedSqlInterceptors().add(new EntityNetSqlExplainer(netConfig));
 		return new BasicRowProcessor();
 	}
 
@@ -180,7 +179,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Create a EntityNet by given configurations, load all columns
 	 */
 	public <T> T netLoad(Object... configObjects) {
-		return entityNetBuilder.createEntityNet(this, false, configObjects);
+		return entityNetFactory.createEntityNet(this, false, configObjects);
 	}
 
 	/**
@@ -188,7 +187,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * improve loading speed
 	 */
 	public <T> T netLoadSketch(Object... configObjects) {
-		return entityNetBuilder.createEntityNet(this, true, configObjects);
+		return entityNetFactory.createEntityNet(this, true, configObjects);
 	}
 
 	/** Create a EntityNet by given list and netConfigs */
@@ -196,7 +195,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
 		if (result == null || result.length == 0)
 			throw new SqlBoxException("No entity class config found");
-		return entityNetBuilder.createEntityNet(listMap, result);
+		return entityNetFactory.createEntityNet(listMap, result);
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
@@ -260,15 +259,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public static void setDefaultContext(SqlBoxContext defaultContext) {
 		SqlBoxContext.defaultContext = defaultContext;
 	}
-
-	// protected TableModel[] getDbMetaTableModels() {
-	// return dbMetaTableModels;
-	// }
-
-	public EntityNetFactory getEntityNetBuilder() {
-		return entityNetBuilder;
-	}
-
+ 
 	public Dialect getDialect() {
 		return dialect;
 	}

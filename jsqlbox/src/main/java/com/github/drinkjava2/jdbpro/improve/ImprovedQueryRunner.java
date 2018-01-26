@@ -57,31 +57,36 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public static final DbProLogger defaultlogger = DbProLogger.getLog(ImprovedQueryRunner.class);
 	/**
 	 * The ConnectionManager determine how to get and release connections from
-	 * DataSource or ThreadLocal. To keep thread-safe, only subclass can access
-	 * this variant
+	 * DataSource or ThreadLocal. only allow initialised by constructor
 	 */
 	protected ConnectionManager connectionManager;
 
 	/**
-	 * If set true will output SQL and parameters in logger, to keep
-	 * thread-safe, only subclass can access this variant
+	 * If set true will output SQL and parameters in logger, only allow initialised
+	 * by constructor
 	 */
 	protected Boolean allowShowSQL = false;
 
 	/**
-	 * Logger of current ImprovedQueryRunner, to keep thread-safe, only subclass
-	 * can access this variant
+	 * Logger of current ImprovedQueryRunner, to keep thread-safe, only allow
+	 * initialised by constructor
 	 */
 	protected DbProLogger logger = defaultlogger;
 
-	/** Default Batch Size, current fixed to 100 */
+	/**
+	 * Default Batch Size, current fixed to 100, only allow initialised by
+	 * constructor
+	 */
 	protected Integer batchSize = 100;
 
+	/** SqlInterceptors, only allow initialised by constructor */
+	protected List<SqlInterceptor> sqlInterceptors = null;
+
 	/**
-	 * A ThreadLocal type cache to store SqlInterceptor instances, all instance
-	 * will be cleaned after this thread close
+	 * A ThreadLocal type cache to store SqlInterceptor instances, all instance will
+	 * be cleaned after this thread close
 	 */
-	private static ThreadLocal<ArrayList<SqlInterceptor>> sqlInterceptorCache = new ThreadLocal<ArrayList<SqlInterceptor>>() {
+	private static ThreadLocal<ArrayList<SqlInterceptor>> threadedSqlInterceptors = new ThreadLocal<ArrayList<SqlInterceptor>>() {
 		@Override
 		protected ArrayList<SqlInterceptor> initialValue() {
 			return new ArrayList<SqlInterceptor>();
@@ -161,8 +166,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to
-	 * customise SQL format
+	 * Format SQL for logger output, subClass can override this method to customise
+	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -179,8 +184,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Add a explainer
 	 */
-	public static ArrayList<SqlInterceptor> getCurrentExplainers() {
-		return sqlInterceptorCache.get();
+	public static ArrayList<SqlInterceptor> getThreadedSqlInterceptors() {
+		return threadedSqlInterceptors.get();
 	}
 
 	/**
@@ -188,14 +193,17 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	public String explainSql(String sql, int paramType, Object paramOrParams) {
 		String newSQL = sql;
-		for (SqlInterceptor explainer : getCurrentExplainers())
+		if (sqlInterceptors != null)
+			for (SqlInterceptor explainer : sqlInterceptors)
+				newSQL = explainer.handleSql(this, newSQL, paramType, paramOrParams);
+		for (SqlInterceptor explainer : getThreadedSqlInterceptors())
 			newSQL = explainer.handleSql(this, newSQL, paramType, paramOrParams);
 		return newSQL;
 	}
 
 	public Object explainResult(Object result) {
 		Object newObj = result;
-		for (SqlInterceptor explainer : getCurrentExplainers())
+		for (SqlInterceptor explainer : getThreadedSqlInterceptors())
 			newObj = explainer.handleResult(result);
 		return newObj;
 	}
@@ -334,7 +342,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -350,7 +358,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (List<T>) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -366,7 +374,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -379,7 +387,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			List<T> result = super.execute(explainedSql, rsh, params);
 			return (List<T>) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -392,7 +400,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.insert(conn, explainedSql, rsh);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -405,7 +413,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.insert(conn, explainedSql, rsh, params);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -418,7 +426,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.insert(explainedSql, rsh);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -431,7 +439,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.insert(explainedSql, rsh, params);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -447,7 +455,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -463,7 +471,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -479,7 +487,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -495,7 +503,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -511,7 +519,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -527,7 +535,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return (Integer) explainResult(result);
 			}
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -589,7 +597,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.query(conn, explainedSql, rsh, params);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -600,7 +608,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.query(conn, explainedSql, rsh);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -611,7 +619,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.query(explainedSql, rsh, params);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -622,7 +630,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			T result = super.query(explainedSql, rsh);
 			return (T) explainResult(result);
 		} finally {
-			getCurrentExplainers().clear();
+			getThreadedSqlInterceptors().clear();
 		}
 	}
 
@@ -632,8 +640,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Set if allow log output SQL and parameters, Note: this is not a
-	 * thread-safe method, should only call once at start of program
+	 * Set if allow log output SQL and parameters, Note: this is not a thread-safe
+	 * method, should only call once at start of program
 	 */
 	public void setGlobalAllowShowSQL(Boolean allowShowSQL) {
 		this.allowShowSQL = allowShowSQL;
@@ -644,8 +652,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Set the global logger, Note: this is not a thread-safe method, should
-	 * only call once at start of program
+	 * Set the global logger, Note: this is not a thread-safe method, should only
+	 * call once at start of program
 	 */
 	public void setGlobalLogger(DbProLogger logger) {
 		this.logger = logger;
