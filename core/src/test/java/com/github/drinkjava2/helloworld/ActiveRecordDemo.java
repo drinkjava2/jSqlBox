@@ -1,4 +1,5 @@
 package com.github.drinkjava2.helloworld;
+
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,11 @@ import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
-public class Demo {
+/**
+ * This demo show jSqlBox's ActiveRecord and jDialects' DDL, pagination and
+ * translate feature.
+ */
+public class ActiveRecordDemo {
 
 	@Table(name = "users")
 	public static class User extends ActiveRecord {
@@ -94,10 +99,7 @@ public class Demo {
 
 		String[] ddlArray = ctx.getDialect().toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)
-			try {
-				ctx.nExecute(ddl);
-			} catch (Exception e) {
-			}
+			ctx.quiteExecute(ddl);
 
 		for (int i = 1; i <= 100; i++) {
 			User u = new User();

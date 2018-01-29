@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.coveragetest.tinynet;
+package com.github.drinkjava2.functionstest.tinynet;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.coveragetest.tinynet.entities.User;
+import com.github.drinkjava2.functionstest.tinynet.entities.User;
 import com.github.drinkjava2.jtinynet.parser.TinyParser;
 
 /**

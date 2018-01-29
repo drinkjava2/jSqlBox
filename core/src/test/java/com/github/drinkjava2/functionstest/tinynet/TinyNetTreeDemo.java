@@ -1,4 +1,4 @@
-package com.github.drinkjava2.coveragetest.tinynet;
+package com.github.drinkjava2.functionstest.tinynet;
 
 import java.util.Set;
 
@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.coveragetest.tinynet.entities.TreeNode;
+import com.github.drinkjava2.functionstest.tinynet.entities.TreeNode;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtinynet.Path;

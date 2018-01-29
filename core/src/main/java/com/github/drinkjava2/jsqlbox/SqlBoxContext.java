@@ -227,18 +227,34 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	// =============CRUD methods=====
+
+	/** Create a new instance and bind current SqlBoxContext to it */
+	public void create(Class<?> entityClass) {
+		Object entity = null;
+		try {
+			entity = entityClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+		SqlBoxUtils.findAndBindSqlBox(this, entity);
+	}
+
+	/** Insert an entity to database */
 	public void insert(Object entity) {
 		SqlBoxContextUtils.insert(this, entity);
 	}
 
+	/** Update an entity in database by its ID columns */
 	public int update(Object entity) {
 		return SqlBoxContextUtils.update(this, entity);
 	}
 
+	/** Delete an entity in database by its ID columns */
 	public void delete(Object entity) {
 		SqlBoxContextUtils.delete(this, entity);
 	}
 
+	/** Load an entity from database by key, key can be one object or a Map */
 	public <T> T load(Class<?> entityClass, Object pkey) {
 		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}

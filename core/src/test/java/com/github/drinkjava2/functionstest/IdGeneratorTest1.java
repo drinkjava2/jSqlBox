@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.coveragetest;
+package com.github.drinkjava2.functionstest;
 
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param;
 import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param0;

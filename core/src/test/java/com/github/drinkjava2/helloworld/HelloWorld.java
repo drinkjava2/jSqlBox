@@ -19,7 +19,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Demo of jSqlBox configurations
+ * ActiveRecordDemo of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -53,9 +53,9 @@ public class HelloWorld {
 			ctx.nExecute(ddl);
 
 		HelloWorld hello = new HelloWorld();
-		hello.setName("Demo");
+		hello.setName("ActiveRecordDemo");
 		ctx.insert(hello);
-		Assert.assertEquals("Demo", ctx.nQueryForString("select name from helloworld"));
+		Assert.assertEquals("ActiveRecordDemo", ctx.nQueryForString("select name from helloworld"));
 		ds.close();
 	}
 }

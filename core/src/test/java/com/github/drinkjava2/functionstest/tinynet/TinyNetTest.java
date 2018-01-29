@@ -1,4 +1,4 @@
-package com.github.drinkjava2.coveragetest.tinynet;
+package com.github.drinkjava2.functionstest.tinynet;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
 
@@ -12,13 +12,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.coveragetest.tinynet.entities.Address;
-import com.github.drinkjava2.coveragetest.tinynet.entities.Email;
-import com.github.drinkjava2.coveragetest.tinynet.entities.Privilege;
-import com.github.drinkjava2.coveragetest.tinynet.entities.Role;
-import com.github.drinkjava2.coveragetest.tinynet.entities.RolePrivilege;
-import com.github.drinkjava2.coveragetest.tinynet.entities.User;
-import com.github.drinkjava2.coveragetest.tinynet.entities.UserRole;
+import com.github.drinkjava2.functionstest.tinynet.entities.Address;
+import com.github.drinkjava2.functionstest.tinynet.entities.Email;
+import com.github.drinkjava2.functionstest.tinynet.entities.Privilege;
+import com.github.drinkjava2.functionstest.tinynet.entities.Role;
+import com.github.drinkjava2.functionstest.tinynet.entities.RolePrivilege;
+import com.github.drinkjava2.functionstest.tinynet.entities.User;
+import com.github.drinkjava2.functionstest.tinynet.entities.UserRole;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtinynet.DefaultNodeValidator;

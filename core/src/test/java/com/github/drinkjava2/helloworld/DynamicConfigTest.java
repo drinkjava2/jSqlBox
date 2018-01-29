@@ -24,7 +24,7 @@ import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBox;
 
 /**
- * Demo of jSqlBox configurations
+ * ActiveRecordDemo of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -74,12 +74,15 @@ public class DynamicConfigTest extends TestBase {
 		Config.setGlobalAllowSqlSql(true);
 
 		TableModel t = new UserDemoSqlBox().getTableModel();
-		t.addColumn("anotherColumn2").VARCHAR(10); // A new column dynamically
-													// created
+
+		// A new column dynamically created
+		t.addColumn("anotherColumn2").VARCHAR(10);
 		dropAndCreateDatabase(t);
 
 		UserDemo u = new UserDemo();
-		u.columnModel("id").pkey(); // A Fake PKey dynamically cretated
+
+		// A Fake PKey dynamically cretated
+		u.columnModel("id").pkey();
 		u.setUserName("Sam");
 		ctx.insert(u);
 

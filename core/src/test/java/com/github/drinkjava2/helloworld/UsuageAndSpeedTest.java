@@ -32,12 +32,12 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Different SQL style and speed test
+ * Usuage of different SQL style and speed test
  * 
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class SqlStylesAndSpeedTest {
+public class UsuageAndSpeedTest {
 	static long REPEAT_TIMES = 1;
 
 	protected HikariDataSource dataSource;
@@ -167,11 +167,13 @@ public class SqlStylesAndSpeedTest {
 				pst.setString(1, "Sam");
 				pst.setString(2, "Canada");
 				pst.execute();
+				pst.close();
 
 				pst = conn.prepareStatement("update users set name=?, address=?");
 				pst.setString(1, "Tom");
 				pst.setString(2, "China");
 				pst.execute();
+				pst.close();
 
 				pst = conn.prepareStatement("select count(*) from users where name=? and address=?");
 				pst.setString(1, "Tom");

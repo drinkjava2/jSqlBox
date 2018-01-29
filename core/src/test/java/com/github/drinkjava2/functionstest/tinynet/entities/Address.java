@@ -1,22 +1,18 @@
-package com.github.drinkjava2.coveragetest.tinynet.entities;
+package com.github.drinkjava2.functionstest.tinynet.entities;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
-import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-
-@Table(name = "userroletb")
-public class UserRole extends ActiveRecord {
+ 
+@Table(name = "addresstb")
+public class Address extends ActiveRecord {
 	@Id
-	@UUID25
 	String id;
+	String addressName;
 
-	@SingleFKey(refs = { "usertb", "id" })
+	@SingleFKey(refs = {"usertb","id"})
 	String userId;
-
-	@SingleFKey(refs = { "roletb", "id" })
-	String rid;
 
 	public String getId() {
 		return id;
@@ -24,6 +20,14 @@ public class UserRole extends ActiveRecord {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getAddressName() {
+		return addressName;
+	}
+
+	public void setAddressName(String addressName) {
+		this.addressName = addressName;
 	}
 
 	public String getUserId() {
@@ -34,11 +38,4 @@ public class UserRole extends ActiveRecord {
 		this.userId = userId;
 	}
 
-	public String getRid() {
-		return rid;
-	}
-
-	public void setRid(String rid) {
-		this.rid = rid;
-	}
 }

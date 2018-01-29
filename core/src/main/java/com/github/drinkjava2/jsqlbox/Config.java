@@ -192,6 +192,11 @@ public class Config {
 		return globalSqlBoxContext;
 	}
 
+	/** Get the global SqlBoxContext, equal to getGlobalSqlBoxContext() method */
+	public static SqlBoxContext ctx() {// NOSONAR
+		return globalSqlBoxContext;
+	}
+
 	/**
 	 * Set a global SqlBoxContext instance, if an ActiveRecord object did not set
 	 * SqlBoxContext property, it will use this global SqlBoxContext instance to do
