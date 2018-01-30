@@ -13,7 +13,7 @@ public class DynamicCompileEngineTest {
 	package com.foo.bar; 	 
 	 public class DynaClass { 
 	   public String toString() { 
-	     return  "Hello, I am dog"; 
+	     return  "Hello, I am a dog"; 
 		 } 
 	 } 	
 	 */
@@ -22,11 +22,11 @@ public class DynamicCompileEngineTest {
 		String fullName = "com.foo.bar.DynaClass";
 		String src = TextUtils.getJavaSourceCodeUTF8(DynamicCompileEngineTest.class);
 		src = StrUtils.substringBetween(src, "/*-", "*/");
-		Object instance = null;
-		// test class cached, only compiled once
-		for (int i = 0; i < 1000000; i++)
-			instance = DynamicCompileEngine.instance.javaCodeToObject(fullName, src);
+		Class<?> clazz = null;
+		for (int i = 0; i < 1000000; i++)// Test class cached
+			clazz = DynamicCompileEngine.instance.javaCodeToClass(fullName, src);
+		Object instance = DynamicCompileEngine.instance.javaCodeToNewInstance(fullName, src);
 		System.out.println(instance);
-		Assert.assertEquals(instance.toString(), "Hello, I am dog");
+		Assert.assertEquals(instance.toString(), "Hello, I am a dog");
 	}
 }

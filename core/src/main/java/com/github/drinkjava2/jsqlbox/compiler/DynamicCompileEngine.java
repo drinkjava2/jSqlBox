@@ -37,13 +37,12 @@ public class DynamicCompileEngine {
 		this.classpath = sb.toString();
 	}
 
-	public Object javaCodeToObject(String fullClassName, String javaCode)
-			throws IllegalAccessException, InstantiationException {
-		if (compiledClassCache.containsKey(fullClassName)) {
-			Class<?> clazz = compiledClassCache.get(fullClassName);
-			return clazz.newInstance();
-		}
-		//long start = System.currentTimeMillis();
+	public Class<?> javaCodeToClass(String fullClassName, String javaCode) {
+		Class<?> result = compiledClassCache.get(fullClassName);
+		if (result != null)
+			return result;
+
+		// long start = System.currentTimeMillis();
 		Object instance = null;
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
@@ -64,17 +63,23 @@ public class DynamicCompileEngine {
 		if (success) {
 			JavaClassObject jco = fileManager.getJavaClassObject();
 			DynamicClassLoader dynamicClassLoader = new DynamicClassLoader(this.parentClassLoader);
-			Class clazz = dynamicClassLoader.loadClass(fullClassName, jco);
-			instance = clazz.newInstance();
-			compiledClassCache.put(fullClassName, clazz);
+			result = dynamicClassLoader.loadClass(fullClassName, jco);
+			if (result != null)
+				compiledClassCache.put(fullClassName, result);
+			return result;
 		} else {
 			String error = "";
 			for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
 				error = error + compilePrint(diagnostic);
 			}
+			throw new RuntimeException(error);
 		}
-		//long end = System.currentTimeMillis();
-		//System.out.println("Compile Java source code of class '" + fullClassName + "' use:" + (end - start) + "ms");
+	}
+
+	public Object javaCodeToNewInstance(String fullClassName, String javaCode)
+			throws InstantiationException, IllegalAccessException {
+		Class<?> clazz = javaCodeToClass(fullClassName, javaCode);
+		Object instance = clazz.newInstance();
 		return instance;
 	}
 
