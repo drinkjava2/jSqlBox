@@ -1,32 +1,33 @@
-package textsample;
+package activerecordtext;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 
-/*-
- * This is a sample to show put SQL in annotation and in multiple line Strings, this is a
- * Java file, and also is a resource file, to do that put a build-helper-maven-plugin
- * plugin in pom.xml, detail see user manual of jSqlBox.
+/**
+ * This is a sample to show put SQL in multiple line Strings(Text) for a
+ * abstract class, a build-helper-maven-plugin in pom.xml is required, detail
+ * see Readme.md
  * 
-* @author Yong Zhu 
-*/
+ * @author Yong Zhu
+ */
 public abstract class AbstractSampleUser extends SampleUser {
-	// insertOneUser method is extended from SampleUser2
+	// some methods are extended from SampleUser
 
 	@Sql("update users set name=?, address=?")
 	public void updateAllUser(String name, String address) {
-		this.bet(name, address);
+		this.guess(name, address);
 	};
 
 	@Sql("delete from users where name=? or address=?")
 	public abstract void deleteUsers(String name, String address);
 
 	@Handler(MapListHandler.class)
-	public abstract List<SampleUser> selectUsers(String name, String address);
+	public abstract List<Map<String, Object>> selectUsersByTxt(String name, String address);
 	/*-
 	   select * 
 	   from 

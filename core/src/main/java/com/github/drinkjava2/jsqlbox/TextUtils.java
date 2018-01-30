@@ -32,17 +32,34 @@ import com.github.drinkjava2.jdialects.StrUtils;
  */
 public abstract class TextUtils {// NOSONAR
 
-	private static final Map<Class<?>, String> javaFileCache = new ConcurrentHashMap<Class<?>, String>();
+	private static final Map<String, String> javaFileCache = new ConcurrentHashMap<String, String>();
 
 	@SuppressWarnings("all")
 	public static String getJavaSourceCodeUTF8(Class<?> clazz) {
 		return getJavaSourceCode(clazz, "UTF-8");
 	}
 
+	public static String getJavaSourceCodeUTF8(String classFullName) {
+		return getJavaSourceCode(classFullName, "UTF-8");
+	}
+
+	public static String getJavaSourceCode(String classFullName, String encoding) {
+		if (javaFileCache.containsKey(classFullName))
+			return javaFileCache.get(classFullName);
+		try {
+			Class<?> clazz = Class.forName(classFullName);
+			return getJavaSourceCode(clazz, encoding);
+		} catch (ClassNotFoundException e) {
+			throw new SqlBoxException(e);
+		}
+	}
+
 	@SuppressWarnings("all")
 	public static String getJavaSourceCode(Class<?> clazz, String encoding) {
-		if (javaFileCache.containsKey(clazz))
-			return javaFileCache.get(clazz);
+		if (clazz == null)
+			return null;
+		if (javaFileCache.containsKey(clazz.getName()))
+			return javaFileCache.get(clazz.getName());
 		String classPathName = StrUtils.substringBefore(clazz.getName(), "$");// aa.bb.Cc
 		classPathName = "/" + StrUtils.replace(classPathName, ".", "/");// /aa/bb/Cc
 		String fileName = classPathName + ".java";// /aa/bb/Cc.java
@@ -72,16 +89,16 @@ public abstract class TextUtils {// NOSONAR
 			while ((length = inputStream.read(buffer)) != -1)
 				result.write(buffer, 0, length);
 			String javaSrc = result.toString(encoding);
-			javaFileCache.put(clazz, javaSrc);
+			javaFileCache.put(clazz.getName(), javaSrc);
 			return javaSrc;
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SqlBoxException(e);
 		} finally {
 			if (inputStream != null)
 				try {
 					inputStream.close();
 				} catch (IOException e) {
-					throw new RuntimeException(e);
+					throw new SqlBoxException(e);
 				}
 		}
 	}

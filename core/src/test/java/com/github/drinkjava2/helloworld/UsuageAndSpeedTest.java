@@ -15,8 +15,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,7 +31,12 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.annotation.Handler;
+import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.zaxxer.hikari.HikariDataSource;
+
+import activerecordtext.AbstractSampleUser;
+import activerecordtext.SampleUser;
 
 /**
  * Usuage of different SQL style and speed test
@@ -49,8 +56,8 @@ public class UsuageAndSpeedTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
+		Config.setGlobalAllowSqlSql(false);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		Config.setGlobalAllowSqlSql(true);
 		Config.setGlobalSqlBoxContext(null);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
 			try {
@@ -67,7 +74,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void speedTest() throws Exception {
 		long keepRepeatTimes = REPEAT_TIMES;
-		REPEAT_TIMES = 1000;
+		REPEAT_TIMES = 10000;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " REPEAT_TIMES:");
 		runMethod("pureJdbc");
 		runMethod("dbUtilsWithConnMethod");
@@ -80,6 +87,9 @@ public class UsuageAndSpeedTest {
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
 		runMethod("activeRecordDefaultContext");
+		runMethod("activeRecordUseAnnotaion");
+		runMethod("activeRecordUseText");
+		runMethod("abstractActiveRecord");
 		REPEAT_TIMES = keepRepeatTimes;
 	}
 
@@ -153,6 +163,30 @@ public class UsuageAndSpeedTest {
 		public void setAddress(String address) {
 			this.address = address;
 		}
+
+	}
+
+	public static class User2 extends User {
+		@Sql("insert into users (name,address) values(?,?)")
+		public void insertOneUser(String name, String address) {
+			this.guess(name, address);
+		};
+
+		@Sql("update users set name=?, address=?")
+		public void updateAllUser(String name, String address) {
+			this.guess(name, address);
+		};
+
+		@Handler(MapListHandler.class)
+		@Sql("select * from users where name=? and address=?")
+		public List<Map<String, Object>> selectUsers(String name, String address) {
+			return this.guess(name, address);
+		};
+
+		@Sql("delete from users where name=? or address=?")
+		public void deleteUsers(String name, String address) {
+			this.guess(name, address);
+		};
 	}
 
 	@Test
@@ -377,4 +411,50 @@ public class UsuageAndSpeedTest {
 		}
 	}
 
+	@Test
+	public void activeRecordUseAnnotaion() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		Config.setGlobalSqlBoxContext(ctx);// use global default context
+		User2 user = new User2();
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			user.insertOneUser("Sam", "Canada");
+			user.updateAllUser("Tom", "China");
+			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
+			Assert.assertEquals(1, users.size());
+			user.deleteUsers("Tom", "China");
+			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
+		}
+	}
+
+	@Test
+	public void activeRecordUseText() {
+		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		Config.setGlobalSqlBoxContext(ctx);// use global default context
+		SampleUser user = new SampleUser();
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			user.insertOneUser("Sam", "Canada");
+			user.updateAllUser("Tom", "China");
+			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
+			Assert.assertEquals(1, users.size());
+			user.deleteUsers("Tom", "China");
+			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
+		}
+	}
+
+	@Test
+	public void abstractActiveRecord() {
+		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		Config.setGlobalSqlBoxContext(ctx);// use global default context
+		AbstractSampleUser user = ctx.build(AbstractSampleUser.class);//TODO here
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			user.insertOneUser("Sam", "Canada");
+			user.updateAllUser("Tom", "China");
+			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
+			Assert.assertEquals(1, users.size());
+			user.deleteUsers("Tom", "China");
+			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
+		}
+	}
 }

@@ -50,11 +50,24 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public SqlBoxContext() {
 		super();
+		this.connectionManager = Config.getGlobalConnectionManager();
+		this.dialect = Config.getGlobalDialect();
+		this.sqlTemplateEngine = Config.getGlobalTemplateEngine();
+		this.allowShowSQL = Config.getGlobalAllowSqlSql();
+		this.logger = Config.getGlobalLogger();
+		this.batchSize = Config.getGlobalBatchSize();
+		this.sqlInterceptors = Config.getGlobalInterceptors();
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
+		this.connectionManager = Config.getGlobalConnectionManager(); 
+		this.sqlTemplateEngine = Config.getGlobalTemplateEngine();
+		this.allowShowSQL = Config.getGlobalAllowSqlSql();
+		this.logger = Config.getGlobalLogger();
+		this.batchSize = Config.getGlobalBatchSize();
+		this.sqlInterceptors = Config.getGlobalInterceptors();
 	}
 
 	public SqlBoxContext(Config config) {

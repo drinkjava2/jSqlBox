@@ -203,8 +203,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public Object explainResult(Object result) {
 		Object newObj = result;
+		if (sqlInterceptors != null)
+			for (SqlInterceptor explainer : sqlInterceptors)
+				newObj = explainer.handleResult(newObj);
 		for (SqlInterceptor explainer : getThreadedSqlInterceptors())
-			newObj = explainer.handleResult(result);
+			newObj = explainer.handleResult(newObj);
 		return newObj;
 	}
 
@@ -638,7 +641,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public Boolean getAllowShowSQL() {
 		return allowShowSQL;
 	}
- 
 
 	public DbProLogger getLogger() {
 		return logger;

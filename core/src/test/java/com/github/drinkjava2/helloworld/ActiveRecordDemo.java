@@ -22,7 +22,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class ActiveRecordDemo {
 
 	@Table(name = "users")
-	public static class User extends ActiveRecord {
+	public static class UserEntity extends ActiveRecord {
 		@UUID25
 		@Id
 		private String id;
@@ -97,12 +97,12 @@ public class ActiveRecordDemo {
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		Config.setGlobalSqlBoxContext(ctx);
 
-		String[] ddlArray = ctx.getDialect().toDropAndCreateDDL(User.class);
+		String[] ddlArray = ctx.getDialect().toDropAndCreateDDL(UserEntity.class);
 		for (String ddl : ddlArray)
 			ctx.quiteExecute(ddl);
 
 		for (int i = 1; i <= 100; i++) {
-			User u = new User();
+			UserEntity u = new UserEntity();
 			u.setFirstName("Foo" + i);
 			u.setLastName("Bar" + i);
 			u.setAge(i);
