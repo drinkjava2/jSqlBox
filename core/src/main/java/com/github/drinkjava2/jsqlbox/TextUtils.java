@@ -32,7 +32,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  */
 public abstract class TextUtils {// NOSONAR
 
-	private static final Map<String, String> javaFileCache = new ConcurrentHashMap<String, String>();
+	protected static final Map<String, String> javaFileCache = new ConcurrentHashMap<String, String>();
 
 	@SuppressWarnings("all")
 	public static String getJavaSourceCodeUTF8(Class<?> clazz) {

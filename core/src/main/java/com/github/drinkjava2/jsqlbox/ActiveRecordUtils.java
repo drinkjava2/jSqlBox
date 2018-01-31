@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +23,7 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
+import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
 
 /**
  * Store some public static methods for ActiveRecord
@@ -29,23 +31,28 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
  * @author Yong Zhu
  * @since 1.0.1
  */
-public class ActiveRecordUtils {
-	private static final Map<Class<?>, Class<?>> subClassImplCache = new ConcurrentHashMap<Class<?>, Class<?>>();
+public abstract class ActiveRecordUtils {
+	private ActiveRecordUtils() {
+		// private Constructor
+	}
+
+	private static final Map<String, Class<?>> subClassImplCache = new ConcurrentHashMap<String, Class<?>>();
+	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class
-	 * extended from ActiveRecord
+	 * This is the method body to build an instance based on abstract class extended
+	 * from ActiveRecord
 	 * 
 	 * @param activeClass
 	 * @return Object instance
 	 */
-	public static Class<?> createInstance(Class<?> abstractClass) {
-		if (subClassImplCache.containsKey(abstractClass))
-			return subClassImplCache.get(abstractClass);
+	public static Class<?> createChildClass(Class<?> abstractClass) {
+		String fullClassName = abstractClass.getName() + "_AutoChild";
+		if (subClassImplCache.containsKey(fullClassName))
+			return subClassImplCache.get(fullClassName);
 		String src = TextUtils.getJavaSourceCodeUTF8(abstractClass);
 		if (StrUtils.isEmpty(src))
 			throw new SqlBoxException("No Java source code found for class '" + abstractClass.getName() + "'");
-		// System.out.println(src);
 		StringBuilder sb = new StringBuilder();
 		String start = StrUtils.substringBefore(src, "public abstract class " + abstractClass.getSimpleName());
 		if (StrUtils.isEmpty(start))
@@ -56,37 +63,49 @@ public class ActiveRecordUtils {
 				.append(abstractClass.getSimpleName()).append("{");
 		String body = StrUtils.substringAfter(src, "public abstract class " + abstractClass.getSimpleName());
 		body = StrUtils.substringAfter(body, "{");
-		String piece = StrUtils.substringAfter(body, "public abstract ");
-		while (!StrUtils.isEmpty(piece)) {
+		String heading = StrUtils.substringAfter(body, "public abstract ");
+		while (!StrUtils.isEmpty(heading)) {
 			start = StrUtils.substringBefore(body, "public abstract ");
 			sb.append(start).append("public ");
 			// void someMethod(String name,int age)
-			String title = StrUtils.substringBefore(piece, ";").trim();
+			String title = StrUtils.substringBefore(heading, ";").trim();
 			sb.append(title).append("{");
 			if (!title.startsWith("void "))
 				sb.append(" return ");
-			sb.append("this.ctx().guess(");
+			sb.append("this.guess(");
+			String paramStr = StrUtils.substringAfter(title, "(");
+			paramStr = StrUtils.substringBeforeLast(paramStr, ")");
+			String[] params = StrUtils.split(paramStr, ',');
+			for (int i = 0; i < params.length; i++) {
+				if (i != 0)
+					sb.append(",");
+				String trimedStr = params[i].trim();
+				sb.append(StrUtils.substringAfterLast(trimedStr, " "));
+			}
 			sb.append(");}");
-			body = StrUtils.substringAfter(piece, ";");
-			piece = StrUtils.substringAfter(body, "public abstract ");
+			body = StrUtils.substringAfter(heading, ";");
+			heading = StrUtils.substringAfter(body, "public abstract ");
 		}
 		sb.append(body);
-		System.out.println(sb.toString());
-		System.out.println(1 / 0);
-		return null;
+		String childClassSrc = sb.toString();
+		Class<?> childClass = null;
+		childClass = DynamicCompileEngine.instance.javaCodeToClass(fullClassName, childClassSrc);
+		subClassImplCache.put(fullClassName, childClass);
+		TextUtils.javaFileCache.put(fullClassName, childClassSrc);
+		return childClass;
 	}
 
 	/**
 	 * The real method body do the guess operation to access database, based on
-	 * current method @Sql annotated String or Text String and parameters, guess
-	 * a best fit query/update/delete/execute method to run
+	 * current method @Sql annotated String or Text String and parameters, guess a
+	 * best fit query/update/delete/execute method to run
 	 * 
 	 * @param ac
 	 * @param params
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	protected static <T> T doGuess(ActiveRecord ac, Object... params) {
+	@SuppressWarnings("all")
+	protected static <T> T doGuess(ActiveRecord ac, Object... params) {// NOSONAR
 		int callerPos = 0;
 		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
 		for (StackTraceElement stack : stacks) {
@@ -97,10 +116,10 @@ public class ActiveRecordUtils {
 		}
 		String callerClassName = stacks[callerPos].getClassName();
 		String callerMethodName = stacks[callerPos].getMethodName();
-		Class<?> callerClass = null;
-
+		Class<?> callerClass = subClassImplCache.get(callerClassName);
 		try {
-			callerClass = Class.forName(callerClassName);
+			if (callerClass == null)
+				callerClass = Class.forName(callerClassName);
 		} catch (ClassNotFoundException e) {
 			throw new SqlBoxException(e);
 		}
@@ -127,7 +146,7 @@ public class ActiveRecordUtils {
 		if (sqlAnno != null)
 			sql = sqlAnno.value()[0];
 		else {
-			String src;
+			String src = null;
 			try {
 				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
 			} catch (Exception e) {
@@ -150,6 +169,19 @@ public class ActiveRecordUtils {
 			dotype = 'u';
 		else
 			dotype = 'e';
+		boolean hasQuestionMark = sql.indexOf('?') > -1;
+		boolean hasColon = sql.indexOf(':') > -1;
+		boolean useTemplate = false;
+		if (hasColon && !hasQuestionMark)
+			useTemplate = true;
+		if (hasColon && hasQuestionMark)
+			throw new SqlBoxException(
+					"Here ActiveRecord's guess() method can not determine use template or normal style for SQL '" + sql
+							+ "', please do operation manual.");
+		Map<String, Object> map = null;
+		if (useTemplate)
+			map = buildParamMap(callerClassName, callerMethodName, params);
+		Object o = null;
 		switch (dotype) {
 		case 's': {
 			if (handlerClass == null)
@@ -160,15 +192,24 @@ public class ActiveRecordUtils {
 			} catch (Exception e) {
 				throw new SqlBoxException(e);
 			}
-			return ac.ctx().nQuery(resultSetHandler, sql, params);
+			if (useTemplate)
+				return ac.ctx().tQuery(map, resultSetHandler, sql);
+			else
+				return ac.ctx().nQuery(resultSetHandler, sql, params);
 		}
 		case 'u': {
-			Object o = ac.ctx().nUpdate(sql, params);
+			if (useTemplate)
+				o = ac.ctx().tUpdate(map, sql);
+			else
+				o = ac.ctx().nUpdate(sql, params);
 			return (T) o;
 		}
 		default:
 			if (handlerClass == null) {
-				Object o = ac.ctx().nExecute(sql, params);
+				if (useTemplate)
+					o = ac.ctx().tExecute(map, sql);
+				else
+					o = ac.ctx().nExecute(sql, params);
 				return (T) o;
 			}
 			ResultSetHandler<T> resultSetHandler = null;
@@ -177,9 +218,36 @@ public class ActiveRecordUtils {
 			} catch (Exception e) {
 				throw new SqlBoxException(e);
 			}
-			Object o = ac.ctx().nExecute(resultSetHandler, sql, params);
+			if (useTemplate)
+				o = ac.ctx().tExecute(map, resultSetHandler, sql);
+			else
+				o = ac.ctx().nExecute(resultSetHandler, sql, params);
 			return (T) o;
 		}
+	}
+
+	private static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName,
+			Object... params) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String[] methodParamNames = getMethodParamNames(callerClassName, callerMethodName);
+		if (methodParamNames != null)
+			for (int i = 0; i < methodParamNames.length; i++) {
+				map.put(methodParamNames[i], params[i]);
+			}
+		return map;
+	}
+
+	private static String[] getMethodParamNames(String classFullName, String callerMethodName) {
+		String key = classFullName + "+" + callerMethodName;
+		if (methodParamNamesCache.containsKey(key))
+			return methodParamNamesCache.get(key);
+		String src = TextUtils.getJavaSourceCodeUTF8(classFullName);
+		src = StrUtils.substringBetween(src, callerMethodName + "(", "}");
+		src = StrUtils.substringBetween(src, ".guess(", ")");
+		String[] result = StrUtils.split(src, ',');
+		if (result != null)
+			methodParamNamesCache.put(key, result);
+		return result;
 	}
 
 }

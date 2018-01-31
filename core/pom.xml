@@ -42,7 +42,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
 		<!-- Release on Java6 -->
-        <version.java>1.7</version.java>
+        <version.java>1.6</version.java>
         <version.javadoc>7</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
         <version.war-plugin>2.6</version.war-plugin>

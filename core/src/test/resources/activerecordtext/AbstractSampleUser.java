@@ -16,7 +16,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
  * @author Yong Zhu
  */
 public abstract class AbstractSampleUser extends SampleUser {
-	// some methods are extended from SampleUser
+	// some methods are extended from SampleUser and User and ActiveRecord 
 
 	@Sql("update users set name=?, address=?")
 	public void updateAllUser(String name, String address) {
@@ -27,14 +27,14 @@ public abstract class AbstractSampleUser extends SampleUser {
 	public abstract void deleteUsers(String name, String address);
 
 	@Handler(MapListHandler.class)
-	public abstract List<Map<String, Object>> selectUsersByTxt(String name, String address);
+	public abstract List<Map<String, Object>> selectUsersByText(String name, String address);
 	/*-
 	   select * 
 	   from 
 	   users 
 	      where 
 	         name=:name 
-	         and address=:address
+	         and  address=:address
 	 */
 
 }

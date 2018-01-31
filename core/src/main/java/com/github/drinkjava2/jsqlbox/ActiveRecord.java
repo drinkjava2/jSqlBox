@@ -13,7 +13,6 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 
-import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -194,17 +193,10 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return null;
 	}
 
-	/**
-	 * Return SqlAndParams object created based on current method @Sql annotated
-	 * String or Text String and parameters
-	 */
-	public SqlAndParams sqlAndParams(Object... params) {
-		return null;
-	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> T create(Class<?> abstractClass) {
-		Class<?> childClass = ActiveRecordUtils.createInstance(abstractClass);
+		Class<?> childClass = ActiveRecordUtils.createChildClass(abstractClass);
 		try {
 			return (T) childClass.newInstance();
 		} catch (Exception e) {

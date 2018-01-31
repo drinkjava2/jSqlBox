@@ -30,6 +30,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.Config;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
@@ -74,7 +75,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void speedTest() throws Exception {
 		long keepRepeatTimes = REPEAT_TIMES;
-		REPEAT_TIMES = 10000;
+		REPEAT_TIMES = 100;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " REPEAT_TIMES:");
 		runMethod("pureJdbc");
 		runMethod("dbUtilsWithConnMethod");
@@ -107,7 +108,7 @@ public class UsuageAndSpeedTest {
 		@Id
 		String name;
 		String address;
-		// SqlBox box;
+		SqlBox box;
 
 		public UserEntity() {
 		}
@@ -428,7 +429,6 @@ public class UsuageAndSpeedTest {
 
 	@Test
 	public void activeRecordUseText() {
-		Config.setGlobalAllowSqlSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
 		SampleUser user = new SampleUser();
@@ -444,14 +444,13 @@ public class UsuageAndSpeedTest {
 
 	@Test
 	public void abstractActiveRecord() {
-		Config.setGlobalAllowSqlSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractSampleUser user = ActiveRecord.create(AbstractSampleUser.class);//TODO here
+		AbstractSampleUser user = ActiveRecord.create(AbstractSampleUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.updateAllUser("Tom", "China");
-			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
+			List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
 			Assert.assertEquals(1, users.size());
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
