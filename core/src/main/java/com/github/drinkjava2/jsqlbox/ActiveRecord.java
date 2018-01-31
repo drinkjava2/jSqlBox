@@ -11,19 +11,12 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-
-import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
-import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.annotation.Handler;
-import com.github.drinkjava2.jsqlbox.annotation.Sql;
 
 /**
  * Entity class extended from ActiveRecord will get CRUD methods, see below
@@ -189,104 +182,11 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	/**
-	 * Run current SQL based on current method @Sql annotated String or Text String
-	 * and parameters, return execute or query result
+	 * Based on current method @Sql annotated String or Text String and
+	 * parameters, guess a best fit query/update/delete/execute method to run
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T guess(Object... params) {// NOSONAR
-		int callerPos = 0;
-		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-		for (StackTraceElement stack : stacks) {
-			callerPos++;
-			if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
-					&& "guess".equals(stack.getMethodName()))
-				break;
-		}
-		String callerClassName = stacks[callerPos].getClassName();
-		String callerMethodName = stacks[callerPos].getMethodName();
-		Class<?> callerClass = null;
-
-		try {
-			callerClass = Class.forName(callerClassName);
-		} catch (ClassNotFoundException e) {
-			throw new SqlBoxException(e);
-		}
-		Method callerMethod = null;
-		Method[] methods = callerClass.getMethods();
-		for (Method method : methods)
-			if (callerMethodName != null && callerMethodName.equals(method.getName())) {
-				callerMethod = method;
-				break;
-			}
-		if (callerMethod == null)
-			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		Annotation[] annos = callerMethod.getAnnotations();
-		Sql sqlAnno = null;
-		Class<?> handlerClass = null;
-		for (Annotation anno : annos) {
-			if (Sql.class.equals(anno.annotationType()))
-				sqlAnno = (Sql) anno;
-			if (Handler.class.equals(anno.annotationType())) {
-				handlerClass = ((Handler) anno).value();
-			}
-		}
-		String sql = null;
-		if (sqlAnno != null)
-			sql = sqlAnno.value()[0];
-		else {
-			String src;
-			try {
-				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
-			} catch (Exception e) {
-				throw new SqlBoxException("Method '" + callerMethodName + "' in '" + callerClassName
-						+ "' have no Sql annotation or text.");
-			}
-			sql = StrUtils.substringAfter(src, callerMethodName + "(");
-			sql = StrUtils.substringBetween(sql, "/*-", "*/");
-		}
-		if (sql != null)
-			sql = sql.trim(); 
-		char dotype;
-		if (StrUtils.startsWithIgnoreCase(sql, "select"))
-			dotype = 's';
-		else if (StrUtils.startsWithIgnoreCase(sql, "delete"))
-			dotype = 'u';
-		else if (StrUtils.startsWithIgnoreCase(sql, "update"))
-			dotype = 'u';
-		else if (StrUtils.startsWithIgnoreCase(sql, "insert"))
-			dotype = 'u';
-		else
-			dotype = 'e';
-		switch (dotype) {
-		case 's': {
-			if (handlerClass == null)
-				handlerClass = ScalarHandler.class;
-			ResultSetHandler<T> resultSetHandler = null;
-			try {
-				resultSetHandler = (ResultSetHandler<T>) handlerClass.newInstance();
-			} catch (Exception e) {
-				throw new SqlBoxException(e);
-			}
-			return ctx().nQuery(resultSetHandler, sql, params);
-		}
-		case 'u': {
-			Object o = ctx().nUpdate(sql, params);
-			return (T) o;
-		}
-		default:
-			if (handlerClass == null) {
-				Object o = ctx().nExecute(sql, params);
-				return (T) o;
-			}
-			ResultSetHandler<T> resultSetHandler = null;
-			try {
-				resultSetHandler = (ResultSetHandler<T>) handlerClass.newInstance();
-			} catch (Exception e) {
-				throw new SqlBoxException(e);
-			}
-			Object o = ctx().nExecute(resultSetHandler, sql, params);
-			return (T) o;
-		}
+		return ActiveRecordUtils.doGuess(this, params);
 	}
 
 	/** Return current method @Sql annotated String or Text String */
@@ -300,6 +200,22 @@ public class ActiveRecord implements ActiveRecordSupport {
 	 */
 	public SqlAndParams sqlAndParams(Object... params) {
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T create(Class<?> abstractClass) {
+		Class<?> childClass = ActiveRecordUtils.createInstance(abstractClass);
+		try {
+			return (T) childClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+	}
+
+	public static <T> T create(SqlBoxContext ctx, Class<?> abstractClass) {
+		T entity = create(abstractClass);
+		SqlBoxUtils.findAndBindSqlBox(ctx, entity);
+		return entity;
 	}
 
 }

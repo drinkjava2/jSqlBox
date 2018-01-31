@@ -447,7 +447,7 @@ public class UsuageAndSpeedTest {
 		Config.setGlobalAllowSqlSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractSampleUser user = ctx.build(AbstractSampleUser.class);//TODO here
+		AbstractSampleUser user = ActiveRecord.create(AbstractSampleUser.class);//TODO here
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.updateAllUser("Tom", "China");
