@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +18,8 @@ import java.util.Map.Entry;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * Store static methods about EntityNet

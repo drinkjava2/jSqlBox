@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +21,11 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 
 /**
  * EntityNetSqlExplainer is the SqlExplainer to explain net() method to help
@@ -46,7 +51,7 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 	public EntityNetSqlExplainer(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
 	}
- 
+
 	@Override
 	public String handleSql(ImprovedQueryRunner query, String sql, int paramType, Object paramOrParams) {
 		return explainNetQuery((SqlBoxContext) query, sql);
@@ -86,7 +91,7 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 			else if (obj instanceof SqlBox)
 				result[i] = ((SqlBox) obj).getTableModel();
 			else if (obj instanceof Class)
-				result[i] = ctx.box((Class<?>) obj).getTableModel();
+				result[i] = SqlBoxUtils.createSqlBox(ctx, (Class<?>) obj).getTableModel();
 			else {
 				result[i] = SqlBoxUtils.findAndBindSqlBox(ctx, obj).getTableModel();
 			}
@@ -252,6 +257,5 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 	public static void bindTableModel(Object listMap, TableModel[] tableModels) {
 		netConfigBindToListCache.get().put(listMap, tableModels);
 	}
- 
 
 }

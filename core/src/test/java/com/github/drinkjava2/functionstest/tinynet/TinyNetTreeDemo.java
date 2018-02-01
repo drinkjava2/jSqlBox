@@ -10,7 +10,7 @@ import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.functionstest.tinynet.entities.TreeNode;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jtinynet.Path;
+import com.github.drinkjava2.jsqlbox.entitynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
 public class TinyNetTreeDemo extends TestBase {

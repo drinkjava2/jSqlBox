@@ -9,10 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jtinynet;
+package com.github.drinkjava2.jsqlbox.entitynet;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jtinynet.TinyNetUtils;
 
 /**
  * Path store search condition path, one path can link to another path to build
@@ -114,7 +115,7 @@ public class Path {
 	/** Set the next part */
 	public Path nextPath(String type, Object target, String... refs) {
 		if (refs == null || refs.length == 0)
-			throw new TinyNetException("For nextPath method, ref columns can not ignore");
+			throw new EntityNetException("For nextPath method, ref columns can not ignore");
 		checkIfModifyInitialized();
 		Path next = new Path(type, target, refs);
 		next.fatherPath = this;
@@ -137,16 +138,16 @@ public class Path {
 	 * In query method will call this method to determine the real target and
 	 * columns
 	 */
-	public void initializePath(TinyNet net) {
+	public void initializePath(EntityNet net) {
 		if (initialized)
 			return;
 		PathUtils.calculateAutoPath(net, this);
 		if (target == null || StrUtils.isEmpty(target))
-			throw new TinyNetException("In path, target can not be null or empty.");
+			throw new EntityNetException("In path, target can not be null or empty.");
 		Class<?> theTargetClass = PathUtils.findClassByTarget(net, this.target);
 		this.targetModel = net.getConfigModels().get(theTargetClass);
 		if (this.targetModel == null)
-			throw new TinyNetException("Can not find target model for target '" + this.getTarget() + "'");
+			throw new EntityNetException("Can not find target model for target '" + this.getTarget() + "'");
 
 		if (refs == null)
 			this.refColumns = null;
@@ -162,28 +163,18 @@ public class Path {
 		initialized = true;
 	}
 
-	/** return target model, note different query may change tableModel */
-	protected TableModel getTargetModel() {
-		return targetModel;
-	}
-
-	/** return target model, note different query may change tableModel */
-	protected String getRefColumns() {
-		return refColumns;
-	}
-
 	/* Check if type setting right */
 	void validateType() {
 		if (type == null || type.length() != 2)
-			throw new TinyNetException("Illegal type charactors: '" + type + "'");
+			throw new EntityNetException("Illegal type charactors: '" + type + "'");
 		String s0 = type.substring(0, 1);
 		if (!("S".equalsIgnoreCase(s0) || "C".equalsIgnoreCase(s0) || "P".equalsIgnoreCase(s0)
 				|| "C*".equalsIgnoreCase(s0) || "P*".equalsIgnoreCase(s0)))
-			throw new TinyNetException("Illegal type charactor: '" + s0 + "'");
+			throw new EntityNetException("Illegal type charactor: '" + s0 + "'");
 
 		String s1 = type.substring(1, 2);
 		if (!("+".equals(s1) || "-".equals(s1) || "*".equals(s1)))
-			throw new TinyNetException("Illegal type charactor: '" + s1 + "'");
+			throw new EntityNetException("Illegal type charactor: '" + s1 + "'");
 	}
 
 	/**
@@ -252,28 +243,28 @@ public class Path {
 
 	public void checkIfModifyInitialized() {
 		if (initialized)
-			throw new TinyNetException("It's not allowed to change path setting after it be initialized");
+			throw new EntityNetException("It's not allowed to change path setting after it be initialized");
 	}
 
 	public String getJoinedColumns() {
 		if (initialized)
 			return joinedColumns;
 		else
-			throw new TinyNetException("Try to get JoinedColumns on a Path not initialized");
+			throw new EntityNetException("Try to get JoinedColumns on a Path not initialized");
 	}
 
 	public NodeValidator getNodeValidator() {
 		if (initialized)
 			return validatorInstance;
 		else
-			throw new TinyNetException("Try to get NodeValidator on a Path not initialized");
+			throw new EntityNetException("Try to get NodeValidator on a Path not initialized");
 	}
 
 	public String getUniqueIdString() {
 		if (initialized)
 			return uniqueStringId;
 		else
-			throw new TinyNetException("Try to get UniqueIdString on a Path not initialized");
+			throw new EntityNetException("Try to get UniqueIdString on a Path not initialized");
 	}
 
 	// =====Getter & Setter ==============
@@ -351,11 +342,7 @@ public class Path {
 		return this;
 	}
 
-	public Object[] getexpressionParams() {
-		return expressionParams;
-	}
-
-	public Path setExpressionParams(Object[] expressionParams) {
+  	public Path setExpressionParams(Object[] expressionParams) {
 		checkIfModifyInitialized();
 		this.expressionParams = expressionParams;
 		return this;
@@ -376,5 +363,38 @@ public class Path {
 		if (this.nextPath != null)
 			sb.append(nextPath.getDebugInfo(level + 1));
 		return sb.toString();
+	}
+	// get & setters===============
+
+	public Boolean getInitialized() {
+		return initialized;
+	}
+
+	public NodeValidator getValidatorInstance() {
+		return validatorInstance;
+	}
+
+	public String getUniqueStringId() {
+		return uniqueStringId;
+	}
+
+	public Object getAutoPathTarget() {
+		return autoPathTarget;
+	}
+
+	public Path getFatherPath() {
+		return fatherPath;
+	}
+
+	public Object[] getExpressionParams() {
+		return expressionParams;
+	}
+
+	public TableModel getTargetModel() {
+		return targetModel;
+	}
+
+	public String getRefColumns() {
+		return refColumns;
 	}
 }

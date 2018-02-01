@@ -18,11 +18,16 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.RowProcessor;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetSqlExplainer;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
  * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
@@ -62,7 +67,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
-		this.connectionManager = Config.getGlobalConnectionManager(); 
+		this.connectionManager = Config.getGlobalConnectionManager();
 		this.sqlTemplateEngine = Config.getGlobalTemplateEngine();
 		this.allowShowSQL = Config.getGlobalAllowSqlSql();
 		this.logger = Config.getGlobalLogger();
@@ -92,18 +97,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.sqlInterceptors = config.getInterceptors();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
-	}
-
-	/** Refresh database's meta data based on current dataSource and dialect */
-	public TableModel[] queryDbMetaData() {
-		return SqlBoxContextUtils.loadMetaTableModels(this, dialect);
-	}
-
-	/**
-	 * create a box for class
-	 */
-	public SqlBox box(Class<?> clazz) {
-		return SqlBoxUtils.createSqlBox(this, clazz);
 	}
 
 	// ========== Dialect shortcut methods ===============
@@ -252,6 +245,14 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxUtils.findAndBindSqlBox(this, entity);
 	}
 
+	/**
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
+	 * and bind on entityBean
+	 */
+	public SqlBox getSqlBox(Object entityBean) {
+		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
+	}
+
 	/** Insert an entity to database */
 	public void insert(Object entity) {
 		SqlBoxContextUtils.insert(this, entity);
@@ -270,6 +271,13 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Load an entity from database by key, key can be one object or a Map */
 	public <T> T load(Class<?> entityClass, Object pkey) {
 		return SqlBoxContextUtils.load(this, entityClass, pkey);
+	}
+
+	/** Query for a Entity from Sql */
+	public <T> T nQueryForEntity(Class<T> entityClass, String sql, Object... params) {
+		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
+		EntityNet net = this.netCreate(mapList1);
+		return null;
 	}
 
 	// getter & setter =======

@@ -21,9 +21,9 @@ import com.github.drinkjava2.functionstest.tinynet.entities.User;
 import com.github.drinkjava2.functionstest.tinynet.entities.UserRole;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jtinynet.DefaultNodeValidator;
-import com.github.drinkjava2.jtinynet.Node;
-import com.github.drinkjava2.jtinynet.Path;
+import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
+import com.github.drinkjava2.jsqlbox.entitynet.Node;
+import com.github.drinkjava2.jsqlbox.entitynet.Path;
 import com.github.drinkjava2.jtinynet.TinyNet;
 
 public class TinyNetTest extends TestBase {

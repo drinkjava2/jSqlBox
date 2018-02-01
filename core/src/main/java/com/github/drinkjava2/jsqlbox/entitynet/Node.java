@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jtinynet;
+package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.HashSet;
 import java.util.List;

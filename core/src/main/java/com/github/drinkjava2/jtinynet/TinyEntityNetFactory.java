@@ -18,10 +18,11 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.EntityNet;
-import com.github.drinkjava2.jsqlbox.EntityNetFactory;
-import com.github.drinkjava2.jsqlbox.EntityNetSqlExplainer;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetException;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetSqlExplainer;
 
 /**
  * This is a EntityNetFactory implementation to create a TinyEntityNet
@@ -43,7 +44,7 @@ public class TinyEntityNetFactory implements EntityNetFactory {
 	@Override
 	public <T> T createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
 		if (configObjects == null || configObjects.length == 0)
-			throw new TinyNetException("LoadNet() does not support empty netConfigs parameter");
+			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
 		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
 		EntityNet net = new TinyNet();
 		String starOrSharp = loadKeyOnly ? ".##" : ".**";

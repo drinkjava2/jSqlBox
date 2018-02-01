@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jtinynet;
+package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,24 +47,24 @@ public class PathUtils {
 			for (ColumnModel col : childOrParentModelOrSelf.getColumns()) {
 				if (ref != null && ref.equalsIgnoreCase(col.getEntityField())) {
 					if (found)
-						throw new TinyNetException("Can't judge '" + ref + "' is a field or a column name.");
+						throw new EntityNetException("Can't judge '" + ref + "' is a field or a column name.");
 					found = true;
 					if (sb.length() > 0)
-						sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
+						sb.append(EntityNet.COMPOUND_COLUMNNAME_SEPARATOR);
 					sb.append(col.getColumnName());
 				} else if (ref != null && ref.equalsIgnoreCase(col.getColumnName())) {
 					if (ref.equalsIgnoreCase(col.getEntityField())) {
 						if (found)
-							throw new TinyNetException("Can't judge '" + ref + "' is a field or a column name.");
+							throw new EntityNetException("Can't judge '" + ref + "' is a field or a column name.");
 						found = true;
 						if (sb.length() > 0)
-							sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
+							sb.append(EntityNet.COMPOUND_COLUMNNAME_SEPARATOR);
 						sb.append(ref);
 					}
 				}
 			}
 			if (!found)
-				throw new TinyNetException("Can't find reference column name for '" + ref + "'  ");
+				throw new EntityNetException("Can't find reference column name for '" + ref + "'  ");
 		}
 		return sb.toString();
 	}
@@ -77,18 +77,18 @@ public class PathUtils {
 	 * @param target The target table name or target class
 	 * @param net The TinyNet instance
 	 */
-	static void calculateAutoPath(TinyNet net, Path path) {
-		if (path.autoPathTarget == null)
+	static void calculateAutoPath(EntityNet net, Path path) {
+		if (path.getAutoPathTarget() == null)
 			return;
 		if (net == null)
-			throw new TinyNetException("To calculate auto path, TinyNet instance can not be null");
+			throw new EntityNetException("To calculate auto path, TinyNet instance can not be null");
 		Map<Class<?>, TableModel> models = net.getConfigModels();
 		if (models == null || models.isEmpty())
-			throw new TinyNetException("To calculate auto path, TinyNet's configModels can not be empty");
+			throw new EntityNetException("To calculate auto path, TinyNet's configModels can not be empty");
 		Class<?> from = findClassByTarget(net, path.getTarget());
 		Class<?> to = findClassByTarget(net, path.autoPathTarget);
-		TinyNetException.assureNotNull(from, "Can not find 'From' target when calculate auto path");
-		TinyNetException.assureNotNull(from, "Can not find 'To' target when calculate auto path");
+		EntityNetException.assureNotNull(from, "Can not find 'From' target when calculate auto path");
+		EntityNetException.assureNotNull(from, "Can not find 'To' target when calculate auto path");
 		Set<Class<?>> classChain = searchNodePath(models, from, to);
 		Path pathChain = classChainTOPathChain(net, classChain);
 		Path oldNextPath = path.getNextPath();
@@ -97,7 +97,7 @@ public class PathUtils {
 			path.getBottomPath().setNextPath(oldNextPath);
 	}
 
-	static Path classChainTOPathChain(TinyNet net, Set<Class<?>> classChain) {
+	static Path classChainTOPathChain(EntityNet net, Set<Class<?>> classChain) {
 		Class<?> from = null;
 		Path path = null;
 		int i = 0;
@@ -120,13 +120,13 @@ public class PathUtils {
 		return path.getTopPath();// NOSONAR
 	}
 
-	static Path buildPathByFromAndTo(TinyNet net, Class<?> from, Class<?> to) {
+	static Path buildPathByFromAndTo(EntityNet net, Class<?> from, Class<?> to) {
 		Object[] r = getRelationShip(net, from, to);
 		return new Path((String) r[0], r[1], (String[]) r[2]);
 	}
 
 	/** The the relationship between from and to */
-	static Object[] getRelationShip(TinyNet net, Class<?> from, Class<?> to) {
+	static Object[] getRelationShip(EntityNet net, Class<?> from, Class<?> to) {
 		TableModel fromModel = net.getConfigModels().get(from);
 		String fromTable = fromModel.getTableName();
 		TableModel toModel = net.getConfigModels().get(to);
@@ -137,7 +137,7 @@ public class PathUtils {
 			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
 			if (toTable.equalsIgnoreCase(parentTableName)) {
 				if (result != null)
-					throw new TinyNetException(
+					throw new EntityNetException(
 							"Auto path can not determined, multiple relationships found between class " + from + " and "
 									+ to);
 				result = new Object[3];
@@ -152,7 +152,7 @@ public class PathUtils {
 			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
 			if (fromTable.equalsIgnoreCase(parentTableName)) {
 				if (result != null)
-					throw new TinyNetException(
+					throw new EntityNetException(
 							"Auto path can not determined, multiple relationships found between class " + from + " and "
 									+ to);
 				result = new Object[3];
@@ -164,12 +164,12 @@ public class PathUtils {
 		}
 		if (result != null)
 			return result;
-		throw new TinyNetException(
+		throw new EntityNetException(
 				"Auto path can not determined, no relationship found between class " + from + " and " + to);
 	}
 
 	/** Find the target class by given target table name or target class */
-	static Class<?> findClassByTarget(TinyNet net, Object target) {
+	static Class<?> findClassByTarget(EntityNet net, Object target) {
 		if (target instanceof String) {
 			String tbName = (String) target;
 			for (Entry<Class<?>, TableModel> entry : net.getConfigModels().entrySet()) {
@@ -177,10 +177,10 @@ public class PathUtils {
 				if (mod != null && tbName.equalsIgnoreCase(mod.getTableName()))
 					return entry.getKey();
 			}
-			throw new TinyNetException("Can not find target class for '" + target + "'");
+			throw new EntityNetException("Can not find target class for '" + target + "'");
 		} else {
 			if (!(target instanceof Class))
-				throw new TinyNetException(
+				throw new EntityNetException(
 						"Target can only be table name string or entity class,  for '" + target + "'");
 			return (Class<?>) target;
 		}
@@ -250,7 +250,7 @@ public class PathUtils {
 					paths.add(newPath);
 			} while (foundClass != null);
 		} while (i < 200);
-		throw new TinyNetException("Not found availible auto path");
+		throw new EntityNetException("Not found availible auto path");
 	}
 
 	/** Get the last element from ordered Collection */

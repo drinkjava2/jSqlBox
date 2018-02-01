@@ -17,14 +17,18 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetException;
+import com.github.drinkjava2.jsqlbox.entitynet.Node;
+import com.github.drinkjava2.jsqlbox.entitynet.NodeValidator;
+import com.github.drinkjava2.jsqlbox.entitynet.ParentRelation;
 
 /**
  * TinyNetUtils is utility class store public static methods about TinyNet
@@ -42,9 +46,9 @@ public class TinyNetUtils {
 		if (models != null && models.length > 0)// Join models
 			for (TableModel tb : models) {
 				if (tb.getEntityClass() == null)
-					throw new TinyNetException("TableModel entityClass not set for table '" + tb.getTableName() + "'");
+					throw new EntityNetException("TableModel entityClass not set for table '" + tb.getTableName() + "'");
 				if (StrUtils.isEmpty(tb.getAlias()))
-					throw new TinyNetException("TableModel alias not set for table '" + tb.getTableName() + "'");
+					throw new EntityNetException("TableModel alias not set for table '" + tb.getTableName() + "'");
 			}
 	}
 
@@ -68,7 +72,7 @@ public class TinyNetUtils {
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : model.getColumns()) {
 			if (col.getPkey() && !col.getTransientable()) {
-				TinyNetException.assureNotEmpty(col.getEntityField(),
+				EntityNetException.assureNotEmpty(col.getEntityField(),
 						"EntityField not found for FKey column '" + col.getColumnName() + "'");
 				if (sb.length() > 0)
 					sb.append(TinyNet.COMPOUND_COLUMNNAME_SEPARATOR);
@@ -76,7 +80,7 @@ public class TinyNetUtils {
 			}
 		}
 		if (sb.length() == 0)
-			throw new TinyNetException("Table '" + model.getTableName() + "' no Prime Key columns set");
+			throw new EntityNetException("Table '" + model.getTableName() + "' no Prime Key columns set");
 		return sb.toString();
 	}
 
@@ -135,7 +139,7 @@ public class TinyNetUtils {
 		try {
 			return c.newInstance();
 		} catch (Exception e) {
-			throw new TinyNetException("Can not create instance of checker class " + checker);
+			throw new EntityNetException("Can not create instance of checker class " + checker);
 		}
 	}
 

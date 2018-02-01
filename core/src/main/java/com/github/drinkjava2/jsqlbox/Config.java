@@ -19,6 +19,7 @@ import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
 import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
 import com.github.drinkjava2.jtinynet.TinyEntityNetFactory;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 

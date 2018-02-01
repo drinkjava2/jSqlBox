@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jtinynet;
+package com.github.drinkjava2.jsqlbox.entitynet;
 
 /**
  * ParentRelationShip of node determined by 3 dimensions: fkeyColumns, refId,
@@ -29,9 +29,9 @@ public class ParentRelation {
 	String parentId;
 
 	public ParentRelation(String columns, String parentId, String parentTable) {
-		TinyNetException.assureNotEmpty(columns, "In ParentRelation, columns can not be empty");
-		TinyNetException.assureNotEmpty(parentId, "In ParentRelation, parentId can not be empty");
-		TinyNetException.assureNotEmpty(parentTable, "In ParentRelation, parentTable can not be empty");
+		EntityNetException.assureNotEmpty(columns, "In ParentRelation, columns can not be empty");
+		EntityNetException.assureNotEmpty(parentId, "In ParentRelation, parentId can not be empty");
+		EntityNetException.assureNotEmpty(parentTable, "In ParentRelation, parentTable can not be empty");
 		this.refColumns = columns;
 		this.parentId = parentId;
 		this.parentTable = parentTable;
