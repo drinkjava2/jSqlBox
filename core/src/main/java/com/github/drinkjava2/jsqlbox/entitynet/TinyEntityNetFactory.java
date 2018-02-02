@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jtinynet;
+package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.List;
 import java.util.Map;
@@ -19,10 +19,6 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetException;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetSqlExplainer;
 
 /**
  * This is a EntityNetFactory implementation to create a TinyEntityNet
@@ -33,12 +29,12 @@ public class TinyEntityNetFactory implements EntityNetFactory {
 
 	@Override
 	public <T> T createEntityNet() {
-		return (T) (new TinyNet());
+		return (T) (new EntityNet());
 	}
 
 	@Override
 	public <T> T createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
-		return (T) (new TinyNet(listMap, configs));
+		return (T) (new EntityNet(listMap, configs));
 	}
 
 	@Override
@@ -46,7 +42,7 @@ public class TinyEntityNetFactory implements EntityNetFactory {
 		if (configObjects == null || configObjects.length == 0)
 			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
 		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
-		EntityNet net = new TinyNet();
+		EntityNet net = new EntityNet();
 		String starOrSharp = loadKeyOnly ? ".##" : ".**";
 		for (TableModel t : models) {
 			List<Map<String, Object>> mapList = null;

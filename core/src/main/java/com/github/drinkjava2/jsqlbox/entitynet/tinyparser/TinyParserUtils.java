@@ -9,10 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jtinynet.parser;
+package com.github.drinkjava2.jsqlbox.entitynet.tinyparser;
 
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jtinynet.parser.TinyParser.Item;
+import com.github.drinkjava2.jsqlbox.entitynet.tinyparser.TinyParser.Item;
 
 /**
  * The utility class put some public static methods for TinyParser

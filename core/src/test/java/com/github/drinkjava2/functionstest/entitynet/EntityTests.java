@@ -1,4 +1,4 @@
-package com.github.drinkjava2.functionstest.tinynet;
+package com.github.drinkjava2.functionstest.entitynet;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
 
@@ -12,28 +12,28 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.functionstest.tinynet.entities.Address;
-import com.github.drinkjava2.functionstest.tinynet.entities.Email;
-import com.github.drinkjava2.functionstest.tinynet.entities.Privilege;
-import com.github.drinkjava2.functionstest.tinynet.entities.Role;
-import com.github.drinkjava2.functionstest.tinynet.entities.RolePrivilege;
-import com.github.drinkjava2.functionstest.tinynet.entities.User;
-import com.github.drinkjava2.functionstest.tinynet.entities.UserRole;
+import com.github.drinkjava2.functionstest.entitynet.entities.Address;
+import com.github.drinkjava2.functionstest.entitynet.entities.Email;
+import com.github.drinkjava2.functionstest.entitynet.entities.Privilege;
+import com.github.drinkjava2.functionstest.entitynet.entities.Role;
+import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
+import com.github.drinkjava2.functionstest.entitynet.entities.User;
+import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Node;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
-import com.github.drinkjava2.jtinynet.TinyNet;
 
-public class TinyNetTest extends TestBase {
+public class EntityTests extends TestBase {
 	@Before
 	public void init() {
 		super.init();
 		// ctx.setAllowShowSQL(true);
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
-		dropAndCreateDatabase(models); 
+		dropAndCreateDatabase(models);
 	}
 
 	@Test
@@ -41,7 +41,7 @@ public class TinyNetTest extends TestBase {
 		System.out.println("==============testJoinFields================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
-		TinyNet net = ctx.netLoadSketch(User.class);
+		EntityNet net = ctx.netLoadSketch(User.class);
 		Assert.assertEquals(2, net.size());
 		List<User> users = net.getAllEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
@@ -67,7 +67,7 @@ public class TinyNetTest extends TestBase {
 		new Email().putValues("e2", "email2", "u1").insert();
 		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
 				netConfig(new Email().alias("e")) + "select e.id as e_id from emailtb e");
-		TinyNet net = (TinyNet) ctx.netCreate(listMap);
+		EntityNet net = (EntityNet) ctx.netCreate(listMap);
 		Assert.assertEquals(2, net.size());
 		Node emailNode = net.getOneNode(Email.class, "e1");
 		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId
@@ -90,7 +90,7 @@ public class TinyNetTest extends TestBase {
 		for (int i = 1; i <= sampleSize; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
-		TinyNet net = ctx.netLoad(new User(), Email.class);
+		EntityNet net = ctx.netLoad(new User(), Email.class);
 
 		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
 		Assert.assertEquals(0, users2.size());
@@ -120,7 +120,7 @@ public class TinyNetTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		TinyNet net = ctx.netLoad(new User(), Email.class);
+		EntityNet net = ctx.netLoad(new User(), Email.class);
 
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
@@ -164,7 +164,7 @@ public class TinyNetTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		TinyNet net = ctx.netLoad(User.class, Email.class);
+		EntityNet net = ctx.netLoad(User.class, Email.class);
 		long start = System.currentTimeMillis();
 		Set<Email> emails = null;
 		// Set validator instance will not cache query result
@@ -196,7 +196,7 @@ public class TinyNetTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		TinyNet net = ctx.netLoad(User.class, Email.class);
+		EntityNet net = ctx.netLoad(User.class, Email.class);
 		long start = System.currentTimeMillis();
 		Set<Email> emails = null;
 		// Set expression query parameters will not cache query result
@@ -229,7 +229,7 @@ public class TinyNetTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		TinyNet net = ctx.netLoad(new User(), Email.class);
+		EntityNet net = ctx.netLoad(new User(), Email.class);
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
 
@@ -246,7 +246,7 @@ public class TinyNetTest extends TestBase {
 	public void testAddEntity() {
 		System.out.println("==============testAddEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
-		TinyNet net = ctx.netLoad(User.class);
+		EntityNet net = ctx.netLoad(User.class);
 		Assert.assertEquals(1, net.size());
 
 		User u2 = new User();
@@ -266,7 +266,7 @@ public class TinyNetTest extends TestBase {
 		System.out.println("==============testRemoveEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
-		TinyNet net = ctx.netLoad(User.class);
+		EntityNet net = ctx.netLoad(User.class);
 		Assert.assertEquals(2, net.size());
 		User u2 = net.getOneEntity(User.class, "u2");
 		ctx.netRemoveEntity(net, u2);
@@ -278,7 +278,7 @@ public class TinyNetTest extends TestBase {
 		System.out.println("==============testUpdateEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
-		TinyNet net = ctx.netLoad(User.class);
+		EntityNet net = ctx.netLoad(User.class);
 		Assert.assertEquals(2, net.size());
 		User u2 = net.getOneEntity(User.class, "u2");
 		u2.setUserName("newName");

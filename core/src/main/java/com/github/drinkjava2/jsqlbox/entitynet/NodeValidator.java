@@ -12,8 +12,7 @@
 package com.github.drinkjava2.jsqlbox.entitynet;
 
 /**
- * Checker used to check if a node allowed to be put into input list or output
- * list
+ * NodeValidator used to check if a node allowed to be selected
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
@@ -23,10 +22,14 @@ public interface NodeValidator {
 	/**
 	 * Check if a node allow be selected
 	 * 
-	 * @param node The node to be check
-	 * @param selectLevel Current search level
-	 * @param selectedSize Current already selected node size
-	 * @param path Current path
+	 * @param node
+	 *            The node to be check
+	 * @param selectLevel
+	 *            Current search level
+	 * @param selectedSize
+	 *            Current already selected node size
+	 * @param path
+	 *            Current path
 	 * @return True or false depends validate result
 	 */
 	public abstract boolean validateNode(Node node, int selectLevel, int selectSize, Path path);

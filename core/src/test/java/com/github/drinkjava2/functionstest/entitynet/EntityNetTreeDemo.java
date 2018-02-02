@@ -1,4 +1,4 @@
-package com.github.drinkjava2.functionstest.tinynet;
+package com.github.drinkjava2.functionstest.entitynet;
 
 import java.util.Set;
 
@@ -7,13 +7,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.functionstest.tinynet.entities.TreeNode;
+import com.github.drinkjava2.functionstest.entitynet.entities.TreeNode;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
-import com.github.drinkjava2.jtinynet.TinyNet;
 
-public class TinyNetTreeDemo extends TestBase {
+public class EntityNetTreeDemo extends TestBase {
 	@Before
 	public void init() {
 		super.init();
@@ -38,7 +38,7 @@ public class TinyNetTreeDemo extends TestBase {
 
 	@Test
 	public void testSearchTreeChild() {
-		TinyNet net = ctx.netLoad(TreeNode.class);
+		EntityNet net = ctx.netLoad(TreeNode.class);
 		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class,
 				new Path("S+", TreeNode.class).where("id=? or id=?", "B", "D").nextPath("C*", TreeNode.class, "pid"));
 		for (TreeNode node : TreeNodes)
@@ -48,7 +48,7 @@ public class TinyNetTreeDemo extends TestBase {
 
 	@Test
 	public void testSearchTreeChild2() {
-		TinyNet net = ctx.netLoad(TreeNode.class);
+		EntityNet net = ctx.netLoad(TreeNode.class);
 		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class, new Path("C*", TreeNode.class, "pid"),
 				new TreeNode("B"), new TreeNode("D"));
 		for (TreeNode node : TreeNodes)
@@ -58,7 +58,7 @@ public class TinyNetTreeDemo extends TestBase {
 
 	@Test
 	public void testSearchTreeParent() {
-		TinyNet net = ctx.netLoad(TreeNode.class);
+		EntityNet net = ctx.netLoad(TreeNode.class);
 		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class,
 				new Path("S-", TreeNode.class).where("id='F' or id='K'").nextPath("P*", TreeNode.class, "pid"));
 		for (TreeNode node : TreeNodes)

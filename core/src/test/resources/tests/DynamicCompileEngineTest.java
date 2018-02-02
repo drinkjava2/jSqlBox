@@ -17,6 +17,7 @@ public class DynamicCompileEngineTest {
 		 } 
 	 } 	
 	 */
+
 	@Test
 	public void doTest() throws IllegalAccessException, InstantiationException {
 		String fullName = "com.foo.bar.DynaClass";

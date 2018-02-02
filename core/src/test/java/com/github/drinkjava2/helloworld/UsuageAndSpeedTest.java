@@ -74,7 +74,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void speedTest() throws Exception {
 		long keepRepeatTimes = REPEAT_TIMES;
-		REPEAT_TIMES = 100000;
+		REPEAT_TIMES = 100;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " REPEAT_TIMES:");
 		runMethod("pureJdbc");
 		runMethod("dbUtilsWithConnMethod");

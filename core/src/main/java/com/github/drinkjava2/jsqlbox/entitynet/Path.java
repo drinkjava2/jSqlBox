@@ -13,7 +13,6 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jtinynet.TinyNetUtils;
 
 /**
  * Path store search condition path, one path can link to another path to build
@@ -154,9 +153,9 @@ public class Path {
 		else {
 			this.refColumns = PathUtils.calculateRefColumns(this);
 		}
-		validatorInstance = TinyNetUtils.getOrBuildChecker(validator);
+		validatorInstance = EntityNetUtils.getOrBuildValidator(validator);
 		if (refs != null)
-			joinedColumns = TinyNetUtils.buildJoinedColumns(refs);
+			joinedColumns = EntityNetUtils.buildJoinedColumns(refs);
 		if (this.getNextPath() != null)
 			this.getNextPath().initializePath(net);
 		initializeUniqueIdString();

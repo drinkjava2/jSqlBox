@@ -1,4 +1,4 @@
-package com.github.drinkjava2.functionstest.tinynet.entities;
+package com.github.drinkjava2.functionstest.entitynet.entities;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;

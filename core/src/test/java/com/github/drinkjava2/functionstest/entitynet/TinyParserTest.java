@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.functionstest.tinynet;
+package com.github.drinkjava2.functionstest.entitynet;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +17,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.functionstest.tinynet.entities.User;
-import com.github.drinkjava2.jtinynet.parser.TinyParser;
+import com.github.drinkjava2.functionstest.entitynet.entities.User;
+import com.github.drinkjava2.jsqlbox.entitynet.tinyparser.TinyParser;
 
 /**
  * Coverage test for TinyParser

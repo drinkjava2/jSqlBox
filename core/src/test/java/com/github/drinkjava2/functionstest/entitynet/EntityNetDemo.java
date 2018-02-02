@@ -1,4 +1,4 @@
-package com.github.drinkjava2.functionstest.tinynet;
+package com.github.drinkjava2.functionstest.entitynet;
 
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
 import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
@@ -13,20 +13,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.functionstest.tinynet.entities.Address;
-import com.github.drinkjava2.functionstest.tinynet.entities.Email;
-import com.github.drinkjava2.functionstest.tinynet.entities.Privilege;
-import com.github.drinkjava2.functionstest.tinynet.entities.Role;
-import com.github.drinkjava2.functionstest.tinynet.entities.RolePrivilege;
-import com.github.drinkjava2.functionstest.tinynet.entities.User;
-import com.github.drinkjava2.functionstest.tinynet.entities.UserRole;
+import com.github.drinkjava2.functionstest.entitynet.entities.Address;
+import com.github.drinkjava2.functionstest.entitynet.entities.Email;
+import com.github.drinkjava2.functionstest.entitynet.entities.Privilege;
+import com.github.drinkjava2.functionstest.entitynet.entities.Role;
+import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
+import com.github.drinkjava2.functionstest.entitynet.entities.User;
+import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
-import com.github.drinkjava2.jsqlbox.entitynet.Path;
-import com.github.drinkjava2.jtinynet.TinyNet;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.entitynet.Path; 
 
-public class TinyNetDemo extends TestBase {
+public class EntityNetDemo extends TestBase {
 	@Before
 	public void init() {
 		super.init();
@@ -94,7 +94,7 @@ public class TinyNetDemo extends TestBase {
 	@Test
 	public void testPathFind() {
 		insertDemoData();
-		TinyNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path("S-", User.class).where("id='u1' or id='u2'").nextPath("C-", UserRole.class, "userId")
 						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
@@ -107,7 +107,7 @@ public class TinyNetDemo extends TestBase {
 	@Test
 	public void testAutoPath() {
 		insertDemoData();
-		TinyNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class));
 		for (Privilege privilege : privileges)
@@ -118,7 +118,7 @@ public class TinyNetDemo extends TestBase {
 	@Test
 	public void testAutoPath2() {
 		insertDemoData();
-		TinyNet net = ctx.netLoad(new Email(), new User(), new Role(), Privilege.class, UserRole.class,
+		EntityNet net = ctx.netLoad(new Email(), new User(), new Role(), Privilege.class, UserRole.class,
 				RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path(Email.class).setValidator(new EmailValidator()).autoPath(Privilege.class));
@@ -138,7 +138,7 @@ public class TinyNetDemo extends TestBase {
 	@Test
 	public void testloadEntityNet() {
 		insertDemoData();
-		TinyNet net = ctx.netLoad(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
+		EntityNet net = ctx.netLoad(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
 				RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
@@ -152,7 +152,7 @@ public class TinyNetDemo extends TestBase {
 	@Test
 	public void testNetLoadSketch() {
 		insertDemoData();
-		TinyNet net = ctx.netLoadSketch(new User(), Email.class, Address.class, new Role(), Privilege.class,
+		EntityNet net = ctx.netLoadSketch(new User(), Email.class, Address.class, new Role(), Privilege.class,
 				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
@@ -167,7 +167,7 @@ public class TinyNetDemo extends TestBase {
 		insertDemoData();
 		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
-		TinyNet net = ctx.netCreate(mapList1);
+		EntityNet net = ctx.netCreate(mapList1);
 		Assert.assertEquals(10, net.size());
 
 		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),

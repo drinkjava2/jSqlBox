@@ -1,18 +1,22 @@
-package com.github.drinkjava2.functionstest.tinynet.entities;
+package com.github.drinkjava2.functionstest.entitynet.entities;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
-@Table(name = "emailtb")
-public class Email extends ActiveRecord { 
+@Table(name = "userroletb")
+public class UserRole extends ActiveRecord {
 	@Id
+	@UUID25
 	String id;
-	String emailName;
 
 	@SingleFKey(refs = { "usertb", "id" })
 	String userId;
+
+	@SingleFKey(refs = { "roletb", "id" })
+	String rid;
 
 	public String getId() {
 		return id;
@@ -20,14 +24,6 @@ public class Email extends ActiveRecord {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getEmailName() {
-		return emailName;
-	}
-
-	public void setEmailName(String emailName) {
-		this.emailName = emailName;
 	}
 
 	public String getUserId() {
@@ -38,4 +34,11 @@ public class Email extends ActiveRecord {
 		this.userId = userId;
 	}
 
+	public String getRid() {
+		return rid;
+	}
+
+	public void setRid(String rid) {
+		this.rid = rid;
+	}
 }

@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.drinkjava2.jtinynet.parser.TinyParser;
+import com.github.drinkjava2.jsqlbox.entitynet.tinyparser.TinyParser;
 
 /**
  * DefaultNodeValidator is the default implementation of NodeValidator to
