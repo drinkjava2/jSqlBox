@@ -18,7 +18,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
  * 
  * @author Yong Zhu
  */
-public class SampleUser extends User {
+public class User2 extends User {
 
 	@Sql("insert into users (name,address) values(?,?)")
 	public void insertOneUser(String name, String address) {

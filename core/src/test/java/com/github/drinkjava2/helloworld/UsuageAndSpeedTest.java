@@ -36,8 +36,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.zaxxer.hikari.HikariDataSource;
 
-import activerecordtext.AbstractSampleUser;
-import activerecordtext.SampleUser;
+import activerecordtext.AbstractUser;
 
 /**
  * Usuage of different SQL style and speed test
@@ -75,7 +74,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void speedTest() throws Exception {
 		long keepRepeatTimes = REPEAT_TIMES;
-		REPEAT_TIMES = 1000;
+		REPEAT_TIMES = 100000;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " REPEAT_TIMES:");
 		runMethod("pureJdbc");
 		runMethod("dbUtilsWithConnMethod");
@@ -431,7 +430,7 @@ public class UsuageAndSpeedTest {
 	public void activeRecordUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
-		SampleUser user = new SampleUser();
+		User2 user = new User2();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.updateAllUser("Tom", "China");
@@ -446,7 +445,7 @@ public class UsuageAndSpeedTest {
 	public void abstractActiveRecord() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractSampleUser user = ActiveRecord.create(AbstractSampleUser.class);
+		AbstractUser user = ActiveRecord.create(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.updateAllUser("Tom", "China");
