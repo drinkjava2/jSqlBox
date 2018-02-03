@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -47,9 +48,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected EntityNetFactory entityNetFactory = Config.getGlobalEntityNetFactory();
 
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
-	 * use setDialect() method to change to other dialect, to keep thread-safe, only
-	 * subclass can access this variant
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
+	 * can use setDialect() method to change to other dialect, to keep
+	 * thread-safe, only subclass can access this variant
 	 */
 	protected Dialect dialect = Config.getGlobalDialect();
 
@@ -161,8 +162,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	// ================================================================
 	/**
-	 * Return an empty "" String and save a ThreadLocal netConfig object array in
-	 * current thread, it will be used by SqlBoxContext's query methods.
+	 * Return an empty "" String and save a ThreadLocal netConfig object array
+	 * in current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String netConfig(Object... netConfig) {
 		getThreadedSqlInterceptors().add(new EntityNetSqlExplainer(netConfig));
@@ -182,8 +183,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
-	 * loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to
+	 * improve loading speed
 	 */
 	public <T> T netLoadSketch(Object... configObjects) {
 		return entityNetFactory.createEntityNet(this, true, configObjects);
@@ -246,8 +247,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
-	 * and bind on entityBean
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new
+	 * one and bind on entityBean
 	 */
 	public SqlBox getSqlBox(Object entityBean) {
 		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
@@ -273,11 +274,34 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}
 
-	/** Query for a Entity from Sql */
-	public <T> T nQueryForEntity(Class<T> entityClass, String sql, Object... params) {
+	/** Query for a Entity set */
+	public <T> Set<T> nQueryForEntitySet(Class<T> entityClass, String sql, Object... params) {
 		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
 		EntityNet net = this.netCreate(mapList1);
-		return null;
+		return net.getAllEntitySet(entityClass);
+	}
+
+	/** Query for a Entity list */
+	public <T> List<T> nQueryForEntityList(Class<T> entityClass, String sql, Object... params) {
+		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
+		EntityNet net = this.netCreate(mapList1);
+		return net.getAllEntityList(entityClass);
+	}
+
+	/** Template style query for a Entity set */
+	public <T> Set<T> tQueryForEntitySet(Class<T> entityClass, Map<String, Object> paramMap, String... templateSQL) {
+		List<Map<String, Object>> mapList1 = this.tQuery(paramMap, new MapListHandler(netProcessor(entityClass)),
+				templateSQL);
+		EntityNet net = this.netCreate(mapList1);
+		return net.getAllEntitySet(entityClass);
+	}
+
+	/** Template style query for a Entity set */
+	public <T> List<T> tQueryForEntityList(Class<T> entityClass, Map<String, Object> paramMap, String... templateSQL) {
+		List<Map<String, Object>> mapList1 = this.tQuery(paramMap, new MapListHandler(netProcessor(entityClass)),
+				templateSQL);
+		EntityNet net = this.netCreate(mapList1);
+		return net.getAllEntityList(entityClass);
 	}
 
 	// getter & setter =======

@@ -28,14 +28,14 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * jTinyNet project is the default implementation of EntityNet in jSqlBox, it's
- * a memory based Object net, can kind of be called "Graph Database" or "NoSQL
- * Database". Not like Neo4j can write to disk file, jTinyNet is only a memory
- * based graph 1:1 mapping to relational database's tables, the relationship in
- * Neo4j is call "Edge", but in jTinyNet is still called relationship, just
- * exactly use the existed relational database's foreign key constraints. If
- * want use jTinyNet but don't want output FKey constraint in DDL, can build
- * fake FKeyModels by setting "ddl=false" (see jDialects project).
+ * EntityNet is a child project to build entity net. it's a memory based Object
+ * net, can kind of be called "Graph Database" or "NoSQL Database". Not like
+ * Neo4j can write to disk file, EntityNet is only a memory based graph 1:1
+ * mapping to relational database's tables, the relationship in Neo4j is call
+ * "Edge", but in EntityNet is still called relationship, just exactly use the
+ * existed relational database's foreign key constraints. If want use EntityNet
+ * but don't want output FKey constraint in DDL, can build fake FKeyModels by
+ * setting "ddl=false" (see jDialects project).
  * 
  * Some benefits to use a graph database than relational database:<br/>
  * 1) No need write complicated join SQLs. <br/>
@@ -43,11 +43,11 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * access database stored on hard disk. <br/>
  * 3) Can use pure Java language do browse search.
  * 
- * TinyNet class is not thread safe. If want use it as a global cache,
+ * EntityNet class is not thread safe. If want use it as a global cache,
  * programmer need use synchronized method to serialize access it, like use a
- * HashMap in multiple threads.
+ * HashMap in multiple threads environment.
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu
  * @since 1.0.0
  */
 public class EntityNet {
@@ -59,8 +59,8 @@ public class EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
-	 * info related to database
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R
+	 * mapping info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
