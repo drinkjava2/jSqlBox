@@ -45,18 +45,17 @@ public interface SqlTemplateEngine {
 	 *            For example: 
 	 *            Template "delete from ${tb}", use replace("tb","users") method,   will get "delete from users"
 	 *            Template "delete from #{tb}", use replace("tb","users") method,   will cause an Exception
-	 *            Template "delete from ${tb}", use bind("tb","users") method,      will cause an Exception
-	 *            Template "delete from #{tb}", use bind("tb","users") method,      will get "delete from ?"
+	 *            Template "delete from ${tb}", use put("tb","users") method,      will cause an Exception
+	 *            Template "delete from #{tb}", use put("tb","users") method,      will get "delete from ?"
 	 *            </pre>
 	 * 
 	 *            This design is to avoid typing mistake cause a SQL injection
-	 *            security leak, when programmer use replace() or replace0()
-	 *            method, he will aware this is a String direct replace method,
-	 *            not a SQL parameter, SQL parameter always use bind() or
-	 *            bind0() method.
+	 *            security leak, when programmer use replace() or replace0() method,
+	 *            he will aware this is a String direct replace method, not a SQL
+	 *            parameter, SQL parameter always use bind() or bind0() method.
 	 * 
 	 * @return SqlAndParams instance
 	 */
 	public SqlAndParams render(String sqlTemplate, Map<String, Object> paramMap, Set<String> directReplaceNamesSet);
- 
+
 }

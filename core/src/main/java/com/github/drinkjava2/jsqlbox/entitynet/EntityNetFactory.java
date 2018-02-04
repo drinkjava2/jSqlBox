@@ -14,19 +14,27 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.handlers.MapListHandler;
+
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Subclass of EntityNetFactory will in charge of create EntityNet
+ * This is a EntityNetFactory implementation to create a TinyEntityNet
  */
-public interface EntityNetFactory {
+@SuppressWarnings("unchecked")
+public class EntityNetFactory { 
 
 	/** Create a EntityNet instance */
-	public <T> T createEntityNet();
+	public static <T> T createEntityNet() {
+		return (T) (new EntityNet());
+	}
 
-	/** Create a EntityNet instance by given listMap and configs */
-	public <T> T createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs);
+	/** Create a EntityNet instance by given listMap and configs */ 
+	public static <T> T createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
+		return (T) (new EntityNet(listMap, configs));
+	}
 
 	/**
 	 * Create a EntityNet instance, load data from database buy given loadKeyOnly
@@ -39,5 +47,26 @@ public interface EntityNetFactory {
 	 *            TableModel instance
 	 * @return The EntityNet
 	 */
-	public <T> T createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects);
+	public static <T> T createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
+		if (configObjects == null || configObjects.length == 0)
+			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
+		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
+		EntityNet net = new EntityNet();
+		String starOrSharp = loadKeyOnly ? ".##" : ".**";
+		for (TableModel t : models) {
+			List<Map<String, Object>> mapList = null;
+			String alias = t.getAlias();
+			if (StrUtils.isEmpty(alias))
+				alias = t.getTableName();
+			try {
+				mapList = ctx.nQuery(new MapListHandler(SqlBoxContext.netProcessor(t)),
+						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
+			} finally {
+				EntityNetSqlExplainer.removeBindedTableModel(mapList);
+			}
+			net.addMapList(mapList, t);
+		}
+		return (T) net;
+	}
+
 }

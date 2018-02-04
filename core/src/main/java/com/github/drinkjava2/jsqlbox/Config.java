@@ -19,8 +19,6 @@ import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
 import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
-import com.github.drinkjava2.jsqlbox.entitynet.TinyEntityNetFactory;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -39,7 +37,6 @@ public class Config {
 	private static Integer globalBatchSize = 100;
 	private static ConnectionManager globalConnectionManager = null;
 	private static List<SqlInterceptor> globalInterceptors = null;
-	private static EntityNetFactory globalEntityNetFactory = TinyEntityNetFactory.instance;
 	private static SqlBoxContext globalSqlBoxContext = null;
 
 	private SqlTemplateEngine templateEngine = globalTemplateEngine;
@@ -49,7 +46,6 @@ public class Config {
 	private Integer batchSize = globalBatchSize;
 	private ConnectionManager connectionManager = globalConnectionManager;
 	private List<SqlInterceptor> interceptors = globalInterceptors;
-	private EntityNetFactory entityNetFactory = globalEntityNetFactory;
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -114,15 +110,6 @@ public class Config {
 		return this;
 	}
 
-	public EntityNetFactory getEntityNetFactory() {
-		return entityNetFactory;
-	}
-
-	public Config setEntityNetFactory(EntityNetFactory entityNetFactory) {
-		this.entityNetFactory = entityNetFactory;
-		return this;
-	}
-
 	// ===============below is for global switch===========
 	public static SqlTemplateEngine getGlobalTemplateEngine() {
 		return globalTemplateEngine;
@@ -178,14 +165,6 @@ public class Config {
 
 	public static void setGlobalInterceptors(List<SqlInterceptor> globalInterceptors) {
 		Config.globalInterceptors = globalInterceptors;
-	}
-
-	public static EntityNetFactory getGlobalEntityNetFactory() {
-		return globalEntityNetFactory;
-	}
-
-	public static void setGlobalEntityNetFactory(EntityNetFactory globalEntityNetFactory) {
-		Config.globalEntityNetFactory = globalEntityNetFactory;
 	}
 
 	/** Get the global SqlBoxContext */

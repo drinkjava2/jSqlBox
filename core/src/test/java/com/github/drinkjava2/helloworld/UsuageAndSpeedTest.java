@@ -74,23 +74,29 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void speedTest() throws Exception {
 		long keepRepeatTimes = REPEAT_TIMES;
-		REPEAT_TIMES = 100;
+		REPEAT_TIMES = 100;// warm up
+		runTestMethods();
+		REPEAT_TIMES = 800;
+		runTestMethods();
+		REPEAT_TIMES = keepRepeatTimes;
+	}
+
+	private void runTestMethods() throws Exception {
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " REPEAT_TIMES:");
 		runMethod("pureJdbc");
 		runMethod("dbUtilsWithConnMethod");
 		runMethod("dbUtilsNoConnMethod");
-		runMethod("nXxxJdbcStyle");
-		runMethod("iXxxInlineStyle");
-		runMethod("tXxxBasicTemplateStyle");
-		runMethod("tXxxNamedParamTemplateStyle");
-		runMethod("tXxxTemplateAndInlineStyle");
+		runMethod("nXxxStyle");
+		runMethod("iXxxStyle");
+		runMethod("tXxxStyle");
+		runMethod("xXxxStyle");
+		runMethod("xXxxStyle_BasicTemplate");
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
 		runMethod("activeRecordDefaultContext");
-		runMethod("activeRecordUseAnnotaion");
-		runMethod("activeRecordUseText");
-		runMethod("abstractActiveRecord");
-		REPEAT_TIMES = keepRepeatTimes;
+		runMethod("activeSqlAnnotaion");
+		runMethod("activeSqlUseText");
+		runMethod("abstractSqlUseText");
 	}
 
 	public void runMethod(String methodName) throws Exception {
@@ -283,7 +289,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void nXxxJdbcStyle() {
+	public void nXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
@@ -295,7 +301,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void iXxxInlineStyle() {
+	public void iXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.iExecute("insert into users (", //
@@ -311,56 +317,57 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void tXxxBasicTemplateStyle() {
-		SqlBoxContext ctx2 = new SqlBoxContext(dataSource, new Config().setTemplateEngine(BasicSqlTemplate.instance()));
+	public void tXxxStyle() {
+		SqlBoxContext ctx2 = new SqlBoxContext(dataSource);
 		Map<String, Object> params = new HashMap<String, Object>();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			User sam = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
 			params.put("user", sam);
-			ctx2.tExecute(params, "insert into users (name, address) values(#{user.name},#{user.address})");
+			ctx2.tExecute(params, "insert into users (name, address) values(#{user.name},:user.address)");
 			params.put("user", tom);
-			ctx2.tExecute(params, "update users set name=#{user.name}, address=#{user.address}");
+			ctx2.tExecute(params, "update users set name=#{user.name}, address=:user.address");
 			params.clear();
 			params.put("name", "Tom");
 			params.put("addr", "China");
 			Assert.assertEquals(1L,
-					ctx2.tQueryForObject(params, "select count(*) from users where name=#{name} and address=#{addr}"));
+					ctx2.tQueryForObject(params, "select count(*) from users where name=#{name} and address=:addr"));
 			params.put("u", tom);
-			ctx2.tExecute(params, "delete from users where name=#{u.name} or address=#{u.address}");
+			ctx2.tExecute(params, "delete from users where name=:u.name or address=#{u.address}");
 		}
 	}
 
 	@Test
-	public void tXxxTemplateAndInlineStyle() {
+	public void xXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
 			put0("user", user);
-			ctx.tExecute("insert into users (name, address) values(#{user.name},:user.address)");
+			ctx.xExecute("insert into users (name, address) values(#{user.name},:user.address)");
 			put0("user", tom);
-			ctx.tExecute("update users set name=#{user.name}, address=#{user.address}");
+			ctx.xExecute("update users set name=#{user.name}, address=:user.address");
 			Assert.assertEquals(1L,
-					ctx.tQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
+					ctx.xQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
 							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-			ctx.tExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
+			ctx.xExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
 		}
 	}
 
 	@Test
-	public void tXxxNamedParamTemplateStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+	public void xXxxStyle_BasicTemplate() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource, new Config().setTemplateEngine(BasicSqlTemplate.instance()));
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
 			put0("user", user);
-			ctx.tExecute("insert into users (name, address) values(:user.name,:user.address)");
-			ctx.tExecute("update users set name=#{user.name}, address=:user.address" + put0("user", tom));
+			ctx.xExecute("insert into users (name, address) values(#{user.name},#{user.address})");
+			put0("user", tom);
+			ctx.xExecute("update users set name=#{user.name}, address=#{user.address}");
 			Assert.assertEquals(1L,
-					ctx.tQueryForObject("select count(*) from users where ${col}=:name and address=:addr",
+					ctx.xQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
 							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-			ctx.tExecute("delete from users where name=:u.name or address=:u.address", put0("u", tom));
+			ctx.xExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
 		}
 	}
 
@@ -412,7 +419,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void activeRecordUseAnnotaion() {
+	public void activeSqlAnnotaion() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
 		User2 user = new User2();
@@ -427,7 +434,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void activeRecordUseText() {
+	public void activeSqlUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
 		User2 user = new User2();
@@ -442,7 +449,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void abstractActiveRecord() {
+	public void abstractSqlUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		Config.setGlobalSqlBoxContext(ctx);// use global default context
 		AbstractUser user = ActiveRecord.create(AbstractUser.class);

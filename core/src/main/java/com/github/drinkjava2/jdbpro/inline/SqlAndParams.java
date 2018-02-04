@@ -30,6 +30,8 @@ public class SqlAndParams {
 	 * Sql parameters
 	 */
 	private Object[] params;
+	
+	private Class<?> handlerClass;
 
 	public SqlAndParams() {
 		// default Constructor
@@ -56,6 +58,14 @@ public class SqlAndParams {
 
 	public void setParams(Object[] params) {
 		this.params = params;
+	}
+
+	public Class<?> getHandlerClass() {
+		return handlerClass;
+	}
+
+	public void setHandlerClass(Class<?> handlerClass) {
+		this.handlerClass = handlerClass;
 	}
 
 	public String getDebugInfo() {

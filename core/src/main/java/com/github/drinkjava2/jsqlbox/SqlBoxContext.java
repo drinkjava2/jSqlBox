@@ -26,9 +26,9 @@ import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetSqlExplainer;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
 
 /**
  * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
@@ -44,20 +44,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** sqlBoxClassSuffix use to identify the SqlBox configuration class */
 	public static final String sqlBoxClassSuffix = "SqlBox";// NOSONAR
 
-	/** The default EntityNetFactory instance */
-	protected EntityNetFactory entityNetFactory = Config.getGlobalEntityNetFactory();
-
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
-	 * can use setDialect() method to change to other dialect, to keep
-	 * thread-safe, only subclass can access this variant
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
+	 * use setDialect() method to change to other dialect, to keep thread-safe, only
+	 * subclass can access this variant
 	 */
-	protected Dialect dialect = Config.getGlobalDialect();
+	protected Dialect dialect;
 
 	public SqlBoxContext() {
 		super();
-		this.connectionManager = Config.getGlobalConnectionManager();
 		this.dialect = Config.getGlobalDialect();
+		this.connectionManager = Config.getGlobalConnectionManager();
 		this.sqlTemplateEngine = Config.getGlobalTemplateEngine();
 		this.allowShowSQL = Config.getGlobalAllowSqlSql();
 		this.logger = Config.getGlobalLogger();
@@ -162,8 +159,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	// ================================================================
 	/**
-	 * Return an empty "" String and save a ThreadLocal netConfig object array
-	 * in current thread, it will be used by SqlBoxContext's query methods.
+	 * Return an empty "" String and save a ThreadLocal netConfig object array in
+	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String netConfig(Object... netConfig) {
 		getThreadedSqlInterceptors().add(new EntityNetSqlExplainer(netConfig));
@@ -179,15 +176,15 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Create a EntityNet by given configurations, load all columns
 	 */
 	public <T> T netLoad(Object... configObjects) {
-		return entityNetFactory.createEntityNet(this, false, configObjects);
+		return EntityNetFactory.createEntityNet(this, false, configObjects);
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to
-	 * improve loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
+	 * loading speed
 	 */
 	public <T> T netLoadSketch(Object... configObjects) {
-		return entityNetFactory.createEntityNet(this, true, configObjects);
+		return EntityNetFactory.createEntityNet(this, true, configObjects);
 	}
 
 	/** Create a EntityNet by given list and netConfigs */
@@ -195,7 +192,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
 		if (result == null || result.length == 0)
 			throw new SqlBoxException("No entity class config found");
-		return entityNetFactory.createEntityNet(listMap, result);
+		return EntityNetFactory.createEntityNet(listMap, result);
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
@@ -247,8 +244,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new
-	 * one and bind on entityBean
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
+	 * and bind on entityBean
 	 */
 	public SqlBox getSqlBox(Object entityBean) {
 		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
@@ -274,21 +271,35 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}
 
-	/** Query for a Entity set */
+	/** Shortcut method, query for a Entity set */
 	public <T> Set<T> nQueryForEntitySet(Class<T> entityClass, String sql, Object... params) {
 		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
 		EntityNet net = this.netCreate(mapList1);
 		return net.getAllEntitySet(entityClass);
 	}
 
-	/** Query for a Entity list */
+	/** Shortcut method, query for a Entity list */
 	public <T> List<T> nQueryForEntityList(Class<T> entityClass, String sql, Object... params) {
 		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
 		EntityNet net = this.netCreate(mapList1);
 		return net.getAllEntityList(entityClass);
 	}
 
-	/** Template style query for a Entity set */
+	/** Shortcut method, query for a Entity set */
+	public <T> Set<T> iQueryForEntitySet(Class<T> entityClass, String sql) {
+		List<Map<String, Object>> mapList1 = this.iQuery(new MapListHandler(netProcessor(entityClass)), sql);
+		EntityNet net = this.netCreate(mapList1);
+		return net.getAllEntitySet(entityClass);
+	}
+
+	/** Shortcut method, query for a Entity list */
+	public <T> List<T> iQueryForEntityList(Class<T> entityClass, String sql) {
+		List<Map<String, Object>> mapList1 = this.iQuery(new MapListHandler(netProcessor(entityClass)), sql);
+		EntityNet net = this.netCreate(mapList1);
+		return net.getAllEntityList(entityClass);
+	}
+
+	/** Shortcut method, template style query for a Entity set */
 	public <T> Set<T> tQueryForEntitySet(Class<T> entityClass, Map<String, Object> paramMap, String... templateSQL) {
 		List<Map<String, Object>> mapList1 = this.tQuery(paramMap, new MapListHandler(netProcessor(entityClass)),
 				templateSQL);
@@ -296,10 +307,24 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return net.getAllEntitySet(entityClass);
 	}
 
-	/** Template style query for a Entity set */
+	/** Shortcut method, template style query for a Entity list */
 	public <T> List<T> tQueryForEntityList(Class<T> entityClass, Map<String, Object> paramMap, String... templateSQL) {
 		List<Map<String, Object>> mapList1 = this.tQuery(paramMap, new MapListHandler(netProcessor(entityClass)),
 				templateSQL);
+		EntityNet net = this.netCreate(mapList1);
+		return net.getAllEntityList(entityClass);
+	}
+
+	/** Shortcut method, template style query for a Entity set */
+	public <T> Set<T> xQueryForEntitySet(Class<T> entityClass, String... templateSQL) {
+		List<Map<String, Object>> mapList1 = this.xQuery(new MapListHandler(netProcessor(entityClass)), templateSQL);
+		EntityNet net = this.netCreate(mapList1);
+		return net.getAllEntitySet(entityClass);
+	}
+
+	/** Shortcut method, template style query for a Entity list */
+	public <T> List<T> xQueryForEntityList(Class<T> entityClass, String... templateSQL) {
+		List<Map<String, Object>> mapList1 = this.xQuery(new MapListHandler(netProcessor(entityClass)), templateSQL);
 		EntityNet net = this.netCreate(mapList1);
 		return net.getAllEntityList(entityClass);
 	}

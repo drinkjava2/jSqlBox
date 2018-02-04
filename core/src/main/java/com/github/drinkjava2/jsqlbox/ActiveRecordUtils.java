@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
@@ -31,13 +33,13 @@ import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
  * @author Yong Zhu
  * @since 1.0.1
  */
-public abstract class ActiveRecordUtils {
+public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private ActiveRecordUtils() {
 		// private Constructor
 	}
 
-	private static final Map<String, Class<?>> subClassImplCache = new ConcurrentHashMap<String, Class<?>>();
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
+	private static final Map<String, SqlAndParams> methodSQLCache = new ConcurrentHashMap<String, SqlAndParams>();
 
 	/**
 	 * This is the method body to build an instance based on abstract class extended
@@ -48,8 +50,8 @@ public abstract class ActiveRecordUtils {
 	 */
 	public static Class<?> createChildClass(Class<?> abstractClass) {
 		String fullClassName = abstractClass.getName() + "_AutoChild";
-		if (subClassImplCache.containsKey(fullClassName))
-			return subClassImplCache.get(fullClassName);
+		if (classExistCache.containsKey(fullClassName))
+			return classExistCache.get(fullClassName);
 		String src = TextUtils.getJavaSourceCodeUTF8(abstractClass);
 		if (StrUtils.isEmpty(src))
 			throw new SqlBoxException("No Java source code found for class '" + abstractClass.getName() + "'");
@@ -90,19 +92,19 @@ public abstract class ActiveRecordUtils {
 		String childClassSrc = sb.toString();
 		Class<?> childClass = null;
 		childClass = DynamicCompileEngine.instance.javaCodeToClass(fullClassName, childClassSrc);
-		subClassImplCache.put(fullClassName, childClass);
+		classExistCache.put(fullClassName, childClass);
 		TextUtils.javaFileCache.put(fullClassName, childClassSrc);
 		return childClass;
 	}
 
 	/**
-	 * The real method body do the guess operation to access database, based on
-	 * current method @Sql annotated String or Text String and parameters, guess a
-	 * best fit query/update/delete/execute method to run
+	 * Execute operation to access database, based on current method @Sql annotated
+	 * String or Text String and parameters, guess a best fit
+	 * query/update/delete/execute method to run
 	 * 
 	 * @param ac
 	 * @param params
-	 * @return
+	 * @return <T> T
 	 */
 	@SuppressWarnings("all")
 	protected static <T> T doGuess(ActiveRecord ac, Object... params) {// NOSONAR
@@ -116,48 +118,16 @@ public abstract class ActiveRecordUtils {
 		}
 		String callerClassName = stacks[callerPos].getClassName();
 		String callerMethodName = stacks[callerPos].getMethodName();
-		Class<?> callerClass = subClassImplCache.get(callerClassName);
-		try {
-			if (callerClass == null)
-				callerClass = Class.forName(callerClassName);
-		} catch (ClassNotFoundException e) {
-			throw new SqlBoxException(e);
-		}
-		Method callerMethod = null;
-		Method[] methods = callerClass.getMethods();
-		for (Method method : methods)
-			if (callerMethodName != null && callerMethodName.equals(method.getName())) {
-				callerMethod = method;
-				break;
-			}
+		Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
+		if (callerClass == null)
+			throw new SqlBoxException("Can not find class '" + callerClassName + "'");
+		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		Annotation[] annos = callerMethod.getAnnotations();
-		Sql sqlAnno = null;
-		Class<?> handlerClass = null;
-		for (Annotation anno : annos) {
-			if (Sql.class.equals(anno.annotationType()))
-				sqlAnno = (Sql) anno;
-			if (Handler.class.equals(anno.annotationType())) {
-				handlerClass = ((Handler) anno).value();
-			}
-		}
-		String sql = null;
-		if (sqlAnno != null)
-			sql = sqlAnno.value()[0];
-		else {
-			String src = null;
-			try {
-				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
-			} catch (Exception e) {
-				throw new SqlBoxException("Method '" + callerMethodName + "' in '" + callerClassName
-						+ "' have no Sql annotation or text.");
-			}
-			sql = StrUtils.substringAfter(src, callerMethodName + "(");
-			sql = StrUtils.substringBetween(sql, "/*-", "*/");
-		}
-		if (sql != null)
-			sql = sql.trim();
+
+		SqlAndParams sp = getSQLbyClassAndMethodName(callerClassName, callerMethodName, callerMethod);
+		String sql = sp.getSql();
+		Class<?> handlerClass = sp.getHandlerClass();
 		char dotype;
 		if (StrUtils.startsWithIgnoreCase(sql, "select"))
 			dotype = 's';
@@ -224,6 +194,47 @@ public abstract class ActiveRecordUtils {
 				o = ac.ctx().nExecute(resultSetHandler, sql, params);
 			return (T) o;
 		}
+	}
+
+	private static SqlAndParams getSQLbyClassAndMethodName(String callerClassName, String callerMethodName,
+			Method callerMethod) {
+		String key = callerClassName + "@#$^!" + callerMethodName;
+		SqlAndParams result = methodSQLCache.get(key);
+		if (result != null)
+			return result;
+		else
+			result = new SqlAndParams();
+
+		Annotation[] annos = callerMethod.getAnnotations();
+		Sql sqlAnno = null;
+		Class<?> handlerClass = null;
+		for (Annotation anno : annos) {
+			if (Sql.class.equals(anno.annotationType()))
+				sqlAnno = (Sql) anno;
+			if (Handler.class.equals(anno.annotationType())) {
+				handlerClass = ((Handler) anno).value();
+			}
+		}
+		String sql = null;
+		if (sqlAnno != null)
+			sql = sqlAnno.value()[0];
+		else {
+			String src = null;
+			try {
+				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
+			} catch (Exception e) {
+				throw new SqlBoxException("Method '" + callerMethodName + "' in '" + callerClassName
+						+ "' have no Sql annotation or text.");
+			}
+			sql = StrUtils.substringAfter(src, callerMethodName + "(");
+			sql = StrUtils.substringBetween(sql, "/*-", "*/");
+		}
+		if (sql != null)
+			sql = sql.trim();
+		result.setSql(sql);
+		result.setHandlerClass(handlerClass);
+		methodSQLCache.put(key, result);
+		return result;
 	}
 
 	private static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName,
