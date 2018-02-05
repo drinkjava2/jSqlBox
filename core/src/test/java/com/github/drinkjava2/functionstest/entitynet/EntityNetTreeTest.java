@@ -13,7 +13,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
 
-public class EntityNetTreeDemo extends TestBase {
+public class EntityNetTreeTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();

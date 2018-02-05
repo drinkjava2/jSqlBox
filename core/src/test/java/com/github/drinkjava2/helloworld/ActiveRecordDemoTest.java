@@ -11,7 +11,6 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -19,7 +18,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * This demo show jSqlBox's ActiveRecord and jDialects' DDL, pagination and
  * translate feature.
  */
-public class ActiveRecordDemo {
+public class ActiveRecordDemoTest {
 
 	@Table(name = "users")
 	public static class UserEntity extends ActiveRecord {
@@ -95,7 +94,7 @@ public class ActiveRecordDemo {
 		// ds.setPassword("root888");
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		Config.setGlobalSqlBoxContext(ctx);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		String[] ddlArray = ctx.getDialect().toDropAndCreateDDL(UserEntity.class);
 		for (String ddl : ddlArray)

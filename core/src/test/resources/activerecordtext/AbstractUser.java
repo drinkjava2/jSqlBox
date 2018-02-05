@@ -15,9 +15,8 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
  * 
  * @author Yong Zhu
  */
-public abstract class AbstractUser extends User2 {
-	// some methods are extended from SampleUser and User and ActiveRecord 
-
+public abstract class AbstractUser extends User2 { 
+	
 	@Sql("update users set name=?, address=?")
 	public void updateAllUser(String name, String address) {
 		this.guess(name, address);

@@ -35,12 +35,12 @@ import com.github.drinkjava2.jdialects.id.UUID25Generator;
 import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jdialects.id.UUID36Generator;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.Config;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * Unit test for SortedUUIDGenerator
  */
-public class IdGeneratorTest1 extends TestBase {
+public class IdGeneratorTest extends TestBase {
 
 	public static class PkeyEntity {
 		@Id
@@ -249,7 +249,7 @@ public class IdGeneratorTest1 extends TestBase {
 
 	@Test
 	public void testIdentityGenerator() {
-		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		TableModel table = new TableModel("testIdentity");
 		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);

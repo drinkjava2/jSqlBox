@@ -54,7 +54,10 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
-	public static final DbProLogger defaultlogger = DbProLogger.getLog(ImprovedQueryRunner.class);
+	protected static DbProLogger globalLogger = DbProLogger.getLog(ImprovedQueryRunner.class);
+
+	protected static Integer globalBatchSize = 100;
+
 	/**
 	 * The ConnectionManager determine how to get and release connections from
 	 * DataSource or ThreadLocal. only allow initialised by constructor
@@ -71,13 +74,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Logger of current ImprovedQueryRunner, to keep thread-safe, only allow
 	 * initialised by constructor
 	 */
-	protected DbProLogger logger = defaultlogger;
+	protected DbProLogger logger = globalLogger;
 
 	/**
 	 * Default Batch Size, current fixed to 100, only allow initialised by
 	 * constructor
 	 */
-	protected Integer batchSize = 100;
+	protected Integer batchSize = globalBatchSize;
 
 	/** SqlInterceptors, only allow initialised by constructor */
 	protected List<SqlInterceptor> sqlInterceptors = null;
@@ -646,28 +649,29 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return logger;
 	}
 
-	/**
-	 * Set the global logger, Note: this is not a thread-safe method, should only
-	 * call once at start of program
-	 */
-	public void setGlobalLogger(DbProLogger logger) {
-		this.logger = logger;
-	}
-
-	/**
-	 * Set the global batch size for batch operations, Note: this is not a
-	 * thread-safe method, should only call once at start of program
-	 */
-	public void setGlobalBatchSize(Integer batchSize) {
-		this.batchSize = batchSize;
-	}
-
 	public Integer getBatchSize() {
 		return batchSize;
 	}
 
 	public boolean isBatchEnabled() {
 		return batchEnabled.get();
+	}
+
+	// =============global getter & setter=======
+	public static DbProLogger getGlobalLogger() {
+		return globalLogger;
+	}
+
+	public static void setGlobalLogger(DbProLogger globalLogger) {
+		ImprovedQueryRunner.globalLogger = globalLogger;
+	}
+
+	public static Integer getGlobalBatchSize() {
+		return globalBatchSize;
+	}
+
+	public static void setGlobalBatchSize(Integer globalBatchSize) {
+		ImprovedQueryRunner.globalBatchSize = globalBatchSize;
 	}
 
 }

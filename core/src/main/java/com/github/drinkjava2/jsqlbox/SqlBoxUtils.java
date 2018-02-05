@@ -126,7 +126,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 		SqlBox box = getBindedBox(entity);
 		if (box != null)
 			return box;
-		return SqlBoxUtils.findAndBindSqlBox(Config.getGlobalSqlBoxContext(), entity);
+		return SqlBoxUtils.findAndBindSqlBox(SqlBoxContext.getGlobalSqlBoxContext(), entity);
 	}
 
 	/**
@@ -183,10 +183,10 @@ public abstract class SqlBoxUtils {// NOSONAR
 		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
-			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.sqlBoxClassSuffix);
+			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.getGlobalsqlboxsuffix());
 		if (boxClass == null)
 			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + "$"
-					+ entityOrBoxClass.getSimpleName() + SqlBoxContext.sqlBoxClassSuffix);
+					+ entityOrBoxClass.getSimpleName() + SqlBoxContext.getGlobalsqlboxsuffix());
 		if (boxClass != null && !SqlBox.class.isAssignableFrom((Class<?>) boxClass))
 			boxClass = null;
 		SqlBox box = null;

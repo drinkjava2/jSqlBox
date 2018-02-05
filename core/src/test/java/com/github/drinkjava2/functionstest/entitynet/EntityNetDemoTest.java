@@ -26,7 +26,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path; 
 
-public class EntityNetDemo extends TestBase {
+public class EntityNetDemoTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();

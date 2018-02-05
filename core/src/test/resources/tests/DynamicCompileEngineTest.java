@@ -6,13 +6,16 @@ import org.junit.Test;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 
 @SuppressWarnings("all")
 public class DynamicCompileEngineTest {
 	/*-	   
-	package com.foo.bar; 	 
+	package com.foo.bar; 
+	import org.apache.commons.dbutils.handlers.MapListHandler;	 
 	 public class DynaClass { 
 	   public String toString() { 
+	     MapListHandler handler=null;
 	     return  "Hello, I am a dog"; 
 		 } 
 	 } 	
@@ -20,6 +23,7 @@ public class DynamicCompileEngineTest {
 
 	@Test
 	public void doTest() throws IllegalAccessException, InstantiationException {
+		MapListHandler handler=null;
 		String fullName = "com.foo.bar.DynaClass";
 		String src = TextUtils.getJavaSourceCodeUTF8(DynamicCompileEngineTest.class);
 		src = StrUtils.substringBetween(src, "/*-", "*/");

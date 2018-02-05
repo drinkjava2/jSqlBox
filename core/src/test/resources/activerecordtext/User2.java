@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
-import org.junit.Test;
 
 import com.github.drinkjava2.helloworld.UsuageAndSpeedTest.User;
 import com.github.drinkjava2.jsqlbox.TextUtils;
@@ -62,9 +61,8 @@ public class User2 extends User {
 	         and address=:address
 	 */
 
-	@Test
-	public void doTestReadSelfSourceCode() {
-		String javaSourceCode = TextUtils.getJavaSourceCodeUTF8(this.getClass());
+	public static void main(String[] args) {
+		String javaSourceCode = TextUtils.getJavaSourceCodeUTF8(User2.class);
 		System.out.println(javaSourceCode);
 		Assert.assertTrue(javaSourceCode.length() > 0);
 	}

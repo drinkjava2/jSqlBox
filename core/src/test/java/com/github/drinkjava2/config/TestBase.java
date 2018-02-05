@@ -18,7 +18,6 @@ import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -45,14 +44,14 @@ public class TestBase {
 		// dataSource.setConnectionTimeout(2000);
 		dialect = Dialect.guessDialect(dataSource);
 		ctx = new SqlBoxContext(dataSource);
-		Config.setGlobalSqlBoxContext(ctx);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 	}
 
 	@After
 	public void cleanUp() {
 		// dataSource.close();
 		BeanBox.defaultContext.close();
-		Config.setGlobalSqlBoxContext(null);
+		SqlBoxContext.setGlobalSqlBoxContext(null);
 	}
 
 	public void executeDDLs(String[] ddls) {

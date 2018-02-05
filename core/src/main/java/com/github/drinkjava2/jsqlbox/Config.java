@@ -14,9 +14,7 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.List;
 
 import com.github.drinkjava2.jdbpro.DbProLogger;
-import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
-import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -29,23 +27,14 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.0.1
  */
-public class Config {
-	private static SqlTemplateEngine globalTemplateEngine = NamedParamSqlTemplate.instance();
-	private static DbProLogger globalLogger = ImprovedQueryRunner.defaultlogger;
-	private static Boolean globalAllowSqlSql = false;
-	private static Dialect globalDialect = null;
-	private static Integer globalBatchSize = 100;
-	private static ConnectionManager globalConnectionManager = null;
-	private static List<SqlInterceptor> globalInterceptors = null;
-	private static SqlBoxContext globalSqlBoxContext = null;
-
-	private SqlTemplateEngine templateEngine = globalTemplateEngine;
-	private DbProLogger logger = globalLogger;
-	private Boolean allowSqlSql = globalAllowSqlSql;
-	private Dialect dialect = globalDialect;
-	private Integer batchSize = globalBatchSize;
-	private ConnectionManager connectionManager = globalConnectionManager;
-	private List<SqlInterceptor> interceptors = globalInterceptors;
+public class Config { 
+	private SqlTemplateEngine templateEngine = SqlBoxContext.getGlobalTemplateEngine();
+	private DbProLogger logger = SqlBoxContext.getGlobalLogger();
+	private Boolean allowSqlSql = SqlBoxContext.getGlobalAllowShowSql();
+	private Dialect dialect = SqlBoxContext.getGlobalDialect();
+	private Integer batchSize = SqlBoxContext.getGlobalBatchSize();
+	private ConnectionManager connectionManager = SqlBoxContext.getGlobalConnectionManager();
+	private List<SqlInterceptor> interceptors = SqlBoxContext.getGlobalInterceptors();
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -108,82 +97,6 @@ public class Config {
 	public Config setInterceptors(List<SqlInterceptor> interceptors) {
 		this.interceptors = interceptors;
 		return this;
-	}
-
-	// ===============below is for global switch===========
-	public static SqlTemplateEngine getGlobalTemplateEngine() {
-		return globalTemplateEngine;
-	}
-
-	public static void setGlobalTemplateEngine(SqlTemplateEngine globalTemplateEngine) {
-		Config.globalTemplateEngine = globalTemplateEngine;
-	}
-
-	public static DbProLogger getGlobalLogger() {
-		return globalLogger;
-	}
-
-	public static void setGlobalLogger(DbProLogger globalLogger) {
-		Config.globalLogger = globalLogger;
-	}
-
-	public static Boolean getGlobalAllowSqlSql() {
-		return globalAllowSqlSql;
-	}
-
-	public static void setGlobalAllowSqlSql(Boolean globalAllowSqlSql) {
-		Config.globalAllowSqlSql = globalAllowSqlSql;
-	}
-
-	public static Dialect getGlobalDialect() {
-		return globalDialect;
-	}
-
-	public static void setGlobalDialect(Dialect globalDialect) {
-		Config.globalDialect = globalDialect;
-	}
-
-	public static Integer getGlobalBatchSize() {
-		return globalBatchSize;
-	}
-
-	public static void setGlobalBatchSize(Integer globalBatchSize) {
-		Config.globalBatchSize = globalBatchSize;
-	}
-
-	public static ConnectionManager getGlobalConnectionManager() {
-		return globalConnectionManager;
-	}
-
-	public static void setGlobalConnectionManager(ConnectionManager globalConnectionManager) {
-		Config.globalConnectionManager = globalConnectionManager;
-	}
-
-	public static List<SqlInterceptor> getGlobalInterceptors() {
-		return globalInterceptors;
-	}
-
-	public static void setGlobalInterceptors(List<SqlInterceptor> globalInterceptors) {
-		Config.globalInterceptors = globalInterceptors;
-	}
-
-	/** Get the global SqlBoxContext */
-	public static SqlBoxContext getGlobalSqlBoxContext() {
-		return globalSqlBoxContext;
-	}
-
-	/** Get the global SqlBoxContext, equal to getGlobalSqlBoxContext() method */
-	public static SqlBoxContext ctx() {// NOSONAR
-		return globalSqlBoxContext;
-	}
-
-	/**
-	 * Set a global SqlBoxContext instance, if an ActiveRecord object did not set
-	 * SqlBoxContext property, it will use this global SqlBoxContext instance to do
-	 * JDBC operation
-	 */
-	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {
-		Config.globalSqlBoxContext = globalSqlBoxContext;
-	}
+	} 
 
 }

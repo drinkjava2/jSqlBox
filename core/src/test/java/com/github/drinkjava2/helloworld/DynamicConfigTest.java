@@ -20,11 +20,11 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * ActiveRecordDemo of jSqlBox configurations
+ * ActiveRecordDemoTest of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -71,7 +71,7 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 
 		TableModel t = new UserDemoSqlBox().getTableModel();
 

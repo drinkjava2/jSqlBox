@@ -14,18 +14,17 @@ package com.github.drinkjava2.helloworld;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * ActiveRecordDemo of jSqlBox configurations
+ * ActiveRecordDemoTest of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 
-public class HelloWorld {
+public class HelloWorldTest {
 	private String name;
 
 	public String getName() {
@@ -47,15 +46,15 @@ public class HelloWorld {
 		ds.setConnectionTimeout(2000);
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		Config.setGlobalAllowSqlSql(true);
-		String[] ddls = ctx.getDialect().toCreateDDL(HelloWorld.class);
+		SqlBoxContext.setGlobalAllowShowSql(true);
+		String[] ddls = ctx.getDialect().toCreateDDL(HelloWorldTest.class);
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
-		HelloWorld hello = new HelloWorld();
-		hello.setName("ActiveRecordDemo");
+		HelloWorldTest hello = new HelloWorldTest();
+		hello.setName("ActiveRecordDemoTest");
 		ctx.insert(hello);
-		Assert.assertEquals("ActiveRecordDemo", ctx.nQueryForString("select name from helloworld"));
+		Assert.assertEquals("ActiveRecordDemoTest", ctx.nQueryForString("select name from HelloWorldTest"));
 		ds.close();
 	}
 }

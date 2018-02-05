@@ -26,12 +26,12 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUIDAny;
 import com.github.drinkjava2.jdialects.annotation.jpa.GeneratedValue;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.Config;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * Unit test for SortedUUIDGenerator
  */
-public class IdGeneratorTest2 extends TestBase {
+public class UUIDGeneratorsTest extends TestBase {
 
 	public static class UUID25Entity {
 		@GeneratedValue(strategy = GenerationType.UUID25)
@@ -73,7 +73,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUID25() {
-		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID25Entity.class));
 		UUID25Entity entity = new UUID25Entity();
 		ctx.insert(entity);
@@ -119,7 +119,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUID32() {
-		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID32Entity.class));
 		UUID32Entity entity = new UUID32Entity();
 		ctx.insert(entity);
@@ -165,7 +165,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUID36() {
-		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID36Entity.class));
 		UUID36Entity entity = new UUID36Entity();
 		ctx.insert(entity);
@@ -213,7 +213,7 @@ public class IdGeneratorTest2 extends TestBase {
 
 	@Test
 	public void testUUIDAny() {
-		Config.setGlobalAllowSqlSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		dropAndCreateDatabase(TableModelUtils.entity2Model(UUIDAnyEntity.class));
 		UUIDAnyEntity entity = new UUIDAnyEntity();
 		ctx.insert(entity);

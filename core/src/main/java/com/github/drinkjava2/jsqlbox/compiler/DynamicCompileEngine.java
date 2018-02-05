@@ -1,6 +1,8 @@
 package com.github.drinkjava2.jsqlbox.compiler;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -13,6 +15,9 @@ import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
+
+import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 @SuppressWarnings("all")
 public class DynamicCompileEngine {
@@ -27,6 +32,29 @@ public class DynamicCompileEngine {
 		this.buildClassPath();
 	}
 
+	private static String readFileToString(String filename) {
+		String result = null;
+		File file = new File(filename);
+		FileReader reader = null;
+		try {
+			reader = new FileReader(file);
+			char[] chars = new char[(int) file.length()];
+			reader.read(chars);
+			result = new String(chars);
+			reader.close();
+		} catch (IOException e) {
+			throw new SqlBoxException("Error happen when open file '" + filename + "'", e);
+		} finally {
+			if (reader != null)
+				try {
+					reader.close();
+				} catch (IOException e) {
+					throw new SqlBoxException("Error happen when closing file '" + filename + "'", e);
+				}
+		}
+		return result;
+	}
+
 	private void buildClassPath() {
 		this.classpath = null;
 		StringBuilder sb = new StringBuilder();
@@ -35,9 +63,24 @@ public class DynamicCompileEngine {
 			sb.append(p).append(File.pathSeparator);
 		}
 		this.classpath = sb.toString();
+		// Deal class path issue caused by run "mvn test" command
+		if (classpath.indexOf("surefire/surefirebooter") > 0) {
+			String path = StrUtils.substringAfter(classpath, "/");
+			path = StrUtils.substringBeforeLast(path, ";");
+			String mavenJarPath = readFileToString(path);
+			mavenJarPath = StrUtils.substringBetween(mavenJarPath, "Class-Path: ", "Main-Class: ");
+			mavenJarPath = StrUtils.replace(mavenJarPath, "\r\n ", "").trim();
+			mavenJarPath = StrUtils.replace(mavenJarPath, " ", ";");
+			classpath = StrUtils.replace(mavenJarPath, "file:/", "");
+		}
 	}
 
 	public Class<?> javaCodeToClass(String fullClassName, String javaCode) {
+		if (StrUtils.isEmpty(fullClassName))
+			throw new SqlBoxException("Can not compile class with empty name");
+		if (StrUtils.isEmpty(javaCode))
+			throw new SqlBoxException("Can not compile class " + fullClassName + " with empty Java source code");
+
 		Class<?> result = compiledClassCache.get(fullClassName);
 		if (result != null)
 			return result;
@@ -72,7 +115,7 @@ public class DynamicCompileEngine {
 			for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
 				error = error + compilePrint(diagnostic);
 			}
-			throw new RuntimeException(error);
+			throw new SqlBoxException(error + " \r\r\r <<< Java Source Code Compile Error \r" + javaCode);
 		}
 	}
 
@@ -84,15 +127,15 @@ public class DynamicCompileEngine {
 	}
 
 	private String compilePrint(Diagnostic diagnostic) {
-		System.out.println("Code:" + diagnostic.getCode());
-		System.out.println("Kind:" + diagnostic.getKind());
-		System.out.println("Position:" + diagnostic.getPosition());
-		System.out.println("Start Position:" + diagnostic.getStartPosition());
-		System.out.println("End Position:" + diagnostic.getEndPosition());
-		System.out.println("Source:" + diagnostic.getSource());
-		System.out.println("Message:" + diagnostic.getMessage(null));
-		System.out.println("LineNumber:" + diagnostic.getLineNumber());
-		System.out.println("ColumnNumber:" + diagnostic.getColumnNumber());
+		// System.out.println("Code:" + diagnostic.getCode());
+		// System.out.println("Kind:" + diagnostic.getKind());
+		// System.out.println("Position:" + diagnostic.getPosition());
+		// System.out.println("Start Position:" + diagnostic.getStartPosition());
+		// System.out.println("End Position:" + diagnostic.getEndPosition());
+		// System.out.println("Source:" + diagnostic.getSource());
+		// System.out.println("Message:" + diagnostic.getMessage(null));
+		// System.out.println("LineNumber:" + diagnostic.getLineNumber());
+		// System.out.println("ColumnNumber:" + diagnostic.getColumnNumber());
 		StringBuffer res = new StringBuffer();
 		res.append("Code:[" + diagnostic.getCode() + "]\n");
 		res.append("Kind:[" + diagnostic.getKind() + "]\n");
@@ -105,4 +148,5 @@ public class DynamicCompileEngine {
 		res.append("ColumnNumber:[" + diagnostic.getColumnNumber() + "]\n");
 		return res.toString();
 	}
+
 }

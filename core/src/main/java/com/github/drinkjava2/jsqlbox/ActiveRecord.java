@@ -72,7 +72,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public SqlBox box() {
 		if (box == null)
-			this.bindBox(SqlBoxUtils.createSqlBox(Config.getGlobalSqlBoxContext(), this.getClass()));
+			this.bindBox(SqlBoxUtils.createSqlBox(SqlBoxContext.getGlobalSqlBoxContext(), this.getClass()));
 		return box;
 	}
 
@@ -101,7 +101,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public SqlBoxContext ctx() {
 		SqlBox theBox = box();
 		if (theBox.getContext() == null)
-			theBox.setContext(Config.getGlobalSqlBoxContext());
+			theBox.setContext(SqlBoxContext.getGlobalSqlBoxContext());
 		return theBox.getContext();
 	}
 
@@ -181,8 +181,8 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	/**
-	 * Based on current method @Sql annotated String or Text String and
-	 * parameters, guess a best fit query/update/delete/execute method to run
+	 * Based on current method @Sql annotated String or Text String and parameters,
+	 * guess a best fit query/update/delete/execute method to run
 	 */
 	public <T> T guess(Object... params) {// NOSONAR
 		return ActiveRecordUtils.doGuess(this, params);
@@ -193,7 +193,9 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return null;
 	}
 
-
+	/**
+	 * Create a subClass instance of a abstract ActiveRecord class
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T create(Class<?> abstractClass) {
 		Class<?> childClass = ActiveRecordUtils.createChildClass(abstractClass);
@@ -204,6 +206,10 @@ public class ActiveRecord implements ActiveRecordSupport {
 		}
 	}
 
+	/**
+	 * Create a subClass instance of a abstract ActiveRecord class and set it's
+	 * SqlBoxContext property
+	 */
 	public static <T> T create(SqlBoxContext ctx, Class<?> abstractClass) {
 		T entity = create(abstractClass);
 		SqlBoxUtils.findAndBindSqlBox(ctx, entity);

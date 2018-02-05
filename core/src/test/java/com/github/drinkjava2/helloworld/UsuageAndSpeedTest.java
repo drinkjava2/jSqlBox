@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
@@ -46,6 +47,7 @@ import activerecordtext.AbstractUser;
  */
 public class UsuageAndSpeedTest {
 	static long REPEAT_TIMES = 1;
+	static boolean PRINT_TIMEUSED = false;
 
 	protected HikariDataSource dataSource;
 
@@ -56,9 +58,10 @@ public class UsuageAndSpeedTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-		Config.setGlobalAllowSqlSql(false);
+		SqlBoxContext.setGlobalAllowShowSql(false);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		Config.setGlobalSqlBoxContext(null);
+		SqlBoxContext.setGlobalSqlBoxContext(null);
+		Dialect.setAllowShowDialectLog(false);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
 			try {
 				ctx.nExecute(ddl);
@@ -73,16 +76,17 @@ public class UsuageAndSpeedTest {
 
 	@Test
 	public void speedTest() throws Exception {
-		long keepRepeatTimes = REPEAT_TIMES;
-		REPEAT_TIMES = 100;// warm up
+		PRINT_TIMEUSED = false;
+		REPEAT_TIMES = 50;// warm up
 		runTestMethods();
-		REPEAT_TIMES = 800;
+		PRINT_TIMEUSED = true;
+		REPEAT_TIMES = 200;
+		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 		runTestMethods();
-		REPEAT_TIMES = keepRepeatTimes;
+		PRINT_TIMEUSED = false;
 	}
 
 	private void runTestMethods() throws Exception {
-		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " REPEAT_TIMES:");
 		runMethod("pureJdbc");
 		runMethod("dbUtilsWithConnMethod");
 		runMethod("dbUtilsNoConnMethod");
@@ -105,7 +109,8 @@ public class UsuageAndSpeedTest {
 		m.invoke(this);
 		long end = System.currentTimeMillis();
 		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
-		System.out.println(String.format("%28s: %6s s", methodName, timeused));
+		if (PRINT_TIMEUSED)
+			System.out.println(String.format("%28s: %6s s", methodName, timeused));
 	}
 
 	@Table(name = "users")
@@ -405,7 +410,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void activeRecordDefaultContext() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		Config.setGlobalSqlBoxContext(ctx);// use global default context
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		User user = new User();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.setName("Sam");
@@ -421,7 +426,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void activeSqlAnnotaion() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		Config.setGlobalSqlBoxContext(ctx);// use global default context
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		User2 user = new User2();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
@@ -436,7 +441,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void activeSqlUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		Config.setGlobalSqlBoxContext(ctx);// use global default context
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		User2 user = new User2();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
@@ -451,7 +456,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void abstractSqlUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		Config.setGlobalSqlBoxContext(ctx);// use global default context
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		AbstractUser user = ActiveRecord.create(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");

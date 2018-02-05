@@ -1,0 +1,158 @@
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building jSqlBox 1.0.7
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- build-helper-maven-plugin:3.0.0:add-source (add-source) @ jsqlbox ---
+[INFO] Source directory: F:\gproj\jq16\jSQLBox\core\src\main\resources added.
+[INFO] 
+[INFO] --- build-helper-maven-plugin:3.0.0:add-test-source (add-test-source) @ jsqlbox ---
+[INFO] Test Source directory: F:\gproj\jq16\jSQLBox\core\src\test\resources added.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ jsqlbox ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.3:compile (default-compile) @ jsqlbox ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ jsqlbox ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 6 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.3:testCompile (default-testCompile) @ jsqlbox ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ jsqlbox ---
+[INFO] Surefire report directory: F:\gproj\jq16\jSQLBox\core\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.drinkjava2.functionstest.entitynet.QueryForEntityTest
+org.apache.commons.logging.LogFactory loaded, DialectLogger use it as logger.
+org.apache.commons.logging.LogFactory loaded, DbProLogger use it as logger.
+==============testJoinFields================ 
+org.apache.commons.logging.LogFactory loaded, SqlBoxLogger use it as logger.
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.529 sec
+Running com.github.drinkjava2.functionstest.entitynet.TinyParserTest
+TinyParser repeat 10000 REPEAT_TIMES cost 0.827s
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.811 sec
+Running com.github.drinkjava2.functionstest.LoggerTest
+Paginated sql: select * from sometable limit 90, 10
+Logger test message1 output ok
+Logger test message2 output ok
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+Running com.github.drinkjava2.functionstest.PojoClassBindTest
+Drop DDL:drop table PojoBeanSample if exists
+Create DDL:create table PojoBeanSample ( field1 varchar(255), primary key (field1))
+test
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 sec
+Running com.github.drinkjava2.helloworld.DynamicConfigTest
+Drop DDL:drop table table2 if exists
+SQL: drop table table2 if exists
+Parameters: []
+Create DDL:create table table2 ( id varchar(255),user_name3 varchar(32),anotherColumn1 varchar(40),anotherColumn2 varchar(10))
+SQL: create table table2 ( id varchar(255),user_name3 varchar(32),anotherColumn1 varchar(40),anotherColumn2 varchar(10))
+Parameters: []
+SQL: insert into table2 (id, user_name3) values(?,?)
+Parameters: [18bb33cc2ec94d6cbd9272f7c8dc3dc1, Sam]
+SQL: update table2 set user_name3=? where id=?
+Parameters: [Tom, 18bb33cc2ec94d6cbd9272f7c8dc3dc1]
+SQL: select count(*) from table2
+Parameters: []
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.453 sec
+Running com.github.drinkjava2.helloworld.UsuageAndSpeedTest
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.171 sec
+Running tests.DynamicCompileEngineTest
+classpath==================/F:/gproj/jq16/jSQLBox/core/target/surefire/surefirebooter1041767999611355257.jar;
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.202 sec <<< FAILURE!
+doTest(tests.DynamicCompileEngineTest)  Time elapsed: 1.202 sec  <<< ERROR!
+com.github.drinkjava2.jsqlbox.SqlBoxException: Code:[compiler.err.doesnt.exist]
+Kind:[ERROR]
+Position:[71]
+Start Position:[36]
+End Position:[86]
+Source:[com.github.drinkjava2.jsqlbox.compiler.CharSequenceJavaFileObject[string:///com/foo/bar/DynaClass.java]]
+Message:[package org.apache.commons.dbutils.handlers does not exist]
+LineNumber:[3]
+ColumnNumber:[51]
+Code:[compiler.err.cant.resolve.location]
+Kind:[ERROR]
+Position:[156]
+Start Position:[156]
+End Position:[170]
+Source:[com.github.drinkjava2.jsqlbox.compiler.CharSequenceJavaFileObject[string:///com/foo/bar/DynaClass.java]]
+Message:[cannot find symbol
+  symbol:   class MapListHandler
+  location: class com.foo.bar.DynaClass]
+LineNumber:[6]
+ColumnNumber:[14]
+  ==============Java Source Code Compile Error=====================	   
+	package com.foo.bar; 
+	import org.apache.commons.dbutils.handlers.MapListHandler;	 
+	 public class DynaClass { 
+	   public String toString() { 
+	     MapListHandler handler=null;
+	     return  "Hello, I am a dog"; 
+		 } 
+	 } 	
+	 
+	at com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine.javaCodeToClass(DynamicCompileEngine.java:84)
+	at tests.DynamicCompileEngineTest.doTest(DynamicCompileEngineTest.java:32)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:47)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:44)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:271)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:70)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:50)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:238)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:63)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:236)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:53)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:229)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:309)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.execute(JUnit4Provider.java:252)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.executeTestSet(JUnit4Provider.java:141)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.invoke(JUnit4Provider.java:112)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.maven.surefire.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:189)
+	at org.apache.maven.surefire.booter.ProviderFactory$ProviderProxy.invoke(ProviderFactory.java:165)
+	at org.apache.maven.surefire.booter.ProviderFactory.invokeProvider(ProviderFactory.java:85)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:115)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:75)
+
+
+Results :
+
+Tests in error: 
+  doTest(tests.DynamicCompileEngineTest): Code:[compiler.err.doesnt.exist](..)
+
+Tests run: 26, Failures: 0, Errors: 1, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 9.550 s
+[INFO] Finished at: 2018-02-04T19:57:58-07:00
+[INFO] Final Memory: 8M/21M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.12.4:test (default-test) on project jsqlbox: There are test failures.
+[ERROR] 
+[ERROR] Please refer to F:\gproj\jq16\jSQLBox\core\target\surefire-reports for the individual test results.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
