@@ -16,7 +16,9 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * If a entity class implements ActiveRecordSupport interface, it will have CRUD
- * Method.
+ * Method. This interface is designed for Java8 because Java8 support default
+ * method can be used for box() method to bind a SqlBox instance to bean. This
+ * interface is not useful for Java7 and below.
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -46,7 +48,7 @@ public interface ActiveRecordSupport {
 
 	/** @return TableModel instance binded in this entity */
 	public TableModel tableModel();
-	
+
 	/** set Entity's box's tableModel's alias name */
 	public <T> T alias(String alias);
 

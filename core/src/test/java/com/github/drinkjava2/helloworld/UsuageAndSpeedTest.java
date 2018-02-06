@@ -25,13 +25,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
-import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.Config;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
@@ -61,12 +59,12 @@ public class UsuageAndSpeedTest {
 		SqlBoxContext.setGlobalAllowShowSql(false);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(null);
-		Dialect.setAllowShowDialectLog(false);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
 			try {
 				ctx.nExecute(ddl);
 			} catch (Exception e) {
 			}
+		SqlBoxContext.setGlobalAllowShowSql(false);
 	}
 
 	@After
@@ -77,13 +75,14 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void speedTest() throws Exception {
 		PRINT_TIMEUSED = false;
-		REPEAT_TIMES = 50;// warm up
+		REPEAT_TIMES = 100;// warm up
 		runTestMethods();
 		PRINT_TIMEUSED = true;
 		REPEAT_TIMES = 200;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 		runTestMethods();
 		PRINT_TIMEUSED = false;
+		REPEAT_TIMES = 1;
 	}
 
 	private void runTestMethods() throws Exception {
@@ -118,7 +117,6 @@ public class UsuageAndSpeedTest {
 		@Id
 		String name;
 		String address;
-		SqlBox box;
 
 		public UserEntity() {
 		}

@@ -20,14 +20,12 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
- * Config class is used to store constructor parameters for build SqlBoxContext,
- * please note, there are some setGlobalXxxxx methods should only be called 1
- * REPEAT_TIMES, becuase these methods are used to set global switch variants
+ * Config class is used to store constructor parameters for build SqlBoxContext
  * 
  * @author Yong Zhu
  * @since 1.0.1
  */
-public class Config { 
+public class Config {
 	private SqlTemplateEngine templateEngine = SqlBoxContext.getGlobalTemplateEngine();
 	private DbProLogger logger = SqlBoxContext.getGlobalLogger();
 	private Boolean allowSqlSql = SqlBoxContext.getGlobalAllowShowSql();
@@ -97,6 +95,6 @@ public class Config {
 	public Config setInterceptors(List<SqlInterceptor> interceptors) {
 		this.interceptors = interceptors;
 		return this;
-	} 
+	}
 
 }

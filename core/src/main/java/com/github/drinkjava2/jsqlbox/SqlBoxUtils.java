@@ -11,95 +11,57 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.WeakHashMap;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 
 /**
  * SqlBoxUtils is utility class to bind SqlBox instance to a entity bean, there
- * are 4 different ways to bind:
+ * are 3 different ways to bind:
  * 
  * <pre>
  * 1. For ActiveRecord child class, jSqlBox bind SqlBox by call its bindBox() method and 
  *    store SqlBox instance in its box field;
  * 
- * 2. For instance implemented ActiveRecordSupport, bind SqlBox buy call its bindBox() method
+ * 2. For instance implemented ActiveRecordSupport (by developer), bind SqlBox buy call its bindBox() method
  * 
- * 3. For Entity with a "public SqlBox box;" field, jSqlBox will directly access this field to store SqlBox instance.
+ * 3. For Entity without box field, will use a threadLocal WeakHashMap cache to store SqlBox instance, and make the key
+ *    point to entity, value point to SqlBox instance.
  * 
- * 4. For Entity without box field, will use a threadLocal Map cache to store SqlBox instance, and make the key
- *    point to entity, value point to SqlBox instance. 
- *    
- * Note: Method 4 is not recommended because if do batch insert like 100000 REPEAT_TIMES may cause out of memory error, because 
- *       before LhreadLocal map be cleaned when thread close, memory will full, simliar like Hibernate's L1 cache full problem.
  * </pre>
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  * @since 1.0.0
  */
 public abstract class SqlBoxUtils {// NOSONAR
-	public static final SqlBoxLogger log = SqlBoxLogger.getLog(SqlBoxUtils.class);
-	private static boolean printWarningIfEntityIsNotActiveRecord = true;
 
 	/**
-	 * Store boxes binded to entities in a threadLocal Map
+	 * Store boxes binded to entities in a threadLocal WeakHashMap, after entity
+	 * no reference, SqlBox will be also be garage collected.
 	 */
-	private static ThreadLocal<Map<Object, SqlBox>> boxCache = new ThreadLocal<Map<Object, SqlBox>>() {
+	public static ThreadLocal<WeakHashMap<Object, SqlBox>> boxCache = new ThreadLocal<WeakHashMap<Object, SqlBox>>() {
 		@Override
-		protected Map<Object, SqlBox> initialValue() {
-			return new HashMap<Object, SqlBox>();
+		protected WeakHashMap<Object, SqlBox> initialValue() {
+			return new WeakHashMap<Object, SqlBox>();
 		}
 	};
+ 
 
-	private static void logoutEntityHaveNoBoxFieldWarning(Class<?> clazz) {
-		printWarningIfEntityIsNotActiveRecord = false; // only print at first
-														// time
-		log.warn("Warning: suggest entity class '" + clazz.getName()
-				+ "' extend from ActiveRecord or add a \"SqlBox box;\" field, otherwise can only cache 10000 SqlBox instance in 1 thread.");
+	private static void bindNonActiveRecordBox(Object entity, SqlBox box) { 
+			boxCache.get().put(entity, box); 
 	}
 
-	private static void bindNonActiveRecordBox(Object entity, SqlBox box) {
-		Field boxField = ClassCacheUtils.getBoxField(entity.getClass());
-		if (boxField != null)
-			ReflectionUtils.setField(boxField, entity, box);
-		else {
-			if (printWarningIfEntityIsNotActiveRecord)
-				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
-			boxCache.get().put(entity, box);
-			if (boxCache.get().size() > 10000) {
-				boxCache.get().clear();
-				throw new SqlBoxException(
-						"SqlBox cache out of 10000 limitation, this can be avoid by set entity class extends from ActiveRecord or add a \"SqlBox box;\" field.");
-			}
-		}
+	private static SqlBox findNonActiveRecordBox(Object entity) { 
+			return boxCache.get().get(entity); 
 	}
 
-	private static SqlBox findNonActiveRecordBox(Object entity) {
-		Field boxField = ClassCacheUtils.getBoxField(entity.getClass());
-		if (boxField != null)
-			return (SqlBox) ReflectionUtils.getField(boxField, entity);
-		else {
-			if (printWarningIfEntityIsNotActiveRecord)
-				logoutEntityHaveNoBoxFieldWarning(entity.getClass());
-			return boxCache.get().get(entity);
-		}
-	}
-
-	private static void unbindNonActiveRecordBox(Object entity) {
-		Field boxField = ClassCacheUtils.getBoxField(entity.getClass());
-		if (boxField != null)
-			ReflectionUtils.setField(boxField, entity, null);
-		else {
+	private static void unbindNonActiveRecordBox(Object entity) { 
 			SqlBox box = boxCache.get().get(entity);
 			if (box != null)
-				boxCache.get().remove(entity);
-		}
+				boxCache.get().remove(entity); 
 	}
 
 	/**
@@ -183,7 +145,8 @@ public abstract class SqlBoxUtils {// NOSONAR
 		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
-			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.getGlobalsqlboxsuffix());
+			boxClass = ClassCacheUtils
+					.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.getGlobalsqlboxsuffix());
 		if (boxClass == null)
 			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + "$"
 					+ entityOrBoxClass.getSimpleName() + SqlBoxContext.getGlobalsqlboxsuffix());
