@@ -96,7 +96,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 		box().getTableModel().setAlias(alias);
 		return (T) this;
 	}
-
+ 
 	@Override
 	public SqlBoxContext ctx() {
 		SqlBox theBox = box();
@@ -104,6 +104,12 @@ public class ActiveRecord implements ActiveRecordSupport {
 			theBox.setContext(SqlBoxContext.getGlobalSqlBoxContext());
 		return theBox.getContext();
 	}
+	
+	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext()  */
+	public static SqlBoxContext gctx() {
+		return SqlBoxContext.getGlobalSqlBoxContext(); 
+	}
+
 
 	@Override
 	public void insert() {

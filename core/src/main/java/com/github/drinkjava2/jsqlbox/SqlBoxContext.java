@@ -187,7 +187,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/**
 	 * Create a EntityNet by given configurations, load all columns
 	 */
-	public <T> T netLoad(Object... configObjects) {
+	public EntityNet netLoad(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, false, configObjects);
 	}
 
@@ -195,12 +195,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
 	 * loading speed
 	 */
-	public <T> T netLoadSketch(Object... configObjects) {
+	public EntityNet netLoadSketch(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, true, configObjects);
 	}
 
 	/** Create a EntityNet by given list and netConfigs */
-	public <T> T netCreate(List<Map<String, Object>> listMap, Object... configObjects) {
+	public EntityNet netCreate(List<Map<String, Object>> listMap, Object... configObjects) {
 		TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
 		if (result == null || result.length == 0)
 			throw new SqlBoxException("No entity class config found");
@@ -389,6 +389,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	public static SqlBoxContext getGlobalSqlBoxContext() {
+		return globalSqlBoxContext;
+	}
+	
+	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
+	public static SqlBoxContext gctx() {
 		return globalSqlBoxContext;
 	}
 

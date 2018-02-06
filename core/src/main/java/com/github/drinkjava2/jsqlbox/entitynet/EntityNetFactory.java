@@ -22,32 +22,34 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * This is a EntityNetFactory implementation to create a TinyEntityNet
- */
-@SuppressWarnings("unchecked")
-public class EntityNetFactory { 
+ */ 
+public abstract class EntityNetFactory {
 
 	/** Create a EntityNet instance */
-	public static <T> T createEntityNet() {
-		return (T) (new EntityNet());
+	public static EntityNet createEntityNet() {
+		return new EntityNet();
 	}
 
-	/** Create a EntityNet instance by given listMap and configs */ 
-	public static <T> T createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
-		return (T) (new EntityNet(listMap, configs));
+	/** Create a EntityNet instance by given listMap and configs */
+	public static EntityNet createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
+		return new EntityNet(listMap, configs);
 	}
 
 	/**
 	 * Create a EntityNet instance, load data from database buy given loadKeyOnly
 	 * and configObjects parameters
 	 * 
-	 * @param ctx A SqlBoxContext instance
-	 * @param loadKeyOnly If true will only load PKey and FKeys field, otherwise
-	 *            load all columns
-	 * @param configObjects netConfigs array, can be entity class, entity, SqlBox or
+	 * @param ctx
+	 *            A SqlBoxContext instance
+	 * @param loadKeyOnly
+	 *            If true will only load PKey and FKeys field, otherwise load all
+	 *            columns
+	 * @param configObjects
+	 *            netConfigs array, can be entity class, entity, SqlBox or
 	 *            TableModel instance
 	 * @return The EntityNet
 	 */
-	public static <T> T createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
+	public static EntityNet createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
 		if (configObjects == null || configObjects.length == 0)
 			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
 		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
@@ -66,7 +68,7 @@ public class EntityNetFactory {
 			}
 			net.addMapList(mapList, t);
 		}
-		return (T) net;
+		return net;
 	}
 
 }

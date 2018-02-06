@@ -311,7 +311,7 @@ public class EntityNet {
 		return EntityNetUtils.nodeCollection2EntitySet(getAllNodeSet(entityClass));
 	}
 
-	/** Return entity set in TinyNet which type is entityClass */
+	/** Return entity List in TinyNet which type is entityClass */
 	public <T> List<T> getAllEntityList(Class<T> entityClass) {
 		return EntityNetUtils.nodeCollection2EntityList(getAllNodeSet(entityClass));
 	}
