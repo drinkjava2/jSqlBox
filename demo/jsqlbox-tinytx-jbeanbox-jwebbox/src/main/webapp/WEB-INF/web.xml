@@ -19,7 +19,7 @@
 		<url-pattern>*.ftl</url-pattern>
 	</servlet-mapping>
 
-	<!-- A JSP servlet to map WebBox to htm -->
+	<!-- A JSP servlet to translate html access to jWebBox -->
 	<servlet>
 		<servlet-name>htm2box</servlet-name>
 		<jsp-file>/htm2box.jsp</jsp-file>
@@ -27,11 +27,11 @@
 
 	<servlet-mapping>
 		<servlet-name>htm2box</servlet-name>
-		<url-pattern>*.htm</url-pattern>
+		<url-pattern>*.html</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>
-		<welcome-file>demo1.htm</welcome-file>
+		<welcome-file>home.html</welcome-file>
 	</welcome-file-list>
 
 </web-app>

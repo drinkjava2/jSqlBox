@@ -34,7 +34,7 @@
 </tbody>
 </table>
 
-<p><a href="${pageContext.request.contextPath}/index.html">Home page</a></p>
+<p><a href="${pageContext.request.contextPath}/home.html">Home page</a></p>
 
 </body>
 </html>
