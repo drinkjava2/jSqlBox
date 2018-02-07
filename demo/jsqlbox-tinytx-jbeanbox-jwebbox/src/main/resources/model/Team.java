@@ -1,4 +1,6 @@
-package com.jsqlboxdemo.model;
+package model;
+
+import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
@@ -38,4 +40,14 @@ public class Team extends ActiveRecord {
 		this.rating = rating;
 	}
 
+	public List<Team> getTeamsRatingBiggerThan(Integer rating) {
+		// If use guess method to read annotation or text SQL, make sure model class be
+		// put in resources folder instead of in src folder, detail see Readme.md
+		return guess(rating);
+	}
+	/*- 
+	 select t.**
+	    from teams t
+	    where t.rating>:rating
+	*/
 }

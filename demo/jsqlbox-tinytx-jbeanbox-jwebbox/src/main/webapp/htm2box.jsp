@@ -1,3 +1,3 @@
-<% 
-com.jsqlboxdemo.box.Dispacher.dispach(pageContext);
+<%
+	com.jsqlboxdemo.dispatcher.Dispatcher.dispach(pageContext);
 %>

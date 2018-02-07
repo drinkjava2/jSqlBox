@@ -2,28 +2,21 @@ package com.jsqlboxdemo.service;
 
 import java.util.List;
 
-import com.jsqlboxdemo.model.Team;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
-public class TeamService {
+import model.Team;
 
-	public void addTeam(Team team) {
-		team.insert();
-	}
+/**
+ * This TeamService class should use a AOP tool to build a singleton instance to
+ * make methods to controlled in transaction.
+ * 
+ * @author Yong Zhu
+ * @since 1.0.2
+ */
+public class TeamService extends PublicService {
 
-	public void updateTeam(Team team) {
-		team.update();
-	}
-
-	public Team getTeam(int id) {
-		return new Team().load(id);
-	}
-
-	public void deleteTeam(int id) {
-		new Team().put("id", id).delete();
-	}
-
-	public List<Team> getTeams() {
-		return Team.gctx().netLoad(Team.class).getAllEntityList(Team.class);
+	public List<Team> getTeams(SqlBoxContext... contexts) {
+		return getContext(contexts).netLoad(Team.class).getAllEntityList(Team.class);
 	}
 
 }

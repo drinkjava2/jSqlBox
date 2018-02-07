@@ -283,6 +283,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}
 
+	/** Shortcut method, load all entities as list */
+	public <T> List<T> nLoadAllEntityList(Class<T> entityClass) {
+		return this.netLoad(entityClass).getAllEntityList(entityClass);
+	}
+
 	/** Shortcut method, query for a Entity set */
 	public <T> Set<T> nQueryForEntitySet(Class<T> entityClass, String sql, Object... params) {
 		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
@@ -356,11 +361,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContext.globalTemplateEngine = globalTemplateEngine;
 	}
 
-	public static Boolean getGlobalAllowShowSql() { 
+	public static Boolean getGlobalAllowShowSql() {
 		return globalAllowShowSql;
 	}
 
-	public static void setGlobalAllowShowSql(Boolean globalAllowShowSql) { 
+	public static void setGlobalAllowShowSql(Boolean globalAllowShowSql) {
 		SqlBoxContext.globalAllowShowSql = globalAllowShowSql;
 	}
 
@@ -391,7 +396,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public static SqlBoxContext getGlobalSqlBoxContext() {
 		return globalSqlBoxContext;
 	}
-	
+
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
 		return globalSqlBoxContext;

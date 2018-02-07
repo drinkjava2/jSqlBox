@@ -12,7 +12,8 @@
 <p>
 ${message}<br/>
 <a href="${pageContext.request.contextPath}/team/add.html">Add new team</a><br/>
-<a href="${pageContext.request.contextPath}/team/list.html">Team list</a><br/>
+<a href="${pageContext.request.contextPath}/team/list.html">List all teams</a><br/>
+<a href="${pageContext.request.contextPath}/team/list/10.html">List teams rating>10</a><br/>
 </p>
 </body>
 </html>
