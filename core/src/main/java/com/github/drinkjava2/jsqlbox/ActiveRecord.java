@@ -96,7 +96,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 		box().getTableModel().setAlias(alias);
 		return (T) this;
 	}
- 
+
 	@Override
 	public SqlBoxContext ctx() {
 		SqlBox theBox = box();
@@ -104,19 +104,18 @@ public class ActiveRecord implements ActiveRecordSupport {
 			theBox.setContext(SqlBoxContext.getGlobalSqlBoxContext());
 		return theBox.getContext();
 	}
-	
-	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext()  */
-	public static SqlBoxContext gctx() {
-		return SqlBoxContext.getGlobalSqlBoxContext(); 
-	}
 
+	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
+	public static SqlBoxContext gctx() {
+		return SqlBoxContext.getGlobalSqlBoxContext();
+	}
 
 	@Override
 	public void insert() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(
-					"No default global SqlBoxContext be set,  please use method SqlBoxContext.setDefaultContext(new SqlBoxContext(dataSource)) to set a global default SqlBoxContext instance");
+					"No default global SqlBoxContext be set,  please use method SqlBoxContext.setGlobalSqlBoxContext() method to set a global default SqlBoxContext instance");
 		ctx.insert(this);
 	}
 
@@ -187,16 +186,16 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	/**
-	 * Based on current method @Sql annotated String or Text String and parameters,
-	 * guess a best fit query/update/delete/execute method to run
+	 * Based on current method @Sql annotated String or Text String and
+	 * parameters, guess a best fit query/update/delete/execute method to run
 	 */
 	public <T> T guess(Object... params) {// NOSONAR
 		return ActiveRecordUtils.doGuess(this, params);
 	}
 
-	/** Return current method @Sql annotated String or Text String */
-	public String sql() {
-		return null;
+	/** Return current method's @Sql annotated String or Text String */
+	public String sqlString() {
+		return ActiveRecordUtils.doGetSqlString(this);
 	}
 
 	/**

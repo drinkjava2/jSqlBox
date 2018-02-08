@@ -19,6 +19,11 @@
 		<url-pattern>*.ftl</url-pattern>
 	</servlet-mapping>
 
+	<!-- Initialize DataSource, Transactions, prepare demo data  -->
+    <listener>
+       <listener-class>com.jsqlboxdemo.init.Initializer</listener-class>
+    </listener>
+
 	<!-- A JSP servlet to translate html access to jWebBox -->
 	<servlet>
 		<servlet-name>htm2box</servlet-name>

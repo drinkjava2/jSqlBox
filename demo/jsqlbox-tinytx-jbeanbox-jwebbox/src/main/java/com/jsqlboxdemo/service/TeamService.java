@@ -15,8 +15,11 @@ import model.Team;
  */
 public class TeamService extends PublicService {
 
-	public List<Team> getTeams(SqlBoxContext... contexts) {
+	public List<Team> queryAllTeams(SqlBoxContext... contexts) {
 		return getContext(contexts).netLoad(Team.class).getAllEntityList(Team.class);
 	}
 
+	public List<Team> queryTeamsBigger(Integer rating) {
+		return new Team().getTeamsRatingBiggerThan(rating);
+	}
 }

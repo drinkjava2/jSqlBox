@@ -17,7 +17,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
  * 
  * @author Yong Zhu
  */
-public class User2 extends User {
+public class TextedUser extends User {
 
 	@Sql("insert into users (name,address) values(?,?)")
 	public void insertOneUser(String name, String address) {
@@ -61,9 +61,22 @@ public class User2 extends User {
 	         and address=:address
 	 */
 
+	public List<User> selectUsersByText2(String name, String address) {
+		return this.ctx().nQueryForEntityList(User.class, this.sqlString(), name, address);
+	}
+	/*-
+	   select u.** 
+	   from 
+	   users u
+	      where 
+	         u.name=? and address=?
+	 */
+	
 	public static void main(String[] args) {
-		String javaSourceCode = TextUtils.getJavaSourceCodeUTF8(User2.class);
+		String javaSourceCode = TextUtils.getJavaSourceCodeUTF8(TextedUser.class);
 		System.out.println(javaSourceCode);
 		Assert.assertTrue(javaSourceCode.length() > 0);
 	}
+	
+	
 }

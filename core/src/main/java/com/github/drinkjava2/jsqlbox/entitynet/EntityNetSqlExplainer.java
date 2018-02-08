@@ -68,8 +68,8 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 	}
 
 	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
-	 * or entity Bean
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance,
+	 * entityClass or entity Bean
 	 * 
 	 * <pre>
 	 * 1. TableModel instance, will use it
@@ -100,8 +100,8 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -180,8 +180,8 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -189,6 +189,7 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 	 * </pre>
 	 */
 	public String explainNetQuery(SqlBoxContext ctx, String thesql) {
+		SqlBoxException.assureNotEmpty(thesql, "Sql can not be empty");
 		String sql = thesql;
 		TableModel[] configModels = objectConfigsToModels(ctx, netConfigObjects);
 		int pos = sql.indexOf(".**");
@@ -206,21 +207,15 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 				throw new SqlBoxException(".** can not put at front");
 			String alias = aliasSB.toString();
 
-			int posAlias = (sql + " ").indexOf(" as " + alias + " ");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" as " + alias + ",");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" as " + alias + ")");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" as " + alias + "\t");
-			if (posAlias == -1)
-				posAlias = (sql + " ").indexOf(" " + alias + " ");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" " + alias + ",");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" " + alias + ")");
-			if (posAlias == -1)
-				posAlias = (sql).indexOf(" " + alias + "\t");
+			sql += " ";
+			int posAlias = sql.indexOf(alias, pos + 1);
+			int aliasLength = alias.length();
+			while (posAlias > -1) {
+				if (!(SqlBoxStrUtils.isNormalLetters(sql.charAt(posAlias - 1))
+						|| SqlBoxStrUtils.isNormalLetters(sql.charAt(posAlias + aliasLength))))
+					break;
+				posAlias = sql.indexOf(alias, posAlias + 1);
+			}
 			if (posAlias == -1)
 				throw new SqlBoxException("Alias '" + alias + "' not found");
 

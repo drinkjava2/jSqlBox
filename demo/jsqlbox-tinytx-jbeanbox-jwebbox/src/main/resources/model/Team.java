@@ -2,25 +2,28 @@ package model;
 
 import java.util.List;
 
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.annotation.Sql;
 
 @Table(name = "teams")
 public class Team extends ActiveRecord {
 
 	@Id
-	private Integer id;
+	@UUID25
+	private String id;
 
 	private String name;
 
 	private Integer rating;
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -40,9 +43,14 @@ public class Team extends ActiveRecord {
 		this.rating = rating;
 	}
 
+	@Sql("select t.** from team t where t.rating<>0")
+	public List<Team> getTeamsRatingNotZero(Integer rating) {
+		return guess(rating);
+	}
+
+	// Text support need Java file located in resources folder, more detail see
+	// Readme.md
 	public List<Team> getTeamsRatingBiggerThan(Integer rating) {
-		// If use guess method to read annotation or text SQL, make sure model class be
-		// put in resources folder instead of in src folder, detail see Readme.md
 		return guess(rating);
 	}
 	/*- 

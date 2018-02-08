@@ -1,5 +1,4 @@
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
@@ -15,16 +14,16 @@
 <h1>Edit team page</h1>
 <p>Here you can edit the existing team.</p>
 <p>${message}</p>
-<form:form method="POST" commandName="team" action="${pageContext.request.contextPath}/team/edit/${team.id}.html">
+<form method="post" action="${pageContext.request.contextPath}/team/edit/${team.id}.html">
 <table>
 <tbody>
 	<tr>
 		<td>Name:</td>
-		<td><form:input path="name" /></td>
+		<td><input name="name" value="${team.name}" /></td>
 	</tr>
 	<tr>
 		<td>Rating:</td>
-		<td><form:input path="rating" /></td>
+		<td><input name="rating" value="${team.rating}"/></td>
 	</tr>
 	<tr>
 		<td><input type="submit" value="Edit" /></td>
@@ -32,7 +31,7 @@
 	</tr>
 </tbody>
 </table>
-</form:form>
+</form>
 
 <p><a href="${pageContext.request.contextPath}/home.html">Home page</a></p>
 </body>

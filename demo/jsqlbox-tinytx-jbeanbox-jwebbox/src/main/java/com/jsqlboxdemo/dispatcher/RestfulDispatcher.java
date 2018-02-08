@@ -25,7 +25,7 @@ import com.github.drinkjava2.jwebbox.WebBox;
  * @since 1.7.0
  */
 @SuppressWarnings("all")
-public class Dispatcher {
+public class RestfulDispatcher {
 	public static void dispach(PageContext pageContext) throws Exception {
 		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
 		String uri = StringUtils.substringBefore(request.getRequestURI(), ".");
@@ -41,16 +41,18 @@ public class Dispatcher {
 		String boxClassName;
 
 		if (paths.length > 1) {
-			// /foo/bar/param1/param2...
+			// /team/add/100...
 			boxClassName = paths[0] + "_" + paths[1];
 			pathParams = new String[paths.length - 2];
 			for (int i = 2; i < paths.length; i++)
 				pathParams[i - 2] = paths[i];
 		} else {
-			// /foo
+			// /home
 			boxClassName = paths[0];
 			pathParams = new String[0];
 		}
+		if (request.getMethod().equals("POST"))
+			boxClassName += "_post";
 		WebBox box;
 		try {
 			box = (WebBox) Class.forName("com.jsqlboxdemo.box.Boxes$" + boxClassName).newInstance();

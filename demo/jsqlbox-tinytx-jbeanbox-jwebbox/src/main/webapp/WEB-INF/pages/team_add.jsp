@@ -12,16 +12,17 @@
 <body>
 <h1>Add team page</h1>
 <p>Here you can add a new team.</p>
+${message}<br/>
 <form method="post" action="${pageContext.request.contextPath}/team/add.html">
 <table>
 <tbody>
 	<tr>
 		<td>Name:</td>
-		<td><input path="name" /></td>
+		<td><input type="text" name="name" /></td>
 	</tr>
 	<tr>
 		<td>Rating:</td>
-		<td><input path="rating" /></td>
+		<td><input type="text" name="rating" /></td>
 	</tr>
 	<tr>
 		<td><input type="submit" value="Add" /></td>

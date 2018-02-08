@@ -82,8 +82,7 @@ public class WebBox {
 	}
 
 	/** For subclasses override this method to do something */
-	public Object execute() {// NOSONAR
-		return page;
+	public void execute() {// NOSONAR
 	}
 
 	/** For subclasses override this method to do something */
@@ -92,8 +91,8 @@ public class WebBox {
 
 	/** Prepare data and out put text include page if have */
 	public void show(PageContext pageContext) {
-		execute();
 		this.pageContext = pageContext;
+		execute();
 		prepareOnly(pageContext);
 		if (text != null && text.length() > 0)
 			try {
@@ -178,14 +177,8 @@ public class WebBox {
 	}
 
 	/** Get an attribute from current page's WebBox instance */
-	@SuppressWarnings("unchecked")
 	public static <T> T getAttribute(PageContext pageContext, String attributeName) {
 		T obj = getBox(pageContext).getAttribute(attributeName);
-		if (obj == null) {
-			obj = (T) pageContext.getRequest().getAttribute(attributeName);
-			if (obj == null)
-				obj = (T) pageContext.getRequest().getParameter(attributeName);
-		}
 		return obj;
 	}
 
@@ -196,8 +189,8 @@ public class WebBox {
 	}
 
 	/**
-	 * Show an target object, target can be: WebBox instance or String or List of
-	 * WebBox instance or String
+	 * Show an target object, target can be: WebBox instance or String or List
+	 * of WebBox instance or String
 	 */
 	public static void showTarget(PageContext pageContext, Object target) {
 		if (target == null)
@@ -233,7 +226,13 @@ public class WebBox {
 	/** Get attribute from current WebBox instance */
 	@SuppressWarnings("unchecked")
 	public <T> T getAttribute(String key) {
-		return (T) attributeMap.get(key);
+		Object obj = attributeMap.get(key);
+		if (obj == null && pageContext != null) {
+			obj = pageContext.getRequest().getAttribute(key);
+			if (obj == null)
+				obj = pageContext.getRequest().getParameter(key);
+		}
+		return (T) obj;
 	}
 
 	/** Get the prepare URL */

@@ -24,26 +24,28 @@ public class PublicService {
 		return ctx;
 	}
 
-	public void insert(ActiveRecord ar) {
+	public void doInsert(ActiveRecord ar) {
 		ar.insert();
 	}
 
-	public void update(ActiveRecord ar) {
+	public void doUpdate(ActiveRecord ar) {
 		ar.update();
 	}
 
-	public void delete(ActiveRecord ar) {
+	public void doDelete(ActiveRecord ar) {
 		ar.delete();
 	}
 
 	/** Load a entity, if contexts is empty, will use globalSqlBoxContext */
-	public <T> T load(Class<ActiveRecord> entityClass, Object pkey, SqlBoxContext... contexts) {
+	public <T> T doLoad(Class<T> entityClass, Object pkey, SqlBoxContext... contexts) {
 		return getContext(contexts).load(entityClass, pkey);
 	}
 
-	/** Load a entity list, if contexts is empty, will use globalSqlBoxContext */
-	public <T> List<T> loadAll(Class<T> arClass, SqlBoxContext... contexts) {
-		return getContext(contexts).nLoadAllEntityList(arClass);
+	/**
+	 * Load a entity list, if contexts is empty, will use globalSqlBoxContext
+	 */
+	public <T> List<T> doLoadAll(Class<T> arClass, SqlBoxContext... contexts) {
+		return getContext(contexts).netLoad(arClass).getAllEntityList(arClass);
 	}
 
 }

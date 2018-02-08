@@ -42,8 +42,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private static final Map<String, SqlAndParams> methodSQLCache = new ConcurrentHashMap<String, SqlAndParams>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class extended
-	 * from ActiveRecord
+	 * This is the method body to build an instance based on abstract class
+	 * extended from ActiveRecord
 	 * 
 	 * @param activeClass
 	 * @return Object instance
@@ -98,8 +98,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	}
 
 	/**
-	 * Execute operation to access database, based on current method @Sql annotated
-	 * String or Text String and parameters, guess a best fit
+	 * Execute operation to access database, based on current method @Sql
+	 * annotated String or Text String and parameters, guess a best fit
 	 * query/update/delete/execute method to run
 	 * 
 	 * @param ac
@@ -125,7 +125,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
-		SqlAndParams sp = getSQLbyClassAndMethodName(callerClassName, callerMethodName, callerMethod);
+		SqlAndParams sp = getSqlAndParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
 		String sql = sp.getSql();
 		Class<?> handlerClass = sp.getHandlerClass();
 		char dotype;
@@ -196,8 +196,30 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		}
 	}
 
-	private static SqlAndParams getSQLbyClassAndMethodName(String callerClassName, String callerMethodName,
+	protected static String doGetSqlString(ActiveRecord ac) {// NOSONAR
+		int callerPos = 0;
+		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
+		for (StackTraceElement stack : stacks) {
+			callerPos++;
+			if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
+					&& "sqlString".equals(stack.getMethodName()))
+				break;
+		}
+		String callerClassName = stacks[callerPos].getClassName();
+		String callerMethodName = stacks[callerPos].getMethodName();
+		Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
+		if (callerClass == null)
+			throw new SqlBoxException("Can not find class '" + callerClassName + "'");
+		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
+		if (callerMethod == null)
+			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
+		SqlAndParams sp = getSqlAndParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
+		return sp.getSql();
+	}
+
+	private static SqlAndParams getSqlAndParamsFromSrcCode(String callerClassName, String callerMethodName,
 			Method callerMethod) {
+		// key is only inside used by cache
 		String key = callerClassName + "@#$^!" + callerMethodName;
 		SqlAndParams result = methodSQLCache.get(key);
 		if (result != null)

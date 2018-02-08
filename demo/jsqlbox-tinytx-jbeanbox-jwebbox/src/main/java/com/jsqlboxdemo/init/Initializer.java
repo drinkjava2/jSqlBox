@@ -1,26 +1,21 @@
 package com.jsqlboxdemo.init;
 
 import java.sql.Connection;
-import java.util.Set;
 
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 import model.Team;
 
-public class Initializer implements ServletContainerInitializer {
-	private static Class<?> tx = TinyTx.class;
-	private static ConnectionManager cm = TinyTxConnectionManager.instance();
+public class Initializer implements ServletContextListener {
 
 	public static class DataSourceBox extends BeanBox {
 		{ // H2 DataSource
@@ -45,26 +40,33 @@ public class Initializer implements ServletContainerInitializer {
 
 	public static class TxBox extends BeanBox {
 		{
-			this.setConstructor(tx, BeanBox.getBean(DataSourceBox.class), Connection.TRANSACTION_READ_COMMITTED);
+			this.setConstructor(TinyTx.class, BeanBox.getBean(DataSourceBox.class),
+					Connection.TRANSACTION_READ_COMMITTED);
 		}
 	}
 
 	@Override
-	public void onStartup(Set<Class<?>> arg0, ServletContext arg1) throws ServletException {
+	public void contextInitialized(ServletContextEvent context) {
 		SqlBoxContext.setGlobalAllowShowSql(false);
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class),
-				new Config().setConnectionManager(cm));
+				new Config().setConnectionManager(TinyTxConnectionManager.instance()));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		// BeanBox AOP transaction setting
-		BeanBox.defaultContext.setAOPAround("com.jsqlboxdemo.service\\w*", "*", new TxBox());
+		BeanBox.defaultContext.setAOPAround("com.jsqlboxdemo.service\\w*", "do\\w*", new TxBox());
 
 		// Initialize database
 		String[] ddls = ctx.toCreateDDL(Team.class);
 		for (String ddl : ddls)
 			ctx.quiteExecute(ddl);
-		for (int i = 0; i < 15; i++)
-			new Team().put("id", i, "name", "Team" + i, "rating", i).insert();
+		for (int i = 0; i < 5; i++)
+			new Team().put("name", "Team" + i, "rating", i * 10).insert();
+		System.out.println("========== com.jsqlboxdemo.init.Initializer initialized=====");
+	}
+
+	@Override
+	public void contextDestroyed(ServletContextEvent context) {
+		BeanBox.defaultContext.close();// close the dataSource
 	}
 
 }

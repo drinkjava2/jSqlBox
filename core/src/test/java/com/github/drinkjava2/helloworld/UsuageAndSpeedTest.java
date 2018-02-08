@@ -36,6 +36,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.zaxxer.hikari.HikariDataSource;
 
 import activerecordtext.AbstractUser;
+import activerecordtext.TextedUser;
 
 /**
  * Usuage of different SQL style and speed test
@@ -78,7 +79,7 @@ public class UsuageAndSpeedTest {
 		REPEAT_TIMES = 100;// warm up
 		runTestMethods();
 		PRINT_TIMEUSED = true;
-		REPEAT_TIMES = 200;
+		REPEAT_TIMES = 10000;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 		runTestMethods();
 		PRINT_TIMEUSED = false;
@@ -440,12 +441,14 @@ public class UsuageAndSpeedTest {
 	public void activeSqlUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		User2 user = new User2();
+		TextedUser user = new TextedUser();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.updateAllUser("Tom", "China");
 			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
 			Assert.assertEquals(1, users.size());
+			List<User> users2 = user.selectUsersByText2("Tom", "China");
+			Assert.assertEquals(1, users2.size());
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
 		}

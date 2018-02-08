@@ -13,6 +13,7 @@
 <body>
 <h1>List of teams</h1>
 <p>Here you can see the list of the teams, edit them, remove or update.</p>
+${message}<br/>
 <table border="1px" cellpadding="0" cellspacing="0" >
 <thead>
 <tr>
