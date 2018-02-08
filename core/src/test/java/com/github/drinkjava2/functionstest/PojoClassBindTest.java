@@ -47,7 +47,7 @@ public class PojoClassBindTest extends TestBase {
 
 	@Test
 	public void pojoBindTest() {
-		SqlBoxContext.setGlobalAllowShowSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(false);
 		TableModel[] tables = TableModelUtils.entity2Models(PojoBeanSample.class);
 		dropAndCreateDatabase(tables);
 		PojoBeanSample pojo = new PojoBeanSample();

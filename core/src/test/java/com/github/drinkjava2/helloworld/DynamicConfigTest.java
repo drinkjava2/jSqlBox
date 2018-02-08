@@ -71,7 +71,7 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		SqlBoxContext.setGlobalAllowShowSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(false);
 
 		TableModel t = new UserDemoSqlBox().getTableModel();
 

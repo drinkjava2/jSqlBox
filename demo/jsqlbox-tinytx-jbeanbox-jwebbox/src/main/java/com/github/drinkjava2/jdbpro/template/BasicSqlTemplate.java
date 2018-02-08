@@ -191,7 +191,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 							directRep, key);
 					boolean hasValue = paramMap.containsKey(key);
 					if (!hasValue)
-						throwEX("No parameter found for '" + key + "' in template: " + template+". Current params="+paramMap);
+						throwEX("No parameter found for '" + key + "' in template: " + template+", current params="+paramMap);
 					if (directReplaceType) {
 						sql.append(paramMap.get(key));
 					} else {

@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2;
+package com.jsqlboxdemo;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,13 +18,13 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * ActiveRecordDemoTest of jSqlBox configurations
+ * This is a unit test to check if jSqlBox can run
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 
-public class HelloWorldTest {
+public class JSqlBoxText {
 	private String name;
 
 	public String getName() {
@@ -47,14 +47,14 @@ public class HelloWorldTest {
 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setGlobalAllowShowSql(true);
-		String[] ddls = ctx.getDialect().toCreateDDL(HelloWorldTest.class);
+		String[] ddls = ctx.getDialect().toCreateDDL(JSqlBoxText.class);
 		for (String ddl : ddls)
-			ctx.nExecute(ddl);
+			ctx.quiteExecute(ddl);
 
-		HelloWorldTest hello = new HelloWorldTest();
-		hello.setName("ActiveRecordDemoTest");
+		JSqlBoxText hello = new JSqlBoxText();
+		hello.setName("jSqlBox test ok!");
 		ctx.insert(hello);
-		Assert.assertEquals("ActiveRecordDemoTest", ctx.nQueryForString("select name from HelloWorldTest"));
+		Assert.assertEquals("jSqlBox test ok!", ctx.nQueryForString("select name from JSqlBoxText"));
 		ds.close();
 	}
 }

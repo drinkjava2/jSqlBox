@@ -4,7 +4,8 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>demo</display-name>
 
-	<!-- FreemarkerServlet settings, see http://www.zheng-hang.com/chm/freemarker2_3_24/pgui_misc_servlet.html -->
+	<!-- FreemarkerServlet settings, see http://www.zheng-hang.com/chm/freemarker2_3_24/pgui_misc_servlet.html 
+		for this example is not necessary, but just keep here -->
 	<servlet>
 		<servlet-name>freemarker</servlet-name>
 		<servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
@@ -19,12 +20,12 @@
 		<url-pattern>*.ftl</url-pattern>
 	</servlet-mapping>
 
-	<!-- Initialize DataSource, Transactions, prepare demo data  -->
-    <listener>
-       <listener-class>com.jsqlboxdemo.init.Initializer</listener-class>
-    </listener>
+	<!-- Initialize DataSource, Database, Transactions setting, global SqlBoxContext... -->
+	<listener>
+		<listener-class>com.jsqlboxdemo.init.Initializer</listener-class>
+	</listener>
 
-	<!-- A JSP servlet to translate html access to jWebBox -->
+	<!-- A JSP dispatcher servlet transfer .html access to controller (jWebBox) -->
 	<servlet>
 		<servlet-name>htm2box</servlet-name>
 		<jsp-file>/htm2box.jsp</jsp-file>

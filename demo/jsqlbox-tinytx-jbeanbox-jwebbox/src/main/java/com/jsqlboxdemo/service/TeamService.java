@@ -13,7 +13,17 @@ import model.Team;
  * @author Yong Zhu
  * @since 1.0.2
  */
-public class TeamService extends PublicService {
+public class TeamService {
+
+	/** If contexts is empty, will use globalSqlBoxContext */
+	protected static SqlBoxContext getContext(SqlBoxContext... contexts) {
+		SqlBoxContext ctx;
+		if (contexts == null || contexts.length == 0)
+			ctx = SqlBoxContext.getGlobalSqlBoxContext();
+		else
+			ctx = contexts[0];
+		return ctx;
+	}
 
 	public List<Team> queryAllTeams(SqlBoxContext... contexts) {
 		return getContext(contexts).netLoad(Team.class).getAllEntityList(Team.class);

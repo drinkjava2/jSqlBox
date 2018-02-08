@@ -29,6 +29,10 @@ public class Boxes {
 		{
 			setPage("/WEB-INF/pages/" + this.getClass().getSimpleName() + ".jsp");
 		}
+
+		public void redirect(Class<?> boxClass) {
+			setPage(BeanBox.getPrototypeBean(boxClass));
+		}
 	}
 
 	public static class home extends RestfulWebBox {
@@ -42,9 +46,9 @@ public class Boxes {
 			Team team = new Team();
 			team.setName((String) this.getAttribute("name"));
 			team.setRating(Integer.parseInt((String) this.getAttribute("rating")));
-			teamService.doInsert(team);
+			team.insert();
 			this.getPageContext().getRequest().setAttribute("message", "Team was successfully added.");
-			setPage(new home());
+			redirect(home.class);
 		}
 	}
 
@@ -64,7 +68,7 @@ public class Boxes {
 	public static class team_edit extends RestfulWebBox {
 		public void execute() {
 			Object[] pathParams = (String[]) this.getAttribute("pathParams");
-			Team team = teamService.doLoad(Team.class, pathParams[0]);
+			Team team = new Team().load(pathParams[0]);
 			this.getPageContext().getRequest().setAttribute("team", team);
 		}
 	}
@@ -77,9 +81,9 @@ public class Boxes {
 				throw new NullPointerException("Team already be deleted");
 			team.setName((String) this.getAttribute("name"));
 			team.setRating(Integer.parseInt((String) this.getAttribute("rating")));
-			teamService.doUpdate(team);
+			team.update();
 			this.getPageContext().getRequest().setAttribute("message", "Team was successfully edited.");
-			this.setPage(new team_list());
+			redirect(team_list.class);
 		}
 	}
 
@@ -89,9 +93,9 @@ public class Boxes {
 			Team team = getAttribute("team");
 			if (team == null)
 				throw new NullPointerException("Team already be deleted");
-			teamService.doDelete(team);
+			team.delete();
 			this.getPageContext().getRequest().setAttribute("message", "Team was successfully deleted.");
-			this.setPage(new team_list());
+			redirect(team_list.class);
 		}
 	}
 

@@ -249,7 +249,7 @@ public class IdGeneratorTest extends TestBase {
 
 	@Test
 	public void testIdentityGenerator() {
-		SqlBoxContext.setGlobalAllowShowSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(false);
 		TableModel table = new TableModel("testIdentity");
 		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);

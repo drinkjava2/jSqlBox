@@ -14,6 +14,7 @@ package com.github.drinkjava2.jsqlbox;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +154,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		Map<String, Object> map = null;
 		if (useTemplate)
 			map = buildParamMap(callerClassName, callerMethodName, params); 
+		System.out.println("map="+map);
 		Object o = null;
 		switch (dotype) {
 		case 's': {
@@ -263,22 +265,29 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 
 	private static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName,
 			Object... params) {
+		System.out.println("callerClassName="+callerClassName);
+		System.out.println("callerMethodName="+callerMethodName);
+		System.out.println("params="+Arrays.toString(params));
 		Map<String, Object> map = new HashMap<String, Object>();
 		String[] methodParamNames = getMethodParamNames(callerClassName, callerMethodName);
+		System.out.println("methodParamNames="+Arrays.toString(methodParamNames));
 		if (methodParamNames != null && methodParamNames.length > 0) {
-			for (int i = 0; i < methodParamNames.length; i++)
+			for (int i = 0; i < methodParamNames.length; i++) {
 				map.put(methodParamNames[i], params[i]);
+			}
 		}
 		return map;
 	}
 
 	private static String[] getMethodParamNames(String classFullName, String callerMethodName) {
-		String key = classFullName + "+" + callerMethodName;
+		String key = classFullName + "@#!$^" + callerMethodName;
 		if (methodParamNamesCache.containsKey(key))
 			return methodParamNamesCache.get(key);
 		String src = TextUtils.getJavaSourceCodeUTF8(classFullName);
+		System.out.println("src1="+src);
 		src = StrUtils.substringBetween(src, callerMethodName + "(", "}");
 		src = StrUtils.substringBetween(src, ".guess(", ")"); 
+		System.out.println("src2="+src);
 		String[] result = StrUtils.split(src, ',');
 		List<String> l = new ArrayList<String>();
 		if (result != null)

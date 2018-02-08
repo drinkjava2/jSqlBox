@@ -16,7 +16,7 @@ public class DynamicCompileEngineTest {
 	 public class DynaClass { 
 	   public String toString() { 
 	     MapListHandler handler=null;
-	     return  "Hello, I am a dog"; 
+	     return  "Test Dynamic Compile"; 
 		 } 
 	 } 	
 	 */
@@ -32,6 +32,6 @@ public class DynamicCompileEngineTest {
 			clazz = DynamicCompileEngine.instance.javaCodeToClass(fullName, src);
 		Object instance = DynamicCompileEngine.instance.javaCodeToNewInstance(fullName, src);
 		System.out.println(instance);
-		Assert.assertEquals(instance.toString(), "Hello, I am a dog");
+		Assert.assertEquals(instance.toString(), "Test Dynamic Compile");
 	}
 }

@@ -48,7 +48,7 @@ public class Team extends ActiveRecord {
 		return guess(rating);
 	}
 
-	// Text support need Java file located in resources folder, more detail see
+	// Text support need Java src file located in resources folder, more detail see
 	// Readme.md
 	public List<Team> getTeamsRatingBiggerThan(Integer rating) {
 		return guess(rating);

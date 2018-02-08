@@ -39,6 +39,7 @@ public class LoggerTest {
 		Dialect.MySQL55Dialect.paginAndTrans(10, 10, "select * from sometable");
 		logger.info("Logger test message1 output ok");
 		System.out.println("Logger test message2 output ok");
+		Dialect.setGlobalAllowShowSql(false);
 	}
 
 	@Test

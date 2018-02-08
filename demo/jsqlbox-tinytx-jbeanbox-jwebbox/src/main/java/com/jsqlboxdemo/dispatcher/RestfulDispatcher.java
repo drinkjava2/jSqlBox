@@ -16,6 +16,7 @@ import javax.servlet.jsp.PageContext;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jwebbox.WebBox;
 
 /**
@@ -53,12 +54,13 @@ public class RestfulDispatcher {
 		}
 		if (request.getMethod().equals("POST"))
 			boxClassName += "_post";
+		boxClassName = "com.jsqlboxdemo.box.Boxes$" + boxClassName;
 		WebBox box;
 		try {
-			box = (WebBox) Class.forName("com.jsqlboxdemo.box.Boxes$" + boxClassName).newInstance();
+			Class boxClass = Class.forName(boxClassName);
+			box = BeanBox.getBean(boxClass);
 		} catch (Exception e) {
-			throw new ClassNotFoundException(
-					"There is no WebBox classs '" + boxClassName + "' found in com.jsqlboxdemo.box.Boxes.");
+			throw new ClassNotFoundException("There is no WebBox classs '" + boxClassName + "' found.");
 		}
 		box.setAttribute("pathParams", pathParams);
 		box.show(pageContext);
