@@ -5,7 +5,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.jsqlboxdemo.TestBase;
 
 import model.Team;
@@ -17,7 +16,6 @@ import model.Team;
  * @since 1.0.2
  */
 public class TeamServiceTest extends TestBase {
-	TeamService teamServices = BeanBox.getBean(TeamService.class);
 
 	@Test
 	public void queryAllTeams() {
@@ -27,7 +25,7 @@ public class TeamServiceTest extends TestBase {
 
 	@Test
 	public void queryTeamsBigger() {
-		List<Team> teams = teamServices.queryTeamsBigger(10);
+		List<Team> teams = teamServices.queryBeamsRatingBiggerThan(10);
 		Assert.assertEquals(4, teams.size());
 	}
 }

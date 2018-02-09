@@ -15,21 +15,11 @@ import model.Team;
  */
 public class TeamService {
 
-	/** If contexts is empty, will use globalSqlBoxContext */
-	protected static SqlBoxContext getContext(SqlBoxContext... contexts) {
-		SqlBoxContext ctx;
-		if (contexts == null || contexts.length == 0)
-			ctx = SqlBoxContext.getGlobalSqlBoxContext();
-		else
-			ctx = contexts[0];
-		return ctx;
+	public List<Team> queryAllTeams() {
+		return SqlBoxContext.gctx().netLoad(Team.class).getAllEntityList(Team.class);
 	}
 
-	public List<Team> queryAllTeams(SqlBoxContext... contexts) {
-		return getContext(contexts).netLoad(Team.class).getAllEntityList(Team.class);
-	}
-
-	public List<Team> queryTeamsBigger(Integer rating) {
-		return new Team().getTeamsRatingBiggerThan(rating);
+	public List<Team> queryBeamsRatingBiggerThan(Integer rating) {
+		return new Team().queryBeamsRatingBiggerThan(rating);
 	}
 }

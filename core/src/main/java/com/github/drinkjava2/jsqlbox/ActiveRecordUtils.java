@@ -44,8 +44,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private static final Map<String, SqlAndParams> methodSQLCache = new ConcurrentHashMap<String, SqlAndParams>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class extended
-	 * from ActiveRecord
+	 * This is the method body to build an instance based on abstract class
+	 * extended from ActiveRecord
 	 * 
 	 * @param activeClass
 	 * @return Object instance
@@ -100,8 +100,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	}
 
 	/**
-	 * Execute operation to access database, based on current method @Sql annotated
-	 * String or Text String and parameters, guess a best fit
+	 * Execute operation to access database, based on current method @Sql
+	 * annotated String or Text String and parameters, guess a best fit
 	 * query/update/delete/execute method to run
 	 * 
 	 * @param ac
@@ -128,7 +128,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
 		SqlAndParams sp = getSqlAndHandlerClassFromSrcCode(callerClassName, callerMethodName, callerMethod);
-		String sql = sp.getSql();
+		String sql = sp.getSql().trim();
 		Class<?> handlerClass = sp.getHandlerClass();
 		char dotype;
 		if (StrUtils.startsWithIgnoreCase(sql, "select"))
@@ -140,34 +140,33 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		else if (StrUtils.startsWithIgnoreCase(sql, "insert"))
 			dotype = 'u';
 		else
-			dotype = 'e';
+			dotype = 'e';// execute
 		boolean hasQuestionMark = sql.indexOf('?') > -1;
-		boolean hasColon = sql.indexOf(':') > -1;
-		boolean useTemplate = false;
-		if (hasColon && !hasQuestionMark)
-			useTemplate = true;
-		if (hasColon && hasQuestionMark)
+		boolean useTemplate = sql.indexOf(':') > -1 || sql.indexOf("#{") > -1;
+		if (useTemplate && hasQuestionMark)
 			throw new SqlBoxException(
-					"Here ActiveRecord's guess() method can not determine use template or normal style for SQL '" + sql
-							+ "', please do operation manual.");
+					"guess() method can not determine use template or normal style for SQL '" + sql + "'");
+		boolean isEntityQuery = sql.indexOf(".**") > -1;
+		if (isEntityQuery && 's' != dotype)
+			throw new SqlBoxException("'.**' entity query style SQL can only start with 'select'");
 		Map<String, Object> map = null;
 		if (useTemplate)
-			map = buildParamMap(callerClassName, callerMethodName, params); 
+			map = buildParamMap(callerClassName, callerMethodName, params);
 		Object o = null;
 		switch (dotype) {
 		case 's': {
-			if (handlerClass == null)
-				handlerClass = ScalarHandler.class;
-			ResultSetHandler<T> resultSetHandler = null;
-			try {
-				resultSetHandler = (ResultSetHandler<T>) handlerClass.newInstance();
-			} catch (Exception e) {
-				throw new SqlBoxException(e);
-			} 
-			if (useTemplate)
-				return ac.ctx().tQuery(map, resultSetHandler, sql);
-			else
-				return ac.ctx().nQuery(resultSetHandler, sql, params);
+			ResultSetHandler<T> resultSetHandler = buildResultHandler(handlerClass);
+			if (isEntityQuery) {
+				if (useTemplate)
+					return (T) ac.ctx().tQueryForEntityList(ac.getClass(), map, sql);
+				else
+					return (T) ac.ctx().nQueryForEntityList(ac.getClass(), sql, params);
+			} else {
+				if (useTemplate)
+					return ac.ctx().tQuery(map, resultSetHandler, sql);
+				else
+					return ac.ctx().nQuery(resultSetHandler, sql, params);
+			}
 		}
 		case 'u': {
 			if (useTemplate)
@@ -176,7 +175,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 				o = ac.ctx().nUpdate(sql, params);
 			return (T) o;
 		}
-		default:
+		case 'e': {
+
 			if (handlerClass == null) {
 				if (useTemplate)
 					o = ac.ctx().tExecute(map, sql);
@@ -184,18 +184,29 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 					o = ac.ctx().nExecute(sql, params);
 				return (T) o;
 			}
-			ResultSetHandler<T> resultSetHandler = null;
-			try {
-				resultSetHandler = (ResultSetHandler<T>) handlerClass.newInstance();
-			} catch (Exception e) {
-				throw new SqlBoxException(e);
-			}
+			ResultSetHandler<T> resultSetHandler = buildResultHandler(handlerClass);
 			if (useTemplate)
 				o = ac.ctx().tExecute(map, resultSetHandler, sql);
 			else
 				o = ac.ctx().nExecute(resultSetHandler, sql, params);
 			return (T) o;
 		}
+		default:
+			return null;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> ResultSetHandler<T> buildResultHandler(Class<?> handlerClass) {
+		if (handlerClass == null)
+			handlerClass = ScalarHandler.class;
+		ResultSetHandler<T> resultSetHandler = null;
+		try {
+			resultSetHandler = (ResultSetHandler<T>) handlerClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+		return resultSetHandler;
 	}
 
 	protected static String doGetSqlString(ActiveRecord ac) {// NOSONAR
@@ -266,19 +277,20 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		Map<String, Object> map = new HashMap<String, Object>();
 		String[] methodParamNames = getMethodParamNames(callerClassName, callerMethodName);
 		if (methodParamNames != null && methodParamNames.length > 0) {
-			for (int i = 0; i < methodParamNames.length; i++)
+			for (int i = 0; i < methodParamNames.length; i++) {
 				map.put(methodParamNames[i], params[i]);
+			}
 		}
 		return map;
 	}
 
 	private static String[] getMethodParamNames(String classFullName, String callerMethodName) {
-		String key = classFullName + "+" + callerMethodName;
+		String key = classFullName + "@#!$^" + callerMethodName;
 		if (methodParamNamesCache.containsKey(key))
 			return methodParamNamesCache.get(key);
 		String src = TextUtils.getJavaSourceCodeUTF8(classFullName);
 		src = StrUtils.substringBetween(src, callerMethodName + "(", "}");
-		src = StrUtils.substringBetween(src, ".guess(", ")"); 
+		src = StrUtils.substringBetween(src, "guess(", ")");
 		String[] result = StrUtils.split(src, ',');
 		List<String> l = new ArrayList<String>();
 		if (result != null)

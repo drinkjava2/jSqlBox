@@ -16,10 +16,12 @@ import javax.sql.DataSource;
 import org.junit.After;
 import org.junit.Before;
 
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.jsqlboxdemo.init.Initializer;
+import com.jsqlboxdemo.service.TeamService;
 
 /**
  * Base class of unit test
@@ -28,6 +30,7 @@ import com.jsqlboxdemo.init.Initializer;
  * @since 1.0.0
  */
 public class TestBase {
+	protected TeamService teamServices;
 	protected DataSource dataSource;
 	protected Dialect dialect;
 	protected SqlBoxContext ctx;
@@ -37,6 +40,7 @@ public class TestBase {
 	public void init() {
 		initializer = new Initializer();
 		initializer.contextInitialized(null);
+		teamServices = BeanBox.getBean(TeamService.class);
 	}
 
 	@After

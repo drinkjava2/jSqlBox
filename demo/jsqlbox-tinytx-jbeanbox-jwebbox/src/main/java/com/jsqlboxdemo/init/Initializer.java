@@ -6,6 +6,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 
+import org.junit.Assert;
+
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -47,7 +49,6 @@ public class Initializer implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
-		SqlBoxContext.setGlobalAllowShowSql(false);
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class),
 				new Config().setConnectionManager(TinyTxConnectionManager.instance()));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
@@ -59,13 +60,16 @@ public class Initializer implements ServletContextListener {
 		String[] ddls = ctx.toCreateDDL(Team.class);
 		for (String ddl : ddls)
 			ctx.quiteExecute(ddl);
-		for (int i = 0; i < 5; i++)
+		for (int i = 1; i <= 5; i++)
 			new Team().put("name", "Team" + i, "rating", i * 10).insert();
+		Assert.assertEquals(5, ctx.nQueryForLongValue("select count(*) from teams"));
 		System.out.println("========== com.jsqlboxdemo.init.Initializer initialized=====");
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent context) {
+		SqlBoxContext.gctx().quiteExecute("delete from teams");
+		Assert.assertEquals(0, SqlBoxContext.gctx().nQueryForLongValue("select count(*) from teams"));
 		BeanBox.defaultContext.close();// close the dataSource
 	}
 

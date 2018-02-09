@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.jsqlboxdemo.box;
+package com.jsqlboxdemo.controller;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jwebbox.WebBox;
@@ -60,7 +60,7 @@ public class Boxes {
 
 	public static class team_listBiggerThan10 extends RestfulWebBox {
 		public void execute() {
-			this.getPageContext().getRequest().setAttribute("teams", teamService.queryTeamsBigger(10));
+			this.getPageContext().getRequest().setAttribute("teams", teamService.queryBeamsRatingBiggerThan(10));
 			setPage("/WEB-INF/pages/team_list.jsp");
 		}
 	}

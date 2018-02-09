@@ -9,12 +9,14 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.jsqlboxdemo.box;
+package com.jsqlboxdemo.integration;
 
 /**
- * This is unit test for boxes
+ * This is Integration test demo
  * 
  * @author Yong Zhu
  */
-public class BoxesTest {
+@SuppressWarnings("all")
+public class IntegrationTest {
+	// To add in future, use embedded Jetty + Spring-Boot or HttpClient
 }

@@ -54,7 +54,7 @@ public class RestfulDispatcher {
 		}
 		if (request.getMethod().equals("POST"))
 			boxClassName += "_post";
-		boxClassName = "com.jsqlboxdemo.box.Boxes$" + boxClassName;
+		boxClassName = "com.jsqlboxdemo.controller.Boxes$" + boxClassName;
 		WebBox box;
 		try {
 			Class boxClass = Class.forName(boxClassName);

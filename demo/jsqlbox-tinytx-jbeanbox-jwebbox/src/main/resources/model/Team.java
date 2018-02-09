@@ -50,7 +50,7 @@ public class Team extends ActiveRecord {
 
 	// Text support need Java src file located in resources folder, more detail see
 	// Readme.md
-	public List<Team> getTeamsRatingBiggerThan(Integer rating) {
+	public List<Team> queryBeamsRatingBiggerThan(Integer rating) {
 		return guess(rating);
 	}
 	/*- 
