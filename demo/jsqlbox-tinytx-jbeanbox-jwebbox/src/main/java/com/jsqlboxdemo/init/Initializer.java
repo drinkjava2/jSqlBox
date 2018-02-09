@@ -54,10 +54,10 @@ public class Initializer implements ServletContextListener {
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		// BeanBox AOP transaction setting
-		BeanBox.defaultContext.setAOPAround("com.jsqlboxdemo.service\\w*", "do\\w*", new TxBox());
+		BeanBox.defaultContext.setAOPAround("com.jsqlboxdemo.controller.Controllers.\\w*", "execute", new TxBox());
 
 		// Initialize database
-		String[] ddls = ctx.toCreateDDL(Team.class);
+		String[] ddls = ctx.toDropAndCreateDDL(Team.class);
 		for (String ddl : ddls)
 			ctx.quiteExecute(ddl);
 		for (int i = 1; i <= 5; i++)
@@ -68,9 +68,9 @@ public class Initializer implements ServletContextListener {
 
 	@Override
 	public void contextDestroyed(ServletContextEvent context) {
-		SqlBoxContext.gctx().quiteExecute("delete from teams");
-		Assert.assertEquals(0, SqlBoxContext.gctx().nQueryForLongValue("select count(*) from teams"));
+		SqlBoxContext.setGlobalSqlBoxContext(null);
 		BeanBox.defaultContext.close();// close the dataSource
+
 	}
 
 }

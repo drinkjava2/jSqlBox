@@ -11,27 +11,47 @@
  */
 package com.jsqlboxdemo.controller;
 
+import javax.servlet.jsp.PageContext;
+
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jwebbox.WebBox;
 import com.jsqlboxdemo.service.TeamService;
 
 import model.Team;
 
 /**
- * This is a Demo to show use jWebBox as controller
+ * This is a Demo to show use jWebBox as controller, WebBox is not thread safe,
+ * to get a WebBox controller, always use a IOC/AOP tool to get a prototype bean
+ * to make sure it's thread safe and some times get a proxy instance to support
+ * transaction
+ * 
+ * For services usually make it singleton, default BeanBox's getBean() method
+ * return a singleton except use getPrototypeBean() method.
  * 
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
-public class Boxes {
+public class Controllers {
 	public static class RestfulWebBox extends WebBox {
-		TeamService teamService = BeanBox.getBean(TeamService.class);
+		static TeamService teamService = BeanBox.getBean(TeamService.class);
+
 		{
-			setPage("/WEB-INF/pages/" + this.getClass().getSimpleName() + ".jsp");
+			String className = this.getClass().getSimpleName();
+			if (className.indexOf("$$") > -1)// is proxy class
+				className = StrUtils.substringBetween(className, "$", "$$");
+			setPage("/WEB-INF/pages/" + className + ".jsp");
 		}
 
-		public void redirect(Class<?> boxClass) {
-			setPage(BeanBox.getPrototypeBean(boxClass));
+		public void show(PageContext pageContext) {
+			if (page instanceof Class) {
+				try {
+					page = BeanBox.getPrototypeBean((Class) page);
+				} catch (Exception e) {
+					throw new WebBoxException("Can not create WebBox instance for class '" + page + "'", e);
+				}
+			}
+			super.show(pageContext);
 		}
 	}
 
@@ -48,7 +68,7 @@ public class Boxes {
 			team.setRating(Integer.parseInt((String) this.getAttribute("rating")));
 			team.insert();
 			this.getPageContext().getRequest().setAttribute("message", "Team was successfully added.");
-			redirect(home.class);
+			setPage(home.class);
 		}
 	}
 
@@ -83,7 +103,7 @@ public class Boxes {
 			team.setRating(Integer.parseInt((String) this.getAttribute("rating")));
 			team.update();
 			this.getPageContext().getRequest().setAttribute("message", "Team was successfully edited.");
-			redirect(team_list.class);
+			setPage(team_list.class);
 		}
 	}
 
@@ -95,7 +115,7 @@ public class Boxes {
 				throw new NullPointerException("Team already be deleted");
 			team.delete();
 			this.getPageContext().getRequest().setAttribute("message", "Team was successfully deleted.");
-			redirect(team_list.class);
+			setPage(team_list.class);
 		}
 	}
 

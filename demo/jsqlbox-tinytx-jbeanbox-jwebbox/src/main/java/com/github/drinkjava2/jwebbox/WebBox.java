@@ -145,10 +145,14 @@ public class WebBox {
 
 	/** Private method, use RequestDispatcher to show a URL or JSP page */
 	private static void showPageOrUrl(PageContext pageContext, Object page, WebBox currentBox) {
+		if (page == null)
+			return;
 		if (page instanceof WebBox) {
 			((WebBox) page).show(pageContext);
 			return;
 		}
+		if (!(page instanceof String))
+			throw new WebBoxException("" + page + " is not a String or WebBox.");
 		String pageOrUrl = (String) page;
 		if (isEmptyStr(pageOrUrl))
 			return;
@@ -189,8 +193,8 @@ public class WebBox {
 	}
 
 	/**
-	 * Show an target object, target can be: WebBox instance or String or List
-	 * of WebBox instance or String
+	 * Show an target object, target can be: WebBox instance or String or List of
+	 * WebBox instance or String
 	 */
 	public static void showTarget(PageContext pageContext, Object target) {
 		if (target == null)
@@ -200,6 +204,14 @@ public class WebBox {
 		else if (target instanceof ArrayList<?>) {
 			for (Object item : (ArrayList<?>) target)
 				showTarget(pageContext, item);
+		} else if (target instanceof Class) {
+			WebBox bx = null;
+			try {
+				bx = (WebBox) ((Class<?>) target).newInstance();
+			} catch (Exception e) {
+				throw new WebBoxException("Can not create WebBox instance for target class '" + target + "'", e);
+			}
+			bx.show(pageContext);
 		} else if (target instanceof String) {
 			String str = (String) target;
 			if (str.startsWith("/")) {
@@ -360,6 +372,10 @@ public class WebBox {
 
 		public WebBoxException(Throwable e) {
 			super(e);
+		}
+
+		public WebBoxException(String msg, Throwable e) {
+			super(msg, e);
 		}
 	}
 

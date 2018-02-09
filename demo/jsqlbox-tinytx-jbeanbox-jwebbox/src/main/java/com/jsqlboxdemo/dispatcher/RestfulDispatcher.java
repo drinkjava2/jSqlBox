@@ -54,11 +54,11 @@ public class RestfulDispatcher {
 		}
 		if (request.getMethod().equals("POST"))
 			boxClassName += "_post";
-		boxClassName = "com.jsqlboxdemo.controller.Boxes$" + boxClassName;
+		boxClassName = "com.jsqlboxdemo.controller.Controllers$" + boxClassName;
 		WebBox box;
 		try {
 			Class boxClass = Class.forName(boxClassName);
-			box = BeanBox.getBean(boxClass);
+			box=BeanBox.getPrototypeBean(boxClass);
 		} catch (Exception e) {
 			throw new ClassNotFoundException("There is no WebBox classs '" + boxClassName + "' found.");
 		}

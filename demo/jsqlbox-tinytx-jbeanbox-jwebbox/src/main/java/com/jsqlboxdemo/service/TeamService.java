@@ -2,7 +2,9 @@ package com.jsqlboxdemo.service;
 
 import java.util.List;
 
+import com.github.drinkjava2.jbeanbox.AopAround;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.jsqlboxdemo.init.Initializer.TxBox;
 
 import model.Team;
 
@@ -19,6 +21,7 @@ public class TeamService {
 		return SqlBoxContext.gctx().netLoad(Team.class).getAllEntityList(Team.class);
 	}
 
+	@AopAround(TxBox.class)
 	public List<Team> queryBeamsRatingBiggerThan(Integer rating) {
 		return new Team().queryBeamsRatingBiggerThan(rating);
 	}

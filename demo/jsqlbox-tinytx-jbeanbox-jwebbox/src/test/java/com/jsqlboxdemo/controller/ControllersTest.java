@@ -18,20 +18,20 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.jsqlboxdemo.TestBase;
-import com.jsqlboxdemo.controller.Boxes.home;
-import com.jsqlboxdemo.controller.Boxes.team_add_post;
-import com.jsqlboxdemo.controller.Boxes.team_listBiggerThan10;
+import com.jsqlboxdemo.controller.Controllers.home;
+import com.jsqlboxdemo.controller.Controllers.team_add_post;
+import com.jsqlboxdemo.controller.Controllers.team_listBiggerThan10;
 import com.jsqlboxdemo.mock.MockPageContext;
 
 import model.Team;
 
 /**
- * This is unit test for boxes
+ * This is unit test for Controller
  * 
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
-public class BoxesTest extends TestBase {
+public class ControllersTest extends TestBase {
 
 	@Test
 	public void test_team_add_post() {
@@ -42,7 +42,7 @@ public class BoxesTest extends TestBase {
 		box.setPageContext(ptx);
 		box.execute();
 		Assert.assertEquals("Team was successfully added.", (String) ptx.getRequest().getAttribute("message"));
-		Assert.assertEquals(box.getPage().getClass(), home.class);
+		Assert.assertEquals(box.getPage(), home.class);
 	}
 
 	@Test
