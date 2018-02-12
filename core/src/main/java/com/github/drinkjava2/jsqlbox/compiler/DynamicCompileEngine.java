@@ -3,6 +3,8 @@ package com.github.drinkjava2.jsqlbox.compiler;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 @SuppressWarnings("all")
@@ -24,11 +27,11 @@ public class DynamicCompileEngine {
 	public static final DynamicCompileEngine instance = new DynamicCompileEngine();
 	private static final Map<String, Class<?>> compiledClassCache = new ConcurrentHashMap<String, Class<?>>();
 
-	private URLClassLoader parentClassLoader;
+	private ClassLoader parentClassLoader;
 	private String classpath;
 
 	private DynamicCompileEngine() {
-		this.parentClassLoader = (URLClassLoader) this.getClass().getClassLoader();
+
 		this.buildClassPath();
 	}
 
@@ -56,14 +59,32 @@ public class DynamicCompileEngine {
 	}
 
 	private void buildClassPath() {
+		// Build classPath for weblogic
 		this.classpath = null;
+		String weblogicClazzPass = null;
+		ClassLoader weblogicClassloader = this.getClass().getClassLoader();
+		try {
+			Method methods = weblogicClassloader.getClass().getDeclaredMethod("getClassPath", null);
+			if (methods != null)
+				weblogicClazzPass = (String) methods.invoke(weblogicClassloader, null);
+		} catch (Exception e) {
+			// System.out.println("Exception found for getClassPath for nnknow Java environment");
+		}
+		if (!StrUtils.isEmpty(weblogicClazzPass)) {
+			this.classpath = weblogicClazzPass;
+			return;
+		}
+
+		// buildClassPath for Tomcat
+		this.parentClassLoader = (URLClassLoader) this.getClass().getClassLoader();
 		StringBuilder sb = new StringBuilder();
-		for (URL url : this.parentClassLoader.getURLs()) {
+		for (URL url : ((URLClassLoader) this.parentClassLoader).getURLs()) {
 			String p = url.getFile();
 			sb.append(p).append(File.pathSeparator);
 		}
 		this.classpath = sb.toString();
-		// Deal class path issue caused by run "mvn test" command
+
+		// buildClassPath for Maven unit test by run "mvn test" command
 		if (classpath.indexOf("surefire/surefirebooter") > 0) {
 			String path = StrUtils.substringAfter(classpath, "/");
 			path = StrUtils.substringBeforeLast(path, ";");

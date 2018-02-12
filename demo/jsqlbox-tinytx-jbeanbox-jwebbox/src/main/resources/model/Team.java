@@ -48,8 +48,8 @@ public class Team extends ActiveRecord {
 		return guess(rating);
 	}
 
-	// Text support need put Java src file in resources folder and config maven
-	// plunin, more detail see jSqlBox's documents
+	// Text support need put Java source code in resources folder and config maven
+	// plugin, more detail see jSqlBox's documents
 	public List<Team> queryBeamsRatingBiggerThan(Integer rating) {
 		return guess(rating);
 	}

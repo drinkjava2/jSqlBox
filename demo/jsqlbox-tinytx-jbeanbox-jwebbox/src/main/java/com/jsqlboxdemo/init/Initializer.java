@@ -1,5 +1,9 @@
 package com.jsqlboxdemo.init;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.sql.Connection;
 
 import javax.servlet.ServletContextEvent;
@@ -9,6 +13,7 @@ import javax.sql.DataSource;
 import org.junit.Assert;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.TX;
 import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
@@ -47,16 +52,24 @@ public class Initializer implements ServletContextListener {
 		}
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.METHOD })
+	public static @interface Transaction {
+		public Class<?> value() default Object.class; 
+
+	}
+
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
-		//SqlBoxContext.setGlobalAllowShowSql(true);
+		// Initialize BeanBox
+		BeanBox.regAopAroundAnnotation(TX.class, TxBox.class);
+		BeanBox.regAopAroundAnnotation(Transaction.class, TxBox.class);
+		
+		// Initialize Global SqlBoxContext
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class),
 				new Config().setConnectionManager(TinyTxConnectionManager.instance()));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
-
-		// Below method use Java Rex to set transaction AOP, not recommend, use Annotation is better
-		//BeanBox.defaultContext.setAOPAround("com.jsqlboxdemo.controller.Controllers.\\w*", "execute", new TxBox());
-
+ 
 		// Initialize database
 		String[] ddls = ctx.toDropAndCreateDDL(Team.class);
 		for (String ddl : ddls)

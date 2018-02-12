@@ -12,6 +12,7 @@
 package com.jsqlboxdemo.controller;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.TX;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jwebbox.WebBox;
 import com.jsqlboxdemo.service.TeamService;
@@ -23,7 +24,7 @@ import model.Team;
  * to use WebBox act as controller, always use a IOC/AOP tool to get a new
  * instance for each thread and some times will get a proxy instance
  * (child-Class of WebBox) to support transaction if put @Transactional or @Tx
- * or @TX or @Trans annotation on controller's method.
+ * or @TX or @Transaction annotation on controller's method.
  * 
  * Service classes usually is singleton, why? because the only purpose of
  * service class is to create proxy by AOP too to support transaction.
@@ -34,7 +35,7 @@ import model.Team;
 public class Controllers {
 	public static class RestfulWebBox extends WebBox {
 		TeamService teamService = BeanBox.getBean(TeamService.class);// singleton
-		{ 
+		{
 			String className = this.getClass().getSimpleName();
 			if (className.indexOf("$$") > -1)// is a proxy class?
 				className = StrUtils.substringBetween(className, "$", "$$");
@@ -71,7 +72,7 @@ public class Controllers {
 
 	public static class team_listBiggerThan10 extends RestfulWebBox {
 		public void execute() {
-			this.setRequestAttribute("teams", teamService.queryBeamsRatingBiggerThan(10));
+			this.setRequestAttribute("teams", teamService.queryTeamsRatingBiggerThan(10));
 			setPage("/WEB-INF/pages/team_list.jsp");
 		}
 	}
@@ -85,6 +86,7 @@ public class Controllers {
 	}
 
 	public static class team_edit_post extends team_edit {
+		@TX
 		public void execute() {
 			super.execute();
 			Team team = getObject("team");

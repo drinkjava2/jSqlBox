@@ -15,13 +15,22 @@
  */
 package com.github.drinkjava2.functionstest;
 
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.github.drinkjava2.jsqlbox.TextUtils;
+
+import activerecordtext.AbstractUser;
+
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  */
-public   class TextUtilsTest {
+public class TextUtilsTest {
+	@Test
 	public void doTextTest() {
-		//String str=TextUtils.getJavaSourceCodeUTF8(AbstractSampleUser.class);
+		String str = TextUtils.getJavaSourceCodeUTF8(AbstractUser.class);
+		Assert.assertTrue(str.indexOf("AbstractUser") > -1);
 	}
 }

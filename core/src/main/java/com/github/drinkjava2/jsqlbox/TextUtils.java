@@ -26,7 +26,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.github.drinkjava2.jdialects.StrUtils;
 
 /**
- * TextUtils is base class for Java text support (multiple line Strings).
+ * TextUtils is used to read Java source file from sources folder, usuage:
+ * String src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this
+ * function need set a plugin in pom.xml, detail see jSqlBox documents
  * 
  * @author Yong Zhu (Yong9981@gmail.com)
  */

@@ -25,22 +25,8 @@ public class TeamServiceTest extends TestBase {
 
 	@Test
 	public void queryTeamsBigger() {
-		List<Team> teams = teamServices.queryBeamsRatingBiggerThan(10);
+		List<Team> teams = teamServices.queryTeamsRatingBiggerThan(10);
 		Assert.assertEquals(4, teams.size());
 	}
-
-	@Test
-	public void rollBackTest() {
-		teamServices.transactionRollBackTest();
-		List<Team> teams = teamServices.queryAllTeams();
-		Assert.assertEquals(5, teams.size());
-		boolean exceptionHappen = false;
-		try {
-			teamServices.transactionRollBackTest();
-		} catch (Exception e) {
-			exceptionHappen = true;
-		}
-		Assert.assertEquals(exceptionHappen, true);
-		Assert.assertEquals(5, teams.size());
-	}
+ 
 }
