@@ -18,7 +18,6 @@ import org.junit.Before;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.jsqlboxdemo.init.Initializer;
 import com.jsqlboxdemo.service.TeamService;
@@ -48,28 +47,4 @@ public class TestBase {
 		initializer.contextDestroyed(null);
 	}
 
-	public void executeDDLs(String[] ddls) {
-		for (String sql : ddls)
-			ctx.nExecute(sql);
-	}
-
-	public void quietExecuteDDLs(String[] ddls) {
-		for (String sql : ddls)
-			ctx.quiteExecute(sql);
-	}
-
-	/**
-	 * Drop and create database according given tableModels
-	 */
-	public void dropAndCreateDatabase(TableModel... tableModels) {
-		String[] ddls = dialect.toDropDDL(tableModels);
-		quietExecuteDDLs(ddls);
-
-		ddls = dialect.toCreateDDL(tableModels);
-		executeDDLs(ddls);
-	}
-
-	public static void printTimeUsed(long startTimeMillis, String msg) {
-		System.out.println(String.format("%50s: %7s s", msg, (System.currentTimeMillis() - startTimeMillis) / 1000.0));
-	}
 }

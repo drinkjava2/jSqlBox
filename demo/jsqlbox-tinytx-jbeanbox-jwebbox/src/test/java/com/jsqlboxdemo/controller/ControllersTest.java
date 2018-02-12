@@ -41,8 +41,8 @@ public class ControllersTest extends TestBase {
 		team_add_post box = BeanBox.getBean(team_add_post.class);
 		box.setPageContext(ptx);
 		box.execute();
-		Assert.assertEquals("Team was successfully added.", (String) ptx.getRequest().getAttribute("message"));
-		Assert.assertEquals(box.getPage(), home.class);
+		Assert.assertEquals("Team was successfully added.", (String) ptx.getRequestAttribute("message"));
+		Assert.assertTrue(box.getPage() instanceof home);
 	}
 
 	@Test
@@ -52,7 +52,18 @@ public class ControllersTest extends TestBase {
 		box.setPageContext(ptx);
 		box.execute();
 		Assert.assertEquals(4, ((List<Team>) ptx.getRequestAttribute("teams")).size());
-		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp");
+		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp"); 
+	}
+	
+
+	@Test
+	public void test_team_listBiggerThan102() {
+		MockPageContext ptx = new MockPageContext();
+		team_listBiggerThan10 box = new team_listBiggerThan10();
+		box.setPageContext(ptx);
+		box.execute();
+		Assert.assertEquals(4, ((List<Team>) ptx.getRequestAttribute("teams")).size());
+		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp"); 
 	}
 
 }

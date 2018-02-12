@@ -45,32 +45,32 @@
  
 
  <dependencies>
-    <!-- jSqlBox is a ORM tool based on DbUtils and jDialects-->
+    <!-- jSqlBox is a ORM tool based on Apache-DbUtils and jDialects-->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
       <version>1.0.7</version>
     </dependency>  
     
-    <!-- jTransactions is a seperated transaction services, TinyTx is included inside-->
+    <!-- jTransactions is a separate transaction tool, TinyTx and SpringTx is included -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jtransactions</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </dependency>
     
-    <!-- jBeanBox is a small IOC/AOP tool -->
+    <!-- jBeanBox is a IOC/AOP tool -->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jbeanbox</artifactId>
-      <version>2.4.5</version>
-    </dependency>     
+      <version>2.4.6</version>
+    </dependency>
     
-   <!-- jWebBox is a JSP/FreeMaker layout tool-->
+   <!-- jWebBox is a JSP/FreeMaker layout tool, here used as MVC controller -->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jwebbox</artifactId>
-      <version>2.1</version>
+      <version>2.1.1</version>
     </dependency>  
     
   <!-- Servlet & JSP libs, provided by servlet server -->

@@ -26,7 +26,7 @@ import com.github.drinkjava2.jwebbox.WebBox;
  * @since 1.7.0
  */
 @SuppressWarnings("all")
-public class RestfulDispatcher {
+public class Dispatcher {
 	public static void dispach(PageContext pageContext) throws Exception {
 		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
 		String uri = StringUtils.substringBefore(request.getRequestURI(), ".");
@@ -58,11 +58,11 @@ public class RestfulDispatcher {
 		WebBox box;
 		try {
 			Class boxClass = Class.forName(boxClassName);
-			box=BeanBox.getPrototypeBean(boxClass);
+			box = BeanBox.getPrototypeBean(boxClass);
 		} catch (Exception e) {
 			throw new ClassNotFoundException("There is no WebBox classs '" + boxClassName + "' found.");
 		}
-		box.setAttribute("pathParams", pathParams);
+		request.setAttribute("pathParamArray", pathParams);
 		box.show(pageContext);
 	}
 

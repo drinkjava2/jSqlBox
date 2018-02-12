@@ -11,8 +11,6 @@
  */
 package com.jsqlboxdemo.controller;
 
-import javax.servlet.jsp.PageContext;
-
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jwebbox.WebBox;
@@ -22,36 +20,29 @@ import model.Team;
 
 /**
  * This is a Demo to show use jWebBox as controller, WebBox is not thread safe,
- * to get a WebBox controller, always use a IOC/AOP tool to get a prototype bean
- * to make sure it's thread safe and some times get a proxy instance to support
- * transaction
+ * to use WebBox act as controller, always use a IOC/AOP tool to get a new
+ * instance for each thread and some times will get a proxy instance
+ * (child-Class of WebBox) to support transaction if put @Transactional or @Tx
+ * or @TX or @Trans annotation on controller's method.
  * 
- * For services usually make it singleton, default BeanBox's getBean() method
- * return a singleton except use getPrototypeBean() method.
+ * Service classes usually is singleton, why? because the only purpose of
+ * service class is to create proxy by AOP too to support transaction.
  * 
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
 public class Controllers {
 	public static class RestfulWebBox extends WebBox {
-		static TeamService teamService = BeanBox.getBean(TeamService.class);
-
-		{
+		TeamService teamService = BeanBox.getBean(TeamService.class);// singleton
+		{ 
 			String className = this.getClass().getSimpleName();
-			if (className.indexOf("$$") > -1)// is proxy class
+			if (className.indexOf("$$") > -1)// is a proxy class?
 				className = StrUtils.substringBetween(className, "$", "$$");
 			setPage("/WEB-INF/pages/" + className + ".jsp");
 		}
 
-		public void show(PageContext pageContext) {
-			if (page instanceof Class) {
-				try {
-					page = BeanBox.getPrototypeBean((Class) page);
-				} catch (Exception e) {
-					throw new WebBoxException("Can not create WebBox instance for class '" + page + "'", e);
-				}
-			}
-			super.show(pageContext);
+		public void redirect(Class<?> target) {
+			setPage(BeanBox.getPrototypeBean((Class) target));// non-singleton
 		}
 	}
 
@@ -64,58 +55,58 @@ public class Controllers {
 	public static class team_add_post extends RestfulWebBox {
 		public void execute() {
 			Team team = new Team();
-			team.setName((String) this.getAttribute("name"));
-			team.setRating(Integer.parseInt((String) this.getAttribute("rating")));
+			team.setName((String) this.getObject("name"));
+			team.setRating(Integer.parseInt((String) this.getObject("rating")));
 			team.insert();
-			this.getPageContext().getRequest().setAttribute("message", "Team was successfully added.");
-			setPage(home.class);
+			setRequestAttribute("message", "Team was successfully added.");
+			redirect(home.class);
 		}
 	}
 
 	public static class team_list extends RestfulWebBox {
 		public void execute() {
-			this.getPageContext().getRequest().setAttribute("teams", teamService.queryAllTeams());
+			this.setRequestAttribute("teams", teamService.queryAllTeams());
 		}
 	}
 
 	public static class team_listBiggerThan10 extends RestfulWebBox {
 		public void execute() {
-			this.getPageContext().getRequest().setAttribute("teams", teamService.queryBeamsRatingBiggerThan(10));
+			this.setRequestAttribute("teams", teamService.queryBeamsRatingBiggerThan(10));
 			setPage("/WEB-INF/pages/team_list.jsp");
 		}
 	}
 
 	public static class team_edit extends RestfulWebBox {
 		public void execute() {
-			Object[] pathParams = (String[]) this.getAttribute("pathParams");
+			Object[] pathParams = (String[]) this.getObject("pathParamArray");
 			Team team = new Team().load(pathParams[0]);
-			this.getPageContext().getRequest().setAttribute("team", team);
+			this.setRequestAttribute("team", team);
 		}
 	}
 
 	public static class team_edit_post extends team_edit {
 		public void execute() {
 			super.execute();
-			Team team = getAttribute("team");
+			Team team = getObject("team");
 			if (team == null)
-				throw new NullPointerException("Team already be deleted");
-			team.setName((String) this.getAttribute("name"));
-			team.setRating(Integer.parseInt((String) this.getAttribute("rating")));
+				throw new NullPointerException("Team does exist");
+			team.setName((String) this.getObject("name"));
+			team.setRating(Integer.parseInt((String) this.getObject("rating")));
 			team.update();
-			this.getPageContext().getRequest().setAttribute("message", "Team was successfully edited.");
-			setPage(team_list.class);
+			this.setRequestAttribute("message", "Team was successfully edited.");
+			redirect(team_list.class);
 		}
 	}
 
 	public static class team_delete extends team_edit {
 		public void execute() {
 			super.execute();
-			Team team = getAttribute("team");
+			Team team = getObject("team");
 			if (team == null)
-				throw new NullPointerException("Team already be deleted");
+				throw new NullPointerException("Team does exist");
 			team.delete();
-			this.getPageContext().getRequest().setAttribute("message", "Team was successfully deleted.");
-			setPage(team_list.class);
+			this.setRequestAttribute("message", "Team was successfully deleted.");
+			redirect(team_list.class);
 		}
 	}
 

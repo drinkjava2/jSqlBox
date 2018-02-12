@@ -34,7 +34,7 @@ public class Initializer implements ServletContextListener {
 			ds.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
 			ds.addDataSourceProperty("useServerPrepStmts", true);
 			ds.setMaximumPoolSize(10);
-			ds.setConnectionTimeout(5000);
+			ds.setConnectionTimeout(600000);
 			this.setPreDestory("close");// jBeanBox will close pool
 			return ds;
 		}
@@ -49,12 +49,13 @@ public class Initializer implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
+		//SqlBoxContext.setGlobalAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class),
 				new Config().setConnectionManager(TinyTxConnectionManager.instance()));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
-		// BeanBox AOP transaction setting
-		BeanBox.defaultContext.setAOPAround("com.jsqlboxdemo.controller.Controllers.\\w*", "execute", new TxBox());
+		// Below method use Java Rex to set transaction AOP, not recommend, use Annotation is better
+		//BeanBox.defaultContext.setAOPAround("com.jsqlboxdemo.controller.Controllers.\\w*", "execute", new TxBox());
 
 		// Initialize database
 		String[] ddls = ctx.toDropAndCreateDDL(Team.class);
