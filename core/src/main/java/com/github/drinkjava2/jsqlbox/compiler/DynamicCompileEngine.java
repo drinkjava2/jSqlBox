@@ -22,6 +22,9 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
+/**
+ * This is a DynamicCompileEngine to compile and load Java source code into memory, only tested in Maven, Tomcat
+ */
 @SuppressWarnings("all")
 public class DynamicCompileEngine {
 	public static final DynamicCompileEngine instance = new DynamicCompileEngine();
@@ -31,7 +34,6 @@ public class DynamicCompileEngine {
 	private String classpath;
 
 	private DynamicCompileEngine() {
-
 		this.buildClassPath();
 	}
 
@@ -58,6 +60,9 @@ public class DynamicCompileEngine {
 		return result;
 	}
 
+	/**
+	 * Only tested in Maven, Tomcat, Weblogic
+	 */
 	private void buildClassPath() {
 		// Build classPath for weblogic
 		this.classpath = null;
@@ -68,9 +73,10 @@ public class DynamicCompileEngine {
 			if (methods != null)
 				weblogicClazzPass = (String) methods.invoke(weblogicClassloader, null);
 		} catch (Exception e) {
-			// System.out.println("Exception found for getClassPath for nnknow Java environment");
+			//Eat exception
 		}
 		if (!StrUtils.isEmpty(weblogicClazzPass)) {
+			this.parentClassLoader=weblogicClassloader;
 			this.classpath = weblogicClazzPass;
 			return;
 		}
@@ -124,12 +130,20 @@ public class DynamicCompileEngine {
 		JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnostics, options, null, jfiles);
 		boolean success = task.call();
 
-		if (success) {
-			JavaClassObject jco = fileManager.getJavaClassObject();
+		if (success) { 
+			JavaClassObject jco = fileManager.getJavaClassObject(); 
 			DynamicClassLoader dynamicClassLoader = new DynamicClassLoader(this.parentClassLoader);
-			result = dynamicClassLoader.loadClass(fullClassName, jco);
+			 
+			try {
+				result = dynamicClassLoader.loadClass(fullClassName, jco);
+			} catch (Exception e) { 
+				e.printStackTrace(); 
+				throw new SqlBoxException(" \r\r\r <<< Dynamic Class Loadere Error \r", e);
+			}
 			if (result != null)
 				compiledClassCache.put(fullClassName, result);
+			else 
+				throw new SqlBoxException(" \r\r\r <<< Dynamic Class Loadere Null Error \r"+fullClassName);
 			return result;
 		} else {
 			String error = "";
