@@ -21,16 +21,15 @@ public class TeamService {
 		return SqlBoxContext.gctx().netLoad(Team.class).getAllEntityList(Team.class);
 	}
 
-//	@Transaction
-//	public List<Team> queryTeamsRatingBiggerThan(Integer rating) {
-//		return new Team().queryBeamsRatingBiggerThan(rating);
-//	}
+	@Transaction
+	public List<Team> getRatingNotZero() {
+		return new Team().getRatingNotZero();
+	}
 
 	@Transaction
-	public List<Team> queryTeamsRatingBiggerThan(Integer rating) {
-		AbstractTeam team=AbstractTeam.create(AbstractTeam.class);
-		System.out.println(team);
-		return team.queryBeamsRatingBiggerThan(rating);
+	public List<Team> queryAbstractRatingBiggerThan(Integer rating) {
+		AbstractTeam team = AbstractTeam.create(AbstractTeam.class);
+		return team.queryAbstractRatingBiggerThan(rating);
 	}
-	
+
 }

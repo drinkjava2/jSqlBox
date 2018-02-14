@@ -72,7 +72,7 @@ public class Controllers {
 
 	public static class team_listBiggerThan10 extends RestfulWebBox {
 		public void execute() {
-			this.setRequestAttribute("teams", teamService.queryTeamsRatingBiggerThan(10));
+			this.setRequestAttribute("teams", teamService.queryAbstractRatingBiggerThan(10));
 			setPage("/WEB-INF/pages/team_list.jsp");
 		}
 	}

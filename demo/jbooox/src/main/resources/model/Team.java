@@ -44,13 +44,11 @@ public class Team extends ActiveRecord {
 	}
 
 	@Sql("select t.** from team t where t.rating<>0")
-	public List<Team> getTeamsRatingNotZero(Integer rating) {
-		return guess(rating);
+	public List<Team> getRatingNotEqual() {
+		return guess();
 	}
 
-	// Text support need put Java source code in resources folder and config maven
-	// plugin, more detail see jSqlBox's documents
-	public List<Team> queryBeamsRatingBiggerThan(Integer rating) {
+	public List<Team> queryRatingBiggerThan(Integer rating) {
 		return guess(rating);
 	}
 	/*- 

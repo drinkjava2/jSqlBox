@@ -25,7 +25,7 @@ public class TeamServiceTest extends TestBase {
 
 	@Test
 	public void queryTeamsBigger() {
-		List<Team> teams = teamServices.queryTeamsRatingBiggerThan(10);
+		List<Team> teams = teamServices.queryAbstractRatingBiggerThan(10);
 		Assert.assertEquals(4, teams.size());
 	}
  
