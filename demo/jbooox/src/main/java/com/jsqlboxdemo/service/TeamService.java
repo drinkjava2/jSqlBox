@@ -17,17 +17,22 @@ import model.Team;
  */
 public class TeamService {
 
-	public List<Team> queryAllTeams() {
-		return SqlBoxContext.gctx().netLoad(Team.class).getAllEntityList(Team.class);
+	public List<Team> listAll() {
+		return SqlBoxContext.gctx().nLoadAllEntityList(Team.class);
 	}
 
 	@Transaction
-	public List<Team> getRatingNotZero() {
-		return new Team().getRatingNotZero();
+	public List<Team> listEqual(Integer rating) {
+		return new Team().queryTeamsRatingEqualTo(rating);
 	}
 
 	@Transaction
-	public List<Team> queryAbstractRatingBiggerThan(Integer rating) {
+	public List<Team> listNotEqual(Integer rating) {
+		return new Team().queryTeamsRatingNotEqual(rating);
+	}
+
+	@Transaction
+	public List<Team> listBigger(Integer rating) {
 		AbstractTeam team = AbstractTeam.create(AbstractTeam.class);
 		return team.queryAbstractRatingBiggerThan(rating);
 	}

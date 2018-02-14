@@ -62,7 +62,7 @@ public class Dispatcher {
 		} catch (Exception e) {
 			throw new ClassNotFoundException("There is no WebBox classs '" + boxClassName + "' found.");
 		}
-		request.setAttribute("pathParamArray", pathParams);
+		request.setAttribute("pathParams", pathParams);
 		box.show(pageContext);
 	}
 

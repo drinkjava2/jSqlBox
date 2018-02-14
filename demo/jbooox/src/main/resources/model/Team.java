@@ -43,17 +43,17 @@ public class Team extends ActiveRecord {
 		this.rating = rating;
 	}
 
-	@Sql("select t.** from team t where t.rating<>0")
-	public List<Team> getRatingNotEqual() {
-		return guess();
+	@Sql("select t.** from team t where t.rating<>?")
+	public List<Team> queryTeamsRatingNotEqual(Integer rating) {
+		return guess(rating);
 	}
 
-	public List<Team> queryRatingBiggerThan(Integer rating) {
+	public List<Team> queryTeamsRatingEqualTo(Integer rating) {
 		return guess(rating);
 	}
 	/*- 
 	 select t.**
 	    from teams t
-	    where t.rating>:rating
+	    where t.rating=:rating
 	*/
 }

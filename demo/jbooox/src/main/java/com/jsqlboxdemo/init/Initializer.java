@@ -84,6 +84,7 @@ public class Initializer implements ServletContextListener {
 	public void contextDestroyed(ServletContextEvent context) {
 		SqlBoxContext.setGlobalSqlBoxContext(null);
 		BeanBox.defaultContext.close();// close the dataSource
+		System.out.println("========== com.jsqlboxdemo.init.Initializer destroyed=====");
 
 	}
 

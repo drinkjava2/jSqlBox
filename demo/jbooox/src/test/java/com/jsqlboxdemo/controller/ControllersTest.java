@@ -20,7 +20,7 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.jsqlboxdemo.TestBase;
 import com.jsqlboxdemo.controller.Controllers.home;
 import com.jsqlboxdemo.controller.Controllers.team_add_post;
-import com.jsqlboxdemo.controller.Controllers.team_listBiggerThan10;
+import com.jsqlboxdemo.controller.Controllers.team_listbigger;
 import com.jsqlboxdemo.mock.MockPageContext;
 
 import model.Team;
@@ -35,35 +35,27 @@ public class ControllersTest extends TestBase {
 
 	@Test
 	public void test_team_add_post() {
-		MockPageContext ptx = new MockPageContext();
-		ptx.setRequestAttribute("name", "Tom");
-		ptx.setRequestAttribute("rating", "123");
+		MockPageContext mockPC = new MockPageContext();
+		mockPC.setRequestAttribute("name", "Tom");
+		mockPC.setRequestAttribute("rating", "123");
 		team_add_post box = BeanBox.getBean(team_add_post.class);
-		box.setPageContext(ptx);
+		box.setPageContext(mockPC);
 		box.execute();
-		Assert.assertEquals("Team was successfully added.", (String) ptx.getRequestAttribute("message"));
+		Assert.assertEquals("Team was successfully added.", (String) mockPC.getRequestAttribute("message"));
 		Assert.assertTrue(box.getPage() instanceof home);
 	}
 
 	@Test
-	public void test_team_listBiggerThan10() {
-		MockPageContext ptx = new MockPageContext();
-		team_listBiggerThan10 box = BeanBox.getBean(team_listBiggerThan10.class);
-		box.setPageContext(ptx);
+	public void test_team_listBigger() {
+		MockPageContext mockPC = new MockPageContext();
+		mockPC.setPathParams("10");
+		team_listbigger box = BeanBox.getPrototypeBean(team_listbigger.class);
+		box.setPageContext(mockPC);
 		box.execute();
-		Assert.assertEquals(4, ((List<Team>) ptx.getRequestAttribute("teams")).size());
+		Assert.assertEquals(4, ((List<Team>) mockPC.getRequestAttribute("teams")).size());
 		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp"); 
 	}
 	
-
-	@Test
-	public void test_team_listBiggerThan102() {
-		MockPageContext ptx = new MockPageContext();
-		team_listBiggerThan10 box = new team_listBiggerThan10();
-		box.setPageContext(ptx);
-		box.execute();
-		Assert.assertEquals(4, ((List<Team>) ptx.getRequestAttribute("teams")).size());
-		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp"); 
-	}
+ 
 
 }

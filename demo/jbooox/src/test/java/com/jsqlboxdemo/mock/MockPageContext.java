@@ -62,6 +62,10 @@ public class MockPageContext extends PageContext {
 		request.setMethod(method);
 	}
 
+	public void setPathParams(String... params) {
+		request.setAttribute("pathParams", params);
+	}
+
 	// ===============================================================
 	// ====================garbage code below=========================
 	// ===============================================================
