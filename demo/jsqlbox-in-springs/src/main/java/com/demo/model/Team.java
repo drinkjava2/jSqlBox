@@ -1,15 +1,16 @@
-package com.sprhib.model;
+package com.demo.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.TableGenerator;
+import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
+import com.github.drinkjava2.jdialects.annotation.jpa.GeneratedValue;
+import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.annotation.jpa.Table;
+import com.github.drinkjava2.jdialects.annotation.jpa.TableGenerator;
+import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Entity
 @Table(name = "teams")
-public class Team {
+public class Team extends ActiveRecord{
 	static {
 		for (int i = 0; i < 200; i++) {
 			System.out.println("55 ");

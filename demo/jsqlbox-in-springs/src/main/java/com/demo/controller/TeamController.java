@@ -1,4 +1,4 @@
-package com.sprhib.controller;
+package com.demo.controller;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sprhib.model.Team;
-import com.sprhib.service.TeamService;
+import com.demo.model.Team;
+import com.demo.service.TeamService;
 
 @Controller
 @RequestMapping(value="/team")

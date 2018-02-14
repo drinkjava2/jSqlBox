@@ -39,7 +39,7 @@ public class Initializer implements ServletContextListener {
 			ds.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
 			ds.addDataSourceProperty("useServerPrepStmts", true);
 			ds.setMaximumPoolSize(10);
-			ds.setConnectionTimeout(600000);
+			ds.setConnectionTimeout(5000);
 			this.setPreDestory("close");// jBeanBox will close pool
 			return ds;
 		}
