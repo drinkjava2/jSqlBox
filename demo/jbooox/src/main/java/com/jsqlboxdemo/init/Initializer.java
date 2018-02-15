@@ -55,7 +55,7 @@ public class Initializer implements ServletContextListener {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD })
 	public static @interface Transaction {
-		public Class<?> value() default Object.class; 
+		public Class<?> value() default Object.class;
 
 	}
 
@@ -64,17 +64,17 @@ public class Initializer implements ServletContextListener {
 		// Initialize BeanBox
 		BeanBox.regAopAroundAnnotation(TX.class, TxBox.class);
 		BeanBox.regAopAroundAnnotation(Transaction.class, TxBox.class);
-		
+
 		// Initialize Global SqlBoxContext
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class),
 				new Config().setConnectionManager(TinyTxConnectionManager.instance()));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
- 
+
 		// Initialize database
 		String[] ddls = ctx.toDropAndCreateDDL(Team.class);
 		for (String ddl : ddls)
 			ctx.quiteExecute(ddl);
-		for (int i = 1; i <= 5; i++)
+		for (int i = 0; i < 5; i++)
 			new Team().put("name", "Team" + i, "rating", i * 10).insert();
 		Assert.assertEquals(5, ctx.nQueryForLongValue("select count(*) from teams"));
 		System.out.println("========== com.jsqlboxdemo.init.Initializer initialized=====");

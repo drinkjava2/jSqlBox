@@ -18,9 +18,11 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.jsqlboxdemo.TestBase;
-import com.jsqlboxdemo.controller.Controllers.home;
-import com.jsqlboxdemo.controller.Controllers.team_add_post;
-import com.jsqlboxdemo.controller.Controllers.team_listbigger;
+import com.jsqlboxdemo.controller.home.home_default;
+import com.jsqlboxdemo.controller.team.team_add_post;
+import com.jsqlboxdemo.controller.team.team_list_bigger;
+import com.jsqlboxdemo.controller.team.team_list_equal;
+import com.jsqlboxdemo.dispatcher.Dispatcher;
 import com.jsqlboxdemo.mock.MockPageContext;
 
 import model.Team;
@@ -31,31 +33,36 @@ import model.Team;
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
-public class ControllersTest extends TestBase {
+public class TeamControllerTest extends TestBase {
 
-	@Test
+	@Test // Test from execute method
 	public void test_team_add_post() {
 		MockPageContext mockPC = new MockPageContext();
 		mockPC.setRequestAttribute("name", "Tom");
 		mockPC.setRequestAttribute("rating", "123");
-		team_add_post box = BeanBox.getBean(team_add_post.class);
+		team_add_post box = BeanBox.getPrototypeBean(team_add_post.class);
 		box.setPageContext(mockPC);
 		box.execute();
 		Assert.assertEquals("Team was successfully added.", (String) mockPC.getRequestAttribute("message"));
-		Assert.assertTrue(box.getPage() instanceof home);
+		Assert.assertTrue(box.getPage() instanceof home_default);
 	}
 
-	@Test
+	@Test // Test from show method
 	public void test_team_listBigger() {
 		MockPageContext mockPC = new MockPageContext();
 		mockPC.setPathParams("10");
-		team_listbigger box = BeanBox.getPrototypeBean(team_listbigger.class);
-		box.setPageContext(mockPC);
-		box.execute();
-		Assert.assertEquals(4, ((List<Team>) mockPC.getRequestAttribute("teams")).size());
-		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp"); 
+		team_list_bigger box = BeanBox.getPrototypeBean(team_list_bigger.class);
+		box.show(mockPC);
+		Assert.assertEquals(3, ((List<Team>) mockPC.getRequestAttribute("teams")).size());
+		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp");
 	}
-	
- 
+
+	@Test // Test from dispatcher
+	public void test_team_equal() throws Exception {
+		MockPageContext mockPC = new MockPageContext();
+		mockPC.setRequestURI("/team/list_equal/10.html");
+		Dispatcher.dispach(mockPC);
+		Assert.assertEquals(1, ((List<Team>) mockPC.getRequestAttribute("teams")).size());
+	}
 
 }

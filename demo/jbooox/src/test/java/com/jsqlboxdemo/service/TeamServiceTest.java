@@ -18,15 +18,15 @@ import model.Team;
 public class TeamServiceTest extends TestBase {
 
 	@Test
-	public void queryAllTeams() {
+	public void listAllTest() {
 		List<Team> teams = teamServices.listAll();
 		Assert.assertEquals(5, teams.size());
 	}
 
 	@Test
-	public void queryTeamsBigger() {
+	public void ListEqualTest() {
 		List<Team> teams = teamServices.listEqual(10);
-		Assert.assertEquals(4, teams.size());
+		Assert.assertEquals(1, teams.size());
 	}
  
 }

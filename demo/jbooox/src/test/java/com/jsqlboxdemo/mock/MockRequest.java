@@ -46,6 +46,7 @@ public class MockRequest implements HttpServletRequest {
 	Map<String, Object> map = new HashMap<String, Object>();
 	String requestURI;
 	String method = "GET";
+	String forwardOrIncludeUrl;
 
 	@Override
 	public Object getAttribute(String key) {
@@ -74,6 +75,11 @@ public class MockRequest implements HttpServletRequest {
 
 	public void setMethod(String method) {
 		this.method = method;
+	}
+	
+	@Override
+	public RequestDispatcher getRequestDispatcher(String url) {
+		return new MockRequestDispatcher(url);
 	}
 
 	// ===============================================================
@@ -212,11 +218,7 @@ public class MockRequest implements HttpServletRequest {
 		return 0;
 	}
 
-	@Override
-	public RequestDispatcher getRequestDispatcher(String arg0) {
-
-		return null;
-	}
+ 
 
 	@Override
 	public String getScheme() {

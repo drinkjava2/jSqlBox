@@ -36,9 +36,10 @@ import javax.servlet.jsp.el.VariableResolver;
 @SuppressWarnings("all")
 public class MockPageContext extends PageContext {
 	MockRequest request = new MockRequest();
+	MockJspWriter out = new MockJspWriter(0, true);
 
 	@Override
-	public ServletRequest getRequest() {
+	public ServletRequest getRequest() { 
 		return request;
 	}
 
@@ -64,6 +65,11 @@ public class MockPageContext extends PageContext {
 
 	public void setPathParams(String... params) {
 		request.setAttribute("pathParams", params);
+	}
+
+	@Override
+	public JspWriter getOut() {
+		return new MockJspWriter(0, true);
 	}
 
 	// ===============================================================
@@ -180,12 +186,6 @@ public class MockPageContext extends PageContext {
 
 	@Override
 	public ExpressionEvaluator getExpressionEvaluator() {
-
-		return null;
-	}
-
-	@Override
-	public JspWriter getOut() {
 
 		return null;
 	}

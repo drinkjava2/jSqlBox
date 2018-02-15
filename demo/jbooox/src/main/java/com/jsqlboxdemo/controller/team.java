@@ -11,11 +11,8 @@
  */
 package com.jsqlboxdemo.controller;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jwebbox.WebBox;
+import com.jsqlboxdemo.controller.home.home_default;
 import com.jsqlboxdemo.init.Initializer.Transaction;
-import com.jsqlboxdemo.service.TeamService;
 
 import model.Team;
 
@@ -26,44 +23,17 @@ import model.Team;
  * (child-Class of WebBox) to support transaction if put @Transactional or @Tx
  * or @TX or @Transaction annotation on controller's method.
  * 
- * Service classes usually is singleton, why? because the only purpose of
- * service class is to create proxy by AOP too to support transaction.
- * 
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
-public class Controllers {
-	public static class home extends WebBox {
-		String[] pathParams;
-		TeamService teamService = BeanBox.getBean(TeamService.class);// singleton
-		{
-			setPage("/WEB-INF/pages/home.jsp");
-		}
-
-		public void beforeExecute() {
-			super.beforeExecute();
-			System.out.println("======================================");
-		}
-
-		public void redirect(Object target) {
-			if (target instanceof String) {
-				String targetPage = (String) target;
-				if (targetPage.indexOf("/WEB-INF/") == 0)
-					setPage(targetPage);
-				else
-					setPage("/WEB-INF/pages/" + targetPage);
-			} else if (target instanceof Class)
-				setPage(BeanBox.getPrototypeBean((Class) target));// non-singleton
-		}
-	}
-
-	public static class team_add extends home {
+public class team {
+	public static class team_add extends home_default {
 		{
 			redirect("team_add.jsp");
 		}
 	}
 
-	public static class team_add_post extends home {
+	public static class team_add_post extends home_default {
 		// Not recommend open transaction in view, usually should put on service methods
 		@Transaction
 		public void execute() {
@@ -72,14 +42,14 @@ public class Controllers {
 			team.setRating(Integer.parseInt((String) this.getObject("rating")));
 			team.insert();
 			setRequestAttribute("message", "Team was successfully added.");
-			redirect(team_list.class);
+			redirect(team_list_all.class);
 		}
 	}
 
-	public static class team_edit extends team_list {
+	public static class team_edit extends home_default {
 		public void execute() {
-			Team team = new Team().load(pathParams[0]);
-			this.setRequestAttribute("team", team);
+			this.setRequestAttribute("team", new Team().load(pathParams[0]));
+			redirect("team_edit.jsp");
 		}
 	}
 
@@ -89,11 +59,12 @@ public class Controllers {
 			super.execute();
 			Team team = getObject("team");
 			if (team == null)
-				throw new NullPointerException("Team does exist");
+				throw new NullPointerException("Team does not exist");
 			team.setName((String) this.getObject("name"));
 			team.setRating(Integer.parseInt((String) this.getObject("rating")));
 			team.update();
 			this.setRequestAttribute("message", "Team was successfully edited.");
+			redirect(team_list_all.class);
 		}
 	}
 
@@ -103,40 +74,39 @@ public class Controllers {
 			super.execute();
 			Team team = getObject("team");
 			if (team == null)
-				throw new NullPointerException("Team does exist");
+				throw new NullPointerException("Team does not exist");
 			team.delete();
 			this.setRequestAttribute("message", "Team was successfully deleted.");
-			redirect(team_list.class);
+			redirect(team_list_all.class);
 		}
 	}
 
-	public static class team_list extends home {
+	public static class team_list extends home_default {
 		{
 			setPage("/WEB-INF/pages/team_list.jsp");
 		}
 	}
 
-	public static class team_listall extends team_list {
+	public static class team_list_all extends team_list {
 		public void execute() {
 			this.setRequestAttribute("teams", teamService.listAll());
 		}
 	}
 
-	public static class team_listequal extends team_list {
+	public static class team_list_equal extends team_list {
 		public void execute() {
 			this.setRequestAttribute("teams", teamService.listEqual(Integer.parseInt(pathParams[0])));
 		}
 	}
 
-	public static class team_listnotequal extends team_list {
+	public static class team_list_notequal extends team_list {
 		public void execute() {
 			this.setRequestAttribute("teams", teamService.listNotEqual(Integer.parseInt(pathParams[0])));
 		}
 	}
 
-	public static class team_listbigger extends team_list {
+	public static class team_list_bigger extends team_list {
 		public void execute() {
-			System.out.println(pathParams);
 			pathParams = (String[]) this.getObject("pathParams");
 			this.setRequestAttribute("teams", teamService.listBigger(Integer.parseInt(pathParams[0])));
 		}

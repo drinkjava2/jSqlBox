@@ -39,28 +39,33 @@ public class Dispatcher {
 
 		String[] paths = StringUtils.split(uri, "/");
 		String[] pathParams;
-		String boxClassName;
+		String resource = null;
+		String operation = null;
 
-		if (paths.length > 1) {
-			// /team/add/100...
-			boxClassName = paths[0] + "_" + paths[1];
+		if (paths.length >= 2) {// /team/add/100...
+			resource = paths[0];
+			operation = paths[1];
 			pathParams = new String[paths.length - 2];
 			for (int i = 2; i < paths.length; i++)
 				pathParams[i - 2] = paths[i];
-		} else {
-			// /home
-			boxClassName = paths[0];
+		} else { // /home_default
+			resource = paths[0];
 			pathParams = new String[0];
 		}
-		if (request.getMethod().equals("POST"))
-			boxClassName += "_post";
-		boxClassName = "com.jsqlboxdemo.controller.Controllers$" + boxClassName;
+
+		if (operation == null)
+			operation = "default";
+		StringBuilder controller = new StringBuilder("com.jsqlboxdemo.controller.").append(resource).append("$")
+				.append(resource).append("_").append(operation);
+		if ("POST".equals(request.getMethod()))
+			controller.append("_post");
+
 		WebBox box;
 		try {
-			Class boxClass = Class.forName(boxClassName);
+			Class boxClass = Class.forName(controller.toString());
 			box = BeanBox.getPrototypeBean(boxClass);
 		} catch (Exception e) {
-			throw new ClassNotFoundException("There is no WebBox classs '" + boxClassName + "' found.");
+			throw new ClassNotFoundException("There is no WebBox classs '" + controller + "' found.");
 		}
 		request.setAttribute("pathParams", pathParams);
 		box.show(pageContext);
