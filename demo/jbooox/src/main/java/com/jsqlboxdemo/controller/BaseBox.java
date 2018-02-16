@@ -11,6 +11,10 @@
  */
 package com.jsqlboxdemo.controller;
 
+import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jwebbox.WebBox;
+import com.jsqlboxdemo.service.TeamService;
+
 /**
  * This is a Demo to show use jWebBox as controller, WebBox is not thread safe,
  * to use WebBox act as controller, always use a IOC/AOP tool to get a new
@@ -19,13 +23,30 @@ package com.jsqlboxdemo.controller;
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
-public class home {
+public class BaseBox extends WebBox {
 
-	public static class home_default extends BaseBox {
-		{
-			setPage("/WEB-INF/pages/home.jsp");
-		}
+	TeamService teamService = BeanBox.getBean(TeamService.class);// singleton
 
+	public void redirect(Object target) {
+		if (target instanceof String) {
+			String targetPage = (String) target;
+			if (targetPage.indexOf("/WEB-INF/") == 0)
+				setPage(targetPage);
+			else
+				setPage("/WEB-INF/pages/" + targetPage);
+		} else if (target instanceof Class)
+			setPage(BeanBox.getPrototypeBean((Class) target));// non-singleton
 	}
 
+	public Integer getObjectAsInt(String key) {
+		return Integer.parseInt(getObject(key));
+	}
+
+	public String[] getPathParams() {
+		return this.getObject("pathParams");
+	}
+
+	public Integer getPathParamAsInt(int index) {
+		return Integer.parseInt(getPathParams()[index]);
+	}
 }

@@ -11,6 +11,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
@@ -18,7 +19,7 @@ import com.zaxxer.hikari.HikariDataSource;
 @EnableWebMvc
 @EnableTransactionManagement
 public class WebAppConfig {
- 
+
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {
 		HikariDataSource ds = new HikariDataSource();
@@ -47,6 +48,15 @@ public class WebAppConfig {
 		resolver.setSuffix(".jsp");
 		resolver.setViewClass(JstlView.class);
 		return resolver;
+	}
+
+	@Bean
+	public SqlBoxContext createDefaultSqlBoxContext() {
+		System.out.println("========================================");
+		if (dataSource() != dataSource())
+			throw new AssertionError("I found Spring weird");
+		SqlBoxContext ctx = new SqlBoxContext(dataSource());
+		return ctx;
 	}
 
 }

@@ -115,7 +115,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(
-					"No default global SqlBoxContext be set,  please use method SqlBoxContext.setGlobalSqlBoxContext() method to set a global default SqlBoxContext instance");
+					"No default global SqlBoxContext found, please use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.");
 		ctx.insert(this);
 	}
 

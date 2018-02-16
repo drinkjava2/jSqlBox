@@ -10,13 +10,7 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Entity
 @Table(name = "teams")
-public class Team extends ActiveRecord{
-	static {
-		for (int i = 0; i < 200; i++) {
-			System.out.println("55 ");
-		}
-	}
-
+public class Team extends ActiveRecord {
 	@Id
 	@TableGenerator(name = "ID_GENERATOR", table = "pk_table", pkColumnName = "pk_col", pkColumnValue = "pk_val", valueColumnName = "val_col", initialValue = 1, allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "ID_GENERATOR")

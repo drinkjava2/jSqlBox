@@ -11,7 +11,6 @@
  */
 package com.jsqlboxdemo.controller;
 
-import com.jsqlboxdemo.controller.home.home_default;
 import com.jsqlboxdemo.init.Initializer.Transaction;
 
 import model.Team;
@@ -19,49 +18,46 @@ import model.Team;
 /**
  * This is a Demo to show use jWebBox as controller, WebBox is not thread safe,
  * to use WebBox act as controller, always use a IOC/AOP tool to get a new
- * instance for each thread and some times will get a proxy instance
- * (child-Class of WebBox) to support transaction if put @Transactional or @Tx
- * or @TX or @Transaction annotation on controller's method.
+ * instance or new proxy instance (for transaction) for each thread
  * 
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
 public class team {
-	public static class team_add extends home_default {
+	public static class team_add extends BaseBox {
 		{
 			redirect("team_add.jsp");
 		}
 	}
 
-	public static class team_add_post extends home_default {
-		// Not recommend open transaction in view, usually should put on service methods
+	public static class team_add_post extends BaseBox {
 		@Transaction
 		public void execute() {
 			Team team = new Team();
 			team.setName((String) this.getObject("name"));
-			team.setRating(Integer.parseInt((String) this.getObject("rating")));
+			team.setRating(getObjectAsInt("rating"));
 			team.insert();
 			setRequestAttribute("message", "Team was successfully added.");
 			redirect(team_list_all.class);
 		}
 	}
 
-	public static class team_edit extends home_default {
+	public static class team_edit extends BaseBox {
 		public void execute() {
-			this.setRequestAttribute("team", new Team().load(pathParams[0]));
+			this.setRequestAttribute("team", new Team().load(getPathParams()[0]));
 			redirect("team_edit.jsp");
 		}
 	}
 
 	public static class team_edit_post extends team_edit {
-		@Transaction // Not recommend open transaction in view
+		@Transaction
 		public void execute() {
 			super.execute();
 			Team team = getObject("team");
 			if (team == null)
 				throw new NullPointerException("Team does not exist");
 			team.setName((String) this.getObject("name"));
-			team.setRating(Integer.parseInt((String) this.getObject("rating")));
+			team.setRating(getObjectAsInt("rating"));
 			team.update();
 			this.setRequestAttribute("message", "Team was successfully edited.");
 			redirect(team_list_all.class);
@@ -69,7 +65,7 @@ public class team {
 	}
 
 	public static class team_delete extends team_edit {
-		@Transaction // Not recommend open transaction in view
+		@Transaction
 		public void execute() {
 			super.execute();
 			Team team = getObject("team");
@@ -81,7 +77,7 @@ public class team {
 		}
 	}
 
-	public static class team_list extends home_default {
+	public static class team_list extends BaseBox {
 		{
 			setPage("/WEB-INF/pages/team_list.jsp");
 		}
@@ -95,20 +91,19 @@ public class team {
 
 	public static class team_list_equal extends team_list {
 		public void execute() {
-			this.setRequestAttribute("teams", teamService.listEqual(Integer.parseInt(pathParams[0])));
+			this.setRequestAttribute("teams", teamService.listEqual(getPathParamAsInt(0)));
 		}
 	}
 
 	public static class team_list_notequal extends team_list {
 		public void execute() {
-			this.setRequestAttribute("teams", teamService.listNotEqual(Integer.parseInt(pathParams[0])));
+			this.setRequestAttribute("teams", teamService.listNotEqual(getPathParamAsInt(0)));
 		}
 	}
 
 	public static class team_list_bigger extends team_list {
 		public void execute() {
-			pathParams = (String[]) this.getObject("pathParams");
-			this.setRequestAttribute("teams", teamService.listBigger(Integer.parseInt(pathParams[0])));
+			this.setRequestAttribute("teams", teamService.listBigger(getPathParamAsInt(0)));
 		}
 	}
 
