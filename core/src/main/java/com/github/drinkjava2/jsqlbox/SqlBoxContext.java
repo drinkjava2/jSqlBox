@@ -23,14 +23,14 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
-import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
+import com.github.drinkjava2.jdbpro.improve.SqlHandler;
 import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetSqlExplainer;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetMapListHandler;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
@@ -53,7 +53,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	private static Boolean globalAllowShowSql = false;
 	private static Dialect globalDialect = null;
 	private static ConnectionManager globalConnectionManager = null;
-	private static List<SqlInterceptor> globalInterceptors = null;
+	private static List<SqlHandler> globalInterceptors = null;
 	private static SqlBoxContext globalSqlBoxContext = null;
 
 	/**
@@ -175,12 +175,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * current thread, it will be used by SqlBoxContext's query methods.
 	 */
 	public static String netConfig(Object... netConfig) {
-		getThreadedSqlInterceptors().add(new EntityNetSqlExplainer(netConfig));
+		getThreadedSqlInterceptors().add(new EntityNetMapListHandler(netConfig));
 		return "";
 	}
 
 	public static RowProcessor netProcessor(Object... netConfig) {
-		getThreadedSqlInterceptors().add(new EntityNetSqlExplainer(netConfig));
+		getThreadedSqlInterceptors().add(new EntityNetMapListHandler(netConfig));
 		return new BasicRowProcessor();
 	}
 
@@ -214,7 +214,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
 			return (T) net.addMapList(listMap, result);
 		} finally {
-			EntityNetSqlExplainer.removeBindedTableModel(listMap);
+			EntityNetUtils.removeBindedTableModel(listMap);
 		}
 	}
 
@@ -385,11 +385,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContext.globalConnectionManager = globalConnectionManager;
 	}
 
-	public static List<SqlInterceptor> getGlobalInterceptors() {
+	public static List<SqlHandler> getGlobalInterceptors() {
 		return globalInterceptors;
 	}
 
-	public static void setGlobalInterceptors(List<SqlInterceptor> globalInterceptors) {
+	public static void setGlobalInterceptors(List<SqlHandler> globalInterceptors) {
 		SqlBoxContext.globalInterceptors = globalInterceptors;
 	}
 

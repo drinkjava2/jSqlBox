@@ -52,7 +52,7 @@ public abstract class EntityNetFactory {
 	public static EntityNet createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
 		if (configObjects == null || configObjects.length == 0)
 			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
-		TableModel[] models = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
+		TableModel[] models = EntityNetUtils.objectConfigsToModels(ctx, configObjects);
 		EntityNet net = new EntityNet();
 		String starOrSharp = loadKeyOnly ? ".##" : ".**";
 		for (TableModel t : models) {
@@ -64,7 +64,7 @@ public abstract class EntityNetFactory {
 				mapList = ctx.nQuery(new MapListHandler(SqlBoxContext.netProcessor(t)),
 						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
 			} finally {
-				EntityNetSqlExplainer.removeBindedTableModel(mapList);
+				EntityNetUtils.removeBindedTableModel(mapList);
 			}
 			net.addMapList(mapList, t);
 		}

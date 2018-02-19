@@ -18,33 +18,26 @@ package com.github.drinkjava2.jdbpro.improve;
 import org.apache.commons.dbutils.QueryRunner;
 
 /**
- * SqlInterceptor should have a explain method to explain SQL and a
- * explainResult method to explainResult
+ * SqlHandler should have a explain method to explain SQL and a explainResult
+ * method to explainResult
  * 
  * @since 1.7.0.1
  */
 @SuppressWarnings({ "all" })
-public interface SqlInterceptor {
-	public static final int NO_PARAM = 0;
-	public static final int SINGLE_PARAM = 1;
-	public static final int ARRAY_PARAM = 2;
-
+public interface SqlHandler {
 	/**
-	 * handleSql method used to change SQL string before execute to add extra
-	 * features like pagination, logging...
+	 * handleSql method used to change SQL string before execute, to add extra
+	 * features like pagination, logging, entityNet SQl explanation...
 	 * 
 	 * @param query
 	 *            The ImprovedQueryRunner
 	 * @param sql
 	 *            The original SQL
-	 * @param paramQtyType
-	 *            Indicate how many parameters, can be NO_PARAM or SINGLE_PARAM or
-	 *            ARRAY_PARAM
 	 * @param params
-	 *            The parameters, can be no or single or array
-	 * @return Changed SQL String
+	 *            Parameters if have
+	 * @return The changed SQL String
 	 */
-	public String handleSql(QueryRunner query, String sql, int paramQtyType, Object paramOrParams);
+	public String handleSql(QueryRunner query, String sql, Object... params);
 
 	/**
 	 * After a SQL be executed, handleResult method be called to change the result
@@ -53,5 +46,5 @@ public interface SqlInterceptor {
 	 *            The original result Object
 	 * @return The changed result Object
 	 */
-	public <T> T handleResult(Object originalResult);
+	public <T> T handleResult(Object result);
 }

@@ -15,10 +15,6 @@
  */
 package com.github.drinkjava2.jdbpro.improve;
 
-import static com.github.drinkjava2.jdbpro.improve.SqlInterceptor.ARRAY_PARAM;
-import static com.github.drinkjava2.jdbpro.improve.SqlInterceptor.NO_PARAM;
-import static com.github.drinkjava2.jdbpro.improve.SqlInterceptor.SINGLE_PARAM;
-
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,7 +42,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * <br/>
  * 2) Override some methods to add logger support <br/>
  * 3) Override some execute/update/query methods to support batch operation and
- * SqlInterceptor <br/>
+ * SqlHandler <br/>
  * 4) Add a dialect property to support dialect features like pagination, DDL...
  * 
  * @author Yong Zhu
@@ -83,16 +79,16 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected Integer batchSize = globalBatchSize;
 
 	/** SqlInterceptors, only allow initialised by constructor */
-	protected List<SqlInterceptor> sqlInterceptors = null;
+	protected List<SqlHandler> sqlInterceptors = null;
 
 	/**
-	 * A ThreadLocal type cache to store SqlInterceptor instances, all instance will
-	 * be cleaned after this thread close
+	 * A ThreadLocal type cache to store SqlHandler instances, all instance will be
+	 * cleaned after this thread close
 	 */
-	private static ThreadLocal<ArrayList<SqlInterceptor>> threadedSqlInterceptors = new ThreadLocal<ArrayList<SqlInterceptor>>() {
+	private static ThreadLocal<ArrayList<SqlHandler>> threadedSqlInterceptors = new ThreadLocal<ArrayList<SqlHandler>>() {
 		@Override
-		protected ArrayList<SqlInterceptor> initialValue() {
-			return new ArrayList<SqlInterceptor>();
+		protected ArrayList<SqlHandler> initialValue() {
+			return new ArrayList<SqlHandler>();
 		}
 	};
 
@@ -187,30 +183,34 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Add a explainer
 	 */
-	public static ArrayList<SqlInterceptor> getThreadedSqlInterceptors() {
+	public static ArrayList<SqlHandler> getThreadedSqlInterceptors() {
 		return threadedSqlInterceptors.get();
 	}
 
 	/**
 	 * Explain SQL to add extra features like pagination...
 	 */
-	public String explainSql(String sql, int paramQtyType, Object paramOrParams) {
+	public String explainSql(ResultSetHandler<?> rsh, String sql, Object... params) {
 		String newSQL = sql;
 		if (sqlInterceptors != null)
-			for (SqlInterceptor explainer : sqlInterceptors)
-				newSQL = explainer.handleSql(this, newSQL, paramQtyType, paramOrParams);
-		for (SqlInterceptor explainer : getThreadedSqlInterceptors())
-			newSQL = explainer.handleSql(this, newSQL, paramQtyType, paramOrParams);
+			for (SqlHandler explainer : sqlInterceptors)
+				newSQL = explainer.handleSql(this, newSQL, params);
+		for (SqlHandler explainer : getThreadedSqlInterceptors())
+			newSQL = explainer.handleSql(this, newSQL, params);
+		if (rsh != null && rsh instanceof SqlHandler)
+			newSQL = ((SqlHandler) rsh).handleSql(this, sql, params);
 		return newSQL;
 	}
 
-	public Object explainResult(Object result) {
+	public Object explainResult(ResultSetHandler<?> rsh, Object result) {
 		Object newObj = result;
 		if (sqlInterceptors != null)
-			for (SqlInterceptor explainer : sqlInterceptors)
+			for (SqlHandler explainer : sqlInterceptors)
 				newObj = explainer.handleResult(newObj);
-		for (SqlInterceptor explainer : getThreadedSqlInterceptors())
+		for (SqlHandler explainer : getThreadedSqlInterceptors())
 			newObj = explainer.handleResult(newObj);
+		if (rsh instanceof SqlHandler)
+			result = ((SqlHandler) rsh).handleResult(result);
 		return newObj;
 	}
 
@@ -339,13 +339,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int execute(Connection conn, String sql, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(null, sql, params);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("e1", null, null, explainedSql, conn, params);
 				return 0;
 			} else {
 				int result = super.execute(conn, explainedSql, params);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -356,16 +356,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
 			throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
-			if (rsh instanceof SqlInterceptor)
-				explainedSql = ((SqlInterceptor) rsh).handleSql(this, sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(rsh, sql, params);
+
 			if (batchEnabled.get()) {
 				return (List<T>) addToCacheIfFullFlush("e2", rsh, null, explainedSql, conn, params);
 			} else {
 				List<T> result = super.execute(conn, explainedSql, rsh, params);
-				result = (List<T>) explainResult(result);
-				if (rsh instanceof SqlInterceptor)
-					result = ((SqlInterceptor) rsh).handleResult(result);
+				result = (List<T>) explainResult(rsh, result);
+				if (rsh instanceof SqlHandler)
+					result = ((SqlHandler) rsh).handleResult(result);
 				return result;
 			}
 		} finally {
@@ -376,13 +375,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int execute(String sql, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(null, sql, params);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("e3", null, null, explainedSql, null, params);
 				return 0;
 			} else {
 				int result = super.execute(explainedSql, params);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -392,11 +391,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> List<T> execute(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(rsh, sql, params);
 			if (batchEnabled.get())
 				return (List<T>) addToCacheIfFullFlush("e4", rsh, null, explainedSql, null, params);
 			List<T> result = super.execute(explainedSql, rsh, params);
-			return (List<T>) explainResult(result);
+			return (List<T>) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -405,11 +404,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, NO_PARAM, null);
+			String explainedSql = explainSql(rsh, sql, null);
 			if (batchEnabled.get())
 				return addToCacheIfFullFlush("i1", rsh, null, explainedSql, conn, null);
 			T result = super.insert(conn, explainedSql, rsh);
-			return (T) explainResult(result);
+			return (T) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -418,11 +417,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(rsh, sql, params);
 			if (batchEnabled.get())
 				return addToCacheIfFullFlush("i2", rsh, null, explainedSql, conn, params);
 			T result = super.insert(conn, explainedSql, rsh, params);
-			return (T) explainResult(result);
+			return (T) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -431,11 +430,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> T insert(String sql, ResultSetHandler<T> rsh) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, NO_PARAM, null);
+			String explainedSql = explainSql(rsh, sql, null);
 			if (batchEnabled.get())
 				return addToCacheIfFullFlush("i3", rsh, null, explainedSql, null, null);
 			T result = super.insert(explainedSql, rsh);
-			return (T) explainResult(result);
+			return (T) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -444,11 +443,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(rsh, sql, params);
 			if (batchEnabled.get())
 				return addToCacheIfFullFlush("i4", rsh, null, explainedSql, null, params);
 			T result = super.insert(explainedSql, rsh, params);
-			return (T) explainResult(result);
+			return (T) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -457,13 +456,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int update(Connection conn, String sql) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, NO_PARAM, null);
+			String explainedSql = explainSql(null, sql, null);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("u1", null, null, explainedSql, conn, null);
 				return 0;
 			} else {
 				int result = super.update(conn, explainedSql);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -473,13 +472,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int update(Connection conn, String sql, Object param) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, SINGLE_PARAM, param);
+			String explainedSql = explainSql(null, sql, param);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("u2", null, param, explainedSql, conn, null);
 				return 0;
 			} else {
 				int result = super.update(conn, explainedSql, param);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -489,13 +488,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int update(Connection conn, String sql, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(null, sql, params);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("u3", null, null, explainedSql, conn, params);
 				return 0;
 			} else {
 				int result = super.update(conn, explainedSql, params);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -505,13 +504,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int update(String sql) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, NO_PARAM, null);
+			String explainedSql = explainSql(null, sql, null);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("u4", null, null, explainedSql, null, null);
 				return 0;
 			} else {
 				int result = super.update(explainedSql);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -521,13 +520,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int update(String sql, Object param) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, SINGLE_PARAM, param);
+			String explainedSql = explainSql(null, sql, param);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("u5", null, param, explainedSql, null, null);
 				return 0;
 			} else {
 				int result = super.update(explainedSql, param);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -537,13 +536,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public int update(String sql, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(null, sql, params);
 			if (batchEnabled.get()) {
 				addToCacheIfFullFlush("u6", null, null, explainedSql, null, params);
 				return 0;
 			} else {
 				int result = super.update(explainedSql, params);
-				return (Integer) explainResult(result);
+				return (Integer) explainResult(null, result);
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -604,9 +603,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(rsh, sql, params);
 			T result = super.query(conn, explainedSql, rsh, params);
-			return (T) explainResult(result);
+			return (T) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -615,9 +614,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, NO_PARAM, null);
+			String explainedSql = explainSql(rsh, sql, null);
 			T result = super.query(conn, explainedSql, rsh);
-			return (T) explainResult(result);
+			return (T) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -626,13 +625,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
-			if (rsh instanceof SqlInterceptor)
-				explainedSql = ((SqlInterceptor) rsh).handleSql(this, sql, ARRAY_PARAM, params);
+			String explainedSql = explainSql(rsh, sql, params);
 			T result = super.query(explainedSql, rsh, params);
-			result = (T) explainResult(result);
-			if (rsh instanceof SqlInterceptor)
-				result = ((SqlInterceptor) rsh).handleResult(result);
+			result = (T) explainResult(rsh, result);
 			return result;
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -642,9 +637,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	public <T> T query(String sql, ResultSetHandler<T> rsh) throws SQLException {
 		try {
-			String explainedSql = explainSql(sql, NO_PARAM, null);
+			String explainedSql = explainSql(rsh, sql, null);
 			T result = super.query(explainedSql, rsh);
-			return (T) explainResult(result);
+			return (T) explainResult(rsh, result);
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}

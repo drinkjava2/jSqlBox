@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.List;
 
 import com.github.drinkjava2.jdbpro.DbProLogger;
-import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
+import com.github.drinkjava2.jdbpro.improve.SqlHandler;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -32,7 +32,7 @@ public class Config {
 	private Dialect dialect = SqlBoxContext.getGlobalDialect();
 	private Integer batchSize = SqlBoxContext.getGlobalBatchSize();
 	private ConnectionManager connectionManager = SqlBoxContext.getGlobalConnectionManager();
-	private List<SqlInterceptor> interceptors = SqlBoxContext.getGlobalInterceptors();
+	private List<SqlHandler> interceptors = SqlBoxContext.getGlobalInterceptors();
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -88,11 +88,11 @@ public class Config {
 		return this;
 	}
 
-	public List<SqlInterceptor> getInterceptors() {
+	public List<SqlHandler> getInterceptors() {
 		return interceptors;
 	}
 
-	public Config setInterceptors(List<SqlInterceptor> interceptors) {
+	public Config setInterceptors(List<SqlHandler> interceptors) {
 		this.interceptors = interceptors;
 		return this;
 	}

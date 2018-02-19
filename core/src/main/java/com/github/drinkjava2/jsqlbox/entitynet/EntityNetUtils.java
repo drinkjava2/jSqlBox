@@ -19,14 +19,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 
 /**
  * Store static methods about EntityNet
@@ -36,6 +39,27 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  */
 public class EntityNetUtils {
 
+ 
+
+	public static final ThreadLocal<WeakHashMap<Object, Object>> netConfigBindToListCache = new ThreadLocal<WeakHashMap<Object, Object>>() {
+		@Override
+		protected WeakHashMap<Object, Object> initialValue() {
+			return new WeakHashMap<Object, Object>();
+		}
+	};
+
+	public static void removeBindedTableModel(List<?> listMap) {
+		netConfigBindToListCache.get().remove(listMap);
+	}
+
+	public static TableModel[] getBindedTableModel(List<?> listMap) {
+		return (TableModel[]) netConfigBindToListCache.get().get(listMap);
+	}
+
+	public static void bindTableModel(Object listMap, TableModel[] tableModels) {
+		netConfigBindToListCache.get().put(listMap, tableModels);
+	}
+	
 	/**
 	 * After a query, listMap may binded a threadLocal type TableModel[] netConfigs,
 	 * this method used to join the binded tableModels with given configObjects,
@@ -45,14 +69,14 @@ public class EntityNetUtils {
 			Object... configObjects) {
 		// bindeds: tableModels entityClass and alias may be empty
 		// given: tableModels should have entityClass, alias may be null
-		TableModel[] bindeds = EntityNetSqlExplainer.getBindedTableModel(listMap);
-		EntityNetSqlExplainer.removeBindedTableModel(listMap);
+		TableModel[] bindeds = getBindedTableModel(listMap);
+		removeBindedTableModel(listMap);
 		if (bindeds == null || bindeds.length == 0)
 			bindeds = new TableModel[0];
 
 		TableModel[] givens;
 		if (configObjects != null && configObjects.length > 0)
-			givens = EntityNetSqlExplainer.objectConfigsToModels(ctx, configObjects);
+			givens = objectConfigsToModels(ctx, configObjects);
 		else
 			givens = new TableModel[0];
 
@@ -281,4 +305,35 @@ public class EntityNetUtils {
 		return result;
 	}
 
+	/**
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
+	 * or entity Bean
+	 * 
+	 * <pre>
+	 * 1. TableModel instance, will use it
+	 * 2. SqlBox instance, will use its tableModel
+	 * 3. Class, will call ctx.createSqlBox() to create a SqlBox instance and use its tableModel
+	 * 4. Object, will call SqlBoxUtils.findAndBindSqlBox() to create a SqlBox instance
+	 * </pre>
+	 */
+	public static TableModel[] objectConfigsToModels(SqlBoxContext ctx, Object[] netConfigs) {
+		if (netConfigs == null || netConfigs.length == 0)
+			return new TableModel[0];
+		TableModel[] result = new TableModel[netConfigs.length];
+		for (int i = 0; i < netConfigs.length; i++) {
+			Object obj = netConfigs[i];
+			if (obj == null)
+				throw new SqlBoxException("Can not convert null to SqlBox instance");
+			if (obj instanceof TableModel)
+				result[i] = (TableModel) obj;
+			else if (obj instanceof SqlBox)
+				result[i] = ((SqlBox) obj).getTableModel();
+			else if (obj instanceof Class)
+				result[i] = SqlBoxUtils.createSqlBox(ctx, (Class<?>) obj).getTableModel();
+			else {
+				result[i] = SqlBoxUtils.findAndBindSqlBox(ctx, obj).getTableModel();
+			}
+		}
+		return result;
+	}
 }
