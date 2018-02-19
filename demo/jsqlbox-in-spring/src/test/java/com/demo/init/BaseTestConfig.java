@@ -1,4 +1,4 @@
-package com.sprhib.init;
+package com.demo.init;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -8,7 +8,7 @@ import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 @Configuration
-@ComponentScan("com.sprhib")
+@ComponentScan("com.demo")
 @EnableWebMvc
 public class BaseTestConfig {
 	

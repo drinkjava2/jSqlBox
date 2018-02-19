@@ -194,13 +194,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Explain SQL to add extra features like pagination...
 	 */
-	public String explainSql(String sql, int paramType, Object paramOrParams) {
+	public String explainSql(String sql, int paramQtyType, Object paramOrParams) {
 		String newSQL = sql;
 		if (sqlInterceptors != null)
 			for (SqlInterceptor explainer : sqlInterceptors)
-				newSQL = explainer.handleSql(this, newSQL, paramType, paramOrParams);
+				newSQL = explainer.handleSql(this, newSQL, paramQtyType, paramOrParams);
 		for (SqlInterceptor explainer : getThreadedSqlInterceptors())
-			newSQL = explainer.handleSql(this, newSQL, paramType, paramOrParams);
+			newSQL = explainer.handleSql(this, newSQL, paramQtyType, paramOrParams);
 		return newSQL;
 	}
 
@@ -357,11 +357,16 @@ public class ImprovedQueryRunner extends QueryRunner {
 			throws SQLException {
 		try {
 			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			if (rsh instanceof SqlInterceptor)
+				explainedSql = ((SqlInterceptor) rsh).handleSql(this, sql, ARRAY_PARAM, params);
 			if (batchEnabled.get()) {
 				return (List<T>) addToCacheIfFullFlush("e2", rsh, null, explainedSql, conn, params);
 			} else {
 				List<T> result = super.execute(conn, explainedSql, rsh, params);
-				return (List<T>) explainResult(result);
+				result = (List<T>) explainResult(result);
+				if (rsh instanceof SqlInterceptor)
+					result = ((SqlInterceptor) rsh).handleResult(result);
+				return result;
 			}
 		} finally {
 			getThreadedSqlInterceptors().clear();
@@ -622,8 +627,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
 			String explainedSql = explainSql(sql, ARRAY_PARAM, params);
+			if (rsh instanceof SqlInterceptor)
+				explainedSql = ((SqlInterceptor) rsh).handleSql(this, sql, ARRAY_PARAM, params);
 			T result = super.query(explainedSql, rsh, params);
-			return (T) explainResult(result);
+			result = (T) explainResult(result);
+			if (rsh instanceof SqlInterceptor)
+				result = ((SqlInterceptor) rsh).handleResult(result);
+			return result;
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}

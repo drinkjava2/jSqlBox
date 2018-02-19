@@ -52,7 +52,6 @@ public class WebAppConfig {
 
 	@Bean
 	public SqlBoxContext createDefaultSqlBoxContext() {
-		System.out.println("========================================");
 		if (dataSource() != dataSource())
 			throw new AssertionError("I found Spring weird");
 		SqlBoxContext ctx = new SqlBoxContext(dataSource());

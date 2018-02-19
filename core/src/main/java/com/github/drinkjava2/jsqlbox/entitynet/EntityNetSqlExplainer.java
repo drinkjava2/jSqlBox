@@ -11,11 +11,11 @@
  */
 package com.github.drinkjava2.jsqlbox.entitynet;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.WeakHashMap;
 
-import com.github.drinkjava2.jdbpro.improve.ImprovedQueryRunner;
+import org.apache.commons.dbutils.QueryRunner;
+
 import com.github.drinkjava2.jdbpro.improve.SqlInterceptor;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
@@ -41,30 +41,31 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 public class EntityNetSqlExplainer implements SqlInterceptor {
 	private Object[] netConfigObjects;
 	private TableModel[] generatedTableModels;
-	public static final ThreadLocal<Map<Object, Object>> netConfigBindToListCache = new ThreadLocal<Map<Object, Object>>() {
+	public static final ThreadLocal<WeakHashMap<Object, Object>> netConfigBindToListCache = new ThreadLocal<WeakHashMap<Object, Object>>() {
 		@Override
-		protected Map<Object, Object> initialValue() {
-			return new HashMap<Object, Object>();
+		protected WeakHashMap<Object, Object> initialValue() {
+			return new WeakHashMap<Object, Object>();
 		}
-	};
+	}; 
 
 	public EntityNetSqlExplainer(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
 	}
 
 	@Override
-	public String handleSql(ImprovedQueryRunner query, String sql, int paramType, Object paramOrParams) {
+	public String handleSql(QueryRunner query, String sql, int paramQtyType, Object paramOrParams) {
 		return explainNetQuery((SqlBoxContext) query, sql);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object handleResult(Object result) {
+	public <T> T handleResult(Object result) {
 		if (result != null && result instanceof List<?>) {
 			if (generatedTableModels == null)
 				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
 			EntityNetSqlExplainer.bindTableModel(result, generatedTableModels);
 		}
-		return result;
+		return (T)result;
 	}
 
 	/**
@@ -253,7 +254,7 @@ public class EntityNetSqlExplainer implements SqlInterceptor {
 		return (TableModel[]) netConfigBindToListCache.get().get(listMap);
 	}
 
-	public static void bindTableModel(Object listMap, TableModel[] tableModels) {
+	public static void bindTableModel(Object listMap, TableModel[] tableModels) { 
 		netConfigBindToListCache.get().put(listMap, tableModels);
 	}
 

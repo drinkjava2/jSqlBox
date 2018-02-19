@@ -15,6 +15,8 @@
  */
 package com.github.drinkjava2.jdbpro.improve;
 
+import org.apache.commons.dbutils.QueryRunner;
+
 /**
  * SqlInterceptor should have a explain method to explain SQL and a
  * explainResult method to explainResult
@@ -31,20 +33,25 @@ public interface SqlInterceptor {
 	 * handleSql method used to change SQL string before execute to add extra
 	 * features like pagination, logging...
 	 * 
-	 * @param query The ImprovedQueryRunner
-	 * @param Sql The original SQL
-	 * @param paramType Indicate parameter, can be NO_PARAM or SINGLE_PARAM or
+	 * @param query
+	 *            The ImprovedQueryRunner
+	 * @param sql
+	 *            The original SQL
+	 * @param paramQtyType
+	 *            Indicate how many parameters, can be NO_PARAM or SINGLE_PARAM or
 	 *            ARRAY_PARAM
-	 * @param param The parameter
+	 * @param params
+	 *            The parameters, can be no or single or array
 	 * @return Changed SQL String
 	 */
-	public String handleSql(ImprovedQueryRunner query, String originalSQL, int paramType, Object param);
+	public String handleSql(QueryRunner query, String sql, int paramQtyType, Object paramOrParams);
 
 	/**
-	 * After a SQL be executed, handleResult method be called to change the result 
+	 * After a SQL be executed, handleResult method be called to change the result
 	 * 
-	 * @param result The original result Object
+	 * @param result
+	 *            The original result Object
 	 * @return The changed result Object
 	 */
-	public Object handleResult(Object originalResult);
+	public <T> T handleResult(Object originalResult);
 }
