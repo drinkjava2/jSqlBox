@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 /**
  * NodeValidator used to check if a node allowed to be selected
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public interface NodeValidator {

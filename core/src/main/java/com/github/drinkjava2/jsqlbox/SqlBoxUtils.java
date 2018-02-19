@@ -33,7 +33,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * 
  * </pre>
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public abstract class SqlBoxUtils {// NOSONAR

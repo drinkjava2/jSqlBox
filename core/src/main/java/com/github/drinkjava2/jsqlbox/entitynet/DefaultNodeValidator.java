@@ -20,7 +20,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.tinyparser.TinyParser;
  * DefaultNodeValidator is the default implementation of NodeValidator to
  * validate if a entity can be selected
  *
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class DefaultNodeValidator implements NodeValidator {

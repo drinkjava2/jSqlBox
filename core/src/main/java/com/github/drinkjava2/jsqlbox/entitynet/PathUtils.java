@@ -28,7 +28,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 /**
  * This class store public static methods concern to Path
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class PathUtils {

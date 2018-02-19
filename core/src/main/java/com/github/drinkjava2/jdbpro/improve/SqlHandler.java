@@ -24,7 +24,7 @@ import org.apache.commons.dbutils.QueryRunner;
  * @since 1.7.0.1
  */
 @SuppressWarnings({ "all" })
-public interface SqlHandler {
+public interface SqlHandler  {
 	/**
 	 * handleSql method used to change SQL string before execute, to add extra
 	 * features like pagination, logging, entityNet SQl explanation...
@@ -46,5 +46,5 @@ public interface SqlHandler {
 	 *            The original result Object
 	 * @return The changed result Object
 	 */
-	public <T> T handleResult(Object result);
+	public <T> T handleResult(QueryRunner query, Object result);
 }

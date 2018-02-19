@@ -28,6 +28,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 /**
  * Store some public static methods for ActiveRecord
@@ -44,8 +45,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private static final Map<String, SqlAndParams> methodSQLCache = new ConcurrentHashMap<String, SqlAndParams>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class
-	 * extended from ActiveRecord
+	 * This is the method body to build an instance based on abstract class extended
+	 * from ActiveRecord
 	 * 
 	 * @param activeClass
 	 * @return Object instance
@@ -100,8 +101,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	}
 
 	/**
-	 * Execute operation to access database, based on current method @Sql
-	 * annotated String or Text String and parameters, guess a best fit
+	 * Execute operation to access database, based on current method @Sql annotated
+	 * String or Text String and parameters, guess a best fit
 	 * query/update/delete/execute method to run
 	 * 
 	 * @param ac
@@ -158,9 +159,9 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			ResultSetHandler<T> resultSetHandler = buildResultHandler(handlerClass);
 			if (isEntityQuery) {
 				if (useTemplate)
-					return (T) ac.ctx().tQueryForEntityList(ac.getClass(), map, sql);
+					return (T) ac.ctx().tQuery(map, new EntityListHandler(ac.getClass()), sql);
 				else
-					return (T) ac.ctx().nQueryForEntityList(ac.getClass(), sql, params);
+					return (T) ac.ctx().nQuery(new EntityListHandler(ac.getClass()), sql, params);
 			} else {
 				if (useTemplate)
 					return ac.ctx().tQuery(map, resultSetHandler, sql);

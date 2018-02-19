@@ -18,7 +18,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * Path store search condition path, one path can link to another path to build
  * a path chain <br/>
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class Path {

@@ -21,7 +21,7 @@ import java.util.Set;
  * relationship allowed in EntityNet system, exact like Relational Database, so
  * it's easy to translate a Relational Database into an EntityNet.
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class Node {

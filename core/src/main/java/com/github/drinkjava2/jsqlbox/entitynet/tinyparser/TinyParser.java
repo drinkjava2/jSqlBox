@@ -32,7 +32,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * 
  * For example: "userName startWith ? and not(age*(10+2) -age>?)"
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class TinyParser {

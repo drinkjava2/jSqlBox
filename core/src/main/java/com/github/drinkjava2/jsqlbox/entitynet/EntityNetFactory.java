@@ -14,16 +14,15 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.dbutils.handlers.MapListHandler;
-
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 
 /**
  * This is a EntityNetFactory implementation to create a TinyEntityNet
- */ 
-public abstract class EntityNetFactory {
+ */
+public abstract class EntityNetFactory {// NOSONAR
 
 	/** Create a EntityNet instance */
 	public static EntityNet createEntityNet() {
@@ -61,7 +60,7 @@ public abstract class EntityNetFactory {
 			if (StrUtils.isEmpty(alias))
 				alias = t.getTableName();
 			try {
-				mapList = ctx.nQuery(new MapListHandler(SqlBoxContext.netProcessor(t)),
+				mapList = ctx.nQuery(new EntitySqlMapListHandler(t),
 						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
 			} finally {
 				EntityNetUtils.removeBindedTableModel(mapList);

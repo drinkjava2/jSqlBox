@@ -25,7 +25,7 @@ import activerecordtext.AbstractUser;
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  */
 public class TextUtilsTest {
 	@Test

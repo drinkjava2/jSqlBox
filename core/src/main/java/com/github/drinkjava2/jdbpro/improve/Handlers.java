@@ -41,10 +41,10 @@ public class Handlers implements SqlHandler {
 	}
 
 	@Override
-	public <T> T handleResult(Object result) {
+	public <T> T handleResult(QueryRunner query, Object result) {
 		Object newResult = result;
 		for (SqlHandler handle : sqlHandles)
-			newResult = handle.handleResult(newResult);
+			newResult = handle.handleResult(query,newResult);
 		return (T) newResult;
 	}
 }

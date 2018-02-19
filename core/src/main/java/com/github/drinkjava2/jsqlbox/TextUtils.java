@@ -30,7 +30,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * String src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this
  * function need set a plugin in pom.xml, detail see jSqlBox documents
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  */
 public abstract class TextUtils {// NOSONAR
 

@@ -198,7 +198,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		for (SqlHandler explainer : getThreadedSqlInterceptors())
 			newSQL = explainer.handleSql(this, newSQL, params);
 		if (rsh != null && rsh instanceof SqlHandler)
-			newSQL = ((SqlHandler) rsh).handleSql(this, sql, params);
+			newSQL = ((SqlHandler) rsh).handleSql(this, newSQL, params);
 		return newSQL;
 	}
 
@@ -206,11 +206,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 		Object newObj = result;
 		if (sqlInterceptors != null)
 			for (SqlHandler explainer : sqlInterceptors)
-				newObj = explainer.handleResult(newObj);
+				newObj = explainer.handleResult(this, newObj);
 		for (SqlHandler explainer : getThreadedSqlInterceptors())
-			newObj = explainer.handleResult(newObj);
+			newObj = explainer.handleResult(this, newObj); 
 		if (rsh instanceof SqlHandler)
-			result = ((SqlHandler) rsh).handleResult(result);
+			newObj = ((SqlHandler) rsh).handleResult(this, newObj);
 		return newObj;
 	}
 
@@ -356,15 +356,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
 			throws SQLException {
 		try {
-			String explainedSql = explainSql(rsh, sql, params);
-
+			String explainedSql = explainSql(rsh, sql, params); 
 			if (batchEnabled.get()) {
 				return (List<T>) addToCacheIfFullFlush("e2", rsh, null, explainedSql, conn, params);
 			} else {
 				List<T> result = super.execute(conn, explainedSql, rsh, params);
-				result = (List<T>) explainResult(rsh, result);
-				if (rsh instanceof SqlHandler)
-					result = ((SqlHandler) rsh).handleResult(result);
+				result = (List<T>) explainResult(rsh, result); 
 				return result;
 			}
 		} finally {

@@ -9,8 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox.entitynet;
+package com.github.drinkjava2.jsqlbox.handler;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.dbutils.QueryRunner;
@@ -24,23 +25,24 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * EntityNetSqlExplainer is the SqlExplainer to explain net() method to help
- * build a EntityNet
+ * EntitySqlMapListHandler is used to explain alias.** to real columns in SQL,
+ * example:
  * 
- * "SqlExplainSupport" interface is defined in jDbPro project, an explainer
- * works like a intercepter, it has few callback methods to deal with SQL and
- * query result
+ * select u.** from users u ==> select u.name, u.address, u.age from users u
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * And bind the netConfigObjects to result Map List
+ * 
+ * @author Yong Zhu 
  * @since 1.0.0
  */
-public class EntityNetMapListHandler extends MapListHandler implements SqlHandler {
-	private Object[] netConfigObjects;
-	private TableModel[] generatedTableModels;
+public class EntitySqlMapListHandler extends MapListHandler implements SqlHandler {
+	protected Object[] netConfigObjects;
+	protected TableModel[] generatedTableModels;
 
-	public EntityNetMapListHandler(Object... netConfigObjects) {
+	public EntitySqlMapListHandler(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
 	}
 
@@ -51,7 +53,7 @@ public class EntityNetMapListHandler extends MapListHandler implements SqlHandle
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T handleResult(Object result) {
+	public <T> T handleResult(QueryRunner query, Object result) {
 		if (result != null && result instanceof List<?>) {
 			if (generatedTableModels == null)
 				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
@@ -196,7 +198,6 @@ public class EntityNetMapListHandler extends MapListHandler implements SqlHandle
 				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
 			String tbStr = tableNameSb.toString();
 
-			// now alias="u", tbStr="users"
 			sql = replaceStarStarToColumn(sql, alias, tbStr, configModels);
 			pos = sql.indexOf(".**");
 			if (pos < 0)

@@ -34,7 +34,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 /**
  * Store static methods about EntityNet
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class EntityNetUtils {

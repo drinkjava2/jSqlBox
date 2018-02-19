@@ -1,15 +1,9 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param0;
-import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put0;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +22,8 @@ import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Node;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
+import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 
 public class EntityNetQueryTest extends TestBase {
 	@Before
@@ -51,8 +47,8 @@ public class EntityNetQueryTest extends TestBase {
 
 		User u = new User();
 		u.tableModel().setAlias("u");
-		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
-				netConfig(u) + "select u.id as u_id, u.userName as u_userName from usertb as u");
+		List<Map<String, Object>> listMap = ctx.nQuery(new EntitySqlMapListHandler(u),
+				"select u.id as u_id, u.userName as u_userName from usertb as u");
 		ctx.netJoinList(net, listMap);// not userName be joined
 
 		Assert.assertEquals(2, net.size());
@@ -61,48 +57,15 @@ public class EntityNetQueryTest extends TestBase {
 	}
 
 	@Test
-	public void testJoinFields2() {
+	public void testEntityListHandler() {
 		System.out.println("==============testJoinFields================ ");
 		new User().put("id", "u1").put("userName", "user1").put("age", 10).insert();
 		new User().put("id", "u2").put("userName", "user2").put("age", 20).insert();
 		new User().put("id", "u3").put("userName", "user3").put("age", 30).insert();
-		Set<User> setResult = ctx.nQueryForEntitySet(User.class, "select u.** from usertb u where u.age>?", 10);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		List<User> setResult = ctx.nQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?",
+				10);
 		Assert.assertTrue(setResult.size() == 2);
-		Assert.assertEquals("user2", setResult.iterator().next().getUserName());
-	
-		List<User> listResult = ctx.nQueryForEntityList(User.class, "select u.** from usertb u where u.age>?", 10);
-		Assert.assertTrue(listResult.size() == 2);
-		Assert.assertEquals("user2", listResult.iterator().next().getUserName());
-	
-		setResult = ctx.iQueryForEntitySet(User.class, "select u.** from usertb u where u.age>?" + param0(10));
-		Assert.assertTrue(setResult.size() == 2);
-		Assert.assertEquals("user2", setResult.iterator().next().getUserName());
-	
-		listResult = ctx.iQueryForEntityList(User.class, "select u.** from usertb u where u.age>?" + param0(10));
-		Assert.assertTrue(listResult.size() == 2);
-		Assert.assertEquals("user2", listResult.iterator().next().getUserName());
-	
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("age", 10);
-		setResult = ctx.tQueryForEntitySet(User.class, paramMap, "select u.** from usertb u where u.age>#{age}");
-		Assert.assertTrue(setResult.size() == 2);
-		Assert.assertEquals("user2", setResult.iterator().next().getUserName());
-	
-		Map<String, Object> paramMap2 = new HashMap<String, Object>();
-		User u = new User();
-		u.setAge(10);
-		paramMap2.put("u", u);
-		listResult = ctx.tQueryForEntityList(User.class, paramMap2, "select u.** from usertb u where u.age>:u.age");
-		Assert.assertTrue(setResult.size() == 2);
-		Assert.assertEquals("user2", setResult.iterator().next().getUserName());
-	
-		setResult = ctx.xQueryForEntitySet(User.class, "select u.** from usertb u where u.age>:age" + put0("age", 10));
-		Assert.assertTrue(setResult.size() == 2);
-		Assert.assertEquals("user2", setResult.iterator().next().getUserName());
-	
-		listResult = ctx.xQueryForEntityList(User.class, "select u.** from usertb u where u.age>:u.age" + put0("u", u));
-		Assert.assertTrue(setResult.size() == 2);
-		Assert.assertEquals("user2", setResult.iterator().next().getUserName());
 	}
 
 	@Test
@@ -113,16 +76,16 @@ public class EntityNetQueryTest extends TestBase {
 		new Email().putFields("id", "emailName", "userId");
 		new Email().putValues("e1", "email1", "u1").insert();
 		new Email().putValues("e2", "email2", "u1").insert();
-		List<Map<String, Object>> listMap = ctx.nQuery(new MapListHandler(),
-				netConfig(new Email().alias("e")) + "select e.id as e_id from emailtb e");
+		List<Map<String, Object>> listMap = ctx.nQuery(new EntitySqlMapListHandler(new Email().alias("e")),
+				"select e.id as e_id from emailtb e");
 		EntityNet net = (EntityNet) ctx.netCreate(listMap);
 		Assert.assertEquals(2, net.size());
 		Node emailNode = net.getOneNode(Email.class, "e1");
 		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId
 															// field
 
-		List<Map<String, Object>> listMap2 = ctx.nQuery(new MapListHandler(),
-				netConfig(Email.class) + "select e.** from emailtb e");
+		List<Map<String, Object>> listMap2 = ctx.nQuery(new EntitySqlMapListHandler(Email.class),
+				"select e.** from emailtb e");
 		ctx.netJoinList(net, listMap2);
 
 		Assert.assertEquals(2, net.size());

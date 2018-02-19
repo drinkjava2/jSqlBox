@@ -17,10 +17,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbutils.BasicRowProcessor;
-import org.apache.commons.dbutils.RowProcessor;
-import org.apache.commons.dbutils.handlers.MapListHandler;
-
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.improve.SqlHandler;
@@ -30,8 +26,8 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetMapListHandler;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
+import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -171,20 +167,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	// ================================================================
 	/**
-	 * Return an empty "" String and save a ThreadLocal netConfig object array in
-	 * current thread, it will be used by SqlBoxContext's query methods.
-	 */
-	public static String netConfig(Object... netConfig) {
-		getThreadedSqlInterceptors().add(new EntityNetMapListHandler(netConfig));
-		return "";
-	}
-
-	public static RowProcessor netProcessor(Object... netConfig) {
-		getThreadedSqlInterceptors().add(new EntityNetMapListHandler(netConfig));
-		return new BasicRowProcessor();
-	}
-
-	/**
 	 * Create a EntityNet by given configurations, load all columns
 	 */
 	public EntityNet netLoad(Object... configObjects) {
@@ -287,64 +269,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> List<T> nLoadAllEntityList(Class<T> entityClass) {
 		return this.netLoad(entityClass).getAllEntityList(entityClass);
 	}
-
-	/** Shortcut method, query for a Entity set */
-	public <T> Set<T> nQueryForEntitySet(Class<T> entityClass, String sql, Object... params) {
-		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntitySet(entityClass);
-	}
-
-	/** Shortcut method, query for a Entity list */
-	public <T> List<T> nQueryForEntityList(Class<T> entityClass, String sql, Object... params) {
-		List<Map<String, Object>> mapList1 = this.nQuery(new MapListHandler(netProcessor(entityClass)), sql, params);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntityList(entityClass);
-	}
-
-	/** Shortcut method, query for a Entity set */
-	public <T> Set<T> iQueryForEntitySet(Class<T> entityClass, String sql) {
-		List<Map<String, Object>> mapList1 = this.iQuery(new MapListHandler(netProcessor(entityClass)), sql);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntitySet(entityClass);
-	}
-
-	/** Shortcut method, query for a Entity list */
-	public <T> List<T> iQueryForEntityList(Class<T> entityClass, String sql) {
-		List<Map<String, Object>> mapList1 = this.iQuery(new MapListHandler(netProcessor(entityClass)), sql);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntityList(entityClass);
-	}
-
-	/** Shortcut method, template style query for a Entity set */
-	public <T> Set<T> tQueryForEntitySet(Class<T> entityClass, Map<String, Object> paramMap, String... templateSQL) {
-		List<Map<String, Object>> mapList1 = this.tQuery(paramMap, new MapListHandler(netProcessor(entityClass)),
-				templateSQL);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntitySet(entityClass);
-	}
-
-	/** Shortcut method, template style query for a Entity list */
-	public <T> List<T> tQueryForEntityList(Class<T> entityClass, Map<String, Object> paramMap, String... templateSQL) {
-		List<Map<String, Object>> mapList1 = this.tQuery(paramMap, new MapListHandler(netProcessor(entityClass)),
-				templateSQL);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntityList(entityClass);
-	}
-
-	/** Shortcut method, template style query for a Entity set */
-	public <T> Set<T> xQueryForEntitySet(Class<T> entityClass, String... templateSQL) {
-		List<Map<String, Object>> mapList1 = this.xQuery(new MapListHandler(netProcessor(entityClass)), templateSQL);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntitySet(entityClass);
-	}
-
-	/** Shortcut method, template style query for a Entity list */
-	public <T> List<T> xQueryForEntityList(Class<T> entityClass, String... templateSQL) {
-		List<Map<String, Object>> mapList1 = this.xQuery(new MapListHandler(netProcessor(entityClass)), templateSQL);
-		EntityNet net = this.netCreate(mapList1);
-		return net.getAllEntityList(entityClass);
-	}
+ 
 
 	// =========getter & setter =======
 	public Dialect getDialect() {

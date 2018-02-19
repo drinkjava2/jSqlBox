@@ -1,13 +1,9 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netConfig;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.netProcessor;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +20,9 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetMapListHandler;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
+import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
+import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 
 public class EntityNetDemoTest extends TestBase {
 	@Before
@@ -196,43 +193,32 @@ public class EntityNetDemoTest extends TestBase {
 	}
 
 	@Test
-	public void testManualLoadAndJoin() {
+	public void testEntityNetQuery() {
 		insertDemoData();
-		List<Map<String, Object>> mapList1 = ctx.nQuery(new MapListHandler(netProcessor(User.class, Address.class)),
-				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
-
-		EntityNet net = ctx.netCreate(mapList1);
-		Assert.assertEquals(10, net.size());
-
-		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
-				netConfig(Email.class) + "select e.** from emailtb as e");
-		ctx.netJoinList(net, mapList2);
-		Assert.assertEquals(15, net.size());
-
-		List<Map<String, Object>> mapList3 = ctx.nQuery(
-				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
-				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
-		Assert.assertEquals(900, mapList3.size());
-		ctx.netJoinList(net, mapList3);
-		Assert.assertEquals(37, net.size());
+		EntityNet net = (EntityNet) ctx.nQuery(new EntityNetHandler(User.class, Email.class),
+				"select u.**, e.** from usertb u, emailtb e where u.id=e.userId");
+		Assert.assertEquals(8, net.size());
+		Set<Email> emails = net.findEntitySet(Email.class,
+				new Path(User.class).where("id='u1' or id='u2'").autoPath(Email.class));
+		Assert.assertEquals(4, emails.size()); 
 	}
 
 	@Test
-	public void testManualLoadAndJoin2() {
+	public void testManualLoadAndJoin() {
 		insertDemoData();
-		List<Map<String, Object>> mapList1 = ctx.nQuery(new EntityNetMapListHandler(User.class, Address.class),
+		List<Map<String, Object>> mapList1 = ctx.nQuery(new EntitySqlMapListHandler(User.class, Address.class),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
 
 		EntityNet net = ctx.netCreate(mapList1);
 		Assert.assertEquals(10, net.size());
 
-		List<Map<String, Object>> mapList2 = ctx.nQuery(new MapListHandler(),
-				netConfig(Email.class) + "select e.** from emailtb as e");
+		List<Map<String, Object>> mapList2 = ctx.nQuery(new EntitySqlMapListHandler(Email.class),
+				"select e.** from emailtb as e");
 		ctx.netJoinList(net, mapList2);
 		Assert.assertEquals(15, net.size());
 
 		List<Map<String, Object>> mapList3 = ctx.nQuery(
-				new MapListHandler(netProcessor(Role.class, UserRole.class, RolePrivilege.class, Privilege.class)),
+				new EntitySqlMapListHandler(Role.class, UserRole.class, RolePrivilege.class, Privilege.class),
 				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
 		Assert.assertEquals(900, mapList3.size());
 		ctx.netJoinList(net, mapList3);

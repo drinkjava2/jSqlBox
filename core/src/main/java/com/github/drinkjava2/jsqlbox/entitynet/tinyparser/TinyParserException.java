@@ -13,7 +13,7 @@ package com.github.drinkjava2.jsqlbox.entitynet.tinyparser;
 
 /**
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class TinyParserException extends RuntimeException {

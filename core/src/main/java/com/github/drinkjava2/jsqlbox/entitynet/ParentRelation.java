@@ -20,7 +20,7 @@ package com.github.drinkjava2.jsqlbox.entitynet;
  * teacher_firstName_lastname, Tom_Li , SuperTeacher.class <br/>
  * teacher_firstName_lastname, Jeff_Wang , SuperTeacher.class <br/>
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class ParentRelation {

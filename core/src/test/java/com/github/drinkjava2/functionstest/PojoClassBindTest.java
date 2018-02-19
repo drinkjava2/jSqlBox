@@ -24,7 +24,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 /**
  * Coverage unit test for bind a box to PojoClass
  * 
- * @author Yong Zhu (Yong9981@gmail.com)
+ * @author Yong Zhu 
  * @since 1.0.0
  */
 public class PojoClassBindTest extends TestBase {

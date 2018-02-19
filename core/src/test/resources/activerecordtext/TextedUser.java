@@ -10,6 +10,7 @@ import com.github.drinkjava2.helloworld.UsuageAndSpeedTest.User;
 import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 /**
  * This is a sample to show put SQL in multiple line Strings(Text), a
@@ -62,7 +63,7 @@ public class TextedUser extends User {
 	 */
 
 	public List<User> selectUsersByText2(String name, String address) {
-		return this.ctx().nQueryForEntityList(User.class, this.sqlString(), name, address);
+		return this.ctx().nQuery(new EntityListHandler(User.class), this.sqlString(), name, address);
 	}
 	/*-
 	   select u.** 
@@ -71,12 +72,11 @@ public class TextedUser extends User {
 	      where 
 	         u.name=? and address=?
 	 */
-	
+
 	public static void main(String[] args) {
 		String javaSourceCode = TextUtils.getJavaSourceCodeUTF8(TextedUser.class);
 		System.out.println(javaSourceCode);
 		Assert.assertTrue(javaSourceCode.length() > 0);
 	}
-	
-	
+
 }
