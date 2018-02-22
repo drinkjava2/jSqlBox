@@ -11,37 +11,72 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
 
+import com.github.drinkjava2.jdbpro.improve.SqlHandler;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
  * EntityNetHandler is the SqlHandler used explain the Entity query sql (For
  * example 'select u.** from users u') and return a EntityNet instance
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
-public class EntityNetHandler<V> extends EntitySqlMapListHandler {
+@SuppressWarnings("all")
+public class EntityNetHandler implements ResultSetHandler, SqlHandler {
+	protected final EntitySqlMapListHandler sqlMapListHandler;
+	protected final Class<?> targetClass;
 
-	/**
-	 * Build a EntityNetHandle 
-	 * @param netConfigObjects
-	 *            The config objects
-	 */
-	public EntityNetHandler(Object... netConfigObjects) {
-		super(netConfigObjects);
+	public EntityNetHandler(Class<?> targetClass, Object... netConfigObjects) {
+		this.targetClass = targetClass;
+		if (netConfigObjects == null || netConfigObjects.length == 0)
+			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass);
+		else
+			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass, netConfigObjects);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public V handleResult(QueryRunner query, Object result) {
-		List<Map<String, Object>> newResult = super.handleResult(query, result);
-		SqlBoxContext ctx = (SqlBoxContext) query;
-		return (V) ctx.netCreate(newResult);
+	public EntityNet handleResult(QueryRunner query, Object result) {
+		List<Map<String, Object>> list = sqlMapListHandler.handleResult(query, result);
+		return ((SqlBoxContext) query).netCreate(list);
 	}
+
+	@Override
+	public String handleSql(QueryRunner query, String sql, Object... params) {
+		return sqlMapListHandler.handleSql(query, sql, params);
+	}
+
+	@Override
+	public List<Map<String, Object>> handle(ResultSet rs) throws SQLException {
+		return sqlMapListHandler.handle(rs);
+	}
+
 }
- 
+
+// public class EntityNetHandler<V> extends EntitySqlMapListHandler {
+//
+// /**
+// * Build a EntityNetHandle
+// * @param netConfigObjects
+// * The config objects
+// */
+// public EntityNetHandler(Object... netConfigObjects) {
+// super(netConfigObjects);
+// }
+//
+// @SuppressWarnings("unchecked")
+// @Override
+// public V handleResult(QueryRunner query, Object result) {
+// List<Map<String, Object>> newResult = super.handleResult(query, result);
+// SqlBoxContext ctx = (SqlBoxContext) query;
+// return (V) ctx.netCreate(newResult);
+// }
+// }

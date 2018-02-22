@@ -20,6 +20,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.improve.SqlHandler;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
@@ -29,33 +30,34 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
  * @author Yong Zhu 
  * @since 1.0.0
  */
-@SuppressWarnings("unchecked")
-public class EntityListHandler<T> implements ResultSetHandler<List<Map<String, Object>>>, SqlHandler {
-	protected final EntityNetHandler entityNetHandler;
+@SuppressWarnings("all")
+public class EntityListHandler<Q> implements ResultSetHandler, SqlHandler {
+	protected final EntitySqlMapListHandler sqlMapListHandler;
 	protected final Class<?> targetClass;
 
 	public EntityListHandler(Class<?> targetClass, Object... netConfigObjects) {
 		this.targetClass = targetClass;
 		if (netConfigObjects == null || netConfigObjects.length == 0)
-			this.entityNetHandler = new EntityNetHandler(targetClass);
+			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass);
 		else
-			this.entityNetHandler = new EntityNetHandler(netConfigObjects);
+			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass, netConfigObjects);
 	}
 
 	@Override
-	public   List<T> handleResult(QueryRunner query, Object result) {
-		EntityNet net = (EntityNet)entityNetHandler.handleResult(query, result);
-		return  (List<T>) net.getAllEntityList(targetClass);
+	public   List<Q> handleResult(QueryRunner query, Object result) {
+		List<Map<String,Object>> list = sqlMapListHandler.handleResult(query, result);
+		EntityNet net= ((SqlBoxContext)query).netCreate(list);
+		return  (List<Q>) net.getAllEntityList(targetClass);
 	}
 
 	@Override
 	public String handleSql(QueryRunner query, String sql, Object... params) {
-		return entityNetHandler.handleSql(query, sql, params);
+		return sqlMapListHandler.handleSql(query, sql, params);
 	}
 
 	@Override
 	public List<Map<String, Object>> handle(ResultSet rs) throws SQLException {
-		return entityNetHandler.handle(rs);
+		return sqlMapListHandler.handle(rs);
 	}
 
 }
