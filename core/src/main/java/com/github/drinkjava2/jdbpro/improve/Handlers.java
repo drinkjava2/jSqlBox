@@ -15,7 +15,11 @@
  */
 package com.github.drinkjava2.jdbpro.improve;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.improve.SqlHandler;
 
@@ -25,26 +29,39 @@ import com.github.drinkjava2.jdbpro.improve.SqlHandler;
  * @since 1.7.0.1
  */
 @SuppressWarnings({ "all" })
-public class Handlers implements SqlHandler {
-	private final SqlHandler[] sqlHandles;
+public class Handlers implements ResultSetHandler, SqlHandler {
+	private final ResultSetHandler[] handlers;
 
-	public Handlers(SqlHandler... sqlHandles) {
-		this.sqlHandles = sqlHandles;
+	public Handlers(ResultSetHandler... sqlHandles) {
+		this.handlers = sqlHandles;
 	}
 
 	@Override
 	public String handleSql(QueryRunner query, String sql, Object... params) {
 		String newSql = sql;
-		for (SqlHandler handle : sqlHandles)
-			newSql = handle.handleSql(query, sql, params);
+		for (ResultSetHandler handle : handlers) {
+			if (handle instanceof SqlHandler)
+				newSql = ((SqlHandler) handle).handleSql(query, newSql, params);
+		}
 		return newSql;
 	}
 
 	@Override
-	public <T> T handleResult(QueryRunner query, Object result) {
+	public Object handleResult(QueryRunner query, Object result) {
 		Object newResult = result;
-		for (SqlHandler handle : sqlHandles)
-			newResult = handle.handleResult(query,newResult);
-		return (T) newResult;
+		for (ResultSetHandler handle : handlers) {
+			if (handle instanceof SqlHandler)
+				newResult = ((SqlHandler) handle).handleResult(query, newResult);
+		}
+		return newResult;
+	}
+
+	@Override
+	public Object handle(ResultSet result) throws SQLException {
+		Object newResult = result;
+		for (ResultSetHandler handle : handlers)
+			if (newResult instanceof ResultSet)
+				newResult = handle.handle((ResultSet) newResult);
+		return newResult;
 	}
 }

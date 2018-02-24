@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a SQL Handler class on a method.
+ * Specifies a ResultSetHandler class on a method.
  */
 @Target({ METHOD })
 @Retention(RUNTIME)

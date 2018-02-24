@@ -13,8 +13,9 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.util.List;
 
+import org.apache.commons.dbutils.ResultSetHandler;
+
 import com.github.drinkjava2.jdbpro.DbProLogger;
-import com.github.drinkjava2.jdbpro.improve.SqlHandler;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -25,6 +26,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.0.1
  */
+@SuppressWarnings("rawtypes")
 public class Config {
 	private SqlTemplateEngine templateEngine = SqlBoxContext.getGlobalTemplateEngine();
 	private DbProLogger logger = SqlBoxContext.getGlobalLogger();
@@ -32,7 +34,7 @@ public class Config {
 	private Dialect dialect = SqlBoxContext.getGlobalDialect();
 	private Integer batchSize = SqlBoxContext.getGlobalBatchSize();
 	private ConnectionManager connectionManager = SqlBoxContext.getGlobalConnectionManager();
-	private List<SqlHandler> interceptors = SqlBoxContext.getGlobalInterceptors();
+	private List<ResultSetHandler> resultSetHandlers = SqlBoxContext.getGlobalInterceptors();
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -88,12 +90,12 @@ public class Config {
 		return this;
 	}
 
-	public List<SqlHandler> getInterceptors() {
-		return interceptors;
+	public List<ResultSetHandler> getResultSetHandlers() {
+		return resultSetHandlers;
 	}
 
-	public Config setInterceptors(List<SqlHandler> interceptors) {
-		this.interceptors = interceptors;
+	public Config setInterceptors(List<ResultSetHandler> interceptors) {
+		this.resultSetHandlers = interceptors;
 		return this;
 	}
 

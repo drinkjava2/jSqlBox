@@ -39,6 +39,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.7.0
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class TemplateQueryRunner extends InlineQueryRunner {
 	/** SqlTemplateEngine of current TemplateQueryRunner */
 	protected SqlTemplateEngine sqlTemplateEngine = NamedParamSqlTemplate.instance();
@@ -69,7 +70,8 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	}
 
 	/**
-	 * A ThreadLocal variant for temporally store parameter Map in current Thread
+	 * A ThreadLocal variant for temporally store parameter Map in current
+	 * Thread
 	 */
 	private static ThreadLocal<Map<String, Object>> templateThreadlocalParamMapCache = new ThreadLocal<Map<String, Object>>() {
 		@Override
@@ -115,8 +117,8 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	}
 
 	/**
-	 * Put a name-value pair into ThreadLocal parameter Map, return an empty String
-	 * ""
+	 * Put a name-value pair into ThreadLocal parameter Map, return an empty
+	 * String ""
 	 */
 	public static String put(String name, Object value) {
 		templateThreadlocalParamMapCache.get().put(name, value);
@@ -125,8 +127,8 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 
 	/**
 	 * Clear all template ThreadLocal parameters, then put a name-value into
-	 * ThreadLocal parameter Map, return an empty String, Note: use replace() method
-	 * the value will directly replace text in template
+	 * ThreadLocal parameter Map, return an empty String, Note: use replace()
+	 * method the value will directly replace text in template
 	 */
 	public static String replace0(String name, Object value) {
 		clearBind();
@@ -135,7 +137,8 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 
 	/**
 	 * put a name-value into ThreadLocal parameter Map, return an empty String,
-	 * Note: use replace() method the value will directly replace text in template
+	 * Note: use replace() method the value will directly replace text in
+	 * template
 	 */
 	public static String replace(String name, Object value) {
 		templateThreadlocalParamMapCache.get().put(name, value);
@@ -222,14 +225,14 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T mixedQuery(Connection conn, ResultSetHandler<T> rsh, String... templateSQL) throws SQLException {
+	public <T> T mixedQuery(Connection conn, ResultSetHandler rsh, String... templateSQL) throws SQLException {
 		SqlAndParams sp = mixedToSqlAndParams(templateSQL);
-		return this.<T>query(conn, sp.getSql(), rsh, sp.getParams());
+		return (T) this.query(conn, sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
-	 * Executes the Mixed-Style style given SELECT SQL query and returns a result
-	 * object. The <code>Connection</code> is retrieved from the
+	 * Executes the Mixed-Style style given SELECT SQL query and returns a
+	 * result object. The <code>Connection</code> is retrieved from the
 	 * <code>DataSource</code> set in the constructor.
 	 * 
 	 * @param <T>
@@ -243,13 +246,14 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T mixedQuery(ResultSetHandler<T> rsh, String... templateSQL) throws SQLException {
+	public <T> T mixedQuery(ResultSetHandler rsh, String... templateSQL) throws SQLException {
 		SqlAndParams sp = mixedToSqlAndParams(templateSQL);
-		return this.<T>query(sp.getSql(), rsh, sp.getParams());
+		return (T) this.query(sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
-	 * Execute a Mixed-style(Inline+Template) SQL INSERT, UPDATE, or DELETE query.
+	 * Execute a Mixed-style(Inline+Template) SQL INSERT, UPDATE, or DELETE
+	 * query.
 	 *
 	 * @param conn
 	 *            The connection to use to run the query.
@@ -265,10 +269,10 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	}
 
 	/**
-	 * Executes the Mixed-Style given INSERT, UPDATE, or DELETE SQL statement. The
-	 * <code>Connection</code> is retrieved from the <code>DataSource</code> set in
-	 * the constructor. This <code>Connection</code> must be in auto-commit mode or
-	 * the update will not be saved.
+	 * Executes the Mixed-Style given INSERT, UPDATE, or DELETE SQL statement.
+	 * The <code>Connection</code> is retrieved from the <code>DataSource</code>
+	 * set in the constructor. This <code>Connection</code> must be in
+	 * auto-commit mode or the update will not be saved.
 	 * 
 	 * @param templateSQL
 	 *            the SQL template
@@ -283,9 +287,9 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 
 	/**
 	 * Executes the Mixed-Style given INSERT SQL statement. The
-	 * <code>Connection</code> is retrieved from the <code>DataSource</code> set in
-	 * the constructor. This <code>Connection</code> must be in auto-commit mode or
-	 * the insert will not be saved.
+	 * <code>Connection</code> is retrieved from the <code>DataSource</code> set
+	 * in the constructor. This <code>Connection</code> must be in auto-commit
+	 * mode or the insert will not be saved.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -298,9 +302,9 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T mixedInsert(ResultSetHandler<T> rsh, String... templateSQL) throws SQLException {
+	public <T> T mixedInsert(ResultSetHandler rsh, String... templateSQL) throws SQLException {
 		SqlAndParams sp = mixedToSqlAndParams(templateSQL);
-		return insert(sp.getSql(), rsh, sp.getParams());
+		return (T) insert(sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
@@ -319,15 +323,16 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T mixedInsert(Connection conn, ResultSetHandler<T> rsh, String... templateSQL) throws SQLException {
+	public <T> T mixedInsert(Connection conn, ResultSetHandler rsh, String... templateSQL) throws SQLException {
 		SqlAndParams sp = mixedToSqlAndParams(templateSQL);
-		return insert(conn, sp.getSql(), rsh, sp.getParams());
+		return (T) insert(conn, sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
 	 * Execute a Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which does not return any result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
+	 * procedure call, which does not return any result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
+	 * parameters.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -347,8 +352,9 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 
 	/**
 	 * Execute a Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which does not return any result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
+	 * procedure call, which does not return any result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
+	 * parameters.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -366,12 +372,13 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 
 	/**
 	 * Execute a Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which returns one or more result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
-	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * procedure call, which returns one or more result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
 	 * parameters.
+	 * <p>
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -385,20 +392,20 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> List<T> mixedExecute(Connection conn, ResultSetHandler<T> rsh, String... templateSQL)
-			throws SQLException {
+	public <T> List<T> mixedExecute(Connection conn, ResultSetHandler rsh, String... templateSQL) throws SQLException {
 		SqlAndParams sp = mixedToSqlAndParams(templateSQL);
-		return this.execute(conn, sp.getSql(), rsh, sp.getParams());
+		return (List<T>) this.execute(conn, sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
 	 * Execute a Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which returns one or more result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
-	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * procedure call, which returns one or more result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
 	 * parameters.
+	 * <p>
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -410,15 +417,15 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> List<T> mixedExecute(ResultSetHandler<T> rsh, String... templateSQL) throws SQLException {
+	public <T> List<T> mixedExecute(ResultSetHandler rsh, String... templateSQL) throws SQLException {
 		SqlAndParams sp = mixedToSqlAndParams(templateSQL);
-		return this.execute(sp.getSql(), rsh, sp.getParams());
+		return (List<T>) this.execute(sp.getSql(), rsh, sp.getParams());
 	}
 
 	// ======================Parameters stored in Map=========================
 	/**
-	 * Execute an SQL template SELECT query. The caller is responsible for closing
-	 * the connection.
+	 * Execute an SQL template SELECT query. The caller is responsible for
+	 * closing the connection.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -434,10 +441,10 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T templateQuery(Connection conn, Map<String, Object> paramMap, ResultSetHandler<T> rsh,
+	public <T> T templateQuery(Connection conn, Map<String, Object> paramMap, ResultSetHandler rsh,
 			String... templateSQL) throws SQLException {
 		SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
-		return this.<T>query(conn, sp.getSql(), rsh, sp.getParams());
+		return (T) this.query(conn, sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
@@ -458,10 +465,10 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T templateQuery(Map<String, Object> paramMap, ResultSetHandler<T> rsh, String... templateSQL)
+	public <T> T templateQuery(Map<String, Object> paramMap, ResultSetHandler rsh, String... templateSQL)
 			throws SQLException {
 		SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
-		return this.<T>query(sp.getSql(), rsh, sp.getParams());
+		return (T) this.query(sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
@@ -484,10 +491,11 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	}
 
 	/**
-	 * Executes the template style given INSERT, UPDATE, or DELETE SQL statement.
-	 * The <code>Connection</code> is retrieved from the <code>DataSource</code> set
-	 * in the constructor. This <code>Connection</code> must be in auto-commit mode
-	 * or the update will not be saved.
+	 * Executes the template style given INSERT, UPDATE, or DELETE SQL
+	 * statement. The <code>Connection</code> is retrieved from the
+	 * <code>DataSource</code> set in the constructor. This
+	 * <code>Connection</code> must be in auto-commit mode or the update will
+	 * not be saved.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map
@@ -504,9 +512,9 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 
 	/**
 	 * Executes the template style given INSERT SQL statement. The
-	 * <code>Connection</code> is retrieved from the <code>DataSource</code> set in
-	 * the constructor. This <code>Connection</code> must be in auto-commit mode or
-	 * the insert will not be saved.
+	 * <code>Connection</code> is retrieved from the <code>DataSource</code> set
+	 * in the constructor. This <code>Connection</code> must be in auto-commit
+	 * mode or the insert will not be saved.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map
@@ -521,10 +529,10 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T templateInsert(Map<String, Object> paramMap, ResultSetHandler<T> rsh, String... templateSQL)
+	public <T> T templateInsert(Map<String, Object> paramMap, ResultSetHandler rsh, String... templateSQL)
 			throws SQLException {
 		SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
-		return insert(sp.getSql(), rsh, sp.getParams());
+		return (T) insert(sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
@@ -545,16 +553,16 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T templateInsert(Connection conn, Map<String, Object> paramMap, ResultSetHandler<T> rsh,
+	public <T> T templateInsert(Connection conn, Map<String, Object> paramMap, ResultSetHandler rsh,
 			String... templateSQL) throws SQLException {
 		SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
-		return insert(conn, sp.getSql(), rsh, sp.getParams());
+		return (T) insert(conn, sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * does not return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which does not return any result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -576,9 +584,9 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * does not return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which does not return any result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -597,13 +605,13 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * returns one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which returns one or more result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 * 
 	 * @param conn
 	 *            The connection to use to run the query.
@@ -619,20 +627,20 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> List<T> templateExecute(Connection conn, Map<String, Object> paramMap, ResultSetHandler<T> rsh,
+	public <T> List<T> templateExecute(Connection conn, Map<String, Object> paramMap, ResultSetHandler rsh,
 			String... templateSQL) throws SQLException {
 		SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
 		return this.execute(conn, sp.getSql(), rsh, sp.getParams());
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * returns one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which returns one or more result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map
@@ -646,7 +654,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> List<T> templateExecute(Map<String, Object> paramMap, ResultSetHandler<T> rsh, String... templateSQL)
+	public <T> List<T> templateExecute(Map<String, Object> paramMap, ResultSetHandler  rsh, String... templateSQL)
 			throws SQLException {
 		SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
 		return this.execute(sp.getSql(), rsh, sp.getParams());

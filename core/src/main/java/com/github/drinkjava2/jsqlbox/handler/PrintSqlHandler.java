@@ -13,12 +13,12 @@ package com.github.drinkjava2.jsqlbox.handler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.improve.SqlHandler;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * PaginHandler is the SqlHandler used to translate SQL to paginated SQL
@@ -27,18 +27,16 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 1.0.0
  */
 @SuppressWarnings("rawtypes")
-public class PaginHandler implements ResultSetHandler, SqlHandler {
-	int pageNumber;
-	int pageSize;
+public class PrintSqlHandler implements ResultSetHandler, SqlHandler {
 
-	public PaginHandler(int pageNumber, int pageSize) {
-		this.pageNumber = pageNumber;
-		this.pageSize = pageSize;
+	public PrintSqlHandler() {
 	}
 
 	@Override
 	public String handleSql(QueryRunner query, String sql, Object... params) {
-		return ((SqlBoxContext) query).getDialect().pagin(pageNumber, pageSize, sql);
+		System.out.println("Sql=" + sql);
+		System.out.println("Parameters=" + Arrays.toString(params));
+		return sql;
 	}
 
 	@Override

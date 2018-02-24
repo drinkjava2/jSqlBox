@@ -46,5 +46,5 @@ public interface SqlHandler  {
 	 *            The original result Object
 	 * @return The changed result Object
 	 */
-	public <T> T handleResult(QueryRunner query, Object result);
+	public Object handleResult(QueryRunner query, Object result);
 }

@@ -61,8 +61,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected ConnectionManager connectionManager;
 
 	/**
-	 * If set true will output SQL and parameters in logger, only allow initialised
-	 * by constructor
+	 * If set true will output SQL and parameters in logger, only allow
+	 * initialised by constructor
 	 */
 	protected Boolean allowShowSQL = false;
 
@@ -79,16 +79,16 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected Integer batchSize = globalBatchSize;
 
 	/** SqlInterceptors, only allow initialised by constructor */
-	protected List<SqlHandler> sqlInterceptors = null;
+	protected List<ResultSetHandler> resultSetHandlers = null;
 
 	/**
-	 * A ThreadLocal type cache to store SqlHandler instances, all instance will be
-	 * cleaned after this thread close
+	 * A ThreadLocal type cache to store SqlHandler instances, all instance will
+	 * be cleaned after this thread close
 	 */
-	private static ThreadLocal<ArrayList<SqlHandler>> threadedSqlInterceptors = new ThreadLocal<ArrayList<SqlHandler>>() {
+	private static ThreadLocal<ArrayList<ResultSetHandler>> threadedSqlInterceptors = new ThreadLocal<ArrayList<ResultSetHandler>>() {
 		@Override
-		protected ArrayList<SqlHandler> initialValue() {
-			return new ArrayList<SqlHandler>();
+		protected ArrayList<ResultSetHandler> initialValue() {
+			return new ArrayList<ResultSetHandler>();
 		}
 	};
 
@@ -165,8 +165,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to customise
-	 * SQL format
+	 * Format SQL for logger output, subClass can override this method to
+	 * customise SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -183,34 +183,48 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Add a explainer
 	 */
-	public static ArrayList<SqlHandler> getThreadedSqlInterceptors() {
+	public static ArrayList<ResultSetHandler> getThreadedSqlInterceptors() {
 		return threadedSqlInterceptors.get();
 	}
 
 	/**
 	 * Explain SQL to add extra features like pagination...
 	 */
-	public String explainSql(ResultSetHandler<?> rsh, String sql, Object... params) {
+	private String explainSql(ResultSetHandler<?> rsh, String sql, Object... params) {
 		String newSQL = sql;
-		if (sqlInterceptors != null)
-			for (SqlHandler explainer : sqlInterceptors)
-				newSQL = explainer.handleSql(this, newSQL, params);
-		for (SqlHandler explainer : getThreadedSqlInterceptors())
-			newSQL = explainer.handleSql(this, newSQL, params);
+		if (resultSetHandlers != null)
+			for (ResultSetHandler explainer : resultSetHandlers) {
+				if (explainer instanceof SqlHandler)
+					newSQL = ((SqlHandler) explainer).handleSql(this, newSQL, params);
+			}
+
+		for (ResultSetHandler explainer : getThreadedSqlInterceptors()) {
+			if (explainer instanceof SqlHandler)
+				newSQL = ((SqlHandler) explainer).handleSql(this, newSQL, params);
+		}
+
 		if (rsh != null && rsh instanceof SqlHandler)
 			newSQL = ((SqlHandler) rsh).handleSql(this, newSQL, params);
 		return newSQL;
 	}
 
-	public Object explainResult(ResultSetHandler<?> rsh, Object result) {
+	/**
+	 * Handle the result set
+	 */
+	private Object explainResult(ResultSetHandler<?> rsh, Object result) {
 		Object newObj = result;
-		if (sqlInterceptors != null)
-			for (SqlHandler explainer : sqlInterceptors)
-				newObj = explainer.handleResult(this, newObj);
-		for (SqlHandler explainer : getThreadedSqlInterceptors())
-			newObj = explainer.handleResult(this, newObj); 
 		if (rsh instanceof SqlHandler)
 			newObj = ((SqlHandler) rsh).handleResult(this, newObj);
+
+		if (resultSetHandlers != null)
+			for (ResultSetHandler explainer : resultSetHandlers) {
+				if (explainer instanceof SqlHandler)
+					newObj = ((SqlHandler) explainer).handleResult(this, newObj);
+			}
+		for (ResultSetHandler explainer : getThreadedSqlInterceptors())
+			if (explainer instanceof SqlHandler)
+				newObj = ((SqlHandler) explainer).handleResult(this, newObj);
+
 		return newObj;
 	}
 
@@ -356,12 +370,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
 			throws SQLException {
 		try {
-			String explainedSql = explainSql(rsh, sql, params); 
+			String explainedSql = explainSql(rsh, sql, params);
 			if (batchEnabled.get()) {
 				return (List<T>) addToCacheIfFullFlush("e2", rsh, null, explainedSql, conn, params);
 			} else {
 				List<T> result = super.execute(conn, explainedSql, rsh, params);
-				result = (List<T>) explainResult(rsh, result); 
+				result = (List<T>) explainResult(rsh, result);
 				return result;
 			}
 		} finally {
@@ -573,8 +587,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T insertBatch(String sql, ResultSetHandler<T> rsh, List<List<?>> paramList) throws SQLException {
-		return insertBatch(sql, rsh, toArray(paramList));
+	public <T> T insertBatch(String sql, ResultSetHandler rsh, List<List<?>> paramList) throws SQLException {
+		return (T) insertBatch(sql, rsh, toArray(paramList));
 	}
 
 	/**
@@ -593,9 +607,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * @throws SQLException
 	 *             if a database access error occurs
 	 */
-	public <T> T insertBatch(Connection conn, String sql, ResultSetHandler<T> rsh, List<List<?>> paramList)
+	public <T> T insertBatch(Connection conn, String sql, ResultSetHandler rsh, List<List<?>> paramList)
 			throws SQLException {
-		return this.insertBatch(conn, sql, rsh, toArray(paramList));
+		return (T) this.insertBatch(conn, sql, rsh, toArray(paramList));
 	}
 
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {

@@ -21,7 +21,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
-import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 
@@ -193,6 +192,8 @@ public class EntityNetDemoTest extends TestBase {
 		Assert.assertEquals(null, users.get(0).getUserName());
 	}
 
+ 
+
 	@Test
 	public void testEntityNetQuery() {
 		insertDemoData();
@@ -204,17 +205,6 @@ public class EntityNetDemoTest extends TestBase {
 		Assert.assertEquals(4, emails.size()); 
 	}
 	
-	@Test
-	public void testEntityListHandler() {
-		System.out.println("==============testJoinFields================ ");
-		new User().put("id", "u1").put("userName", "user1").put("age", 10).insert();
-		new User().put("id", "u2").put("userName", "user2").put("age", 20).insert();
-		new User().put("id", "u3").put("userName", "user3").put("age", 30).insert();
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		List<User> setResult = ctx.nQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?",
-				10);
-		Assert.assertTrue(setResult.size() == 2);
-	}
 
 	@Test
 	public void testManualLoadAndJoin() {

@@ -43,6 +43,7 @@ public class TestBase {
 		// dataSource.setMaximumPoolSize(8);
 		// dataSource.setConnectionTimeout(2000);
 		dialect = Dialect.guessDialect(dataSource);
+		// SqlBoxContext.setGlobalAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 	}

@@ -33,19 +33,14 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 @SuppressWarnings("all")
 public class EntityNetHandler implements ResultSetHandler, SqlHandler {
 	protected final EntitySqlMapListHandler sqlMapListHandler;
-	protected final Class<?> targetClass;
 
-	public EntityNetHandler(Class<?> targetClass, Object... netConfigObjects) {
-		this.targetClass = targetClass;
-		if (netConfigObjects == null || netConfigObjects.length == 0)
-			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass);
-		else
-			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass, netConfigObjects);
+	public EntityNetHandler(Object... netConfigObjects) {
+		this.sqlMapListHandler = new EntitySqlMapListHandler(netConfigObjects);
 	}
 
 	@Override
-	public EntityNet handleResult(QueryRunner query, Object result) {
-		List<Map<String, Object>> list = sqlMapListHandler.handleResult(query, result);
+	public Object handleResult(QueryRunner query, Object result) {
+		List<Map<String, Object>> list = (List) sqlMapListHandler.handleResult(query, result);
 		return ((SqlBoxContext) query).netCreate(list);
 	}
 
@@ -55,28 +50,7 @@ public class EntityNetHandler implements ResultSetHandler, SqlHandler {
 	}
 
 	@Override
-	public List<Map<String, Object>> handle(ResultSet rs) throws SQLException {
+	public Object handle(ResultSet rs) throws SQLException {
 		return sqlMapListHandler.handle(rs);
 	}
-
 }
-
-// public class EntityNetHandler<V> extends EntitySqlMapListHandler {
-//
-// /**
-// * Build a EntityNetHandle
-// * @param netConfigObjects
-// * The config objects
-// */
-// public EntityNetHandler(Object... netConfigObjects) {
-// super(netConfigObjects);
-// }
-//
-// @SuppressWarnings("unchecked")
-// @Override
-// public V handleResult(QueryRunner query, Object result) {
-// List<Map<String, Object>> newResult = super.handleResult(query, result);
-// SqlBoxContext ctx = (SqlBoxContext) query;
-// return (V) ctx.netCreate(newResult);
-// }
-// }

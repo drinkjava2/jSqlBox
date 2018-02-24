@@ -11,7 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.dbutils.QueryRunner;
@@ -35,9 +34,10 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
  * 
  * And bind the netConfigObjects to result Map List
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
+@SuppressWarnings("all")
 public class EntitySqlMapListHandler extends MapListHandler implements SqlHandler {
 	protected Object[] netConfigObjects;
 	protected TableModel[] generatedTableModels;
@@ -51,20 +51,19 @@ public class EntitySqlMapListHandler extends MapListHandler implements SqlHandle
 		return explainNetQuery((SqlBoxContext) query, sql);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T handleResult(QueryRunner query, Object result) {
+	public Object handleResult(QueryRunner query, Object result) {
 		if (result != null && result instanceof List<?>) {
 			if (generatedTableModels == null)
 				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
 			EntityNetUtils.bindTableModel(result, generatedTableModels);
 		}
-		return (T) result;
+		return result;
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -143,8 +142,8 @@ public class EntitySqlMapListHandler extends MapListHandler implements SqlHandle
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...

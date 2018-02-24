@@ -27,11 +27,11 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
  * EntityListHandler is the SqlHandler used explain the Entity query sql (For
  * example 'select u.** from users u') and return a List<Entity> instance
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityListHandler<Q> implements ResultSetHandler, SqlHandler {
+public class EntityListHandler implements ResultSetHandler, SqlHandler {
 	protected final EntitySqlMapListHandler sqlMapListHandler;
 	protected final Class<?> targetClass;
 
@@ -40,14 +40,14 @@ public class EntityListHandler<Q> implements ResultSetHandler, SqlHandler {
 		if (netConfigObjects == null || netConfigObjects.length == 0)
 			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass);
 		else
-			this.sqlMapListHandler = new EntitySqlMapListHandler(targetClass, netConfigObjects);
+			this.sqlMapListHandler = new EntitySqlMapListHandler(netConfigObjects);
 	}
 
 	@Override
-	public   List<Q> handleResult(QueryRunner query, Object result) {
-		List<Map<String,Object>> list = sqlMapListHandler.handleResult(query, result);
-		EntityNet net= ((SqlBoxContext)query).netCreate(list);
-		return  (List<Q>) net.getAllEntityList(targetClass);
+	public Object handleResult(QueryRunner query, Object result) {
+		List<Map<String, Object>> list = (List) sqlMapListHandler.handleResult(query, result);
+		EntityNet net = ((SqlBoxContext) query).netCreate(list);
+		return net.getAllEntityList(targetClass);
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class EntityListHandler<Q> implements ResultSetHandler, SqlHandler {
 	}
 
 	@Override
-	public List<Map<String, Object>> handle(ResultSet rs) throws SQLException {
+	public Object handle(ResultSet rs) throws SQLException {
 		return sqlMapListHandler.handle(rs);
 	}
 
