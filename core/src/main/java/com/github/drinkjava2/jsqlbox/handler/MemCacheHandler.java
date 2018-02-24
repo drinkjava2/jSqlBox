@@ -54,7 +54,7 @@ public class MemCacheHandler implements ResultSetHandler, CacheHandler {
 	}
 
 	public static void clearCache() {
-
+		cache.clearCache();
 	}
 
 	/**

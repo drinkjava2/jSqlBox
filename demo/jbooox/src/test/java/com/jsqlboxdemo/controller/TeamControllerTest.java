@@ -18,10 +18,9 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.jsqlboxdemo.TestBase;
-import com.jsqlboxdemo.controller.home.home_default;
 import com.jsqlboxdemo.controller.team.team_add_post;
+import com.jsqlboxdemo.controller.team.team_list_all;
 import com.jsqlboxdemo.controller.team.team_list_bigger;
-import com.jsqlboxdemo.controller.team.team_list_equal;
 import com.jsqlboxdemo.dispatcher.Dispatcher;
 import com.jsqlboxdemo.mock.MockPageContext;
 
@@ -44,7 +43,7 @@ public class TeamControllerTest extends TestBase {
 		box.setPageContext(mockPC);
 		box.execute();
 		Assert.assertEquals("Team was successfully added.", (String) mockPC.getRequestAttribute("message"));
-		Assert.assertTrue(box.getPage() instanceof home_default);
+		Assert.assertTrue(box.getPage() instanceof team_list_all);
 	}
 
 	@Test // Test from show method

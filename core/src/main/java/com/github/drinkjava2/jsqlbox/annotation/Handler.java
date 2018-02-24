@@ -22,14 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a ResultSetHandler class on a method.
+ * Specifies ResultSetHandler class array above a method
  */
 @Target({ METHOD })
 @Retention(RUNTIME)
 
 public @interface Handler {
 	/**
-	 * (Optional) The handler Class to handle the query result
+	 * (Optional) The handler Classes to handle the query sql and result
 	 */
-	Class<?> value();
+	Class<?>[] value();
 }

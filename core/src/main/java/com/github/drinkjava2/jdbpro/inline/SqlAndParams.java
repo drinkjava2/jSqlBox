@@ -30,8 +30,8 @@ public class SqlAndParams {
 	 * Sql parameters
 	 */
 	private Object[] params;
-	
-	private Class<?> handlerClass;
+
+	private Class<?>[] handlerClasses;
 
 	public SqlAndParams() {
 		// default Constructor
@@ -60,16 +60,17 @@ public class SqlAndParams {
 		this.params = params;
 	}
 
-	public Class<?> getHandlerClass() {
-		return handlerClass;
+	public Class<?>[] getHandlerClasses() {
+		return handlerClasses;
 	}
 
-	public void setHandlerClass(Class<?> handlerClass) {
-		this.handlerClass = handlerClass;
+	public void setHandlerClasses(Class<?>[] handlerClasses) {
+		this.handlerClasses = handlerClasses;
 	}
 
 	public String getDebugInfo() {
 		return new StringBuffer("SQL: ").append(this.getSql()).append("\nParameters: ")
-				.append(Arrays.deepToString(this.getParams())).append("\n").toString();
+				.append(Arrays.deepToString(this.getParams())).append("\nHandler Class:")
+				.append(Arrays.deepToString(this.getHandlerClasses())).append("\n").toString();
 	}
 }

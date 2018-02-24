@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import com.github.drinkjava2.jdbpro.improve.Wrap;
 import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -130,7 +131,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 
 		SqlAndParams sp = getSqlAndHandlerClassFromSrcCode(callerClassName, callerMethodName, callerMethod);
 		String sql = sp.getSql().trim();
-		Class<?> handlerClass = sp.getHandlerClass();
+		Class<?>[] handlerClass = sp.getHandlerClasses();
 		char dotype;
 		if (StrUtils.startsWithIgnoreCase(sql, "select"))
 			dotype = 's';
@@ -196,18 +197,19 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			return null;
 		}
 	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> ResultSetHandler<T> buildResultHandler(Class<?> handlerClass) {
-		if (handlerClass == null)
-			handlerClass = ScalarHandler.class;
-		ResultSetHandler<T> resultSetHandler = null;
+ 
+	@SuppressWarnings("rawtypes")
+	private static ResultSetHandler buildResultHandler(Class<?>[] handlerClass) {
+		if (handlerClass == null || handlerClass.length == 0)
+			return new ScalarHandler();
+		ResultSetHandler[] resultSetHandlers = new ResultSetHandler[handlerClass.length];
 		try {
-			resultSetHandler = (ResultSetHandler<T>) handlerClass.newInstance();
+			for (int i = 0; i < handlerClass.length; i++)
+				resultSetHandlers[i] = (ResultSetHandler) handlerClass[i].newInstance();
 		} catch (Exception e) {
 			throw new SqlBoxException(e);
 		}
-		return resultSetHandler;
+		return new Wrap(resultSetHandlers);
 	}
 
 	protected static String doGuessSQL(ActiveRecord ac) {// NOSONAR
@@ -243,12 +245,12 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 
 		Annotation[] annos = callerMethod.getAnnotations();
 		Sql sqlAnno = null;
-		Class<?> handlerClass = null;
+		Class<?>[] handlerClasses = null;
 		for (Annotation anno : annos) {
 			if (Sql.class.equals(anno.annotationType()))
 				sqlAnno = (Sql) anno;
 			if (Handler.class.equals(anno.annotationType())) {
-				handlerClass = ((Handler) anno).value();
+				handlerClasses = ((Handler) anno).value();
 			}
 		}
 		String sql = null;
@@ -268,7 +270,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (sql != null)
 			sql = sql.trim();
 		result.setSql(sql);
-		result.setHandlerClass(handlerClass);
+		result.setHandlerClasses(handlerClasses);
 		methodSQLCache.put(key, result);
 		return result;
 	}

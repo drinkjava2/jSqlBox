@@ -104,7 +104,7 @@ public class HandlersTest extends TestBase {
 	}
 
 	@Test
-	public void testEntityListHandler() {
+	public void testEntityListHandler() { 
 		List<DemoUser> result = ctx.nQuery(new EntityListHandler(DemoUser.class),
 				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 99);
