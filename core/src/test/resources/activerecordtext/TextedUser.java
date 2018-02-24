@@ -63,7 +63,7 @@ public class TextedUser extends User {
 	 */
 
 	public List<User> selectUsersByText2(String name, String address) {
-		return this.ctx().nQuery(new EntityListHandler(User.class), this.sqlString(), name, address);
+		return this.ctx().nQuery(new EntityListHandler(User.class), this.guessSQL(), name, address);
 	}
 	/*-
 	   select u.** 

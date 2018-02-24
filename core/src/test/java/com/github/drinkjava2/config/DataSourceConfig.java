@@ -5,19 +5,19 @@ import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * This is jBeanBox configuration classes, equal to XML in Spring <br/>
- * About jBeanBox project can google it, it's a small IOC/AOP tool to replace
- * Spring
+ * About jBeanBox project can google it, it's a small IOC/AOP tool, here used
+ * only for prepare dataSource singleton.
  * 
  * @author Yong Zhu
  *
  * @version 1.0.0
  * @since 1.0.0
  */
-public class DataSourceConfig {  
+public class DataSourceConfig {
 	/**
 	 * ================================================================<br/>
-	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to
-	 * test on MySql <br/>
+	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to test
+	 * on MySql <br/>
 	 * This project is already tested on H2, MySql5, Oracle11g, MSSQL2012
 	 * ================================================================<br/>
 	 */
@@ -66,7 +66,7 @@ public class DataSourceConfig {
 
 	// HikariCP is a DataSource pool much quicker than C3P0
 	public static class HikariCPBox extends BeanBox {
-		//In jBeanBox, bean default is singleton
+		// In jBeanBox, bean default is singleton
 		public HikariDataSource create() {
 			HikariDataSource ds = new HikariDataSource();
 			ds.addDataSourceProperty("cachePrepStmts", true);
@@ -78,6 +78,6 @@ public class DataSourceConfig {
 			this.setPreDestory("close");// jBeanBox will close pool
 			return ds;
 		}
-	} 
- 
+	}
+
 }

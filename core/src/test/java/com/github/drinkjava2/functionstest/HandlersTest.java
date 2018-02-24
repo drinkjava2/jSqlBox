@@ -25,16 +25,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.functionstest.entitynet.entities.User;
-import com.github.drinkjava2.jdbpro.improve.Handlers;
+import com.github.drinkjava2.jdbpro.improve.Wrap;
 import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.github.drinkjava2.jsqlbox.handler.PrintSqlHandler;
+import com.github.drinkjava2.jsqlbox.handler.MemCacheHandler;
 
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
@@ -43,49 +46,116 @@ import com.github.drinkjava2.jsqlbox.handler.PrintSqlHandler;
  */
 public class HandlersTest extends TestBase {
 
+	@Table(name = "DemoUser")
+	public static class DemoUser extends ActiveRecord {
+		@Id
+		String id;
+		String userName;
+		Integer age;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getUserName() {
+			return userName;
+		}
+
+		public void setUserName(String userName) {
+			this.userName = userName;
+		}
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
+		}
+
+	}
+
 	@Before
 	public void init() {
 		super.init();
-		TableModel[] models = TableModelUtils.entity2Models(User.class);
+		TableModel[] models = TableModelUtils.entity2Models(DemoUser.class);
 		dropAndCreateDatabase(models);
-		new User().put("id", "u1").put("userName", "user1").put("age", 10).insert();
-		new User().put("id", "u2").put("userName", "user2").put("age", 20).insert();
-		new User().put("id", "u3").put("userName", "user3").put("age", 30).insert();
+		for (int i = 0; i < 100; i++)
+			new DemoUser().put("id", "" + i).put("userName", "user" + i).put("age", i).insert();
 	}
 
 	@Test
 	public void testHandlers() {
-		List<User> result = ctx.nQuery(new Handlers(new PrintSqlHandler(), new EntityListHandler(User.class),
-				new PaginHandler(1, 2), new PrintSqlHandler()), "select u.** from usertb u where u.age>?", 0);
-		Assert.assertTrue(result.size() == 2);
+		List<DemoUser> result = ctx.nQuery(new Wrap(new PrintSqlHandler(), new EntityListHandler(DemoUser.class),
+				new PaginHandler(1, 5), new PrintSqlHandler()), "select u.** from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(result.size() == 5);
 	}
 
 	@Test
 	public void testEntityNetHandler() {
-		EntityNet net = ctx.nQuery(new EntityNetHandler(User.class), "select u.** from usertb u where u.age>?", 0);
-		List<User> result = net.getAllEntityList(User.class);
-		Assert.assertTrue(result.size() == 3);
+		EntityNet net = ctx.nQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?",
+				0);
+		List<DemoUser> result = net.getAllEntityList(DemoUser.class);
+		Assert.assertTrue(result.size() == 99);
 	}
 
 	@Test
 	public void testEntityListHandler() {
-		List<User> result = ctx.nQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?", 0);
-		Assert.assertTrue(result.size() == 3);
+		List<DemoUser> result = ctx.nQuery(new EntityListHandler(DemoUser.class),
+				"select u.** from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(result.size() == 99);
+	}
+
+	@Test
+	public void testSimpleCacheHandler() {
+		for (int i = 0; i < 10; i++) {// warm up
+			ctx.nQuery(new Wrap(new MemCacheHandler(), new EntityListHandler(DemoUser.class)),
+					"select u.** from DemoUser u where u.age>?", 0);
+			ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class)), "select u.** from DemoUser u where u.age>?",
+					0);
+		}
+
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < 1000; i++) {
+			List<DemoUser> result = ctx.nQuery(
+					new Wrap(new MemCacheHandler(), new EntityListHandler(DemoUser.class)),
+					"select u.** from DemoUser u where u.age>?", 0);
+			Assert.assertTrue(result.size() == 99);
+		}
+		long end = System.currentTimeMillis();
+		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
+		System.out.println(String.format("%28s: %6s s", "With Cache", timeused));
+
+		start = System.currentTimeMillis();
+		for (int i = 0; i < 1000; i++) {
+			List<DemoUser> result = ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class)),
+					"select u.** from DemoUser u where u.age>?", 0);
+			Assert.assertTrue(result.size() == 99);
+		}
+		end = System.currentTimeMillis();
+		timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
+		System.out.println(String.format("%28s: %6s s", "No Cache", timeused));
+
 	}
 
 	@Test
 	public void testEntityMapListHandler() {
-		List<Map<String, Object>> result = ctx.nQuery(new EntitySqlMapListHandler(User.class),
-				"select u.** from usertb u where u.age>?", 0);
-		Assert.assertTrue(result.size() == 3);
+		List<Map<String, Object>> result = ctx.nQuery(new EntitySqlMapListHandler(DemoUser.class),
+				"select u.** from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(result.size() == 99);
 	}
 
 	@Test
 	public void testPrintSqlHandler() throws SQLException {
 		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> result = ctx.query("select u.* from usertb u where u.age>?",
-				new Handlers(new MapListHandler(), new PrintSqlHandler()), 0);
-		Assert.assertTrue(result.size() == 3);
+		List<Map<String, Object>> result = (List<Map<String, Object>>) ctx.query(
+				"select u.* from DemoUser u where u.age>?", new Wrap(new MapListHandler(), new PrintSqlHandler()),
+				0);
+		Assert.assertTrue(result.size() == 99);
 	}
 
 }

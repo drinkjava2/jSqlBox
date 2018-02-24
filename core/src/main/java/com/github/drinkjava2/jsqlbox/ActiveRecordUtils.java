@@ -210,13 +210,13 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		return resultSetHandler;
 	}
 
-	protected static String doGetSqlString(ActiveRecord ac) {// NOSONAR
+	protected static String doGuessSQL(ActiveRecord ac) {// NOSONAR
 		int callerPos = 0;
 		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
 		for (StackTraceElement stack : stacks) {
 			callerPos++;
 			if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
-					&& "sqlString".equals(stack.getMethodName()))
+					&& "guessSQL".equals(stack.getMethodName()))
 				break;
 		}
 		String callerClassName = stacks[callerPos].getClassName();

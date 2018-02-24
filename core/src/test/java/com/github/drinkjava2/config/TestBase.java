@@ -78,7 +78,7 @@ public class TestBase {
 		quietExecuteDDLs(ddls);
 
 		ddls = dialect.toCreateDDL(tableModels);
-		executeDDLs(ddls);
+		quietExecuteDDLs(ddls);
 	}
 
 	public static void printTimeUsed(long startTimeMillis, String msg) {

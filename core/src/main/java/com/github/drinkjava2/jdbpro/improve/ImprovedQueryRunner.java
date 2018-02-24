@@ -61,8 +61,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected ConnectionManager connectionManager;
 
 	/**
-	 * If set true will output SQL and parameters in logger, only allow
-	 * initialised by constructor
+	 * If set true will output SQL and parameters in logger, only allow initialised
+	 * by constructor
 	 */
 	protected Boolean allowShowSQL = false;
 
@@ -82,8 +82,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected List<ResultSetHandler> resultSetHandlers = null;
 
 	/**
-	 * A ThreadLocal type cache to store SqlHandler instances, all instance will
-	 * be cleaned after this thread close
+	 * A ThreadLocal type cache to store SqlHandler instances, all instance will be
+	 * cleaned after this thread close
 	 */
 	private static ThreadLocal<ArrayList<ResultSetHandler>> threadedSqlInterceptors = new ThreadLocal<ArrayList<ResultSetHandler>>() {
 		@Override
@@ -165,8 +165,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to
-	 * customise SQL format
+	 * Format SQL for logger output, subClass can override this method to customise
+	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -193,19 +193,92 @@ public class ImprovedQueryRunner extends QueryRunner {
 	private String explainSql(ResultSetHandler<?> rsh, String sql, Object... params) {
 		String newSQL = sql;
 		if (resultSetHandlers != null)
-			for (ResultSetHandler explainer : resultSetHandlers) {
-				if (explainer instanceof SqlHandler)
-					newSQL = ((SqlHandler) explainer).handleSql(this, newSQL, params);
+			for (ResultSetHandler handler : resultSetHandlers) {
+				if (handler instanceof SqlHandler)
+					newSQL = ((SqlHandler) handler).handleSql(this, newSQL, params);
 			}
 
-		for (ResultSetHandler explainer : getThreadedSqlInterceptors()) {
-			if (explainer instanceof SqlHandler)
-				newSQL = ((SqlHandler) explainer).handleSql(this, newSQL, params);
+		for (ResultSetHandler handler : getThreadedSqlInterceptors()) {
+			if (handler instanceof SqlHandler)
+				newSQL = ((SqlHandler) handler).handleSql(this, newSQL, params);
 		}
 
 		if (rsh != null && rsh instanceof SqlHandler)
 			newSQL = ((SqlHandler) rsh).handleSql(this, newSQL, params);
 		return newSQL;
+	}
+
+	private static String createKey(String sql, Object... params) {
+		return new StringBuilder("SQL:").append(sql).append("  Params:").append(Arrays.toString(params)).toString();
+	}
+
+	/**
+	 * Explain SQL to cached result object, if have
+	 */
+	private Object[] readCache(ResultSetHandler<?> rsh, String sql, Object... params) {
+		Object[] result = new Object[2];
+		String key = null;
+		if (resultSetHandlers != null)
+			for (ResultSetHandler handler : resultSetHandlers)
+				if (handler instanceof CacheHandler) {
+
+					if (key == null)
+						key = createKey(sql, params);
+					result[0] = key;
+
+					Object value = ((CacheHandler) handler).readFromCache(key);
+					if (value != null) {
+						result[1] = value;
+						return result;
+					}
+				}
+
+		for (ResultSetHandler handler : getThreadedSqlInterceptors())
+			if (handler instanceof CacheHandler) {
+				if (key == null)
+					key = createKey(sql, params);
+				result[0] = key;
+
+				Object value = ((CacheHandler) handler).readFromCache(key);
+				if (value != null) {
+					result[1] = value;
+					return result;
+				}
+			}
+
+		if (rsh != null && rsh instanceof CacheHandler) {
+			if (key == null)
+				key = createKey(sql, params);
+			result[0] = key;
+
+			Object value = ((CacheHandler) rsh).readFromCache(key);
+			if (value != null)
+				result[1] = value;
+		}
+		return result;
+	}
+
+	/**
+	 * Explain SQL to cached result object, if have
+	 */
+	private void writeToCache(ResultSetHandler<?> rsh, String key, Object value) {
+		if (key == null || key.length() == 0 || value == null)
+			return;
+		if (resultSetHandlers != null)
+			for (ResultSetHandler handler : resultSetHandlers)
+				if (handler instanceof CacheHandler) {
+					((CacheHandler) handler).writeToCache(key, value);
+					return;
+				}
+
+		for (ResultSetHandler handler : getThreadedSqlInterceptors())
+			if (handler instanceof CacheHandler) {
+				((CacheHandler) handler).writeToCache(key, value);
+				return;
+			}
+
+		if (rsh != null && rsh instanceof CacheHandler)
+			((CacheHandler) rsh).writeToCache(key, value);
 	}
 
 	/**
@@ -615,8 +688,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
 			String explainedSql = explainSql(rsh, sql, params);
-			T result = super.query(conn, explainedSql, rsh, params);
-			return (T) explainResult(rsh, result);
+			Object[] cached = readCache(rsh, explainedSql, params);
+			if (cached != null && cached[1] != null)
+				return (T) cached[1];
+			Object result = super.query(conn, explainedSql, rsh, params);
+			if (cached != null)
+				writeToCache(rsh, (String) cached[0], result);
+			result = explainResult(rsh, result);
+			return (T) result;
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -626,8 +705,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh) throws SQLException {
 		try {
 			String explainedSql = explainSql(rsh, sql, null);
-			T result = super.query(conn, explainedSql, rsh);
-			return (T) explainResult(rsh, result);
+			Object[] cached = readCache(rsh, explainedSql, null);
+			if (cached != null && cached[1] != null)
+				return (T) cached[1];
+			Object result = super.query(conn, explainedSql, rsh);
+			if (cached != null)
+				writeToCache(rsh, (String) cached[0], result);
+			result = explainResult(rsh, result);
+			return (T) result;
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -637,9 +722,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		try {
 			String explainedSql = explainSql(rsh, sql, params);
+			Object[] cached = readCache(rsh, explainedSql, params);
+			if (cached != null && cached[1] != null)
+				return (T) cached[1];
 			T result = super.query(explainedSql, rsh, params);
+			if (cached != null)
+				writeToCache(rsh, (String) cached[0], result);
 			result = (T) explainResult(rsh, result);
-			return result;
+			return (T) result;
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}
@@ -649,8 +739,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public <T> T query(String sql, ResultSetHandler<T> rsh) throws SQLException {
 		try {
 			String explainedSql = explainSql(rsh, sql, null);
-			T result = super.query(explainedSql, rsh);
-			return (T) explainResult(rsh, result);
+			Object[] cached = readCache(rsh, explainedSql, null);
+			if (cached != null && cached[1] != null)
+				return (T) cached[1];
+			Object result = super.query(explainedSql, rsh);
+			if (cached != null)
+				writeToCache(rsh, (String) cached[0], result);
+			result = explainResult(rsh, result);
+			return (T) result;
 		} finally {
 			getThreadedSqlInterceptors().clear();
 		}

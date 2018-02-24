@@ -194,8 +194,8 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	/** Return current method's @Sql annotated String or Text String */
-	public String sqlString() {
-		return ActiveRecordUtils.doGetSqlString(this);
+	public String guessSQL() {
+		return ActiveRecordUtils.doGuessSQL(this);
 	}
 
 	/**

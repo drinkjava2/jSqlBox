@@ -21,18 +21,19 @@ import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdbpro.improve.SqlHandler;
-
 /**
- * Handlers used to wrap a set of SqlHandlers into one
+ * Wrap used to wrap a set of ResultSetHandler together so can be put int query
+ * method, Usage exapmle:<br/>
+ * ctx.nQuery(new Wrap(new someHandler1(), new someHandler2(), "select * from
+ * users")
  * 
- * @since 1.7.0.1
+ * @since 1.0.7
  */
 @SuppressWarnings({ "all" })
-public class Handlers implements ResultSetHandler, SqlHandler {
+public class Wrap implements ResultSetHandler, SqlHandler, CacheHandler {
 	private final ResultSetHandler[] handlers;
 
-	public Handlers(ResultSetHandler... sqlHandles) {
+	public Wrap(ResultSetHandler... sqlHandles) {
 		this.handlers = sqlHandles;
 	}
 
@@ -60,8 +61,28 @@ public class Handlers implements ResultSetHandler, SqlHandler {
 	public Object handle(ResultSet result) throws SQLException {
 		Object newResult = result;
 		for (ResultSetHandler handle : handlers)
-			if (newResult instanceof ResultSet)
+			if (newResult != null && newResult instanceof ResultSet)
 				newResult = handle.handle((ResultSet) newResult);
 		return newResult;
+	}
+
+	@Override
+	public Object readFromCache(String key) {
+		for (ResultSetHandler handle : handlers)
+			if (handle instanceof CacheHandler) {
+				Object result = ((CacheHandler) handle).readFromCache(key);
+				if (result != null)
+					return result;
+			}
+		return null;
+	}
+
+	@Override
+	public void writeToCache(String key, Object value) {
+		for (ResultSetHandler handle : handlers)
+			if (handle instanceof CacheHandler) {
+				((CacheHandler) handle).writeToCache(key, value);
+				return;
+			}
 	}
 }

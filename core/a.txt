@@ -1,0 +1,240 @@
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building jSqlBox 1.0.7
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- build-helper-maven-plugin:1.12:add-source (add-source) @ jsqlbox ---
+[INFO] Source directory: F:\gproj\jq16\jSQLBox\core\src\main\resources added.
+[INFO] 
+[INFO] --- build-helper-maven-plugin:1.12:add-test-source (add-test-source) @ jsqlbox ---
+[INFO] Test Source directory: F:\gproj\jq16\jSQLBox\core\src\test\resources added.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ jsqlbox ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory F:\gproj\jq16\jSQLBox\core\src\main\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.3:compile (default-compile) @ jsqlbox ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ jsqlbox ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 4 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.3:testCompile (default-testCompile) @ jsqlbox ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ jsqlbox ---
+[INFO] Surefire report directory: F:\gproj\jq16\jSQLBox\core\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.github.drinkjava2.functionstest.DynamicCompileEngineTest
+Test Dynamic Compile
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.702 sec
+Running com.github.drinkjava2.functionstest.entitynet.EntityNetDemoTest
+org.apache.commons.logging.LogFactory loaded, DialectLogger use it as logger.
+org.apache.commons.logging.LogFactory loaded, DbProLogger use it as logger.
+p1 p2 p3 p1
+37
+37
+user1
+p1 p2 p3 Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.045 sec
+Running com.github.drinkjava2.functionstest.entitynet.EntityNetQueryTest
+==============testFindParent================ 
+                            Find parent (no cache):   0.016 s
+user selected2:20
+email selected2:400
+==============testValidateByBeanValidator================ 
+                Bean Validator instance (No Cache):   0.234 s
+               Bean Validator instance (Has Cache):   0.203 s
+==============testJoinFields================ 
+==============testUpdateEntity================ 
+==============testRemoveEntity================ 
+==============testFindSelf================ 
+                                Find self No Cache:   0.093 s
+                              Find self With Cache:   0.078 s
+==============testAddEntity================ 
+==============testJoinParents================ 
+==============testJoinFields================ 
+==============testFindChild================ 
+                              Find Childs no Cache:   0.078 s
+user selected2:30
+email selected2:900
+                            Find Childs with Cache:   0.078 s
+user selected2:30
+email selected2:900
+==============testValidateByExpression================ 
+            Validate by expression with parameters:   0.047 s
+              Validate by expression no parameters:   0.031 s
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.248 sec
+Running com.github.drinkjava2.functionstest.entitynet.EntityNetTreeTest
+
+B D E F H I J K L 
+E F H I J K L 
+B H A D Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 sec
+Running com.github.drinkjava2.functionstest.entitynet.TinyParserTest
+TinyParser repeat 10000 REPEAT_TIMES cost 0.328s
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.328 sec
+Running com.github.drinkjava2.functionstest.HandlersTest
+Sql=select u.** from usertb u where u.age>?
+Parameters=[0]
+Sql=select u.age as u_age, u.bossId as u_bossId, u.id as u_id, u.teatherId as u_teatherId, u.userName as u_userName from usertb u where u.age>? limit 2
+Parameters=[0]
+Sql=select u.* from usertb u where u.age>?
+Parameters=[0]
+result=[{AGE=10, BOSSID=null, ID=u1, TEATHERID=null, USERNAME=user1}, {AGE=20, BOSSID=null, ID=u2, TEATHERID=null, USERNAME=user2}, {AGE=30, BOSSID=null, ID=u3, TEATHERID=null, USERNAME=user3}]
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 sec
+Running com.github.drinkjava2.functionstest.IdGeneratorTest
+1
+11
+21
+31
+41
+51
+61
+71
+81
+91
+101
+111
+10000002ur570938
+100000044deb3vnk
+100000068tnmk26h
+10000008912qj7hg
+10000010o1tgc0fr
+100000127l1fv875
+10000014v1i7fi3s
+10000016j3cfgf9p
+10000018sfqbq0di
+10000020cmj19pvs
+1000000022dp13513q2j
+1000000024dvn098sv14
+10000000267bnjla7saf
+1000000028te3v4m35ec
+100000003085or020gfe
+1000000032spknjhmlb3
+1000000034b3auahmga5
+1000000036djs8t65hd3
+1000000038mnsj23ugc6
+1000000040c2pm1p8l09
+87nfofu8x8ssjoa7cbtmqw6u6
+a8b1b81b5e564476886c41079b129c40
+42f92518-758b-4136-ab8d-7b347ada48c6
+p8bty4o4giopaau0wjlq77rp0
+933a7f5e9bde465b9f0da192f5f25c26
+ddb00f97-8dc2-44fe-8f21-040a7847df35
+f0v6pxfmwhjrvmgb460o8nbt4
+99ac686c27a849429517b6d15dbe5e97
+c99c2108-7e88-440b-a45a-d9c3f823e7c0
+6ooy2by6oxgbbqubiozouhi1m
+88b52608abdc4267808789e4a5b6be0b
+caff9968-dc95-418b-b180-ba1d75e86a12
+3c2kfmapi1kgrksivzso4s9ou
+59a0e4ff070940ecb26b697c8db00ee2
+67695289-ea3b-4f13-b3f7-05c3b451ac17
+dy5p5ftouaabyywjs4v0aojkb
+4b982aa41e8f471d9d43f23a83d68b0e
+8c041b91-aca2-43c3-9b1b-16f015688b16
+c97jagp8owwz3w2mi4fzwf5yr
+5c5974a9d1314bea9d043cdcf67d38ca
+4d2422cd-9ad1-450d-8806-e119b737ff71
+cfzs9xeceb2etymiw0hah3nnt
+4ee4518d8213403d872cfc67ec53fb6c
+7ef4c240-bb08-45f3-a065-3cb79c3af19b
+diu779yu4uxdfu5sauovhcqnz
+5aa4aedda0dd4368b52b1d06414dccea
+c1c3256a-d1c1-446a-b372-f4d21adf808a
+30p48nozeqqw30uc22qxfu7e2
+42919f8a81924bf88839f1ef6d43756f
+aef64b26-e062-49eb-9a91-6b986ff61f95
+2
+2
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+1
+1
+11
+21
+21
+41
+1
+61
+11
+81
+21
+101
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.063 sec
+Running com.github.drinkjava2.functionstest.LoggerTest
+Translated sql: select * from sometable
+Paginated sql: select * from sometable limit 90, 10
+Logger test message1 output ok
+Logger test message2 output ok
+SQL: drop table LoggerTest if exists
+Parameters: []
+SQL: create table LoggerTest ( name varchar(255))
+Parameters: []
+SQL: insert into LoggerTest (name) values(?)
+Parameters: [Tom]
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 sec
+Running com.github.drinkjava2.functionstest.PojoClassBindTest
+test
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+Running com.github.drinkjava2.functionstest.TextUtilsTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+Running com.github.drinkjava2.functionstest.UUIDGeneratorsTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 sec
+Running com.github.drinkjava2.helloworld.ActiveRecordDemoTest
+UserName=Foo61 Bar61, age=61
+UserName=Foo62 Bar62, age=62
+UserName=Foo63 Bar63, age=63
+UserName=Foo64 Bar64, age=64
+UserName=Foo65 Bar65, age=65
+UserName=Foo66 Bar66, age=66
+UserName=Foo67 Bar67, age=67
+UserName=Foo68 Bar68, age=68
+UserName=Foo69 Bar69, age=69
+UserName=Foo70 Bar70, age=70
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 sec
+Running com.github.drinkjava2.helloworld.DynamicConfigTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 sec
+Running com.github.drinkjava2.helloworld.HelloWorldTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+Running com.github.drinkjava2.helloworld.UsuageAndSpeedTest
+Compare method execute time for repeat 100 times:
+                    pureJdbc:    0.0 s
+       dbUtilsWithConnMethod:    0.0 s
+         dbUtilsNoConnMethod:   0.16 s
+                   nXxxStyle:    0.0 s
+                   iXxxStyle:    0.0 s
+                   tXxxStyle:   0.62 s
+                   xXxxStyle:   0.31 s
+     xXxxStyle_BasicTemplate:   0.16 s
+             dataMapperStyle:   0.15 s
+           activeRecordStyle:    0.0 s
+  activeRecordDefaultContext:   0.16 s
+          activeSqlAnnotaion:   0.31 s
+            activeSqlUseText:   0.47 s
+          abstractSqlUseText:   0.31 s
+Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.921 sec
+
+Results :
+
+Tests run: 69, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 6.727 s
+[INFO] Finished at: 2018-02-24T02:11:00-07:00
+[INFO] Final Memory: 8M/20M
+[INFO] ------------------------------------------------------------------------

@@ -34,8 +34,8 @@ public class PrintSqlHandler implements ResultSetHandler, SqlHandler {
 
 	@Override
 	public String handleSql(QueryRunner query, String sql, Object... params) {
-		System.out.println("Sql=" + sql);
-		System.out.println("Parameters=" + Arrays.toString(params));
+		System.out.println("Sql=" + sql);//NOSONAR
+		System.out.println("Parameters=" + Arrays.toString(params));//NOSONAR
 		return sql;
 	}
 
