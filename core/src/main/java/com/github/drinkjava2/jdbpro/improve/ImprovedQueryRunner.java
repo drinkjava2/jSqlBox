@@ -30,6 +30,8 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.DbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
+import com.github.drinkjava2.jdbpro.handler.CacheHandler;
+import com.github.drinkjava2.jdbpro.handler.SqlHandler;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**

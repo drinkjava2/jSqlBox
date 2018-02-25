@@ -21,7 +21,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * ActiveRecordDemoTest of jSqlBox configurations
@@ -71,8 +70,6 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		SqlBoxContext.setGlobalAllowShowSql(false);
-
 		TableModel t = new UserDemoSqlBox().getTableModel();
 
 		// A new column dynamically created

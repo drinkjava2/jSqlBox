@@ -52,10 +52,7 @@ public class LoggerTest {
 		SqlBoxContext.setGlobalAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(LoggerTest.class))
-			try {
-				ctx.nExecute(ddl);
-			} catch (Exception e) {
-			}
+			ctx.quiteExecute(ddl);
 		LoggerTest t = new LoggerTest();
 		t.setName("Tom");
 		ctx.insert(t);

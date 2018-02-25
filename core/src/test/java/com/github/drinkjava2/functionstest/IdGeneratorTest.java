@@ -35,7 +35,6 @@ import com.github.drinkjava2.jdialects.id.UUID25Generator;
 import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jdialects.id.UUID36Generator;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * Unit test for SortedUUIDGenerator
@@ -249,7 +248,6 @@ public class IdGeneratorTest extends TestBase {
 
 	@Test
 	public void testIdentityGenerator() {
-		SqlBoxContext.setGlobalAllowShowSql(false);
 		TableModel table = new TableModel("testIdentity");
 		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);

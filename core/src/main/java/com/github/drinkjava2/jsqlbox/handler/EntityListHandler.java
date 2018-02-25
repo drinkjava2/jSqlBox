@@ -19,7 +19,7 @@ import java.util.Map;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdbpro.improve.SqlHandler;
+import com.github.drinkjava2.jdbpro.handler.SqlHandler;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 

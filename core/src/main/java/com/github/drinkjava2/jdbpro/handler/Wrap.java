@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro.improve;
+package com.github.drinkjava2.jdbpro.handler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,7 +27,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
  * ctx.nQuery(new Wrap(new someHandler1(), new someHandler2(), "select * from
  * users")
  * 
- * @since 1.0.7
+ * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
 public class Wrap implements ResultSetHandler, SqlHandler, CacheHandler {

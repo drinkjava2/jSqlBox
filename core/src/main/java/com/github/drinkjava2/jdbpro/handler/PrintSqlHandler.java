@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox.handler;
+package com.github.drinkjava2.jdbpro.handler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,18 +18,17 @@ import java.util.Arrays;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdbpro.improve.SqlHandler;
-
 /**
  * PaginHandler is the SqlHandler used to translate SQL to paginated SQL
  * 
  * @author Yong Zhu
- * @since 1.0.0
+ * @since 1.7.0.2
  */
 @SuppressWarnings("rawtypes")
 public class PrintSqlHandler implements ResultSetHandler, SqlHandler {
 
 	public PrintSqlHandler() {
+		//Default constructor
 	}
 
 	@Override

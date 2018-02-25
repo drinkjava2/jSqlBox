@@ -16,7 +16,7 @@ import java.util.List;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
-import com.github.drinkjava2.jdbpro.improve.SqlHandler;
+import com.github.drinkjava2.jdbpro.handler.SqlHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;

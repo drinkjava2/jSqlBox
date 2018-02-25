@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro.improve;
+package com.github.drinkjava2.jdbpro.handler;
 
 import org.apache.commons.dbutils.QueryRunner;
 
@@ -21,7 +21,7 @@ import org.apache.commons.dbutils.QueryRunner;
  * SqlHandler should have a explain method to explain SQL and a explainResult
  * method to explainResult
  * 
- * @since 1.7.0.1
+ * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
 public interface SqlHandler {

@@ -57,7 +57,6 @@ public class UsuageAndSpeedTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-		SqlBoxContext.setGlobalAllowShowSql(false);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(null);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
@@ -65,7 +64,6 @@ public class UsuageAndSpeedTest {
 				ctx.nExecute(ddl);
 			} catch (Exception e) {
 			}
-		SqlBoxContext.setGlobalAllowShowSql(false);
 	}
 
 	@After
@@ -446,12 +444,12 @@ public class UsuageAndSpeedTest {
 			user.insertOneUser("Sam", "Canada");
 			user.updateAllUser("Tom", "China");
 			List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
-			Assert.assertEquals(1, users.size()); 
+			Assert.assertEquals(1, users.size());
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
 		}
 	}
-	
+
 	@Test
 	public void activeSqlUseText2() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);

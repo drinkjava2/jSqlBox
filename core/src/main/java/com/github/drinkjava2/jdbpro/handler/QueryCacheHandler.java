@@ -9,30 +9,46 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox.handler;
+package com.github.drinkjava2.jdbpro.handler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdbpro.improve.CacheHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 
 /**
- * MemCacheHandler is a simple memory cache used to cache SQL query result .
+ * QueryCacheHandler is a simple memory cache used to cache SQL query result .
  * 
  * @author Yong Zhu
- * @since 1.0.0
+ * @since 1.7.0.2
  */
 @SuppressWarnings("rawtypes")
-public class MemCacheHandler implements ResultSetHandler, CacheHandler {
-	private static final LRULinkedHashMap cache = new LRULinkedHashMap(500);
+public class QueryCacheHandler implements ResultSetHandler, CacheHandler {
+	private static final Map<String, Object> cache = Collections.synchronizedMap(new LRULinkedHashMap(500));
+	private int aliveSeconds;
 
-	public MemCacheHandler() {
-		// Default constructor
+	public QueryCacheHandler() {
+		aliveSeconds = 1000;
+	}
+
+	public QueryCacheHandler(int aliveSeconds) {
+		if (aliveSeconds <= 1)
+			this.aliveSeconds = 1;
+		else if (aliveSeconds <= 10)
+			this.aliveSeconds = 10;
+		else if (aliveSeconds <= 100)
+			this.aliveSeconds = 100;
+		else if (aliveSeconds <= 1000)
+			this.aliveSeconds = 1000;
+		else if (aliveSeconds <= 10000)
+			this.aliveSeconds = 10000;
+		else
+			this.aliveSeconds = 100000;
 	}
 
 	@Override
@@ -42,19 +58,20 @@ public class MemCacheHandler implements ResultSetHandler, CacheHandler {
 
 	@Override
 	public void writeToCache(String key, Object value) {
-		if (!StrUtils.isEmpty(key) && value != null)
-			cache.putValue(key, value);
+		if (StrUtils.isEmpty(key) || value == null)
+			return;
+		cache.put(Long.toString(System.currentTimeMillis() / 1000 / aliveSeconds) + key, value);
 	}
 
 	@Override
 	public Object readFromCache(String key) {
-		if (StrUtils.isEmpty(key) || !cache.haveKey(key))
+		if (StrUtils.isEmpty(key))
 			return null;
-		return cache.getValue(key);
+		return cache.get(Long.toString(System.currentTimeMillis() / 1000 / aliveSeconds) + key);
 	}
 
 	public static void clearCache() {
-		cache.clearCache();
+		cache.clear();
 	}
 
 	/**
@@ -67,22 +84,6 @@ public class MemCacheHandler implements ResultSetHandler, CacheHandler {
 		LRULinkedHashMap(int capacity) {
 			super(16, 0.75f, true);
 			this.capacity = capacity;
-		}
-
-		public synchronized void putValue(String key, Object value) {
-			this.put(key, value);
-		}
-
-		public synchronized Object getValue(String key) {
-			return this.get(key);
-		}
-
-		public synchronized boolean haveKey(String key) {
-			return this.containsKey(key);
-		}
-
-		public synchronized void clearCache() {
-			this.clear();
 		}
 
 		@Override

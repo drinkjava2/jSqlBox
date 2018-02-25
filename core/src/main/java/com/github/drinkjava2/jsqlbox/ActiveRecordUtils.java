@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.github.drinkjava2.jdbpro.improve.Wrap;
+import com.github.drinkjava2.jdbpro.handler.Wrap;
 import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;

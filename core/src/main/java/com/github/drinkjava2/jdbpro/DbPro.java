@@ -47,7 +47,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.7.0
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {
+public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {//NOSONAR
 	public DbPro() {
 		super();
 	}

@@ -25,7 +25,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.jdbpro.improve.Wrap;
+import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
+import com.github.drinkjava2.jdbpro.handler.QueryCacheHandler;
+import com.github.drinkjava2.jdbpro.handler.Wrap;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
@@ -36,8 +38,6 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
-import com.github.drinkjava2.jsqlbox.handler.PrintSqlHandler;
-import com.github.drinkjava2.jsqlbox.handler.MemCacheHandler;
 
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
@@ -104,7 +104,7 @@ public class HandlersTest extends TestBase {
 	}
 
 	@Test
-	public void testEntityListHandler() { 
+	public void testEntityListHandler() {
 		List<DemoUser> result = ctx.nQuery(new EntityListHandler(DemoUser.class),
 				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 99);
@@ -113,16 +113,14 @@ public class HandlersTest extends TestBase {
 	@Test
 	public void testSimpleCacheHandler() {
 		for (int i = 0; i < 10; i++) {// warm up
-			ctx.nQuery(new Wrap(new MemCacheHandler(), new EntityListHandler(DemoUser.class)),
+			ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class), new QueryCacheHandler()),
 					"select u.** from DemoUser u where u.age>?", 0);
-			ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class)), "select u.** from DemoUser u where u.age>?",
-					0);
+			ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class)), "select u.** from DemoUser u where u.age>?", 0);
 		}
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < 1000; i++) {
-			List<DemoUser> result = ctx.nQuery(
-					new Wrap(new MemCacheHandler(), new EntityListHandler(DemoUser.class)),
+			List<DemoUser> result = ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class), new QueryCacheHandler()),
 					"select u.** from DemoUser u where u.age>?", 0);
 			Assert.assertTrue(result.size() == 99);
 		}
@@ -153,8 +151,7 @@ public class HandlersTest extends TestBase {
 	public void testPrintSqlHandler() throws SQLException {
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> result = (List<Map<String, Object>>) ctx.query(
-				"select u.* from DemoUser u where u.age>?", new Wrap(new MapListHandler(), new PrintSqlHandler()),
-				0);
+				"select u.* from DemoUser u where u.age>?", new Wrap(new MapListHandler(), new PrintSqlHandler()), 0);
 		Assert.assertTrue(result.size() == 99);
 	}
 

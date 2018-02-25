@@ -19,12 +19,11 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBox;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * Coverage unit test for bind a box to PojoClass
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
 public class PojoClassBindTest extends TestBase {
@@ -47,7 +46,6 @@ public class PojoClassBindTest extends TestBase {
 
 	@Test
 	public void pojoBindTest() {
-		SqlBoxContext.setGlobalAllowShowSql(false);
 		TableModel[] tables = TableModelUtils.entity2Models(PojoBeanSample.class);
 		dropAndCreateDatabase(tables);
 		PojoBeanSample pojo = new PojoBeanSample();

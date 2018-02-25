@@ -48,7 +48,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	private static SqlTemplateEngine globalTemplateEngine = NamedParamSqlTemplate.instance();
 	private static Boolean globalAllowShowSql = false;
 	private static Dialect globalDialect = null;
-	private static ConnectionManager globalConnectionManager = null; 
+	private static ConnectionManager globalConnectionManager = null;
 	private static List<ResultSetHandler> globalResultSetHandler = null;
 	private static SqlBoxContext globalSqlBoxContext = null;
 
@@ -269,7 +269,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> List<T> nLoadAllEntityList(Class<T> entityClass) {
 		return this.netLoad(entityClass).getAllEntityList(entityClass);
 	}
- 
 
 	// =========getter & setter =======
 	public Dialect getDialect() {

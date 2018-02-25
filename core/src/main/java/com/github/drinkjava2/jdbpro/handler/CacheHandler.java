@@ -13,17 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro.improve;
-
-import org.apache.commons.dbutils.QueryRunner;
+package com.github.drinkjava2.jdbpro.handler;
 
 /**
  * CacheHandler used to read
  * 
- * @since 1.7.0.1
+ * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
-public interface CacheHandler { 
+public interface CacheHandler {
 	/**
 	 * Read value from cache
 	 */
