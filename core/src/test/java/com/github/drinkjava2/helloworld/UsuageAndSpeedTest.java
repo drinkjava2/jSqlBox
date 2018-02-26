@@ -326,16 +326,16 @@ public class UsuageAndSpeedTest {
 			User sam = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");
 			params.put("user", sam);
-			ctx2.tExecute(params, "insert into users (name, address) values(#{user.name},:user.address)");
+			ctx2.tExecute("insert into users (name, address) values(#{user.name},:user.address)", params);
 			params.put("user", tom);
-			ctx2.tExecute(params, "update users set name=#{user.name}, address=:user.address");
+			ctx2.tExecute("update users set name=#{user.name}, address=:user.address", params);
 			params.clear();
 			params.put("name", "Tom");
 			params.put("addr", "China");
 			Assert.assertEquals(1L,
-					ctx2.tQueryForObject(params, "select count(*) from users where name=#{name} and address=:addr"));
+					ctx2.tQueryForObject("select count(*) from users where name=#{name} and address=:addr", params));
 			params.put("u", tom);
-			ctx2.tExecute(params, "delete from users where name=:u.name or address=#{u.address}");
+			ctx2.tExecute("delete from users where name=:u.name or address=#{u.address}", params);
 		}
 	}
 

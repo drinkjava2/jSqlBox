@@ -160,19 +160,19 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			ResultSetHandler<T> resultSetHandler = buildResultHandler(handlerClass);
 			if (isEntityQuery) {
 				if (useTemplate)
-					return (T) ac.ctx().tQuery(map, new EntityListHandler(ac.getClass()), sql);
+					return (T) ac.ctx().tQuery(new EntityListHandler(ac.getClass()), sql, map);
 				else
 					return (T) ac.ctx().nQuery(new EntityListHandler(ac.getClass()), sql, params);
 			} else {
 				if (useTemplate)
-					return ac.ctx().tQuery(map, resultSetHandler, sql);
+					return ac.ctx().tQuery(resultSetHandler, sql, map);
 				else
 					return ac.ctx().nQuery(resultSetHandler, sql, params);
 			}
 		}
 		case 'u': {
 			if (useTemplate)
-				o = ac.ctx().tUpdate(map, sql);
+				o = ac.ctx().tUpdate(sql, map);
 			else
 				o = ac.ctx().nUpdate(sql, params);
 			return (T) o;
@@ -181,14 +181,14 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 
 			if (handlerClass == null) {
 				if (useTemplate)
-					o = ac.ctx().tExecute(map, sql);
+					o = ac.ctx().tExecute(sql, map);
 				else
 					o = ac.ctx().nExecute(sql, params);
 				return (T) o;
 			}
 			ResultSetHandler<T> resultSetHandler = buildResultHandler(handlerClass);
 			if (useTemplate)
-				o = ac.ctx().tExecute(map, resultSetHandler, sql);
+				o = ac.ctx().tExecute(resultSetHandler, sql, map);
 			else
 				o = ac.ctx().nExecute(resultSetHandler, sql, params);
 			return (T) o;
@@ -197,7 +197,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			return null;
 		}
 	}
- 
+
 	@SuppressWarnings("rawtypes")
 	private static ResultSetHandler buildResultHandler(Class<?>[] handlerClass) {
 		if (handlerClass == null || handlerClass.length == 0)

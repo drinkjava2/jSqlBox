@@ -33,8 +33,9 @@ public interface SqlTemplateEngine {
 	 * Render a SQL Template String and a Map<String, Object> instance into a
 	 * {@link SqlAndParams} instance
 	 * 
-	 * @param sqlTemplate
-	 *            A SQL template String.
+	 * @param sqlTemplateOrSqlID
+	 *            A SQL Template String, or a SqlId used to locate the real SQL
+	 *            template String
 	 * @param paramMap
 	 *            A Map instance, key is String type, value is Object type
 	 * @param directReplaceNamesSet
@@ -56,6 +57,7 @@ public interface SqlTemplateEngine {
 	 * 
 	 * @return SqlAndParams instance
 	 */
-	public SqlAndParams render(String sqlTemplate, Map<String, Object> paramMap, Set<String> directReplaceNamesSet);
+	public SqlAndParams render(String sqlTemplateOrSqlID, Map<String, Object> paramMap,
+			Set<String> directReplaceNamesSet);
 
 }

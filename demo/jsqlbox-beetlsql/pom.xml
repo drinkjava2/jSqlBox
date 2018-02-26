@@ -1,0 +1,130 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ <modelVersion>4.0.0</modelVersion>
+ <groupId>com.github.drinkjava2</groupId>
+ <artifactId>jsqlbox-beetlsql</artifactId>
+ <packaging>jar</packaging>
+ <version>1.0.0</version>
+ 
+ <name>jsqlbox-beetlsql</name>
+ <description>This is a demo project to show use beetlsql as SQL template engine in jSqlBox</description> 
+   
+ <licenses>
+   <license>
+     <name>The Apache Software License, Version 2.0</name>
+     <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+   </license>
+ </licenses>
+
+ <developers>
+   <developer>
+     <name>Yong Zhu</name>
+     <email>yong9981@gmail.com</email>
+     <url>https://github.com/drinkjava2/</url>
+   </developer>
+ </developers> 
+
+ <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
+        <!-- Demo run on JDK1.8 -->
+        <version.java>1.8</version.java>
+        <version.javadoc>6</version.javadoc>
+        <version.compiler-plugin>3.3</version.compiler-plugin>
+        <version.war-plugin>2.6</version.war-plugin>
+        <version.clean-plugin>3.0.0</version.clean-plugin>
+        <version.resources-plugin>2.7</version.resources-plugin>
+        <version.surefire-plugin>2.19</version.surefire-plugin>
+        <version.jar-plugin>2.6</version.jar-plugin>
+        <version.source-plugin>2.4</version.source-plugin>
+        <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
+        <version.gpg-plugin>1.6</version.gpg-plugin> 
+ </properties> 
+ 
+ 
+
+ <dependencies>
+    <!-- jSqlBox is a ORM tool based on Apache-DbUtils and jDialects-->
+    <dependency>
+      <groupId>com.github.drinkjava2</groupId>
+      <artifactId>jsqlbox</artifactId>
+      <version>1.0.7</version>
+    </dependency> 
+
+    <dependency>
+        <groupId>com.ibeetl</groupId>
+        <artifactId>beetl</artifactId>
+        <version>2.7.26</version>
+    </dependency>    
+    
+    <dependency>
+        <groupId>com.ibeetl</groupId>
+        <artifactId>beetlsql</artifactId>
+        <version>2.10.11</version>
+    </dependency>
+ 
+    <!-- jBeanBox is a IOC/AOP tool, here used to config datasource-->
+    <dependency>
+      <groupId>com.github.drinkjava2</groupId>
+      <artifactId>jbeanbox</artifactId>
+      <version>2.4.6</version>
+    </dependency> 
+   
+   <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
+   <dependency>
+     <groupId>commons-lang</groupId>
+     <artifactId>commons-lang</artifactId>
+     <version>2.6</version>
+   </dependency>   
+   
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.2</version> 
+    </dependency>
+    
+    <dependency>  
+      <groupId>log4j</groupId>  
+      <artifactId>log4j</artifactId>  
+      <version>1.2.17</version>  
+    </dependency>    
+ 
+   <!-- HikariCP is a dataSource pool quicker than c3p0 -->
+    <dependency>
+        <groupId>com.zaxxer</groupId>
+        <artifactId>HikariCP-java6</artifactId>
+        <version>2.3.13</version> 
+    </dependency> 
+    
+    <!-- H2Database memory database for unit test -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.3.176</version>
+    </dependency>
+
+ </dependencies>
+ 
+    <build>
+      <plugins>  
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${version.compiler-plugin}</version>
+                <configuration>
+                    <source>${version.java}</source>
+                    <target>${version.java}</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>  
+       </plugins>       
+    </build> 
+
+</project>
