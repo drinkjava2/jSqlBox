@@ -19,7 +19,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * Base class of unit test
+ * Mock class of RequestDispatcher for unit test
  * 
  * @author Yong Zhu
  * @since 1.0.0

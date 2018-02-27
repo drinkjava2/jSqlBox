@@ -22,8 +22,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 /**
- * Wrap used to wrap a set of ResultSetHandler together so can be put int query
- * method, Usage exapmle:<br/>
+ * Wrap used to wrap a set of ResultSetHandler together so can be put into query
+ * method, Usage example:<br/>
  * ctx.nQuery(new Wrap(new someHandler1(), new someHandler2(), "select * from
  * users")
  * 

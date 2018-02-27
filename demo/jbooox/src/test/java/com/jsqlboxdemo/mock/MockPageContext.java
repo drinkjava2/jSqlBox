@@ -28,7 +28,7 @@ import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
 
 /**
- * Base class of unit test
+ * Mock class of PageContext for unit test
  * 
  * @author Yong Zhu
  * @since 1.0.0

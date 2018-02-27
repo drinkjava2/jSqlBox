@@ -36,7 +36,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
 /**
- * Base class of unit test
+ * Mock class of HttpServletRequest for unit test
  * 
  * @author Yong Zhu
  * @since 1.0.0

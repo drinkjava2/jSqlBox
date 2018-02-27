@@ -16,7 +16,7 @@ import java.io.IOException;
 import javax.servlet.jsp.JspWriter;
 
 /**
- * Base class of unit test
+ * Mock class of JspWriter for unit test
  * 
  * @author Yong Zhu
  * @since 1.0.0

@@ -45,7 +45,6 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * 2) Override some methods to add logger support <br/>
  * 3) Override some execute/update/query methods to support batch operation and
  * SqlHandler <br/>
- * 4) Add a dialect property to support dialect features like pagination, DDL...
  * 
  * @author Yong Zhu
  * @since 1.7.0

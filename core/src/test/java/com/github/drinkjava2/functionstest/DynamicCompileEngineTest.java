@@ -24,7 +24,7 @@ public class DynamicCompileEngineTest {
 		MapListHandler handler=null;
 		String fullName = "com.foo.bar.DynaClass"; 
 		Class<?> clazz = null;
-		for (int i = 0; i < 1000000; i++)// Test class cached
+		for (int i = 0; i < 100000; i++)// Test class cached
 			clazz = DynamicCompileEngine.instance.javaCodeToClass(fullName, javaSrc);
 		Object instance = DynamicCompileEngine.instance.javaCodeToNewInstance(fullName, javaSrc);
 		System.out.println(instance.toString());
