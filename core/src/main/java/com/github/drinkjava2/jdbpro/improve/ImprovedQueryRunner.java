@@ -31,6 +31,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
+import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
 import com.github.drinkjava2.jdbpro.handler.AroundSqlExecute;
 import com.github.drinkjava2.jdbpro.handler.CacheSqlResult;
 import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
@@ -56,8 +57,8 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
 public class ImprovedQueryRunner extends QueryRunner {
 	protected static Boolean globalAllowShowSql = false;
 	protected static ConnectionManager globalConnectionManager = null;
-	protected static List<ResultSetHandler> globalResultSetHandler = null;
-	protected static DbProLogger globalLogger = DbProLogger.getLog(ImprovedQueryRunner.class);
+	protected static List<ResultSetHandler> globalResultSetHandlers = null;
+	protected static DbProLogger globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalBatchSize = 100;
 	protected static SqlTemplateEngine globalTemplateEngine = NamedParamSqlTemplate.instance();
 
@@ -66,7 +67,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected Boolean allowShowSQL = globalAllowShowSql;
 	protected DbProLogger logger = globalLogger;
 	protected Integer batchSize = globalBatchSize;
-	protected List<ResultSetHandler> resultSetHandlers = globalResultSetHandler;
+	protected List<ResultSetHandler> resultSetHandlers = globalResultSetHandlers;
 
 	/**
 	 * A ThreadLocal type cache to store AroundSqlExecute instances, all instance
@@ -779,10 +780,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	public static List<ResultSetHandler> getGlobalInterceptors() {
-		return globalResultSetHandler;
+		return globalResultSetHandlers;
 	}
 
-	public static void setGlobalInterceptors(List<ResultSetHandler> globalInterceptors) {
-		DbPro.globalResultSetHandler = globalInterceptors;
+	public static void setGlobalResultSetHandlers(List<ResultSetHandler> globalResultSetHandlers) {
+		DbPro.globalResultSetHandlers = globalResultSetHandlers;
 	}
 }

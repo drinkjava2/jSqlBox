@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.config;
 
+import javax.sql.DataSource;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -19,7 +21,6 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * Base class of unit test
@@ -28,7 +29,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.0
  */
 public class TestBase {
-	protected HikariDataSource dataSource;
+	protected DataSource dataSource;
 	protected Dialect dialect;
 	protected SqlBoxContext ctx;
 
@@ -43,7 +44,7 @@ public class TestBase {
 		// dataSource.setMaximumPoolSize(8);
 		// dataSource.setConnectionTimeout(2000);
 		dialect = Dialect.guessDialect(dataSource);
-		// SqlBoxContext.setGlobalAllowShowSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 	}

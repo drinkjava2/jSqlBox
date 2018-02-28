@@ -27,95 +27,120 @@ import java.util.logging.Logger;
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class DbProLogger {
-	private Object commonLogger;
-	private Method commonLoggerInfoMethod;
-	private Method commonLoggerWarnMethod;
-	private Method commonLoggerErrorMethod;
-	private Logger jdkLogger;
-	private static boolean firstRun = true;
-	private static boolean enableLog = true;
-	public static DbProLogger INSTANCE = null;// NOSONAR
+public interface DbProLogger {
+	public void info(String msg);
 
-	static {
-		INSTANCE = new DbProLogger(DbProLogger.class);
-		firstRun = false;
-	}
+	public void warn(String msg);
 
-	public DbProLogger(Class<?> targetClass) {
-		if (targetClass == null)
-			throw new AssertionError("DbProLogger error: targetClass can not be null.");
-		try {
-			Class<?> logFactoryClass = Class.forName("org.apache.commons.logging.LogFactory");
-			Method method = logFactoryClass.getMethod("getLog", Class.class);
-			commonLogger = method.invoke(logFactoryClass, targetClass);
-			commonLoggerInfoMethod = commonLogger.getClass().getMethod("info", Object.class);
-			commonLoggerWarnMethod = commonLogger.getClass().getMethod("warn", Object.class);
-			commonLoggerErrorMethod = commonLogger.getClass().getMethod("error", Object.class);
-		} catch (Exception e) {
-			// do nothing
+	public void error(String msg);
+
+	public void debug(String msg);
+
+	public static class DefaultDbProLogger implements DbProLogger {
+		private Object commonLogger;
+		private Method commonLoggerInfoMethod;
+		private Method commonLoggerWarnMethod;
+		private Method commonLoggerErrorMethod;
+		private Logger jdkLogger;
+		private static boolean firstRun = true;
+		private static boolean enableLog = true;
+
+		static {
+			firstRun = false;
 		}
 
-		if (commonLogger == null || commonLoggerWarnMethod == null) {
-			if (firstRun)
-				System.err.println("DbProLogger failed to load org.apache.commons.logging.LogFactory. Use JDK logger.");// NOSONAR
-			jdkLogger = Logger.getLogger(targetClass.getName());// use JDK log
-		} else if (firstRun)
-			System.out.println("org.apache.commons.logging.LogFactory loaded, DbProLogger use it as logger.");// NOSONAR
-	}
+		public DefaultDbProLogger(Class<?> targetClass) {
+			if (targetClass == null)
+				throw new AssertionError("DbProLogger error: targetClass can not be null.");
+			try {
+				Class<?> logFactoryClass = Class.forName("org.apache.commons.logging.LogFactory");
+				Method method = logFactoryClass.getMethod("getLog", Class.class);
+				commonLogger = method.invoke(logFactoryClass, targetClass);
+				commonLoggerInfoMethod = commonLogger.getClass().getMethod("info", Object.class);
+				commonLoggerWarnMethod = commonLogger.getClass().getMethod("warn", Object.class);
+				commonLoggerErrorMethod = commonLogger.getClass().getMethod("error", Object.class);
+			} catch (Exception e) {
+				// do nothing
+			}
 
-	/**
-	 * Build a DbProLogger instance by given targetClass
-	 * @param targetClass
-	 * @return A DbProLogger instance
-	 */
-	public static DbProLogger getLog(Class<?> targetClass) {
-		return new DbProLogger(targetClass);
-	}
+			if (commonLogger == null || commonLoggerWarnMethod == null) {
+				if (firstRun)
+					System.err.println(
+							"DbProLogger failed to load org.apache.commons.logging.LogFactory. Use JDK logger.");// NOSONAR
+				jdkLogger = Logger.getLogger(targetClass.getName());// use JDK
+																	// log
+			} else if (firstRun)
+				System.out.println("org.apache.commons.logging.LogFactory loaded, DbProLogger use it as logger.");// NOSONAR
+		}
 
-	public static void setEnableLog(boolean enablelog) {
-		enableLog = enablelog;
-	}
+		/**
+		 * Build a DbProLogger instance by given targetClass
+		 * 
+		 * @param targetClass
+		 * @return A DbProLogger instance
+		 */
+		public static DefaultDbProLogger getLog(Class<?> targetClass) {
+			return new DefaultDbProLogger(targetClass);
+		}
 
-	public void info(String msg) {
-		if (!enableLog)
-			return;
-		if (jdkLogger != null) {
-			jdkLogger.log(Level.INFO, msg);
-			return;
+		public static void setEnableLog(boolean enablelog) {
+			enableLog = enablelog;
 		}
-		try {
-			commonLoggerInfoMethod.invoke(commonLogger, msg);
-		} catch (Exception e) {
-			throw new AssertionError(e.getMessage());
-		}
-	}
 
-	public void warn(String msg) {
-		if (!enableLog)
-			return;
-		if (jdkLogger != null) {
-			jdkLogger.log(Level.WARNING, msg);
-			return;
+		public void info(String msg) {
+			if (!enableLog)
+				return;
+			if (jdkLogger != null) {
+				jdkLogger.log(Level.INFO, msg);
+				return;
+			}
+			try {
+				commonLoggerInfoMethod.invoke(commonLogger, msg);
+			} catch (Exception e) {
+				throw new AssertionError(e.getMessage());
+			}
 		}
-		try {
-			commonLoggerWarnMethod.invoke(commonLogger, msg);
-		} catch (Exception e) {
-			throw new AssertionError(e.getMessage());
-		}
-	}
 
-	public void error(String msg) {
-		if (!enableLog)
-			return;
-		if (jdkLogger != null) {
-			jdkLogger.log(Level.SEVERE, msg);
-			return;
+		public void warn(String msg) {
+			if (!enableLog)
+				return;
+			if (jdkLogger != null) {
+				jdkLogger.log(Level.WARNING, msg);
+				return;
+			}
+			try {
+				commonLoggerWarnMethod.invoke(commonLogger, msg);
+			} catch (Exception e) {
+				throw new AssertionError(e.getMessage());
+			}
 		}
-		try {
-			commonLoggerErrorMethod.invoke(commonLogger, msg);
-		} catch (Exception e) {
-			throw new AssertionError(e.getMessage());
+
+		public void debug(String msg) {
+			if (!enableLog)
+				return;
+			if (jdkLogger != null) {
+				jdkLogger.log(Level.FINE, msg);
+				return;
+			}
+			try {
+				commonLoggerWarnMethod.invoke(commonLogger, msg);
+			} catch (Exception e) {
+				throw new AssertionError(e.getMessage());
+			}
+		}
+
+		public void error(String msg) {
+			if (!enableLog)
+				return;
+			if (jdkLogger != null) {
+				jdkLogger.log(Level.SEVERE, msg);
+				return;
+			}
+			try {
+				commonLoggerErrorMethod.invoke(commonLogger, msg);
+			} catch (Exception e) {
+				throw new AssertionError(e.getMessage());
+			}
 		}
 	}
 }
