@@ -16,18 +16,13 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbutils.ResultSetHandler;
-
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
-import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
-import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
-import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
  * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
@@ -39,18 +34,12 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.0.0
  */
-@SuppressWarnings("rawtypes")
 public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** globalSqlBoxSuffix use to identify the SqlBox configuration class */
 	private static String globalSqlBoxSuffix = "SqlBox";// NOSONAR
-
-	private static SqlTemplateEngine globalTemplateEngine = NamedParamSqlTemplate.instance();
-	private static Boolean globalAllowShowSql = false;
-	private static Dialect globalDialect = null;
-	private static ConnectionManager globalConnectionManager = null;
-	private static List<ResultSetHandler> globalResultSetHandler = null;
 	private static SqlBoxContext globalSqlBoxContext = null;
+	private static Dialect globalDialect = null;
 
 	/**
 	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
@@ -62,26 +51,15 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public SqlBoxContext() {
 		super();
 		this.dialect = globalDialect;
-		this.connectionManager = globalConnectionManager;
-		this.sqlTemplateEngine = globalTemplateEngine;
-		this.allowShowSQL = globalAllowShowSql;
-		this.logger = globalLogger;
-		this.batchSize = globalBatchSize;
-		this.resultSetHandlers = globalResultSetHandler;
+
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
-		this.connectionManager = globalConnectionManager;
-		this.sqlTemplateEngine = globalTemplateEngine;
-		this.allowShowSQL = globalAllowShowSql;
-		this.logger = globalLogger;
-		this.batchSize = globalBatchSize;
-		this.resultSetHandlers = globalResultSetHandler;
 	}
 
-	public SqlBoxContext(Config config) {
+	public SqlBoxContext(SqlBoxContextConfig config) {
 		super();
 		this.connectionManager = config.getConnectionManager();
 		this.dialect = config.getDialect();
@@ -92,7 +70,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.resultSetHandlers = config.getResultSetHandlers();
 	}
 
-	public SqlBoxContext(DataSource ds, Config config) {
+	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
 		super(ds);
 		this.connectionManager = config.getConnectionManager();
 		this.dialect = config.getDialect();
@@ -277,44 +255,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	// ==========global getter & setter =======
 
-	public static SqlTemplateEngine getGlobalTemplateEngine() {
-		return globalTemplateEngine;
-	}
-
-	public static void setGlobalTemplateEngine(SqlTemplateEngine globalTemplateEngine) {
-		SqlBoxContext.globalTemplateEngine = globalTemplateEngine;
-	}
-
-	public static Boolean getGlobalAllowShowSql() {
-		return globalAllowShowSql;
-	}
-
-	public static void setGlobalAllowShowSql(Boolean globalAllowShowSql) {
-		SqlBoxContext.globalAllowShowSql = globalAllowShowSql;
-	}
-
 	public static Dialect getGlobalDialect() {
 		return globalDialect;
 	}
 
 	public static void setGlobalDialect(Dialect globalDialect) {
 		SqlBoxContext.globalDialect = globalDialect;
-	}
-
-	public static ConnectionManager getGlobalConnectionManager() {
-		return globalConnectionManager;
-	}
-
-	public static void setGlobalConnectionManager(ConnectionManager globalConnectionManager) {
-		SqlBoxContext.globalConnectionManager = globalConnectionManager;
-	}
-
-	public static List<ResultSetHandler> getGlobalInterceptors() {
-		return globalResultSetHandler;
-	}
-
-	public static void setGlobalInterceptors(List<ResultSetHandler> globalInterceptors) {
-		SqlBoxContext.globalResultSetHandler = globalInterceptors;
 	}
 
 	public static SqlBoxContext getGlobalSqlBoxContext() {

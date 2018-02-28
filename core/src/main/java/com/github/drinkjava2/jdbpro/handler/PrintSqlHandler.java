@@ -19,13 +19,13 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 /**
- * PaginHandler is the SqlHandler used to translate SQL to paginated SQL
+ * PaginHandler is the AroundSqlExecute used to translate SQL to paginated SQL
  * 
  * @author Yong Zhu
  * @since 1.7.0.2
  */
 @SuppressWarnings("rawtypes")
-public class PrintSqlHandler implements ResultSetHandler, SqlHandler {
+public class PrintSqlHandler implements ResultSetHandler, BeforeSqlExecute {
 
 	public PrintSqlHandler() {
 		//Default constructor
@@ -37,12 +37,7 @@ public class PrintSqlHandler implements ResultSetHandler, SqlHandler {
 		System.out.println("Parameters=" + Arrays.toString(params));//NOSONAR
 		return sql;
 	}
-
-	@Override
-	public Object handleResult(QueryRunner query, Object result) {
-		return result;
-	}
-
+  
 	@Override
 	public Object handle(ResultSet result) throws SQLException {
 		return result;

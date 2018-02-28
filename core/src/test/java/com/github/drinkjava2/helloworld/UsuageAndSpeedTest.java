@@ -29,8 +29,8 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.zaxxer.hikari.HikariDataSource;
@@ -358,7 +358,9 @@ public class UsuageAndSpeedTest {
 
 	@Test
 	public void xXxxStyle_BasicTemplate() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource, new Config().setTemplateEngine(BasicSqlTemplate.instance()));
+		SqlBoxContextConfig config=new SqlBoxContextConfig();
+		config.setTemplateEngine(BasicSqlTemplate.instance());
+		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			User user = new User("Sam", "Canada");
 			User tom = new User("Tom", "China");

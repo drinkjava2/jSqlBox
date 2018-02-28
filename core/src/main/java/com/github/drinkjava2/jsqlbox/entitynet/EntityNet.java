@@ -533,7 +533,7 @@ public class EntityNet {
 	}
 
 	// getter & setter=======
-	/** Get Config models */
+	/** Get SqlBoxContextConfig models */
 	public Map<Class<?>, TableModel> getConfigModels() {
 		return configModels;
 	}

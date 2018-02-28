@@ -19,19 +19,19 @@ import java.util.Map;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdbpro.handler.SqlHandler;
+import com.github.drinkjava2.jdbpro.handler.AroundSqlExecute;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
- * EntityListHandler is the SqlHandler used explain the Entity query sql (For
+ * EntityListHandler is the AroundSqlExecute used explain the Entity query sql (For
  * example 'select u.** from users u') and return a List<Entity> instance
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityListHandler implements ResultSetHandler, SqlHandler {
+public class EntityListHandler implements ResultSetHandler, AroundSqlExecute {
 	protected final EntitySqlMapListHandler sqlMapListHandler;
 	protected final Class<?> targetClass;
 

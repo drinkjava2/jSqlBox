@@ -19,8 +19,6 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdialects.StrUtils;
-
 /**
  * QueryCacheHandler is a simple memory cache used to cache SQL query result .
  * 
@@ -28,7 +26,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * @since 1.7.0.2
  */
 @SuppressWarnings("rawtypes")
-public class QueryCacheHandler implements ResultSetHandler, CacheHandler {
+public class QueryCacheHandler implements ResultSetHandler, CacheSqlResult {
 	private static final Map<String, Object> cache = Collections.synchronizedMap(new LRULinkedHashMap(500));
 	private int aliveSeconds;
 
@@ -58,14 +56,14 @@ public class QueryCacheHandler implements ResultSetHandler, CacheHandler {
 
 	@Override
 	public void writeToCache(String key, Object value) {
-		if (StrUtils.isEmpty(key) || value == null)
+		if ((key == null || key.length() == 0) || value == null)
 			return;
 		cache.put(Long.toString(System.currentTimeMillis() / 1000 / aliveSeconds) + key, value);
 	}
 
 	@Override
 	public Object readFromCache(String key) {
-		if (StrUtils.isEmpty(key))
+		if ((key == null || key.length() == 0))
 			return null;
 		return cache.get(Long.toString(System.currentTimeMillis() / 1000 / aliveSeconds) + key);
 	}

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.demo.model.Team;
 
-@Service 
+@Service
 public class TeamService {
 
 	public void addTeam(Team team) {
@@ -26,7 +26,7 @@ public class TeamService {
 	}
 
 	public List<Team> getTeams() {
-		return new Team().ctx().nLoadAllEntityList(Team.class);
+		return new Team().finaAllTeams();
 	}
 
 }

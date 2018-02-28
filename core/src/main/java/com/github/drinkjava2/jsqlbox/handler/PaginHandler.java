@@ -17,17 +17,17 @@ import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdbpro.handler.SqlHandler;
+import com.github.drinkjava2.jdbpro.handler.AroundSqlExecute;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * PaginHandler is the SqlHandler used to translate SQL to paginated SQL
+ * PaginHandler is the AroundSqlExecute used to translate SQL to paginated SQL
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("rawtypes")
-public class PaginHandler implements ResultSetHandler, SqlHandler {
+public class PaginHandler implements ResultSetHandler, AroundSqlExecute {
 	int pageNumber;
 	int pageSize;
 

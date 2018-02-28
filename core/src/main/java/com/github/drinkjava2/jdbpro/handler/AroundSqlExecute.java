@@ -18,13 +18,13 @@ package com.github.drinkjava2.jdbpro.handler;
 import org.apache.commons.dbutils.QueryRunner;
 
 /**
- * SqlHandler should have a explain method to explain SQL and a explainResult
- * method to explainResult
+ * AroundSqlExecute should have a handleSql method to translate SQL and a
+ * handleResult method to translate Result
  * 
  * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
-public interface SqlHandler {
+public interface AroundSqlExecute {
 
 	/**
 	 * handleSql method used to change SQL string before execute, to add extra

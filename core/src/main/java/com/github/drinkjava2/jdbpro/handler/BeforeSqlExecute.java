@@ -15,21 +15,28 @@
  */
 package com.github.drinkjava2.jdbpro.handler;
 
+import org.apache.commons.dbutils.QueryRunner;
+
 /**
- * CacheHandler used to read
+ * BeforeSqlExecute should have a handleSql method to translate SQL
  * 
  * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
-public interface CacheHandler {
-	/**
-	 * Read value from cache
-	 */
-	public Object readFromCache(String key);
+public interface BeforeSqlExecute {
 
 	/**
-	 * Write result to cache
+	 * handleSql method used to change SQL string before execute, to add extra features
+	 * like pagination, logging, entityNet SQl explanation...
+	 * 
+	 * @param query
+	 *            The QueryRunner instance
+	 * @param sql
+	 *            The original SQL
+	 * @param params
+	 *            Parameters if have
+	 * @return The changed SQL String
 	 */
-	public void writeToCache(String key, Object value);
+	public String handleSql(QueryRunner query, String sql, Object... params);
 
 }
