@@ -57,6 +57,9 @@ public class LoggerTest {
 		t.setName("Tom");
 		ctx.insert(t);
 		SqlBoxContext.setGlobalAllowShowSql(false);
+
+		SqlBoxContext.getGlobalLogger().info("Logger test message3 output ok");
+		SqlBoxContext.getGlobalLogger().info("Logger test message4 output ok");
 	}
 
 }

@@ -30,7 +30,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
  * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
-public class Wrap implements ResultSetHandler, AroundSqlExecute, CacheSqlResult {
+public class Wrap implements ResultSetHandler, AroundSqlHandler, CacheSqlHandler {
 	private final ResultSetHandler[] handlers;
 
 	public Wrap(ResultSetHandler... sqlHandles) {
@@ -41,8 +41,8 @@ public class Wrap implements ResultSetHandler, AroundSqlExecute, CacheSqlResult 
 	public String handleSql(QueryRunner query, String sql, Object... params) {
 		String newSql = sql;
 		for (ResultSetHandler handle : handlers) {
-			if (handle instanceof AroundSqlExecute)
-				newSql = ((AroundSqlExecute) handle).handleSql(query, newSql, params);
+			if (handle instanceof AroundSqlHandler)
+				newSql = ((AroundSqlHandler) handle).handleSql(query, newSql, params);
 		}
 		return newSql;
 	}
@@ -51,8 +51,8 @@ public class Wrap implements ResultSetHandler, AroundSqlExecute, CacheSqlResult 
 	public Object handleResult(QueryRunner query, Object result) {
 		Object newResult = result;
 		for (ResultSetHandler handle : handlers) {
-			if (handle instanceof AroundSqlExecute)
-				newResult = ((AroundSqlExecute) handle).handleResult(query, newResult);
+			if (handle instanceof AroundSqlHandler)
+				newResult = ((AroundSqlHandler) handle).handleResult(query, newResult);
 		}
 		return newResult;
 	}
@@ -69,8 +69,8 @@ public class Wrap implements ResultSetHandler, AroundSqlExecute, CacheSqlResult 
 	@Override
 	public Object readFromCache(String key) {
 		for (ResultSetHandler handle : handlers)
-			if (handle instanceof CacheSqlResult) {
-				Object result = ((CacheSqlResult) handle).readFromCache(key);
+			if (handle instanceof CacheSqlHandler) {
+				Object result = ((CacheSqlHandler) handle).readFromCache(key);
 				if (result != null)
 					return result;
 			}
@@ -80,8 +80,8 @@ public class Wrap implements ResultSetHandler, AroundSqlExecute, CacheSqlResult 
 	@Override
 	public void writeToCache(String key, Object value) {
 		for (ResultSetHandler handle : handlers)
-			if (handle instanceof CacheSqlResult) {
-				((CacheSqlResult) handle).writeToCache(key, value);
+			if (handle instanceof CacheSqlHandler) {
+				((CacheSqlHandler) handle).writeToCache(key, value);
 				return;
 			}
 	}

@@ -20,21 +20,21 @@ import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 /**
- * QueryCacheHandler is a simple memory cache used to cache SQL query result .
+ * SimpleCacheHandler is a simple memory cache used to cache SQL query result .
  * 
  * @author Yong Zhu
  * @since 1.7.0.2
  */
 @SuppressWarnings("rawtypes")
-public class QueryCacheHandler implements ResultSetHandler, CacheSqlResult {
+public class SimpleCacheHandler implements ResultSetHandler, CacheSqlHandler {
 	private static final Map<String, Object> cache = Collections.synchronizedMap(new LRULinkedHashMap(500));
 	private int aliveSeconds;
 
-	public QueryCacheHandler() {
+	public SimpleCacheHandler() {
 		aliveSeconds = 1000;
 	}
 
-	public QueryCacheHandler(int aliveSeconds) {
+	public SimpleCacheHandler(int aliveSeconds) {
 		if (aliveSeconds <= 1)
 			this.aliveSeconds = 1;
 		else if (aliveSeconds <= 10)

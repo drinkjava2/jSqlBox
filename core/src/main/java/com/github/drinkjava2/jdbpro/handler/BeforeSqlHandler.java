@@ -18,12 +18,12 @@ package com.github.drinkjava2.jdbpro.handler;
 import org.apache.commons.dbutils.QueryRunner;
 
 /**
- * BeforeSqlExecute should have a handleSql method to translate SQL
+ * BeforeSqlHandler should have a handleSql method to translate SQL
  * 
  * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
-public interface BeforeSqlExecute {
+public interface BeforeSqlHandler {
 
 	/**
 	 * handleSql method used to change SQL string before execute, to add extra features

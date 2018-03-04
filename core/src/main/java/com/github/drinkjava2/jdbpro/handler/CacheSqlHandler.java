@@ -16,12 +16,12 @@
 package com.github.drinkjava2.jdbpro.handler;
 
 /**
- * CacheSqlResult used to read
+ * CacheSqlHandler used to read
  * 
  * @since 1.7.0.2
  */
 @SuppressWarnings({ "all" })
-public interface CacheSqlResult {
+public interface CacheSqlHandler {
 	/**
 	 * Read value from cache
 	 */

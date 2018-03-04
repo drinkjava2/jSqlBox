@@ -32,8 +32,8 @@ import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
-import com.github.drinkjava2.jdbpro.handler.AroundSqlExecute;
-import com.github.drinkjava2.jdbpro.handler.CacheSqlResult;
+import com.github.drinkjava2.jdbpro.handler.AroundSqlHandler;
+import com.github.drinkjava2.jdbpro.handler.CacheSqlHandler;
 import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -48,7 +48,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * <br/>
  * 2) Override some methods to add logger support <br/>
  * 3) Override some execute/update/query methods to support batch operation and
- * AroundSqlExecute <br/>
+ * AroundSqlHandler <br/>
  * 
  * @author Yong Zhu
  * @since 1.7.0
@@ -70,7 +70,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected List<ResultSetHandler> resultSetHandlers = globalResultSetHandlers;
 
 	/**
-	 * A ThreadLocal type cache to store AroundSqlExecute instances, all instance
+	 * A ThreadLocal type cache to store AroundSqlHandler instances, all instance
 	 * will be cleaned after this thread close
 	 */
 	private static ThreadLocal<ArrayList<ResultSetHandler>> threadedSqlInterceptors = new ThreadLocal<ArrayList<ResultSetHandler>>() {
@@ -225,17 +225,17 @@ public class ImprovedQueryRunner extends QueryRunner {
 		String newSQL = sql;
 		if (resultSetHandlers != null)
 			for (ResultSetHandler handler : resultSetHandlers) {
-				if (handler instanceof AroundSqlExecute)
-					newSQL = ((AroundSqlExecute) handler).handleSql(this, newSQL, params);
+				if (handler instanceof AroundSqlHandler)
+					newSQL = ((AroundSqlHandler) handler).handleSql(this, newSQL, params);
 			}
 
 		for (ResultSetHandler handler : getThreadedSqlInterceptors()) {
-			if (handler instanceof AroundSqlExecute)
-				newSQL = ((AroundSqlExecute) handler).handleSql(this, newSQL, params);
+			if (handler instanceof AroundSqlHandler)
+				newSQL = ((AroundSqlHandler) handler).handleSql(this, newSQL, params);
 		}
 
-		if (rsh != null && rsh instanceof AroundSqlExecute)
-			newSQL = ((AroundSqlExecute) rsh).handleSql(this, newSQL, params);
+		if (rsh != null && rsh instanceof AroundSqlHandler)
+			newSQL = ((AroundSqlHandler) rsh).handleSql(this, newSQL, params);
 		return newSQL;
 	}
 
@@ -251,12 +251,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 		String key = null;
 		if (resultSetHandlers != null)
 			for (ResultSetHandler handler : resultSetHandlers)
-				if (handler instanceof CacheSqlResult) {
+				if (handler instanceof CacheSqlHandler) {
 					if (key == null)
 						key = createKey(sql, params);
 					result[0] = key;
 
-					Object value = ((CacheSqlResult) handler).readFromCache(key);
+					Object value = ((CacheSqlHandler) handler).readFromCache(key);
 					if (value != null) {
 						result[1] = value;
 						return result;
@@ -264,24 +264,24 @@ public class ImprovedQueryRunner extends QueryRunner {
 				}
 
 		for (ResultSetHandler handler : getThreadedSqlInterceptors())
-			if (handler instanceof CacheSqlResult) {
+			if (handler instanceof CacheSqlHandler) {
 				if (key == null)
 					key = createKey(sql, params);
 				result[0] = key;
 
-				Object value = ((CacheSqlResult) handler).readFromCache(key);
+				Object value = ((CacheSqlHandler) handler).readFromCache(key);
 				if (value != null) {
 					result[1] = value;
 					return result;
 				}
 			}
 
-		if (rsh != null && rsh instanceof CacheSqlResult) {
+		if (rsh != null && rsh instanceof CacheSqlHandler) {
 			if (key == null)
 				key = createKey(sql, params);
 			result[0] = key;
 
-			Object value = ((CacheSqlResult) rsh).readFromCache(key);
+			Object value = ((CacheSqlHandler) rsh).readFromCache(key);
 			if (value != null)
 				result[1] = value;
 		}
@@ -296,19 +296,19 @@ public class ImprovedQueryRunner extends QueryRunner {
 			return;
 		if (resultSetHandlers != null)
 			for (ResultSetHandler handler : resultSetHandlers)
-				if (handler instanceof CacheSqlResult) {
-					((CacheSqlResult) handler).writeToCache(key, value);
+				if (handler instanceof CacheSqlHandler) {
+					((CacheSqlHandler) handler).writeToCache(key, value);
 					return;
 				}
 
 		for (ResultSetHandler handler : getThreadedSqlInterceptors())
-			if (handler instanceof CacheSqlResult) {
-				((CacheSqlResult) handler).writeToCache(key, value);
+			if (handler instanceof CacheSqlHandler) {
+				((CacheSqlHandler) handler).writeToCache(key, value);
 				return;
 			}
 
-		if (rsh != null && rsh instanceof CacheSqlResult)
-			((CacheSqlResult) rsh).writeToCache(key, value);
+		if (rsh != null && rsh instanceof CacheSqlHandler)
+			((CacheSqlHandler) rsh).writeToCache(key, value);
 	}
 
 	/**
@@ -316,17 +316,17 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	private Object explainResult(ResultSetHandler<?> rsh, Object result) {
 		Object newObj = result;
-		if (rsh instanceof AroundSqlExecute)
-			newObj = ((AroundSqlExecute) rsh).handleResult(this, newObj);
+		if (rsh instanceof AroundSqlHandler)
+			newObj = ((AroundSqlHandler) rsh).handleResult(this, newObj);
 
 		if (resultSetHandlers != null)
 			for (ResultSetHandler explainer : resultSetHandlers) {
-				if (explainer instanceof AroundSqlExecute)
-					newObj = ((AroundSqlExecute) explainer).handleResult(this, newObj);
+				if (explainer instanceof AroundSqlHandler)
+					newObj = ((AroundSqlHandler) explainer).handleResult(this, newObj);
 			}
 		for (ResultSetHandler explainer : getThreadedSqlInterceptors())
-			if (explainer instanceof AroundSqlExecute)
-				newObj = ((AroundSqlExecute) explainer).handleResult(this, newObj);
+			if (explainer instanceof AroundSqlHandler)
+				newObj = ((AroundSqlHandler) explainer).handleResult(this, newObj);
 
 		return newObj;
 	}
@@ -339,7 +339,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Convert paramList to 2d array for insertBatch use, insertBatch's last
 	 * parameter is a 2d array, not easy to use
 	 */
-	private static Object[][] toArray(List<List<?>> paramList) {
+	protected static Object[][] listList2Arrays(List<List<?>> paramList) {
 		Object[][] array = new Object[paramList.size()][];
 		int i = 0;
 		for (List<?> item : paramList)
@@ -434,50 +434,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 		if (!sqlBatchCache.get().isEmpty())
 			batchFlush();
 		this.batchEnabled.set(false);
-	}
-
-	// ===override execute/insert/update methods to support batch and explainSql
-	// BTW, some methods in QueryRunner are private, otherwise no need override
-	// so many methods
-
-	/**
-	 * Executes the given batch of INSERT SQL statements, connection is get from
-	 * current dataSource
-	 * 
-	 * @param sql
-	 *            The SQL statement to execute.
-	 * @param rsh
-	 *            The handler used to create the result object
-	 * @param paramList
-	 *            the parameters for all SQLs, list.get(0) is the first SQL's
-	 *            parameters
-	 * @return The result generated by the handler.
-	 * @throws SQLException
-	 *             if a database access error occurs
-	 */
-	public <T> T insertBatch(String sql, ResultSetHandler rsh, List<List<?>> paramList) throws SQLException {
-		return (T) insertBatch(sql, rsh, toArray(paramList));
-	}
-
-	/**
-	 * Executes the given batch of INSERT SQL statements
-	 * 
-	 * @param conn
-	 *            The connection
-	 * @param sql
-	 *            The SQL statement to execute.
-	 * @param rsh
-	 *            The handler used to create the result object
-	 * @param paramList
-	 *            the parameters for all SQLs, list.get(0) is the first SQL's
-	 *            parameters
-	 * @return The result generated by the handler.
-	 * @throws SQLException
-	 *             if a database access error occurs
-	 */
-	public <T> T insertBatch(Connection conn, String sql, ResultSetHandler rsh, List<List<?>> paramList)
-			throws SQLException {
-		return (T) this.insertBatch(conn, sql, rsh, toArray(paramList));
 	}
 
 	// ===override execute/insert/update methods to support batch and explainSql

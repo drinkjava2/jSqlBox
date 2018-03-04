@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
-import com.github.drinkjava2.jdbpro.handler.QueryCacheHandler;
+import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
 import com.github.drinkjava2.jdbpro.handler.Wrap;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -113,14 +113,15 @@ public class HandlersTest extends TestBase {
 	@Test
 	public void testSimpleCacheHandler() {
 		for (int i = 0; i < 10; i++) {// warm up
-			ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class), new QueryCacheHandler()),
+			ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class), new SimpleCacheHandler()),
 					"select u.** from DemoUser u where u.age>?", 0);
 			ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class)), "select u.** from DemoUser u where u.age>?", 0);
 		}
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < 1000; i++) {
-			List<DemoUser> result = ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class), new QueryCacheHandler()),
+			List<DemoUser> result = ctx.nQuery(
+					new Wrap(new EntityListHandler(DemoUser.class), new SimpleCacheHandler()),
 					"select u.** from DemoUser u where u.age>?", 0);
 			Assert.assertTrue(result.size() == 99);
 		}
@@ -145,6 +146,19 @@ public class HandlersTest extends TestBase {
 		List<Map<String, Object>> result = ctx.nQuery(new EntitySqlMapListHandler(DemoUser.class),
 				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 99);
+	}
+
+	@Test
+	public void testPaginHandler() {
+		List<Map<String, Object>> result = ctx.nQuery(
+				new Wrap(new EntitySqlMapListHandler(DemoUser.class), new PaginHandler(2, 5)),
+				"select u.** from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(result.size() == 5);
+
+		List<DemoUser> users = ctx.nQuery(new Wrap(new EntityListHandler(DemoUser.class), new PaginHandler(2, 5)),
+				"select u.** from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(users.size() == 5);
+
 	}
 
 	@Test

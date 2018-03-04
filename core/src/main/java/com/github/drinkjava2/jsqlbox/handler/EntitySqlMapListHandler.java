@@ -16,7 +16,7 @@ import java.util.List;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
-import com.github.drinkjava2.jdbpro.handler.AroundSqlExecute;
+import com.github.drinkjava2.jdbpro.handler.AroundSqlHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
@@ -38,7 +38,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntitySqlMapListHandler extends MapListHandler implements AroundSqlExecute {
+public class EntitySqlMapListHandler extends MapListHandler implements AroundSqlHandler {
 	protected Object[] netConfigObjects;
 	protected TableModel[] generatedTableModels;
 

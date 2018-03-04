@@ -19,13 +19,13 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 /**
- * PaginHandler is the AroundSqlExecute used to translate SQL to paginated SQL
+ * PaginHandler is the AroundSqlHandler used to translate SQL to paginated SQL
  * 
  * @author Yong Zhu
  * @since 1.7.0.2
  */
 @SuppressWarnings("rawtypes")
-public class PrintSqlHandler implements ResultSetHandler, BeforeSqlExecute {
+public class PrintSqlHandler implements ResultSetHandler, BeforeSqlHandler {
 
 	public PrintSqlHandler() {
 		//Default constructor
