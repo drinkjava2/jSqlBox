@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
+import com.github.drinkjava2.helloworld.UsuageAndSpeedTest.User;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 
@@ -36,5 +37,15 @@ public abstract class AbstractUser extends TextedUser {
 	         and  address=:address
 	 */
 
+	public abstract List<User> selectUsersByText2(String name, String address);
+	/*-
+	   select u.** 
+	   from 
+	   users u
+	      where 
+	         u.name=? and address=?
+	 */
+	 
+	
  
 }

@@ -62,10 +62,10 @@ public interface ActiveRecordSupport {
 	public SqlBoxContext ctx();
 
 	/** Insert entity to database */
-	public void insert();
+	public <T> T insert();
 
 	/** Update entity in database */
-	public int update();
+	public <T> T update();
 
 	/** Delete entity in database */
 	public void delete();

@@ -110,21 +110,25 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void insert() {
+	public <T> T insert() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(
 					"No default global SqlBoxContext found, please use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.");
 		ctx.insert(this);
+		return (T) this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public int update() {
+	public <T> T update() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException("No default global SqlBoxContext be set.");
-		return ctx.update(this);
+		ctx.update(this);
+		return (T) this;
 	}
 
 	@Override
@@ -186,8 +190,8 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	/**
-	 * Based on current method @Sql annotated String or Text String and
-	 * parameters, guess a best fit query/update/delete/execute method to run
+	 * Based on current method @Sql annotated String or Text String and parameters,
+	 * guess a best fit query/update/delete/execute method to run
 	 */
 	public <T> T guess(Object... params) {// NOSONAR
 		return ActiveRecordUtils.doGuess(this, params);

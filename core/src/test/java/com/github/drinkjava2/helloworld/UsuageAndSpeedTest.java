@@ -8,6 +8,7 @@ import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.valuesQuesio
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put0;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.replace;
+import static com.github.drinkjava2.helloworld.UsuageAndSpeedTest.User.*;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -144,6 +145,10 @@ public class UsuageAndSpeedTest {
 
 	@Table(name = "users")
 	public static class User extends ActiveRecord {
+		public static final String USER = "users";
+		public static final String NAME = "name";
+		public static final String ADDRESS = "address";
+
 		@Id
 		String name;
 		String address;
@@ -319,6 +324,22 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
+	public void iXxxStyle2() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			ctx.iExecute("insert into ", USER, " ( ", //
+					NAME, ",", param0("Sam"), //
+					ADDRESS, " ", param("Canada"), //
+					") ", valuesQuesions());
+			param0("Tom", "China");
+			ctx.iExecute("update users set name=?,address=?");
+			Assert.assertEquals(1L, ctx
+					.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
+			ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
+		}
+	}
+
+	@Test
 	public void tXxxStyle() {
 		SqlBoxContext ctx2 = new SqlBoxContext(dataSource);
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -358,7 +379,7 @@ public class UsuageAndSpeedTest {
 
 	@Test
 	public void xXxxStyle_BasicTemplate() {
-		SqlBoxContextConfig config=new SqlBoxContextConfig();
+		SqlBoxContextConfig config = new SqlBoxContextConfig();
 		config.setTemplateEngine(BasicSqlTemplate.instance());
 		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
@@ -477,6 +498,9 @@ public class UsuageAndSpeedTest {
 			user.updateAllUser("Tom", "China");
 			List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
 			Assert.assertEquals(1, users.size());
+			List<User> users2 = user.selectUsersByText2("Tom", "China");
+			Assert.assertEquals(1, users2.size());
+
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
 		}
