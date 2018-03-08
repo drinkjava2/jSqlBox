@@ -146,6 +146,16 @@ public class EntityNetDemoTest extends TestBase {
 	}
 
 	@Test
+	public void testReturnDifferentType() {
+		insertDemoData();
+		EntityNet net = ctx.netLoad(new User(), new Email());
+		Map<Class<?>, Set<Object>> result = net
+				.findEntityMap(new Path("S+", Email.class).nextPath("P+", User.class, "userId"));
+		System.out.println("user selected:" + result.get(User.class).size());
+		System.out.println("email selected:" + result.get(Email.class).size());
+	}
+
+	@Test
 	public void testAutoPath2() {
 		insertDemoData();
 		EntityNet net = ctx.netLoad(new Email(), new User(), new Role(), Privilege.class, UserRole.class,
@@ -192,19 +202,16 @@ public class EntityNetDemoTest extends TestBase {
 		Assert.assertEquals(null, users.get(0).getUserName());
 	}
 
- 
-
 	@Test
 	public void testEntityNetQuery() {
 		insertDemoData();
-		EntityNet net =  ctx.nQuery(new EntityNetHandler(User.class, Email.class),
+		EntityNet net = ctx.nQuery(new EntityNetHandler(User.class, Email.class),
 				"select u.**, e.** from usertb u, emailtb e where u.id=e.userId");
 		Assert.assertEquals(8, net.size());
 		Set<Email> emails = net.findEntitySet(Email.class,
 				new Path(User.class).where("id='u1' or id='u2'").autoPath(Email.class));
-		Assert.assertEquals(4, emails.size()); 
+		Assert.assertEquals(4, emails.size());
 	}
-	
 
 	@Test
 	public void testManualLoadAndJoin() {
@@ -215,8 +222,10 @@ public class EntityNetDemoTest extends TestBase {
 		EntityNet net = ctx.netCreate(mapList1);
 		Assert.assertEquals(10, net.size());
 
-		List<Map<String, Object>> mapList2 = ctx.nQuery(new EntitySqlMapListHandler(Email.class),
-				"select e.** from emailtb as e");
+		Email e = new Email();
+		e.alias("e");
+		List<Map<String, Object>> mapList2 = ctx.nQuery(new EntitySqlMapListHandler(e),
+				"select e.id as e_id from emailtb as e");
 		ctx.netJoinList(net, mapList2);
 		Assert.assertEquals(15, net.size());
 

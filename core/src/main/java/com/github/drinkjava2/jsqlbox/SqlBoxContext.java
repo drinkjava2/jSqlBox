@@ -60,7 +60,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	public SqlBoxContext(SqlBoxContextConfig config) {
-		super();
+		super(); 
 		this.connectionManager = config.getConnectionManager();
 		this.dialect = config.getDialect();
 		this.sqlTemplateEngine = config.getTemplateEngine();

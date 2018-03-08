@@ -15,16 +15,21 @@
  */
 package com.github.drinkjava2.functionstest;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
+import com.github.drinkjava2.jdbpro.handler.AroundSqlHandler;
+import com.github.drinkjava2.jdbpro.handler.BeforeSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
 import com.github.drinkjava2.jdbpro.handler.Wrap;
@@ -163,10 +168,41 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testPrintSqlHandler() throws SQLException {
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> result = (List<Map<String, Object>>) ctx.query(
-				"select u.* from DemoUser u where u.age>?", new Wrap(new MapListHandler(), new PrintSqlHandler()), 0);
+		List<Map<String, Object>> result = ctx.query("select u.* from DemoUser u where u.age>?", new MapListHandler(),
+				0);
 		Assert.assertTrue(result.size() == 99);
+
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> result2 = ctx.query("select u.* from DemoUser u where u.age>?",
+				new Wrap(new MapListHandler(), new PrintSqlHandler()), 0);
+		Assert.assertTrue(result2.size() == 99);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static class MyAroundSqlHandler implements ResultSetHandler, AroundSqlHandler {
+		@Override
+		public String handleSql(QueryRunner query, String sql, Object... params) {
+			System.out.println("Hello");
+			return sql;
+		}
+
+		@Override
+		public Object handleResult(QueryRunner query, Object result) {
+			System.out.println("Bye");
+			return result;
+		}
+
+		@Override
+		public Object handle(ResultSet result) throws SQLException {
+			return result;
+		}
+	}
+
+	@Test
+	public void testMyAroundSqlHandler() throws SQLException {
+		List<Map<String, Object>> result2 = ctx.nQuery(new Wrap(new MapListHandler(), new MyAroundSqlHandler()),
+				"select u.* from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(result2.size() == 99);
 	}
 
 }

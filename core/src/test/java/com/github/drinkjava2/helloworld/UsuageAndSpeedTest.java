@@ -415,7 +415,7 @@ public class UsuageAndSpeedTest {
 	public void activeRecordStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		User user = new User();
-		user.box().setContext(ctx); // set SqlBoxContent
+		user.useContext(ctx); // Use ctx as SqlBoxContext
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.setName("Sam");
 			user.setAddress("Canada");

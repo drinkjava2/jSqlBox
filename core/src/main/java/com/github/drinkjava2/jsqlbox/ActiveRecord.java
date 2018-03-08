@@ -105,6 +105,10 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return theBox.getContext();
 	}
 
+	public void useContext(SqlBoxContext ctx) {
+		box().setContext(ctx);
+	}
+
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
 		return SqlBoxContext.getGlobalSqlBoxContext();
