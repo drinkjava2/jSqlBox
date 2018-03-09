@@ -57,7 +57,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
 public class ImprovedQueryRunner extends QueryRunner {
 	protected static Boolean globalAllowShowSql = false;
 	protected static ConnectionManager globalConnectionManager = null;
-	protected static List<ResultSetHandler> globalResultSetHandlers = null;
+	protected static List<ResultSetHandler> globalHandlers = null;
 	protected static DbProLogger globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalBatchSize = 100;
 	protected static SqlTemplateEngine globalTemplateEngine = NamedParamSqlTemplate.instance();
@@ -67,7 +67,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected Boolean allowShowSQL = globalAllowShowSql;
 	protected DbProLogger logger = globalLogger;
 	protected Integer batchSize = globalBatchSize;
-	protected List<ResultSetHandler> resultSetHandlers = globalResultSetHandlers;
+	protected List<ResultSetHandler> handlers = globalHandlers;
 
 	/**
 	 * A ThreadLocal type cache to store AroundSqlHandler instances, all instance
@@ -223,8 +223,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	private String explainSql(ResultSetHandler<?> rsh, String sql, Object... params) {
 		String newSQL = sql;
-		if (resultSetHandlers != null)
-			for (ResultSetHandler handler : resultSetHandlers) {
+		if (handlers != null)
+			for (ResultSetHandler handler : handlers) {
 				if (handler instanceof AroundSqlHandler)
 					newSQL = ((AroundSqlHandler) handler).handleSql(this, newSQL, params);
 			}
@@ -249,8 +249,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	private Object[] readCache(ResultSetHandler<?> rsh, String sql, Object... params) {
 		Object[] result = new Object[2];
 		String key = null;
-		if (resultSetHandlers != null)
-			for (ResultSetHandler handler : resultSetHandlers)
+		if (handlers != null)
+			for (ResultSetHandler handler : handlers)
 				if (handler instanceof CacheSqlHandler) {
 					if (key == null)
 						key = createKey(sql, params);
@@ -294,8 +294,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	private void writeToCache(ResultSetHandler<?> rsh, String key, Object value) {
 		if (key == null || key.length() == 0 || value == null)
 			return;
-		if (resultSetHandlers != null)
-			for (ResultSetHandler handler : resultSetHandlers)
+		if (handlers != null)
+			for (ResultSetHandler handler : handlers)
 				if (handler instanceof CacheSqlHandler) {
 					((CacheSqlHandler) handler).writeToCache(key, value);
 					return;
@@ -319,8 +319,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		if (rsh instanceof AroundSqlHandler)
 			newObj = ((AroundSqlHandler) rsh).handleResult(this, newObj);
 
-		if (resultSetHandlers != null)
-			for (ResultSetHandler explainer : resultSetHandlers) {
+		if (handlers != null)
+			for (ResultSetHandler explainer : handlers) {
 				if (explainer instanceof AroundSqlHandler)
 					newObj = ((AroundSqlHandler) explainer).handleResult(this, newObj);
 			}
@@ -735,11 +735,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 		DbPro.globalConnectionManager = globalConnectionManager;
 	}
 
-	public static List<ResultSetHandler> getGlobalInterceptors() {
-		return globalResultSetHandlers;
+	public static List<ResultSetHandler> getGlobalHandlers() {
+		return globalHandlers;
 	}
 
-	public static void setGlobalResultSetHandlers(List<ResultSetHandler> globalResultSetHandlers) {
-		DbPro.globalResultSetHandlers = globalResultSetHandlers;
+	public static void setGlobalResultSetHandlers(List<ResultSetHandler> globalHandlers) {
+		DbPro.globalHandlers = globalHandlers;
 	}
 }

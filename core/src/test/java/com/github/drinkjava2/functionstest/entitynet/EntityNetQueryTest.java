@@ -46,7 +46,6 @@ public class EntityNetQueryTest extends TestBase {
 		Assert.assertTrue(setResult.size() == 2);
 	}
 
- 
 	@Test
 	public void testJoinFields() {
 		System.out.println("==============testJoinFields================ ");
@@ -125,7 +124,7 @@ public class EntityNetQueryTest extends TestBase {
 	public void testFindChild() {
 		System.out.println("==============testFindChild================ ");
 		int sampleSize = 30;
-		int queyrTimes = 20;
+		int queyrTimes = 30;
 		for (int i = 0; i < sampleSize; i++) {
 			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
 			for (int j = 0; j < sampleSize; j++)
@@ -145,13 +144,34 @@ public class EntityNetQueryTest extends TestBase {
 
 		System.out.println("user selected2:" + result.get(User.class).size());
 		System.out.println("email selected2:" + result.get(Email.class).size());
-
+		net.setAllowQueryCache(true);
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
 			result = net.findNodeMapByEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
 		}
 		printTimeUsed(start, "Find Childs with Cache");
 
+		System.out.println("user selected2:" + result.get(User.class).size());
+		System.out.println("email selected2:" + result.get(Email.class).size());
+	}
+
+	@Test
+	public void testFindChild2() {//This unit test will put on user manual
+		int sampleSize = 30;
+		int queyrTimes = 30;
+		for (int i = 0; i < sampleSize; i++) {
+			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
+			for (int j = 0; j < sampleSize; j++)
+				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
+		}
+		EntityNet net = ctx.netLoad(new User(), Email.class);
+		net.setAllowQueryCache(true);
+		Map<Class<?>, Set<Node>> result = null;
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < queyrTimes; i++) {
+			result = net.findNodeMapByEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
+		}
+		printTimeUsed(start, "Find Childs with Cache");
 		System.out.println("user selected2:" + result.get(User.class).size());
 		System.out.println("email selected2:" + result.get(Email.class).size());
 	}

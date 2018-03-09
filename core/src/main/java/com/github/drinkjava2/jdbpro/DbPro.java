@@ -64,7 +64,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.resultSetHandlers = config.getResultSetHandlers();
+		this.handlers = config.getHandlers();
 	}
 
 	public DbPro(DataSource ds, DbProConfig config) {
@@ -74,7 +74,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.resultSetHandlers = config.getResultSetHandlers();
+		this.handlers = config.getHandlers();
 	}
 
 	public DbPro(SqlTemplateEngine templateEngine) {

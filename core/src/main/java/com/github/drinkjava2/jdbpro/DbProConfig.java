@@ -32,7 +32,7 @@ public class DbProConfig {
 	private Boolean allowSqlSql = DbPro.getGlobalAllowShowSql();
 	private Integer batchSize = DbPro.getGlobalBatchSize();
 	private ConnectionManager connectionManager = DbPro.getGlobalConnectionManager();
-	private List<ResultSetHandler> resultSetHandlers = DbPro.getGlobalInterceptors();
+	private List<ResultSetHandler> handlers = DbPro.getGlobalHandlers();
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -74,12 +74,12 @@ public class DbProConfig {
 		this.connectionManager = connectionManager;
 	}
 
-	public List<ResultSetHandler> getResultSetHandlers() {
-		return resultSetHandlers;
+	public List<ResultSetHandler> getHandlers() {
+		return handlers;
 	}
 
-	public void setInterceptors(List<ResultSetHandler> interceptors) {
-		this.resultSetHandlers = interceptors;
+	public void setHandlers(List<ResultSetHandler> handlers) {
+		this.handlers = handlers;
 	}
 
 }
