@@ -15,29 +15,36 @@
  */
 package com.github.drinkjava2.jdbpro.inline;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.dbutils.ResultSetHandler;
+
+import com.github.drinkjava2.jdbpro.DbProRuntimeException;
+import com.github.drinkjava2.jdbpro.handler.Wrap;
 
 /**
- * SqlAndParams is a POJO used for store a SQL String and a parameter array
+ * PreparedSQL is a POJO used for store SQL、parameter array、handler array
  * 
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class SqlAndParams {
+@SuppressWarnings("all")
+public class PreparedSQL {
 	private String sql;
 
-	/**
-	 * Sql parameters
-	 */
 	private Object[] params;
 
 	private Class<?>[] handlerClasses;
 
-	public SqlAndParams() {
+	private ResultSetHandler[] handlers;
+
+	public PreparedSQL() {
 		// default Constructor
 	}
 
-	public SqlAndParams(String sql, Object[] parameters) {
+	public PreparedSQL(String sql, Object[] parameters) {
 		this.sql = sql;
 		this.params = parameters;
 	}
@@ -68,9 +75,42 @@ public class SqlAndParams {
 		this.handlerClasses = handlerClasses;
 	}
 
+	public ResultSetHandler[] getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(ResultSetHandler<?>[] handlers) {
+		this.handlers = handlers;
+	}
+
+	public ResultSetHandler getWrappedHandler() {
+		List<ResultSetHandler> l = new ArrayList<ResultSetHandler>();
+		if (handlerClasses != null && handlerClasses.length != 0)
+			try {
+				for (int i = 0; i < handlerClasses.length; i++)
+					l.add((ResultSetHandler) handlerClasses[i].newInstance());
+			} catch (Exception e) {
+				throw new DbProRuntimeException(e);
+			}
+		if (handlers != null && handlers.length != 0)
+			try {
+				for (int i = 0; i < handlers.length; i++)
+					l.add(handlers[i]);
+			} catch (Exception e) {
+				throw new DbProRuntimeException(e);
+			}
+		if (l.isEmpty())
+			return null;// I don't in charge of check null
+		if (l.size() == 1)
+			return l.get(0);
+		return new Wrap(l.toArray(new ResultSetHandler[l.size()]));
+	}
+
 	public String getDebugInfo() {
 		return new StringBuffer("SQL: ").append(this.getSql()).append("\nParameters: ")
 				.append(Arrays.deepToString(this.getParams())).append("\nHandler Class:")
-				.append(Arrays.deepToString(this.getHandlerClasses())).append("\n").toString();
+				.append(Arrays.deepToString(this.getHandlerClasses())).append("\nHandlers:")
+				.append(Arrays.deepToString(this.getHandlers())).append("\n").toString();
 	}
+
 }

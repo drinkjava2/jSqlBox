@@ -18,7 +18,7 @@ package com.github.drinkjava2.jdbpro.template;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 
 /**
  * NamedParamSqlTemplate is an implementation of SqlTemplateEngine. It allow use
@@ -67,7 +67,7 @@ public class NamedParamSqlTemplate implements SqlTemplateEngine {
 		return sb.toString();
 	}
 
-	public SqlAndParams render(String sqlTemplate, Map<String, Object> paramMap, Set<String> directReplaceNamesSet) {
+	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap, Set<String> directReplaceNamesSet) {
 		return BasicSqlTemplate.instance().render(toBasicSqlTemplate(sqlTemplate), paramMap, directReplaceNamesSet);
 	}
 

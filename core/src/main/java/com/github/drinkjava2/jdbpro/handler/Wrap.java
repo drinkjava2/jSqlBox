@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
+import com.github.drinkjava2.jdbpro.DbProRuntimeException;
+
 /**
  * Wrap used to wrap a set of ResultSetHandler together so can be put into query
  * method, Usage example:<br/>
@@ -33,8 +35,20 @@ import org.apache.commons.dbutils.ResultSetHandler;
 public class Wrap implements ResultSetHandler, AroundSqlHandler, CacheSqlHandler {
 	private final ResultSetHandler[] handlers;
 
-	public Wrap(ResultSetHandler... sqlHandles) {
-		this.handlers = sqlHandles;
+	public Wrap(Object... handlerClassOrHandlers) {
+		handlers = new ResultSetHandler[handlerClassOrHandlers.length];
+		for (int i = 0; i < handlerClassOrHandlers.length; i++) {
+			Object obj = handlerClassOrHandlers[i];
+			if (obj instanceof ResultSetHandler)
+				handlers[i] = (ResultSetHandler) obj;
+			else
+				try {
+					handlers[i] = (ResultSetHandler) (((Class<?>) obj).newInstance());
+				} catch (Exception e) {
+					throw new DbProRuntimeException(e);
+				}
+
+		}
 	}
 
 	@Override

@@ -128,13 +128,13 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	}
 
 	/**
-	 * Build a SqlAndParams instance by given in-line style SQL and parameters
+	 * Build a PreparedSQL instance by given in-line style SQL and parameters
 	 * stored in ThreadLocal
 	 * 
 	 * @param inlineSQL
-	 * @return SqlAndParams instance
+	 * @return PreparedSQL instance
 	 */
-	public static SqlAndParams inlineToSqlAndParams(String... inlineSQL) {
+	public static PreparedSQL inlineToSqlAndParams(String... inlineSQL) {
 		try {
 			String sql = null;
 			if (inlineSQL != null) {
@@ -144,7 +144,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 				sql = sb.toString();
 			}
 			ArrayList<Object> params = inlineThreadlocalParamCache.get();
-			SqlAndParams sp = new SqlAndParams();
+			PreparedSQL sp = new PreparedSQL();
 			sp.setSql(sql);
 			sp.setParams(params.toArray(new Object[params.size()]));
 			return sp;
@@ -232,7 +232,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public <T> T iQuery(Connection conn, ResultSetHandler rsh, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return (T) this.query(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -254,7 +254,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public <T> T iQuery(ResultSetHandler rsh, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return (T) this.query(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -346,7 +346,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public int iUpdate(Connection conn, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return update(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -363,7 +363,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public int iUpdate(String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return this.update(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -386,7 +386,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public <T> T iInsert(Connection conn, ResultSetHandler rsh, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return (T) insert(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -409,7 +409,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public <T> T iInsert(ResultSetHandler rsh, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return (T) insert(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -436,7 +436,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public <T> List<T> iExecute(Connection conn, ResultSetHandler rsh, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return (List<T>) this.execute(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -463,7 +463,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public <T> List<T> iExecute(ResultSetHandler rsh, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return (List<T>) this.execute(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -485,7 +485,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public int iExecute(Connection conn, String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return this.execute(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -507,7 +507,7 @@ public class InlineQueryRunner extends ImprovedQueryRunner {
 	 */
 	public int iExecute(String... inlineSQL) {
 		try {
-			SqlAndParams sp = inlineToSqlAndParams(inlineSQL);
+			PreparedSQL sp = inlineToSqlAndParams(inlineSQL);
 			return this.execute(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);

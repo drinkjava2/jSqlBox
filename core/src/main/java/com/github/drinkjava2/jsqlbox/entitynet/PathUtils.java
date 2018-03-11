@@ -132,7 +132,7 @@ public class PathUtils {
 		TableModel toModel = net.getConfigModels().get(to);
 		String toTable = toModel.getTableName();
 		Object[] result = null;
-		// assume from is child, like from is RoleUser, to is UserEntity
+		// assume from is child, like from is RoleUser, to is UserPOJO
 		for (FKeyModel fKeyModel : fromModel.getFkeyConstraints()) {
 			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
 			if (toTable.equalsIgnoreCase(parentTableName)) {
@@ -147,7 +147,7 @@ public class PathUtils {
 				result[2] = refs;
 			}
 		}
-		// assume to is child, like from is UserEntity, to is UserRole
+		// assume to is child, like from is UserPOJO, to is UserRole
 		for (FKeyModel fKeyModel : toModel.getFkeyConstraints()) {
 			String parentTableName = fKeyModel.getRefTableAndColumns()[0];
 			if (fromTable.equalsIgnoreCase(parentTableName)) {

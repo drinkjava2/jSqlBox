@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
-import com.github.drinkjava2.helloworld.UsuageAndSpeedTest.User;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 
@@ -18,16 +18,17 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
  */
 public abstract class AbstractUser extends TextedUser {
 
-	@Sql("update users set name=?, address=?")
-	public void updateAllUser(String name, String address) {
-		this.guess(name, address);
-	};
-
 	@Sql("delete from users where name=? or address=?")
-	public abstract void deleteUsers(String name, String address);
+	public abstract void deleteAbsUser(String name, String address);
+
+	public abstract PreparedSQL updateUserPreparedSQL(String name, String address);
+	/*- 
+	   update users 
+	      set name=?, address=?
+	*/
 
 	@Handler(MapListHandler.class)
-	public abstract List<Map<String, Object>> selectUsersByText(String name, String address);
+	public abstract List<Map<String, Object>> selectUserListMap(String name, String address);
 	/*-
 	   select * 
 	   from 
@@ -37,7 +38,7 @@ public abstract class AbstractUser extends TextedUser {
 	         and  address=:address
 	 */
 
-	public abstract List<User> selectUsersByText2(String name, String address);
+	public abstract List<AbstractUser> selectAbstractUserList(String name, String address);
 	/*-
 	   select u.** 
 	   from 
@@ -45,7 +46,5 @@ public abstract class AbstractUser extends TextedUser {
 	      where 
 	         u.name=? and address=?
 	 */
-	 
-	
- 
+
 }

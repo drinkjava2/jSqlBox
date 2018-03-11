@@ -15,7 +15,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -50,6 +49,7 @@ public class HelloWorldTest {
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
+ 
 		HelloWorldTest hello = new HelloWorldTest();
 		hello.setName("ActiveRecordDemoTest");
 		ctx.insert(hello);

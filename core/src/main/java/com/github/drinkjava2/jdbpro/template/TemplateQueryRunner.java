@@ -33,7 +33,7 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 import com.github.drinkjava2.jdbpro.DbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.inline.InlineQueryRunner;
-import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -51,6 +51,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 
 	public TemplateQueryRunner(SqlTemplateEngine templateEngine) {
 		super();
+		this.sqlTemplateEngine = templateEngine;
 	}
 
 	public TemplateQueryRunner(DataSource ds) {
@@ -150,13 +151,13 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	}
 
 	/**
-	 * Build a SqlAndParams instance by given template style SQL and parameters
+	 * Build a PreparedSQL instance by given template style SQL and parameters
 	 * stored in ThreadLocal
 	 * 
 	 * @param sqlTemplate
-	 * @return SqlAndParams instance
+	 * @return PreparedSQL instance
 	 */
-	protected SqlAndParams templateToSqlAndParams(Map<String, Object> paramMap, String... sqlTemplate) {
+	protected PreparedSQL templateToSqlAndParams(Map<String, Object> paramMap, String... sqlTemplate) {
 		try {
 			String sql = null;
 			if (sqlTemplate != null) {
@@ -207,7 +208,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public <T> T tQuery(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return (T) this.query(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -231,7 +232,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public <T> T tInsert(Connection conn, ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return (T) insert(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -250,7 +251,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public int tUpdate(Connection conn, String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return update(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -292,7 +293,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public <T> T tQuery(Connection conn, ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return (T) this.query(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -341,7 +342,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public int tExecute(Connection conn, String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return this.execute(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -371,7 +372,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	public <T> List<T> tExecute(Connection conn, ResultSetHandler rsh, String templateSQL,
 			Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return this.execute(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -411,7 +412,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public int tUpdate(String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return this.update(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -435,7 +436,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public <T> T tInsert(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return (T) insert(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -459,7 +460,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public int tExecute(String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return this.execute(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
@@ -488,7 +489,7 @@ public class TemplateQueryRunner extends InlineQueryRunner {
 	 */
 	public <T> List<T> tExecute(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
-			SqlAndParams sp = templateToSqlAndParams(paramMap, templateSQL);
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
 			return this.execute(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);

@@ -23,7 +23,8 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * This is a DynamicCompileEngine to compile and load Java source code into memory, only tested in Maven, Tomcat
+ * This is a DynamicCompileEngine to compile and load Java source code into
+ * memory, only tested in Maven, Tomcat
  */
 @SuppressWarnings("all")
 public class DynamicCompileEngine {
@@ -73,10 +74,10 @@ public class DynamicCompileEngine {
 			if (methods != null)
 				weblogicClazzPass = (String) methods.invoke(weblogicClassloader, null);
 		} catch (Exception e) {
-			//Eat exception
+			// Eat exception
 		}
 		if (!StrUtils.isEmpty(weblogicClazzPass)) {
-			this.parentClassLoader=weblogicClassloader;
+			this.parentClassLoader = weblogicClassloader;
 			this.classpath = weblogicClazzPass;
 			return;
 		}
@@ -130,20 +131,20 @@ public class DynamicCompileEngine {
 		JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnostics, options, null, jfiles);
 		boolean success = task.call();
 
-		if (success) { 
-			JavaClassObject jco = fileManager.getJavaClassObject(); 
+		if (success) {
+			JavaClassObject jco = fileManager.getJavaClassObject();
 			DynamicClassLoader dynamicClassLoader = new DynamicClassLoader(this.parentClassLoader);
-			 
+
 			try {
 				result = dynamicClassLoader.loadClass(fullClassName, jco);
-			} catch (Exception e) { 
-				e.printStackTrace(); 
+			} catch (Exception e) {
+				e.printStackTrace();
 				throw new SqlBoxException(" \r\r\r <<< Dynamic Class Loadere Error \r", e);
 			}
 			if (result != null)
 				compiledClassCache.put(fullClassName, result);
-			else 
-				throw new SqlBoxException(" \r\r\r <<< Dynamic Class Loadere Null Error \r"+fullClassName);
+			else
+				throw new SqlBoxException(" \r\r\r <<< Dynamic Class Loadere Null Error \r" + fullClassName);
 			return result;
 		} else {
 			String error = "";
@@ -162,15 +163,6 @@ public class DynamicCompileEngine {
 	}
 
 	private String compilePrint(Diagnostic diagnostic) {
-		// System.out.println("Code:" + diagnostic.getCode());
-		// System.out.println("Kind:" + diagnostic.getKind());
-		// System.out.println("Position:" + diagnostic.getPosition());
-		// System.out.println("Start Position:" + diagnostic.getStartPosition());
-		// System.out.println("End Position:" + diagnostic.getEndPosition());
-		// System.out.println("Source:" + diagnostic.getSource());
-		// System.out.println("Message:" + diagnostic.getMessage(null));
-		// System.out.println("LineNumber:" + diagnostic.getLineNumber());
-		// System.out.println("ColumnNumber:" + diagnostic.getColumnNumber());
 		StringBuffer res = new StringBuffer();
 		res.append("Code:[" + diagnostic.getCode() + "]\n");
 		res.append("Kind:[" + diagnostic.getKind() + "]\n");

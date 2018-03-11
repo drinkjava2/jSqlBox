@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.junit.Assert;
 
-import com.github.drinkjava2.helloworld.UsuageAndSpeedTest.User;
+import com.github.drinkjava2.helloworld.UsuageAndSpeedTest.UserAR;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
@@ -18,15 +18,15 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
  * 
  * @author Yong Zhu
  */
-public class TextedUser extends User {
+public class TextedUser extends UserAR {
 
 	@Sql("insert into users (name,address) values(?,?)")
 	public void insertOneUser(String name, String address) {
 		this.guess(name, address);
 	};
 
-	public void updateAllUser(String name, String address) {
-		this.guess(name, address);
+	public PreparedSQL updateAllUserPreSql(String name, String address) {
+		return this.guessPreparedSQL(name, address);
 	};
 	/*- 
 	 update users 
@@ -62,8 +62,8 @@ public class TextedUser extends User {
 	         and address=:address
 	 */
 
-	public List<User> selectUsersByText2(String name, String address) {
-		return this.ctx().nQuery(new EntityListHandler(User.class), this.guessSQL(), name, address);
+	public List<TextedUser> selectUsersByText2(String name, String address) {
+		return this.ctx().nQuery(new EntityListHandler(TextedUser.class), this.guessSQL(), name, address);
 	}
 	/*-
 	   select u.** 
@@ -76,7 +76,6 @@ public class TextedUser extends User {
 	public static void main(String[] args) {
 		String javaSourceCode = TextUtils.getJavaSourceCodeUTF8(TextedUser.class);
 		System.out.println(javaSourceCode);
-		Assert.assertTrue(javaSourceCode.length() > 0);
 	}
 
 }

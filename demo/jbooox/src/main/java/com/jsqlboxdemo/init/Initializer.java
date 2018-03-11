@@ -14,8 +14,8 @@ import org.junit.Assert;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.TX;
-import com.github.drinkjava2.jsqlbox.Config;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
@@ -66,8 +66,9 @@ public class Initializer implements ServletContextListener {
 		BeanBox.regAopAroundAnnotation(Transaction.class, TxBox.class);
 
 		// Initialize Global SqlBoxContext
-		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class),
-				new Config().setConnectionManager(TinyTxConnectionManager.instance()));
+		SqlBoxContextConfig config = new SqlBoxContextConfig();
+		config.setConnectionManager(TinyTxConnectionManager.instance());
+		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class), config);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		// Initialize database

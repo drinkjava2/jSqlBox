@@ -8,7 +8,6 @@ import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.valuesQuesio
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put0;
 import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.replace;
-import static com.github.drinkjava2.helloworld.UsuageAndSpeedTest.User.*;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -60,7 +59,7 @@ public class UsuageAndSpeedTest {
 		dataSource.setPassword("");
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(null);
-		for (String ddl : ctx.getDialect().toDropAndCreateDDL(User.class))
+		for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
 			try {
 				ctx.nExecute(ddl);
 			} catch (Exception e) {
@@ -75,10 +74,10 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void speedTest() throws Exception {
 		PRINT_TIMEUSED = false;
-		REPEAT_TIMES = 100;// warm up
+		REPEAT_TIMES = 20;// warm up
 		runTestMethods();
 		PRINT_TIMEUSED = true;
-		REPEAT_TIMES = 100;
+		REPEAT_TIMES = 10;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 		runTestMethods();
 		PRINT_TIMEUSED = false;
@@ -97,9 +96,9 @@ public class UsuageAndSpeedTest {
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
 		runMethod("activeRecordDefaultContext");
-		runMethod("activeSqlAnnotaion");
-		runMethod("activeSqlUseText");
-		runMethod("abstractSqlUseText");
+		runMethod("sqlMapperSqlAnnotaion");
+		runMethod("sqlMapperUseText");
+		runMethod("abstractSqlMapperUseText");
 	}
 
 	public void runMethod(String methodName) throws Exception {
@@ -113,15 +112,15 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Table(name = "users")
-	public static class UserEntity {
+	public static class UserPOJO {
 		@Id
 		String name;
 		String address;
 
-		public UserEntity() {
+		public UserPOJO() {
 		}
 
-		public UserEntity(String name, String address) {
+		public UserPOJO(String name, String address) {
 			this.name = name;
 			this.address = address;
 		}
@@ -144,7 +143,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Table(name = "users")
-	public static class User extends ActiveRecord {
+	public static class UserAR extends ActiveRecord {
 		public static final String USER = "users";
 		public static final String NAME = "name";
 		public static final String ADDRESS = "address";
@@ -153,10 +152,10 @@ public class UsuageAndSpeedTest {
 		String name;
 		String address;
 
-		public User() {
+		public UserAR() {
 		}
 
-		public User(String name, String address) {
+		public UserAR(String name, String address) {
 			this.name = name;
 			this.address = address;
 		}
@@ -179,7 +178,7 @@ public class UsuageAndSpeedTest {
 
 	}
 
-	public static class User2 extends User {
+	public static class UserMapper extends UserAR {
 		@Sql("insert into users (name,address) values(?,?)")
 		public void insertOneUser(String name, String address) {
 			this.guess(name, address);
@@ -327,9 +326,9 @@ public class UsuageAndSpeedTest {
 	public void iXxxStyle2() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.iExecute("insert into ", USER, " ( ", //
-					NAME, ",", param0("Sam"), //
-					ADDRESS, " ", param("Canada"), //
+			ctx.iExecute("insert into ", UserAR.USER, " ( ", //
+					UserAR.NAME, ",", param0("Sam"), //
+					UserAR.ADDRESS, " ", param("Canada"), //
 					") ", valuesQuesions());
 			param0("Tom", "China");
 			ctx.iExecute("update users set name=?,address=?");
@@ -344,8 +343,8 @@ public class UsuageAndSpeedTest {
 		SqlBoxContext ctx2 = new SqlBoxContext(dataSource);
 		Map<String, Object> params = new HashMap<String, Object>();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			User sam = new User("Sam", "Canada");
-			User tom = new User("Tom", "China");
+			UserAR sam = new UserAR("Sam", "Canada");
+			UserAR tom = new UserAR("Tom", "China");
 			params.put("user", sam);
 			ctx2.tExecute("insert into users (name, address) values(#{user.name},:user.address)", params);
 			params.put("user", tom);
@@ -364,8 +363,8 @@ public class UsuageAndSpeedTest {
 	public void xXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			User user = new User("Sam", "Canada");
-			User tom = new User("Tom", "China");
+			UserAR user = new UserAR("Sam", "Canada");
+			UserAR tom = new UserAR("Tom", "China");
 			put0("user", user);
 			ctx.xExecute("insert into users (name, address) values(#{user.name},:user.address)");
 			put0("user", tom);
@@ -383,8 +382,8 @@ public class UsuageAndSpeedTest {
 		config.setTemplateEngine(BasicSqlTemplate.instance());
 		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			User user = new User("Sam", "Canada");
-			User tom = new User("Tom", "China");
+			UserAR user = new UserAR("Sam", "Canada");
+			UserAR tom = new UserAR("Tom", "China");
 			put0("user", user);
 			ctx.xExecute("insert into users (name, address) values(#{user.name},#{user.address})");
 			put0("user", tom);
@@ -400,13 +399,13 @@ public class UsuageAndSpeedTest {
 	public void dataMapperStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			UserEntity user = new UserEntity();
+			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
 			user.setAddress("Canada");
 			ctx.insert(user);
 			user.setAddress("China");
 			ctx.update(user);
-			UserEntity sam2 = ctx.load(UserEntity.class, "Sam");
+			UserPOJO sam2 = ctx.load(UserPOJO.class, "Sam");
 			ctx.delete(sam2);
 		}
 	}
@@ -414,7 +413,7 @@ public class UsuageAndSpeedTest {
 	@Test
 	public void activeRecordStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		User user = new User();
+		UserAR user = new UserAR();
 		user.useContext(ctx); // Use ctx as SqlBoxContext
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.setName("Sam");
@@ -422,7 +421,7 @@ public class UsuageAndSpeedTest {
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			User user2 = user.load("Sam");
+			UserAR user2 = user.load("Sam");
 			user2.delete();
 		}
 	}
@@ -431,23 +430,23 @@ public class UsuageAndSpeedTest {
 	public void activeRecordDefaultContext() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		User user = new User();
+		UserAR user = new UserAR();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.setName("Sam");
 			user.setAddress("Canada");
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			User user2 = ctx.load(User.class, "Sam");
+			UserAR user2 = ctx.load(UserAR.class, "Sam");
 			user2.delete();
 		}
 	}
 
 	@Test
-	public void activeSqlAnnotaion() {
+	public void sqlMapperSqlAnnotaion() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		User2 user = new User2();
+		UserMapper user = new UserMapper();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.updateAllUser("Tom", "China");
@@ -459,29 +458,16 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void activeSqlUseText() {
+	public void sqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		TextedUser user = new TextedUser();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
-			user.updateAllUser("Tom", "China");
-			List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
-			Assert.assertEquals(1, users.size());
-			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
-		}
-	}
-
-	@Test
-	public void activeSqlUseText2() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		TextedUser user = new TextedUser();
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			user.insertOneUser("Sam", "Canada");
-			user.updateAllUser("Tom", "China");
-			List<User> users2 = user.selectUsersByText2("Tom", "China");
+			user.ctx().nUpdate(user.updateAllUserPreSql("Tom", "China"));
+			// List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
+			// Assert.assertEquals(1, users.size());
+			List<TextedUser> users2 = user.selectUsersByText2("Tom", "China");
 			Assert.assertEquals(1, users2.size());
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
@@ -489,20 +475,19 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void abstractSqlUseText() {
+	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		AbstractUser user = ActiveRecord.create(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
-			user.updateAllUser("Tom", "China");
-			List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
-			Assert.assertEquals(1, users.size());
-			List<User> users2 = user.selectUsersByText2("Tom", "China");
+			user.ctx().nUpdate(user.updateUserPreparedSQL("Tom", "China"));
+			// List<Map<String, Object>> users = user.selectUserListMap("Tom", "China");
+			// Assert.assertEquals(1, users.size());
+			List<AbstractUser> users2 = user.selectAbstractUserList("Tom", "China");
 			Assert.assertEquals(1, users2.size());
-
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
+			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from	 users"));
 		}
 	}
 }

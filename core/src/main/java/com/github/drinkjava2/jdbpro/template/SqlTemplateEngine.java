@@ -18,11 +18,11 @@ package com.github.drinkjava2.jdbpro.template;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 
 /**
  * A SqlTemplateEngine render a SQL Template String and a Map<String, Object>
- * into a {@link SqlAndParams} instance
+ * into a {@link PreparedSQL} instance
  * 
  * @author Yong Zhu
  * @since 1.7.0
@@ -31,7 +31,7 @@ public interface SqlTemplateEngine {
 
 	/**
 	 * Render a SQL Template String and a Map<String, Object> instance into a
-	 * {@link SqlAndParams} instance
+	 * {@link PreparedSQL} instance
 	 * 
 	 * @param sqlTemplateOrSqlID
 	 *            A SQL Template String, or a SqlId used to locate the real SQL
@@ -55,9 +55,9 @@ public interface SqlTemplateEngine {
 	 *            he will aware this is a String direct replace method, not a SQL
 	 *            parameter, SQL parameter always use bind() or bind0() method.
 	 * 
-	 * @return SqlAndParams instance
+	 * @return PreparedSQL instance
 	 */
-	public SqlAndParams render(String sqlTemplateOrSqlID, Map<String, Object> paramMap,
+	public PreparedSQL render(String sqlTemplateOrSqlID, Map<String, Object> paramMap,
 			Set<String> directReplaceNamesSet);
 
 }

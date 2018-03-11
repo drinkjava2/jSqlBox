@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -81,6 +82,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return box().getTableModel();
 	}
 
+	@Override
 	public ColumnModel columnModel(String columnName) {
 		return box().getTableModel().getColumn(columnName);
 	}
@@ -105,6 +107,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return theBox.getContext();
 	}
 
+	@Override
 	public void useContext(SqlBoxContext ctx) {
 		box().setContext(ctx);
 	}
@@ -193,17 +196,19 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return this;
 	}
 
-	/**
-	 * Based on current method @Sql annotated String or Text String and parameters,
-	 * guess a best fit query/update/delete/execute method to run
-	 */
+	@Override
 	public <T> T guess(Object... params) {// NOSONAR
 		return ActiveRecordUtils.doGuess(this, params);
 	}
 
-	/** Return current method's @Sql annotated String or Text String */
+	@Override
 	public String guessSQL() {
 		return ActiveRecordUtils.doGuessSQL(this);
+	}
+
+	@Override
+	public PreparedSQL guessPreparedSQL(Object... params) {
+		return ActiveRecordUtils.doGuessPreparedSQL(this, params);
 	}
 
 	/**

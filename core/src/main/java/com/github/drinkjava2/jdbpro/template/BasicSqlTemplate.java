@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 
 /**
  * BasicSqlTemplate is a simple implementation of SqlTemplateEngine. It allow
@@ -80,12 +80,12 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		this.endDelimiter = endDelimiter;
 	}
 
-	public SqlAndParams render(String sqlTemplate, Map<String, Object> paramMap) {
+	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap) {
 		return doRender(sqlTemplate, paramMap, startDelimiter, endDelimiter, null);
 	}
 
 	@Override
-	public SqlAndParams render(String sqlTemplate, Map<String, Object> paramMap, Set<String> directReplaceNamesSet) {
+	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap, Set<String> directReplaceNamesSet) {
 		return doRender(sqlTemplate, paramMap, startDelimiter, endDelimiter, directReplaceNamesSet);
 	}
 
@@ -100,9 +100,9 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	 *            Start Delimiter of SQL Template
 	 * @param endDelimiter
 	 *            End Delimiter of SQL Template
-	 * @return A SqlAndParams instance
+	 * @return A PreparedSQL instance
 	 */
-	protected static SqlAndParams doRender(String template, Map<String, Object> paramMap, String startDelimiter,
+	protected static PreparedSQL doRender(String template, Map<String, Object> paramMap, String startDelimiter,
 			String endDelimiter, Set<String> directReplaceNamesSet) {
 		if (template == null)
 			throw new NullPointerException("Template can not be null");
@@ -210,7 +210,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		}
 		if (status != 0)
 			throwEX("Missing end delimiter '" + endDelimiter + "' in template: " + template);
-		SqlAndParams sp = new SqlAndParams();
+		PreparedSQL sp = new PreparedSQL();
 		sql.setLength(sql.length() - 1);
 		sp.setSql(sql.toString());
 		sp.setParams(paramList.toArray(new Object[paramList.size()]));

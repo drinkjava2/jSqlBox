@@ -29,7 +29,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdbpro.handler.AroundSqlHandler;
-import com.github.drinkjava2.jdbpro.handler.BeforeSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
 import com.github.drinkjava2.jdbpro.handler.Wrap;
@@ -95,8 +94,8 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testHandlers() {
-		List<DemoUser> result = ctx.nQuery(new Wrap(new PrintSqlHandler(), new EntityListHandler(DemoUser.class),
-				new PaginHandler(1, 5), new PrintSqlHandler()), "select u.** from DemoUser u where u.age>?", 0);
+		List<DemoUser> result = ctx.nQuery(new Wrap(PrintSqlHandler.class, new EntityListHandler(DemoUser.class),
+				new PaginHandler(1, 5), PrintSqlHandler.class), "select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 5);
 	}
 
@@ -168,13 +167,12 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testPrintSqlHandler() throws SQLException {
-		List<Map<String, Object>> result = ctx.query("select u.* from DemoUser u where u.age>?", new MapListHandler(),
+		List<Map<String, Object>> result = ctx.nQuery(new MapListHandler(), "select u.* from DemoUser u where u.age>?",
 				0);
 		Assert.assertTrue(result.size() == 99);
 
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> result2 = ctx.query("select u.* from DemoUser u where u.age>?",
-				new Wrap(new MapListHandler(), new PrintSqlHandler()), 0);
+		List<Map<String, Object>> result2 = ctx.nQuery(new Wrap(new MapListHandler(), new PrintSqlHandler()),
+				"select u.* from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result2.size() == 99);
 	}
 

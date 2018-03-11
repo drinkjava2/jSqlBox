@@ -23,7 +23,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdbpro.handler.Wrap;
-import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handler;
@@ -43,7 +43,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	}
 
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
-	private static final Map<String, SqlAndParams> methodSQLCache = new ConcurrentHashMap<String, SqlAndParams>();
+	private static final Map<String, PreparedSQL> methodSQLCache = new ConcurrentHashMap<String, PreparedSQL>();
 
 	/**
 	 * This is the method body to build an instance based on abstract class extended
@@ -53,7 +53,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	 * @return Object instance
 	 */
 	public static Class<?> createChildClass(Class<?> abstractClass) {
-		String fullClassName = abstractClass.getName() + "_AutoChild";
+		String fullClassName = abstractClass.getName() + "_Child";
 		if (classExistCache.containsKey(fullClassName))
 			return classExistCache.get(fullClassName);
 		String src = TextUtils.getJavaSourceCodeUTF8(abstractClass);
@@ -65,7 +65,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			throw new SqlBoxException("AbstractActiveRecord Java source code should have a 'public abstract class "
 					+ abstractClass.getSimpleName() + "' ");
 		sb.append(start);
-		sb.append("public class ").append(abstractClass.getSimpleName()).append("_AutoChild extends ")
+		sb.append("public class ").append(abstractClass.getSimpleName()).append("_Child extends ")
 				.append(abstractClass.getSimpleName()).append("{");
 		String body = StrUtils.substringAfter(src, "public abstract class " + abstractClass.getSimpleName());
 		body = StrUtils.substringAfter(body, "{");
@@ -78,7 +78,10 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			sb.append(title).append("{");
 			if (!title.startsWith("void "))
 				sb.append(" return ");
-			sb.append("this.guess(");
+			if (title.indexOf("PreparedSQL ") > -1)
+				sb.append("this.guessPreparedSQL(");
+			else
+				sb.append("this.guess(");
 			String paramStr = StrUtils.substringAfter(title, "(");
 			paramStr = StrUtils.substringBeforeLast(paramStr, ")");
 			String[] params = StrUtils.split(paramStr, ',');
@@ -129,7 +132,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
-		SqlAndParams sp = getSqlAndHandlerClassFromSrcCode(callerClassName, callerMethodName, callerMethod);
+		PreparedSQL sp = getPreparedSQLNoParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
 		String sql = sp.getSql().trim();
 		Class<?>[] handlerClass = sp.getHandlerClasses();
 		char dotype;
@@ -209,7 +212,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		} catch (Exception e) {
 			throw new SqlBoxException(e);
 		}
-		return new Wrap(resultSetHandlers);
+		return new Wrap((Object[]) resultSetHandlers);
 	}
 
 	protected static String doGuessSQL(ActiveRecord ac) {// NOSONAR
@@ -229,19 +232,42 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		SqlAndParams sp = getSqlAndHandlerClassFromSrcCode(callerClassName, callerMethodName, callerMethod);
+		PreparedSQL sp = getPreparedSQLNoParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
 		return sp.getSql();
 	}
 
-	private static SqlAndParams getSqlAndHandlerClassFromSrcCode(String callerClassName, String callerMethodName,
+	protected static PreparedSQL doGuessPreparedSQL(ActiveRecord ac, Object... params) {// NOSONAR
+		int callerPos = 0;
+		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
+		for (StackTraceElement stack : stacks) {
+			callerPos++;
+			if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
+					&& "guessPreparedSQL".equals(stack.getMethodName()))
+				break;
+		}
+		String callerClassName = stacks[callerPos].getClassName();
+		String callerMethodName = stacks[callerPos].getMethodName();
+		Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
+		if (callerClass == null)
+			throw new SqlBoxException("Can not find class '" + callerClassName + "'");
+		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
+		if (callerMethod == null)
+			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
+
+		PreparedSQL sp = getPreparedSQLNoParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
+		sp.setParams(params);
+		return sp;
+	}
+
+	private static PreparedSQL getPreparedSQLNoParamsFromSrcCode(String callerClassName, String callerMethodName,
 			Method callerMethod) {
 		// key is only inside used by cache
 		String key = callerClassName + "@#$^!" + callerMethodName;
-		SqlAndParams result = methodSQLCache.get(key);
+		PreparedSQL result = methodSQLCache.get(key);
 		if (result != null)
 			return result;
 		else
-			result = new SqlAndParams();
+			result = new PreparedSQL();
 
 		Annotation[] annos = callerMethod.getAnnotations();
 		Sql sqlAnno = null;

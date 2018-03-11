@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -86,9 +87,24 @@ public interface ActiveRecordSupport {
 	public ActiveRecordSupport putFields(String... fieldNames);
 
 	/**
-	 * Put values for entity fields, field names should be cached by call
-	 * putFields method first
+	 * Put values for entity fields, field names should be cached by call putFields
+	 * method first
 	 */
 	public ActiveRecordSupport putValues(Object... values);
+
+	/**
+	 * Based on current method @Sql annotated String or Text String and parameters,
+	 * guess a best fit query/update/delete/execute method to run
+	 */
+	public <T> T guess(Object... params);
+
+	/** Return current method's @Sql annotated String or Text String */
+	public String guessSQL();
+
+	/** Return current method's prepared SQL */
+	public PreparedSQL guessPreparedSQL(Object... params);
+
+	/** Switch to use another SqlBoxContext */
+	public void useContext(SqlBoxContext ctx);
 
 }
