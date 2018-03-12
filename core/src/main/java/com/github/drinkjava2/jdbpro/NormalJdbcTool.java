@@ -17,8 +17,8 @@ package com.github.drinkjava2.jdbpro;
 
 /**
  * Interface of Normal JDBC methods, this interface is used for other projects
- * like jDialects to eliminate jar dependency, other projects need copy this
- * interface into there source code folder but always use name
+ * to eliminate jar dependency, other projects need copy this interface into
+ * there source code folder but always use name
  * "com.github.drinkjava2.jdbpro.NormalJdbcTool"
  * 
  * @author Yong Zhu
@@ -28,9 +28,9 @@ package com.github.drinkjava2.jdbpro;
 public interface NormalJdbcTool {// NOSONAR
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found
 	 * 
 	 * @param sql
 	 * @param params
@@ -52,14 +52,14 @@ public interface NormalJdbcTool {// NOSONAR
 	/**
 	 * Execute an statement, including a stored procedure call, which does not
 	 * return any result sets. Any parameters which are instances of
-	 * org.apache.commons.dbutils.OutParameter will be registered as OUT
-	 * parameters. Transaction mode is determined by connectionManager property.
+	 * org.apache.commons.dbutils.OutParameter will be registered as OUT parameters.
+	 * Transaction mode is determined by connectionManager property.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
-	 * does not return any result sets. If you are not invoking a stored
-	 * procedure, or the stored procedure has no OUT parameters, consider using
-	 * {@link #Update(java.lang.String...) }. If the stored procedure returns
-	 * result sets, use
+	 * does not return any result sets. If you are not invoking a stored procedure,
+	 * or the stored procedure has no OUT parameters, consider using
+	 * {@link #Update(java.lang.String...) }. If the stored procedure returns result
+	 * sets, use
 	 * {@link #iExecute(org.apache.commons.dbutils.ResultSetHandler, java.lang.String...) }.
 	 * 
 	 * @param sql

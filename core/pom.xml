@@ -56,6 +56,13 @@
     </properties>
    
  <dependencies>   
+      <!-- jSqlBox depends on Apache Commons DbUtils latest version -->   
+    <dependency>
+      <groupId>commons-dbutils</groupId>
+      <artifactId>commons-dbutils</artifactId>
+      <version>1.7</version>
+    </dependency> 
+    
      <!-- jSqlBox depends on jDialects latest version, jDialects is a database dialect tool -->
   	<dependency>  
 		<groupId>com.github.drinkjava2</groupId>
@@ -63,15 +70,13 @@
 		<version>1.0.7</version>  
 	</dependency>
 	
-     <!-- jSqlBox depends on Apache Commons DbUtils latest version -->   
-    <dependency>
-      <groupId>commons-dbutils</groupId>
-      <artifactId>commons-dbutils</artifactId>
-      <version>1.7</version>
-    </dependency> 
-     
- 
-
+    <!-- jSqlBox depends on jTransactions latest version, jTransactions is a transaction tool -->
+  	<dependency>  
+		<groupId>com.github.drinkjava2</groupId>
+		<artifactId>jtransactions</artifactId>  
+		<version>1.0.1</version>  
+	</dependency>
+    
     <!-- ==================================================================================================  -->
     <!-- Below dependencies are for unit test only, scope be set to "test"                                   -->
     <!-- jSqlBox only test on H2, MySql5, MSSQL2012 and Oracle11g although it should support many databases  -->  
