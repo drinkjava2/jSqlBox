@@ -47,11 +47,11 @@ public class BeetlSqlTemplateDemo {
 		SQLManager sqlManager = new SQLManager(dbstyle, loader, source, nc, new Interceptor[] {});
 		SqlBoxContext.setGlobalTemplateEngine(new BeetlSqlTempalte(sqlManager));// Done BeetlSQL engine
 
-		//SqlBoxContext.setGlobalAllowShowSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);// Log output
 		SqlBoxContext ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
-		String[] ddlArray = ctx.getDialect().toDropAndCreateDDL(User.class);
+		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)
 			ctx.quiteExecute(ddl);
 

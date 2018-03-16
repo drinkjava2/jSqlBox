@@ -11,7 +11,7 @@ import org.beetl.sql.core.SQLResult;
 import org.beetl.sql.core.SQLScript;
 import org.beetl.sql.core.engine.SQLParameter;
 
-import com.github.drinkjava2.jdbpro.inline.SqlAndParams;
+import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
@@ -29,11 +29,11 @@ public class BeetlSqlTempalte implements SqlTemplateEngine {
 	}
 
 	@Override
-	public SqlAndParams render(String sqlId, Map<String, Object> paramMap, Set<String> directReplaceSet) {
+	public PreparedSQL render(String sqlId, Map<String, Object> paramMap, Set<String> directReplaceSet) {
 		return doRender(sm, sqlId, paramMap);
 	}
 
-	private static SqlAndParams doRender(SQLManager sm, String sqlId, Object paras) {
+	private static PreparedSQL doRender(SQLManager sm, String sqlId, Object paras) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("_root", paras);
 		SQLScript script = sm.getScript(sqlId);
@@ -46,7 +46,7 @@ public class BeetlSqlTempalte implements SqlTemplateEngine {
 		} catch (Exception e) {
 			throw new SqlBoxException("Can not access method 'run' in class 'org.beetl.sql.core.SQLScript'");
 		}
-		SqlAndParams sp = new SqlAndParams();
+		PreparedSQL sp = new PreparedSQL();
 		sp.setSql(result.jdbcSql);
 		List<SQLParameter> sqlparam = result.jdbcPara;
 
