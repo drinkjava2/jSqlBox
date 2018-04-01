@@ -18,7 +18,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * Path store search condition path, one path can link to another path to build
  * a path chain <br/>
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
 public class Path {
@@ -40,6 +40,9 @@ public class Path {
 
 	/** The reference table name or entity class */
 	Object target;
+
+	Class<?> bindTarget;
+	String bindField;
 
 	/** A String expression condition should return true or false */
 	String expression;
@@ -226,6 +229,12 @@ public class Path {
 		return this;
 	}
 
+	public Path bind(Class<?> bindTarget, String bindField) {
+		this.bindTarget = bindTarget;
+		this.bindField = bindField;
+		return this;
+	}
+
 	public Path getTopPath() {
 		if (this.fatherPath == null)
 			return this;
@@ -341,7 +350,7 @@ public class Path {
 		return this;
 	}
 
-  	public Path setExpressionParams(Object[] expressionParams) {
+	public Path setExpressionParams(Object[] expressionParams) {
 		checkIfModifyInitialized();
 		this.expressionParams = expressionParams;
 		return this;

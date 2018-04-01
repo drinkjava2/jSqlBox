@@ -16,6 +16,8 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
+import com.github.drinkjava2.jdialects.DebugUtils;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
@@ -31,6 +33,7 @@ public class EntityNetDemoTest extends TestBase {
 		// ctx.setAllowShowSQL(true);
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
+		Dialect.setGlobalAllowReservedWords(true);
 		dropAndCreateDatabase(models);
 	}
 
@@ -121,6 +124,27 @@ public class EntityNetDemoTest extends TestBase {
 		// @formatter:on
 	}
 
+	/**
+	 * Test User class with Transient Annotated fields Address and Role
+	 */
+	@Test
+	public void testEntityCrudWithTransientAnnotation() {
+		System.out.println(DebugUtils.getTableModelDebugInfo( TableModelUtils.entity2Model(User.class)  ));
+
+		new User().put("id", "u1").put("userName", "user1").insert();
+		Assert.assertEquals(1, ctx.nQueryForLongValue("select count(*) from usertb"));
+
+		User u = new User().load("u1");
+		Assert.assertEquals("user1", u.getUserName());
+
+		u.setUserName("user2");
+		u.update();
+		Assert.assertEquals("user2", ((User) (new User().load("u1"))).getUserName());
+
+		u.delete();
+		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from usertb"));
+	}
+
 	@Test
 	public void testPathFind() {
 		insertDemoData();
@@ -140,6 +164,17 @@ public class EntityNetDemoTest extends TestBase {
 		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class));
+		for (Privilege privilege : privileges)
+			System.out.print(privilege.getId() + " ");
+		Assert.assertEquals(3, privileges.size());
+	}
+	
+	@Test
+	public void testAutoPathAndBind() {
+		insertDemoData();
+		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
+				new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class)   );
 		for (Privilege privilege : privileges)
 			System.out.print(privilege.getId() + " ");
 		Assert.assertEquals(3, privileges.size());

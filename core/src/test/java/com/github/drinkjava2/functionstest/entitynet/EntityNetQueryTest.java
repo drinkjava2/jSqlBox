@@ -28,8 +28,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntitySqlMapListHandler;
 public class EntityNetQueryTest extends TestBase {
 	@Before
 	public void init() {
-		super.init();
-		// ctx.setAllowShowSQL(true);
+		super.init(); 
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		dropAndCreateDatabase(models);
@@ -207,6 +206,7 @@ public class EntityNetQueryTest extends TestBase {
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 
 		// Set validator class will cache query result
+		net.setAllowQueryCache(true);
 		start = System.currentTimeMillis();
 		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(MyBeanValidator.class);
 		for (int i = 0; i < queyrTimes; i++) {

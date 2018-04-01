@@ -1,18 +1,34 @@
 package com.github.drinkjava2.functionstest.entitynet.entities;
 
+import java.util.List;
+import java.util.Set;
+
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
+import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "usertb")
 public class User extends ActiveRecord {
 	@Id
 	String id;
+
 	String userName;
- 
-	String teatherId; 
+
+	String teatherId;
+
 	String bossId;
+
 	Integer age;
+
+	@Transient
+	Address address;
+
+	@Transient
+	List<Role> roleList;
+
+	@Transient
+	Set<Privilege> privilegeSet;
 
 	public String getId() {
 		return id;
@@ -52,6 +68,30 @@ public class User extends ActiveRecord {
 
 	public void setAge(Integer age) {
 		this.age = age;
+	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+
+	public List<Role> getRoleList() {
+		return roleList;
+	}
+
+	public void setRoleList(List<Role> roleList) {
+		this.roleList = roleList;
+	}
+
+	public Set<Privilege> getPrivilegeSet() {
+		return privilegeSet;
+	}
+
+	public void setPrivilegeSet(Set<Privilege> privilegeSet) {
+		this.privilegeSet = privilegeSet;
 	}
 
 }
