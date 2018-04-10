@@ -462,10 +462,18 @@ public class UsuageAndSpeedTest {
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.ctx().iUpdate(user.updateAllUserPreSql("Tom", "China"));
-			// List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
-			// Assert.assertEquals(1, users.size());
-			List<TextedUser> users2 = user.selectUsersByText2("Tom", "China");
-			Assert.assertEquals(1, users2.size());
+			List<Map<String, Object>> u1 = user.selectUsersMapListByText("Tom", "China");
+			Assert.assertEquals(1, u1.size());
+
+			List<Map<String, Object>> u2 = user.selectUsersMapListByText2("Tom", "China");
+			Assert.assertEquals(1, u2.size());
+
+			List<TextedUser> u3 = user.selectUsersByText2("Tom", "China");
+			Assert.assertEquals(1, u3.size());
+
+			List<TextedUser> u4 = user.selectUsersByText3("Tom", "China");
+			Assert.assertEquals(1, u4.size());
+
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
 		}
@@ -479,7 +487,8 @@ public class UsuageAndSpeedTest {
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.ctx().iUpdate(user.updateUserPreparedSQL("Tom", "China"));
-			// List<Map<String, Object>> users = user.selectUserListMap("Tom", "China");
+			// List<Map<String, Object>> users = user.selectUserListMap("Tom",
+			// "China");
 			// Assert.assertEquals(1, users.size());
 			List<AbstractUser> users2 = user.selectAbstractUserList("Tom", "China");
 			Assert.assertEquals(1, users2.size());

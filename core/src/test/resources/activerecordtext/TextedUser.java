@@ -1,5 +1,7 @@
 package activerecordtext;
 
+import static com.github.drinkjava2.jdbpro.DbPro.param;
+
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +13,8 @@ import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
+import com.github.drinkjava2.jsqlbox.handler.StarStarHandler;
+import com.github.drinkjava2.jsqlbox.handler.StarStarMapListHandler;
 
 /**
  * This is a sample to show put SQL in multiple line Strings(Text), a
@@ -50,20 +54,41 @@ public class TextedUser extends UserAR {
 	*/
 
 	@Handlers(MapListHandler.class)
-	public List<Map<String, Object>> selectUsersByText(String name, String address) {
+	public List<Map<String, Object>> selectUsersMapListByText(String name, String address) {
 		return this.guess(name, address);
 	};
 	/*-
-	   select * 
-	   from 
-	   users 
+	   select *
+	   from  users 
 	      where 
 	         name=:name 
 	         and address=:address
 	 */
 
+	public List<Map<String, Object>> selectUsersMapListByText2(String name, String address) {
+		return this.guess(name, address);
+	};
+	/*-
+	   select u.** 
+	   from  users u 
+	         where 
+	         u.name=:name 
+	         and u.address=:address
+	 */
+
 	public List<TextedUser> selectUsersByText2(String name, String address) {
-		return this.ctx().iQuery(new EntityListHandler(TextedUser.class), this.guessSQL(), name, address);
+		return this.guess(name, address);
+	}
+	/*-
+	   select u.** 
+	   from 
+	   users u
+	      where 
+	         u.name=? and address=?
+	 */
+
+	public List<TextedUser> selectUsersByText3(String name, String address) {
+		return this.ctx().iQuery(new EntityListHandler(TextedUser.class), this.guessSQL(), param(name), param(address));
 	}
 	/*-
 	   select u.** 

@@ -18,6 +18,7 @@ package com.github.drinkjava2.jdbpro;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
@@ -25,10 +26,10 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 
 /**
  * PreparedSQL2 is a POJO used for store SQL、parameter、ResultSetHandlers,
- * Connection, this is a temporary object only used for query method
+ * Connection, this is a temporary object only used for query method. 
  * 
  * @author Yong Zhu
- * @since 1.7.0
+ * @since 1.7.0.3
  */
 public class PreparedSQL {
 
@@ -47,8 +48,10 @@ public class PreparedSQL {
 	/** If set true, will use templateEngine to render SQL */
 	private Boolean useTemplate = false;
 
-	/** Optional, store a return result */
+	/** Optional, store a SqlTemplateEngine used only for this PreparedSQL */
 	private SqlTemplateEngine templateEngine;
+
+	private Map<String, Object> templateParams;
 
 	/** Optional,SqlHandler instance list */
 	private List<SqlHandler> sqlHandlers;
@@ -56,10 +59,31 @@ public class PreparedSQL {
 	/** Optional,ResultSetHandler instance */
 	private ResultSetHandler<?> resultSetHandler;
 
+	/** Clone self to get a new PreparedSQL copy */
+	public PreparedSQL newCopy() {
+		PreparedSQL ps = new PreparedSQL();
+		ps.setType(this.type);
+		ps.setConnection(this.connection);
+		ps.setSql(this.sql);
+		ps.setParams(this.params);
+		ps.setUseTemplate(this.useTemplate);
+		ps.setTemplateEngine(this.templateEngine);
+		ps.setTemplateParams(this.templateParams);
+		ps.setSqlHandlers(this.sqlHandlers);
+		ps.setResultSetHandler(this.resultSetHandler);
+		return ps;
+	}
+
 	public void addParam(Object param) {
 		if (params == null)
 			params = new ArrayList<Object>();
 		params.add(param);
+	}
+
+	public void addSqlHandler(SqlHandler sqlHandler) {
+		if (sqlHandlers == null)
+			sqlHandlers = new ArrayList<SqlHandler>();
+		sqlHandlers.add(sqlHandler);
 	}
 
 	public int getParamSize() {
@@ -71,7 +95,7 @@ public class PreparedSQL {
 	public void setResultSetHandler(ResultSetHandler<?> resultSetHandler) {
 		if (this.resultSetHandler != null)
 			throw new DbProRuntimeException(
-					"ResultSetHandler already exist and can only set 1, please use changeResultSetHandler method");
+					"ResultSetHandler already exist and can only set 1, need use changeResultSetHandler method.");
 		this.resultSetHandler = resultSetHandler;
 	}
 
@@ -91,7 +115,40 @@ public class PreparedSQL {
 		return params.toArray();
 	}
 
-	// === Plan getter && setter======
+	/**
+	 * @param handlerOrHandlerClass
+	 *            a SqlHandler or ResultHandler or a class of them
+	 * @return true if added
+	 */
+	@SuppressWarnings("rawtypes")
+	public boolean addHandler(Object handlerOrHandlerClass) {
+		if (handlerOrHandlerClass == null)
+			throw new DbProRuntimeException("Handler Or Handler class can not be null");
+		if (handlerOrHandlerClass instanceof ResultSetHandler)
+			setResultSetHandler(((ResultSetHandler) handlerOrHandlerClass));
+		else if (handlerOrHandlerClass instanceof SqlHandler)
+			addSqlHandler((SqlHandler) handlerOrHandlerClass);
+		else if (handlerOrHandlerClass instanceof Class) {
+			Class itemClass = (Class) handlerOrHandlerClass;
+			try {
+				if (ResultSetHandler.class.isAssignableFrom(itemClass)) {
+					setResultSetHandler((ResultSetHandler) itemClass.newInstance());
+					return true;
+				}
+				if (SqlHandler.class.isAssignableFrom(itemClass)) {
+					addSqlHandler((SqlHandler) itemClass.newInstance());
+					return true;
+				}
+			} catch (Exception e) {
+				throw new DbProRuntimeException(e);
+			}
+			return false;
+		} else
+			return false;
+		return true;
+	}
+
+	// === Normal getter && setter======
 
 	public SqlType getType() {
 		return type;
@@ -151,6 +208,22 @@ public class PreparedSQL {
 
 	public void setTemplateEngine(SqlTemplateEngine templateEngine) {
 		this.templateEngine = templateEngine;
+	}
+
+	public List<Object> getParams() {
+		return params;
+	}
+
+	public void setParams(List<Object> params) {
+		this.params = params;
+	}
+
+	public Map<String, Object> getTemplateParams() {
+		return templateParams;
+	}
+
+	public void setTemplateParams(Map<String, Object> templateParams) {
+		this.templateParams = templateParams;
 	}
 
 }

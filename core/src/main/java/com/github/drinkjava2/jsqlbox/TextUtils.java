@@ -28,9 +28,10 @@ import com.github.drinkjava2.jdialects.StrUtils;
 /**
  * TextUtils is used to read Java source file from sources folder, usuage:
  * String src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this
- * function need set a plugin in pom.xml, detail see jSqlBox documents
+ * function need copy java src file into resources folder or set a plugin in
+ * pom.xml, detail see jSqlBox documents
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  */
 public abstract class TextUtils {// NOSONAR
 

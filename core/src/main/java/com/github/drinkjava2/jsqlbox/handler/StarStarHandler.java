@@ -16,6 +16,7 @@ import java.util.List;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
@@ -27,22 +28,21 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * EntitySqlMapListHandler is used to explain alias.** to real columns in SQL,
- * example:
+ * StarStarHandler is used to explain alias.** to real columns in SQL, example:
  * 
  * select u.** from users u ==> select u.name, u.address, u.age from users u
  * 
- * And bind the netConfigObjects to result Map List
+ * Transient columns not included
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntitySqlMapListHandler implements SqlHandler {
+public class StarStarHandler implements SqlHandler {
 	protected Object[] netConfigObjects;
 	protected TableModel[] generatedTableModels;
 
-	public EntitySqlMapListHandler(Object... netConfigObjects) {
+	public StarStarHandler(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
 	}
 
@@ -50,18 +50,12 @@ public class EntitySqlMapListHandler implements SqlHandler {
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		String sql = explainNetQuery((SqlBoxContext) runner, ps.getSql());
 		ps.setSql(sql);
-		Object result = runner.runPreparedSQL(ps);
-		if (result != null && result instanceof List<?>) {
-			if (generatedTableModels == null)
-				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
-			EntityNetUtils.bindTableModel(result, generatedTableModels);
-		}
-		return result;
+		return runner.runPreparedSQL(ps);
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -140,8 +134,8 @@ public class EntitySqlMapListHandler implements SqlHandler {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
-	 * example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
+	 * for example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...

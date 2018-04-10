@@ -195,8 +195,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to customise
-	 * SQL format
+	 * Format SQL for logger output, subClass can override this method to
+	 * customise SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -207,7 +207,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * customise parameters format
 	 */
 	protected String formatParametersForLoggerOutput(Object... params) {
-		return "Parameters: " + Arrays.deepToString(params);
+		return "PAR: " + Arrays.deepToString(params);
 	}
 
 	/**
@@ -346,10 +346,10 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	// DbUtils style methods, throw SQLException
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found, SQLException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -363,10 +363,10 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found, SQLException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -406,10 +406,10 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found , DbProRuntimeException may be threw if some
+	 * SQL operation Exception happen.
 	 * 
 	 * @param sql
 	 * @param params
@@ -424,7 +424,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute query and force return a String object, no need catch SQLException.
+	 * Execute query and force return a String object, no need catch
+	 * SQLException.
 	 * 
 	 */
 	public String nQueryForString(Connection conn, String sql, Object... params) {
@@ -440,8 +441,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute query and force return a List<Map<String, Object>> type result, no
-	 * need catch SQLException.
+	 * Execute query and force return a List<Map<String, Object>> type result,
+	 * no need catch SQLException.
 	 */
 	public List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... params) {
 		try {
@@ -513,14 +514,14 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns one or
-	 * more result sets. Any parameters which are instances of {@link OutParameter}
-	 * will be registered as OUT parameters. Note: This method does not close
-	 * connection.
+	 * Execute an statement, including a stored procedure call, which returns
+	 * one or more result sets. Any parameters which are instances of
+	 * {@link OutParameter} will be registered as OUT parameters. Note: This
+	 * method does not close connection.
 	 * 
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -563,10 +564,10 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found , DbProRuntimeException may be threw if some
+	 * SQL operation Exception happen.
 	 * 
 	 * @param sql
 	 * @param params
@@ -582,7 +583,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute query and force return a String object, no need catch SQLException
+	 * Execute query and force return a String object, no need catch
+	 * SQLException
 	 */
 	public String nQueryForString(String sql, Object... params) {
 		return String.valueOf(nQueryForObject(sql, params));
@@ -597,8 +599,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute query and force return a List<Map<String, Object>> type result, no
-	 * need catch SQLException
+	 * Execute query and force return a List<Map<String, Object>> type result,
+	 * no need catch SQLException
 	 */
 	public List<Map<String, Object>> nQueryForMapList(String sql, Object... params) {
 		try {
@@ -671,13 +673,13 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns one or
-	 * more result sets. Any parameters which are instances of {@link OutParameter}
-	 * will be registered as OUT parameters.
+	 * Execute an statement, including a stored procedure call, which returns
+	 * one or more result sets. Any parameters which are instances of
+	 * {@link OutParameter} will be registered as OUT parameters.
 	 * 
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -697,10 +699,19 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * This is the core method of whole project, run a PreparedSQL and return the
-	 * result
+	 * This is the core method of whole project, handle a PreparedSQL instance
+	 * and return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
+		if (ps.getUseTemplate()) {
+			ps.setUseTemplate(false);
+			SqlTemplateEngine engine = ps.getTemplateEngine();
+			if (engine == null)
+				engine = this.sqlTemplateEngine;
+			PreparedSQL rendered = engine.render(ps.getSql(), ps.getTemplateParams(), null);
+			ps.setSql(rendered.getSql());
+			ps.setParams(rendered.getListParams());
+		}
 		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty()) {
 			SqlHandler newPs = ps.getSqlHandlers().get(0);
 			ps.getSqlHandlers().remove(0);
@@ -842,9 +853,9 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found , DbProRuntimeException may be threw if some SQL
-	 * operation Exception happen.
+	 * value if more than one column or more than 1 rows returned, a null object
+	 * may return if no result found , DbProRuntimeException may be threw if
+	 * some SQL operation Exception happen.
 	 * 
 	 * @param ps
 	 *            The PreparedSQL which included SQL、parameters and handlers(if
@@ -908,8 +919,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is responsible
-	 *            for closing this Connection.
+	 *            The Connection to use to run the query. The caller is
+	 *            responsible for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
 	 * @param params

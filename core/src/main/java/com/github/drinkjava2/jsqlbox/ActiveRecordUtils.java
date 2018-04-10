@@ -19,10 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
-
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlType;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -30,6 +28,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
+import com.github.drinkjava2.jsqlbox.handler.StarStarMapListHandler;
 
 /**
  * Store some public static methods for ActiveRecord
@@ -37,7 +36,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
  * @author Yong Zhu
  * @since 1.0.1
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "unchecked" })
 public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private ActiveRecordUtils() {
 		// private Constructor
@@ -47,8 +46,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private static final Map<String, PreparedSQL> methodSQLCache = new ConcurrentHashMap<String, PreparedSQL>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class extended
-	 * from ActiveRecord
+	 * This is the method body to build an instance based on abstract class
+	 * extended from ActiveRecord
 	 * 
 	 * @param activeClass
 	 * @return Object instance
@@ -106,16 +105,16 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	}
 
 	/**
-	 * Execute operation to access database, based on current method @Sql annotated
-	 * String or Text String and parameters, guess a best fit
+	 * Execute operation to access database, based on current method @Sql
+	 * annotated String or Text String and parameters, guess a best fit
 	 * query/update/delete/execute method to run
 	 * 
-	 * @param ac
+	 * @param entity
 	 * @param params
 	 * @return <T> T
 	 */
 	@SuppressWarnings("all")
-	protected static <T> T doGuess(ActiveRecord ac, Object... params) {// NOSONAR
+	protected static <T> T doGuess(ActiveRecord entity, Object... params) {// NOSONAR
 		int callerPos = 0;
 		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
 		for (StackTraceElement stack : stacks) {
@@ -133,32 +132,48 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
-		PreparedSQL sp = getPreparedSQLNoParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
-		String sql = sp.getSql().trim();
+		PreparedSQL ps = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
+		String sql = ps.getSql().trim();
 		if (StrUtils.startsWithIgnoreCase(sql, "select"))
-			sp.setType(SqlType.QUERY);
+			ps.setType(SqlType.QUERY);
 		else if (StrUtils.startsWithIgnoreCase(sql, "delete"))
-			sp.setType(SqlType.UPDATE);
+			ps.setType(SqlType.UPDATE);
 		else if (StrUtils.startsWithIgnoreCase(sql, "update"))
-			sp.setType(SqlType.UPDATE);
+			ps.setType(SqlType.UPDATE);
 		else if (StrUtils.startsWithIgnoreCase(sql, "insert"))
-			sp.setType(SqlType.UPDATE);
+			ps.setType(SqlType.UPDATE);
 		else
-			sp.setType(SqlType.EXECUTE);// execute
+			ps.setType(SqlType.EXECUTE);// execute
 		boolean hasQuestionMark = sql.indexOf('?') > -1;
 		boolean useTemplate = sql.indexOf(':') > -1 || sql.indexOf("#{") > -1;
-		sp.setUseTemplate(useTemplate);
+		ps.setUseTemplate(useTemplate);
 		if (useTemplate && hasQuestionMark)
 			throw new SqlBoxException(
 					"guess() method can not determine use template or normal style for SQL '" + sql + "'");
-		boolean isEntityQuery = sql.indexOf(".**") > -1;
-		if (isEntityQuery && !SqlType.QUERY.equals(sp.getType()))
-			throw new SqlBoxException("'.**' entity query style SQL can only start with 'select'");
-
-		Map<String, Object> map = null;
 		if (useTemplate)
-			map = buildParamMap(callerClassName, callerMethodName, params);
-		return (T) ac.ctx().runPreparedSQL(sp);
+			ps.setTemplateParams(buildParamMap(callerClassName, callerMethodName, params));
+		else
+			ps.setParams(params);
+		autoGuessHandler(entity, ps, sql, callerMethod); // guess handler
+		return (T) entity.ctx().runPreparedSQL(ps);
+	}
+
+	/** Automatically guess the handlers */
+	private static void autoGuessHandler(ActiveRecord entity, PreparedSQL ps, String sql, Method method) {
+		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty())
+			return;
+		if (ps.getResultSetHandler() != null)
+			return;
+		String methodType = method.getGenericReturnType().toString();
+		if (sql.indexOf(".**") > -1) {
+			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
+				ps.addSqlHandler(new StarStarMapListHandler(entity.getClass()));
+			else if (methodType.startsWith("java.util.List"))
+				ps.addSqlHandler(new EntityListHandler(entity.getClass()));
+		} else {
+			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
+				ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
+		}
 	}
 
 	protected static String doGuessSQL(ActiveRecord ac) {// NOSONAR
@@ -178,7 +193,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		PreparedSQL sp = getPreparedSQLNoParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
+		PreparedSQL sp = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
 		return sp.getSql();
 	}
 
@@ -200,32 +215,31 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
-		PreparedSQL sp = getPreparedSQLNoParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
+		PreparedSQL sp = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
 		sp.setParams(params);
 		return sp;
 	}
 
-	/** Get the PreparedSQL of a abstract method, but without parameters */
-	private static PreparedSQL getPreparedSQLNoParamsFromSrcCode(String callerClassName, String callerMethodName,
+	/** Get the PreparedSQL from a abstract method, but do not set parameters */
+	private static PreparedSQL getPreparedSqlAndHandles(String callerClassName, String callerMethodName,
 			Method callerMethod) {
 		// key is only inside used by cache
 		String key = callerClassName + "@#$^!" + callerMethodName;
 		PreparedSQL result = methodSQLCache.get(key);
 		if (result != null)
-			return result;
+			return result.newCopy();
 		else
 			result = new PreparedSQL();
 
 		Annotation[] annos = callerMethod.getAnnotations();
 		Sql sqlAnno = null;
-		List<Class<ResultSetHandler>> handlerClasses = new ArrayList<Class<ResultSetHandler>>();
 		for (Annotation anno : annos) {
 			if (Sql.class.equals(anno.annotationType()))
 				sqlAnno = (Sql) anno;
 			if (Handlers.class.equals(anno.annotationType())) {
 				Class<?>[] array = ((Handlers) anno).value();
 				for (Class<?> claz : array)
-					handlerClasses.add((Class<ResultSetHandler>) claz);
+					result.addHandler(claz);
 			}
 		}
 		String sql = null;
@@ -245,9 +259,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (sql != null)
 			sql = sql.trim();
 		result.setSql(sql);
-		//result.setHandlerClasses(handlerClasses);
 		methodSQLCache.put(key, result);
-		return result;
+		return result.newCopy();
 	}
 
 	private static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName,

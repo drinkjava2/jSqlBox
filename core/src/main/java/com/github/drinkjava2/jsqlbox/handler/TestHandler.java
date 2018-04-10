@@ -13,37 +13,39 @@ package com.github.drinkjava2.jsqlbox.handler;
 
 import java.util.List;
 
+import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlHandler;
+import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * EntityListHandler is the AroundSqlHandler used explain the Entity query sql
- * (For example 'select u.** from users u') and return a List<Entity> instance
+ * StarStarHandler is used to explain alias.** to real columns in SQL, example:
+ * 
+ * select u.** from users u ==> select u.name, u.address, u.age from users u
+ * 
+ * Transient columns not included
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityListHandler implements SqlHandler {
-	protected final StarStarMapListHandler sqlMapListHandler;
-	protected final Class<?> targetClass;
-
-	public EntityListHandler(Class<?> targetClass, Object... netConfigObjects) {
-		this.targetClass = targetClass;
-		if (netConfigObjects == null || netConfigObjects.length == 0)
-			this.sqlMapListHandler = new StarStarMapListHandler(targetClass);
-		else
-			this.sqlMapListHandler = new StarStarMapListHandler(netConfigObjects);
-	}
+public class TestHandler implements SqlHandler {
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		Object obj = sqlMapListHandler.handle(runner, ps);
-		EntityNet net = ((SqlBoxContext) runner).netCreate((List) obj);
-		return net.getAllEntityList(targetClass);
+		System.out.println("Before");
+		Object result = runner.runPreparedSQL(ps);
+		System.out.println("After");
+		return result;
 	}
 
 }
