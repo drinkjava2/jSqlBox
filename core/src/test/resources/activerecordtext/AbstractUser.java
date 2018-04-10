@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
-import com.github.drinkjava2.jsqlbox.annotation.Handler;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 
 /**
@@ -27,7 +27,7 @@ public abstract class AbstractUser extends TextedUser {
 	      set name=?, address=?
 	*/
 
-	@Handler(MapListHandler.class)
+	@Handlers(MapListHandler.class)
 	public abstract List<Map<String, Object>> selectUserListMap(String name, String address);
 	/*-
 	   select * 

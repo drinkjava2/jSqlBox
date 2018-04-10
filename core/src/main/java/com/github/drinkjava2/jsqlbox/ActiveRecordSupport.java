@@ -11,7 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 

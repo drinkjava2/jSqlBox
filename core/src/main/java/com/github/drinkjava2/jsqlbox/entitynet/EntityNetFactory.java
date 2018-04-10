@@ -60,7 +60,7 @@ public abstract class EntityNetFactory {// NOSONAR
 			if (StrUtils.isEmpty(alias))
 				alias = t.getTableName();
 			try {
-				mapList = ctx.nQuery(new EntitySqlMapListHandler(t),
+				mapList = ctx.iQuery(new EntitySqlMapListHandler(t),
 						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
 			} finally {
 				EntityNetUtils.removeBindedTableModel(mapList);

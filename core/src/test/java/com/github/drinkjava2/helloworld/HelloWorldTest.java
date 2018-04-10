@@ -49,7 +49,6 @@ public class HelloWorldTest {
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
- 
 		HelloWorldTest hello = new HelloWorldTest();
 		hello.setName("ActiveRecordDemoTest");
 		ctx.insert(hello);

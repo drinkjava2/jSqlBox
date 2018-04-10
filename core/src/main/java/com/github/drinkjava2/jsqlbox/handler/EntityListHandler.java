@@ -11,27 +11,23 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
-
-import com.github.drinkjava2.jdbpro.handler.AroundSqlHandler;
+import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
- * EntityListHandler is the AroundSqlHandler used explain the Entity query sql (For
- * example 'select u.** from users u') and return a List<Entity> instance
+ * EntityListHandler is the AroundSqlHandler used explain the Entity query sql
+ * (For example 'select u.** from users u') and return a List<Entity> instance
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityListHandler implements ResultSetHandler, AroundSqlHandler {
+public class EntityListHandler implements SqlHandler {
 	protected final EntitySqlMapListHandler sqlMapListHandler;
 	protected final Class<?> targetClass;
 
@@ -44,20 +40,10 @@ public class EntityListHandler implements ResultSetHandler, AroundSqlHandler {
 	}
 
 	@Override
-	public Object handleResult(QueryRunner query, Object result) {
-		List<Map<String, Object>> list = (List) sqlMapListHandler.handleResult(query, result);
-		EntityNet net = ((SqlBoxContext) query).netCreate(list);
+	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
+		Object obj = sqlMapListHandler.handle(runner, ps);
+		EntityNet net = ((SqlBoxContext) runner).netCreate((List) obj);
 		return net.getAllEntityList(targetClass);
-	}
-
-	@Override
-	public String handleSql(QueryRunner query, String sql, Object... params) {
-		return sqlMapListHandler.handleSql(query, sql, params);
-	}
-
-	@Override
-	public Object handle(ResultSet rs) throws SQLException {
-		return sqlMapListHandler.handle(rs);
 	}
 
 }

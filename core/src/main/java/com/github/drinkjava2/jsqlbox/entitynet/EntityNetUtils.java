@@ -34,12 +34,10 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 /**
  * Store static methods about EntityNet
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
 public class EntityNetUtils {
-
- 
 
 	public static final ThreadLocal<WeakHashMap<Object, Object>> netConfigBindToListCache = new ThreadLocal<WeakHashMap<Object, Object>>() {
 		@Override
@@ -59,7 +57,7 @@ public class EntityNetUtils {
 	public static void bindTableModel(Object listMap, TableModel[] tableModels) {
 		netConfigBindToListCache.get().put(listMap, tableModels);
 	}
-	
+
 	/**
 	 * After a query, listMap may binded a threadLocal type TableModel[] netConfigs,
 	 * this method used to join the binded tableModels with given configObjects,

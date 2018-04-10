@@ -22,11 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.github.drinkjava2.jdbpro.handler.Wrap;
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlType;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jsqlbox.annotation.Handler;
+import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
@@ -37,6 +37,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
  * @author Yong Zhu
  * @since 1.0.1
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private ActiveRecordUtils() {
 		// private Constructor
@@ -134,85 +135,30 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 
 		PreparedSQL sp = getPreparedSQLNoParamsFromSrcCode(callerClassName, callerMethodName, callerMethod);
 		String sql = sp.getSql().trim();
-		Class<?>[] handlerClass = sp.getHandlerClasses();
-		char dotype;
 		if (StrUtils.startsWithIgnoreCase(sql, "select"))
-			dotype = 's';
+			sp.setType(SqlType.QUERY);
 		else if (StrUtils.startsWithIgnoreCase(sql, "delete"))
-			dotype = 'u';
+			sp.setType(SqlType.UPDATE);
 		else if (StrUtils.startsWithIgnoreCase(sql, "update"))
-			dotype = 'u';
+			sp.setType(SqlType.UPDATE);
 		else if (StrUtils.startsWithIgnoreCase(sql, "insert"))
-			dotype = 'u';
+			sp.setType(SqlType.UPDATE);
 		else
-			dotype = 'e';// execute
+			sp.setType(SqlType.EXECUTE);// execute
 		boolean hasQuestionMark = sql.indexOf('?') > -1;
 		boolean useTemplate = sql.indexOf(':') > -1 || sql.indexOf("#{") > -1;
+		sp.setUseTemplate(useTemplate);
 		if (useTemplate && hasQuestionMark)
 			throw new SqlBoxException(
 					"guess() method can not determine use template or normal style for SQL '" + sql + "'");
 		boolean isEntityQuery = sql.indexOf(".**") > -1;
-		if (isEntityQuery && 's' != dotype)
+		if (isEntityQuery && !SqlType.QUERY.equals(sp.getType()))
 			throw new SqlBoxException("'.**' entity query style SQL can only start with 'select'");
+
 		Map<String, Object> map = null;
 		if (useTemplate)
 			map = buildParamMap(callerClassName, callerMethodName, params);
-		Object o = null;
-		switch (dotype) {
-		case 's': {
-			ResultSetHandler<T> resultSetHandler = buildResultHandler(handlerClass);
-			if (isEntityQuery) {
-				if (useTemplate)
-					return (T) ac.ctx().tQuery(new EntityListHandler(ac.getClass()), sql, map);
-				else
-					return (T) ac.ctx().nQuery(new EntityListHandler(ac.getClass()), sql, params);
-			} else {
-				if (useTemplate)
-					return ac.ctx().tQuery(resultSetHandler, sql, map);
-				else
-					return ac.ctx().nQuery(resultSetHandler, sql, params);
-			}
-		}
-		case 'u': {
-			if (useTemplate)
-				o = ac.ctx().tUpdate(sql, map);
-			else
-				o = ac.ctx().nUpdate(sql, params);
-			return (T) o;
-		}
-		case 'e': {
-
-			if (handlerClass == null) {
-				if (useTemplate)
-					o = ac.ctx().tExecute(sql, map);
-				else
-					o = ac.ctx().nExecute(sql, params);
-				return (T) o;
-			}
-			ResultSetHandler<T> resultSetHandler = buildResultHandler(handlerClass);
-			if (useTemplate)
-				o = ac.ctx().tExecute(resultSetHandler, sql, map);
-			else
-				o = ac.ctx().nExecute(resultSetHandler, sql, params);
-			return (T) o;
-		}
-		default:
-			return null;
-		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	private static ResultSetHandler buildResultHandler(Class<?>[] handlerClass) {
-		if (handlerClass == null || handlerClass.length == 0)
-			return new ScalarHandler();
-		ResultSetHandler[] resultSetHandlers = new ResultSetHandler[handlerClass.length];
-		try {
-			for (int i = 0; i < handlerClass.length; i++)
-				resultSetHandlers[i] = (ResultSetHandler) handlerClass[i].newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
-		return new Wrap((Object[]) resultSetHandlers);
+		return (T) ac.ctx().runPreparedSQL(sp);
 	}
 
 	protected static String doGuessSQL(ActiveRecord ac) {// NOSONAR
@@ -259,6 +205,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		return sp;
 	}
 
+	/** Get the PreparedSQL of a abstract method, but without parameters */
 	private static PreparedSQL getPreparedSQLNoParamsFromSrcCode(String callerClassName, String callerMethodName,
 			Method callerMethod) {
 		// key is only inside used by cache
@@ -271,12 +218,14 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 
 		Annotation[] annos = callerMethod.getAnnotations();
 		Sql sqlAnno = null;
-		Class<?>[] handlerClasses = null;
+		List<Class<ResultSetHandler>> handlerClasses = new ArrayList<Class<ResultSetHandler>>();
 		for (Annotation anno : annos) {
 			if (Sql.class.equals(anno.annotationType()))
 				sqlAnno = (Sql) anno;
-			if (Handler.class.equals(anno.annotationType())) {
-				handlerClasses = ((Handler) anno).value();
+			if (Handlers.class.equals(anno.annotationType())) {
+				Class<?>[] array = ((Handlers) anno).value();
+				for (Class<?> claz : array)
+					handlerClasses.add((Class<ResultSetHandler>) claz);
 			}
 		}
 		String sql = null;
@@ -296,7 +245,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (sql != null)
 			sql = sql.trim();
 		result.setSql(sql);
-		result.setHandlerClasses(handlerClasses);
+		//result.setHandlerClasses(handlerClasses);
 		methodSQLCache.put(key, result);
 		return result;
 	}

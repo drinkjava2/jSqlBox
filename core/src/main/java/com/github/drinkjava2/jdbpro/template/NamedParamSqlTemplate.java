@@ -18,7 +18,7 @@ package com.github.drinkjava2.jdbpro.template;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 
 /**
  * NamedParamSqlTemplate is an implementation of SqlTemplateEngine. It allow use

@@ -17,8 +17,11 @@ package com.github.drinkjava2.jdbpro;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -27,10 +30,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.github.drinkjava2.jdbpro.inline.InlineQueryRunner;
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
-import com.github.drinkjava2.jdbpro.template.TemplateQueryRunner;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -48,7 +48,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.7.0
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOSONAR
+public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public DbPro() {
 		super();
 	}
@@ -77,10 +77,6 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 		this.handlers = config.getHandlers();
 	}
 
-	public DbPro(SqlTemplateEngine templateEngine) {
-		super(templateEngine);
-	}
-
 	public DbPro(DataSource ds, Object... args) {
 		super(ds);
 		for (Object arg : args) {
@@ -90,678 +86,6 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 				this.sqlTemplateEngine = (SqlTemplateEngine) arg;
 			else if (arg instanceof DbProLogger)
 				this.logger = (DbProLogger) arg;
-		}
-	}
-
-	/**
-	 * Clear all In-Line parameters and Template parameters stored in ThreadLocal
-	 */
-	public static void clearAll() {
-		TemplateQueryRunner.clearBind();
-		InlineQueryRunner.clearParams();
-	}
-
-	// ==========================================================
-	// DbUtils style methods, throw SQLException
-
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen. Note: This method does not close connection.
-	 * 
-	 * @param sql
-	 *            The SQL
-	 * @param params
-	 *            The parameters
-	 * @return An Object or null, Object type determined by SQL content
-	 * @throws SQLException
-	 */
-	public <T> T queryForObject(Connection conn, String sql, Object... params) throws SQLException {
-		return query(conn, sql, new ScalarHandler<T>(1), params);
-	}
-
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen.
-	 * 
-	 * @param sql
-	 *            The SQL
-	 * @param params
-	 *            The parameters
-	 * @return An Object or null, Object type determined by SQL content
-	 * @throws SQLException
-	 */
-	public <T> T queryForObject(String sql, Object... params) throws SQLException {
-		return query(sql, new ScalarHandler<T>(1), params);
-	}
-
-	/**
-	 * Execute query and force return a String object, Note: This method does not
-	 * close connection.
-	 * 
-	 * @param sql
-	 *            The SQL
-	 * @param params
-	 *            The parameters
-	 * @throws SQLException
-	 */
-	public String queryForString(Connection conn, String sql, Object... params) throws SQLException {
-		return String.valueOf(queryForObject(conn, sql, params));
-	}
-
-	/**
-	 * Execute query and force return a String object
-	 * 
-	 * @param sql
-	 *            The SQL
-	 * @param params
-	 *            The parameters
-	 * @throws SQLException
-	 */
-	public String queryForString(String sql, Object... params) throws SQLException {
-		return String.valueOf(queryForObject(sql, params));
-	}
-
-	/**
-	 * Execute query and force return a Long object, runtime exception may throw if
-	 * result can not be cast to long, SQLException may throw if SQL exception
-	 * happen, Note: This method does not close connection.
-	 * 
-	 * @param sql
-	 *            The SQL
-	 * @param params
-	 *            The parameters
-	 * @throws SQLException
-	 */
-	public long queryForLongValue(Connection conn, String sql, Object... params) throws SQLException {
-		return ((Number) queryForObject(conn, sql, params)).longValue();// NOSONAR
-	}
-
-	/**
-	 * Execute query and force return a Long object, runtime exception may throw if
-	 * result can not be cast to long, SQLException may throw if SQL exception
-	 * happen
-	 * 
-	 * @param sql
-	 *            The SQL
-	 * @param params
-	 *            The parameters
-	 * @throws SQLException
-	 */
-	public long queryForLongValue(String sql, Object... params) throws SQLException {
-		return ((Number) queryForObject(sql, params)).longValue();// NOSONAR
-	}
-
-	/**
-	 * Execute a query and wrap result to Map List, Note: This method does not close
-	 * connection.
-	 * 
-	 * @param sql
-	 *            The SQL String
-	 * @param params
-	 *            The parameters
-	 * @return A MapList result
-	 * @throws SQLException
-	 */
-	public List<Map<String, Object>> queryForMapList(Connection conn, String sql, Object... params)
-			throws SQLException {
-		return query(conn, sql, new MapListHandler(), params);
-	}
-
-	/**
-	 * Execute a query and wrap result to Map List
-	 * 
-	 * @param sql
-	 *            The SQL String
-	 * @param params
-	 *            The parameters
-	 * @return A MapList result
-	 * @throws SQLException
-	 */
-	public List<Map<String, Object>> queryForMapList(String sql, Object... params) throws SQLException {
-		return query(sql, new MapListHandler(), params);
-	}
-
-	// =======================================================================
-	// Normal style methods but transfer SQLException to DbProRuntimeException
-
-	/**
-	 * Executes the given SELECT SQL query and returns a result object. Transaction
-	 * mode is determined by connectionManager property. Note: this method does not
-	 * close connection
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param sql
-	 *            the SQL
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code>.
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nQuery(Connection conn, ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return (T) query(conn, sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given SELECT SQL query and returns a result object. Transaction
-	 * mode is determined by connectionManager property. Note: this method does not
-	 * close connection
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param preparedSQL
-	 *            The preparedSQL with include SQL, parameters and handlers
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nQuery(Connection conn, PreparedSQL preparedSQL) {
-		return nQuery(conn, preparedSQL.getWrappedHandler(), preparedSQL.getSql(), preparedSQL.getParams());
-	}
-
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen. Note: This method does not close connection.
-	 * 
-	 * @param sql
-	 * @param params
-	 * @return An Object or null, Object type determined by SQL content
-	 */
-	public <T> T nQueryForObject(Connection conn, String sql, Object... params) {
-		return nQuery(conn, new ScalarHandler<T>(1), sql, params);
-	}
-
-	/**
-	 * Execute query and force return a String object, no need catch SQLException.
-	 * Note: This method does not close connection.
-	 */
-	public String nQueryForString(Connection conn, String sql, Object... params) {
-		return String.valueOf(nQueryForObject(conn, sql, params));
-	}
-
-	/**
-	 * Execute query and force return a Long object, no need catch SQLException,
-	 * runtime exception may throw if result can not be cast to long. Note: This
-	 * method does not close connection.
-	 */
-	public long nQueryForLongValue(Connection conn, String sql, Object... params) {
-		try {
-			return queryForLongValue(conn, sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute query and force return a List<Map<String, Object>> type result, no
-	 * need catch SQLException. Note: This method does not close connection.
-	 */
-	public List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... params) {
-		try {
-			return query(conn, sql, new MapListHandler(), params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given INSERT, UPDATE, or DELETE SQL statement. Note: This method
-	 * does not close connection.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return The number of rows updated.
-	 */
-	public int nUpdate(Connection conn, String sql, Object... params) {
-		try {
-			return update(conn, sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given INSERT SQL statement. Note: This method does not close
-	 * connection.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code> of auto-generated keys.
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nInsert(Connection conn, ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return (T) insert(conn, sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which does not
-	 * return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters. Note: This method
-	 * does not close connection.
-	 * <p>
-	 * Use this method when invoking a stored procedure with OUT parameters that
-	 * does not return any result sets.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @return The number of rows updated.
-	 */
-	public int nExecute(Connection conn, String sql, Object... params) {
-		try {
-			return execute(conn, sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which returns one or
-	 * more result sets. Any parameters which are instances of {@link OutParameter}
-	 * will be registered as OUT parameters. Note: This method does not close
-	 * connection.
-	 * 
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
-	 *
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The result set handler
-	 * @param sql
-	 *            the SQL
-	 * @return A list of objects generated by the handler
-	 * 
-	 */
-	public <T> List<T> nExecute(Connection conn, ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return execute(conn, sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which returns one or
-	 * more result sets. Any parameters which are instances of {@link OutParameter}
-	 * will be registered as OUT parameters. Note: This method does not close
-	 * connection.
-	 * 
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
-	 *
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The result set handler
-	 * @param sql
-	 *            the SQL
-	 * @return A list of objects generated by the handler
-	 * 
-	 */
-	public <T> List<T> nExecute(Connection conn, PreparedSQL preparedSQL) {
-		return nExecute(conn, preparedSQL.getWrappedHandler(), preparedSQL.getSql(), preparedSQL.getParams());
-	}
-
-	/**
-	 * Force flush cached SQLs
-	 */
-	public void nBatchFlush() {
-		try {
-			batchFlush();
-		} catch (Exception e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/** Start batch sql */
-	public void nBatchBegin() {
-		try {
-			batchBegin();
-		} catch (Exception e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/** Stop batch sql */
-	public void nBatchEnd() {
-		try {
-			batchEnd();
-		} catch (Exception e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given SELECT SQL query and returns a result object. Transaction
-	 * mode is determined by connectionManager property.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param sql
-	 *            the SQL
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code>.
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nQuery(ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return (T) query(sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given SELECT SQL query and returns a result object. Transaction
-	 * mode is determined by connectionManager property.
-	 * 
-	 * @param preparedSQL
-	 *            The preparedSQL with include SQL, parameters and handlers
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nQuery(PreparedSQL preparedSQL) {
-		return nQuery(preparedSQL.getWrappedHandler(), preparedSQL.getSql(), preparedSQL.getParams());
-	}
-
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen.
-	 * 
-	 * @param sql
-	 * @param params
-	 * @return An Object or null, Object type determined by SQL content
-	 */
-	@Override
-	public <T> T nQueryForObject(String sql, Object... params) {
-		return nQuery(new ScalarHandler<T>(1), sql, params);
-	}
-
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen.
-	 * 
-	 * @param preparedSQL
-	 *            The preparedSQL which included SQL、parameters and handlers(if
-	 *            have)
-	 * @return An Object or null, Object type determined by SQL content
-	 */
-	public <T> T nQueryForObject(PreparedSQL preparedSQL) {
-		ResultSetHandler handler = preparedSQL.getWrappedHandler();
-		if (handler == null)
-			return nQuery(new ScalarHandler<T>(1), preparedSQL.getSql(), preparedSQL.getParams());
-		else
-			return nQuery(handler, preparedSQL.getSql(), preparedSQL.getParams());
-	}
-
-	/**
-	 * Execute query and force return a String object, no need catch SQLException
-	 */
-	public String nQueryForString(String sql, Object... params) {
-		return String.valueOf(nQueryForObject(sql, params));
-	}
-
-	/**
-	 * Execute query and force return a Long object, no need catch SQLException,
-	 * runtime exception may throw if result can not be cast to long
-	 */
-	public long nQueryForLongValue(String sql, Object... params) {
-		try {
-			return queryForLongValue(sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute query and force return a List<Map<String, Object>> type result, no
-	 * need catch SQLException
-	 */
-	public List<Map<String, Object>> nQueryForMapList(String sql, Object... params) {
-		try {
-			return query(sql, new MapListHandler(), params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given INSERT, UPDATE, or DELETE SQL statement. Transaction mode
-	 * is determined by connectionManager property.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return The number of rows updated.
-	 */
-	@Override
-	public int nUpdate(String sql, Object... params) {
-		try {
-			return update(sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given INSERT, UPDATE, or DELETE SQL statement. Transaction mode
-	 * is determined by connectionManager property.
-	 * 
-	 * @param preparedSQL
-	 *            The preparedSQL with include SQL, parameters and handlers
-	 * @return The number of rows updated.
-	 */
-	public int nUpdate(PreparedSQL preparedSQL) {
-		return nUpdate(preparedSQL.getSql(), preparedSQL.getParams());
-	}
-
-	/**
-	 * Executes the given INSERT SQL statement. Transaction mode is determined by
-	 * connectionManager property.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code> of auto-generated keys.
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nInsert(ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return (T) insert(sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which does not
-	 * return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters. Transaction mode
-	 * is determined by connectionManager property.
-	 * <p>
-	 * Use this method when invoking a stored procedure with OUT parameters that
-	 * does not return any result sets.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @return The number of rows updated.
-	 */
-	@Override
-	public int nExecute(String sql, Object... params) {
-		try {
-			return execute(sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which does not
-	 * return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters. Transaction mode
-	 * is determined by connectionManager property.
-	 * <p>
-	 * Use this method when invoking a stored procedure with OUT parameters that
-	 * does not return any result sets.
-	 * 
-	 * @param preparedSQL
-	 *            the preparedSQL include SQL, parameters and Handlers(if have)
-	 * @return The number of rows updated.
-	 */
-	public int nExecute(PreparedSQL preparedSQL) {
-		return nExecute(preparedSQL.getSql(), preparedSQL.getParams());
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which returns one or
-	 * more result sets. Any parameters which are instances of {@link OutParameter}
-	 * will be registered as OUT parameters. Transaction mode is determined by
-	 * connectionManager property.
-	 * 
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
-	 *
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The result set handler
-	 * @param sql
-	 *            the SQL
-	 * @return A list of objects generated by the handler
-	 * 
-	 */
-	public <T> List<T> nExecute(ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return execute(sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
-	 * 
-	 * @param sql
-	 *            The SQL to execute.
-	 * @param params
-	 *            A List of parameter list.
-	 * @return The number of rows updated per statement.
-	 */
-	public int[] nBatch(String sql, List<List<?>> params) {
-		try {
-			return batch(sql, listList2Arrays(params));
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
-	 *
-	 * @param conn
-	 *            The Connection to use to run the query. The caller is responsible
-	 *            for closing this Connection.
-	 * @param sql
-	 *            The SQL to execute.
-	 * @param params
-	 *            A List of parameter list.
-	 * @return The number of rows updated per statement.
-	 */
-	public int[] nBatch(Connection conn, String sql, List<List<?>> params) throws SQLException {
-		try {
-			return batch(conn, sql, listList2Arrays(params));
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given batch of INSERT SQL statements.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param sql
-	 *            The SQL statement to execute.
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code> of auto-generated keys.
-	 * @param params
-	 *            A List of parameter list.
-	 * @return The result generated by the handler.
-	 */
-	public <T> T nInsertBatch(String sql, ResultSetHandler<T> rsh, List<List<?>> params) throws SQLException {
-		try {
-			return insertBatch(sql, rsh, listList2Arrays(params));
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the given batch of INSERT SQL statements.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param conn
-	 *            The connection to use to run the query.
-	 * @param sql
-	 *            The SQL to execute.
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code> of auto-generated keys.
-	 * @param params
-	 *            A List of parameter list.
-	 * @return The result generated by the handler.
-	 */
-	public <T> T nInsertBatch(Connection conn, String sql, ResultSetHandler<T> rsh, List<List<?>> params)
-			throws SQLException {
-		try {
-			return this.insertBatch(conn, sql, rsh, listList2Arrays(params));
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
 		}
 	}
 
@@ -813,7 +137,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public <T> T xQuery(Connection conn, ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) this.query(conn, sp.getSql(), rsh, sp.getParams());
+			return (T) this.query(conn, sp.getSql(), rsh, sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -844,7 +168,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public int xUpdate(Connection conn, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return update(conn, sp.getSql(), sp.getParams());
+			return update(conn, sp.getSql(), sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -866,7 +190,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public <T> T xInsert(Connection conn, ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) insert(conn, sp.getSql(), rsh, sp.getParams());
+			return (T) insert(conn, sp.getSql(), rsh, sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -888,7 +212,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public int xExecute(Connection conn, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return this.execute(conn, sp.getSql(), sp.getParams());
+			return this.execute(conn, sp.getSql(), sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -915,7 +239,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public <T> List<T> xExecute(Connection conn, ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (List<T>) this.execute(conn, sp.getSql(), rsh, sp.getParams());
+			return (List<T>) this.execute(conn, sp.getSql(), rsh, sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -952,8 +276,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 
 	/**
 	 * Executes the Mixed-style(Inline+Template) given SELECT SQL query and returns
-	 * a result object. Transaction mode is determined by connectionManager
-	 * property.
+	 * a result object. property.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -967,7 +290,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public <T> T xQuery(ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) this.query(sp.getSql(), rsh, sp.getParams());
+			return (T) this.query(sp.getSql(), rsh, sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -988,7 +311,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 
 	/**
 	 * Executes the Mixed-style(Inline+Template) given INSERT, UPDATE, or DELETE SQL
-	 * statement. Transaction mode is determined by connectionManager property.
+	 * statement.
 	 * 
 	 * @param templateSQL
 	 *            the SQL template
@@ -997,7 +320,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public int xUpdate(String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return this.update(sp.getSql(), sp.getParams());
+			return this.update(sp.getSql(), sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1005,7 +328,6 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 
 	/**
 	 * Executes the Mixed-style(Inline+Template) given INSERT SQL statement.
-	 * Transaction mode is determined by connectionManager property.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -1019,7 +341,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public <T> T xInsert(ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) insert(sp.getSql(), rsh, sp.getParams());
+			return (T) insert(sp.getSql(), rsh, sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1029,7 +351,6 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	 * Execute an Mixed-style(Inline+Template) SQL statement, including a stored
 	 * procedure call, which does not return any result sets. Any parameters which
 	 * are instances of {@link OutParameter} will be registered as OUT parameters.
-	 * Transaction mode is determined by connectionManager property.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -1041,7 +362,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public int xExecute(String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return this.execute(sp.getSql(), sp.getParams());
+			return this.execute(sp.getSql(), sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1051,7 +372,6 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	 * Execute an Mixed-style(Inline+Template) SQL statement, including a stored
 	 * procedure call, which returns one or more result sets. Any parameters which
 	 * are instances of {@link OutParameter} will be registered as OUT parameters.
-	 * Transaction mode is determined by connectionManager property.
 	 * <p>
 	 * Use this method when: a) running SQL statements that return multiple result
 	 * sets; b) invoking a stored procedure that return result sets and OUT
@@ -1068,7 +388,7 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	public <T> List<T> xExecute(ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (List<T>) this.execute(sp.getSql(), rsh, sp.getParams());
+			return (List<T>) this.execute(sp.getSql(), rsh, sp.getParamArray());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1099,6 +419,602 @@ public class DbPro extends TemplateQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public List<Map<String, Object>> xQueryForMapList(String... templateSQL) {
 		return this.xQuery(new MapListHandler(), templateSQL);
+	}
+
+	// ============================================================================
+
+	/**
+	 * Cache parameters in ThreadLocal and return an empty String
+	 */
+	public static Param param(Object... parameters) {
+		return new Param(Param.PARAM, parameters);
+	}
+
+	/**
+	 * Cache parameters in ThreadLocal and return a "?" String
+	 */
+	public static Param question(Object... parameters) {
+		return new Param(Param.QUESTION_PARAM, parameters);
+	}
+
+	/**
+	 * Create "values(?,?,?...,?)" String according how many SQL parameters be
+	 * cached in ThreadLocal
+	 */
+	public static Param valuesQuesions() {
+		return new Param(Param.VALUES_QUESTIONS);
+	}
+
+	/**
+	 * prepare a PreparedSQL instance by given in-line style SQL
+	 * 
+	 * @param inlineSQL
+	 *            SQL String or Parameters or Connector or ResultSetHandler or
+	 *            ResultSetHandler Class
+	 * @return PreparedSQL instance
+	 */
+	public static PreparedSQL prepareSQL(Object... inlineSQL) {
+		if (inlineSQL == null || inlineSQL.length == 0)
+			throw new DbProRuntimeException("prepareSQL items can not be empty");
+		PreparedSQL result = new PreparedSQL();
+		StringBuilder sqlSB = new StringBuilder();
+		for (Object item : inlineSQL) {
+			if (item == null)
+				throw new DbProRuntimeException("'null' can not added as part of SQL string");
+			else if (item instanceof String)
+				sqlSB.append((String) item);
+			else if (item instanceof PreparedSQL) {
+				return (PreparedSQL) item;
+			} else if (item instanceof Param) {
+				Param p = (Param) item;
+				if (Param.PARAM.equals(p.getType())) {
+					for (Object pm : p.value())
+						result.addParam(pm);
+				} else if (Param.QUESTION_PARAM.equals(p.getType())) {
+					int i = 0;
+					for (Object pm : p.value()) {
+						result.addParam(pm);
+						if (i > 0)
+							sqlSB.append(",");
+						sqlSB.append("?");
+						i++;
+					}
+				} else if (Param.VALUES_QUESTIONS.equals(p.getType())) {
+					sqlSB.append(" values(");
+					for (int i = 0; i < result.getParamSize(); i++) {
+						if (i > 0)
+							sqlSB.append(",");
+						sqlSB.append("?");
+					}
+					sqlSB.append(")");
+				}
+
+			} else if (item instanceof Connection)
+				result.setConnection((Connection) item);
+			else if (item instanceof ResultSetHandler)
+				result.setResultSetHandler((ResultSetHandler) item);
+			else if (item instanceof Class) {
+				Class itemClass = (Class) item;
+				if (ResultSetHandler.class.isAssignableFrom(itemClass))
+					try {
+						result.setResultSetHandler((ResultSetHandler) itemClass.newInstance());
+					} catch (Exception e) {
+						throw new DbProRuntimeException(e);
+					}
+			}
+		}
+		result.setSql(sqlSB.toString());
+		return result;
+	}
+
+	// ======================================================
+	// =============== SQL methods below ====================
+	// ======================================================
+
+	/**
+	 * Executes the in-line style query statement
+	 * 
+	 * @param inlineSQL
+	 *            the in-line style SQL
+	 * @return An object generated by the handler.
+	 */
+	public <T> T iQuery(Object... inlineSQL) {
+		PreparedSQL ps = prepareSQL(inlineSQL);
+		ps.setType(SqlType.QUERY);
+		return (T) runPreparedSQL(ps);
+	}
+
+	/**
+	 * Execute an In-line style query for an Object, only return the first row and
+	 * first column's value if more than one column or more than 1 rows returned
+	 * 
+	 * @param inlineSQL
+	 * @param params
+	 * @return An Object or null value determined by SQL content
+	 */
+	public <T> T iQueryForObject(Object... inlineSQL) {
+		PreparedSQL ps = prepareSQL(inlineSQL);
+		ps.setType(SqlType.SCALAR);
+		return (T) runPreparedSQL(ps);
+	}
+
+	/**
+	 * In-line style execute query and force return a long value, runtime exception
+	 * may throw if result can not be cast to long.
+	 */
+	public long iQueryForLongValue(Object... inlineSQL) {
+		return ((Number) iQueryForObject(inlineSQL)).longValue();// NOSONAR
+	}
+
+	/**
+	 * In-line style execute query and force return a String object.
+	 */
+	public String iQueryForString(Object... inlineSQL) {
+		return String.valueOf(iQueryForObject(inlineSQL));
+	}
+
+	/**
+	 * In-Line style execute query and force return a List<Map<String, Object>> type
+	 * result.
+	 */
+	public List<Map<String, Object>> iQueryForMapList(Object... inlineSQL) {
+		return iQuery(new MapListHandler(), inlineSQL);
+	}
+
+	/**
+	 * Executes the in-line style INSERT, UPDATE, or DELETE statement
+	 * 
+	 * @param inlineSQL
+	 *            the in-line style SQL
+	 * @return The number of rows updated.
+	 */
+	public int iUpdate(Object... inlineSQL) {
+		PreparedSQL ps = prepareSQL(inlineSQL);
+		ps.setType(SqlType.UPDATE);
+		return (Integer) runPreparedSQL(ps);
+	}
+
+	/**
+	 * Executes the in-line style insert statement
+	 * 
+	 * @param inlineSQL
+	 *            the in-line style SQL
+	 * @return An object generated by the handler.
+	 */
+	public int iInsert(Object... inlineSQL) {
+		PreparedSQL ps = prepareSQL(inlineSQL);
+		ps.setType(SqlType.INSERT);
+		return (Integer) runPreparedSQL(ps);
+	}
+
+	/**
+	 * Executes the in-line style execute statement
+	 * 
+	 * @param inlineSQL
+	 *            the in-line style SQL
+	 * @return A list of objects generated by the handler, or number of rows updated
+	 *         if no handler
+	 */
+	public <T> T iExecute(Object... inlineSQL) {
+		PreparedSQL ps = prepareSQL(inlineSQL);
+		ps.setType(SqlType.EXECUTE);
+		return (T) runPreparedSQL(ps);
+	}
+
+	// ===============================Template Style====================
+	/**
+	 * A ThreadLocal variant for temporally store parameter key names which is a
+	 * direct-replace type parameter in current Thread
+	 */
+	protected static ThreadLocal<Set<String>> directReplaceKeysCache = new ThreadLocal<Set<String>>() {
+		@Override
+		protected Set<String> initialValue() {
+			return new HashSet<String>();
+		}
+	};
+
+	// getter && setter ===========
+	public SqlTemplateEngine getSqlTemplateEngine() {
+		return sqlTemplateEngine;
+	}
+
+	/**
+	 * A ThreadLocal variant for temporally store parameter Map in current Thread
+	 */
+	protected static ThreadLocal<Map<String, Object>> templateThreadlocalParamMapCache = new ThreadLocal<Map<String, Object>>() {
+		@Override
+		protected Map<String, Object> initialValue() {
+			return new HashMap<String, Object>();
+		}
+	};
+
+	/**
+	 * Put a name-value pair into ThreadLocal parameter Map, return an empty String
+	 * ""
+	 */
+	public static String put(String name, Object value) {
+		templateThreadlocalParamMapCache.get().put(name, value);
+		return "";
+	}
+
+	/**
+	 * put a name-value into ThreadLocal parameter Map, return an empty String,
+	 * Note: use replace() method the value will directly replace text in template
+	 */
+	public static String replace(String name, Object value) {
+		templateThreadlocalParamMapCache.get().put(name, value);
+		directReplaceKeysCache.get().add(name);
+		return "";
+	}
+
+	/**
+	 * Clear all template ThreadLocal parameters, put a name-value pair into
+	 * ThreadLocal parameter Map, return an empty String ""
+	 */
+	public static String put0(String name, Object value) {
+		clearBind();
+		return put(name, value);
+	}
+
+	/**
+	 * Clear all template ThreadLocal parameters, return an empty String ""
+	 */
+	public static String put0() {
+		clearBind();
+		return "";
+	}
+
+	/**
+	 * Clear all template ThreadLocal parameters, then put a name-value into
+	 * ThreadLocal parameter Map, return an empty String, Note: use replace() method
+	 * the value will directly replace text in template
+	 */
+	public static String replace0(String name, Object value) {
+		clearBind();
+		return replace(name, value);
+	}
+
+	/**
+	 * Clear all template ThreadLocal parameters
+	 */
+	public static void clearBind() {
+		templateThreadlocalParamMapCache.get().clear();
+		directReplaceKeysCache.get().clear();
+	}
+
+	/**
+	 * Build a PreparedSQL instance by given template style SQL and parameters
+	 * stored in ThreadLocal
+	 * 
+	 * @param sqlTemplate
+	 * @return PreparedSQL instance
+	 */
+	protected PreparedSQL templateToSqlAndParams(Map<String, Object> paramMap, String... sqlTemplate) {
+		try {
+			String sql = null;
+			if (sqlTemplate != null) {
+				StringBuilder sb = new StringBuilder("");
+				for (String str : sqlTemplate)
+					sb.append(str);
+				sql = sb.toString();
+			}
+			return sqlTemplateEngine.render(sql, paramMap, null);
+		} finally {
+			clearBind();
+		}
+	}
+
+	// ======================================================
+	// =============== SQL methods below ====================
+	// ======================================================
+
+	/**
+	 * Template style execute SQL query, force return a Long value, runtime
+	 * Exception may throw if result can not cast to long
+	 */
+	public long tQueryForLongValue(String templateSQL, Map<String, Object> paramMap) {
+		return ((Number) tQueryForObject(templateSQL, paramMap)).longValue();// NOSONAR
+	}
+
+	/**
+	 * Template style query and force return a List<Map<String, Object>> type result
+	 */
+	public List<Map<String, Object>> tQueryForMapList(String templateSQL, Map<String, Object> paramMap) {
+		return this.tQuery(new MapListHandler(), templateSQL, paramMap);
+	}
+
+	/**
+	 * Executes the template style given SELECT SQL query and returns a result
+	 * object.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param <T>
+	 *            The type of object that the handler returns
+	 * @param rsh
+	 *            The handler used to create the result object from the
+	 *            <code>ResultSet</code>.
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return An object generated by the handler.
+	 */
+	public <T> T tQuery(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return (T) this.query(sp.getSql(), rsh, sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Executes the template style given INSERT SQL statement.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param <T>
+	 *            The type of object that the handler returns
+	 * @param rsh
+	 *            The handler used to create the result object from the
+	 *            <code>ResultSet</code> of auto-generated keys.
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return An object generated by the handler.
+	 */
+	public <T> T tInsert(Connection conn, ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return (T) insert(conn, sp.getSql(), rsh, sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Executes the template style INSERT, UPDATE, or DELETE statement
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return The number of rows updated.
+	 */
+	public int tUpdate(Connection conn, String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return update(conn, sp.getSql(), sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Template style query and force return a List<Map<String, Object>> type
+	 * result.
+	 */
+	public List<Map<String, Object>> tQueryForMapList(Connection conn, String templateSQL,
+			Map<String, Object> paramMap) {
+		return this.tQuery(conn, new MapListHandler(), templateSQL, paramMap);
+	}
+
+	/**
+	 * Template style execute SQL query, force return a Long value, runtime
+	 * Exception may throw if result can not cast to long.
+	 */
+	public long tQueryForLongValue(Connection conn, String templateSQL, Map<String, Object> paramMap) {
+		return ((Number) tQueryForObject(conn, templateSQL, paramMap)).longValue();// NOSONAR
+	}
+
+	/**
+	 * Executes the template style given SELECT SQL query and returns a result
+	 * object.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param <T>
+	 *            The type of object that the handler returns
+	 * @param rsh
+	 *            The handler used to create the result object from the
+	 *            <code>ResultSet</code>.
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return An object generated by the handler.
+	 */
+	public <T> T tQuery(Connection conn, ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return (T) this.query(conn, sp.getSql(), rsh, sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Execute an SQL Template query for an Object, only return the first row and
+	 * first column's value if more than one column or more than 1 rows returned, a
+	 * null object may return if no result found , DbProRuntimeException may be
+	 * threw if some SQL operation Exception happen.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return An Object or null, Object type determined by SQL content
+	 */
+	public <T> T tQueryForObject(Connection conn, String templateSQL, Map<String, Object> paramMap) {
+		return tQuery(conn, new ScalarHandler<T>(), templateSQL, paramMap);
+	}
+
+	/**
+	 * Template style execute SQL query, force return a String value.
+	 */
+	public String tQueryForString(Connection conn, String templateSQL, Map<String, Object> paramMap) {
+		return String.valueOf(tQueryForObject(conn, templateSQL, paramMap));
+	}
+
+	/**
+	 * Execute an SQL template statement, including a stored procedure call, which
+	 * does not return any result sets. Any parameters which are instances of
+	 * {@link OutParameter} will be registered as OUT parameters.
+	 * 
+	 * Use this method when invoking a stored procedure with OUT parameters that
+	 * does not return any result sets.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param templateSQL
+	 *            the SQL template.
+	 * @return The number of rows updated.
+	 */
+	public int tExecute(Connection conn, String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return this.execute(conn, sp.getSql(), sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Execute an SQL template statement, including a stored procedure call, which
+	 * returns one or more result sets. Any parameters which are instances of
+	 * {@link OutParameter} will be registered as OUT parameters.
+	 * <p>
+	 * Use this method when: a) running SQL statements that return multiple result
+	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * parameters.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param <T>
+	 *            The type of object that the handler returns
+	 * @param rsh
+	 *            The result set handler
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return A list of objects generated by the handler
+	 */
+	public <T> List<T> tExecute(Connection conn, ResultSetHandler rsh, String templateSQL,
+			Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return this.execute(conn, sp.getSql(), rsh, sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Execute an SQL Template query for an Object, only return the first row and
+	 * first column's value if more than one column or more than 1 rows returned, a
+	 * null object may return if no result found , DbProRuntimeException may be
+	 * threw if some SQL operation Exception happen.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return An Object or null, Object type determined by SQL content
+	 */
+	public <T> T tQueryForObject(String templateSQL, Map<String, Object> paramMap) {
+		return tQuery(new ScalarHandler<T>(), templateSQL, paramMap);
+	}
+
+	/** Template style execute SQL query, force return a String value */
+	public String tQueryForString(String templateSQL, Map<String, Object> paramMap) {
+		return String.valueOf(tQueryForObject(templateSQL, paramMap));
+	}
+
+	/**
+	 * Executes the template style given INSERT, UPDATE, or DELETE SQL statement.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return The number of rows updated.
+	 */
+	public int tUpdate(String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return this.update(sp.getSql(), sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Executes the template style given INSERT SQL statement.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param <T>
+	 *            The type of object that the handler returns
+	 * @param rsh
+	 *            The handler used to create the result object from the
+	 *            <code>ResultSet</code> of auto-generated keys.
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return An object generated by the handler.
+	 */
+	public <T> T tInsert(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return (T) insert(sp.getSql(), rsh, sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Execute an SQL template statement, including a stored procedure call, which
+	 * does not return any result sets. Any parameters which are instances of
+	 * {@link OutParameter} will be registered as OUT parameters.
+	 * <p>
+	 * Use this method when invoking a stored procedure with OUT parameters that
+	 * does not return any result sets.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param templateSQL
+	 *            the SQL template.
+	 * @return The number of rows updated.
+	 */
+	public int tExecute(String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return this.execute(sp.getSql(), sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
+	}
+
+	/**
+	 * Execute an SQL template statement, including a stored procedure call, which
+	 * returns one or more result sets. Any parameters which are instances of
+	 * {@link OutParameter} will be registered as OUT parameters.
+	 * <p>
+	 * Use this method when: a) running SQL statements that return multiple result
+	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * parameters.
+	 * 
+	 * @param paramMap
+	 *            The parameters stored in Map
+	 * @param <T>
+	 *            The type of object that the handler returns
+	 * @param rsh
+	 *            The result set handler
+	 * @param templateSQL
+	 *            the SQL template
+	 * @return A list of objects generated by the handler
+	 */
+	public <T> List<T> tExecute(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
+		try {
+			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
+			return this.execute(sp.getSql(), rsh, sp.getParamArray());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
 	}
 
 }

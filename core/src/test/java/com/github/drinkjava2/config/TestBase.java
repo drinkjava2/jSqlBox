@@ -44,7 +44,7 @@ public class TestBase {
 		// dataSource.setMaximumPoolSize(8);
 		// dataSource.setConnectionTimeout(2000);
 		dialect = Dialect.guessDialect(dataSource);
-		//SqlBoxContext.setGlobalAllowShowSql(true);
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 	}
@@ -64,7 +64,6 @@ public class TestBase {
 	public void quietExecuteDDLs(String[] ddls) {
 		for (String sql : ddls) {
 			try {
-				System.out.println(sql);
 				ctx.nExecute(sql);
 			} catch (Exception e) {
 				// do nothing
@@ -80,6 +79,14 @@ public class TestBase {
 		quietExecuteDDLs(ddls);
 
 		ddls = dialect.toCreateDDL(tableModels);
+		quietExecuteDDLs(ddls);
+	}
+
+	/**
+	 * Drop and create database according given tableModels
+	 */
+	public void dropAndCreateDatabase(Class<?>... classes) {
+		String[] ddls = ctx.toDropAndCreateDDL(classes);
 		quietExecuteDDLs(ddls);
 	}
 

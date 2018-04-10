@@ -1,13 +1,11 @@
 package com.github.drinkjava2.helloworld;
 
-import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param;
-import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.param0;
-import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.question;
-import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.question0;
-import static com.github.drinkjava2.jdbpro.inline.InlineQueryRunner.valuesQuesions;
-import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put;
-import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.put0;
-import static com.github.drinkjava2.jdbpro.template.TemplateQueryRunner.replace;
+import static com.github.drinkjava2.jdbpro.DbPro.param;
+import static com.github.drinkjava2.jdbpro.DbPro.put;
+import static com.github.drinkjava2.jdbpro.DbPro.put0;
+import static com.github.drinkjava2.jdbpro.DbPro.question;
+import static com.github.drinkjava2.jdbpro.DbPro.replace;
+import static com.github.drinkjava2.jdbpro.DbPro.valuesQuesions;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -31,7 +29,7 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
-import com.github.drinkjava2.jsqlbox.annotation.Handler;
+import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -57,6 +55,7 @@ public class UsuageAndSpeedTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
+		SqlBoxContext.setGlobalAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(null);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
@@ -189,7 +188,7 @@ public class UsuageAndSpeedTest {
 			this.guess(name, address);
 		};
 
-		@Handler(MapListHandler.class)
+		@Handlers(MapListHandler.class)
 		@Sql("select * from users where name=? and address=?")
 		public List<Map<String, Object>> selectUsers(String name, String address) {
 			return this.guess(name, address);
@@ -311,14 +310,13 @@ public class UsuageAndSpeedTest {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.iExecute("insert into users (", //
-					" name ,", param0("Sam"), //
+					" name ,", param("Sam"), //
 					" address ", param("Canada"), //
 					") ", valuesQuesions());
-			param0("Tom", "China");
-			ctx.iExecute("update users set name=?,address=?");
-			Assert.assertEquals(1L, ctx
-					.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
-			ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
+			ctx.iExecute("update users set name=?,address=?", param("Tom", "China"));
+			Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where name=? and address=?",
+					param("Tom", "China")));
+			ctx.iExecute("delete from users where name=", question("Tom"), " or address=", question("China"));
 		}
 	}
 
@@ -327,14 +325,13 @@ public class UsuageAndSpeedTest {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.iExecute("insert into ", UserAR.USER, " ( ", //
-					UserAR.NAME, ",", param0("Sam"), //
+					UserAR.NAME, ",", param("Sam"), //
 					UserAR.ADDRESS, " ", param("Canada"), //
 					") ", valuesQuesions());
-			param0("Tom", "China");
-			ctx.iExecute("update users set name=?,address=?");
-			Assert.assertEquals(1L, ctx
-					.iQueryForObject("select count(*) from users where name=? and address=?" + param0("Tom", "China")));
-			ctx.iExecute("delete from users where name=", question0("Tom"), " or address=", question("China"));
+			ctx.iExecute("update users set name=?,address=?", param("Tom", "China"));
+			Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where name=? and address=?",
+					param("Tom", "China")));
+			ctx.iExecute("delete from users where name=", question("Tom"), " or address=", question("China"));
 		}
 	}
 
@@ -464,7 +461,7 @@ public class UsuageAndSpeedTest {
 		TextedUser user = new TextedUser();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
-			user.ctx().nUpdate(user.updateAllUserPreSql("Tom", "China"));
+			user.ctx().iUpdate(user.updateAllUserPreSql("Tom", "China"));
 			// List<Map<String, Object>> users = user.selectUsersByText("Tom", "China");
 			// Assert.assertEquals(1, users.size());
 			List<TextedUser> users2 = user.selectUsersByText2("Tom", "China");
@@ -481,7 +478,7 @@ public class UsuageAndSpeedTest {
 		AbstractUser user = ActiveRecord.create(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
-			user.ctx().nUpdate(user.updateUserPreparedSQL("Tom", "China"));
+			user.ctx().iUpdate(user.updateUserPreparedSQL("Tom", "China"));
 			// List<Map<String, Object>> users = user.selectUserListMap("Tom", "China");
 			// Assert.assertEquals(1, users.size());
 			List<AbstractUser> users2 = user.selectAbstractUserList("Tom", "China");

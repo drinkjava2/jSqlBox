@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 
 /**
  * BasicSqlTemplate is a simple implementation of SqlTemplateEngine. It allow
@@ -191,7 +191,8 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 							directRep, key);
 					boolean hasValue = paramMap.containsKey(key);
 					if (!hasValue)
-						throwEX("No parameter found for '" + key + "' in template: " + template+". Current params="+paramMap);
+						throwEX("No parameter found for '" + key + "' in template: " + template + ". Current params="
+								+ paramMap);
 					if (directReplaceType) {
 						sql.append(paramMap.get(key));
 					} else {
@@ -213,7 +214,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		PreparedSQL sp = new PreparedSQL();
 		sql.setLength(sql.length() - 1);
 		sp.setSql(sql.toString());
-		sp.setParams(paramList.toArray(new Object[paramList.size()]));
+		sp.setListParams(paramList);
 		return sp;
 	}
 

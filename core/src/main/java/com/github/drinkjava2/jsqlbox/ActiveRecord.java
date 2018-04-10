@@ -13,7 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -49,7 +49,37 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public class ActiveRecord implements ActiveRecordSupport {
+	private static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
+
 	private static ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
+
+	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
+	public static SqlBoxContext gctx() {
+		return SqlBoxContext.getGlobalSqlBoxContext();
+	}
+
+	/**
+	 * Create a subClass instance of a abstract ActiveRecord class
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T create(Class<?> abstractClass) {
+		Class<?> childClass = ActiveRecordUtils.createChildClass(abstractClass);
+		try {
+			return (T) childClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+	}
+
+	/**
+	 * Create a subClass instance of a abstract ActiveRecord class and set it's
+	 * SqlBoxContext property
+	 */
+	public static <T> T create(SqlBoxContext ctx, Class<?> abstractClass) {
+		T entity = create(abstractClass);
+		SqlBoxUtils.findAndBindSqlBox(ctx, entity);
+		return entity;
+	}
 
 	SqlBox box;
 
@@ -112,18 +142,12 @@ public class ActiveRecord implements ActiveRecordSupport {
 		box().setContext(ctx);
 	}
 
-	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
-	public static SqlBoxContext gctx() {
-		return SqlBoxContext.getGlobalSqlBoxContext();
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T insert() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException(
-					"No default global SqlBoxContext found, please use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.");
+			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		ctx.insert(this);
 		return (T) this;
 	}
@@ -133,7 +157,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public <T> T update() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException("No default global SqlBoxContext be set.");
+			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		ctx.update(this);
 		return (T) this;
 	}
@@ -142,7 +166,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public void delete() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException("No default global SqlBoxContext be set. ");
+			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		ctx.delete(this);
 	}
 
@@ -150,7 +174,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public <T> T load(Object pkey) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException("No default global SqlBoxContext be set.  ");
+			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx.load(this.getClass(), pkey);
 	}
 
@@ -209,29 +233,6 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public PreparedSQL guessPreparedSQL(Object... params) {
 		return ActiveRecordUtils.doGuessPreparedSQL(this, params);
-	}
-
-	/**
-	 * Create a subClass instance of a abstract ActiveRecord class
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T create(Class<?> abstractClass) {
-		Class<?> childClass = ActiveRecordUtils.createChildClass(abstractClass);
-		try {
-			return (T) childClass.newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
-	}
-
-	/**
-	 * Create a subClass instance of a abstract ActiveRecord class and set it's
-	 * SqlBoxContext property
-	 */
-	public static <T> T create(SqlBoxContext ctx, Class<?> abstractClass) {
-		T entity = create(abstractClass);
-		SqlBoxUtils.findAndBindSqlBox(ctx, entity);
-		return entity;
 	}
 
 }

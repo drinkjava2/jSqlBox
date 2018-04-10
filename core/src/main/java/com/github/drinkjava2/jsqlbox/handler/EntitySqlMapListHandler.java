@@ -13,10 +13,10 @@ package com.github.drinkjava2.jsqlbox.handler;
 
 import java.util.List;
 
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
-
-import com.github.drinkjava2.jdbpro.handler.AroundSqlHandler;
+import com.github.drinkjava2.jdbpro.DbPro;
+import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
@@ -38,7 +38,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntitySqlMapListHandler extends MapListHandler implements AroundSqlHandler {
+public class EntitySqlMapListHandler implements SqlHandler {
 	protected Object[] netConfigObjects;
 	protected TableModel[] generatedTableModels;
 
@@ -47,12 +47,10 @@ public class EntitySqlMapListHandler extends MapListHandler implements AroundSql
 	}
 
 	@Override
-	public String handleSql(QueryRunner query, String sql, Object... params) {
-		return explainNetQuery((SqlBoxContext) query, sql);
-	}
-
-	@Override
-	public Object handleResult(QueryRunner query, Object result) {
+	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
+		String sql = explainNetQuery((SqlBoxContext) runner, ps.getSql());
+		ps.setSql(sql);
+		Object result = runner.runPreparedSQL(ps);
 		if (result != null && result instanceof List<?>) {
 			if (generatedTableModels == null)
 				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
@@ -62,8 +60,8 @@ public class EntitySqlMapListHandler extends MapListHandler implements AroundSql
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -142,8 +140,8 @@ public class EntitySqlMapListHandler extends MapListHandler implements AroundSql
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
