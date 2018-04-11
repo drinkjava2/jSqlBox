@@ -28,32 +28,27 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * EntityMapListHandler is used to explain alias.** to real columns in SQL,
- * example: select u.** from users u ==> select u.name, u.address, u.age from
- * users u
+ * DStarMapListHandler is a SqlHandler used to explain alias.** to real columns
+ * in SQL, example:
  * 
- * And return and bind the netConfigObjects to result Map List
+ * select u.** from users u ==> select u.name, u.address, u.age from users u
+ * 
+ * And return a Map List
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityMapListHandler extends StarStarHandler {
+public class SSMapListHandler extends SSHandler {
 
-	public EntityMapListHandler(Object... netConfigObjects) {
+	public SSMapListHandler(Object... netConfigObjects) {
 		super(netConfigObjects);
 	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
-		Object result = super.handle(runner, ps);
-		if (result != null && result instanceof List<?>) {
-			if (generatedTableModels == null)
-				throw new SqlBoxException("Can not bind null generatedTableModels to list result");
-			EntityNetUtils.bindTableModel(result, generatedTableModels);
-		}
-		return result;
+		return super.handle(runner, ps);
 	}
 
 }

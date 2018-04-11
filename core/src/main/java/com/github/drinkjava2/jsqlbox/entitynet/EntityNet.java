@@ -40,11 +40,11 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * Some benefits to use a graph database than relational database:<br/>
  * 1) No need write complicated join SQLs. <br/>
  * 2) Working in memory, much quicker browse speed between connected nodes than
- * access database stored on hard disk. <br/>
- * 3) Can use pure Java language do browse search.
+ * access database tables stored on hard disk. <br/>
+ * 3) Can use pure Java language do browsing search.
  * 
  * EntityNet class is not thread safe. If want use it as a global cache,
- * programmer need use synchronized method to serialize access it, like use a
+ * programmer need use synchronized method to serialize write it, like use a
  * HashMap in multiple threads environment.
  * 
  * @author Yong Zhu

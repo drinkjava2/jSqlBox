@@ -28,7 +28,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
  * Store some public static methods for ActiveRecord
@@ -36,7 +36,6 @@ import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
  * @author Yong Zhu
  * @since 1.0.1
  */
-@SuppressWarnings({ "unchecked" })
 public abstract class ActiveRecordUtils extends ClassCacheUtils {
 	private ActiveRecordUtils() {
 		// private Constructor
@@ -167,7 +166,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		String methodType = method.getGenericReturnType().toString();
 		if (sql.indexOf(".**") > -1) {
 			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
-				ps.addSqlHandler(new EntityMapListHandler(entity.getClass()));
+				ps.addSqlHandler(new SSMapListHandler(entity.getClass()));
 			else if (methodType.startsWith("java.util.List"))
 				ps.addSqlHandler(new EntityListHandler(entity.getClass()));
 		} else {

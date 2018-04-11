@@ -12,33 +12,44 @@
 package com.github.drinkjava2.jsqlbox.handler;
 
 import java.util.List;
+import java.util.Map;
 
+import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SingleTonHandlers;
+import com.github.drinkjava2.jdbpro.SqlHandler;
+import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * EntityNetHandler is a SqlHandler used explain the Entity query SQL (For
- * example 'select u.** from users u') and return a EntityNet instance
+ * SSMapListWrapHandler is a SqlHandler used to explain alias.** to real columns
+ * in SQL, example:
+ * 
+ * select u.** from users u ==> select u.name, u.address, u.age from users u
+ * 
+ * And return and bind the netConfigObjects to result Map List
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityNetHandler extends SSMapListHandler {
+public class SSMapListWrapHandler extends SSHandler {
 
-	public EntityNetHandler(Object... netConfigObjects) {
+	public SSMapListWrapHandler(Object... netConfigObjects) {
 		super(netConfigObjects);
 	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		Object result = super.handle(runner, ps);
-		if (result != null && result instanceof List<?>) {
-			if (config == null)
-				throw new SqlBoxException("Can not build netConfig for Map List result");
-		}
-		return ((SqlBoxContext) runner).netCreate((List) result, this.config);
+		ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
+		return new MapListWrap( (List<Map<String, Object>>) super.handle(runner, ps), config);
 	}
+
 }

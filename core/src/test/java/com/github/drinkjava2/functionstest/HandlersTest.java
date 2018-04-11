@@ -39,7 +39,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
-import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
@@ -146,14 +146,14 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testEntityMapListHandler() {
-		List<Map<String, Object>> result = ctx.eQuery(new EntityMapListHandler(DemoUser.class),
+		List<Map<String, Object>> result = ctx.eQuery(new SSMapListHandler(DemoUser.class),
 				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 99);
 	}
 
 	@Test
 	public void testPaginHandler() {
-		List<Map<String, Object>> result = ctx.eQuery(new EntityMapListHandler(DemoUser.class),
+		List<Map<String, Object>> result = ctx.eQuery(new SSMapListHandler(DemoUser.class),
 				new PaginHandler(2, 5), "select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 5);
 

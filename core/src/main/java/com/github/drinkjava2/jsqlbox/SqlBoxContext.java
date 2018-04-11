@@ -23,6 +23,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
+import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 
 /**
  * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
@@ -42,9 +43,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	private static Dialect globalDialect = null;
 
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
-	 * use setDialect() method to change to other dialect, to keep thread-safe, only
-	 * subclass can access this variant
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
+	 * can use setDialect() method to change to other dialect, to keep
+	 * thread-safe, only subclass can access this variant
 	 */
 	protected Dialect dialect;
 
@@ -60,7 +61,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	public SqlBoxContext(SqlBoxContextConfig config) {
-		super(); 
+		super();
 		this.connectionManager = config.getConnectionManager();
 		this.dialect = config.getDialect();
 		this.sqlTemplateEngine = config.getTemplateEngine();
@@ -152,8 +153,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
-	 * loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to
+	 * improve loading speed
 	 */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, true, configObjects);
@@ -161,21 +162,29 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** Create a EntityNet by given list and netConfigs */
 	public EntityNet netCreate(List<Map<String, Object>> listMap, Object... configObjects) {
-		TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
+		TableModel[] result = EntityNetUtils.objectConfigsToModels(this, configObjects);
 		if (result == null || result.length == 0)
 			throw new SqlBoxException("No entity class config found");
 		return EntityNetFactory.createEntityNet(listMap, result);
 	}
 
+	/** Create a EntityNet by given list and netConfigs */
+	public EntityNet netCreate(MapListWrap mapListWrap) {
+		if (mapListWrap.getConfig() == null || mapListWrap.getConfig().length == 0)
+			throw new SqlBoxException("No entity class config found");
+		return EntityNetFactory.createEntityNet(mapListWrap.getMapList(), mapListWrap.getConfig());
+	}
+
 	/** Join list and netConfigs to existed EntityNet */
 	@SuppressWarnings("unchecked")
 	public <T> T netJoinList(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
-		try {
-			TableModel[] result = EntityNetUtils.joinConfigsModels(this, listMap, configObjects);
-			return (T) net.addMapList(listMap, result);
-		} finally {
-			EntityNetUtils.removeBindedTableModel(listMap);
-		}
+		TableModel[] result = EntityNetUtils.objectConfigsToModels(this, configObjects);
+		return (T) net.addMapList(listMap, result);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T netJoinList(EntityNet net, MapListWrap mapListWrap) {
+		return (T) net.addMapList(mapListWrap.getMapList(), mapListWrap.getConfig());
 	}
 
 	/** Add an entity to existed EntityNet */
@@ -216,8 +225,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
-	 * and bind on entityBean
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new
+	 * one and bind on entityBean
 	 */
 	public SqlBox getSqlBox(Object entityBean) {
 		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);

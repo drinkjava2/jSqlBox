@@ -17,7 +17,7 @@ import java.util.Map;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
  * This is a EntityNetFactory implementation to create a TinyEntityNet
@@ -35,14 +35,14 @@ public abstract class EntityNetFactory {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance, load data from database buy given loadKeyOnly
-	 * and configObjects parameters
+	 * Create a EntityNet instance, load data from database buy given
+	 * loadKeyOnly and configObjects parameters
 	 * 
 	 * @param ctx
 	 *            A SqlBoxContext instance
 	 * @param loadKeyOnly
-	 *            If true will only load PKey and FKeys field, otherwise load all
-	 *            columns
+	 *            If true will only load PKey and FKeys field, otherwise load
+	 *            all columns
 	 * @param configObjects
 	 *            netConfigs array, can be entity class, entity, SqlBox or
 	 *            TableModel instance
@@ -59,12 +59,8 @@ public abstract class EntityNetFactory {// NOSONAR
 			String alias = t.getAlias();
 			if (StrUtils.isEmpty(alias))
 				alias = t.getTableName();
-			try {
-				mapList = ctx.iQuery(new EntityMapListHandler(t),
-						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
-			} finally {
-				EntityNetUtils.removeBindedTableModel(mapList);
-			}
+			mapList = ctx.iQuery(new SSMapListHandler(t),
+					"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
 			net.addMapList(mapList, t);
 		}
 		return net;

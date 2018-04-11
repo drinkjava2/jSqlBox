@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jdbpro.handler;
 
+import java.util.Arrays;
+
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlHandler;
@@ -26,7 +28,7 @@ public class PrintSqlHandler implements SqlHandler {
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		System.out.println("SQL: " + ps.getSql());// NOSONAR
-		System.out.println("Param:" + ps.getParamList());// NOSONAR
+		System.out.println("Param:" + Arrays.deepToString(ps.getParamArray()));// NOSONAR
 		return runner.runPreparedSQL(ps);
 	}
 }

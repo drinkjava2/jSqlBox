@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
+import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
@@ -23,7 +25,9 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Node;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListWrapHandler;
 
 public class EntityNetQueryTest extends TestBase {
 	@Before
@@ -55,11 +59,9 @@ public class EntityNetQueryTest extends TestBase {
 		List<User> users = net.getAllEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
-		User u = new User();
-		u.tableModel().setAlias("u");
-		List<Map<String, Object>> listMap = ctx.eQuery(new EntityMapListHandler(u),
+		List<Map<String, Object>> listMap = ctx.eQuery(MapListHandler.class,
 				"select u.id as u_id, u.userName as u_userName from usertb as u");
-		ctx.netJoinList(net, listMap);// not userName be joined
+		ctx.netJoinList(net, listMap, new User().alias("u"));// userName joined
 
 		Assert.assertEquals(2, net.size());
 		users = net.getAllEntityList(User.class);
@@ -74,15 +76,18 @@ public class EntityNetQueryTest extends TestBase {
 		new Email().putFields("id", "emailName", "userId");
 		new Email().putValues("e1", "email1", "u1").insert();
 		new Email().putValues("e2", "email2", "u1").insert();
-		List<Map<String, Object>> listMap = ctx.eQuery(new EntityMapListHandler(new Email().alias("e")),
+
+		MapListWrap wrap = ctx.eQuery(new SSMapListWrapHandler(new Email().alias("e")),
 				"select e.id as e_id from emailtb e");
-		EntityNet net = (EntityNet) ctx.netCreate(listMap);
+		System.out.println(wrap.getMapList());
+		System.out.println(DebugUtils.getTableModelsDebugInfo(wrap.getConfig()));
+
+		EntityNet net = (EntityNet) ctx.netCreate(wrap);
 		Assert.assertEquals(2, net.size());
 		Node emailNode = net.getOneNode(Email.class, "e1");
 		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId
-															// field
 
-		List<Map<String, Object>> listMap2 = ctx.eQuery(new EntityMapListHandler(Email.class),
+		List<Map<String, Object>> listMap2 = ctx.eQuery(new SSMapListHandler(Email.class),
 				"select e.** from emailtb e");
 		ctx.netJoinList(net, listMap2);
 

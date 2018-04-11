@@ -11,9 +11,12 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
+import java.util.Arrays;
+
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlHandler;
+import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
@@ -24,7 +27,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * StarStarHandler is used to explain alias.** to real columns in SQL, example:
+ * SSHandler is used to explain alias.** to real columns in SQL, example:
  * 
  * select u.** from users u ==> select u.name, u.address, u.age from users u
  * 
@@ -34,11 +37,11 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class StarStarHandler implements SqlHandler {
-	protected Object[] netConfigObjects;
-	protected TableModel[] generatedTableModels;
+public class SSHandler implements SqlHandler {
+	protected Object[] netConfigObjects; // The input config objects
+	protected TableModel[] config; // the real config tableModels
 
-	public StarStarHandler(Object... netConfigObjects) {
+	public SSHandler(Object... netConfigObjects) {
 		this.netConfigObjects = netConfigObjects;
 	}
 
@@ -190,7 +193,7 @@ public class StarStarHandler implements SqlHandler {
 			if (pos < 0)
 				pos = sql.indexOf(".##");
 		}
-		generatedTableModels = configModels;
+		config = configModels;
 		return sql;
 	}
 

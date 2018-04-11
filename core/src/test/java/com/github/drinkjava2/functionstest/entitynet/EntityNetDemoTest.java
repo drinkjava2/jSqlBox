@@ -16,15 +16,16 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
-import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
-import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListWrapHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
+import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 
 public class EntityNetDemoTest extends TestBase {
 	@Before
@@ -33,6 +34,7 @@ public class EntityNetDemoTest extends TestBase {
 		// ctx.setAllowShowSQL(true);
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
+		// Dialect.setGlobalAllowShowSql(true);
 		Dialect.setGlobalAllowReservedWords(true);
 		dropAndCreateDatabase(models);
 	}
@@ -129,7 +131,7 @@ public class EntityNetDemoTest extends TestBase {
 	 */
 	@Test
 	public void testEntityCrudWithTransientAnnotation() {
-		System.out.println(DebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(User.class)));
+		// System.out.println(DebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(User.class)));
 
 		new User().put("id", "u1").put("userName", "user1").insert();
 		Assert.assertEquals(1, ctx.nQueryForLongValue("select count(*) from usertb"));
@@ -151,8 +153,8 @@ public class EntityNetDemoTest extends TestBase {
 		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path("S-", User.class).where("id='u1' or id='u2'").nextPath("C-", UserRole.class, "userId")
-						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
-						.nextPath("P+", Privilege.class, "pid"));
+						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid").nextPath("P+",
+								Privilege.class, "pid"));
 		for (Privilege privilege : privileges)
 			System.out.print(privilege.getId() + " ");
 		Assert.assertEquals(3, privileges.size());
@@ -251,24 +253,20 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testManualLoadAndJoin() {
 		insertDemoData();
-		List<Map<String, Object>> mapList1 = ctx.eQuery(new EntityMapListHandler(User.class, Address.class),
+		EntityNet net = ctx.eQuery(new EntityNetHandler(User.class, Address.class),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
-
-		EntityNet net = ctx.netCreate(mapList1);
 		Assert.assertEquals(10, net.size());
 
-		Email e = new Email();
-		e.alias("e");
-		List<Map<String, Object>> mapList2 = ctx.eQuery(new EntityMapListHandler(e),
+		List<Map<String, Object>> mapList2 = ctx.eQuery(new SSMapListHandler(Email.class),
 				"select e.id as e_id from emailtb as e");
-		ctx.netJoinList(net, mapList2);
+		ctx.netJoinList(net, mapList2, new Email().alias("e"));
 		Assert.assertEquals(15, net.size());
 
-		List<Map<String, Object>> mapList3 = ctx.eQuery(
-				new EntityMapListHandler(Role.class, UserRole.class, RolePrivilege.class, Privilege.class),
+		MapListWrap wrap = ctx.eQuery(
+				new SSMapListWrapHandler(Role.class, UserRole.class, RolePrivilege.class, Privilege.class),
 				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
-		Assert.assertEquals(900, mapList3.size());
-		ctx.netJoinList(net, mapList3);
+		Assert.assertEquals(900, wrap.getMapList().size());
+		ctx.netJoinList(net, wrap);
 		Assert.assertEquals(37, net.size());
 	}
 

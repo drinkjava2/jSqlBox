@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -39,92 +38,9 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
  */
 public class EntityNetUtils {
 
-	public static final ThreadLocal<WeakHashMap<Object, Object>> netConfigBindToListCache = new ThreadLocal<WeakHashMap<Object, Object>>() {
-		@Override
-		protected WeakHashMap<Object, Object> initialValue() {
-			return new WeakHashMap<Object, Object>();
-		}
-	};
-
-	public static void removeBindedTableModel(List<?> listMap) {
-		netConfigBindToListCache.get().remove(listMap);
-	}
-
-	public static TableModel[] getBindedTableModel(List<?> listMap) {
-		return (TableModel[]) netConfigBindToListCache.get().get(listMap);
-	}
-
-	public static void bindTableModel(Object listMap, TableModel[] tableModels) {
-		netConfigBindToListCache.get().put(listMap, tableModels);
-	}
-
 	/**
-	 * After a query, listMap may binded a threadLocal type TableModel[] netConfigs,
-	 * this method used to join the binded tableModels with given configObjects,
-	 * return a new TableModel[],
-	 */
-	public static TableModel[] joinConfigsModels(SqlBoxContext ctx, List<Map<String, Object>> listMap,
-			Object... configObjects) {
-		// bindeds: tableModels entityClass and alias may be empty
-		// given: tableModels should have entityClass, alias may be null
-		TableModel[] bindeds = getBindedTableModel(listMap);
-		removeBindedTableModel(listMap);
-		if (bindeds == null || bindeds.length == 0)
-			bindeds = new TableModel[0];
-
-		TableModel[] givens;
-		if (configObjects != null && configObjects.length > 0)
-			givens = objectConfigsToModels(ctx, configObjects);
-		else
-			givens = new TableModel[0];
-
-		return EntityNetUtils.jointConfigModels(bindeds, givens);
-	}
-
-	public static TableModel[] jointConfigModels(TableModel[] bindeds, TableModel[] givens) {
-		// check setted to avoid user set empty value to TableModel
-		Map<String, TableModel> uses = new HashMap<String, TableModel>();
-		for (TableModel tb : givens) {
-			SqlBoxException.assureNotNull(tb.getEntityClass(),
-					"EntityClass setting can not be null for '" + tb.getTableName() + "'");
-			SqlBoxException.assureNotEmpty(tb.getTableName(),
-					"TableName setting can not be empty for '" + tb.getTableName() + "'");
-			uses.put(tb.getTableName().toLowerCase(), tb);
-		}
-
-		for (TableModel tb : bindeds) {
-			SqlBoxException.assureNotEmpty(tb.getTableName(),
-					"TableName setting can not be empty for '" + tb.getTableName() + "'");
-			TableModel exist = uses.get(tb.getTableName().toLowerCase());
-			if (tb.getEntityClass() != null) {// it's binded by has entityClass
-				if (exist == null)
-					uses.put(tb.getTableName().toLowerCase(), tb);
-				else // exist and current tb both can use, duplicated
-					throw new SqlBoxException("Duplicated entityClass setting for '" + tb.getTableName() + "'");
-			}
-		}
-
-		for (TableModel tb : bindeds) { // use alias to fill
-			TableModel exist = uses.get(tb.getTableName().toLowerCase());
-			if (exist != null && tb.getEntityClass() == null) {// it's binded by
-																// has
-																// entityClass
-				String alias = tb.getAlias();
-				if (!StrUtils.isEmpty(alias) && StrUtils.isEmpty(exist.getAlias()))
-					exist.setAlias(alias);
-			}
-		}
-		TableModel[] result = new TableModel[uses.size()];
-		int i = 0;
-		for (Entry<String, TableModel> entry : uses.entrySet()) {
-			result[i++] = entry.getValue();
-		}
-		return result;
-	}
-
-	/**
-	 * If nodeValidator is object, return it, otherwise it is a NodeValidator class,
-	 * build a new instance as return
+	 * If nodeValidator is object, return it, otherwise it is a NodeValidator
+	 * class, build a new instance as return
 	 */
 	@SuppressWarnings("unchecked")
 	public static NodeValidator getOrBuildValidator(Object nodeValidator) {
@@ -154,7 +70,8 @@ public class EntityNetUtils {
 	}
 
 	/**
-	 * Check if each TableModel has entityClass and Alias, if no, throw exception
+	 * Check if each TableModel has entityClass and Alias, if no, throw
+	 * exception
 	 */
 	public static void checkModelHasEntityClassAndAlias(TableModel... models) {
 		if (models != null && models.length > 0)// Join models
@@ -304,8 +221,8 @@ public class EntityNetUtils {
 	}
 
 	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
-	 * or entity Bean
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance,
+	 * entityClass or entity Bean
 	 * 
 	 * <pre>
 	 * 1. TableModel instance, will use it

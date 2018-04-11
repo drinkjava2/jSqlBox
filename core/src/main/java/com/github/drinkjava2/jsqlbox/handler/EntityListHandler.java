@@ -20,29 +20,29 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
- * EntityListHandler is the AroundSqlHandler used explain the Entity query sql
- * (For example 'select u.** from users u') and return a List<Entity> instance
+ * EntityListHandler is the SqlHandler used explain the Entity query SQL (For
+ * example 'select u.** from users u') and return a List<Entity> instance
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityListHandler implements SqlHandler {
-	protected final EntityMapListHandler entityMapListHandler;
+public class EntityListHandler extends EntityNetHandler {
 	protected final Class<?> targetClass;
 
 	public EntityListHandler(Class<?> targetClass, Object... netConfigObjects) {
+		super(netConfigObjects);
 		this.targetClass = targetClass;
-		if (netConfigObjects == null || netConfigObjects.length == 0)
-			this.entityMapListHandler = new EntityMapListHandler(targetClass);
-		else
-			this.entityMapListHandler = new EntityMapListHandler(netConfigObjects);
+	}
+
+	public EntityListHandler(Class<?> targetClass) {
+		super(targetClass);
+		this.targetClass = targetClass;
 	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		Object obj = entityMapListHandler.handle(runner, ps);
-		EntityNet net = ((SqlBoxContext) runner).netCreate((List) obj);
+		EntityNet net = (EntityNet) super.handle(runner, ps);
 		return net.getAllEntityList(targetClass);
 	}
 

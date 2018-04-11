@@ -31,7 +31,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
-import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
 import activerecordtext.AbstractUser;
@@ -56,7 +55,7 @@ public class UsuageAndSpeedTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-		//SqlBoxContext.setGlobalAllowShowSql(true);
+		// SqlBoxContext.setGlobalAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(null);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
@@ -77,7 +76,7 @@ public class UsuageAndSpeedTest {
 		REPEAT_TIMES = 20;// warm up
 		runTestMethods();
 		PRINT_TIMEUSED = true;
-		REPEAT_TIMES = 10;
+		REPEAT_TIMES = 100000;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 		runTestMethods();
 		PRINT_TIMEUSED = false;
@@ -86,9 +85,10 @@ public class UsuageAndSpeedTest {
 
 	private void runTestMethods() throws Exception {
 		runMethod("pureJdbc");
-		runMethod("dbUtilsWithConnMethod");
-		runMethod("dbUtilsNoConnMethod");
+		runMethod("xxxxStyle_withConnection");
+		runMethod("xxxxStyle");
 		runMethod("nXxxStyle");
+		runMethod("eXxxStyle");
 		runMethod("iXxxStyle");
 		runMethod("tXxxStyle");
 		runMethod("xXxxStyle");
@@ -96,8 +96,8 @@ public class UsuageAndSpeedTest {
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
 		runMethod("activeRecordDefaultContext");
-		runMethod("sqlMapperSqlAnnotaion");
 		runMethod("sqlMapperUseText");
+		runMethod("sqlMapperSqlAnnotaion");
 		runMethod("abstractSqlMapperUseText");
 	}
 
@@ -255,7 +255,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void dbUtilsWithConnMethod() {
+	public void xxxxStyle_withConnection() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			Connection conn = null;
@@ -279,7 +279,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void dbUtilsNoConnMethod() {
+	public void xxxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			try {
@@ -307,13 +307,11 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void sXxxStyle() {
+	public void eXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.eExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 			ctx.eExecute("update users set name=?, address=?", "Tom", "China");
-			List<Map<String, Object>> users = ctx.eQueryForMapList("select * from users", new PaginHandler(1, 10));
-			Assert.assertEquals(1L, users.size());
 			Assert.assertEquals(1L,
 					ctx.eQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
 			ctx.eExecute("delete from users where name=? or address=?", "Tom", "China");
@@ -343,10 +341,10 @@ public class UsuageAndSpeedTest {
 					UserAR.NAME, ",", param("Sam"), //
 					UserAR.ADDRESS, " ", param("Canada"), //
 					") ", valuesQuesions());
-			ctx.iExecute("update users set name=?,address=?", param("Tom", "China"));
-			Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where name=? and address=?",
-					param("Tom", "China")));
-			ctx.iExecute("delete from users where name=", question("Tom"), " or address=", question("China"));
+			ctx.iExecute("delete from users where ", //
+					UserAR.NAME, "=", question("Sam"), //
+					" or ", UserAR.ADDRESS, "=", question("Canada")//
+			);
 		}
 	}
 
@@ -476,6 +474,22 @@ public class UsuageAndSpeedTest {
 		TextedUser user = new TextedUser();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
+			user.ctx().eUpdate(user.updateAllUserPreSql("Tom", "China"));
+			List<Map<String, Object>> u1 = user.selectUsersMapListByText("Tom", "China");
+			Assert.assertEquals(1, u1.size()); 
+			user.deleteUsers("Tom", "China");
+			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from users"));
+		}
+	}
+
+
+	@Test
+	public void sqlMapperUseText2() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
+		TextedUser user = new TextedUser();
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			user.insertOneUser("Sam", "Canada");
 			user.ctx().iUpdate(user.updateAllUserPreSql("Tom", "China"));
 			List<Map<String, Object>> u1 = user.selectUsersMapListByText("Tom", "China");
 			Assert.assertEquals(1, u1.size());
@@ -493,7 +507,7 @@ public class UsuageAndSpeedTest {
 			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from users"));
 		}
 	}
-
+	
 	@Test
 	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
