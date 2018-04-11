@@ -28,7 +28,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * StarStarMapListHandler is used to explain alias.** to real columns in SQL,
+ * EntityMapListHandler is used to explain alias.** to real columns in SQL,
  * example: select u.** from users u ==> select u.name, u.address, u.age from
  * users u
  * 
@@ -38,9 +38,9 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class StarStarMapListHandler extends StarStarHandler {
+public class EntityMapListHandler extends StarStarHandler {
 
-	public StarStarMapListHandler(Object... netConfigObjects) {
+	public EntityMapListHandler(Object... netConfigObjects) {
 		super(netConfigObjects);
 	}
 

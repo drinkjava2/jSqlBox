@@ -28,7 +28,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.StarStarMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
 
 /**
  * Store some public static methods for ActiveRecord
@@ -153,7 +153,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (useTemplate)
 			ps.setTemplateParams(buildParamMap(callerClassName, callerMethodName, params));
 		else
-			ps.setParams(params);
+			ps.setParamArray(params);
 		autoGuessHandler(entity, ps, sql, callerMethod); // guess handler
 		return (T) entity.ctx().runPreparedSQL(ps);
 	}
@@ -167,7 +167,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		String methodType = method.getGenericReturnType().toString();
 		if (sql.indexOf(".**") > -1) {
 			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
-				ps.addSqlHandler(new StarStarMapListHandler(entity.getClass()));
+				ps.addSqlHandler(new EntityMapListHandler(entity.getClass()));
 			else if (methodType.startsWith("java.util.List"))
 				ps.addSqlHandler(new EntityListHandler(entity.getClass()));
 		} else {
@@ -216,7 +216,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
 		PreparedSQL sp = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
-		sp.setParams(params);
+		sp.setParamArray(params);
 		return sp;
 	}
 

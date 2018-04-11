@@ -110,7 +110,7 @@ public class ActiveRecordDemoTest {
 
 		Assert.assertEquals(100L, ((Number) ctx.nQueryForObject("select count(*) from users")).longValue());
 
-		List<Map<String, Object>> users = ctx.nQuery(new MapListHandler(),
+		List<Map<String, Object>> users = ctx.eQuery(new MapListHandler(),
 				ctx.pagin(2, 10, "select concat(firstName, ' ', lastName) as UserName, age from users where age>?"),
 				50);
 

@@ -15,7 +15,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.handler.TestHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -53,8 +52,7 @@ public class HelloWorldTest {
 		HelloWorldTest hello = new HelloWorldTest();
 		hello.setName("ActiveRecordDemoTest");
 		ctx.insert(hello);
-		ctx.iQueryForObject(new TestHandler(),new TestHandler(),new TestHandler(), "select name from HelloWorldTest");
-		Assert.assertEquals("ActiveRecordDemoTest", ctx.nQueryForString("select name from HelloWorldTest"));
+		Assert.assertEquals("ActiveRecordDemoTest", ctx.eQueryForString("select name from HelloWorldTest"));
 		ds.close();
 	}
 }

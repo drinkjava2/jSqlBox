@@ -17,7 +17,7 @@ import java.util.Map;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.handler.StarStarMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.EntityMapListHandler;
 
 /**
  * This is a EntityNetFactory implementation to create a TinyEntityNet
@@ -60,7 +60,7 @@ public abstract class EntityNetFactory {// NOSONAR
 			if (StrUtils.isEmpty(alias))
 				alias = t.getTableName();
 			try {
-				mapList = ctx.iQuery(new StarStarMapListHandler(t),
+				mapList = ctx.iQuery(new EntityMapListHandler(t),
 						"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
 			} finally {
 				EntityNetUtils.removeBindedTableModel(mapList);

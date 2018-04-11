@@ -26,7 +26,7 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 
 /**
  * PreparedSQL2 is a POJO used for store SQL、parameter、ResultSetHandlers,
- * Connection, this is a temporary object only used for query method. 
+ * Connection, this is a temporary object only used for query method.
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
@@ -43,7 +43,7 @@ public class PreparedSQL {
 	private String sql;
 
 	/** Optional,The SQL parameters */
-	private List<Object> params;
+	private List<Object> paramList;
 
 	/** If set true, will use templateEngine to render SQL */
 	private Boolean useTemplate = false;
@@ -65,7 +65,7 @@ public class PreparedSQL {
 		ps.setType(this.type);
 		ps.setConnection(this.connection);
 		ps.setSql(this.sql);
-		ps.setParams(this.params);
+		ps.setParamList(this.paramList);
 		ps.setUseTemplate(this.useTemplate);
 		ps.setTemplateEngine(this.templateEngine);
 		ps.setTemplateParams(this.templateParams);
@@ -75,9 +75,9 @@ public class PreparedSQL {
 	}
 
 	public void addParam(Object param) {
-		if (params == null)
-			params = new ArrayList<Object>();
-		params.add(param);
+		if (paramList == null)
+			paramList = new ArrayList<Object>();
+		paramList.add(param);
 	}
 
 	public void addSqlHandler(SqlHandler sqlHandler) {
@@ -87,9 +87,9 @@ public class PreparedSQL {
 	}
 
 	public int getParamSize() {
-		if (params == null)
+		if (paramList == null)
 			return 0;
-		return params.size();
+		return paramList.size();
 	}
 
 	public void setResultSetHandler(ResultSetHandler<?> resultSetHandler) {
@@ -103,16 +103,16 @@ public class PreparedSQL {
 		this.resultSetHandler = resultSetHandler;
 	}
 
-	public void setParams(Object... args) {
-		this.params = new ArrayList<Object>();
+	public void setParamArray(Object... args) {
+		this.paramList = new ArrayList<Object>();
 		for (Object obj : args)
-			params.add(obj);
+			paramList.add(obj);
 	}
 
 	public Object[] getParamArray() {
-		if (params == null)
+		if (paramList == null)
 			return new Object[0];
-		return params.toArray();
+		return paramList.toArray();
 	}
 
 	/**
@@ -174,14 +174,6 @@ public class PreparedSQL {
 		this.sql = sql;
 	}
 
-	public void setListParams(List<Object> params) {
-		this.params = params;
-	}
-
-	public List<Object> getListParams() {
-		return params;
-	}
-
 	public List<SqlHandler> getSqlHandlers() {
 		return sqlHandlers;
 	}
@@ -210,12 +202,12 @@ public class PreparedSQL {
 		this.templateEngine = templateEngine;
 	}
 
-	public List<Object> getParams() {
-		return params;
+	public List<Object> getParamList() {
+		return paramList;
 	}
 
-	public void setParams(List<Object> params) {
-		this.params = params;
+	public void setParamList(List<Object> paramList) {
+		this.paramList = paramList;
 	}
 
 	public Map<String, Object> getTemplateParams() {

@@ -11,12 +11,8 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.util.List;
-
-import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;

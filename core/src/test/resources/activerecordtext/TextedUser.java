@@ -13,8 +13,6 @@ import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.StarStarHandler;
-import com.github.drinkjava2.jsqlbox.handler.StarStarMapListHandler;
 
 /**
  * This is a sample to show put SQL in multiple line Strings(Text), a

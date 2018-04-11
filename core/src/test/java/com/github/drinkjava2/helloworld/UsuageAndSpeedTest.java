@@ -31,6 +31,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
+import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
 import activerecordtext.AbstractUser;
@@ -55,7 +56,7 @@ public class UsuageAndSpeedTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-		SqlBoxContext.setGlobalAllowShowSql(true);
+		//SqlBoxContext.setGlobalAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(null);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
@@ -306,6 +307,20 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
+	public void sXxxStyle() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			ctx.eExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
+			ctx.eExecute("update users set name=?, address=?", "Tom", "China");
+			List<Map<String, Object>> users = ctx.eQueryForMapList("select * from users", new PaginHandler(1, 10));
+			Assert.assertEquals(1L, users.size());
+			Assert.assertEquals(1L,
+					ctx.eQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
+			ctx.eExecute("delete from users where name=? or address=?", "Tom", "China");
+		}
+	}
+
+	@Test
 	public void iXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
@@ -450,7 +465,7 @@ public class UsuageAndSpeedTest {
 			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
 			Assert.assertEquals(1, users.size());
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
+			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from users"));
 		}
 	}
 
@@ -475,7 +490,7 @@ public class UsuageAndSpeedTest {
 			Assert.assertEquals(1, u4.size());
 
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from users"));
+			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from users"));
 		}
 	}
 
@@ -487,13 +502,12 @@ public class UsuageAndSpeedTest {
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.ctx().iUpdate(user.updateUserPreparedSQL("Tom", "China"));
-			// List<Map<String, Object>> users = user.selectUserListMap("Tom",
-			// "China");
-			// Assert.assertEquals(1, users.size());
+			List<Map<String, Object>> users = user.selectUserListMap("Tom", "China");
+			Assert.assertEquals(1, users.size());
 			List<AbstractUser> users2 = user.selectAbstractUserList("Tom", "China");
 			Assert.assertEquals(1, users2.size());
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().nQueryForLongValue("select count(*) from	 users"));
+			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from	 users"));
 		}
 	}
 }

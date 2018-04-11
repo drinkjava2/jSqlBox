@@ -13,39 +13,34 @@ package com.github.drinkjava2.jsqlbox.handler;
 
 import java.util.List;
 
-import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlHandler;
-import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jdialects.model.FKeyModel;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * StarStarHandler is used to explain alias.** to real columns in SQL, example:
- * 
- * select u.** from users u ==> select u.name, u.address, u.age from users u
- * 
- * Transient columns not included
+ * EntityNetHandler is a SqlHandler used explain the Entity query SQL (For
+ * example 'select u.** from users u') and return a EntityNet instance
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class TestHandler implements SqlHandler {
+public class EntityNetHandler implements SqlHandler {
+	protected final EntityMapListHandler entityMapListHandler;
+	protected final Class<?> targetClass;
+
+	public EntityNetHandler(Class<?> targetClass, Object... netConfigObjects) {
+		this.targetClass = targetClass;
+		if (netConfigObjects == null || netConfigObjects.length == 0)
+			this.entityMapListHandler = new EntityMapListHandler(targetClass);
+		else
+			this.entityMapListHandler = new EntityMapListHandler(netConfigObjects);
+	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		System.out.println("Before");
-		Object result = runner.runPreparedSQL(ps);
-		System.out.println("After");
-		return result;
+		Object obj = entityMapListHandler.handle(runner, ps);
+		return ((SqlBoxContext) runner).netCreate((List) obj);
 	}
-
 }

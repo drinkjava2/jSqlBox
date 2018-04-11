@@ -710,7 +710,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 				engine = this.sqlTemplateEngine;
 			PreparedSQL rendered = engine.render(ps.getSql(), ps.getTemplateParams(), null);
 			ps.setSql(rendered.getSql());
-			ps.setParams(rendered.getListParams());
+			ps.setParamList(rendered.getParamList());
 		}
 		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty()) {
 			SqlHandler newPs = ps.getSqlHandlers().get(0);
