@@ -137,7 +137,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T xQuery(Connection conn, ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) this.query(conn, sp.getSql(), rsh, sp.getParamArray());
+			return (T) this.query(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -168,7 +168,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int xUpdate(Connection conn, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return update(conn, sp.getSql(), sp.getParamArray());
+			return update(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -190,7 +190,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T xInsert(Connection conn, ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) insert(conn, sp.getSql(), rsh, sp.getParamArray());
+			return (T) insert(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -212,7 +212,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int xExecute(Connection conn, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return this.execute(conn, sp.getSql(), sp.getParamArray());
+			return this.execute(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -239,7 +239,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> List<T> xExecute(Connection conn, ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (List<T>) this.execute(conn, sp.getSql(), rsh, sp.getParamArray());
+			return (List<T>) this.execute(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -290,7 +290,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T xQuery(ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) this.query(sp.getSql(), rsh, sp.getParamArray());
+			return (T) this.query(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -320,7 +320,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int xUpdate(String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return this.update(sp.getSql(), sp.getParamArray());
+			return this.update(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -341,7 +341,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T xInsert(ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (T) insert(sp.getSql(), rsh, sp.getParamArray());
+			return (T) insert(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -362,7 +362,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int xExecute(String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return this.execute(sp.getSql(), sp.getParamArray());
+			return this.execute(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -388,7 +388,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> List<T> xExecute(ResultSetHandler rsh, String... templateSQL) {
 		try {
 			PreparedSQL sp = mixedToSqlAndParams(templateSQL);
-			return (List<T>) this.execute(sp.getSql(), rsh, sp.getParamArray());
+			return (List<T>) this.execute(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -912,7 +912,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T tQuery(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return (T) this.query(sp.getSql(), rsh, sp.getParamArray());
+			return (T) this.query(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -935,7 +935,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T tInsert(Connection conn, ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return (T) insert(conn, sp.getSql(), rsh, sp.getParamArray());
+			return (T) insert(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -953,7 +953,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int tUpdate(Connection conn, String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return update(conn, sp.getSql(), sp.getParamArray());
+			return update(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -994,7 +994,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T tQuery(Connection conn, ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return (T) this.query(conn, sp.getSql(), rsh, sp.getParamArray());
+			return (T) this.query(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1040,7 +1040,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int tExecute(Connection conn, String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return this.execute(conn, sp.getSql(), sp.getParamArray());
+			return this.execute(conn, sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1069,7 +1069,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 			Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return this.execute(conn, sp.getSql(), rsh, sp.getParamArray());
+			return this.execute(conn, sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1108,7 +1108,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int tUpdate(String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return this.update(sp.getSql(), sp.getParamArray());
+			return this.update(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1131,7 +1131,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> T tInsert(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return (T) insert(sp.getSql(), rsh, sp.getParamArray());
+			return (T) insert(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1154,7 +1154,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public int tExecute(String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return this.execute(sp.getSql(), sp.getParamArray());
+			return this.execute(sp.getSql(), sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -1182,7 +1182,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public <T> List<T> tExecute(ResultSetHandler rsh, String templateSQL, Map<String, Object> paramMap) {
 		try {
 			PreparedSQL sp = templateToSqlAndParams(paramMap, templateSQL);
-			return this.execute(sp.getSql(), rsh, sp.getParamArray());
+			return this.execute(sp.getSql(), rsh, sp.getParams());
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}

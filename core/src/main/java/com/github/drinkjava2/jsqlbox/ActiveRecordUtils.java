@@ -152,7 +152,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		if (useTemplate)
 			ps.setTemplateParams(buildParamMap(callerClassName, callerMethodName, params));
 		else
-			ps.setParamArray(params);
+			ps.setParams(params);
 		autoGuessHandler(entity, ps, sql, callerMethod); // guess handler
 		return (T) entity.ctx().runPreparedSQL(ps);
 	}
@@ -215,7 +215,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
 		PreparedSQL sp = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
-		sp.setParamArray(params);
+		sp.setParams(params);
 		return sp;
 	}
 

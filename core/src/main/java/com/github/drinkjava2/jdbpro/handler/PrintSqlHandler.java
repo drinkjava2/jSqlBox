@@ -28,7 +28,7 @@ public class PrintSqlHandler implements SqlHandler {
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		System.out.println("SQL: " + ps.getSql());// NOSONAR
-		System.out.println("Param:" + Arrays.deepToString(ps.getParamArray()));// NOSONAR
+		System.out.println("Param:" + Arrays.deepToString(ps.getParams()));// NOSONAR
 		return runner.runPreparedSQL(ps);
 	}
 }

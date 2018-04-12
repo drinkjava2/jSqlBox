@@ -43,7 +43,7 @@ public class PreparedSQL {
 	private String sql;
 
 	/** Optional,The SQL parameters */
-	private List<Object> paramList;
+	private Object[] params;
 
 	/** If set true, will use templateEngine to render SQL */
 	private Boolean useTemplate = false;
@@ -59,13 +59,24 @@ public class PreparedSQL {
 	/** Optional,ResultSetHandler instance */
 	private ResultSetHandler<?> resultSetHandler;
 
+	public PreparedSQL() {// default constructor
+	}
+
+	public PreparedSQL(SqlType type, Connection conn, ResultSetHandler<?> rsh, String sql, Object... params) {
+		this.type = type;
+		this.connection = conn;
+		this.resultSetHandler = rsh;
+		this.sql = sql;
+		this.params = params;
+	}
+
 	/** Clone self to get a new PreparedSQL copy */
 	public PreparedSQL newCopy() {
 		PreparedSQL ps = new PreparedSQL();
 		ps.setType(this.type);
 		ps.setConnection(this.connection);
 		ps.setSql(this.sql);
-		ps.setParamList(this.paramList);
+		ps.setParams(this.params);
 		ps.setUseTemplate(this.useTemplate);
 		ps.setTemplateEngine(this.templateEngine);
 		ps.setTemplateParams(this.templateParams);
@@ -75,9 +86,11 @@ public class PreparedSQL {
 	}
 
 	public void addParam(Object param) {
-		if (paramList == null)
-			paramList = new ArrayList<Object>();
-		paramList.add(param);
+		if (params == null)
+			params = new Object[1];
+		else
+			params = new Object[params.length + 1];
+		params[params.length - 1] = param;
 	}
 
 	public void addSqlHandler(SqlHandler sqlHandler) {
@@ -87,32 +100,20 @@ public class PreparedSQL {
 	}
 
 	public int getParamSize() {
-		if (paramList == null)
+		if (params == null)
 			return 0;
-		return paramList.size();
+		return params.length;
 	}
 
-	public void setResultSetHandler(ResultSetHandler<?> resultSetHandler) {
+	public void setResultSetHandler(ResultSetHandler<?> rsh) {
 		if (this.resultSetHandler != null)
 			throw new DbProRuntimeException(
 					"ResultSetHandler already exist and can only set 1, need use changeResultSetHandler method.");
-		this.resultSetHandler = resultSetHandler;
+		this.resultSetHandler = rsh;
 	}
 
-	public void changeResultSetHandler(ResultSetHandler<?> resultSetHandler) {
-		this.resultSetHandler = resultSetHandler;
-	}
-
-	public void setParamArray(Object... args) {
-		this.paramList = new ArrayList<Object>();
-		for (Object obj : args)
-			paramList.add(obj);
-	}
-
-	public Object[] getParamArray() {
-		if (paramList == null)
-			return new Object[0];
-		return paramList.toArray();
+	public void changeResultSetHandler(ResultSetHandler<?> rsh) {
+		this.resultSetHandler = rsh;
 	}
 
 	/**
@@ -202,12 +203,14 @@ public class PreparedSQL {
 		this.templateEngine = templateEngine;
 	}
 
-	public List<Object> getParamList() {
-		return paramList;
+	public Object[] getParams() {
+		if (params == null)
+			return new Object[0];
+		return params;
 	}
 
-	public void setParamList(List<Object> paramList) {
-		this.paramList = paramList;
+	public void setParams(Object... params) {
+		this.params = params;
 	}
 
 	public Map<String, Object> getTemplateParams() {

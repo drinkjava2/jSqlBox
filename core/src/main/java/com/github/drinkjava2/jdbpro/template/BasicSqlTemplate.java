@@ -214,7 +214,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		PreparedSQL sp = new PreparedSQL();
 		sql.setLength(sql.length() - 1);
 		sp.setSql(sql.toString());
-		sp.setParamList(paramList);
+		sp.setParams(paramList);
 		return sp;
 	}
 

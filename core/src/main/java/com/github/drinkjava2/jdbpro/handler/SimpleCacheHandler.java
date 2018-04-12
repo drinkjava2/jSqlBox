@@ -53,7 +53,7 @@ public class SimpleCacheHandler implements SqlHandler {
 
 	private String createKey(PreparedSQL ps) {
 		return new StringBuilder(Long.toString(System.currentTimeMillis() / 1000 / aliveSeconds)).append("SQL:")
-				.append(ps.getSql()).append("  Params:").append(ps.getParamList()).toString();
+				.append(ps.getSql()).append("  Params:").append(ps.getParams()).toString();
 	}
 
 	@Override

@@ -24,6 +24,9 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 1.7.0
  */
 public class BatchTest {
+	static {
+		SqlBoxContext.setGlobalAllowShowSql(true);
+	}
 	SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(MySqlDataSourceBox.class));
 	{
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
@@ -72,6 +75,8 @@ public class BatchTest {
 		user.setAddress("Canada");
 
 		ctx.nExecute("delete from batch_test_tb");
+		
+		
 		long start = System.currentTimeMillis();
 		for (long i = 0; i < repeat; i++) {
 			user.setName("Name" + i);
