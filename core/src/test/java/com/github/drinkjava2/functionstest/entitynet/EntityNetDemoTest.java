@@ -16,16 +16,15 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
-import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
-import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
-import com.github.drinkjava2.jsqlbox.handler.SSMapListWrapHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListWrapHandler;
 
 public class EntityNetDemoTest extends TestBase {
 	@Before
@@ -35,7 +34,7 @@ public class EntityNetDemoTest extends TestBase {
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
 		// Dialect.setGlobalAllowShowSql(true);
-		Dialect.setGlobalAllowReservedWords(true);
+		//Dialect.setGlobalAllowReservedWords(true);
 		dropAndCreateDatabase(models);
 	}
 

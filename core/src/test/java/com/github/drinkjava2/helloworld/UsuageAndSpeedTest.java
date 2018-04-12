@@ -76,7 +76,7 @@ public class UsuageAndSpeedTest {
 		REPEAT_TIMES = 20;// warm up
 		runTestMethods();
 		PRINT_TIMEUSED = true;
-		REPEAT_TIMES = 100000;
+		REPEAT_TIMES = 10;
 		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 		runTestMethods();
 		PRINT_TIMEUSED = false;
