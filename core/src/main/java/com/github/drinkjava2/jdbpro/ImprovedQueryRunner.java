@@ -58,7 +58,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	protected static ConnectionManager globalConnectionManager = null;
 	protected static List<ResultSetHandler> globalHandlers = null;
 	protected static DbProLogger globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
-	protected static Integer globalBatchSize = 10;
+	protected static Integer globalBatchSize = 300;
 	protected static SqlTemplateEngine globalTemplateEngine = NamedParamSqlTemplate.instance();
 
 	protected SqlTemplateEngine sqlTemplateEngine = globalTemplateEngine;
@@ -195,8 +195,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to
-	 * customise SQL format
+	 * Format SQL for logger output, subClass can override this method to customise
+	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -256,35 +256,55 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * 
 	 */
 	private <T> T addToCacheIfFullFlush(PreparedSQL ps) {
+		if (ps == null)
+			throw new DbProRuntimeException("PreparedSQL can not be null.");
+		Object result = null;
 		List<PreparedSQL> cached = sqlBatchCache.get();
 		if (cached.size() >= this.batchSize)
-			this.nBatchFlush();
+			result = this.nBatchFlush();
 		else if (!cached.isEmpty()) {
 			PreparedSQL last = cached.get(cached.size() - 1);
-			if (!last.getType().equals(ps.getType()) || !last.getConnection().equals(ps.getConnection())
-					|| !last.getSql().equals(ps.getSql()) || last.getParamSize() != ps.getParamSize()
-					|| last.getResultSetHandler() != (ps.getResultSetHandler()))
-				this.nBatchFlush();
+			if (!last.getType().equals(ps.getType()) //
+					|| last.getConnection() != ps.getConnection() //
+					|| !last.getSql().equals(ps.getSql()) //
+					|| last.getParamSize() != ps.getParamSize()//
+					|| last.getResultSetHandler() != (ps.getResultSetHandler()))//
+				result = this.nBatchFlush();
 		}
 		sqlBatchCache.get().add(ps);
-		return null;
+
+		switch (ps.getType()) {
+		case UPDATE:
+		case EXECUTE: {
+			result = 0;
+			break;
+		}
+		case INSERT: {
+			result = null;
+			break;
+		}
+		default:
+			throw new DbProRuntimeException("Unknow batch sql operation type:" + ps.getType());
+		}
+		return (T) result;
 	}
 
 	// === Batch execute methods======
 	/**
 	 * Force flush cached SQLs
 	 */
-	public void nBatchFlush() {
+	public <T> T nBatchFlush() {
 		List<PreparedSQL> psList = sqlBatchCache.get();
 		if (psList.isEmpty())
-			return;
+			return null;
+		Object result = null;
 		PreparedSQL first = psList.get(0);
 
 		int paramLenth = first.getParamSize();
 		Object[][] allParams = new Object[psList.size()][paramLenth];
 
 		if (paramLenth > 0)
-			for (int i = 0; i < psList.hashCode(); i++) {// cached parameters
+			for (int i = 0; i < psList.size(); i++) {// cached parameters
 				allParams[i] = psList.get(i).getParams();
 			}
 		if (this.getAllowShowSQL()) {
@@ -300,9 +320,9 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 			case EXECUTE: {
 				try {
 					if (first.getConnection() != null)
-						batch(first.getConnection(), first.getSql(), allParams);
+						result = ((int[]) batch(first.getConnection(), first.getSql(), allParams)).length;
 					else
-						batch(first.getSql(), allParams);
+						result = ((int[]) batch(first.getSql(), allParams)).length;
 				} catch (SQLException e) {
 					throw new DbProRuntimeException(e);
 				}
@@ -313,20 +333,21 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 					throw new DbProRuntimeException("insertBatch need a ResultSetHandler.");
 				try {
 					if (first.getConnection() != null)
-						insertBatch(first.getConnection(), first.getSql(), first.getResultSetHandler(), allParams);
+						result = insertBatch(first.getConnection(), first.getSql(), first.getResultSetHandler(),
+								allParams);
 					else
-						insertBatch(first.getSql(), first.getResultSetHandler(), allParams);
+						result = insertBatch(first.getSql(), first.getResultSetHandler(), allParams);
 				} catch (SQLException e) {
 					throw new DbProRuntimeException(e);
 				}
 				break;
-
 			}
 			default:
 				throw new DbProRuntimeException("Unknow batch sql operation type:" + first.getType());
 			}
 		}
 		sqlBatchCache.get().clear();
+		return (T) result;
 	}
 
 	/** Start batch sql */
@@ -354,10 +375,10 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	// DbUtils style methods, throw SQLException
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found, SQLException may be threw if some SQL
-	 * operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -371,10 +392,10 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found, SQLException may be threw if some SQL
-	 * operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -411,10 +432,10 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found , DbProRuntimeException may be threw if some
-	 * SQL operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found , DbProRuntimeException may be threw if some SQL operation
+	 * Exception happen.
 	 * 
 	 * @param sql
 	 * @param params
@@ -426,8 +447,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute query and force return a String object, no need catch
-	 * SQLException.
+	 * Execute query and force return a String object, no need catch SQLException.
 	 * 
 	 */
 	public String nQueryForString(Connection conn, String sql, Object... params) {
@@ -443,16 +463,12 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute query and force return a List<Map<String, Object>> type result,
-	 * no need catch SQLException.
+	 * Execute query and force return a List<Map<String, Object>> type result, no
+	 * need catch SQLException.
 	 */
 	public List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... params) {
-		working at here
-		try {
-			return query(conn, sql, new MapListHandler(), params);
-		} catch (SQLException e) { 
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, conn, SingleTonHandlers.mapListHandler, sql, params);
+		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
 
 	/**
@@ -465,11 +481,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * @return The number of rows updated.
 	 */
 	public int nUpdate(Connection conn, String sql, Object... params) {
-		try {
-			return update(conn, sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.UPDATE, conn, null, sql, params);
+		return (Integer) runPreparedSQL(ps);
 	}
 
 	/**
@@ -489,11 +502,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * 
 	 */
 	public <T> T nInsert(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {
-		try {
-			return insert(conn, sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.INSERT, conn, rsh, sql, params);
+		return (T) runPreparedSQL(ps);
 	}
 
 	/**
@@ -509,22 +519,19 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * @return The number of rows updated.
 	 */
 	public int nExecute(Connection conn, String sql, Object... params) {
-		try {
-			return execute(conn, sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, conn, null, sql, params);
+		return (Integer) runPreparedSQL(ps);
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns
-	 * one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters. Note: This
-	 * method does not close connection.
+	 * Execute an statement, including a stored procedure call, which returns one or
+	 * more result sets. Any parameters which are instances of {@link OutParameter}
+	 * will be registered as OUT parameters. Note: This method does not close
+	 * connection.
 	 * 
-	 * Use this method when: a) running SQL statements that return multiple
-	 * result sets; b) invoking a stored procedure that return result sets and
-	 * OUT parameters.
+	 * Use this method when: a) running SQL statements that return multiple result
+	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -536,11 +543,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * 
 	 */
 	public <T> List<T> nExecute(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {
-		try {
-			return execute(conn, sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, conn, rsh, sql, params);
+		return (List<T>) runPreparedSQL(ps);
 	}
 
 	/**
@@ -559,18 +563,15 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * 
 	 */
 	public <T> T nQuery(ResultSetHandler<T> rsh, String sql, Object... params) {
-		try {
-			return query(sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, null, rsh, sql, params);
+		return (T) runPreparedSQL(ps);
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found , DbProRuntimeException may be threw if some
-	 * SQL operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found , DbProRuntimeException may be threw if some SQL operation
+	 * Exception happen.
 	 * 
 	 * @param sql
 	 * @param params
@@ -578,16 +579,12 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 */
 	@Override
 	public <T> T nQueryForObject(String sql, Object... params) {
-		try {
-			return queryForObject(sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, null, SingleTonHandlers.scalarHandler, sql, params);
+		return (T) runPreparedSQL(ps);
 	}
 
 	/**
-	 * Execute query and force return a String object, no need catch
-	 * SQLException
+	 * Execute query and force return a String object, no need catch SQLException
 	 */
 	public String nQueryForString(String sql, Object... params) {
 		return String.valueOf(nQueryForObject(sql, params));
@@ -602,15 +599,12 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	}
 
 	/**
-	 * Execute query and force return a List<Map<String, Object>> type result,
-	 * no need catch SQLException
+	 * Execute query and force return a List<Map<String, Object>> type result, no
+	 * need catch SQLException
 	 */
 	public List<Map<String, Object>> nQueryForMapList(String sql, Object... params) {
-		try {
-			return query(sql, new MapListHandler(), params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, null, SingleTonHandlers.mapListHandler, sql, params);
+		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
 
 	/**
@@ -624,11 +618,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 */
 	@Override
 	public int nUpdate(String sql, Object... params) {
-		try {
-			return update(sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.UPDATE, null, null, sql, params);
+		return (Integer) runPreparedSQL(ps);
 	}
 
 	/**
@@ -647,11 +638,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * 
 	 */
 	public <T> T nInsert(ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return (T) insert(sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.INSERT, null, rsh, sql, params);
+		return (T) runPreparedSQL(ps);
 	}
 
 	/**
@@ -668,21 +656,19 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 */
 	@Override
 	public int nExecute(String sql, Object... params) {
-		try {
-			return execute(sql, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, null, null, sql, params);
+		Object o = runPreparedSQL(ps);
+		return (Integer) o;
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns
-	 * one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an statement, including a stored procedure call, which returns one or
+	 * more result sets. Any parameters which are instances of {@link OutParameter}
+	 * will be registered as OUT parameters.
 	 * 
-	 * Use this method when: a) running SQL statements that return multiple
-	 * result sets; b) invoking a stored procedure that return result sets and
-	 * OUT parameters.
+	 * Use this method when: a) running SQL statements that return multiple result
+	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -694,16 +680,13 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * 
 	 */
 	public <T> List<T> nExecute(ResultSetHandler rsh, String sql, Object... params) {
-		try {
-			return execute(sql, rsh, params);
-		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
-		}
+		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, null, rsh, sql, params);
+		return (List<T>) runPreparedSQL(ps);
 	}
 
 	/**
-	 * This is the core method of whole project, handle a PreparedSQL instance
-	 * and return a result
+	 * This is the core method of whole project, handle a PreparedSQL instance and
+	 * return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
 		if (ps.getUseTemplate()) {
@@ -864,9 +847,9 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object
-	 * may return if no result found , DbProRuntimeException may be threw if
-	 * some SQL operation Exception happen.
+	 * value if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found , DbProRuntimeException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param ps
 	 *            The PreparedSQL which included SQL、parameters and handlers(if
@@ -901,8 +884,8 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is
-	 *            responsible for closing this Connection.
+	 *            The Connection to use to run the query. The caller is responsible
+	 *            for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
 	 * @param params

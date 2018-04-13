@@ -24,11 +24,12 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 /**
+ * Here store some singleTon thread safe ResultSetHandlers
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public class SingleTonHandlers {
+public abstract class SingleTonHandlers {// NOSONAR
 	public static final KeyedHandler<?> keyedHandler = new KeyedHandler<Object>();
 	public static final MapHandler mapHandler = new MapHandler();
 	public static final MapListHandler mapListHandler = new MapListHandler();

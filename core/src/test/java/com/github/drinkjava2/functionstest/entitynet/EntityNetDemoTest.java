@@ -40,6 +40,7 @@ public class EntityNetDemoTest extends TestBase {
 
 	protected void insertDemoData() {
 		// @formatter:off
+		try {
 		ctx.nBatchBegin(); // Batch insert enabled
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
@@ -121,7 +122,9 @@ public class EntityNetDemoTest extends TestBase {
 		new RolePrivilege().putValues("r2", "p3").insert();
 		new RolePrivilege().putValues("r3", "p3").insert();
 		new RolePrivilege().putValues("r4", "p1").insert();
+		}finally {
 		ctx.nBatchEnd(); // Batch insert end
+		}
 		// @formatter:on
 	}
 
