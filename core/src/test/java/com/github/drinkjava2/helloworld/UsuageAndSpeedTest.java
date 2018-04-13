@@ -310,11 +310,11 @@ public class UsuageAndSpeedTest {
 	public void eXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.eExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
-			ctx.eExecute("update users set name=?, address=?", "Tom", "China");
+			ctx.pExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
+			ctx.pExecute("update users set name=?, address=?", "Tom", "China");
 			Assert.assertEquals(1L,
-					ctx.eQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
-			ctx.eExecute("delete from users where name=? or address=?", "Tom", "China");
+					ctx.pQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
+			ctx.pExecute("delete from users where name=? or address=?", "Tom", "China");
 		}
 	}
 
@@ -463,7 +463,7 @@ public class UsuageAndSpeedTest {
 			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
 			Assert.assertEquals(1, users.size());
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from users"));
+			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
 		}
 	}
 
@@ -474,11 +474,11 @@ public class UsuageAndSpeedTest {
 		TextedUser user = new TextedUser();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
-			user.ctx().eUpdate(user.updateAllUserPreSql("Tom", "China"));
+			user.ctx().pUpdate(user.updateAllUserPreSql("Tom", "China"));
 			List<Map<String, Object>> u1 = user.selectUsersMapListByText("Tom", "China");
 			Assert.assertEquals(1, u1.size()); 
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from users"));
+			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
 		}
 	}
 
@@ -504,7 +504,7 @@ public class UsuageAndSpeedTest {
 			Assert.assertEquals(1, u4.size());
 
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from users"));
+			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
 		}
 	}
 	
@@ -521,7 +521,7 @@ public class UsuageAndSpeedTest {
 			List<AbstractUser> users2 = user.selectAbstractUserList("Tom", "China");
 			Assert.assertEquals(1, users2.size());
 			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().eQueryForLongValue("select count(*) from	 users"));
+			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from	 users"));
 		}
 	}
 }

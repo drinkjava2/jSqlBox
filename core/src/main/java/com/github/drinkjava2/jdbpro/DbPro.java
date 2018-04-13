@@ -122,8 +122,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Executes the Mixed-style(Inline+Template) given SELECT SQL query and returns
-	 * a result object. Note: This method does not close connection.
+	 * Executes the Mixed-style(Inline+Template) given SELECT SQL query and
+	 * returns a result object. Note: This method does not close connection.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -144,11 +144,11 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an Mixed-style(Inline+Template) SQL query for an Object, only return
-	 * the first row and first column's value if more than one column or more than 1
-	 * rows returned, a null object may return if no result found ,
-	 * DbProRuntimeException may be threw if some SQL operation Exception happen.
-	 * Note: This method does not close connection.
+	 * Execute an Mixed-style(Inline+Template) SQL query for an Object, only
+	 * return the first row and first column's value if more than one column or
+	 * more than 1 rows returned, a null object may return if no result found ,
+	 * DbProRuntimeException may be threw if some SQL operation Exception
+	 * happen. Note: This method does not close connection.
 	 * 
 	 * @param templateSQL
 	 * @return An Object or null, Object type determined by SQL content
@@ -158,8 +158,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Executes the Mixed-style(Inline+Template) given INSERT, UPDATE, or DELETE SQL
-	 * statement. Note: This method does not close connection.
+	 * Executes the Mixed-style(Inline+Template) given INSERT, UPDATE, or DELETE
+	 * SQL statement. Note: This method does not close connection.
 	 * 
 	 * @param templateSQL
 	 *            the SQL template
@@ -175,8 +175,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Executes the Mixed-style(Inline+Template) given INSERT SQL statement. Note:
-	 * This method does not close connection.
+	 * Executes the Mixed-style(Inline+Template) given INSERT SQL statement.
+	 * Note: This method does not close connection.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -198,9 +198,9 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 
 	/**
 	 * Execute an Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which does not return any result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
-	 * Note: This method does not close connection.
+	 * procedure call, which does not return any result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
+	 * parameters. Note: This method does not close connection.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -220,13 +220,13 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 
 	/**
 	 * Execute an Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which returns one or more result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
-	 * Note: This method does not close connection.
+	 * procedure call, which returns one or more result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
+	 * parameters. Note: This method does not close connection.
 	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -250,17 +250,17 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	// parameters carried by a Map<String, Object> instance
 
 	/**
-	 * Mixed-style(Inline+Template) execute SQL query, force return a String value.
-	 * Note: This method does not close connection
+	 * Mixed-style(Inline+Template) execute SQL query, force return a String
+	 * value. Note: This method does not close connection
 	 */
 	public String xQueryForString(Connection conn, String... templateSQL) {
 		return String.valueOf(xQueryForObject(conn, templateSQL));
 	}
 
 	/**
-	 * Mixed-style(Inline+Template) execute SQL query, force return a Long value,
-	 * runtime Exception may throw if result can not cast to long. Note: This method
-	 * does not close connection
+	 * Mixed-style(Inline+Template) execute SQL query, force return a Long
+	 * value, runtime Exception may throw if result can not cast to long. Note:
+	 * This method does not close connection
 	 */
 	public long xQueryForLongValue(Connection conn, String... templateSQL) {
 		return ((Number) xQueryForObject(conn, templateSQL)).longValue();// NOSONAR
@@ -275,8 +275,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Executes the Mixed-style(Inline+Template) given SELECT SQL query and returns
-	 * a result object. property.
+	 * Executes the Mixed-style(Inline+Template) given SELECT SQL query and
+	 * returns a result object. property.
 	 * 
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -297,10 +297,11 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an Mixed-style(Inline+Template) SQL query for an Object, only return
-	 * the first row and first column's value if more than one column or more than 1
-	 * rows returned, a null object may return if no result found ,
-	 * DbProRuntimeException may be threw if some SQL operation Exception happen.
+	 * Execute an Mixed-style(Inline+Template) SQL query for an Object, only
+	 * return the first row and first column's value if more than one column or
+	 * more than 1 rows returned, a null object may return if no result found ,
+	 * DbProRuntimeException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param templateSQL
 	 * @return An Object or null, Object type determined by SQL content
@@ -310,8 +311,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Executes the Mixed-style(Inline+Template) given INSERT, UPDATE, or DELETE SQL
-	 * statement.
+	 * Executes the Mixed-style(Inline+Template) given INSERT, UPDATE, or DELETE
+	 * SQL statement.
 	 * 
 	 * @param templateSQL
 	 *            the SQL template
@@ -349,8 +350,9 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 
 	/**
 	 * Execute an Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which does not return any result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
+	 * procedure call, which does not return any result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
+	 * parameters.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -370,12 +372,13 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 
 	/**
 	 * Execute an Mixed-style(Inline+Template) SQL statement, including a stored
-	 * procedure call, which returns one or more result sets. Any parameters which
-	 * are instances of {@link OutParameter} will be registered as OUT parameters.
-	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * procedure call, which returns one or more result sets. Any parameters
+	 * which are instances of {@link OutParameter} will be registered as OUT
 	 * parameters.
+	 * <p>
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -399,15 +402,16 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	// parameters carried by a Map<String, Object> instance
 
 	/**
-	 * Mixed-style(Inline+Template) execute SQL query, force return a String value
+	 * Mixed-style(Inline+Template) execute SQL query, force return a String
+	 * value
 	 */
 	public String xQueryForString(String... templateSQL) {
 		return String.valueOf(xQueryForObject(templateSQL));
 	}
 
 	/**
-	 * Mixed-style(Inline+Template) execute SQL query, force return a Long value,
-	 * runtime Exception may throw if result can not cast to long
+	 * Mixed-style(Inline+Template) execute SQL query, force return a Long
+	 * value, runtime Exception may throw if result can not cast to long
 	 */
 	public long xQueryForLongValue(String... templateSQL) {
 		return ((Number) xQueryForObject(templateSQL)).longValue();// NOSONAR
@@ -446,14 +450,16 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Prepare a PreparedSQL for iXxxx (In-line) style, iXxxx style SQL allow may
-	 * Strings, parameters can written in-line of SQL, but parameters must in
-	 * param() method, for example:
+	 * Prepare a PreparedSQL for iXxxx (In-line) style, iXxxx style SQL allow
+	 * may Strings, parameters can written in-line of SQL, but parameters must
+	 * in param() method, for example:
 	 * 
-	 * ctx.iQuery(new SimpleCacheHandler(), connection, "select u.** from users u
-	 * where u.age>?", param(20)," and u.id=?", param("001"), MapListHandler.class);
+	 * ctx.iQuery(new SimpleCacheHandler(), connection, "select u.** from users
+	 * u where u.age>?", param(20)," and u.id=?", param("001"),
+	 * MapListHandler.class);
 	 * 
-	 * Parameter 20 and "001" must be written as param(20) and param("001"). <br/>
+	 * Parameter 20 and "001" must be written as param(20) and param("001").
+	 * <br/>
 	 * 
 	 * In above example connection and handlers are optional, there is no order
 	 * limitation for optional items, can appear at anywhere
@@ -516,25 +522,25 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Prepare a PreparedSQL for eXxxx (Single SQL) style, eXxxx style only allow
-	 * single String (The first appeared) as SQL, parameters no need inside of
-	 * param() method, unknown objects (include null) will automatically looked as
-	 * SQL parameters,for example:
+	 * Prepare a PreparedSQL for pXxxx (Single SQL) style, pXxxx style only
+	 * allow single String (The first appeared) as SQL, unknown objects (include
+	 * null) will automatically looked as SQL parameters,for example:
 	 * 
-	 * ctx.sQuery(MapListHandler.class, "select * from users where age>? and id=?",
-	 * 20 , "001" , connection, new PaginHandler(2,5) );
+	 * ctx.pQuery(MapListHandler.class, "select * from users where age>? and
+	 * id=?", 20 , "001" , connection, new PaginHandler(2,5) );
 	 * 
-	 * Parameter20 and "001" will automatically be looked as SQL parameter,
+	 * Parameter 20 and "001" will automatically be looked as SQL parameter, no
+	 * need to write in a param() method like iXxxx styel did
 	 * 
 	 * In above example connection and handlers are optional, there is no order
 	 * limitation for optional items, can appear at anywhere
 	 * 
 	 * @param items
-	 *            SQL String or Parameters or Connector or ResultSetHandler or
-	 *            ResultSetHandler Class
+	 *            SQL String or Parameters or Connector or
+	 *            Handler/ResultSetHandler instance or class
 	 * @return PreparedSQL instance
 	 */
-	public static PreparedSQL ePrepareSQL(Object... items) {
+	public static PreparedSQL pPrepareSQL(Object... items) {
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
 		PreparedSQL ps = new PreparedSQL();
@@ -575,7 +581,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 				if (!added)
 					throw new DbProRuntimeException("Class '" + item + "' can not be part of SQL");
 			} else
-				ps.addParam(item);// Unknown object looked as SQL parameter include null
+				ps.addParam(item);// Unknown object looked as SQL parameter
+									// include null
 		}
 		ps.setSql(sqlSB.toString());
 		return ps;
@@ -599,8 +606,9 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an In-line style query for an Object, only return the first row and
-	 * first column's value if more than one column or more than 1 rows returned
+	 * Execute an In-line style query for an Object, only return the first row
+	 * and first column's value if more than one column or more than 1 rows
+	 * returned
 	 * 
 	 * @param inlineSQL
 	 * @param params
@@ -613,8 +621,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * In-line style execute query and force return a long value, runtime exception
-	 * may throw if result can not be cast to long.
+	 * In-line style execute query and force return a long value, runtime
+	 * exception may throw if result can not be cast to long.
 	 */
 	public long iQueryForLongValue(Object... inlineSQL) {
 		return ((Number) iQueryForObject(inlineSQL)).longValue();// NOSONAR
@@ -628,8 +636,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * In-Line style execute query and force return a List<Map<String, Object>> type
-	 * result.
+	 * In-Line style execute query and force return a List<Map<String, Object>>
+	 * type result.
 	 */
 	public List<Map<String, Object>> iQueryForMapList(Object... items) {
 		PreparedSQL ps = iPrepareSQL(items);
@@ -669,8 +677,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	 * 
 	 * @param inlineSQL
 	 *            the in-line style SQL
-	 * @return A list of objects generated by the handler, or number of rows updated
-	 *         if no handler
+	 * @return A list of objects generated by the handler, or number of rows
+	 *         updated if no handler
 	 */
 	public <T> T iExecute(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareSQL(inlineSQL);
@@ -678,96 +686,96 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 		return (T) runPreparedSQL(ps);
 	}
 
-	// ===============================eXxxx Style====================
+	// ===============================pXxxx Style====================
 	/**
-	 * Executes the eXxxx style query statement
+	 * Executes the pXxxx style query statement
 	 * 
 	 * @param items
 	 *            The items
 	 * @return An object generated by the handler.
 	 */
-	public <T> T eQuery(Object... items) {
-		PreparedSQL ps = ePrepareSQL(items);
+	public <T> T pQuery(Object... items) {
+		PreparedSQL ps = pPrepareSQL(items);
 		ps.setType(SqlType.QUERY);
 		return (T) runPreparedSQL(ps);
 	}
 
 	/**
-	 * Execute an eXxxx style query for an Object, only return the first row and
+	 * Execute an pXxxx style query for an Object, only return the first row and
 	 * first column's value if more than one column or more than 1 rows returned
 	 * 
 	 * @param items
 	 *            The items
 	 * @return An Object or null value determined by SQL content
 	 */
-	public <T> T eQueryForObject(Object... items) {
-		PreparedSQL ps = ePrepareSQL(items);
+	public <T> T pQueryForObject(Object... items) {
+		PreparedSQL ps = pPrepareSQL(items);
 		ps.setType(SqlType.SCALAR);
 		return (T) runPreparedSQL(ps);
 	}
 
 	/**
-	 * eXxxx style execute query and force return a long value, runtime exception
-	 * may throw if result can not be cast to long.
+	 * pXxxx style execute query and force return a long value, runtime
+	 * exception may throw if result can not be cast to long.
 	 */
-	public long eQueryForLongValue(Object... items) {
-		return ((Number) eQueryForObject(items)).longValue();// NOSONAR
+	public long pQueryForLongValue(Object... items) {
+		return ((Number) pQueryForObject(items)).longValue();// NOSONAR
 	}
 
 	/**
-	 * eXxxx style execute query and force return a String object.
+	 * pXxxx style execute query and force return a String object.
 	 */
-	public String eQueryForString(Object... items) {
-		return String.valueOf(eQueryForObject(items));
+	public String pQueryForString(Object... items) {
+		return String.valueOf(pQueryForObject(items));
 	}
 
 	/**
-	 * eXxxx style execute query and force return a List<Map<String, Object>> type
-	 * result.
+	 * pXxxx style execute query and force return a List<Map<String, Object>>
+	 * type result.
 	 */
-	public List<Map<String, Object>> eQueryForMapList(Object... items) {
-		PreparedSQL ps = ePrepareSQL(items);
+	public List<Map<String, Object>> pQueryForMapList(Object... items) {
+		PreparedSQL ps = pPrepareSQL(items);
 		ps.addHandler(new MapListHandler());
 		ps.setType(SqlType.QUERY);
 		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
 
 	/**
-	 * Executes the eXxxx style INSERT, UPDATE, or DELETE statement
+	 * Executes the pXxxx style INSERT, UPDATE, or DELETE statement
 	 * 
 	 * @param items
 	 *            the items
 	 * @return The number of rows updated.
 	 */
-	public int eUpdate(Object... items) {
-		PreparedSQL ps = ePrepareSQL(items);
+	public int pUpdate(Object... items) {
+		PreparedSQL ps = pPrepareSQL(items);
 		ps.setType(SqlType.UPDATE);
 		return (Integer) runPreparedSQL(ps);
 	}
 
 	/**
-	 * Executes the eXxxx style insert statement
+	 * Executes the pXxxx style insert statement
 	 * 
 	 * @param inlineSQL
 	 *            the in-line style SQL
 	 * @return An object generated by the handler.
 	 */
-	public int eInsert(Object... items) {
-		PreparedSQL ps = ePrepareSQL(items);
+	public int pInsert(Object... items) {
+		PreparedSQL ps = pPrepareSQL(items);
 		ps.setType(SqlType.INSERT);
 		return (Integer) runPreparedSQL(ps);
 	}
 
 	/**
-	 * Executes the eXxxx style execute statement
+	 * Executes the pXxxx style execute statement
 	 * 
 	 * @param items
 	 *            the items
-	 * @return A list of objects generated by the handler, or number of rows updated
-	 *         if no handler
+	 * @return A list of objects generated by the handler, or number of rows
+	 *         updated if no handler
 	 */
-	public <T> T eExecute(Object... items) {
-		PreparedSQL ps = ePrepareSQL(items);
+	public <T> T pExecute(Object... items) {
+		PreparedSQL ps = pPrepareSQL(items);
 		ps.setType(SqlType.EXECUTE);
 		return (T) runPreparedSQL(ps);
 	}
@@ -790,7 +798,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * A ThreadLocal variant for temporally store parameter Map in current Thread
+	 * A ThreadLocal variant for temporally store parameter Map in current
+	 * Thread
 	 */
 	protected static ThreadLocal<Map<String, Object>> templateThreadlocalParamMapCache = new ThreadLocal<Map<String, Object>>() {
 		@Override
@@ -800,8 +809,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	};
 
 	/**
-	 * Put a name-value pair into ThreadLocal parameter Map, return an empty String
-	 * ""
+	 * Put a name-value pair into ThreadLocal parameter Map, return an empty
+	 * String ""
 	 */
 	public static String put(String name, Object value) {
 		templateThreadlocalParamMapCache.get().put(name, value);
@@ -810,7 +819,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 
 	/**
 	 * put a name-value into ThreadLocal parameter Map, return an empty String,
-	 * Note: use replace() method the value will directly replace text in template
+	 * Note: use replace() method the value will directly replace text in
+	 * template
 	 */
 	public static String replace(String name, Object value) {
 		templateThreadlocalParamMapCache.get().put(name, value);
@@ -837,8 +847,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 
 	/**
 	 * Clear all template ThreadLocal parameters, then put a name-value into
-	 * ThreadLocal parameter Map, return an empty String, Note: use replace() method
-	 * the value will directly replace text in template
+	 * ThreadLocal parameter Map, return an empty String, Note: use replace()
+	 * method the value will directly replace text in template
 	 */
 	public static String replace0(String name, Object value) {
 		clearBind();
@@ -888,7 +898,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Template style query and force return a List<Map<String, Object>> type result
+	 * Template style query and force return a List<Map<String, Object>> type
+	 * result
 	 */
 	public List<Map<String, Object>> tQueryForMapList(String templateSQL, Map<String, Object> paramMap) {
 		return this.tQuery(new MapListHandler(), templateSQL, paramMap);
@@ -1001,10 +1012,11 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an SQL Template query for an Object, only return the first row and
-	 * first column's value if more than one column or more than 1 rows returned, a
-	 * null object may return if no result found , DbProRuntimeException may be
-	 * threw if some SQL operation Exception happen.
+	 * Execute an SQL Template query for an Object, only return the first row
+	 * and first column's value if more than one column or more than 1 rows
+	 * returned, a null object may return if no result found ,
+	 * DbProRuntimeException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map
@@ -1024,9 +1036,9 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * does not return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which does not return any result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * 
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -1047,13 +1059,13 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * returns one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which returns one or more result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map
@@ -1076,10 +1088,11 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an SQL Template query for an Object, only return the first row and
-	 * first column's value if more than one column or more than 1 rows returned, a
-	 * null object may return if no result found , DbProRuntimeException may be
-	 * threw if some SQL operation Exception happen.
+	 * Execute an SQL Template query for an Object, only return the first row
+	 * and first column's value if more than one column or more than 1 rows
+	 * returned, a null object may return if no result found ,
+	 * DbProRuntimeException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map
@@ -1097,7 +1110,8 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Executes the template style given INSERT, UPDATE, or DELETE SQL statement.
+	 * Executes the template style given INSERT, UPDATE, or DELETE SQL
+	 * statement.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map
@@ -1138,9 +1152,9 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * does not return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which does not return any result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * <p>
 	 * Use this method when invoking a stored procedure with OUT parameters that
 	 * does not return any result sets.
@@ -1161,13 +1175,13 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	}
 
 	/**
-	 * Execute an SQL template statement, including a stored procedure call, which
-	 * returns one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an SQL template statement, including a stored procedure call,
+	 * which returns one or more result sets. Any parameters which are instances
+	 * of {@link OutParameter} will be registered as OUT parameters.
 	 * <p>
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
+	 * Use this method when: a) running SQL statements that return multiple
+	 * result sets; b) invoking a stored procedure that return result sets and
+	 * OUT parameters.
 	 * 
 	 * @param paramMap
 	 *            The parameters stored in Map

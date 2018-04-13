@@ -52,7 +52,7 @@ public class HelloWorldTest {
 		HelloWorldTest hello = new HelloWorldTest();
 		hello.setName("ActiveRecordDemoTest");
 		ctx.insert(hello);
-		Assert.assertEquals("ActiveRecordDemoTest", ctx.eQueryForString("select name from HelloWorldTest"));
+		Assert.assertEquals("ActiveRecordDemoTest", ctx.pQueryForString("select name from HelloWorldTest"));
 		ds.close();
 	}
 }

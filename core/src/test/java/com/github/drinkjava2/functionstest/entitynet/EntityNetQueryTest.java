@@ -44,7 +44,7 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u1").put("userName", "user1").put("age", 10).insert();
 		new User().put("id", "u2").put("userName", "user2").put("age", 20).insert();
 		new User().put("id", "u3").put("userName", "user3").put("age", 30).insert();
-		List<User> setResult = ctx.eQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?",
+		List<User> setResult = ctx.pQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?",
 				10);
 		Assert.assertTrue(setResult.size() == 2);
 	}
@@ -59,7 +59,7 @@ public class EntityNetQueryTest extends TestBase {
 		List<User> users = net.getAllEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
-		List<Map<String, Object>> listMap = ctx.eQuery(MapListHandler.class,
+		List<Map<String, Object>> listMap = ctx.pQuery(MapListHandler.class,
 				"select u.id as u_id, u.userName as u_userName from usertb as u");
 		ctx.netJoinList(net, listMap, new User().alias("u"));// userName joined
 
@@ -77,7 +77,7 @@ public class EntityNetQueryTest extends TestBase {
 		new Email().putValues("e1", "email1", "u1").insert();
 		new Email().putValues("e2", "email2", "u1").insert();
 
-		MapListWrap wrap = ctx.eQuery(new SSMapListWrapHandler(new Email().alias("e")),
+		MapListWrap wrap = ctx.pQuery(new SSMapListWrapHandler(new Email().alias("e")),
 				"select e.id as e_id from emailtb e");
 		System.out.println(wrap.getMapList());
 		System.out.println(DebugUtils.getTableModelsDebugInfo(wrap.getConfig()));
@@ -87,7 +87,7 @@ public class EntityNetQueryTest extends TestBase {
 		Node emailNode = net.getOneNode(Email.class, "e1");
 		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId
 
-		List<Map<String, Object>> listMap2 = ctx.eQuery(new SSMapListHandler(Email.class),
+		List<Map<String, Object>> listMap2 = ctx.pQuery(new SSMapListHandler(Email.class),
 				"select e.** from emailtb e");
 		ctx.netJoinList(net, listMap2);
 

@@ -92,14 +92,14 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testHandlers() {
-		List<DemoUser> result = ctx.eQuery(PrintSqlHandler.class, new EntityListHandler(DemoUser.class),
+		List<DemoUser> result = ctx.pQuery(PrintSqlHandler.class, new EntityListHandler(DemoUser.class),
 				new PaginHandler(1, 5), PrintSqlHandler.class, "select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 5);
 	}
 
 	@Test
 	public void testEntityNetHandler() {
-		EntityNet net = ctx.eQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?",
+		EntityNet net = ctx.pQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?",
 				0);
 		List<DemoUser> result = net.getAllEntityList(DemoUser.class);
 		Assert.assertTrue(result.size() == 99);
@@ -107,7 +107,7 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testEntityListHandler() {
-		List<DemoUser> result = ctx.eQuery(new EntityListHandler(DemoUser.class),
+		List<DemoUser> result = ctx.pQuery(new EntityListHandler(DemoUser.class),
 				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 99);
 	}
@@ -117,14 +117,14 @@ public class HandlersTest extends TestBase {
 		int repeatTimes=1000;
 		
 		for (int i = 0; i < 10; i++) {// warm up
-			ctx.eQuery(new SimpleCacheHandler(),new EntityListHandler(DemoUser.class), 
+			ctx.pQuery(new SimpleCacheHandler(),new EntityListHandler(DemoUser.class), 
 					"select u.** from DemoUser u where u.age>?", 0);
-			ctx.eQuery(new EntityListHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
+			ctx.pQuery(new EntityListHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
 		}
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
-			List<DemoUser> result = ctx.eQuery(new SimpleCacheHandler(),new EntityListHandler(DemoUser.class), 
+			List<DemoUser> result = ctx.pQuery(new SimpleCacheHandler(),new EntityListHandler(DemoUser.class), 
 					"select u.** from DemoUser u where u.age>?", 0);
 			Assert.assertTrue(result.size() == 99);
 		}
@@ -134,7 +134,7 @@ public class HandlersTest extends TestBase {
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
-			List<DemoUser> result = ctx.eQuery(new EntityListHandler(DemoUser.class),
+			List<DemoUser> result = ctx.pQuery(new EntityListHandler(DemoUser.class),
 					"select u.** from DemoUser u where u.age>?", 0);
 			Assert.assertTrue(result.size() == 99);
 		}
@@ -146,18 +146,18 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testEntityMapListHandler() {
-		List<Map<String, Object>> result = ctx.eQuery(new SSMapListHandler(DemoUser.class),
+		List<Map<String, Object>> result = ctx.pQuery(new SSMapListHandler(DemoUser.class),
 				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 99);
 	}
 
 	@Test
 	public void testPaginHandler() {
-		List<Map<String, Object>> result = ctx.eQuery(new SSMapListHandler(DemoUser.class),
+		List<Map<String, Object>> result = ctx.pQuery(new SSMapListHandler(DemoUser.class),
 				new PaginHandler(2, 5), "select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 5);
 
-		List<DemoUser> users = ctx.eQuery(new EntityListHandler(DemoUser.class), new PaginHandler(2, 5),
+		List<DemoUser> users = ctx.pQuery(new EntityListHandler(DemoUser.class), new PaginHandler(2, 5),
 				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(users.size() == 5);
 
@@ -165,11 +165,11 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testPrintSqlHandler() throws SQLException {
-		List<Map<String, Object>> result = ctx.eQuery(new MapListHandler(), "select u.* from DemoUser u where u.age>?",
+		List<Map<String, Object>> result = ctx.pQuery(new MapListHandler(), "select u.* from DemoUser u where u.age>?",
 				0);
 		Assert.assertTrue(result.size() == 99);
 
-		List<Map<String, Object>> result2 = ctx.eQuery(new MapListHandler(), new PrintSqlHandler(),
+		List<Map<String, Object>> result2 = ctx.pQuery(new MapListHandler(), new PrintSqlHandler(),
 				"select u.* from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result2.size() == 99);
 	}
@@ -186,7 +186,7 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testMyAroundSqlHandler() throws SQLException {
-		List<Map<String, Object>> result2 = ctx.eQuery(MyDemoAroundSqlHandler.class, new MapListHandler(),
+		List<Map<String, Object>> result2 = ctx.pQuery(MyDemoAroundSqlHandler.class, new MapListHandler(),
 				PrintSqlHandler.class, new MyDemoAroundSqlHandler(), "select u.* from DemoUser u where u.age>?", 50);
 		Assert.assertEquals(49, result2.size());
 	}
