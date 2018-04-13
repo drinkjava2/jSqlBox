@@ -426,23 +426,23 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	/**
 	 * Cache parameters in ThreadLocal and return an empty String
 	 */
-	public static Param param(Object... parameters) {
-		return new Param(Param.PARAM, parameters);
+	public static SqlParam param(Object... parameters) {
+		return new SqlParam(SqlParam.PARAM, parameters);
 	}
 
 	/**
 	 * Cache parameters in ThreadLocal and return a "?" String
 	 */
-	public static Param question(Object... parameters) {
-		return new Param(Param.QUESTION_PARAM, parameters);
+	public static SqlParam question(Object... parameters) {
+		return new SqlParam(SqlParam.QUESTION_PARAM, parameters);
 	}
 
 	/**
 	 * Create "values(?,?,?...,?)" String according how many SQL parameters be
 	 * cached in ThreadLocal
 	 */
-	public static Param valuesQuesions() {
-		return new Param(Param.VALUES_QUESTIONS);
+	public static SqlParam valuesQuesions() {
+		return new SqlParam(SqlParam.VALUES_QUESTIONS);
 	}
 
 	/**
@@ -475,12 +475,12 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 				sqlSB.append((String) item);
 			else if (item instanceof PreparedSQL) {
 				return (PreparedSQL) item;
-			} else if (item instanceof Param) {
-				Param p = (Param) item;
-				if (Param.PARAM.equals(p.getType())) {
+			} else if (item instanceof SqlParam) {
+				SqlParam p = (SqlParam) item;
+				if (SqlParam.PARAM.equals(p.getType())) {
 					for (Object pm : p.value())
 						ps.addParam(pm);
-				} else if (Param.QUESTION_PARAM.equals(p.getType())) {
+				} else if (SqlParam.QUESTION_PARAM.equals(p.getType())) {
 					int i = 0;
 					for (Object pm : p.value()) {
 						ps.addParam(pm);
@@ -489,7 +489,7 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 						sqlSB.append("?");
 						i++;
 					}
-				} else if (Param.VALUES_QUESTIONS.equals(p.getType())) {
+				} else if (SqlParam.VALUES_QUESTIONS.equals(p.getType())) {
 					sqlSB.append(" values(");
 					for (int i = 0; i < ps.getParamSize(); i++) {
 						if (i > 0)
@@ -550,12 +550,12 @@ public class DbPro extends ImprovedQueryRunner {// NOSONAR
 				}
 			} else if (item instanceof PreparedSQL) {
 				return (PreparedSQL) item;
-			} else if (item instanceof Param) {
-				Param p = (Param) item;
-				if (Param.PARAM.equals(p.getType())) {
+			} else if (item instanceof SqlParam) {
+				SqlParam p = (SqlParam) item;
+				if (SqlParam.PARAM.equals(p.getType())) {
 					for (Object pm : p.value())
 						ps.addParam(pm);
-				} else if (Param.VALUES_QUESTIONS.equals(p.getType())) {
+				} else if (SqlParam.VALUES_QUESTIONS.equals(p.getType())) {
 					sqlSB.append(" values(");
 					for (int i = 0; i < ps.getParamSize(); i++) {
 						if (i > 0)

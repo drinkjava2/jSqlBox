@@ -17,6 +17,7 @@ package com.github.drinkjava2.jdbpro;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -85,11 +86,32 @@ public class PreparedSQL {
 		return ps;
 	}
 
+	/**
+	 * This is used for debug only
+	 */
+	public String getDebugInfo() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\ntype=").append(type);
+		sb.append("\nsql=").append(sql);
+		sb.append("\nparams=").append(Arrays.deepToString(params));
+		sb.append("\nconnection=").append(connection);
+		sb.append("\nresultSetHandler=").append(resultSetHandler);
+		sb.append("\nsqlHandlers=").append(sqlHandlers);
+		sb.append("\nuseTemplate=").append(useTemplate);
+		sb.append("\ntemplateEngine=").append(templateEngine);
+		sb.append("\ntemplateParams=").append(templateParams);
+		sb.append("\n");
+		return sb.toString();
+	}
+
 	public void addParam(Object param) {
 		if (params == null)
 			params = new Object[1];
-		else
-			params = new Object[params.length + 1];
+		else {
+			Object[] newParams = new Object[params.length + 1];
+			System.arraycopy(params, 0, newParams, 0, params.length);
+			params = newParams;
+		}
 		params[params.length - 1] = param;
 	}
 

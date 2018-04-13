@@ -131,9 +131,9 @@ public class IdGeneratorTest extends TestBase {
 			Object id1 = dialect.getNexID(UUID25Generator.INSTANCE, ctx, null);
 			Object id2 = dialect.getNexID(UUID32Generator.INSTANCE, ctx, null);
 			Object id3 = dialect.getNexID(UUID36Generator.INSTANCE, ctx, null);
-			System.out.println(id1);
-			System.out.println(id2);
-			System.out.println(id3);
+			System.out.println("id1=" + id1);
+			System.out.println("id2=" + id2);
+			System.out.println("id3=" + id3);
 			Assert.assertTrue(("" + id1).length() == 25);
 			Assert.assertTrue(("" + id2).length() == 32);
 			Assert.assertTrue(("" + id3).length() == 36);

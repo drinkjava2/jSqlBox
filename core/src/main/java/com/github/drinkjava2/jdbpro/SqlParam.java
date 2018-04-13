@@ -16,20 +16,30 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * Param store a SQL parameter
+ * SqlParam store SQL parameters
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public class Param {
-	public static final String PARAM = "PARAM";// NOSONAR
+public class SqlParam {
+	
+	/** Normal SQL param, is a Object[] type*/
+	public static final String PARAM = "PARAM";// NOSONAR 
+	
+	/** Template param, is a Object[2] type */
+	public static final String PUT = "PUT";  
+	
+	/**Template replace param, is a Object[2] type */
+	public static final String REPLACE = "REPLACE"; 
+	
+	/** Param but also return question marks */
 	public static final String QUESTION_PARAM = "QUESTION_PARAM";
 	public static final String VALUES_QUESTIONS = "VALUES_QUESTIONS";
 
 	private String type;
 	private Object[] parameters;
 
-	public Param(String type, Object... parameters) {
+	public SqlParam(String type, Object... parameters) {
 		this.type = type;
 		this.parameters = parameters;
 	}
