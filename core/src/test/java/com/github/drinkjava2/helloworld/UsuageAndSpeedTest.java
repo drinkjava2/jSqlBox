@@ -1,11 +1,19 @@
 package com.github.drinkjava2.helloworld;
 
+import static com.github.drinkjava2.jdbpro.DbPro.PARA;
+import static com.github.drinkjava2.jdbpro.DbPro.PARA0;
+import static com.github.drinkjava2.jdbpro.DbPro.PARAMS;
+import static com.github.drinkjava2.jdbpro.DbPro.QUES;
+import static com.github.drinkjava2.jdbpro.DbPro.QUES0;
+import static com.github.drinkjava2.jdbpro.DbPro.VALUESQUES;
+import static com.github.drinkjava2.jdbpro.DbPro.iPrepare;
+import static com.github.drinkjava2.jdbpro.DbPro.notNull;
+import static com.github.drinkjava2.jdbpro.DbPro.pPrepare;
 import static com.github.drinkjava2.jdbpro.DbPro.param;
 import static com.github.drinkjava2.jdbpro.DbPro.put;
-import static com.github.drinkjava2.jdbpro.DbPro.put0;
 import static com.github.drinkjava2.jdbpro.DbPro.question;
-import static com.github.drinkjava2.jdbpro.DbPro.replace;
-import static com.github.drinkjava2.jdbpro.DbPro.valuesQuesions;
+import static com.github.drinkjava2.jdbpro.DbPro.sql;
+import static com.github.drinkjava2.jdbpro.DbPro.valuesQuestions;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -16,13 +24,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
+import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
@@ -72,27 +83,30 @@ public class UsuageAndSpeedTest {
 
 	@Test
 	public void speedTest() throws Exception {
-		PRINT_TIMEUSED = false;
-		REPEAT_TIMES = 20;// warm up
-		runTestMethods();
-		PRINT_TIMEUSED = true;
-		REPEAT_TIMES = 10;
-		System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
-		runTestMethods();
-		PRINT_TIMEUSED = false;
-		REPEAT_TIMES = 1;
+		try {
+			PRINT_TIMEUSED = false;
+			REPEAT_TIMES = 20;// warm up
+			runTestMethods();
+			PRINT_TIMEUSED = true;
+			REPEAT_TIMES = 1000;
+			System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
+			runTestMethods();
+		} finally {
+			PRINT_TIMEUSED = false;
+			REPEAT_TIMES = 1;
+		}
 	}
 
 	private void runTestMethods() throws Exception {
 		runMethod("pureJdbc");
-		runMethod("xxxxStyle_withConnection");
+		runMethod("xxxxStyleWithConnection");
 		runMethod("xxxxStyle");
 		runMethod("nXxxStyle");
-		runMethod("eXxxStyle");
 		runMethod("iXxxStyle");
+		runMethod("pXxxStyle");
+		runMethod("INLINEmethods");
 		runMethod("tXxxStyle");
-		runMethod("xXxxStyle");
-		runMethod("xXxxStyle_BasicTemplate");
+		runMethod("tXxxUseAnotherSqlTemplateEngine");
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
 		runMethod("activeRecordDefaultContext");
@@ -108,7 +122,7 @@ public class UsuageAndSpeedTest {
 		long end = System.currentTimeMillis();
 		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
 		if (PRINT_TIMEUSED)
-			System.out.println(String.format("%28s: %6s s", methodName, timeused));
+			System.out.println(String.format("%35s: %6s s", methodName, timeused));
 	}
 
 	@Table(name = "users")
@@ -142,15 +156,17 @@ public class UsuageAndSpeedTest {
 		}
 	}
 
-	@Table(name = "users")
+	@Table(name = UserAR.TABLE)
 	public static class UserAR extends ActiveRecord {
-		public static final String USER = "users";
+		public static final String TABLE = "users";
 		public static final String NAME = "name";
 		public static final String ADDRESS = "address";
 
 		@Id
+		@Column(name = "name")
 		String name;
 		String address;
+		Integer age;
 
 		public UserAR() {
 		}
@@ -174,6 +190,14 @@ public class UsuageAndSpeedTest {
 
 		public void setAddress(String address) {
 			this.address = address;
+		}
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
 		}
 
 	}
@@ -255,7 +279,7 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void xxxxStyle_withConnection() {
+	public void xxxxStyleWithConnection() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			Connection conn = null;
@@ -294,6 +318,37 @@ public class UsuageAndSpeedTest {
 		}
 	}
 
+	/**
+	 * INLINE Methods are designed for old DAO tools which only allow 1 SQL string
+	 * in parameter list
+	 */
+	@Test
+	public void INLINEmethods() {
+		QueryRunner runner = new QueryRunner(dataSource);
+		final String name = "Tom";
+		final String age = null;
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			try {
+				runner.execute("insert into users (" //
+						+ " name " + PARA0("Sam") //
+						+ " ,address" + PARA("Canada") //
+						+ ")"//
+						+ VALUESQUES(), PARAMS());
+				runner.execute("update users set " //
+						+ (name == null ? "" : "name=" + QUES0("Tom")) //
+						+ (age == null ? "" : "age=" + QUES0(age)) //
+						+ ", address=" + QUES("China")//
+						, PARAMS());
+				PARA0("Tom", "China");
+				Assert.assertEquals(1L, (long) runner.query("select count(*) from users where name=? and address=?",
+						new ScalarHandler<Long>(), PARAMS()));
+				runner.execute("delete from users where name=? or address=?" + PARA0("Tom", "China"), PARAMS());
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	@Test
 	public void nXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
@@ -307,25 +362,14 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void eXxxStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.pExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
-			ctx.pExecute("update users set name=?, address=?", "Tom", "China");
-			Assert.assertEquals(1L,
-					ctx.pQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
-			ctx.pExecute("delete from users where name=? or address=?", "Tom", "China");
-		}
-	}
-
-	@Test
 	public void iXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.iExecute("insert into users (", //
-					" name ,", param("Sam"), //
+					notNull(" name ,", "Sam"), //
+					notNull(" someother ,", null), //
 					" address ", param("Canada"), //
-					") ", valuesQuesions());
+					") ", valuesQuestions());
 			ctx.iExecute("update users set name=?,address=?", param("Tom", "China"));
 			Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where name=? and address=?",
 					param("Tom", "China")));
@@ -334,74 +378,52 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void iXxxStyle2() {
+	public void pXxxStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.iExecute("insert into ", UserAR.USER, " ( ", //
-					UserAR.NAME, ",", param("Sam"), //
-					UserAR.ADDRESS, " ", param("Canada"), //
-					") ", valuesQuesions());
-			ctx.iExecute("delete from users where ", //
-					UserAR.NAME, "=", question("Sam"), //
-					" or ", UserAR.ADDRESS, "=", question("Canada")//
-			);
+			ctx.pExecute("insert into users (name,address,age) ", "Sam", "Canada", 10, valuesQuestions());
+			ctx.pExecute("update users set name=?", "Tom", sql(", address=?"), "China", sql(", age=?"), null);
+			Assert.assertEquals(1L, ctx.pQueryForObject(
+					"select count(*) from users where name=? and address=? and age is ?", "Tom", "China", null));
+			ctx.pExecute("delete from users where name=? or address=?", "Tom", "China");
 		}
 	}
 
 	@Test
 	public void tXxxStyle() {
 		SqlBoxContext ctx2 = new SqlBoxContext(dataSource);
-		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			UserAR sam = new UserAR("Sam", "Canada");
 			UserAR tom = new UserAR("Tom", "China");
-			params.put("user", sam);
-			ctx2.tExecute("insert into users (name, address) values(#{user.name},:user.address)", params);
-			params.put("user", tom);
-			ctx2.tExecute("update users set name=#{user.name}, address=:user.address", params);
-			params.clear();
-			params.put("name", "Tom");
-			params.put("addr", "China");
+			paramMap.put("user", sam);
+			ctx2.tExecute("insert into users (name, address) values(#{user.name},:user.address)", paramMap);
+			ctx2.tExecute("update users set name=#{user.name}, address=:user.address", put("user", tom));
 			Assert.assertEquals(1L,
-					ctx2.tQueryForObject("select count(*) from users where name=#{name} and address=:addr", params));
-			params.put("u", tom);
-			ctx2.tExecute("delete from users where name=:u.name or address=#{u.address}", params);
+					ctx2.tQueryForObject("select count(*) from users where name=#{name} and address=:addr",
+							put("name", "Tom", "addr", "China")));
+			ctx2.tExecute("delete from users where "//
+					, " name=:name ", put("name", "Tom")//
+					, " or address=#{address}", put("address", "China")//
+			);
 		}
 	}
 
 	@Test
-	public void xXxxStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			UserAR user = new UserAR("Sam", "Canada");
-			UserAR tom = new UserAR("Tom", "China");
-			put0("user", user);
-			ctx.xExecute("insert into users (name, address) values(#{user.name},:user.address)");
-			put0("user", tom);
-			ctx.xExecute("update users set name=#{user.name}, address=:user.address");
-			Assert.assertEquals(1L,
-					ctx.xQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
-							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-			ctx.xExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
-		}
-	}
-
-	@Test
-	public void xXxxStyle_BasicTemplate() {
+	public void tXxxUseAnotherSqlTemplateEngine() {
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
-		config.setTemplateEngine(BasicSqlTemplate.instance());
+		config.setTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
 		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			UserAR user = new UserAR("Sam", "Canada");
 			UserAR tom = new UserAR("Tom", "China");
-			put0("user", user);
-			ctx.xExecute("insert into users (name, address) values(#{user.name},#{user.address})");
-			put0("user", tom);
-			ctx.xExecute("update users set name=#{user.name}, address=#{user.address}");
+			ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", put("user", user));
+			ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom));
 			Assert.assertEquals(1L,
-					ctx.xQueryForObject("select count(*) from users where ${col}=#{name} and address=#{addr}",
-							put0("name", "Tom"), put("addr", "China"), replace("col", "name")));
-			ctx.xExecute("delete from users where name=#{u.name} or address=#{u.address}", put0("u", tom));
+					ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
+							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
+			ctx.tExecute("delete from users where name='${t.name}' or address=:u.address", put("u", tom),
+					put("$t", tom));
 		}
 	}
 
@@ -476,12 +498,11 @@ public class UsuageAndSpeedTest {
 			user.insertOneUser("Sam", "Canada");
 			user.ctx().pUpdate(user.updateAllUserPreSql("Tom", "China"));
 			List<Map<String, Object>> u1 = user.selectUsersMapListByText("Tom", "China");
-			Assert.assertEquals(1, u1.size()); 
+			Assert.assertEquals(1, u1.size());
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
 		}
 	}
-
 
 	@Test
 	public void sqlMapperUseText2() {
@@ -507,7 +528,7 @@ public class UsuageAndSpeedTest {
 			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
 		}
 	}
-	
+
 	@Test
 	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
@@ -524,4 +545,52 @@ public class UsuageAndSpeedTest {
 			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from	 users"));
 		}
 	}
+
+	public void usagesTest______________() {
+		// below methods are test usages only, not join to speed test
+	}
+
+	/** Use const String can make SQL support Java Bean field refactoring */
+	@Test
+	public void iXxxxSupportRefactor() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			ctx.iExecute("insert into ", UserAR.TABLE, " ( ", //
+					UserAR.NAME, ",", param("Sam"), //
+					UserAR.ADDRESS, " ", param("Canada"), //
+					") ", valuesQuestions());
+			ctx.iExecute("delete from users where ", //
+					UserAR.NAME, "=", question("Sam"), //
+					" or ", UserAR.ADDRESS, "=", question("Canada")//
+			);
+		}
+	}
+
+	@Test
+	public void conditionsQuery() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		final String name = "Tom";
+		final String age = null;
+		final String address = "China";
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			ctx.iExecute("insert into users (", //
+					notNull(" name", name), //
+					notNull(" ,age ", age), //
+					" ,address ", param(address), //
+					") ", valuesQuestions());
+			ctx.pExecute("update users set ", //
+					notNull(" name=?,", name), //
+					notNull(" age=?,", age), //
+					sql(" address=? "), address //
+			);
+			Assert.assertEquals(1L, ctx.iQueryForLongValue(//
+					"select count(*) from users where 1=1 ", //
+					notNull(" and name=? ", name), //
+					"Someother".equals(name) ? iPrepare(" and Someother>?  ", param(name)) : "", //
+					"China".equals(address) ? pPrepare(" and address=?  ", address) : ""//
+			));
+			ctx.nExecute("delete from users");
+		}
+	}
+
 }

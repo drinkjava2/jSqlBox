@@ -11,12 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.util.Arrays;
-
+import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlHandler;
-import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
@@ -37,7 +34,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class SSHandler implements SqlHandler {
+public class SSHandler extends DefaultOrderSqlHandler {
 	protected Object[] netConfigObjects; // The input config objects
 	protected TableModel[] config; // the real config tableModels
 
@@ -53,8 +50,8 @@ public class SSHandler implements SqlHandler {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...
@@ -133,8 +130,8 @@ public class SSHandler implements SqlHandler {
 	}
 
 	/**
-	 * Replace .** to all fields, replace .## to all PKey and FKey fields only,
-	 * for example:
+	 * Replace .** to all fields, replace .## to all PKey and FKey fields only, for
+	 * example:
 	 * 
 	 * <pre>
 	 * u.**  ==> u.id as u_id, u.userName as u_userName, u.address as u_address...

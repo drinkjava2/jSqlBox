@@ -18,19 +18,22 @@ package com.github.drinkjava2.jdbpro;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 
 /**
- * PreparedSQL2 is a POJO used for store SQL、parameter、ResultSetHandlers,
- * Connection, this is a temporary object only used for query method.
+ * PreparedSQL is a POJO used for store SQL, parameter, ResultSetHandlers,
+ * SqlHandlers, Connection and templateEngine..., this is a temporary object
+ * prepared for lower layer JDBC tool to access database
  * 
  * @author Yong Zhu
- * @since 1.7.0.3
+ * @since 1.7.0
  */
 public class PreparedSQL {
 
@@ -52,7 +55,8 @@ public class PreparedSQL {
 	/** Optional, store a SqlTemplateEngine used only for this PreparedSQL */
 	private SqlTemplateEngine templateEngine;
 
-	private Map<String, Object> templateParams;
+	/** Store template parameter map, for #{someName} format */
+	private Map<String, Object> templateParamMap;
 
 	/** Optional,SqlHandler instance list */
 	private List<SqlHandler> sqlHandlers;
@@ -71,7 +75,7 @@ public class PreparedSQL {
 		this.params = params;
 	}
 
-	/** Clone self to get a new PreparedSQL copy */
+	/** Clone self to get a new PreparedSQL copy, this is a shallow clone */
 	public PreparedSQL newCopy() {
 		PreparedSQL ps = new PreparedSQL();
 		ps.setType(this.type);
@@ -80,7 +84,7 @@ public class PreparedSQL {
 		ps.setParams(this.params);
 		ps.setUseTemplate(this.useTemplate);
 		ps.setTemplateEngine(this.templateEngine);
-		ps.setTemplateParams(this.templateParams);
+		ps.setTemplateParamMap(this.templateParamMap);
 		ps.setSqlHandlers(this.sqlHandlers);
 		ps.setResultSetHandler(this.resultSetHandler);
 		return ps;
@@ -99,7 +103,7 @@ public class PreparedSQL {
 		sb.append("\nsqlHandlers=").append(sqlHandlers);
 		sb.append("\nuseTemplate=").append(useTemplate);
 		sb.append("\ntemplateEngine=").append(templateEngine);
-		sb.append("\ntemplateParams=").append(templateParams);
+		sb.append("\ntemplateParams=").append(templateParamMap);
 		sb.append("\n");
 		return sb.toString();
 	}
@@ -115,9 +119,38 @@ public class PreparedSQL {
 		params[params.length - 1] = param;
 	}
 
+	/**
+	 * Add map content to current template map, if keys already exist will use new
+	 * value replace
+	 */
+	public void addTemplateMap(Map<String, Object> map) {
+		if (map == null)
+			return;
+		if (templateParamMap == null)
+			templateParamMap = new HashMap<String, Object>();
+		for (Entry<String, Object> entry : map.entrySet())
+			templateParamMap.put(entry.getKey(), entry.getValue());
+	}
+
+	public void addTemplateParam(SqlParam sp) {
+		if (sp.getParameters() == null || !((sp.getParameters().length % 2) == 0))
+			throw new DbProRuntimeException(
+					"Put type template parameter should be key1, value1, key2,value2... format");
+		if (templateParamMap == null)
+			templateParamMap = new HashMap<String, Object>();
+		for (int i = 1; i <= sp.getParameters().length / 2; i++)
+			templateParamMap.put((String) sp.getParameters()[(i - 1) * 2], sp.getParameters()[(i - 1) * 2 + 1]);
+	}
+
 	public void addSqlHandler(SqlHandler sqlHandler) {
 		if (sqlHandlers == null)
 			sqlHandlers = new ArrayList<SqlHandler>();
+		for (int i = sqlHandlers.size() - 1; i >= 0; i--) {
+			if (sqlHandlers.get(i).getOrder() <= sqlHandler.getOrder()) {
+				sqlHandlers.add(i + 1, sqlHandler);
+				return;
+			}
+		}
 		sqlHandlers.add(sqlHandler);
 	}
 
@@ -171,7 +204,29 @@ public class PreparedSQL {
 		return true;
 	}
 
-	// === Normal getter && setter======
+	public Object[] getParams() {
+		if (params == null)
+			return new Object[0];
+		return params;
+	}
+
+	public void addGlobalAndThreadedHandlers(DbPro dbPro) {
+		if (dbPro.getSqlHandlers() != null)
+			for (SqlHandler handler : dbPro.getSqlHandlers())
+				addSqlHandler(handler);
+		if (ImprovedQueryRunner.getThreadLocalSqlHandlers() != null) {
+			try {
+				for (SqlHandler handler : ImprovedQueryRunner.getThreadLocalSqlHandlers())
+					addSqlHandler(handler);
+			} finally {
+				ImprovedQueryRunner.setThreadLocalSqlHandlers((SqlHandler[]) null);
+			}
+		}
+	}
+
+	protected void GetterSetters_________________________() {// NOSONAR
+		// === below this line are normal getter && setter======
+	}
 
 	public SqlType getType() {
 		return type;
@@ -197,18 +252,6 @@ public class PreparedSQL {
 		this.sql = sql;
 	}
 
-	public List<SqlHandler> getSqlHandlers() {
-		return sqlHandlers;
-	}
-
-	public void setSqlHandlers(List<SqlHandler> sqlHandlers) {
-		this.sqlHandlers = sqlHandlers;
-	}
-
-	public ResultSetHandler<?> getResultSetHandler() {
-		return resultSetHandler;
-	}
-
 	public Boolean getUseTemplate() {
 		return useTemplate;
 	}
@@ -225,22 +268,28 @@ public class PreparedSQL {
 		this.templateEngine = templateEngine;
 	}
 
-	public Object[] getParams() {
-		if (params == null)
-			return new Object[0];
-		return params;
+	public Map<String, Object> getTemplateParamMap() {
+		return templateParamMap;
 	}
 
-	public void setParams(Object... params) {
+	public void setTemplateParamMap(Map<String, Object> templateParamMap) {
+		this.templateParamMap = templateParamMap;
+	}
+
+	public List<SqlHandler> getSqlHandlers() {
+		return sqlHandlers;
+	}
+
+	public void setSqlHandlers(List<SqlHandler> sqlHandlers) {
+		this.sqlHandlers = sqlHandlers;
+	}
+
+	public ResultSetHandler<?> getResultSetHandler() {// NOSONAR
+		return resultSetHandler;
+	}
+
+	public void setParams(Object[] params) {
 		this.params = params;
-	}
-
-	public Map<String, Object> getTemplateParams() {
-		return templateParams;
-	}
-
-	public void setTemplateParams(Map<String, Object> templateParams) {
-		this.templateParams = templateParams;
 	}
 
 }

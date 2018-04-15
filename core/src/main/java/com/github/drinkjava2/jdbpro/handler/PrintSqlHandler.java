@@ -13,9 +13,9 @@ package com.github.drinkjava2.jdbpro.handler;
 
 import java.util.Arrays;
 
+import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlHandler;
 
 /**
  * PaginHandler is the AroundSqlHandler used to translate SQL to paginated SQL
@@ -23,7 +23,7 @@ import com.github.drinkjava2.jdbpro.SqlHandler;
  * @author Yong Zhu
  * @since 1.7.0.2
  */
-public class PrintSqlHandler implements SqlHandler {
+public class PrintSqlHandler extends DefaultOrderSqlHandler {
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {

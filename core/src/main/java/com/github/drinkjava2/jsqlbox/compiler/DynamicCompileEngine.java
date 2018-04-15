@@ -3,7 +3,6 @@ package com.github.drinkjava2.jsqlbox.compiler;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -19,12 +18,14 @@ import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * This is a DynamicCompileEngine to compile and load Java source code into
- * memory, only tested in Maven, Tomcat
+ * memory, only tested in Eclipse, Maven, Tomcat, Weblogic
+ * 
+ * @author Yong Zhu
+ * @since 1.7.0
  */
 @SuppressWarnings("all")
 public class DynamicCompileEngine {
@@ -62,7 +63,7 @@ public class DynamicCompileEngine {
 	}
 
 	/**
-	 * Only tested in Maven, Tomcat, Weblogic
+	 * Only tested in Eclipse, Maven, Tomcat, Weblogic
 	 */
 	private void buildClassPath() {
 		// Build classPath for weblogic

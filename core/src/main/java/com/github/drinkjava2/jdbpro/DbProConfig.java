@@ -11,10 +11,6 @@
  */
 package com.github.drinkjava2.jdbpro;
 
-import java.util.List;
-
-import org.apache.commons.dbutils.ResultSetHandler;
-
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
@@ -25,14 +21,13 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.0.1
  */
-@SuppressWarnings("rawtypes")
 public class DbProConfig {
 	private SqlTemplateEngine templateEngine = DbPro.getGlobalTemplateEngine();
 	private DbProLogger logger = DbPro.getGlobalLogger();
 	private Boolean allowSqlSql = DbPro.getGlobalAllowShowSql();
 	private Integer batchSize = DbPro.getGlobalBatchSize();
 	private ConnectionManager connectionManager = DbPro.getGlobalConnectionManager();
-	private List<ResultSetHandler> handlers = DbPro.getGlobalHandlers();
+	private SqlHandler[] sqlHandlers = DbPro.getGlobalSqlHandlers();
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -74,12 +69,12 @@ public class DbProConfig {
 		this.connectionManager = connectionManager;
 	}
 
-	public List<ResultSetHandler> getHandlers() {
-		return handlers;
+	public SqlHandler[] getHandlers() {
+		return sqlHandlers;
 	}
 
-	public void setHandlers(List<ResultSetHandler> handlers) {
-		this.handlers = handlers;
+	public void setSqlHandlers(SqlHandler[] sqlHandlers) {
+		this.sqlHandlers = sqlHandlers;
 	}
 
 }

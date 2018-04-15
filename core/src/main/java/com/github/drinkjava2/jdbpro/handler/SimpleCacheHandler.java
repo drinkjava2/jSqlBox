@@ -15,9 +15,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlHandler;
 
 /**
  * SimpleCacheHandler is a simple memory cache used to cache SQL query result .
@@ -25,7 +25,7 @@ import com.github.drinkjava2.jdbpro.SqlHandler;
  * @author Yong Zhu
  * @since 1.7.0.2
  */
-public class SimpleCacheHandler implements SqlHandler {
+public class SimpleCacheHandler extends DefaultOrderSqlHandler {
 
 	/** A simple thread-safe LRU Cache with 500 items capacity */
 	private static final Map<String, Object> cache = Collections.synchronizedMap(new LRULinkedHashMap(500));

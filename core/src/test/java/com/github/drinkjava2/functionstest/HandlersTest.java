@@ -25,9 +25,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
+import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
 import com.github.drinkjava2.jdialects.TableModelUtils;
@@ -42,7 +42,7 @@ import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
- * TextUtils is base class for Java text support (multiple line Strings).
+ * This is function test for SqlHandlers
  * 
  * @author Yong Zhu
  */
@@ -114,17 +114,17 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testSimpleCacheHandler() {
-		int repeatTimes=1000;
-		
+		int repeatTimes = 1000;
+
 		for (int i = 0; i < 10; i++) {// warm up
-			ctx.pQuery(new SimpleCacheHandler(),new EntityListHandler(DemoUser.class), 
+			ctx.pQuery(new SimpleCacheHandler(), new EntityListHandler(DemoUser.class),
 					"select u.** from DemoUser u where u.age>?", 0);
 			ctx.pQuery(new EntityListHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
 		}
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
-			List<DemoUser> result = ctx.pQuery(new SimpleCacheHandler(),new EntityListHandler(DemoUser.class), 
+			List<DemoUser> result = ctx.pQuery(new SimpleCacheHandler(), new EntityListHandler(DemoUser.class),
 					"select u.** from DemoUser u where u.age>?", 0);
 			Assert.assertTrue(result.size() == 99);
 		}
@@ -153,8 +153,8 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testPaginHandler() {
-		List<Map<String, Object>> result = ctx.pQuery(new SSMapListHandler(DemoUser.class),
-				new PaginHandler(2, 5), "select u.** from DemoUser u where u.age>?", 0);
+		List<Map<String, Object>> result = ctx.pQuery(new SSMapListHandler(DemoUser.class), new PaginHandler(2, 5),
+				"select u.** from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 5);
 
 		List<DemoUser> users = ctx.pQuery(new EntityListHandler(DemoUser.class), new PaginHandler(2, 5),
@@ -174,7 +174,7 @@ public class HandlersTest extends TestBase {
 		Assert.assertTrue(result2.size() == 99);
 	}
 
-	public static class MyDemoAroundSqlHandler implements SqlHandler {
+	public static class MyDemoAroundSqlHandler extends DefaultOrderSqlHandler {
 		@Override
 		public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 			System.out.println("Hello");

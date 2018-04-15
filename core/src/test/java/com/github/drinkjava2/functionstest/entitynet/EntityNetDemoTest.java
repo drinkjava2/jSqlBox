@@ -29,12 +29,9 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListWrapHandler;
 public class EntityNetDemoTest extends TestBase {
 	@Before
 	public void init() {
-		super.init();
-		// ctx.setAllowShowSQL(true);
+		super.init(); 
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
-				Privilege.class, UserRole.class, RolePrivilege.class);
-		// Dialect.setGlobalAllowShowSql(true);
-		//Dialect.setGlobalAllowReservedWords(true);
+				Privilege.class, UserRole.class, RolePrivilege.class); 
 		dropAndCreateDatabase(models);
 	}
 

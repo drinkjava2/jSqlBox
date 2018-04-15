@@ -16,41 +16,11 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * SqlParam store SQL parameters
+ * Sql Parameter Item Type
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public class SqlParam {
-
-	private SqlParamType type;
-	private Object[] parameters;
-
-	public SqlParam(SqlParamType type, Object... parameters) {
-		this.type = type;
-		this.parameters = parameters;
-	}
- 
-	public Object[] getParameters() {
-		return parameters;
-	}
-
-	public SqlParamType getType() {
-		return type;
-	}
-
-	public void setType(SqlParamType type) {
-		this.type = type;
-	}
-
-	public void setParameters(Object[] parameters) {
-		this.parameters = parameters;
-	}
-
-	@Override
-	public String toString() {
-		throw new DbProRuntimeException(
-				"SqlParam toString() method overrided, not allowed to change to String directly");
-	}
-
+public enum SqlParamType {
+	SQL, PARAM, PUT, QUESTION_PARAM, NOT_NULL, VALUES_QUESTIONS
 }

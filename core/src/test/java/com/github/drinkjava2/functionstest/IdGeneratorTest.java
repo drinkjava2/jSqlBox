@@ -16,7 +16,7 @@
 package com.github.drinkjava2.functionstest;
 
 import static com.github.drinkjava2.jdbpro.DbPro.param;
-import static com.github.drinkjava2.jdbpro.DbPro.valuesQuesions;
+import static com.github.drinkjava2.jdbpro.DbPro.valuesQuestions;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -137,7 +137,7 @@ public class IdGeneratorTest extends TestBase {
 			Assert.assertTrue(("" + id1).length() == 25);
 			Assert.assertTrue(("" + id2).length() == 32);
 			Assert.assertTrue(("" + id3).length() == 36);
-			ctx.iExecute("insert into testNextIdTable (id1,id2,id3) ", param(id1, id2, id3), valuesQuesions());
+			ctx.iExecute("insert into testNextIdTable (id1,id2,id3) ", param(id1, id2, id3), valuesQuestions());
 		}
 	}
 

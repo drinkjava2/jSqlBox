@@ -21,7 +21,22 @@ package com.github.drinkjava2.jdbpro;
  * 
  * @since 1.7.0.2
  */
-public interface SqlHandler {
+public interface SqlHandler {// NOSONAR
+ 
+
+	/**
+	 * @return The order number, usually when add a SqlHandler into a existed
+	 *         SqlHandlers list, will sort according this order number
+	 */
+	public Integer getOrder();
+
+	/**
+	 * @param order
+	 *            Usually when add a SqlHandler into a existed SqlHandlers list,
+	 *            will sort according this order number, if no order requirement,
+	 *            can set this value to DEFAULT_ORDER
+	 */
+	public void setOrder(Integer order);
 
 	/**
 	 * handle method is an intercept method, subClass should implement this method

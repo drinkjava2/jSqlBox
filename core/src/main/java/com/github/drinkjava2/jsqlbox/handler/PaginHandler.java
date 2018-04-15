@@ -11,9 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
+import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
@@ -22,7 +22,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class PaginHandler implements SqlHandler {
+public class PaginHandler extends DefaultOrderSqlHandler {
 	int pageNumber;
 	int pageSize;
 

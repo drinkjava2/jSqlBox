@@ -22,18 +22,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbutils.OutParameter;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
-import com.github.drinkjava2.jdbpro.template.NamedParamSqlTemplate;
+import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
@@ -53,31 +50,23 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.7.0
  */
 @SuppressWarnings({ "all" })
-public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
+public class ImprovedQueryRunner extends QueryRunner {
 	protected static Boolean globalAllowShowSql = false;
 	protected static ConnectionManager globalConnectionManager = null;
-	protected static List<ResultSetHandler> globalHandlers = null;
+	protected static SqlHandler[] globalSqlHandlers = null;
 	protected static DbProLogger globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalBatchSize = 300;
-	protected static SqlTemplateEngine globalTemplateEngine = NamedParamSqlTemplate.instance();
+	protected static SqlTemplateEngine globalTemplateEngine = BasicSqlTemplate.instance();
 
 	protected SqlTemplateEngine sqlTemplateEngine = globalTemplateEngine;
 	protected ConnectionManager connectionManager = globalConnectionManager;
 	protected Boolean allowShowSQL = globalAllowShowSql;
 	protected DbProLogger logger = globalLogger;
 	protected Integer batchSize = globalBatchSize;
-	protected List<ResultSetHandler> handlers = globalHandlers;
+	protected SqlHandler[] sqlHandlers = globalSqlHandlers;
 
-	/**
-	 * A ThreadLocal type cache to store handlers, all handlers will be cleaned
-	 * after any SQL method be executed
-	 */
-	private static ThreadLocal<ArrayList<ResultSetHandler>> threadedHandlers = new ThreadLocal<ArrayList<ResultSetHandler>>() {
-		@Override
-		protected ArrayList<ResultSetHandler> initialValue() {
-			return new ArrayList<ResultSetHandler>();
-		}
-	};
+	/** A ThreadLocal SqlHandler instance */
+	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
 
 	/**
 	 * A ThreadLocal type tag to indicate current all SQL operations should be
@@ -112,49 +101,6 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 		super(ds);
 		this.connectionManager = cm;
 	}
-
-	// ==========getter & setter==========
-	public Boolean getAllowShowSQL() {
-		return allowShowSQL;
-	}
-
-	public DbProLogger getLogger() {
-		return logger;
-	}
-
-	public Integer getBatchSize() {
-		return batchSize;
-	}
-
-	public boolean isBatchEnabled() {
-		return batchEnabled.get();
-	}
-
-	public static DbProLogger getGlobalLogger() {
-		return globalLogger;
-	}
-
-	public static void setGlobalLogger(DbProLogger globalLogger) {
-		ImprovedQueryRunner.globalLogger = globalLogger;
-	}
-
-	public static Integer getGlobalBatchSize() {
-		return globalBatchSize;
-	}
-
-	public static void setGlobalBatchSize(Integer globalBatchSize) {
-		ImprovedQueryRunner.globalBatchSize = globalBatchSize;
-	}
-
-	public static SqlTemplateEngine getGlobalTemplateEngine() {
-		return globalTemplateEngine;
-	}
-
-	public static void setGlobalTemplateEngine(SqlTemplateEngine globalTemplateEngine) {
-		ImprovedQueryRunner.globalTemplateEngine = globalTemplateEngine;
-	}
-
-	// End of getter & setters
 
 	@Override
 	public void close(Connection conn) throws SQLException {
@@ -210,44 +156,9 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 		return "PAR: " + Arrays.deepToString(params);
 	}
 
-	/**
-	 * Add a explainer
-	 */
-	public static ArrayList<ResultSetHandler> getThreadedHandlers() {
-		return threadedHandlers.get();
-	}
-
-	private static String createKey(String sql, Object... params) {
-		return new StringBuilder("SQL:").append(sql).append("  Params:").append(Arrays.toString(params)).toString();
-	}
-
 	// ===override execute/insert/update methods to support batch and explainSql
 	// BTW, some methods in QueryRunner are private, otherwise no need override
 	// so many methods
-
-	/**
-	 * Convert Objects List to 2d array for insertBatch use, insertBatch's last
-	 * parameter is a 2d array, not easy to use
-	 */
-	public static Object[][] ListListToArray2D(List<List<?>> paramList) {
-		Object[][] array = new Object[paramList.size()][];
-		int i = 0;
-		for (List<?> item : paramList)
-			array[i++] = item.toArray(new Object[item.size()]);
-		return array;
-	}
-
-	/**
-	 * Convert List List to 2d array for insertBatch use, insertBatch's last
-	 * parameter is a 2d array, not easy to use
-	 */
-	public static Object[][] ObjectsListToArray2D(List<Object[]> paramList) {
-		Object[][] array = new Object[paramList.size()][];
-		int i = 0;
-		for (Object[] item : paramList)
-			array[i++] = item;
-		return array;
-	}
 
 	/**
 	 * Add SQL to cache, if full (reach batchSize) then call batchFlush() <br/>
@@ -408,282 +319,6 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 		return query(sql, new ScalarHandler<T>(1), params);
 	}
 
-	// =======================================================================
-	// Normal style methods but transfer SQLException to DbProRuntimeException
-
-	/**
-	 * Executes the given SELECT SQL query and returns a result object.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param sql
-	 *            the SQL
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code>.
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nQuery(SqlType type, Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, conn, rsh, sql, params);
-		return (T) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen.
-	 * 
-	 * @param sql
-	 * @param params
-	 * @return An Object or null, Object type determined by SQL content
-	 */
-	public <T> T nQueryForObject(Connection conn, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, conn, SingleTonHandlers.scalarHandler, sql, params);
-		return (T) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Execute query and force return a String object, no need catch SQLException.
-	 * 
-	 */
-	public String nQueryForString(Connection conn, String sql, Object... params) {
-		return (String) nQueryForObject(conn, sql, params);
-	}
-
-	/**
-	 * Execute query and force return a Long object, no need catch SQLException,
-	 * runtime exception may throw if result can not be cast to long.
-	 */
-	public long nQueryForLongValue(Connection conn, String sql, Object... params) {
-		return ((Number) nQueryForObject(conn, sql, params)).longValue();
-	}
-
-	/**
-	 * Execute query and force return a List<Map<String, Object>> type result, no
-	 * need catch SQLException.
-	 */
-	public List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, conn, SingleTonHandlers.mapListHandler, sql, params);
-		return (List<Map<String, Object>>) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Executes the given INSERT, UPDATE, or DELETE SQL statement.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return The number of rows updated.
-	 */
-	public int nUpdate(Connection conn, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.UPDATE, conn, null, sql, params);
-		return (Integer) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Executes the given INSERT SQL statement. Note: This method does not close
-	 * connection.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code> of auto-generated keys.
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nInsert(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.INSERT, conn, rsh, sql, params);
-		return (T) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which does not
-	 * return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
-	 * <p>
-	 * Use this method when invoking a stored procedure with OUT parameters that
-	 * does not return any result sets.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @return The number of rows updated.
-	 */
-	public int nExecute(Connection conn, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, conn, null, sql, params);
-		return (Integer) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which returns one or
-	 * more result sets. Any parameters which are instances of {@link OutParameter}
-	 * will be registered as OUT parameters. Note: This method does not close
-	 * connection.
-	 * 
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
-	 *
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The result set handler
-	 * @param sql
-	 *            the SQL
-	 * @return A list of objects generated by the handler
-	 * 
-	 */
-	public <T> List<T> nExecute(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, conn, rsh, sql, params);
-		return (List<T>) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Executes the given SELECT SQL query and returns a result object.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param sql
-	 *            the SQL
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code>.
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nQuery(ResultSetHandler<T> rsh, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, null, rsh, sql, params);
-		return (T) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen.
-	 * 
-	 * @param sql
-	 * @param params
-	 * @return An Object or null, Object type determined by SQL content
-	 */
-	@Override
-	public <T> T nQueryForObject(String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, null, SingleTonHandlers.scalarHandler, sql, params);
-		return (T) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Execute query and force return a String object, no need catch SQLException
-	 */
-	public String nQueryForString(String sql, Object... params) {
-		return String.valueOf(nQueryForObject(sql, params));
-	}
-
-	/**
-	 * Execute query and force return a Long object, no need catch SQLException,
-	 * runtime exception may throw if result can not be cast to long
-	 */
-	public long nQueryForLongValue(String sql, Object... params) {
-		return ((Number) nQueryForObject(sql, params)).longValue();// NOSONAR
-	}
-
-	/**
-	 * Execute query and force return a List<Map<String, Object>> type result, no
-	 * need catch SQLException
-	 */
-	public List<Map<String, Object>> nQueryForMapList(String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, null, SingleTonHandlers.mapListHandler, sql, params);
-		return (List<Map<String, Object>>) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Executes the given INSERT, UPDATE, or DELETE SQL statement.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return The number of rows updated.
-	 */
-	@Override
-	public int nUpdate(String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.UPDATE, null, null, sql, params);
-		return (Integer) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Executes the given INSERT SQL statement.
-	 * 
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The handler used to create the result object from the
-	 *            <code>ResultSet</code> of auto-generated keys.
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return An object generated by the handler.
-	 * 
-	 */
-	public <T> T nInsert(ResultSetHandler rsh, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.INSERT, null, rsh, sql, params);
-		return (T) runPreparedSQL(ps);
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which does not
-	 * return any result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
-	 * <p>
-	 * Use this method when invoking a stored procedure with OUT parameters that
-	 * does not return any result sets.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @return The number of rows updated.
-	 */
-	@Override
-	public int nExecute(String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, null, null, sql, params);
-		Object o = runPreparedSQL(ps);
-		return (Integer) o;
-	}
-
-	/**
-	 * Execute an statement, including a stored procedure call, which returns one or
-	 * more result sets. Any parameters which are instances of {@link OutParameter}
-	 * will be registered as OUT parameters.
-	 * 
-	 * Use this method when: a) running SQL statements that return multiple result
-	 * sets; b) invoking a stored procedure that return result sets and OUT
-	 * parameters.
-	 *
-	 * @param <T>
-	 *            The type of object that the handler returns
-	 * @param rsh
-	 *            The result set handler
-	 * @param sql
-	 *            the SQL
-	 * @return A list of objects generated by the handler
-	 * 
-	 */
-	public <T> List<T> nExecute(ResultSetHandler rsh, String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlType.EXECUTE, null, rsh, sql, params);
-		return (List<T>) runPreparedSQL(ps);
-	}
-
 	/**
 	 * This is the core method of whole project, handle a PreparedSQL instance and
 	 * return a result
@@ -694,7 +329,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 			SqlTemplateEngine engine = ps.getTemplateEngine();
 			if (engine == null)
 				engine = this.sqlTemplateEngine;
-			PreparedSQL rendered = engine.render(ps.getSql(), ps.getTemplateParams(), null);
+			PreparedSQL rendered = engine.render(ps.getSql(), ps.getTemplateParamMap());
 			ps.setSql(rendered.getSql());
 			ps.setParams(rendered.getParams());
 		}
@@ -852,15 +487,19 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 * operation Exception happen.
 	 * 
 	 * @param ps
-	 *            The PreparedSQL which included SQL、parameters and handlers(if
+	 *            The PreparedSQL which included SQL、parameters and sqlHandlers(if
 	 *            have)
 	 * @return An Object or null, Object type determined by SQL content
 	 */
 	private <T> T runQueryForScalar(PreparedSQL ps) {
-		if (ps.getResultSetHandler() == null)
-			return nQuery(new ScalarHandler<T>(1), ps.getSql(), ps.getParams());
-		else
-			return (T) nQuery(ps.getResultSetHandler(), ps.getSql(), ps.getParams());
+		try {
+			if (ps.getResultSetHandler() == null)
+				return query(ps.getSql(), new ScalarHandler<T>(1), ps.getParams());
+			else
+				return (T) query(ps.getSql(), ps.getResultSetHandler(), ps.getParams());
+		} catch (SQLException e) {
+			throw new DbProRuntimeException(e);
+		}
 	}
 
 	/**
@@ -874,7 +513,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 */
 	public int[] nBatch(String sql, List<Object[]> params) {
 		try {
-			return batch(sql, ObjectsListToArray2D(params));
+			return batch(sql, objectsListToArray2D(params));
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -894,7 +533,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 */
 	public int[] nBatch(Connection conn, String sql, List<Object[]> params) throws SQLException {
 		try {
-			return batch(conn, sql, ObjectsListToArray2D(params));
+			return batch(conn, sql, objectsListToArray2D(params));
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -916,7 +555,7 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 */
 	public <T> T nInsertBatch(String sql, ResultSetHandler<T> rsh, List<Object[]> params) {
 		try {
-			return insertBatch(sql, rsh, ObjectsListToArray2D(params));
+			return insertBatch(sql, rsh, objectsListToArray2D(params));
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
@@ -940,13 +579,80 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 	 */
 	public <T> T nInsertBatch(Connection conn, String sql, ResultSetHandler<T> rsh, List<Object[]> params) {
 		try {
-			return this.insertBatch(conn, sql, rsh, ObjectsListToArray2D(params));
+			return this.insertBatch(conn, sql, rsh, objectsListToArray2D(params));
 		} catch (SQLException e) {
 			throw new DbProRuntimeException(e);
 		}
 	}
 
-	// ==========public static global methods============
+	private void publicStaticMethods_____________________() {// NOSONAR
+	}
+
+	public static DbProLogger getGlobalLogger() {
+		return globalLogger;
+	}
+
+	public static void setGlobalLogger(DbProLogger globalLogger) {
+		ImprovedQueryRunner.globalLogger = globalLogger;
+	}
+
+	public static Integer getGlobalBatchSize() {
+		return globalBatchSize;
+	}
+
+	public static void setGlobalBatchSize(Integer globalBatchSize) {
+		ImprovedQueryRunner.globalBatchSize = globalBatchSize;
+	}
+
+	public static SqlTemplateEngine getGlobalTemplateEngine() {
+		return globalTemplateEngine;
+	}
+
+	public static void setGlobalTemplateEngine(SqlTemplateEngine globalTemplateEngine) {
+		ImprovedQueryRunner.globalTemplateEngine = globalTemplateEngine;
+	}
+
+	/**
+	 * Get current thread's ThreadLocal SqlHandler
+	 */
+	public static SqlHandler[] getThreadLocalSqlHandlers() {
+		return threadLocalSqlHandlers.get();
+	}
+
+	/**
+	 * Set current thread's ThreadLocal SqlHandler
+	 */
+	public static void setThreadLocalSqlHandlers(SqlHandler... handlers) {
+		threadLocalSqlHandlers.set(handlers);
+	}
+
+	// ===override execute/insert/update methods to support batch and explainSql
+	// BTW, some methods in QueryRunner are private, otherwise no need override
+	// so many methods
+
+	/**
+	 * Convert Objects List to 2d array for insertBatch use, insertBatch's last
+	 * parameter is a 2d array, not easy to use
+	 */
+	public static Object[][] listListToArray2D(List<List<?>> paramList) {
+		Object[][] array = new Object[paramList.size()][];
+		int i = 0;
+		for (List<?> item : paramList)
+			array[i++] = item.toArray(new Object[item.size()]);
+		return array;
+	}
+
+	/**
+	 * Convert List List to 2d array for insertBatch use, insertBatch's last
+	 * parameter is a 2d array, not easy to use
+	 */
+	public static Object[][] objectsListToArray2D(List<Object[]> paramList) {
+		Object[][] array = new Object[paramList.size()][];
+		int i = 0;
+		for (Object[] item : paramList)
+			array[i++] = item;
+		return array;
+	}
 
 	public static Boolean getGlobalAllowShowSql() {
 		return globalAllowShowSql;
@@ -964,11 +670,47 @@ public class ImprovedQueryRunner extends QueryRunner implements NormalJdbcTool {
 		DbPro.globalConnectionManager = globalConnectionManager;
 	}
 
-	public static List<ResultSetHandler> getGlobalHandlers() {
-		return globalHandlers;
+	public static SqlHandler[] getGlobalSqlHandlers() {
+		return globalSqlHandlers;
 	}
 
-	public static void setGlobalResultSetHandlers(List<ResultSetHandler> globalHandlers) {
-		DbPro.globalHandlers = globalHandlers;
+	public static void setGlobalSqlHandlers(SqlHandler... sqlHandlers) {
+		globalSqlHandlers = sqlHandlers;
 	}
+
+	private void getterSetters_____________________() {// NOSONAR
+	}
+
+	public Boolean getAllowShowSQL() {
+		return allowShowSQL;
+	}
+
+	/**
+	 * @deprecated This method is not thread safe, but sometimes need use it for
+	 *             debugging purpose
+	 */
+	public void setAllowShowSQL(Boolean bl) {
+		this.allowShowSQL = bl;
+	}
+
+	public DbProLogger getLogger() {
+		return logger;
+	}
+
+	public Integer getBatchSize() {
+		return batchSize;
+	}
+
+	public boolean isBatchEnabled() {
+		return batchEnabled.get();
+	}
+
+	public SqlTemplateEngine getSqlTemplateEngine() {
+		return sqlTemplateEngine;
+	}
+
+	public SqlHandler[] getSqlHandlers() {
+		return sqlHandlers;
+	}
+
 }

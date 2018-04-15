@@ -11,21 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.util.List;
-
-import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
-import com.github.drinkjava2.jdbpro.SqlHandler;
-import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jdialects.model.FKeyModel;
-import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
  * DStarMapListHandler is a SqlHandler used to explain alias.** to real columns

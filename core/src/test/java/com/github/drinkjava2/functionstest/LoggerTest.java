@@ -7,6 +7,8 @@
  */
 package com.github.drinkjava2.functionstest;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.Dialect;
@@ -21,6 +23,16 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.2
  */
 public class LoggerTest {
+	@Before
+	public void init() {
+		SqlBoxContext.resetGlobalSqlBoxVariants();
+	}
+
+	@After
+	public void cleanUp() {
+		SqlBoxContext.resetGlobalSqlBoxVariants();
+	}
+
 	private String name;
 
 	public String getName() {
@@ -56,10 +68,9 @@ public class LoggerTest {
 		LoggerTest t = new LoggerTest();
 		t.setName("Tom");
 		ctx.insert(t);
-		SqlBoxContext.setGlobalAllowShowSql(false);
-
 		SqlBoxContext.getGlobalLogger().info("Logger test message3 output ok");
 		SqlBoxContext.getGlobalLogger().info("Logger test message4 output ok");
+		SqlBoxContext.setGlobalAllowShowSql(false);
 	}
 
 }

@@ -150,14 +150,14 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			throw new SqlBoxException(
 					"guess() method can not determine use template or normal style for SQL '" + sql + "'");
 		if (useTemplate)
-			ps.setTemplateParams(buildParamMap(callerClassName, callerMethodName, params));
+			ps.setTemplateParamMap(buildParamMap(callerClassName, callerMethodName, params));
 		else
 			ps.setParams(params);
 		autoGuessHandler(entity, ps, sql, callerMethod); // guess handler
 		return (T) entity.ctx().runPreparedSQL(ps);
 	}
 
-	/** Automatically guess the handlers */
+	/** Automatically guess the sqlHandlers */
 	private static void autoGuessHandler(ActiveRecord entity, PreparedSQL ps, String sql, Method method) {
 		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty())
 			return;

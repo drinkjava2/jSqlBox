@@ -17,7 +17,10 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.DbPro;
+import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
+import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
@@ -43,9 +46,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	private static Dialect globalDialect = null;
 
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
-	 * can use setDialect() method to change to other dialect, to keep
-	 * thread-safe, only subclass can access this variant
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
+	 * use setDialect() method to change to other dialect, to keep thread-safe, only
+	 * subclass can access this variant
 	 */
 	protected Dialect dialect;
 
@@ -68,7 +71,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.handlers = config.getHandlers();
+		this.sqlHandlers = config.getHandlers();
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
@@ -79,7 +82,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.handlers = config.getHandlers();
+		this.sqlHandlers = config.getHandlers();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
 	}
@@ -153,8 +156,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to
-	 * improve loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
+	 * loading speed
 	 */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, true, configObjects);
@@ -225,8 +228,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new
-	 * one and bind on entityBean
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
+	 * and bind on entityBean
 	 */
 	public SqlBox getSqlBox(Object entityBean) {
 		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
@@ -262,7 +265,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return dialect;
 	}
 
-	// ==========global getter & setter =======
+	protected void publicStaticMethods_____________________() {// NOSONAR
+	}
 
 	public static Dialect getGlobalDialect() {
 		return globalDialect;
@@ -287,6 +291,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static String getGlobalsqlboxsuffix() {
 		return globalSqlBoxSuffix;
+	}
+
+	/** Reset all global SqlBox variants to its old default values */
+	public static void resetGlobalSqlBoxVariants() {
+		globalAllowShowSql = false;
+		globalConnectionManager = null;
+		globalSqlHandlers = null;
+		globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
+		globalBatchSize = 300;
+		globalTemplateEngine = BasicSqlTemplate.instance();
+		globalSqlBoxContext = null;
 	}
 
 }

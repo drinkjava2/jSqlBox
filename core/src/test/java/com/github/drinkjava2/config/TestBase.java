@@ -35,6 +35,8 @@ public class TestBase {
 
 	@Before
 	public void init() {
+		SqlBoxContext.resetGlobalSqlBoxVariants();
+		
 		dataSource = BeanBox.getBean(DataSourceBox.class);
 		// dataSource = new HikariDataSource();
 		// dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
@@ -43,8 +45,10 @@ public class TestBase {
 		// dataSource.setPassword("");
 		// dataSource.setMaximumPoolSize(8);
 		// dataSource.setConnectionTimeout(2000);
-		dialect = Dialect.guessDialect(dataSource);
+		dialect = Dialect.guessDialect(dataSource); 
 		Dialect.setGlobalAllowReservedWords(true);
+ 
+		SqlBoxContext.resetGlobalSqlBoxVariants();
 		// SqlBoxContext.setGlobalAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
@@ -54,7 +58,7 @@ public class TestBase {
 	public void cleanUp() {
 		// dataSource.close();
 		BeanBox.defaultContext.close();
-		SqlBoxContext.setGlobalSqlBoxContext(null);
+		SqlBoxContext.resetGlobalSqlBoxVariants();
 	}
 
 	public void executeDDLs(String[] ddls) {

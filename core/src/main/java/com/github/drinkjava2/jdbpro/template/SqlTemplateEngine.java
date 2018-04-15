@@ -16,7 +16,6 @@
 package com.github.drinkjava2.jdbpro.template;
 
 import java.util.Map;
-import java.util.Set;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 
@@ -38,26 +37,26 @@ public interface SqlTemplateEngine {
 	 *            template String
 	 * @param paramMap
 	 *            A Map instance, key is String type, value is Object type
-	 * @param directReplaceNamesSet
-	 *            Optional, A Set includes key names in Template should only use
-	 *            replace() or replace0() method to put real values;
+	 * @param directReplaceMap
+	 *            Optional, A Map instance, key is String type, value is Object
+	 *            type, only use replace() or replace0() method to put real values;
 	 * 
 	 *            <pre>
 	 *            For example: 
+	 *            Template "delete from #{tb}", use put("tb","users") method,      will get "delete from ?"
 	 *            Template "delete from ${tb}", use replace("tb","users") method,   will get "delete from users"
 	 *            Template "delete from #{tb}", use replace("tb","users") method,   will cause an Exception
 	 *            Template "delete from ${tb}", use put("tb","users") method,      will cause an Exception
-	 *            Template "delete from #{tb}", use put("tb","users") method,      will get "delete from ?"
+	 * 
 	 *            </pre>
 	 * 
 	 *            This design is to avoid typing mistake cause a SQL injection
 	 *            security leak, when programmer use replace() or replace0() method,
 	 *            he will aware this is a String direct replace method, not a SQL
-	 *            parameter, SQL parameter always use bind() or bind0() method.
+	 *            parameter, SQL parameter always use "put" method.
 	 * 
 	 * @return PreparedSQL instance
 	 */
-	public PreparedSQL render(String sqlTemplateOrSqlID, Map<String, Object> paramMap,
-			Set<String> directReplaceNamesSet);
+	public PreparedSQL render(String sqlTemplateOrSqlID, Map<String, Object> paramMap );
 
 }

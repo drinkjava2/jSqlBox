@@ -21,26 +21,38 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 
 /**
  * BasicSqlTemplate is a simple implementation of SqlTemplateEngine. It allow
  * use #{xxxx} format parameters in template, and replace ${xxxx} pieces
- * directly
+ * directly. This is a thread safe class.
  * 
  * @author Yong Zhu
  * @since 1.7.0
  */
 public class BasicSqlTemplate implements SqlTemplateEngine {
-	private String startDelimiter;
-	private String endDelimiter;
+	/**
+	 * If set true, for ${placeHolder} in template, should use
+	 * put("$placeHolder",value) instead of use put("placeHolder",value) <br/>
+	 * Default is false
+	 */
+	protected Boolean dollarKeyForDollarPlaceHolder = false;
+
+	/**
+	 * If set true, ${placeHolder} can write as :placeHolder <br/>
+	 * Default is true
+	 */
+	protected Boolean allowColonAsDelimiter = true;
+
+	private String startDelimiter = "#{";
+	private String endDelimiter = "}";
 
 	private static final String DIRECT_REPLACE_START_DELIMITER = "${";
 	private static final String DIRECT_REPLACE_END_DELIMITER = "}";
 
-	/** A lazy initialization singleton pattern */
+	/** A lazy initialisation singleton pattern */
 	private static class InnerBasicSqlTemplate {
 		private InnerBasicSqlTemplate() {
 		}
@@ -54,11 +66,10 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	}
 
 	/**
-	 * Build a BasicSqlTemplate instance, default use #{} as delimiter
+	 * Build a BasicSqlTemplate instance, default use #{} as delimiter,
+	 * dollarKeyForDollarPlaceHolder is false, allow
 	 */
 	public BasicSqlTemplate() {
-		this.startDelimiter = "#{";
-		this.endDelimiter = "}";
 	}
 
 	/**
@@ -71,22 +82,61 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	 * @param endDelimiter
 	 *            The end delimiter
 	 */
-	public BasicSqlTemplate(String startDelimiter, String endDelimiter) {
+	/**
+	 * @param startDelimiter
+	 *            The start delimiter
+	 * @param endDelimiter
+	 *            The end delimiter
+	 * @param allowColonAsDelimiter
+	 *            If set true, write :placeHolder is equal to #{placeHolder}
+	 * @param dollarKeyForDollarPlaceHolder
+	 *            If set true, ${placeHolder} should use put("$placeHolder",value)
+	 *            instead of use put("placeHolder",value)
+	 */
+	public BasicSqlTemplate(String startDelimiter, String endDelimiter, Boolean allowColonAsDelimiter,
+			Boolean dollarKeyForDollarPlaceHolder) {
 		if (isEmpty(startDelimiter) || isEmpty(endDelimiter) || startDelimiter.length() > 2
 				|| endDelimiter.length() != 1)
 			throw new BasicSqlTemplateException(
 					"BasicSqlTemplate only support startDelimiter has 1 or 2 characters and endDelimiter has 1 character");
 		this.startDelimiter = startDelimiter;
 		this.endDelimiter = endDelimiter;
+		this.allowColonAsDelimiter = allowColonAsDelimiter;
+		this.dollarKeyForDollarPlaceHolder = dollarKeyForDollarPlaceHolder;
 	}
 
-	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap) {
-		return doRender(sqlTemplate, paramMap, startDelimiter, endDelimiter, null);
+	private static boolean isParamChars(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '.';
+	}
+
+	private String translateColonToDelimiter(String sql) {
+		StringBuilder sb = new StringBuilder();
+		int status = 0;// status 0:normal, 1:in parameter
+		for (int i = 0; i < sql.length(); i++) {
+			char c = sql.charAt(i);
+			if (status == 0 && c != ':')
+				sb.append(c);
+			else if (status == 0 && c == ':') {
+				sb.append(startDelimiter);
+				status = 1;
+			} else if (status == 1 && isParamChars(c))
+				sb.append(c);
+			else {
+				sb.append(endDelimiter).append(c);
+				status = 0;
+			}
+		}
+		if (status == 1)
+			sb.append(endDelimiter);
+		return sb.toString();
 	}
 
 	@Override
-	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap, Set<String> directReplaceNamesSet) {
-		return doRender(sqlTemplate, paramMap, startDelimiter, endDelimiter, directReplaceNamesSet);
+	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap) {
+		String newSql = sqlTemplate;
+		if (allowColonAsDelimiter)
+			newSql = translateColonToDelimiter(sqlTemplate);
+		return doRender(newSql, paramMap);
 	}
 
 	/**
@@ -102,8 +152,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	 *            End Delimiter of SQL Template
 	 * @return A PreparedSQL instance
 	 */
-	protected static PreparedSQL doRender(String template, Map<String, Object> paramMap, String startDelimiter,
-			String endDelimiter, Set<String> directReplaceNamesSet) {
+	private PreparedSQL doRender(String template, Map<String, Object> paramMap) {
 		if (template == null)
 			throw new NullPointerException("Template can not be null");
 		StringBuilder sql = new StringBuilder();
@@ -126,6 +175,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		char eDirect = DIRECT_REPLACE_END_DELIMITER.charAt(0);
 
 		// - - # { - - - } - - - $ { - - - } - -
+		// - - @ [ - - - ] - - - $ { - - - } - -
 		// 0 0 1 1 2 2 2 3 0 0 0 1 1 2 2 2 3 0 0
 		// - - - - - - - - - - - D D D D D - - -
 		int status = 0; // 0:normal 1:start-delimiter 2:inside 3: end-delimiter
@@ -147,6 +197,8 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 				status = 2;
 			} else if (status == 1 && ((drlg == 1 && cm1 == drst1) || (drlg == 2 && (cm2 == drst1 && cm1 == drst2)))) {
 				status = 2;
+			} else if (status == 3 && (((cm1 == e) && !directRep) || ((cm1 == eDirect) && directRep))) {
+				status = 0;
 			} else if (status == 2 && (((c == e) && !directRep) || ((c == eDirect) && directRep))) {
 				status = 3;
 				if (keyNameSB.length() == 0)
@@ -158,14 +210,13 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 					String propertyName = substringAfter(key, ".");
 					if (isEmpty(beanName) || isEmpty(propertyName))
 						throwEX("illegal parameter name '" + key + "' found in template: " + template);
-					boolean directReplaceType = isDirectReplaceTypeParameter(template, paramMap, directReplaceNamesSet,
-							directRep, beanName);
 
-					boolean hasValue = paramMap.containsKey(beanName);
+					String paramKey = (directRep && dollarKeyForDollarPlaceHolder) ? "$" + beanName : beanName;
+					boolean hasValue = paramMap.containsKey(paramKey);
 					if (!hasValue)
-						throwEX("Not found bean '" + beanName + "' when render template: " + template);
+						throwEX("Not found bean '" + paramKey + "' when render template: " + template);
 
-					Object bean = paramMap.get(beanName);
+					Object bean = paramMap.get(paramKey);
 					PropertyDescriptor pd = null;
 					try {
 						pd = new PropertyDescriptor(propertyName, bean.getClass());
@@ -180,30 +231,26 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 					} catch (Exception e1) {
 						throwEX("Exception happen when read bean property '" + key + "' in template: " + template, e1);
 					}
-					if (directReplaceType) {
+					if (directRep) {
 						sql.append(beanProperty);
 					} else {
 						sql.append("?");
 						paramList.add(beanProperty);
 					}
 				} else {
-					boolean directReplaceType = isDirectReplaceTypeParameter(template, paramMap, directReplaceNamesSet,
-							directRep, key);
-					boolean hasValue = paramMap.containsKey(key);
-					if (!hasValue)
-						throwEX("No parameter found for '" + key + "' in template: " + template + ". Current params="
-								+ paramMap);
-					if (directReplaceType) {
-						sql.append(paramMap.get(key));
+					String paramKey = (directRep && dollarKeyForDollarPlaceHolder) ? "$" + key : key;
+					if (!paramMap.containsKey(paramKey))
+						throwEX("No parameter found for '" + paramKey + "' in template: " + template);
+					if (directRep) {
+						sql.append(paramMap.get(paramKey));
 					} else {
 						sql.append("?");
-						paramList.add(paramMap.get(key));
+						paramList.add(paramMap.get(paramKey));
 					}
 				}
 				keyNameSB.setLength(0);
-			} else if (status == 3 && cm1 == e) {
-				status = 0;
 			}
+			// Debug: "" + c + " " + status + " " + directRep; //NOSONAR
 			if (status == 0)
 				sql.append(c);
 			else if (status == 2)
@@ -216,32 +263,6 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		sp.setSql(sql.toString());
 		sp.setParams(paramList.toArray());
 		return sp;
-	}
-
-	private static boolean isDirectReplaceTypeParameter(String template, Map<String, Object> paramMap,
-			Set<String> directReplaceNamesSet, boolean directRep, String beanName) {
-		boolean directReplaceType = isDirectReplaceType(beanName, paramMap, directReplaceNamesSet);
-		if (directReplaceType && !directRep)
-			throwEX("'" + beanName
-					+ "' is a SQL parameter, should use put() or put0() method to set SQL parameter, in template: "
-					+ template);
-		if (!directReplaceType && directRep)
-			throwEX("'" + beanName
-					+ "' is a direct-replace type parameter, should use replace() or replace0() method to put parameter, in template: "
-					+ template);
-		return directReplaceType;
-	}
-
-	private static boolean isDirectReplaceType(String keyName, Map<String, Object> paramMap,
-			Set<String> directReplaceNamesSet) {
-		if (directReplaceNamesSet == null)
-			return false;
-		if (directReplaceNamesSet.contains(keyName)) {
-			if (!paramMap.containsKey(keyName))
-				throwEX("'" + keyName + "' is indicated as a direct replace parameter but can not in parameter Map");
-			return true;
-		}
-		return false;
 	}
 
 	private static void throwEX(String message, Exception... cause) {

@@ -25,14 +25,16 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  */
 public class BatchTest {
 	int BUFFER_SIZE = 300;
-	int INSERT_AMOUNT = BUFFER_SIZE * 10;
+	int INSERT_AMOUNT = BUFFER_SIZE * 1; // Change 1 to 1000 try
 
 	SqlBoxContext ctx = null;
 
 	{
-		// When test
-		// Change to MySqlDataSourceBox.class because H2 does not support batch
+		SqlBoxContext.resetGlobalSqlBoxVariants();
+		// SqlBoxContext.setGlobalAllowShowSql(true);
+
 		SqlBoxContext.setGlobalBatchSize(BUFFER_SIZE);
+		// When test Change to MySqlDataSourceBox.class
 		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(H2DataSourceBox.class));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 	}
@@ -73,27 +75,44 @@ public class BatchTest {
 
 	@Test
 	public void testBatch() {
+		int OLD_INSERT_AMOUNT = INSERT_AMOUNT;
+		INSERT_AMOUNT = BUFFER_SIZE * 2;
+		doTestBatch();
+		System.out.println("=================================================");
+		System.out.println("======Above are warm up, below are real test=====");
+		System.out.println("=================================================");
+
+		INSERT_AMOUNT = OLD_INSERT_AMOUNT;
+		doTestBatch();
+	}
+
+	public void doTestBatch() {
 		User user = new User();
 		user.setName("Sam");
 		user.setAddress("Canada");
+		long start, end;
+		String timeused;
 
-		System.out.println("=======================Normal insert begin=====================");
-		ctx.nExecute("delete from batch_test_tb");
-		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from  batch_test_tb"));
-		long start = System.currentTimeMillis();
+		System.out.println("=======================nBatch method begin=====================");
+		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
+		start = System.currentTimeMillis();
+		List<Object[]> params = new ArrayList<Object[]>();
 		for (long i = 0; i < INSERT_AMOUNT; i++) {
-			user.setName("Name" + i);
-			user.setAddress("Address" + i);
-			user.insert();
+			params.add(new Object[] { "Name" + i, "Address" + i });
+			if (i % BUFFER_SIZE == (BUFFER_SIZE - 1)) {
+				ctx.nBatch("insert into batch_test_tb (name, address) values(?,?)", params);
+				params.clear();
+			}
 		}
-		long end = System.currentTimeMillis();
-		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
-		System.out.println(String.format("Non-Batch execute " + INSERT_AMOUNT + " SQLs time used: %6s s", timeused));
-		Assert.assertEquals(INSERT_AMOUNT, ctx.nQueryForLongValue("select 		 count(*) from batch_test_tb"));
-		System.out.println("=======================Normal insert  end=====================\n\n");
+		end = System.currentTimeMillis();
+		timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
+		System.out.println(String.format(
+				"nBatch(Sql, List<Object[])) method execute " + INSERT_AMOUNT + " SQLs time used: %6s s", timeused));
+		Assert.assertEquals(INSERT_AMOUNT, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
+		ctx.nExecute("delete from batch_test_tb");
+		System.out.println("=======================nBatch method end=====================\n\n");
 
 		System.out.println("=======================nBatchBegin() =====================");
-		ctx.nExecute("delete from batch_test_tb");
 		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
 		start = System.currentTimeMillis();
 		try {
@@ -111,30 +130,10 @@ public class BatchTest {
 		System.out.println(
 				String.format("nBatchBegin/nBatchEnd execute " + INSERT_AMOUNT + " SQLs time used: %6s s", timeused));
 		Assert.assertEquals(INSERT_AMOUNT, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
+		ctx.nExecute("delete from batch_test_tb");
 		System.out.println("=======================nBatchEnd() =====================\n\n");
 
-		System.out.println("=======================nBatch method begin=====================");
-
-		ctx.nExecute("delete from batch_test_tb");
-		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
-		start = System.currentTimeMillis();
-		List<Object[]> params = new ArrayList<Object[]>();
-		for (long i = 0; i < INSERT_AMOUNT; i++) {
-			params.add(new Object[] { "Name" + i, "Address" + i });
-			if (i % BUFFER_SIZE == (BUFFER_SIZE - 1)) {
-				ctx.nBatch("insert into batch_test_tb (name, address) values(?,?)", params);
-				params.clear();
-			}
-		}
-		end = System.currentTimeMillis();
-		timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
-		System.out.println(String.format(
-				"nBatch(Sql, List<Object[])) method execute " + INSERT_AMOUNT + " SQLs time used: %6s s", timeused));
-		Assert.assertEquals(INSERT_AMOUNT, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
-		System.out.println("=======================nBatch method end=====================\n\n");
-
 		System.out.println("=======================DbUtils batch method begin=====================");
-		ctx.nExecute("delete from batch_test_tb");
 		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
 		start = System.currentTimeMillis();
 		Object[][] paramsArray = new Object[BUFFER_SIZE][2];
@@ -157,7 +156,25 @@ public class BatchTest {
 		System.out.println(String
 				.format("batch(Sql, Object[][]) method execute " + INSERT_AMOUNT + " SQLs time used: %6s s", timeused));
 		Assert.assertEquals(INSERT_AMOUNT, ctx.nQueryForLongValue("select count(*) from batch_test_tb"));
+		ctx.nExecute("delete from batch_test_tb");
 		System.out.println("=======================DbUtils batch method end=====================\n\n");
+
+		System.out.println("=======================Normal insert begin=====================");
+		ctx.nExecute("delete from batch_test_tb");
+		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from  batch_test_tb"));
+		start = System.currentTimeMillis();
+		for (long i = 0; i < INSERT_AMOUNT; i++) {
+			user.setName("Name" + i);
+			user.setAddress("Address" + i);
+			user.insert();
+		}
+		end = System.currentTimeMillis();
+		timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
+		System.out.println(String.format("Non-Batch execute " + INSERT_AMOUNT + " SQLs time used: %6s s", timeused));
+		Assert.assertEquals(INSERT_AMOUNT, ctx.nQueryForLongValue("select 		 count(*) from batch_test_tb"));
+		ctx.nExecute("delete from batch_test_tb");
+		System.out.println("=======================Normal insert  end=====================\n\n");
+
 	}
 
 }
