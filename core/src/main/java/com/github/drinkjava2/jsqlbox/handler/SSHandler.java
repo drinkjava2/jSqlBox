@@ -24,11 +24,12 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
- * SSHandler is used to explain alias.** to real columns in SQL, example:
+ * SSHandler is used to explain alias.** to real columns in SQL, transient
+ * columns not included, the example:
  * 
  * select u.** from users u ==> select u.name, u.address, u.age from users u
  * 
- * Transient columns not included
+ * SS means star-star
  * 
  * @author Yong Zhu
  * @since 1.0.0

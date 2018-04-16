@@ -40,7 +40,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class SSMapListWrapHandler extends SSHandler {
+public class SSMapListWrapHandler extends SSMapListHandler {
 
 	public SSMapListWrapHandler(Object... netConfigObjects) {
 		super(netConfigObjects);
@@ -48,8 +48,7 @@ public class SSMapListWrapHandler extends SSHandler {
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
-		return new MapListWrap( (List<Map<String, Object>>) super.handle(runner, ps), config);
+		return new MapListWrap((List<Map<String, Object>>) super.handle(runner, ps), config);
 	}
 
 }
