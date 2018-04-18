@@ -1,6 +1,7 @@
 package com.github.drinkjava2.beetlsqldemo;
 
-import java.util.HashMap;
+import static com.github.drinkjava2.jdbpro.DbPro.put;
+
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -28,7 +30,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * BeetlSQL is already a separate DAO tool, but anyway here I just want extract
  * the SQL template function of it.)
  * 
- * SQL file 'user.md' is located in foler "test/resources/sql"
+ * SQL file 'user.md' is located in folder "test/resources/sql"
  */
 public class BeetlSqlTemplateDemo {
 
@@ -45,29 +47,37 @@ public class BeetlSqlTemplateDemo {
 		SQLLoader loader = new ClasspathLoader("/sql");
 		UnderlinedNameConversion nc = new UnderlinedNameConversion();
 		SQLManager sqlManager = new SQLManager(dbstyle, loader, source, nc, new Interceptor[] {});
-		SqlBoxContext.setGlobalTemplateEngine(new BeetlSqlTempalte(sqlManager));// Done BeetlSQL engine
+		// Set BeetlSqlTempalte as global default template engine
+		SqlBoxContext.setGlobalTemplateEngine(new BeetlSqlTempalte(sqlManager));
 
-		SqlBoxContext.setGlobalAllowShowSql(true);// Log output
-		SqlBoxContext ctx = new SqlBoxContext(ds);
+		SqlBoxContext.setGlobalAllowShowSql(true); // Log output
+		SqlBoxContext ctx = new SqlBoxContext(ds); // Here you go
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)
 			ctx.quiteExecute(ddl);
 
-		for (int i = 1; i <= 100; i++) {
-			User u = new User();
-			u.setName("Foo" + i);
-			u.setAge(i);
-			u.insert();
+		try {
+			ctx.nBatchBegin();
+			for (int i = 1; i <= 100; i++) {
+				User u = new User();
+				u.setName("Foo" + i);
+				u.setAge(i);
+				u.insert();
+			}
+		} finally {
+			ctx.nBatchEnd();
 		}
 
 		Assert.assertEquals(100, ctx.nQueryForLongValue("select count(*) from users"));
-
-		Map<String, Object> params = new HashMap<>();
-		params.put("age", 50);
-		List<Map<String, Object>> result = ctx.tQueryForMapList("user.select", params);
+		List<Map<String, Object>> result = ctx.tQueryForMapList("user.select", put("age", 50));
 		Assert.assertEquals(50, result.size());
+
+		List<User> users = ctx.tQuery("user.selectUserEntity", put("u", new User().put("age", 50, "name", "Foo100")),
+				new EntityListHandler(User.class));
+		Assert.assertEquals(1, users.size());
+		Assert.assertTrue(users.get(0).getAge().equals(100));
 
 		ds.close();
 	}

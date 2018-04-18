@@ -38,7 +38,6 @@ public class EntityNetDemoTest extends TestBase {
 	protected void insertDemoData() {
 		// @formatter:off
 		try {
-			ctx.setAllowShowSQL(true);
 		ctx.nBatchBegin(); // Batch insert enabled
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();

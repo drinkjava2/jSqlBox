@@ -11,7 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.config.DataSourceConfig.H2DataSourceBox;
+import com.github.drinkjava2.config.DataSourceConfig.MySqlDataSourceBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -35,7 +35,7 @@ public class BatchTest {
 
 		SqlBoxContext.setGlobalBatchSize(BUFFER_SIZE);
 		// When test Change to MySqlDataSourceBox.class
-		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(H2DataSourceBox.class));
+		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(MySqlDataSourceBox.class));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 	}
 

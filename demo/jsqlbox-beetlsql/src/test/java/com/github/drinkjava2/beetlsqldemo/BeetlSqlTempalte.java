@@ -4,14 +4,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.SQLResult;
 import org.beetl.sql.core.SQLScript;
 import org.beetl.sql.core.engine.SQLParameter;
 
-import com.github.drinkjava2.jdbpro.inline.PreparedSQL;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
@@ -29,7 +28,7 @@ public class BeetlSqlTempalte implements SqlTemplateEngine {
 	}
 
 	@Override
-	public PreparedSQL render(String sqlId, Map<String, Object> paramMap, Set<String> directReplaceSet) {
+	public PreparedSQL render(String sqlId, Map<String, Object> paramMap ) {
 		return doRender(sm, sqlId, paramMap);
 	}
 
@@ -57,5 +56,6 @@ public class BeetlSqlTempalte implements SqlTemplateEngine {
 		sp.setParams(params);
 		return sp;
 	}
+ 
 
 }

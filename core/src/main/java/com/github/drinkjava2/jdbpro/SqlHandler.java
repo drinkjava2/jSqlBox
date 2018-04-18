@@ -33,8 +33,7 @@ public interface SqlHandler {// NOSONAR
 	/**
 	 * @param order
 	 *            Usually when add a SqlHandler into a existed SqlHandlers list,
-	 *            will sort according this order number, if no order requirement,
-	 *            can set this value to DEFAULT_ORDER
+	 *            will sort according this order number
 	 */
 	public void setOrder(Integer order);
 
