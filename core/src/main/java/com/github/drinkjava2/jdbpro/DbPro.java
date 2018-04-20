@@ -305,6 +305,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				if (!added)
 					throw new DbProRuntimeException(
 							"Class '" + item + "' can not use public zero parameter constructor to build instance");
+			} else if (item instanceof CustomSqlItem) {
+				((CustomSqlItem) item).dealItem(result, sql);
 			} else {
 				if (iXxxStyle)
 					sql.append(item); // iXxxx style, unknown object is SQL piece

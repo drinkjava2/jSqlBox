@@ -171,7 +171,7 @@ public class EntityNetDemoTest extends TestBase {
 	}
 
 	@Test
-	public void testAutoPathAndBind() {
+	public void testAutoPathAndBind() {//TODO here
 		insertDemoData();
 		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,

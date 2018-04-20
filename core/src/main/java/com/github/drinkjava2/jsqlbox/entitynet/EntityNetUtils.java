@@ -39,8 +39,8 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 public class EntityNetUtils {
 
 	/**
-	 * If nodeValidator is object, return it, otherwise it is a NodeValidator
-	 * class, build a new instance as return
+	 * If nodeValidator is object, return it, otherwise it is a NodeValidator class,
+	 * build a new instance as return
 	 */
 	@SuppressWarnings("unchecked")
 	public static NodeValidator getOrBuildValidator(Object nodeValidator) {
@@ -70,8 +70,7 @@ public class EntityNetUtils {
 	}
 
 	/**
-	 * Check if each TableModel has entityClass and Alias, if no, throw
-	 * exception
+	 * Check if each TableModel has entityClass and Alias, if no, throw exception
 	 */
 	public static void checkModelHasEntityClassAndAlias(TableModel... models) {
 		if (models != null && models.length > 0)// Join models
@@ -221,8 +220,8 @@ public class EntityNetUtils {
 	}
 
 	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance,
-	 * entityClass or entity Bean
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
+	 * or entity Bean
 	 * 
 	 * <pre>
 	 * 1. TableModel instance, will use it
@@ -235,20 +234,27 @@ public class EntityNetUtils {
 		if (netConfigs == null || netConfigs.length == 0)
 			return new TableModel[0];
 		TableModel[] result = new TableModel[netConfigs.length];
-		for (int i = 0; i < netConfigs.length; i++) {
-			Object obj = netConfigs[i];
-			if (obj == null)
-				throw new SqlBoxException("Can not convert null to SqlBox instance");
-			if (obj instanceof TableModel)
-				result[i] = (TableModel) obj;
-			else if (obj instanceof SqlBox)
-				result[i] = ((SqlBox) obj).getTableModel();
-			else if (obj instanceof Class)
-				result[i] = SqlBoxUtils.createSqlBox(ctx, (Class<?>) obj).getTableModel();
-			else {
-				result[i] = SqlBoxUtils.findAndBindSqlBox(ctx, obj).getTableModel();
-			}
-		}
+		for (int i = 0; i < netConfigs.length; i++)
+			result[i] = singleNetConfigToModel(ctx, netConfigs[i]);
 		return result;
 	}
+
+	/**
+	 * @param ctx
+	 * @param obj
+	 * @return A TableModel instance related this object
+	 */
+	public static TableModel singleNetConfigToModel(SqlBoxContext ctx, Object netConfig) {
+		if (netConfig == null)
+			throw new SqlBoxException("Can build TableModel configuration for null netConfig");
+		if (netConfig instanceof TableModel)
+			return (TableModel) netConfig;
+		else if (netConfig instanceof SqlBox)
+			return ((SqlBox) netConfig).getTableModel();
+		else if (netConfig instanceof Class)
+			return SqlBoxUtils.createSqlBox(ctx, (Class<?>) netConfig).getTableModel();
+		else
+			return SqlBoxUtils.findAndBindSqlBox(ctx, netConfig).getTableModel();
+	}
+
 }
