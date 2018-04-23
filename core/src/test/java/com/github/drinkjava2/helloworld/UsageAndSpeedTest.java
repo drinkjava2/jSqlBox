@@ -49,12 +49,12 @@ import activerecordtext.AbstractUser;
 import activerecordtext.TextedUser;
 
 /**
- * Usuage of different SQL style and speed test
+ * Usage of different SQL style and speed test
  * 
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class UsuageAndSpeedTest {
+public class UsageAndSpeedTest {
 	static long REPEAT_TIMES = 1;
 	static boolean PRINT_TIMEUSED = false;
 
@@ -89,7 +89,7 @@ public class UsuageAndSpeedTest {
 			REPEAT_TIMES = 20;// warm up
 			runTestMethods();
 			PRINT_TIMEUSED = true;
-			REPEAT_TIMES = 20;
+			REPEAT_TIMES = 20000;
 			System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
@@ -107,7 +107,6 @@ public class UsuageAndSpeedTest {
 		runMethod("pXxxStyle");
 		runMethod("INLINEmethods");
 		runMethod("tXxxStyle");
-		runMethod("tXxxUseAnotherSqlTemplateEngine");
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
 		runMethod("activeRecordDefaultContext");
@@ -411,24 +410,6 @@ public class UsuageAndSpeedTest {
 	}
 
 	@Test
-	public void tXxxUseAnotherSqlTemplateEngine() {
-		SqlBoxContextConfig config = new SqlBoxContextConfig();
-		config.setTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
-		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			UserAR user = new UserAR("Sam", "Canada");
-			UserAR tom = new UserAR("Tom", "China");
-			ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", put("user", user));
-			ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom));
-			Assert.assertEquals(1L,
-					ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
-							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
-			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
-					put("$t", tom), put("$nm", "name"));
-		}
-	}
-
-	@Test
 	public void dataMapperStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
@@ -549,6 +530,24 @@ public class UsuageAndSpeedTest {
 
 	public void otherTestsNotForSpeedTest______________() {
 		// below methods are test usages only, not join to speed test
+	}
+
+	@Test
+	public void tXxxUseAnotherSqlTemplateEngine() {
+		SqlBoxContextConfig config = new SqlBoxContextConfig();
+		config.setTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
+		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			UserAR user = new UserAR("Sam", "Canada");
+			UserAR tom = new UserAR("Tom", "China");
+			ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", put("user", user));
+			ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom));
+			Assert.assertEquals(1L,
+					ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
+							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
+			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
+					put("$t", tom), put("$nm", "name"));
+		}
 	}
 
 	/** Use const String can make SQL support Java Bean field refactoring */

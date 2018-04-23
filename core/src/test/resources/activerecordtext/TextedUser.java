@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
-import com.github.drinkjava2.helloworld.UsuageAndSpeedTest.UserAR;
+import com.github.drinkjava2.helloworld.UsageAndSpeedTest.UserAR;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;

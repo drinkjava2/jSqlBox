@@ -25,10 +25,10 @@ public class AliasProxyUtils {
 			this.alias = alias;
 			this.colName = colName;
 		}
-		 
+
 	}
 
-	public static class ProxyBean implements MethodInterceptor {
+	static class ProxyBean implements MethodInterceptor {
 		private TableModel tableModel;
 
 		public ProxyBean(TableModel tableModel) {
@@ -59,7 +59,6 @@ public class AliasProxyUtils {
 		enhancer.setCallback(new ProxyBean(t));
 		return (T) enhancer.create();
 	}
- 
 
 	public static SqlItem clean() {
 		thdMethodName.remove();
@@ -68,12 +67,29 @@ public class AliasProxyUtils {
 
 	public static SqlItem alias(Object o) {
 		try {
-			AliasItemInfo a = thdMethodName.get(); 
+			AliasItemInfo a = thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
-			String sqlPiece = new StringBuilder(a.alias).append(".").append(a.colName).append(" as ").append(a.alias).append("_")
-					.append(a.colName).toString();
-			return new SqlItem(sqlPiece);
+			if (StrUtils.isEmpty(a.alias))
+				return new SqlItem(a.colName);
+			else
+				return new SqlItem(new StringBuilder(a.alias).append(".").append(a.colName).append(" as ")
+						.append(a.alias).append("_").append(a.colName).toString());
+		} finally {
+			thdMethodName.remove();
+		}
+	}
+	
+	public static SqlItem c_alias(Object o) {
+		try {
+			AliasItemInfo a = thdMethodName.get();
+			if (StrUtils.isEmpty(a.colName))
+				throw new SqlBoxException("Column name not found.");
+			if (StrUtils.isEmpty(a.alias))
+				return new SqlItem(", "+a.colName);
+			else
+				return new SqlItem(new StringBuilder(", ").append(a.alias).append(".").append(a.colName).append(" as ")
+						.append(a.alias).append("_").append(a.colName).toString());
 		} finally {
 			thdMethodName.remove();
 		}
@@ -81,11 +97,13 @@ public class AliasProxyUtils {
 
 	public static SqlItem col(Object o) {
 		try {
-			AliasItemInfo a = thdMethodName.get(); 
+			AliasItemInfo a = thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
-			String sqlPiece = new StringBuilder(a.alias).append(".").append(a.colName).toString();
-			return new SqlItem(sqlPiece);
+			if (StrUtils.isEmpty(a.alias))
+				return new SqlItem(a.colName);
+			else
+				return new SqlItem(new StringBuilder(a.alias).append(".").append(a.colName).toString());
 		} finally {
 			thdMethodName.remove();
 		}
@@ -94,9 +112,11 @@ public class AliasProxyUtils {
 	public static SqlItem table(Object o) {
 		try {
 			o.toString();
-			AliasItemInfo a = thdMethodName.get(); 
-			String sqlPiece = new StringBuilder(a.tableName).append(" ").append(a.alias).toString();
-			return new SqlItem(sqlPiece);
+			AliasItemInfo a = thdMethodName.get();
+			if (StrUtils.isEmpty(a.alias))
+				return new SqlItem(a.tableName);
+			else
+				return new SqlItem(new StringBuilder(a.tableName).append(" ").append(a.alias).toString());
 		} finally {
 			thdMethodName.remove();
 		}

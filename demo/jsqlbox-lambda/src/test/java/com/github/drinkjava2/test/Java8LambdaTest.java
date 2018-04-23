@@ -38,7 +38,7 @@ public class Java8LambdaTest extends TestBase {
 		public Object get();
 	}
 
-	public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
+	public static class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 
 		@Override
 		public void doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item) {
@@ -48,21 +48,30 @@ public class Java8LambdaTest extends TestBase {
 				AliasItemInfo a = AliasProxyUtils.thdMethodName.get();
 				if (StrUtils.isEmpty(a.colName))
 					throw new SqlBoxException("Column name not found.");
-				sql.append(new StringBuilder(a.alias).append(".").append(a.colName).append(" as ").append(a.alias)
-						.append("_").append(a.colName).toString());
+				if (StrUtils.isEmpty(a.alias))
+					sql.append(a.colName);
+				else
+					sql.append(new StringBuilder(a.alias).append(".").append(a.colName).append(" as ").append(a.alias)
+							.append("_").append(a.colName).toString());
 			} else if (item instanceof C_ALIAS) {
 				((C_ALIAS) item).get();
 				AliasItemInfo a = AliasProxyUtils.thdMethodName.get();
 				if (StrUtils.isEmpty(a.colName))
 					throw new SqlBoxException("Column name not found.");
-				sql.append(new StringBuilder(", ").append(a.alias).append(".").append(a.colName).append(" as ")
-						.append(a.alias).append("_").append(a.colName).toString());
+				if (StrUtils.isEmpty(a.alias))
+					sql.append(", " + a.colName);
+				else
+					sql.append(new StringBuilder(", ").append(a.alias).append(".").append(a.colName).append(" as ")
+							.append(a.alias).append("_").append(a.colName).toString());
 			} else if (item instanceof COL) {
 				((COL) item).get();
 				AliasItemInfo a = AliasProxyUtils.thdMethodName.get();
 				if (StrUtils.isEmpty(a.colName))
 					throw new SqlBoxException("Column name not found.");
-				sql.append(new StringBuilder(a.alias).append(".").append(a.colName).toString());
+				if (StrUtils.isEmpty(a.alias))
+					sql.append(a.colName);
+				else
+					sql.append(new StringBuilder(a.alias).append(".").append(a.colName).toString());
 			} else
 				throw new SqlBoxException("Unknow SpecialSqlItem: " + item);
 		}
@@ -74,8 +83,21 @@ public class Java8LambdaTest extends TestBase {
 		Assert.assertEquals(100, totalUsers.size());
 
 		SqlBoxContext.setGlobalSpecialSqlItemPreparer(new LambdSqlItemPreparer());
-		User u = createAliasProxy(User.class, "u");
-		List<User> list = ctx.iQuery(new EntityListHandler(User.class, (User) new User().alias("u")),
+		User u = createAliasProxy(User.class, null);
+
+		List<?> list1 = ctx.iQueryForMapList(new PrintSqlHandler(), //
+				"select "//
+				, (ALIAS) u::getId//
+				, (C_ALIAS) u::getAddress //
+				, (C_ALIAS) u::getName //
+				, " from ", table(u), " where "//
+				, (COL) u::getName, ">=?", param("Foo90") //
+				, " and ", (COL) u::getAge, ">?", param(1) //
+		);
+		Assert.assertEquals(10, list1.size());
+
+		u = createAliasProxy(User.class, "u");
+		List<User> list2 = ctx.iQuery(new EntityListHandler(User.class, (User) new User().alias("u")),
 				new PrintSqlHandler(), //
 				"select "//
 				, (ALIAS) u::getId//
@@ -85,7 +107,7 @@ public class Java8LambdaTest extends TestBase {
 				, (COL) u::getName, ">=?", param("Foo90") //
 				, " and ", (COL) u::getAge, ">?", param(1) //
 		);
-		Assert.assertEquals(10, list.size());
+		Assert.assertEquals(10, list2.size());
 
 	}
 
