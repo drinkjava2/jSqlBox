@@ -22,7 +22,7 @@ import com.github.drinkjava2.jdialects.Dialect;
  * @since 1.0.1
  */
 public class SqlBoxContextConfig extends DbProConfig {
-	private Dialect dialect = SqlBoxContext.getGlobalDialect();
+	private Dialect dialect = SqlBoxContext.getGlobalNextDialect();
 
 	public Dialect getDialect() {
 		return dialect;

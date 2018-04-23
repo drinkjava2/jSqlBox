@@ -152,8 +152,8 @@ public class EntityNetDemoTest extends TestBase {
 		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path("S-", User.class).where("id='u1' or id='u2'").nextPath("C-", UserRole.class, "userId")
-						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
-						.nextPath("P+", Privilege.class, "pid"));
+						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid").nextPath("P+",
+								Privilege.class, "pid"));
 		for (Privilege privilege : privileges)
 			System.out.print(privilege.getId() + " ");
 		Assert.assertEquals(3, privileges.size());
@@ -240,11 +240,8 @@ public class EntityNetDemoTest extends TestBase {
 
 	@Test
 	public void testEntityNetQuery() {
-		insertDemoData();//TODO here to debug
-		EntityNet net = ctx.iQuery(new EntityNetHandler(User.class, new Object[] {new User().alias("u")}), "select u.id as u_id, u.age as u_age from usertb u");
-		Assert.assertEquals(5, net.size());
-
-		net = ctx.pQuery(new EntityNetHandler(User.class, Email.class),
+		insertDemoData();
+		EntityNet net = ctx.pQuery(new EntityNetHandler(User.class, Email.class),
 				"select u.**, e.** from usertb u, emailtb e where u.id=e.userId");
 		Assert.assertEquals(8, net.size());
 		Set<Email> emails = net.findEntitySet(Email.class,

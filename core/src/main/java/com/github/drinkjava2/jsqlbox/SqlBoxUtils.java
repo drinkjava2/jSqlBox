@@ -146,10 +146,10 @@ public abstract class SqlBoxUtils {// NOSONAR
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
 			boxClass = ClassCacheUtils
-					.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.getGlobalsqlboxsuffix());
+					.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.getGlobalSqlBoxSuffix());
 		if (boxClass == null)
 			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + "$"
-					+ entityOrBoxClass.getSimpleName() + SqlBoxContext.getGlobalsqlboxsuffix());
+					+ entityOrBoxClass.getSimpleName() + SqlBoxContext.getGlobalSqlBoxSuffix());
 		if (boxClass != null && !SqlBox.class.isAssignableFrom((Class<?>) boxClass))
 			boxClass = null;
 		SqlBox box = null;

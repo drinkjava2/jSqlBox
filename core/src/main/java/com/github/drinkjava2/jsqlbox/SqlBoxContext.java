@@ -41,20 +41,20 @@ import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** globalSqlBoxSuffix use to identify the SqlBox configuration class */
-	private static String globalSqlBoxSuffix = "SqlBox";// NOSONAR
-	private static SqlBoxContext globalSqlBoxContext = null;
-	private static Dialect globalDialect = null;
+	protected static String globalSqlBoxSuffix = "SqlBox";// NOSONAR
+	protected static Dialect globalNextDialect = null;
+	protected static SqlBoxContext globalSqlBoxContext = null;
 
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
-	 * use setDialect() method to change to other dialect, to keep thread-safe, only
-	 * subclass can access this variant
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
+	 * can use setDialect() method to change to other dialect, to keep
+	 * thread-safe, only subclass can access this variant
 	 */
 	protected Dialect dialect;
 
 	public SqlBoxContext() {
 		super();
-		this.dialect = globalDialect;
+		this.dialect = globalNextDialect;
 
 	}
 
@@ -156,8 +156,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
-	 * loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to
+	 * improve loading speed
 	 */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, true, configObjects);
@@ -228,8 +228,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
-	 * and bind on entityBean
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new
+	 * one and bind on entityBean
 	 */
 	public SqlBox getSqlBox(Object entityBean) {
 		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
@@ -268,19 +268,19 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected void publicStaticMethods_____________________() {// NOSONAR
 	}
 
-	public static Dialect getGlobalDialect() {
-		return globalDialect;
+	public static Dialect getGlobalNextDialect() {
+		return globalNextDialect;
 	}
 
-	public static void setGlobalDialect(Dialect globalDialect) {
-		SqlBoxContext.globalDialect = globalDialect;
+	public static void setGlobalNextDialect(Dialect dialect) {
+		SqlBoxContext.globalNextDialect = dialect;
 	}
 
 	public static SqlBoxContext getGlobalSqlBoxContext() {
 		return globalSqlBoxContext;
 	}
 
-	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
+	/** Shortcut method equal to getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
 		return globalSqlBoxContext;
 	}
@@ -289,19 +289,22 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
 	}
 
-	public static String getGlobalsqlboxsuffix() {
+	/** Return "SqlBox" String */
+	public static String getGlobalSqlBoxSuffix() {
 		return globalSqlBoxSuffix;
 	}
 
 	/** Reset all global SqlBox variants to its old default values */
 	public static void resetGlobalSqlBoxVariants() {
-		globalAllowShowSql = false;
-		globalConnectionManager = null;
-		globalSqlHandlers = null;
-		globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
-		globalBatchSize = 300;
-		globalTemplateEngine = BasicSqlTemplate.instance();
+		globalNextAllowShowSql = false;
+		globalNextConnectionManager = null;
+		globalNextSqlHandlers = null;
+		globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
+		globalNextBatchSize = 300;
+		globalNextTemplateEngine = BasicSqlTemplate.instance();
+		globalNextDialect = null;
 		globalSqlBoxContext = null;
+		globalSpecialSqlItemPreparer = null;
 	}
 
 }

@@ -22,12 +22,12 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.1
  */
 public class DbProConfig {
-	private SqlTemplateEngine templateEngine = DbPro.getGlobalTemplateEngine();
-	private DbProLogger logger = DbPro.getGlobalLogger();
-	private Boolean allowSqlSql = DbPro.getGlobalAllowShowSql();
-	private Integer batchSize = DbPro.getGlobalBatchSize();
-	private ConnectionManager connectionManager = DbPro.getGlobalConnectionManager();
-	private SqlHandler[] sqlHandlers = DbPro.getGlobalSqlHandlers();
+	private SqlTemplateEngine templateEngine = DbPro.getGlobalNextTemplateEngine();
+	private DbProLogger logger = DbPro.getGlobalNextLogger();
+	private Boolean allowSqlSql = DbPro.getGlobalNextAllowShowSql();
+	private Integer batchSize = DbPro.getGlobalNextBatchSize();
+	private ConnectionManager connectionManager = DbPro.getGlobalNextConnectionManager();
+	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;

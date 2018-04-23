@@ -61,16 +61,16 @@ public class LoggerTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-		SqlBoxContext.setGlobalAllowShowSql(true);
+		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(LoggerTest.class))
 			ctx.quiteExecute(ddl);
 		LoggerTest t = new LoggerTest();
 		t.setName("Tom");
 		ctx.insert(t);
-		SqlBoxContext.getGlobalLogger().info("Logger test message3 output ok");
-		SqlBoxContext.getGlobalLogger().info("Logger test message4 output ok");
-		SqlBoxContext.setGlobalAllowShowSql(false);
+		SqlBoxContext.getGlobalNextLogger().info("Logger test message3 output ok");
+		SqlBoxContext.getGlobalNextLogger().info("Logger test message4 output ok");
+		SqlBoxContext.setGlobalNextAllowShowSql(false);
 	}
 
 }

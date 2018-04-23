@@ -48,9 +48,9 @@ public class BeetlSqlTemplateDemo {
 		UnderlinedNameConversion nc = new UnderlinedNameConversion();
 		SQLManager sqlManager = new SQLManager(dbstyle, loader, source, nc, new Interceptor[] {});
 		// Set BeetlSqlTempalte as global default template engine
-		SqlBoxContext.setGlobalTemplateEngine(new BeetlSqlTempalte(sqlManager));
 
-		SqlBoxContext.setGlobalAllowShowSql(true); // Log output
+		SqlBoxContext.setGlobalNextTemplateEngine(new BeetlSqlTempalte(sqlManager));
+		SqlBoxContext.setGlobalNextAllowShowSql(true); // Log output
 		SqlBoxContext ctx = new SqlBoxContext(ds); // Here you go
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 

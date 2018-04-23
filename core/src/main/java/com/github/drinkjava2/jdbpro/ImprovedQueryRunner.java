@@ -51,20 +51,20 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
-	protected static Boolean globalAllowShowSql = false;
-	protected static ConnectionManager globalConnectionManager = null;
-	protected static SqlHandler[] globalSqlHandlers = null;
-	protected static DbProLogger globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
-	protected static Integer globalBatchSize = 300;
-	protected static SqlTemplateEngine globalTemplateEngine = BasicSqlTemplate.instance();
+	protected static Boolean globalNextAllowShowSql = false;
+	protected static ConnectionManager globalNextConnectionManager = null;
+	protected static SqlHandler[] globalNextSqlHandlers = null;
+	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
+	protected static Integer globalNextBatchSize = 300;
+	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
 	protected static SpecialSqlItemPreparer globalSpecialSqlItemPreparer = null;
 
-	protected SqlTemplateEngine sqlTemplateEngine = globalTemplateEngine;
-	protected ConnectionManager connectionManager = globalConnectionManager;
-	protected Boolean allowShowSQL = globalAllowShowSql;
-	protected DbProLogger logger = globalLogger;
-	protected Integer batchSize = globalBatchSize;
-	protected SqlHandler[] sqlHandlers = globalSqlHandlers;
+	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
+	protected ConnectionManager connectionManager = globalNextConnectionManager;
+	protected Boolean allowShowSQL = globalNextAllowShowSql;
+	protected DbProLogger logger = globalNextLogger;
+	protected Integer batchSize = globalNextBatchSize;
+	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
@@ -589,28 +589,28 @@ public class ImprovedQueryRunner extends QueryRunner {
 	private void publicStaticMethods_____________________() {// NOSONAR
 	}
 
-	public static DbProLogger getGlobalLogger() {
-		return globalLogger;
+	public static DbProLogger getGlobalNextLogger() {
+		return globalNextLogger;
 	}
 
-	public static void setGlobalLogger(DbProLogger globalLogger) {
-		ImprovedQueryRunner.globalLogger = globalLogger;
+	public static void setGlobalNextLogger(DbProLogger dbProLogger) {
+		ImprovedQueryRunner.globalNextLogger = dbProLogger;
 	}
 
-	public static Integer getGlobalBatchSize() {
-		return globalBatchSize;
+	public static Integer getGlobalNextBatchSize() {
+		return globalNextBatchSize;
 	}
 
-	public static void setGlobalBatchSize(Integer globalBatchSize) {
-		ImprovedQueryRunner.globalBatchSize = globalBatchSize;
+	public static void setGlobalNextBatchSize(Integer batchSize) {
+		ImprovedQueryRunner.globalNextBatchSize = batchSize;
 	}
 
-	public static SqlTemplateEngine getGlobalTemplateEngine() {
-		return globalTemplateEngine;
+	public static SqlTemplateEngine getGlobalNextTemplateEngine() {
+		return globalNextTemplateEngine;
 	}
 
-	public static void setGlobalTemplateEngine(SqlTemplateEngine globalTemplateEngine) {
-		ImprovedQueryRunner.globalTemplateEngine = globalTemplateEngine;
+	public static void setGlobalNextTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
+		ImprovedQueryRunner.globalNextTemplateEngine = sqlTemplateEngine;
 	}
 
 	/**
@@ -662,28 +662,28 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return array;
 	}
 
-	public static Boolean getGlobalAllowShowSql() {
-		return globalAllowShowSql;
+	public static Boolean getGlobalNextAllowShowSql() {
+		return globalNextAllowShowSql;
 	}
 
-	public static void setGlobalAllowShowSql(Boolean globalAllowShowSql) {
-		DbPro.globalAllowShowSql = globalAllowShowSql;
+	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
+		DbPro.globalNextAllowShowSql = allowShowSql;
 	}
 
-	public static ConnectionManager getGlobalConnectionManager() {
-		return globalConnectionManager;
+	public static ConnectionManager getGlobalNextConnectionManager() {
+		return globalNextConnectionManager;
 	}
 
-	public static void setGlobalConnectionManager(ConnectionManager globalConnectionManager) {
-		DbPro.globalConnectionManager = globalConnectionManager;
+	public static void setGlobalNextConnectionManager(ConnectionManager globalConnectionManager) {
+		DbPro.globalNextConnectionManager = globalConnectionManager;
 	}
 
-	public static SqlHandler[] getGlobalSqlHandlers() {
-		return globalSqlHandlers;
+	public static SqlHandler[] getGlobalNextSqlHandlers() {
+		return globalNextSqlHandlers;
 	}
 
-	public static void setGlobalSqlHandlers(SqlHandler... sqlHandlers) {
-		globalSqlHandlers = sqlHandlers;
+	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
+		globalNextSqlHandlers = sqlHandlers;
 	}
 
 	private void getterSetters_____________________() {// NOSONAR

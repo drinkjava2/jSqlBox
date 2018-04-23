@@ -33,7 +33,7 @@ public class BatchTest {
 		SqlBoxContext.resetGlobalSqlBoxVariants();
 		// SqlBoxContext.setGlobalAllowShowSql(true);
 
-		SqlBoxContext.setGlobalBatchSize(BUFFER_SIZE);
+		SqlBoxContext.setGlobalNextBatchSize(BUFFER_SIZE);
 		// When test Change to MySqlDataSourceBox.class
 		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(MySqlDataSourceBox.class));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);

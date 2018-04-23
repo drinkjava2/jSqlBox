@@ -26,15 +26,15 @@ import com.github.drinkjava2.test.AliasProxyUtils.AliasItemInfo;
 
 public class Java8LambdaTest extends TestBase {
 
-	public static interface ALIAS extends SpecialSqlItem {
+	public static interface ALIAS extends SpecialSqlItem {// a.col as a_col
 		public Object get();
 	}
 
-	public static interface COL extends SpecialSqlItem {
+	public static interface C_ALIAS extends SpecialSqlItem {// , a.clo as a_col
 		public Object get();
 	}
 
-	public static interface Table extends SpecialSqlItem {
+	public static interface COL extends SpecialSqlItem {// a.col
 		public Object get();
 	}
 
@@ -50,6 +50,13 @@ public class Java8LambdaTest extends TestBase {
 					throw new SqlBoxException("Column name not found.");
 				sql.append(new StringBuilder(a.alias).append(".").append(a.colName).append(" as ").append(a.alias)
 						.append("_").append(a.colName).toString());
+			} else if (item instanceof C_ALIAS) {
+				((C_ALIAS) item).get();
+				AliasItemInfo a = AliasProxyUtils.thdMethodName.get();
+				if (StrUtils.isEmpty(a.colName))
+					throw new SqlBoxException("Column name not found.");
+				sql.append(new StringBuilder(", ").append(a.alias).append(".").append(a.colName).append(" as ")
+						.append(a.alias).append("_").append(a.colName).toString());
 			} else if (item instanceof COL) {
 				((COL) item).get();
 				AliasItemInfo a = AliasProxyUtils.thdMethodName.get();
@@ -63,26 +70,23 @@ public class Java8LambdaTest extends TestBase {
 
 	@Test
 	public void lambdaTest() {
+		List<User> totalUsers = ctx.iQuery(new EntityListHandler(User.class), "select u.** from usertb u");
+		Assert.assertEquals(100, totalUsers.size());
 
 		SqlBoxContext.setGlobalSpecialSqlItemPreparer(new LambdSqlItemPreparer());
 		User u = createAliasProxy(User.class, "u");
-
- 
-		List<User> u1 = ctx.iQuery(new EntityListHandler(User.class,   new User().alias("u") ), new PrintSqlHandler(),
-				"select u.address as u_address, u.usr_age as u_usr_age, u.id as u_id,"
-				+ " u.usr_name as u_usr_name from usertb u where u.usr_name>=? and u.usr_age>? ", ctx.param("Foo90",1));
-		System.out.println(u1);
-
-		List<User> list = ctx.iQuery(new EntityListHandler(User.class), new PrintSqlHandler(), //
-				"select u.**,"//
+		List<User> list = ctx.iQuery(new EntityListHandler(User.class, (User) new User().alias("u")),
+				new PrintSqlHandler(), //
+				"select "//
 				, (ALIAS) u::getId//
-				, ", ", (ALIAS) u::getAddress //
-				, ", ", (ALIAS) u::getName //
+				, (C_ALIAS) u::getAddress //
+				, (C_ALIAS) u::getName //
 				, " from ", table(u), " where "//
 				, (COL) u::getName, ">=?", param("Foo90") //
 				, " and ", (COL) u::getAge, ">?", param(1) //
 		);
-		Assert.assertTrue(list.size() == 10);
+		Assert.assertEquals(10, list.size());
+
 	}
 
 }

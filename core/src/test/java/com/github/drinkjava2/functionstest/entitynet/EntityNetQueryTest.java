@@ -1,5 +1,7 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
+import static com.github.drinkjava2.jdbpro.DbPro.param;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,9 +46,13 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u1").put("userName", "user1").put("age", 10).insert();
 		new User().put("id", "u2").put("userName", "user2").put("age", 20).insert();
 		new User().put("id", "u3").put("userName", "user3").put("age", 30).insert();
-		List<User> setResult = ctx.pQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?",
-				10);
-		Assert.assertTrue(setResult.size() == 2);
+		List<User> users = ctx.pQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?", 10);
+		Assert.assertEquals(2, users.size());
+
+		List<User> users2 = ctx.iQuery(new EntityListHandler(User.class,  new User().alias("u")),
+				"select u.id as u_id, u.age as u_age from usertb u where u.age>?", param(10));
+
+		Assert.assertEquals(2, users2.size());
 	}
 
 	@Test

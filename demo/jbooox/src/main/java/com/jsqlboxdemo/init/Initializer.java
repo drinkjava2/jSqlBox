@@ -62,7 +62,9 @@ public class Initializer implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
 		// Initialize BeanBox
+		// TX is defined in jBeanBox project
 		BeanBox.regAopAroundAnnotation(TX.class, TxBox.class);
+		// "Transaction" is a customized AOP annotation
 		BeanBox.regAopAroundAnnotation(Transaction.class, TxBox.class);
 
 		// Initialize Global SqlBoxContext

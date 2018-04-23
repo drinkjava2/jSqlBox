@@ -16,7 +16,7 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 
 /**
- * DStarMapListHandler is a SqlHandler used to explain alias.** to real columns
+ * SSMapListHandler is a SqlHandler used to explain alias.** to real columns
  * in SQL, example:
  * 
  * select u.** from users u ==> select u.name, u.address, u.age from users u
