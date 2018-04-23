@@ -16,11 +16,10 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * Sql Parameter Item Type
+ * Sql Operation Type
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public enum SqlParamType {
-	SQL, PARAM, PUT, QUESTION_PARAM, NOT_NULL, VALUES_QUESTIONS
+public interface SpecialSqlItem {
 }

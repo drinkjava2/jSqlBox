@@ -26,6 +26,13 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 public class EntityListHandler extends EntityNetHandler {
 	protected final Class<?> targetClass;
 
+	
+	public EntityListHandler(Class<?> targetClass, Object netConfigObject) {
+		super(netConfigObject);
+		this.targetClass = targetClass;
+	}
+	
+	
 	public EntityListHandler(Class<?> targetClass, Object... netConfigObjects) {
 		super(netConfigObjects);
 		this.targetClass = targetClass;

@@ -57,6 +57,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected static DbProLogger globalLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalBatchSize = 300;
 	protected static SqlTemplateEngine globalTemplateEngine = BasicSqlTemplate.instance();
+	protected static SpecialSqlItemPreparer globalSpecialSqlItemPreparer = null;
 
 	protected SqlTemplateEngine sqlTemplateEngine = globalTemplateEngine;
 	protected ConnectionManager connectionManager = globalConnectionManager;
@@ -626,10 +627,17 @@ public class ImprovedQueryRunner extends QueryRunner {
 		threadLocalSqlHandlers.set(handlers);
 	}
 
+	public static SpecialSqlItemPreparer getGlobalSpecialSqlItemPreparer() {
+		return globalSpecialSqlItemPreparer;
+	}
+
+	public static void setGlobalSpecialSqlItemPreparer(SpecialSqlItemPreparer globalSpecialSqlItemPreparer) {
+		ImprovedQueryRunner.globalSpecialSqlItemPreparer = globalSpecialSqlItemPreparer;
+	}
+
 	// ===override execute/insert/update methods to support batch and explainSql
 	// BTW, some methods in QueryRunner are private, otherwise no need override
 	// so many methods
-
 	/**
 	 * Convert Objects List to 2d array for insertBatch use, insertBatch's last
 	 * parameter is a 2d array, not easy to use

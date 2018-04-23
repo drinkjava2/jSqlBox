@@ -32,8 +32,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
+import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
@@ -89,7 +89,7 @@ public class UsuageAndSpeedTest {
 			REPEAT_TIMES = 20;// warm up
 			runTestMethods();
 			PRINT_TIMEUSED = true;
-			REPEAT_TIMES = 1000;
+			REPEAT_TIMES = 20;
 			System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
@@ -320,8 +320,8 @@ public class UsuageAndSpeedTest {
 	}
 
 	/**
-	 * INLINE Methods are designed for old DAO tools which only allow 1 SQL
-	 * string in parameter list
+	 * INLINE Methods are designed for old DAO tools which only allow 1 SQL string
+	 * in parameter list
 	 */
 	@Test
 	public void INLINEmethods() {
@@ -335,11 +335,10 @@ public class UsuageAndSpeedTest {
 						+ " ,address" + PARA("Canada") //
 						+ ")"//
 						+ VALUESQUES(), PARAMS());
-				runner.execute(
-						"update users set " //
-								+ (name == null ? "" : "name=" + QUES0("Tom")) //
-								+ (age == null ? "" : "age=" + QUES0(age)) //
-								+ ", address=" + QUES("China")//
+				runner.execute("update users set " //
+						+ (name == null ? "" : "name=" + QUES0("Tom")) //
+						+ (age == null ? "" : "age=" + QUES0(age)) //
+						+ ", address=" + QUES("China")//
 						, PARAMS());
 				PARA0("Tom", "China");
 				Assert.assertEquals(1L, (long) runner.query("select count(*) from users where name=? and address=?",
@@ -425,7 +424,7 @@ public class UsuageAndSpeedTest {
 					ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
 							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
 			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
-					put("$t", tom), put("$nm", "name"),new PrintSqlHandler());
+					put("$t", tom), put("$nm", "name"));
 		}
 	}
 
@@ -548,7 +547,7 @@ public class UsuageAndSpeedTest {
 		}
 	}
 
-	public void usagesTest______________() {
+	public void otherTestsNotForSpeedTest______________() {
 		// below methods are test usages only, not join to speed test
 	}
 
@@ -585,14 +584,31 @@ public class UsuageAndSpeedTest {
 					notNull(" age=?,", age), //
 					sql(" address=? "), address //
 			);
-			Assert.assertEquals(1L,
-					ctx.iQueryForLongValue(//
-							"select count(*) from users where 1=1 ", //
-							notNull(" and name=? ", name), //
-							"Someother".equals(name) ? iPrepare(" and Someother>?  ", param(name)) : "", //
-							"China".equals(address) ? pPrepare(" and address=?  ", address) : ""//
-					));
+			Assert.assertEquals(1L, ctx.iQueryForLongValue(//
+					"select count(*) from users where 1=1 ", //
+					notNull(" and name=? ", name), //
+					"Someother".equals(name) ? iPrepare(" and Someother>?  ", param(name)) : "", //
+					"China".equals(address) ? pPrepare(" and address=?  ", address) : ""//
+			));
 			ctx.nExecute("delete from users");
+		}
+	}
+
+	@Test
+	public void tXxxDynamicChangeTemplateEngine() {
+		SqlTemplateEngine engine = new BasicSqlTemplate("[", "]", true, true);
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			UserAR user = new UserAR("Sam", "Canada");
+			UserAR tom = new UserAR("Tom", "China");
+			ctx.tExecute(engine, "insert into users (name, address) values([user.name], [user.address])",
+					put("user", user));
+			ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom), engine);
+			Assert.assertEquals(1L,
+					ctx.tQueryForObject(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
+							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
+			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
+					put("$t", tom), put("$nm", "name"), engine);
 		}
 	}
 

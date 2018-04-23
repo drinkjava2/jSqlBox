@@ -16,41 +16,21 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * SqlParam store SQL parameters
+ * SqlItemType type is an enum type
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public class SqlParam {
+public enum SqlItemType {
+	SQL, // Append a SQL String piece
 
-	private SqlParamType type;
-	private Object[] parameters;
+	PARAM, // Append a parameter or parameter array
 
-	public SqlParam(SqlParamType type, Object... parameters) {
-		this.type = type;
-		this.parameters = parameters;
-	}
- 
-	public Object[] getParameters() {
-		return parameters;
-	}
+	PUT, // Append [key1,value1, key2,value2...] parameters array (for SqlTemplateEngine)
 
-	public SqlParamType getType() {
-		return type;
-	}
+	QUESTION_PARAM, // Append a "?" at end of SQL, append a parameter or parameter array
 
-	public void setType(SqlParamType type) {
-		this.type = type;
-	}
+	NOT_NULL, // Usage: NOT_NUL("user_name=?", name), only effect when name is not null
 
-	public void setParameters(Object[] parameters) {
-		this.parameters = parameters;
-	}
-
-	@Override
-	public String toString() {
-		throw new DbProRuntimeException(
-				"SqlParam toString() method overrided, not allowed to change to String directly");
-	}
-
+	VALUES_QUESTIONS // Append a " values(?,?,?....?)" String at end of SQL
 }

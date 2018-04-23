@@ -5,8 +5,7 @@ import java.lang.reflect.Method;
 import com.github.drinkjava2.cglib3_2_0.proxy.Enhancer;
 import com.github.drinkjava2.cglib3_2_0.proxy.MethodInterceptor;
 import com.github.drinkjava2.cglib3_2_0.proxy.MethodProxy;
-import com.github.drinkjava2.jdbpro.CustomSqlItem;
-import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
@@ -14,7 +13,20 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 public class AliasProxyUtils {
-	public static ThreadLocal<String[]> thdMethodName = new ThreadLocal<String[]>();
+	public static ThreadLocal<AliasItemInfo> thdMethodName = new ThreadLocal<AliasItemInfo>();
+
+	static class AliasItemInfo {
+		public String tableName;
+		public String alias;
+		public String colName;
+
+		public AliasItemInfo(String tableName, String alias, String colName) {
+			this.tableName = tableName;
+			this.alias = alias;
+			this.colName = colName;
+		}
+		 
+	}
 
 	public static class ProxyBean implements MethodInterceptor {
 		private TableModel tableModel;
@@ -32,7 +44,7 @@ public class AliasProxyUtils {
 				for (ColumnModel col : tableModel.getColumns())
 					if (col.getEntityField().equalsIgnoreCase(fieldName))
 						columnName = col.getColumnName();
-				thdMethodName.set(new String[] { tableModel.getTableName(), tableModel.getAlias(), columnName });
+				thdMethodName.set(new AliasItemInfo(tableModel.getTableName(), tableModel.getAlias(), columnName));
 			}
 			return null;
 		}
@@ -47,69 +59,51 @@ public class AliasProxyUtils {
 		enhancer.setCallback(new ProxyBean(t));
 		return (T) enhancer.create();
 	}
+ 
 
-	public static void checkArrayStringExist(String[] a) {
-		if (a == null)
-			throw new SqlBoxException("No configuration found.");
-		if (StrUtils.isEmpty(a[0]))
-			throw new SqlBoxException("TableName name not found.");
-		if (StrUtils.isEmpty(a[1]))
-			throw new SqlBoxException("Table alias not set.");
+	public static SqlItem clean() {
+		thdMethodName.remove();
+		return new SqlItem("");
 	}
 
-	/**
-	 * SqlPieceCustomSqlItem Simply add the String into SQL
-	 */
-	public static class SqlPieceCustomSqlItem implements CustomSqlItem {
-		String sqlPiece;
-
-		public SqlPieceCustomSqlItem(String sqlPiece) {
-			this.sqlPiece = sqlPiece;
-		}
-
-		@Override
-		public void dealItem(PreparedSQL ps, StringBuilder sb) {
-			sb.append(sqlPiece);
-		}
-	}
-
-	public static CustomSqlItem acol(Object o) {
+	public static SqlItem alias(Object o) {
 		try {
-			String[] a = thdMethodName.get();
-			checkArrayStringExist(a);
-			if (StrUtils.isEmpty(a[2]))
+			AliasItemInfo a = thdMethodName.get(); 
+			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
-			String sqlPiece = new StringBuilder(a[1]).append(".").append(a[2]).append(" as ").append(a[1]).append("_")
-					.append(a[2]).toString();
-			return new SqlPieceCustomSqlItem(sqlPiece);
+			String sqlPiece = new StringBuilder(a.alias).append(".").append(a.colName).append(" as ").append(a.alias).append("_")
+					.append(a.colName).toString();
+			return new SqlItem(sqlPiece);
 		} finally {
 			thdMethodName.remove();
 		}
 	}
 
-	public static CustomSqlItem col(Object o) {
+	public static SqlItem col(Object o) {
 		try {
-			String[] a = thdMethodName.get();
-			checkArrayStringExist(a);
-			if (StrUtils.isEmpty(a[2]))
+			AliasItemInfo a = thdMethodName.get(); 
+			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
-			String sqlPiece = new StringBuilder(a[1]).append(".").append(a[2]).toString();
-			return new SqlPieceCustomSqlItem(sqlPiece);
+			String sqlPiece = new StringBuilder(a.alias).append(".").append(a.colName).toString();
+			return new SqlItem(sqlPiece);
 		} finally {
 			thdMethodName.remove();
 		}
 	}
 
-	public static CustomSqlItem table(Object o) {
+	public static SqlItem table(Object o) {
 		try {
 			o.toString();
-			String[] a = thdMethodName.get();
-			checkArrayStringExist(a);
-			String sqlPiece = new StringBuilder(a[0]).append(" ").append(a[1]).toString();
-			return new SqlPieceCustomSqlItem(sqlPiece);
+			AliasItemInfo a = thdMethodName.get(); 
+			String sqlPiece = new StringBuilder(a.tableName).append(" ").append(a.alias).toString();
+			return new SqlItem(sqlPiece);
 		} finally {
 			thdMethodName.remove();
 		}
+	}
+
+	public static SqlItem TABLE(Object o) {
+		return table(o);
 	}
 
 }

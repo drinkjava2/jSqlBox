@@ -69,7 +69,7 @@ public class DbProConfig {
 		this.connectionManager = connectionManager;
 	}
 
-	public SqlHandler[] getHandlers() {
+	public SqlHandler[] getSqlHandlers() {
 		return sqlHandlers;
 	}
 

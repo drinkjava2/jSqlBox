@@ -60,7 +60,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getHandlers();
+		this.sqlHandlers = config.getSqlHandlers();
 	}
 
 	public DbPro(DataSource ds, DbProConfig config) {
@@ -70,7 +70,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getHandlers();
+		this.sqlHandlers = config.getSqlHandlers();
 	}
 
 	public DbPro(DataSource ds, Object... args) {
@@ -227,7 +227,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * @return a PreparedSQL instance
 	 */
 	private static PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
-		// TODO add templateEngine
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
 		PreparedSQL result = new PreparedSQL();
@@ -257,19 +256,21 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				if (psItem.getParams() != null)
 					for (Object obj : psItem.getParams())
 						result.addParam(obj);
+			} else if (item instanceof SqlTemplateEngine) {
+				result.setTemplateEngine((SqlTemplateEngine) item);
 			} else if (item instanceof Map<?, ?>) {
 				result.addTemplateMap((Map<String, Object>) item);
-			} else if (item instanceof SqlParam) {
-				SqlParam spm = (SqlParam) item;
-				if (SqlParamType.PARAM.equals(spm.getType())) {
+			} else if (item instanceof SqlItem) {
+				SqlItem spm = (SqlItem) item;
+				if (SqlItemType.PARAM.equals(spm.getType())) {
 					for (Object pm : spm.getParameters())
 						result.addParam(pm);
-				} else if (SqlParamType.PUT.equals(spm.getType())) {
+				} else if (SqlItemType.PUT.equals(spm.getType())) {
 					result.addTemplateParam(spm);
-				} else if (SqlParamType.SQL.equals(spm.getType())) {
+				} else if (SqlItemType.SQL.equals(spm.getType())) {
 					for (Object pm : spm.getParameters())
 						sql.append(pm);
-				} else if (SqlParamType.QUESTION_PARAM.equals(spm.getType())) {
+				} else if (SqlItemType.QUESTION_PARAM.equals(spm.getType())) {
 					int i = 0;
 					for (Object pm : spm.getParameters()) {
 						result.addParam(pm);
@@ -278,12 +279,12 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 						sql.append("?");
 						i++;
 					}
-				} else if (SqlParamType.NOT_NULL.equals(spm.getType())) {
+				} else if (SqlItemType.NOT_NULL.equals(spm.getType())) {
 					if (spm.getParameters()[1] != null) {
 						sql.append(spm.getParameters()[0]);
 						result.addParam(spm.getParameters()[1]);
 					}
-				} else if (SqlParamType.VALUES_QUESTIONS.equals(spm.getType())) {
+				} else if (SqlItemType.VALUES_QUESTIONS.equals(spm.getType())) {
 					sql.append(" values(");
 					for (int i = 0; i < result.getParamSize(); i++) {
 						if (i > 0)
@@ -305,8 +306,11 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				if (!added)
 					throw new DbProRuntimeException(
 							"Class '" + item + "' can not use public zero parameter constructor to build instance");
-			} else if (item instanceof CustomSqlItem) {
-				((CustomSqlItem) item).dealItem(result, sql);
+			} else if (item instanceof SpecialSqlItem) {
+				if (ImprovedQueryRunner.getGlobalSpecialSqlItemPreparer() == null)
+					throw new DbProRuntimeException(
+							"globalSpecialSqlItemPreparer not set, need call DbPro.setGlobalSpecialSqlItemPreparer() method first");
+				ImprovedQueryRunner.getGlobalSpecialSqlItemPreparer().doPrepare(result, sql, (SpecialSqlItem) item);
 			} else {
 				if (iXxxStyle)
 					sql.append(item); // iXxxx style, unknown object is SQL piece
@@ -320,23 +324,23 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 
 	// ============================================================================
 
-	/** Return a SqlParamType.PARAM type SqlParam instance */
-	public static SqlParam param(Object... parameters) {
-		return new SqlParam(SqlParamType.PARAM, parameters);
+	/** Return a SqlItemType.PARAM type SqlItem instance */
+	public static SqlItem param(Object... parameters) {
+		return new SqlItem(SqlItemType.PARAM, parameters);
 	}
 
 	/**
 	 * Cache parameters in ThreadLocal and return an empty String
 	 */
-	public static SqlParam sql(Object... parameters) {
-		return new SqlParam(SqlParamType.SQL, parameters);
+	public static SqlItem sql(Object... parameters) {
+		return new SqlItem(SqlItemType.SQL, parameters);
 	}
 
 	/**
 	 * Cache parameters in ThreadLocal and return a "?" String
 	 */
-	public static SqlParam question(Object... parameters) {
-		return new SqlParam(SqlParamType.QUESTION_PARAM, parameters);
+	public static SqlItem question(Object... parameters) {
+		return new SqlItem(SqlItemType.QUESTION_PARAM, parameters);
 	}
 
 	/**
@@ -346,28 +350,28 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 *            The SQL piece will be appended
 	 * @param param
 	 *            The param
-	 * @return a SqlParam instance will be used by iPrepare method
+	 * @return a SqlItem instance will be used by iPrepare method
 	 */
-	public static SqlParam notNull(String sqlPiece, Object param) {
-		return new SqlParam(SqlParamType.NOT_NULL, sqlPiece, param);
+	public static SqlItem notNull(String sqlPiece, Object param) {
+		return new SqlItem(SqlItemType.NOT_NULL, sqlPiece, param);
 	}
 
 	/**
 	 * Create "values(?,?,?...,?)" String according how many SQL parameters be
 	 * cached in ThreadLocal
 	 */
-	public static SqlParam valuesQuestions() {
-		return new SqlParam(SqlParamType.VALUES_QUESTIONS);
+	public static SqlItem valuesQuestions() {
+		return new SqlItem(SqlItemType.VALUES_QUESTIONS);
 	}
 
 	/**
-	 * For tXxxx style templateEngine use, return a SqlParamType.PUT type SqlParam
+	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
 	 * instance,
 	 * 
 	 * Usage: put("key1",value1,"key2",value2...);
 	 */
-	public static SqlParam put(Object... parameters) {
-		return new SqlParam(SqlParamType.PUT, parameters);
+	public static SqlItem put(Object... parameters) {
+		return new SqlItem(SqlItemType.PUT, parameters);
 	}
 
 	public void ________iXxxxStyles________() {// NOSONAR

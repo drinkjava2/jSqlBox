@@ -132,7 +132,7 @@ public class PreparedSQL {
 			templateParamMap.put(entry.getKey(), entry.getValue());
 	}
 
-	public void addTemplateParam(SqlParam sp) {
+	public void addTemplateParam(SqlItem sp) {
 		if (sp.getParameters() == null || !((sp.getParameters().length % 2) == 0))
 			throw new DbProRuntimeException(
 					"Put type template parameter should be key1, value1, key2,value2... format");

@@ -71,7 +71,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getHandlers();
+		this.sqlHandlers = config.getSqlHandlers();
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
@@ -82,7 +82,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getHandlers();
+		this.sqlHandlers = config.getSqlHandlers();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
 	}
