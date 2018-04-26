@@ -142,8 +142,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to customise
-	 * SQL format
+	 * Format SQL for logger output, subClass can override this method to
+	 * customise SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -287,10 +287,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	// DbUtils style methods, throw SQLException
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found, SQLException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -304,10 +304,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found, SQLException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -321,8 +321,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * This is the core method of whole project, handle a PreparedSQL instance and
-	 * return a result
+	 * This is the core method of whole project, handle a PreparedSQL instance
+	 * and return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
 		if (ps.getUseTemplate()) {
@@ -483,13 +483,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found , DbProRuntimeException may be threw if some SQL
-	 * operation Exception happen.
+	 * value if more than one column or more than 1 rows returned, a null object
+	 * may return if no result found , DbProRuntimeException may be threw if
+	 * some SQL operation Exception happen.
 	 * 
 	 * @param ps
-	 *            The PreparedSQL which included SQL、parameters and sqlHandlers(if
-	 *            have)
+	 *            The PreparedSQL which included SQL、parameters and
+	 *            sqlHandlers(if have)
 	 * @return An Object or null, Object type determined by SQL content
 	 */
 	private <T> T runQueryForScalar(PreparedSQL ps) {
@@ -524,8 +524,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is responsible
-	 *            for closing this Connection.
+	 *            The Connection to use to run the query. The caller is
+	 *            responsible for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
 	 * @param params
@@ -586,7 +586,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		}
 	}
 
-	private void publicStaticMethods_____________________() {// NOSONAR
+	private void staticGlobalNextMethods_____________________() {// NOSONAR
 	}
 
 	public static DbProLogger getGlobalNextLogger() {
@@ -613,26 +613,31 @@ public class ImprovedQueryRunner extends QueryRunner {
 		ImprovedQueryRunner.globalNextTemplateEngine = sqlTemplateEngine;
 	}
 
-	/**
-	 * Get current thread's ThreadLocal SqlHandler
-	 */
-	public static SqlHandler[] getThreadLocalSqlHandlers() {
-		return threadLocalSqlHandlers.get();
+	public static Boolean getGlobalNextAllowShowSql() {
+		return globalNextAllowShowSql;
 	}
 
-	/**
-	 * Set current thread's ThreadLocal SqlHandler
-	 */
-	public static void setThreadLocalSqlHandlers(SqlHandler... handlers) {
-		threadLocalSqlHandlers.set(handlers);
+	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
+		DbPro.globalNextAllowShowSql = allowShowSql;
 	}
 
-	public static SpecialSqlItemPreparer getGlobalSpecialSqlItemPreparer() {
-		return globalSpecialSqlItemPreparer;
+	public static ConnectionManager getGlobalNextConnectionManager() {
+		return globalNextConnectionManager;
 	}
 
-	public static void setGlobalSpecialSqlItemPreparer(SpecialSqlItemPreparer globalSpecialSqlItemPreparer) {
-		ImprovedQueryRunner.globalSpecialSqlItemPreparer = globalSpecialSqlItemPreparer;
+	public static void setGlobalNextConnectionManager(ConnectionManager globalConnectionManager) {
+		DbPro.globalNextConnectionManager = globalConnectionManager;
+	}
+
+	public static SqlHandler[] getGlobalNextSqlHandlers() {
+		return globalNextSqlHandlers;
+	}
+
+	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
+		globalNextSqlHandlers = sqlHandlers;
+	}
+
+	private void specialStaticMethods_____________________() {// NOSONAR
 	}
 
 	// ===override execute/insert/update methods to support batch and explainSql
@@ -662,35 +667,29 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return array;
 	}
 
-	public static Boolean getGlobalNextAllowShowSql() {
-		return globalNextAllowShowSql;
+	public static SpecialSqlItemPreparer getGlobalSpecialSqlItemPreparer() {
+		return globalSpecialSqlItemPreparer;
 	}
 
-	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
-		DbPro.globalNextAllowShowSql = allowShowSql;
+	public static void setGlobalSpecialSqlItemPreparer(SpecialSqlItemPreparer globalSpecialSqlItemPreparer) {
+		ImprovedQueryRunner.globalSpecialSqlItemPreparer = globalSpecialSqlItemPreparer;
 	}
 
-	public static ConnectionManager getGlobalNextConnectionManager() {
-		return globalNextConnectionManager;
+	/**
+	 * Get current thread's ThreadLocal SqlHandler
+	 */
+	public static SqlHandler[] getThreadLocalSqlHandlers() {
+		return threadLocalSqlHandlers.get();
 	}
 
-	public static void setGlobalNextConnectionManager(ConnectionManager globalConnectionManager) {
-		DbPro.globalNextConnectionManager = globalConnectionManager;
+	/**
+	 * Set current thread's ThreadLocal SqlHandler
+	 */
+	public static void setThreadLocalSqlHandlers(SqlHandler... handlers) {
+		threadLocalSqlHandlers.set(handlers);
 	}
 
-	public static SqlHandler[] getGlobalNextSqlHandlers() {
-		return globalNextSqlHandlers;
-	}
-
-	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
-		globalNextSqlHandlers = sqlHandlers;
-	}
-
-	private void getterSetters_____________________() {// NOSONAR
-	}
-
-	public Boolean getAllowShowSQL() {
-		return allowShowSQL;
+	private void normalGetterSetters_____________________() {// NOSONAR
 	}
 
 	/**
@@ -699,6 +698,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	public void setAllowShowSQL(Boolean bl) {
 		this.allowShowSQL = bl;
+	}
+
+	public Boolean getAllowShowSQL() {
+		return allowShowSQL;
 	}
 
 	public DbProLogger getLogger() {
@@ -719,6 +722,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public SqlHandler[] getSqlHandlers() {
 		return sqlHandlers;
+	}
+
+	public ConnectionManager getConnectionManager() {
+		return connectionManager;
+	}
+
+	public ThreadLocal<ArrayList<PreparedSQL>> getSqlBatchCache() {
+		return sqlBatchCache;
 	}
 
 }

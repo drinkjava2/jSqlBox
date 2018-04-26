@@ -89,7 +89,7 @@ public class UsageAndSpeedTest {
 			REPEAT_TIMES = 20;// warm up
 			runTestMethods();
 			PRINT_TIMEUSED = true;
-			REPEAT_TIMES = 20000;
+			REPEAT_TIMES = 20;
 			System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
