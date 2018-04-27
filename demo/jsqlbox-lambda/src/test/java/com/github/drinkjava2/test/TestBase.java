@@ -22,8 +22,8 @@ public class TestBase {
 		ds.setUsername("sa");
 		ds.setPassword("");
 
-		//SqlBoxContext.setGlobalAllowShowSql(true);
-		ctx = new SqlBoxContext(ds);  
+		// SqlBoxContext.setGlobalNextAllowShowSql(true);
+		ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);

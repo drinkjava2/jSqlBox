@@ -35,6 +35,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
@@ -108,8 +109,29 @@ public class HandlersTest extends TestBase {
 	@Test
 	public void testEntityListHandler() {
 		List<DemoUser> result = ctx.pQuery(new EntityListHandler(DemoUser.class),
-				"select u.** from DemoUser u where u.age>?", 0);
-		Assert.assertTrue(result.size() == 99);
+				"select u.** from DemoUser u where u.age>=?", 90);
+		Assert.assertTrue(result.size() == 10);
+
+		result = ctx.pQuery(new EntityListHandler("u", DemoUser.class),
+				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		Assert.assertTrue(result.size() == 10);
+
+		result = ctx.pQuery(new EntityListHandler(DemoUser.class, new DemoUser().alias("u")),
+				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		Assert.assertTrue(result.size() == 10);
+
+		TableModel t = new DemoUser().tableModel();
+		t.setAlias("u");
+		result = ctx.pQuery(new EntityListHandler(DemoUser.class, t),
+				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		Assert.assertTrue(result.size() == 10);
+
+		SqlBox b = new DemoUser().box();
+		b.getTableModel().setAlias("u");
+		result = ctx.pQuery(new EntityListHandler(DemoUser.class, b),
+				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		Assert.assertTrue(result.size() == 10);
+
 	}
 
 	@Test

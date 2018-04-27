@@ -14,7 +14,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 /**
@@ -24,11 +23,12 @@ public class Java6Java7Test extends TestBase {
 
 	@Test
 	public void normalTest() {
+		//ctx.setAllowShowSQL(true);
 		List<User> totalUsers = ctx.iQuery(new EntityListHandler(User.class), "select u.** from usertb u");
 		Assert.assertEquals(100, totalUsers.size());
 
-		User u = createAliasProxy(User.class, null);
-		List<Map<String, Object>> list = ctx.iQueryForMapList(new PrintSqlHandler(), clean(), //
+		User u = createAliasProxy(User.class);
+		List<Map<String, Object>> list = ctx.iQueryForMapList(clean(), //
 				"select "//
 				, alias(u.getId())//
 				, ", ", alias(u.getAddress())//
@@ -40,8 +40,7 @@ public class Java6Java7Test extends TestBase {
 		Assert.assertEquals(10, list.size());
 
 		u = createAliasProxy(User.class, "u");
-		List<User> list2 = ctx.iQuery(new EntityListHandler(User.class, (User) new User().alias("u")),
-				new PrintSqlHandler(), clean(), //
+		List<User> list2 = ctx.iQuery(new EntityListHandler("u", User.class), clean(), //
 				"select "//
 				, alias(u.getId())//
 				, c_alias(u.getAddress())//

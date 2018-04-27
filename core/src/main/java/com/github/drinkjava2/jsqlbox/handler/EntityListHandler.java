@@ -11,8 +11,13 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
+import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
@@ -34,6 +39,23 @@ public class EntityListHandler extends EntityNetHandler {
 	public EntityListHandler(Class<?> targetClass) {
 		super(targetClass);
 		this.targetClass = targetClass;
+	}
+
+	public EntityListHandler(String alias, Class<?> targetClass) {
+		super(toTableModel(alias, targetClass));
+		this.targetClass = targetClass;
+	}
+
+	public static TableModel toTableModel(String alias, Class<?> targetClass) {
+		try {
+			Object o = targetClass.newInstance();
+			SqlBox box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx(), targetClass);
+			TableModel tb = box.getTableModel();
+			tb.setAlias(alias);
+			return tb;
+		} catch (Exception e) {
+			throw new DbProRuntimeException(e);
+		}
 	}
 
 	@Override

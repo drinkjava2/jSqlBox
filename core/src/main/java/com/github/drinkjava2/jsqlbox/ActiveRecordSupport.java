@@ -51,7 +51,7 @@ public interface ActiveRecordSupport {
 	public TableModel tableModel();
 
 	/** set Entity's box's tableModel's alias name */
-	public <T> T alias(String alias);
+	public ActiveRecordSupport alias(String alias);
 
 	/** @return binded TableModel's columnModel by given columnName */
 	public ColumnModel columnModel(String columnName);

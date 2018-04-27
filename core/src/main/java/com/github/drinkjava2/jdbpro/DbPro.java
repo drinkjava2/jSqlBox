@@ -85,7 +85,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		}
 	}
 
-	/** Quite execute a SQL, do not throw any exception, if any exception happen, return -1 */  
+	/**
+	 * Quite execute a SQL, do not throw any exception, if any exception happen,
+	 * return -1
+	 */
 	public int quiteExecute(String sql, Object... params) {
 		try {
 			return execute(sql, params);

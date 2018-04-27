@@ -39,6 +39,7 @@ import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
  * @since 1.0.0
  */
 public class SqlBoxContext extends DbPro {// NOSONAR
+	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
 	/** globalSqlBoxSuffix use to identify the SqlBox configuration class */
 	protected static String globalSqlBoxSuffix = "SqlBox";// NOSONAR
@@ -46,9 +47,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected static SqlBoxContext globalSqlBoxContext = null;
 
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
-	 * can use setDialect() method to change to other dialect, to keep
-	 * thread-safe, only subclass can access this variant
+	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource, can
+	 * use setDialect() method to change to other dialect, to keep thread-safe, only
+	 * subclass can access this variant
 	 */
 	protected Dialect dialect;
 
@@ -156,8 +157,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to
-	 * improve loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
+	 * loading speed
 	 */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, true, configObjects);
@@ -228,8 +229,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new
-	 * one and bind on entityBean
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
+	 * and bind on entityBean
 	 */
 	public SqlBox getSqlBox(Object entityBean) {
 		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
@@ -282,6 +283,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** Shortcut method equal to getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
+		if (globalSqlBoxContext == null)
+			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return globalSqlBoxContext;
 	}
 
@@ -306,5 +309,24 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		globalSqlBoxContext = null;
 		globalSpecialSqlItemPreparer = null;
 	}
+
+	//@formatter:off
+	public <T> T igQuery(Object... inlineSQL) {return gctx().iQuery(inlineSQL);}
+	public <T> T igQueryForObject(Object... inlineSQL) {return gctx().iQueryForObject(inlineSQL);}
+	public long igQueryForLongValue(Object... inlineSQL) {return gctx().iQueryForLongValue(inlineSQL);}
+	public String igQueryForString(Object... inlineSQL) {return gctx()}
+	public List<Map<String, Object>> igQueryForMapList(Object... items) {return gctx()}
+	public int igUpdate(Object... inlineSQL) {return gctx()}
+	public int igInsert(Object... inlineSQL) {return gctx()}
+	public <T> T igExecute(Object... inlineSQL) {return gctx() } 
+	
+	public <T> T tgQuery(Object... items) {return gctx()}
+	public <T> T tgQueryForObject(Object... items) {return gctx()}
+	public long tgQueryForLongValue(Object... items) {return gctx()}
+	public String tgQueryForString(Object... items) {return gctx()}
+	public List<Map<String, Object>> tgQueryForMapList(Object... items) {return gctx()}
+	public int tgUpdate(Object... items) {return gctx()}
+	public int tgInsert(Object... items) {return gctx()}
+	public <T> T tgExecute(Object... items) {return gctx()}
 
 }

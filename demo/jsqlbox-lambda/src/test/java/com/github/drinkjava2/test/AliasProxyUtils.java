@@ -50,6 +50,26 @@ public class AliasProxyUtils {
 		}
 	}
 
+	/**
+	 * Create a alias proxy for iQuery query
+	 * 
+	 * @param clazz
+	 *            target class
+	 * @return proxy bean which make all methods only return null
+	 */
+	public static <T> T createAliasProxy(Class<T> c) {
+		return createAliasProxy(c, null);
+	}
+
+	/**
+	 * Create a alias proxy for iQuery query
+	 * 
+	 * @param clazz
+	 *            The target entity class
+	 * @param alias
+	 *            The alias in SQL
+	 * @return Proxy entity bean which make all methods only return null
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T createAliasProxy(Class<T> c, String alias) {
 		TableModel t = TableModelUtils.entity2Model(c);
@@ -79,14 +99,14 @@ public class AliasProxyUtils {
 			thdMethodName.remove();
 		}
 	}
-	
+
 	public static SqlItem c_alias(Object o) {
 		try {
 			AliasItemInfo a = thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
 			if (StrUtils.isEmpty(a.alias))
-				return new SqlItem(", "+a.colName);
+				return new SqlItem(", " + a.colName);
 			else
 				return new SqlItem(new StringBuilder(", ").append(a.alias).append(".").append(a.colName).append(" as ")
 						.append(a.alias).append("_").append(a.colName).toString());

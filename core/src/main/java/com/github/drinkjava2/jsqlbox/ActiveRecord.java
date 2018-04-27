@@ -49,7 +49,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public class ActiveRecord implements ActiveRecordSupport {
-	private static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
 	private static ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 
@@ -122,11 +121,10 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return box().getTableModel().getTableName();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T alias(String alias) {
+	public ActiveRecord alias(String alias) {
 		box().getTableModel().setAlias(alias);
-		return (T) this;
+		return this;
 	}
 
 	@Override
@@ -147,7 +145,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public <T> T insert() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		ctx.insert(this);
 		return (T) this;
 	}
@@ -157,7 +155,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public <T> T update() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		ctx.update(this);
 		return (T) this;
 	}
@@ -166,7 +164,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public void delete() {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		ctx.delete(this);
 	}
 
@@ -174,7 +172,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	public <T> T load(Object pkey) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
-			throw new SqlBoxException(NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx.load(this.getClass(), pkey);
 	}
 
