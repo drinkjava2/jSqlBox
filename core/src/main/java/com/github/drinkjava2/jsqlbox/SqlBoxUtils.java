@@ -33,7 +33,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * 
  * </pre>
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
 public abstract class SqlBoxUtils {// NOSONAR
@@ -48,20 +48,19 @@ public abstract class SqlBoxUtils {// NOSONAR
 			return new WeakHashMap<Object, SqlBox>();
 		}
 	};
- 
 
-	private static void bindNonActiveRecordBox(Object entity, SqlBox box) { 
-			boxCache.get().put(entity, box); 
+	private static void bindNonActiveRecordBox(Object entity, SqlBox box) {
+		boxCache.get().put(entity, box);
 	}
 
-	private static SqlBox findNonActiveRecordBox(Object entity) { 
-			return boxCache.get().get(entity); 
+	private static SqlBox findNonActiveRecordBox(Object entity) {
+		return boxCache.get().get(entity);
 	}
 
-	private static void unbindNonActiveRecordBox(Object entity) { 
-			SqlBox box = boxCache.get().get(entity);
-			if (box != null)
-				boxCache.get().remove(entity); 
+	private static void unbindNonActiveRecordBox(Object entity) {
+		SqlBox box = boxCache.get().get(entity);
+		if (box != null)
+			boxCache.get().remove(entity);
 	}
 
 	/**
@@ -127,8 +126,10 @@ public abstract class SqlBoxUtils {// NOSONAR
 	public static SqlBox findAndBindSqlBox(SqlBoxContext ctx, Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
 		SqlBox box = SqlBoxUtils.getBindedBox(entity);
-		if (box != null)
+		if (box != null) {
+			box.setContext(ctx);
 			return box;
+		}
 		box = SqlBoxUtils.createSqlBox(ctx, entity.getClass());
 		box.setContext(ctx);
 		SqlBoxUtils.bindBoxToBean(box, entity);

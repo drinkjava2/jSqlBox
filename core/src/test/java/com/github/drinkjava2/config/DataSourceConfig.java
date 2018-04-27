@@ -16,9 +16,8 @@ import com.zaxxer.hikari.HikariDataSource;
 public class DataSourceConfig {
 	/**
 	 * ================================================================<br/>
-	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to test
-	 * on MySql <br/>
-	 * This project is already tested on H2, MySql5, Oracle11g, MSSQL2012
+	 * Data source setting, change "H2DataSourceBox" to MySqlDataSourceBox to
+	 * test on MySql <br/>
 	 * ================================================================<br/>
 	 */
 	public static class DataSourceBox extends H2DataSourceBox {

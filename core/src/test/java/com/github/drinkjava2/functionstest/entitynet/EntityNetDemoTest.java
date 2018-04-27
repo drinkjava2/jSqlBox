@@ -1,5 +1,7 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.gpQuery;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -241,7 +243,7 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testEntityNetQuery() {
 		insertDemoData();
-		EntityNet net = ctx.pQuery(new EntityNetHandler(User.class, Email.class),
+		EntityNet net = gpQuery(new EntityNetHandler(User.class, Email.class),
 				"select u.**, e.** from usertb u, emailtb e where u.id=e.userId");
 		Assert.assertEquals(8, net.size());
 		Set<Email> emails = net.findEntitySet(Email.class,
@@ -252,16 +254,16 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testManualLoadAndJoin() {
 		insertDemoData();
-		EntityNet net = ctx.pQuery(new EntityNetHandler(User.class, Address.class),
+		EntityNet net = gpQuery(new EntityNetHandler(User.class, Address.class),
 				"select u.**, a.** from usertb u, addresstb a where a.userId=u.id");
 		Assert.assertEquals(10, net.size());
 
-		List<Map<String, Object>> mapList2 = ctx.pQuery(new SSMapListHandler(Email.class),
+		List<Map<String, Object>> mapList2 = gpQuery(new SSMapListHandler(Email.class),
 				"select e.id as e_id from emailtb as e");
 		ctx.netJoinList(net, mapList2, new Email().alias("e"));
 		Assert.assertEquals(15, net.size());
 
-		MapListWrap wrap = ctx.pQuery(
+		MapListWrap wrap = gpQuery(
 				new SSMapListWrapHandler(Role.class, UserRole.class, RolePrivilege.class, Privilege.class),
 				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
 		Assert.assertEquals(900, wrap.getMapList().size());
