@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
-import com.github.drinkjava2.jdbpro.SqlType;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;
@@ -31,30 +31,28 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
- * Store some public static methods for ActiveRecord
+ * Store some public static methods of Guesser
  * 
  * @author Yong Zhu
- * @since 1.0.1
+ * @since 1.0.8
  */
-public abstract class ActiveRecordUtils extends ClassCacheUtils {
-	private ActiveRecordUtils() {
-		// private Constructor
-	}
+public abstract class GuesserUtils {// NOSONAR
 
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
 	private static final Map<String, PreparedSQL> methodSQLCache = new ConcurrentHashMap<String, PreparedSQL>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class
-	 * extended from ActiveRecord
+	 * This is the method body to build an instance based on abstract class extended
+	 * from ActiveRecord
 	 * 
 	 * @param activeClass
 	 * @return Object instance
 	 */
 	public static Class<?> createChildClass(Class<?> abstractClass) {
 		String fullClassName = abstractClass.getName() + "_Child";
-		if (classExistCache.containsKey(fullClassName))
-			return classExistCache.get(fullClassName);
+		Class<?> check = ClassCacheUtils.checkClassExist(fullClassName);
+		if (check != null)
+			return check;
 		String src = TextUtils.getJavaSourceCodeUTF8(abstractClass);
 		if (StrUtils.isEmpty(src))
 			throw new SqlBoxException("No Java source code found for class '" + abstractClass.getName() + "'");
@@ -68,7 +66,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 				.append(abstractClass.getSimpleName()).append("{");
 		String body = StrUtils.substringAfter(src, "public abstract class " + abstractClass.getSimpleName());
 		body = StrUtils.substringAfter(body, "{");
-		String heading = StrUtils.substringAfter(body, "public abstract ");
+		String heading = StrUtils.substringAfter(body, "public abstract ");// NOSONAR
 		while (!StrUtils.isEmpty(heading)) {
 			start = StrUtils.substringBefore(body, "public abstract ");
 			sb.append(start).append("public ");
@@ -98,67 +96,13 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		String childClassSrc = sb.toString();
 		Class<?> childClass = null;
 		childClass = DynamicCompileEngine.instance.javaCodeToClass(fullClassName, childClassSrc);
-		classExistCache.put(fullClassName, childClass);
+		ClassCacheUtils.registerClass(childClass);
 		TextUtils.javaFileCache.put(fullClassName, childClassSrc);
 		return childClass;
 	}
 
-	/**
-	 * Execute operation to access database, based on current method @Sql
-	 * annotated String or Text String and parameters, guess a best fit
-	 * query/update/delete/execute method to run
-	 * 
-	 * @param entity
-	 * @param params
-	 * @return <T> T
-	 */
-	@SuppressWarnings("all")
-	protected static <T> T doGuess(ActiveRecord entity, Object... params) {// NOSONAR
-		int callerPos = 0;
-		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-		for (StackTraceElement stack : stacks) {
-			callerPos++;
-			if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
-					&& "guess".equals(stack.getMethodName()))
-				break;
-		}
-		String callerClassName = stacks[callerPos].getClassName();
-		String callerMethodName = stacks[callerPos].getMethodName();
-		Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
-		if (callerClass == null)
-			throw new SqlBoxException("Can not find class '" + callerClassName + "'");
-		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
-		if (callerMethod == null)
-			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-
-		PreparedSQL ps = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
-		String sql = ps.getSql().trim();
-		if (StrUtils.startsWithIgnoreCase(sql, "select"))
-			ps.setType(SqlType.QUERY);
-		else if (StrUtils.startsWithIgnoreCase(sql, "delete"))
-			ps.setType(SqlType.UPDATE);
-		else if (StrUtils.startsWithIgnoreCase(sql, "update"))
-			ps.setType(SqlType.UPDATE);
-		else if (StrUtils.startsWithIgnoreCase(sql, "insert"))
-			ps.setType(SqlType.UPDATE);
-		else
-			ps.setType(SqlType.EXECUTE);// execute
-		boolean hasQuestionMark = sql.indexOf('?') > -1;
-		boolean useTemplate = sql.indexOf(':') > -1 || sql.indexOf("#{") > -1;
-		ps.setUseTemplate(useTemplate);
-		if (useTemplate && hasQuestionMark)
-			throw new SqlBoxException(
-					"guess() method can not determine use template or normal style for SQL '" + sql + "'");
-		if (useTemplate)
-			ps.setTemplateParamMap(buildParamMap(callerClassName, callerMethodName, params));
-		else
-			ps.setParams(params);
-		autoGuessHandler(entity, ps, sql, callerMethod); // guess handler
-		return (T) entity.ctx().runPreparedSQL(ps);
-	}
-
 	/** Automatically guess the sqlHandlers */
-	private static void autoGuessHandler(ActiveRecord entity, PreparedSQL ps, String sql, Method method) {
+	public static void autoGuessHandler(Object entity, PreparedSQL ps, String sql, Method method) {
 		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty())
 			return;
 		if (ps.getResultSetHandler() != null)
@@ -175,55 +119,10 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		}
 	}
 
-	protected static String doGuessSQL(ActiveRecord ac) {// NOSONAR
-		int callerPos = 0;
-		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-		for (StackTraceElement stack : stacks) {
-			callerPos++;
-			if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
-					&& "guessSQL".equals(stack.getMethodName()))
-				break;
-		}
-		String callerClassName = stacks[callerPos].getClassName();
-		String callerMethodName = stacks[callerPos].getMethodName();
-		Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
-		if (callerClass == null)
-			throw new SqlBoxException("Can not find class '" + callerClassName + "'");
-		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
-		if (callerMethod == null)
-			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		PreparedSQL sp = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
-		return sp.getSql();
-	}
-
-	protected static PreparedSQL doGuessPreparedSQL(ActiveRecord ac, Object... params) {// NOSONAR
-		int callerPos = 0;
-		StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-		for (StackTraceElement stack : stacks) {
-			callerPos++;
-			if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
-					&& "guessPreparedSQL".equals(stack.getMethodName()))
-				break;
-		}
-		String callerClassName = stacks[callerPos].getClassName();
-		String callerMethodName = stacks[callerPos].getMethodName();
-		Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
-		if (callerClass == null)
-			throw new SqlBoxException("Can not find class '" + callerClassName + "'");
-		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
-		if (callerMethod == null)
-			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-
-		PreparedSQL sp = getPreparedSqlAndHandles(callerClassName, callerMethodName, callerMethod);
-		sp.setParams(params);
-		return sp;
-	}
-
 	/** Get the PreparedSQL from a abstract method, but do not set parameters */
-	private static PreparedSQL getPreparedSqlAndHandles(String callerClassName, String callerMethodName,
-			Method callerMethod) {
+	public static PreparedSQL getPreparedSqlAndHandles(String callerClassName, Method callerMethod, IocTool iocTool) {// NOSONAR
 		// key is only inside used by cache
-		String key = callerClassName + "@#$^!" + callerMethodName;
+		String key = callerClassName + "@#$^!" + callerMethod.getName();
 		PreparedSQL result = methodSQLCache.get(key);
 		if (result != null)
 			return result.newCopy();
@@ -237,8 +136,8 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 				sqlAnno = (Sql) anno;
 			if (Handlers.class.equals(anno.annotationType())) {
 				Class<?>[] array = ((Handlers) anno).value();
-				for (Class<?> claz : array)
-					result.addHandler(claz);
+				for (Class<?> claz : array)  
+					 result.addHandler(claz, iocTool);
 			}
 		}
 		String sql = null;
@@ -249,10 +148,10 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 			try {
 				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
 			} catch (Exception e) {
-				throw new SqlBoxException("Method '" + callerMethodName + "' in '" + callerClassName
+				throw new SqlBoxException("Method '" + callerMethod.getName() + "' in '" + callerClassName
 						+ "' have no Sql annotation or text.");
 			}
-			sql = StrUtils.substringAfter(src, callerMethodName + "(");
+			sql = StrUtils.substringAfter(src, callerMethod.getName() + "(");
 			sql = StrUtils.substringBetween(sql, "/*-", "*/");
 		}
 		if (sql != null)
@@ -262,8 +161,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		return result.newCopy();
 	}
 
-	private static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName,
-			Object... params) {
+	public static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName, Object... params) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		String[] methodParamNames = getMethodParamNames(callerClassName, callerMethodName);
 		if (methodParamNames != null && methodParamNames.length > 0) {
@@ -274,7 +172,7 @@ public abstract class ActiveRecordUtils extends ClassCacheUtils {
 		return map;
 	}
 
-	private static String[] getMethodParamNames(String classFullName, String callerMethodName) {
+	public static String[] getMethodParamNames(String classFullName, String callerMethodName) {
 		String key = classFullName + "@#!$^" + callerMethodName;
 		if (methodParamNamesCache.containsKey(key))
 			return methodParamNamesCache.get(key);

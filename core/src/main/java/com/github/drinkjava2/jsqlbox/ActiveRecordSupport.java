@@ -94,11 +94,14 @@ public interface ActiveRecordSupport {
 
 	/**
 	 * Based on current method @Sql annotated String or Text String and parameters,
-	 * guess a best fit query/update/delete/execute method to run
+	 * guess a best fit query/update/delete/execute method and run it
 	 */
 	public <T> T guess(Object... params);
 
-	/** Return current method's @Sql annotated String or Text String */
+	/**
+	 * Return current method's SQL String from @Sql annotated, or Text in
+	 * comments(this need put Java file in resources folder)
+	 */
 	public String guessSQL();
 
 	/** Return current method's prepared SQL */

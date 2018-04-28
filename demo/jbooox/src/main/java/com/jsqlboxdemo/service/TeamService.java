@@ -18,7 +18,7 @@ import model.Team;
 public class TeamService {
 
 	public List<Team> listAll() {
-		return SqlBoxContext.gctx().nLoadAllEntityList(Team.class);
+		return SqlBoxContext.gctx().netLoadAllEntityList(Team.class);
 	}
 
 	@Transaction
@@ -33,7 +33,7 @@ public class TeamService {
 
 	@Transaction
 	public List<Team> listBigger(Integer rating) {
-		AbstractTeam team = AbstractTeam.create(AbstractTeam.class);
+		AbstractTeam team = AbstractTeam.createMapper(AbstractTeam.class);
 		return team.queryAbstractRatingBiggerThan(rating);
 	}
 

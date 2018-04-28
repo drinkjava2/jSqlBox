@@ -5,10 +5,8 @@ import static com.github.drinkjava2.jdbpro.DbPro.PARA0;
 import static com.github.drinkjava2.jdbpro.DbPro.PARAMS;
 import static com.github.drinkjava2.jdbpro.DbPro.QUES;
 import static com.github.drinkjava2.jdbpro.DbPro.QUES0;
-import static com.github.drinkjava2.jdbpro.DbPro.VALUESQUES;
-import static com.github.drinkjava2.jdbpro.DbPro.iPrepare;
-import static com.github.drinkjava2.jdbpro.DbPro.notNull;
-import static com.github.drinkjava2.jdbpro.DbPro.pPrepare;
+import static com.github.drinkjava2.jdbpro.DbPro.VALUESQUES; 
+import static com.github.drinkjava2.jdbpro.DbPro.notNull; 
 import static com.github.drinkjava2.jdbpro.DbPro.param;
 import static com.github.drinkjava2.jdbpro.DbPro.put;
 import static com.github.drinkjava2.jdbpro.DbPro.question;
@@ -515,7 +513,7 @@ public class UsageAndSpeedTest {
 	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractUser user = ActiveRecord.create(AbstractUser.class);
+		AbstractUser user = ActiveRecord.createMapper(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.ctx().iUpdate(user.updateUserPreparedSQL("Tom", "China"));
@@ -547,6 +545,23 @@ public class UsageAndSpeedTest {
 							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
 			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
 					put("$t", tom), put("$nm", "name"));
+		}
+	}
+
+	@Test
+	public void tXxxDynamicChangeTemplateEngine() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		SqlTemplateEngine engine = new BasicSqlTemplate("[", "]", true, true);
+		for (int i = 0; i < REPEAT_TIMES; i++) {
+			UserAR user = new UserAR("Sam", "Canada");
+			UserAR tom = new UserAR("Tom", "China");
+			ctx.tExecute("insert into users (name, address) values(#{user.name}, #{user.address})", put("user", user));
+			ctx.tExecute(engine, "update users set name=[user.name], address=[user.address]", put("user", tom));
+			Assert.assertEquals(1L,
+					ctx.tQueryForObject(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
+							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
+			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
+					put("$t", tom), put("$nm", "name"), engine);
 		}
 	}
 
@@ -586,28 +601,10 @@ public class UsageAndSpeedTest {
 			Assert.assertEquals(1L, ctx.iQueryForLongValue(//
 					"select count(*) from users where 1=1 ", //
 					notNull(" and name=? ", name), //
-					"Someother".equals(name) ? iPrepare(" and Someother>?  ", param(name)) : "", //
-					"China".equals(address) ? pPrepare(" and address=?  ", address) : ""//
+					"Someother".equals(name) ? ctx.iPrepare(" and Someother>?  ", param(name)) : "", //
+					"China".equals(address) ? ctx.pPrepare(" and address=?  ", address) : ""//
 			));
 			ctx.nExecute("delete from users");
-		}
-	}
-
-	@Test
-	public void tXxxDynamicChangeTemplateEngine() {
-		SqlTemplateEngine engine = new BasicSqlTemplate("[", "]", true, true);
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			UserAR user = new UserAR("Sam", "Canada");
-			UserAR tom = new UserAR("Tom", "China");
-			ctx.tExecute(engine, "insert into users (name, address) values([user.name], [user.address])",
-					put("user", user));
-			ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom), engine);
-			Assert.assertEquals(1L,
-					ctx.tQueryForObject(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
-							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
-			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
-					put("$t", tom), put("$nm", "name"), engine);
 		}
 	}
 

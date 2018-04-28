@@ -15,6 +15,8 @@
  */
 package com.github.drinkjava2.functionstest;
 
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.gpQuery;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +25,12 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.*;
 
 import com.github.drinkjava2.config.TestBase;
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
@@ -37,6 +40,10 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
+import com.github.drinkjava2.jsqlbox.annotation.Handlers;
+import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
@@ -81,6 +88,22 @@ public class HandlersTest extends TestBase {
 			this.age = age;
 		}
 
+		@Sql("select u.** from DemoUser u where u.age>?")
+		public List<DemoUser> selectAgeBiggerThan1(Integer age) {
+			return this.guess(age);
+		}
+
+		@Handlers({ EntityListHandlerCfg.class })
+		@Sql("select u.id as u_id from DemoUser u where u.age>?")
+		public List<DemoUser> selectAgeBiggerThan2(Integer age) {
+			return this.guess(age);
+		}
+	}
+
+	public static class EntityListHandlerCfg extends BeanBox {
+		public EntityListHandler create() {
+			return new EntityListHandler("u", DemoUser.class);
+		}
 	}
 
 	@Before
@@ -93,23 +116,39 @@ public class HandlersTest extends TestBase {
 	}
 
 	@Test
-	public void testHandlers() {
-		List<DemoUser> result = gpQuery(PrintSqlHandler.class, new EntityListHandler(DemoUser.class),
-				new PaginHandler(1, 5), PrintSqlHandler.class, "select u.** from DemoUser u where u.age>?", 0);
-		Assert.assertTrue(result.size() == 5);
+	public void testGuessAnnotationNoParam() {
+		DemoUser user = new DemoUser();
+		List<DemoUser> result = user.selectAgeBiggerThan1(0);
+		Assert.assertTrue(result.size() == 99);
+	}
+
+	@Test
+	public void testGuessAnnotationHasParam() {
+		SqlBoxContextConfig cfg = new SqlBoxContextConfig();
+		cfg.setIocTool(new IocTool() {
+			@Override
+			public <T> T getBean(Class<?> configClass) {
+				return BeanBox.getBean(configClass);
+			}
+		});
+		SqlBoxContext ctx2 = new SqlBoxContext(ctx.getDataSource(), cfg);
+
+		DemoUser user = new DemoUser();
+		user.useContext(ctx2);
+		List<DemoUser> result2 = user.selectAgeBiggerThan2(0);
+		Assert.assertTrue(result2.size() == 99);
 	}
 
 	@Test
 	public void testEntityNetHandler() {
-		EntityNet net = gpQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?",
-				0);
+		EntityNet net = gpQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
 		List<DemoUser> result = net.getAllEntityList(DemoUser.class);
 		Assert.assertTrue(result.size() == 99);
 	}
 
 	@Test
-	public void testEntityListHandler() {
-		List<DemoUser> result = gpQuery(new EntityListHandler(DemoUser.class),
+	public void testEntityListHandler2() {
+		List<DemoUser> result = gpQuery(PrintSqlHandler.class, new EntityListHandler(DemoUser.class),
 				"select u.** from DemoUser u where u.age>=?", 90);
 		Assert.assertTrue(result.size() == 10);
 
@@ -123,16 +162,15 @@ public class HandlersTest extends TestBase {
 
 		TableModel t = new DemoUser().tableModel();
 		t.setAlias("u");
-		result = gpQuery(new EntityListHandler(DemoUser.class, t),
-				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		result = gpQuery(new EntityListHandler(DemoUser.class, t), "select u.id as u_id from DemoUser u where u.age>=?",
+				90);
 		Assert.assertTrue(result.size() == 10);
 
 		SqlBox b = new DemoUser().box();
 		b.getTableModel().setAlias("u");
-		result = gpQuery(new EntityListHandler(DemoUser.class, b),
-				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		result = gpQuery(new EntityListHandler(DemoUser.class, b), "select u.id as u_id from DemoUser u where u.age>=?",
+				90);
 		Assert.assertTrue(result.size() == 10);
-
 	}
 
 	@Test
@@ -188,8 +226,7 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testPrintSqlHandler() throws SQLException {
-		List<Map<String, Object>> result = gpQuery(new MapListHandler(), "select u.* from DemoUser u where u.age>?",
-				0);
+		List<Map<String, Object>> result = gpQuery(new MapListHandler(), "select u.* from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result.size() == 99);
 
 		List<Map<String, Object>> result2 = gpQuery(new MapListHandler(), new PrintSqlHandler(),

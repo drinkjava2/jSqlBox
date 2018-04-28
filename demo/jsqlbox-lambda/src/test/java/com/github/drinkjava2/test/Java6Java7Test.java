@@ -1,6 +1,8 @@
 package com.github.drinkjava2.test;
 
 import static com.github.drinkjava2.jdbpro.DbPro.param;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQuery;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQueryForMapList;
 import static com.github.drinkjava2.test.AliasProxyUtils.alias;
 import static com.github.drinkjava2.test.AliasProxyUtils.c_alias;
 import static com.github.drinkjava2.test.AliasProxyUtils.clean;
@@ -23,12 +25,12 @@ public class Java6Java7Test extends TestBase {
 
 	@Test
 	public void normalTest() {
-		//ctx.setAllowShowSQL(true);
-		List<User> totalUsers = ctx.iQuery(new EntityListHandler(User.class), "select u.** from usertb u");
+		// ctx.setAllowShowSQL(true);
+		List<User> totalUsers = giQuery(new EntityListHandler(User.class), "select u.** from usertb u");
 		Assert.assertEquals(100, totalUsers.size());
 
 		User u = createAliasProxy(User.class);
-		List<Map<String, Object>> list = ctx.iQueryForMapList(clean(), //
+		List<Map<String, Object>> list = giQueryForMapList(clean(), //
 				"select "//
 				, alias(u.getId())//
 				, ", ", alias(u.getAddress())//
@@ -40,7 +42,7 @@ public class Java6Java7Test extends TestBase {
 		Assert.assertEquals(10, list.size());
 
 		u = createAliasProxy(User.class, "u");
-		List<User> list2 = ctx.iQuery(new EntityListHandler("u", User.class), clean(), //
+		List<User> list2 = giQuery(new EntityListHandler("u", User.class), clean(), //
 				"select "//
 				, alias(u.getId())//
 				, c_alias(u.getAddress())//

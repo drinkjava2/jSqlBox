@@ -57,7 +57,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
-	protected static SpecialSqlItemPreparer globalSpecialSqlItemPreparer = null;
+	protected static SpecialSqlItemPreparer globalNextSpecialSqlItemPreparer = null;
+	protected static IocTool globalNextIocTool = null;
 
 	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = globalNextConnectionManager;
@@ -65,6 +66,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected DbProLogger logger = globalNextLogger;
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
+	protected SpecialSqlItemPreparer specialSqlItemPreparer = globalNextSpecialSqlItemPreparer;
+
+	/**
+	 * An Ioc tool is needed if want use SqlMapper style in ActiveRecord to build
+	 * SqlHandler instance from SqlHandler class in Annotations
+	 */
+	protected IocTool iocTool = globalNextIocTool;
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
@@ -142,8 +150,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to
-	 * customise SQL format
+	 * Format SQL for logger output, subClass can override this method to customise
+	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -287,10 +295,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	// DbUtils style methods, throw SQLException
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found, SQLException may be threw if some SQL
-	 * operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -304,10 +312,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found, SQLException may be threw if some SQL
-	 * operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -321,8 +329,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * This is the core method of whole project, handle a PreparedSQL instance
-	 * and return a result
+	 * This is the core method of whole project, handle a PreparedSQL instance and
+	 * return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
 		if (ps.getUseTemplate()) {
@@ -483,13 +491,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object
-	 * may return if no result found , DbProRuntimeException may be threw if
-	 * some SQL operation Exception happen.
+	 * value if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found , DbProRuntimeException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param ps
-	 *            The PreparedSQL which included SQL、parameters and
-	 *            sqlHandlers(if have)
+	 *            The PreparedSQL which included SQL、parameters and sqlHandlers(if
+	 *            have)
 	 * @return An Object or null, Object type determined by SQL content
 	 */
 	private <T> T runQueryForScalar(PreparedSQL ps) {
@@ -524,8 +532,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is
-	 *            responsible for closing this Connection.
+	 *            The Connection to use to run the query. The caller is responsible
+	 *            for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
 	 * @param params
@@ -637,6 +645,22 @@ public class ImprovedQueryRunner extends QueryRunner {
 		globalNextSqlHandlers = sqlHandlers;
 	}
 
+	public static SpecialSqlItemPreparer getGlobalNextSpecialSqlItemPreparer() {
+		return globalNextSpecialSqlItemPreparer;
+	}
+
+	public static void setGlobalNextSpecialSqlItemPreparer(SpecialSqlItemPreparer globalNextSpecialSqlItemPreparer) {
+		ImprovedQueryRunner.globalNextSpecialSqlItemPreparer = globalNextSpecialSqlItemPreparer;
+	}
+
+	public static IocTool getGlobalNextIocTool() {
+		return globalNextIocTool;
+	}
+
+	public static void setGlobalNextIocTool(IocTool globalNextIocTool) {
+		ImprovedQueryRunner.globalNextIocTool = globalNextIocTool;
+	}
+
 	private void specialStaticMethods_____________________() {// NOSONAR
 	}
 
@@ -665,14 +689,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 		for (Object[] item : paramList)
 			array[i++] = item;
 		return array;
-	}
-
-	public static SpecialSqlItemPreparer getGlobalSpecialSqlItemPreparer() {
-		return globalSpecialSqlItemPreparer;
-	}
-
-	public static void setGlobalSpecialSqlItemPreparer(SpecialSqlItemPreparer globalSpecialSqlItemPreparer) {
-		ImprovedQueryRunner.globalSpecialSqlItemPreparer = globalSpecialSqlItemPreparer;
 	}
 
 	/**
@@ -730,6 +746,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public ThreadLocal<ArrayList<PreparedSQL>> getSqlBatchCache() {
 		return sqlBatchCache;
+	}
+
+	public SpecialSqlItemPreparer getSpecialSqlItemPreparer() {
+		return specialSqlItemPreparer;
+	}
+
+	public IocTool getIocTool() {
+		return iocTool;
 	}
 
 }

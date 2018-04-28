@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro;
+package com.github.drinkjava2.functionstest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,7 +34,7 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
  * @author Yong Zhu
  * @since 1.7.0.2
  */
-public class DbProTest extends TestBase {
+public class BatchInsertTest extends TestBase {
 
 	public static class DummyUser extends ActiveRecord {
 		private String name;

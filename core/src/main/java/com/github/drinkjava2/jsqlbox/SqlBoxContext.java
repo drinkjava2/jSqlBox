@@ -46,20 +46,22 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** globalSqlBoxSuffix use to identify the SqlBox configuration class */
 	protected static String globalSqlBoxSuffix = "SqlBox";// NOSONAR
-	protected static Dialect globalNextDialect = null;
+
 	protected static SqlBoxContext globalSqlBoxContext = null;
+	protected static Dialect globalNextDialect = null;
+	protected static Guesser globalNextGuesser = Guesser.simpleGuesserInstance;
 
 	/**
-	 * Dialect of current ImprovedQueryRunner, default guessed from DataSource,
-	 * can use setDialect() method to change to other dialect, to keep
-	 * thread-safe, only subclass can access this variant
+	 * Dialect of current SqlBoxContext, optional
 	 */
 	protected Dialect dialect;
+
+	/** In SqlMapper style, A guesser needed to guess and execute SQL methods */
+	protected Guesser guesser = globalNextGuesser;
 
 	public SqlBoxContext() {
 		super();
 		this.dialect = globalNextDialect;
-
 	}
 
 	public SqlBoxContext(DataSource ds) {
@@ -70,31 +72,85 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public SqlBoxContext(SqlBoxContextConfig config) {
 		super();
 		this.connectionManager = config.getConnectionManager();
-		this.dialect = config.getDialect();
 		this.sqlTemplateEngine = config.getTemplateEngine();
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
 		this.sqlHandlers = config.getSqlHandlers();
+		this.guesser = config.getGuesser();
+		this.dialect = config.getDialect();
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
 		super(ds);
 		this.connectionManager = config.getConnectionManager();
-		this.dialect = config.getDialect();
 		this.sqlTemplateEngine = config.getTemplateEngine();
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
 		this.sqlHandlers = config.getSqlHandlers();
+		this.guesser = config.getGuesser();
+		this.iocTool = config.getIocTool();
+		this.dialect = config.getDialect();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
+
+	}
+
+	protected void coreMethods______________________________() {// NOSONAR
+	}
+
+	// =========getter & setter =======
+	public Dialect getDialect() {
+		return dialect;
+	}
+
+	public Guesser getGuesser() {
+		return guesser;
+	}
+
+	/**
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
+	 * and bind on entityBean
+	 */
+	public SqlBox getSqlBox(Object entityBean) {
+		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
+	}
+
+	/** Create a new instance and bind current SqlBoxContext to it */
+	public void create(Class<?> entityClass) {
+		Object entity = null;
+		try {
+			entity = entityClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+		SqlBoxUtils.findAndBindSqlBox(this, entity);
+	}
+
+	/** Insert an entity to database */
+	public void insert(Object entity) {
+		SqlBoxContextUtils.insert(this, entity);
+	}
+
+	/** Update an entity in database by its ID columns */
+	public int update(Object entity) {
+		return SqlBoxContextUtils.update(this, entity);
+	}
+
+	/** Delete an entity in database by its ID columns */
+	public void delete(Object entity) {
+		SqlBoxContextUtils.delete(this, entity);
+	}
+
+	/** Load an entity from database by key, key can be one object or a Map */
+	public <T> T load(Class<?> entityClass, Object pkey) {
+		return SqlBoxContextUtils.load(this, entityClass, pkey);
 	}
 
 	// ========== Dialect shortcut methods ===============
-	private void assertDialectNotNull() {
-		if (dialect == null)
-			throw new DbProRuntimeException("Try use a dialect method but dialect is null");
+	// ================================================================
+	protected void dialectShortcutMethods__________________________() {// NOSONAR
 	}
 
 	/** Shortcut call to dialect.pagin method */
@@ -151,7 +207,15 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return dialect.toDropAndCreateDDL(tables);
 	}
 
+	private void assertDialectNotNull() {
+		if (dialect == null)
+			throw new DbProRuntimeException("Try use a dialect method but dialect is null");
+	}
+
 	// ================================================================
+	protected void entityNetAboutMethods__________________________() {// NOSONAR
+	}
+
 	/**
 	 * Create a EntityNet by given configurations, load all columns
 	 */
@@ -160,8 +224,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to
-	 * improve loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
+	 * loading speed
 	 */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, true, configObjects);
@@ -212,55 +276,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		net.updateEntity(entity, box.getTableModel());
 	}
 
-	// =============CRUD methods=====
-
-	/** Create a new instance and bind current SqlBoxContext to it */
-	public void create(Class<?> entityClass) {
-		Object entity = null;
-		try {
-			entity = entityClass.newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
-		SqlBoxUtils.findAndBindSqlBox(this, entity);
-	}
-
-	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new
-	 * one and bind on entityBean
-	 */
-	public SqlBox getSqlBox(Object entityBean) {
-		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
-	}
-
-	/** Insert an entity to database */
-	public void insert(Object entity) {
-		SqlBoxContextUtils.insert(this, entity);
-	}
-
-	/** Update an entity in database by its ID columns */
-	public int update(Object entity) {
-		return SqlBoxContextUtils.update(this, entity);
-	}
-
-	/** Delete an entity in database by its ID columns */
-	public void delete(Object entity) {
-		SqlBoxContextUtils.delete(this, entity);
-	}
-
-	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T load(Class<?> entityClass, Object pkey) {
-		return SqlBoxContextUtils.load(this, entityClass, pkey);
-	}
-
 	/** Shortcut method, load all entities as list */
-	public <T> List<T> nLoadAllEntityList(Class<T> entityClass) {
+	public <T> List<T> netLoadAllEntityList(Class<T> entityClass) {
 		return this.netLoad(entityClass).getAllEntityList(entityClass);
-	}
-
-	// =========getter & setter =======
-	public Dialect getDialect() {
-		return dialect;
 	}
 
 	protected void publicStaticMethods_____________________() {// NOSONAR
@@ -268,6 +286,14 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static Dialect getGlobalNextDialect() {
 		return globalNextDialect;
+	}
+
+	public static Guesser getGlobalNextGuesser() {
+		return globalNextGuesser;
+	}
+
+	public static void setGlobalNextGuesser(Guesser globalNextGuesser) {
+		SqlBoxContext.globalNextGuesser = globalNextGuesser;
 	}
 
 	public static void setGlobalNextDialect(Dialect dialect) {
@@ -303,11 +329,13 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		globalNextBatchSize = 300;
 		globalNextTemplateEngine = BasicSqlTemplate.instance();
 		globalNextDialect = null;
+		globalNextSpecialSqlItemPreparer = null;
 		globalSqlBoxContext = null;
-		globalSpecialSqlItemPreparer = null;
+
 	}
 
 	//@formatter:off
+	protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
 	public static <T> T giQuery(Object... inlineSQL) {return gctx().iQuery(inlineSQL);}
 	public static <T> T giQueryForObject(Object... inlineSQL) {return gctx().iQueryForObject(inlineSQL);}
 	public static long giQueryForLongValue(Object... inlineSQL) {return gctx().iQueryForLongValue(inlineSQL);}

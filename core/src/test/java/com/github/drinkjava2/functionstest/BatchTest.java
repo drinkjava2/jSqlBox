@@ -11,14 +11,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.config.DataSourceConfig.MySqlDataSourceBox;
+import com.github.drinkjava2.config.DataSourceConfig.H2DataSourceBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * This is Batch operation function test
+ * This is Batch operation function test<br/>
+ * note: only test on MySql, not on H2
  * 
  * @author Yong Zhu
  * @since 1.7.0
@@ -34,8 +35,9 @@ public class BatchTest {
 		// SqlBoxContext.setGlobalAllowShowSql(true);
 
 		SqlBoxContext.setGlobalNextBatchSize(BUFFER_SIZE);
-		// When test Change to MySqlDataSourceBox.class
-		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(MySqlDataSourceBox.class));
+
+		// Change to MySQL to Test!
+		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(H2DataSourceBox.class));// !MySQL
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 	}
 
@@ -173,8 +175,7 @@ public class BatchTest {
 		System.out.println(String.format("Non-Batch execute " + INSERT_AMOUNT + " SQLs time used: %6s s", timeused));
 		Assert.assertEquals(INSERT_AMOUNT, ctx.nQueryForLongValue("select 		 count(*) from batch_test_tb"));
 		ctx.nExecute("delete from batch_test_tb");
-		System.out.println("=======================Normal insert  end=====================\n\n");
-
+		System.out.println("=======================Normal insert  end=====================\n\n"); 
 	}
 
 }

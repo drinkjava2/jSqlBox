@@ -25,9 +25,12 @@ public class AliasProxyUtils {
 			this.alias = alias;
 			this.colName = colName;
 		}
-
 	}
 
+	/**
+	 * This proxy bean return null for all methods call, but based on current
+	 * methodName write TableName, Alias,ColumnName into ThreadLocal cache
+	 */
 	static class ProxyBean implements MethodInterceptor {
 		private TableModel tableModel;
 

@@ -60,7 +60,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getSqlHandlers();
+		this.sqlHandlers = config.getSqlHandlers(); 
+		this.iocTool = config.getIocTool();
 	}
 
 	public DbPro(DataSource ds, DbProConfig config) {
@@ -181,7 +182,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * single String (The first appeared) as SQL, unknown objects (include null)
 	 * will automatically looked as SQL parameters, more detail see doPrepare method
 	 */
-	public static PreparedSQL pPrepare(Object... items) {
+	public PreparedSQL pPrepare(Object... items) {
 		return doPrepare(false, items);
 	}
 
@@ -190,7 +191,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * null) will automatically looked as SQL pieces, more detail see doPrepare
 	 * method
 	 */
-	public static PreparedSQL iPrepare(Object... items) {
+	public PreparedSQL iPrepare(Object... items) {
 		return doPrepare(true, items);
 	}
 
@@ -229,7 +230,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 *            or instance / SqlHandler class or instance
 	 * @return a PreparedSQL instance
 	 */
-	private static PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
+	private  PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
 		PreparedSQL result = new PreparedSQL();
@@ -301,19 +302,16 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			} else if (item instanceof Connection)
 				result.setConnection((Connection) item);
 			else if (item instanceof SqlHandler)
-				result.addHandler((SqlHandler) item);
+				result.addHandler((SqlHandler) item, this.getIocTool());
 			else if (item instanceof ResultSetHandler)
 				result.setResultSetHandler((ResultSetHandler) item);
 			else if (item instanceof Class) {
-				boolean added = result.addHandler(item);
-				if (!added)
-					throw new DbProRuntimeException(
-							"Class '" + item + "' can not use public zero parameter constructor to build instance");
+			  result.addHandler(item, this.getIocTool());
 			} else if (item instanceof SpecialSqlItem) {
-				if (ImprovedQueryRunner.getGlobalSpecialSqlItemPreparer() == null)
+				if ( specialSqlItemPreparer  == null)
 					throw new DbProRuntimeException(
-							"globalSpecialSqlItemPreparer not set, need call DbPro.setGlobalSpecialSqlItemPreparer() method first");
-				ImprovedQueryRunner.getGlobalSpecialSqlItemPreparer().doPrepare(result, sql, (SpecialSqlItem) item);
+							"sqlItemPreparer not set, need call DbPro.setGlobalNextSpecialSqlItemPreparer() method first");
+				 specialSqlItemPreparer.doPrepare(result, sql, (SpecialSqlItem) item);
 			} else {
 				if (iXxxStyle)
 					sql.append(item); // iXxxx style, unknown object is SQL piece
@@ -430,7 +428,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public List<Map<String, Object>> iQueryForMapList(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.addHandler(new MapListHandler());
+		ps.addHandler(new MapListHandler(), this.getIocTool());
 		ps.setType(SqlType.QUERY);
 		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
@@ -526,7 +524,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public List<Map<String, Object>> pQueryForMapList(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
-		ps.addHandler(new MapListHandler());
+		ps.addHandler(new MapListHandler(), this.getIocTool());
 		ps.setType(SqlType.QUERY);
 		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
@@ -625,7 +623,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	public List<Map<String, Object>> tQueryForMapList(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
 		ps.setUseTemplate(true);
-		ps.addHandler(new MapListHandler());
+		ps.addHandler(new MapListHandler(), this.getIocTool());
 		ps.setType(SqlType.QUERY);
 		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}

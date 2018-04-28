@@ -61,8 +61,8 @@ public class ActiveRecord implements ActiveRecordSupport {
 	 * Create a subClass instance of a abstract ActiveRecord class
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T create(Class<?> abstractClass) {
-		Class<?> childClass = ActiveRecordUtils.createChildClass(abstractClass);
+	public static <T> T createMapper(Class<?> abstractClass) {
+		Class<?> childClass = GuesserUtils.createChildClass(abstractClass);
 		try {
 			return (T) childClass.newInstance();
 		} catch (Exception e) {
@@ -74,8 +74,8 @@ public class ActiveRecord implements ActiveRecordSupport {
 	 * Create a subClass instance of a abstract ActiveRecord class and set it's
 	 * SqlBoxContext property
 	 */
-	public static <T> T create(SqlBoxContext ctx, Class<?> abstractClass) {
-		T entity = create(abstractClass);
+	public static <T> T createMapper(SqlBoxContext ctx, Class<?> abstractClass) {
+		T entity = createMapper(abstractClass);
 		SqlBoxUtils.findAndBindSqlBox(ctx, entity);
 		return entity;
 	}
@@ -122,7 +122,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public ActiveRecord alias(String alias) {
+	public ActiveRecordSupport alias(String alias) {
 		box().getTableModel().setAlias(alias);
 		return this;
 	}
@@ -220,17 +220,17 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public <T> T guess(Object... params) {// NOSONAR
-		return ActiveRecordUtils.doGuess(this, params);
+		return ctx().getGuesser().guess(ctx(), this, params);
 	}
 
 	@Override
 	public String guessSQL() {
-		return ActiveRecordUtils.doGuessSQL(this);
+		return ctx().getGuesser().guessSQL(ctx(), this);
 	}
 
 	@Override
 	public PreparedSQL guessPreparedSQL(Object... params) {
-		return ActiveRecordUtils.doGuessPreparedSQL(this, params);
+		return ctx().getGuesser().doGuessPreparedSQL(ctx(), this, params);
 	}
 
 }

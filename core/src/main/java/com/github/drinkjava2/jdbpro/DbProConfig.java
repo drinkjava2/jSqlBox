@@ -28,6 +28,7 @@ public class DbProConfig {
 	private Integer batchSize = DbPro.getGlobalNextBatchSize();
 	private ConnectionManager connectionManager = DbPro.getGlobalNextConnectionManager();
 	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
+	private IocTool iocTool = DbPro.getGlobalNextIocTool();
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -75,6 +76,14 @@ public class DbProConfig {
 
 	public void setSqlHandlers(SqlHandler[] sqlHandlers) {
 		this.sqlHandlers = sqlHandlers;
+	}
+
+	public IocTool getIocTool() {
+		return iocTool;
+	}
+
+	public void setIocTool(IocTool iocTool) {
+		this.iocTool = iocTool;
 	}
 
 }

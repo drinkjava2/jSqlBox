@@ -133,7 +133,7 @@ public class PreparedSQL {
 	}
 
 	public void addTemplateParam(SqlItem sp) {
-		if (sp.getParameters() == null || !((sp.getParameters().length % 2) == 0))
+		if (sp.getParameters() == null || ((sp.getParameters().length % 2) != 0))
 			throw new DbProRuntimeException(
 					"Put type template parameter should be key1, value1, key2,value2... format");
 		if (templateParamMap == null)
@@ -173,11 +173,11 @@ public class PreparedSQL {
 
 	/**
 	 * @param handlerOrHandlerClass
-	 *            a SqlHandler or ResultHandler or a class of them
+	 *            a SqlHandler or ResultSetHandler instance or class
 	 * @return true if added
 	 */
 	@SuppressWarnings("rawtypes")
-	public boolean addHandler(Object handlerOrHandlerClass) {
+	public void addHandler(Object handlerOrHandlerClass, IocTool iocTool) {
 		if (handlerOrHandlerClass == null)
 			throw new DbProRuntimeException("Handler Or Handler class can not be null");
 		if (handlerOrHandlerClass instanceof ResultSetHandler)
@@ -187,21 +187,19 @@ public class PreparedSQL {
 		else if (handlerOrHandlerClass instanceof Class) {
 			Class itemClass = (Class) handlerOrHandlerClass;
 			try {
-				if (ResultSetHandler.class.isAssignableFrom(itemClass)) {
+				if (ResultSetHandler.class.isAssignableFrom(itemClass))
 					setResultSetHandler((ResultSetHandler) itemClass.newInstance());
-					return true;
-				}
-				if (SqlHandler.class.isAssignableFrom(itemClass)) {
+				else if (SqlHandler.class.isAssignableFrom(itemClass))
 					addSqlHandler((SqlHandler) itemClass.newInstance());
-					return true;
+				else {
+					Object handler = iocTool.getBean((Class<?>) handlerOrHandlerClass);
+					addHandler(handler, null);
 				}
 			} catch (Exception e) {
 				throw new DbProRuntimeException(e);
 			}
-			return false;
 		} else
-			return false;
-		return true;
+			throw new DbProRuntimeException("Can not create handler instance for '" + handlerOrHandlerClass + "'");
 	}
 
 	public Object[] getParams() {

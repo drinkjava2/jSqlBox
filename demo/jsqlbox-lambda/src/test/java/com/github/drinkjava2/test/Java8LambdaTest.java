@@ -1,6 +1,9 @@
 package com.github.drinkjava2.test;
 
 import static com.github.drinkjava2.jdbpro.DbPro.param;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQuery;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQueryForMapList;
 import static com.github.drinkjava2.test.AliasProxyUtils.createAliasProxy;
 import static com.github.drinkjava2.test.AliasProxyUtils.table;
 
@@ -10,7 +13,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.test.LambdSqlItemPreparer.ALIAS;
 import com.github.drinkjava2.test.LambdSqlItemPreparer.COL;
@@ -25,15 +27,13 @@ public class Java8LambdaTest extends TestBase {
 
 	@Test
 	public void lambdaTest() {
-		Assert.assertEquals(100, ctx.iQueryForLongValue("select count(*) from usertb"));
+		Assert.assertEquals(100, giQueryForLongValue("select count(*) from usertb"));
 
-		List<User> totalUsers = ctx.iQuery(new EntityListHandler(User.class), "select u.** from usertb u");
-		Assert.assertEquals(100, totalUsers.size());
-
-		SqlBoxContext.setGlobalSpecialSqlItemPreparer(new LambdSqlItemPreparer());
-
+		List<User> totalUsers = giQuery(new EntityListHandler(User.class), "select u.** from usertb u");
+		Assert.assertEquals(100, totalUsers.size()); 
+		
 		User u = createAliasProxy(User.class);
-		List<?> list1 = ctx.iQueryForMapList(new PrintSqlHandler(), //
+		List<?> list1 = giQueryForMapList(new PrintSqlHandler(), //
 				"select "//
 				, (ALIAS) u::getId//
 				, (C_ALIAS) u::getAddress //
@@ -45,7 +45,7 @@ public class Java8LambdaTest extends TestBase {
 		Assert.assertEquals(10, list1.size());
 
 		u = createAliasProxy(User.class, "u");
-		List<User> list2 = ctx.iQuery(new EntityListHandler("u", User.class) //
+		List<User> list2 = giQuery(new EntityListHandler("u", User.class) //
 				, "select "//
 				, (ALIAS) u::getId//
 				, (C_ALIAS) u::getAddress //

@@ -23,6 +23,7 @@ public class TestBase {
 		ds.setPassword("");
 
 		// SqlBoxContext.setGlobalNextAllowShowSql(true);
+		SqlBoxContext.setGlobalNextSpecialSqlItemPreparer(new LambdSqlItemPreparer());
 		ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
