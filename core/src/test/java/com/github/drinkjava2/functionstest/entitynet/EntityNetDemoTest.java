@@ -1,13 +1,12 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.gpQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.gpQuery;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
@@ -18,8 +17,6 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
-import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
@@ -29,12 +26,9 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListWrapHandler;
 
 public class EntityNetDemoTest extends TestBase {
-	@Before
-	public void init() {
-		super.init();
-		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
-				Privilege.class, UserRole.class, RolePrivilege.class);
-		dropAndCreateDatabase(models);
+	{
+		regTables(User.class, Email.class, Address.class, Role.class, Privilege.class, UserRole.class,
+				RolePrivilege.class);
 	}
 
 	protected void insertDemoData() {
@@ -154,8 +148,8 @@ public class EntityNetDemoTest extends TestBase {
 		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path("S-", User.class).where("id='u1' or id='u2'").nextPath("C-", UserRole.class, "userId")
-						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid").nextPath("P+",
-								Privilege.class, "pid"));
+						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
+						.nextPath("P+", Privilege.class, "pid"));
 		for (Privilege privilege : privileges)
 			System.out.print(privilege.getId() + " ");
 		Assert.assertEquals(3, privileges.size());

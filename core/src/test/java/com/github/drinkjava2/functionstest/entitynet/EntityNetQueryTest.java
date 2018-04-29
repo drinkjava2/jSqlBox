@@ -1,8 +1,8 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import static com.github.drinkjava2.jdbpro.DbPro.param;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQuery;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.gpQuery;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.gpQuery;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class EntityNetQueryTest extends TestBase {
 		super.init();
 		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
 				Privilege.class, UserRole.class, RolePrivilege.class);
-		dropAndCreateDatabase(models);
+		createAndRegTables(models);
 	}
 
 	@Test

@@ -20,7 +20,7 @@ public class DataSourceConfig {
 	 * test on MySql <br/>
 	 * ================================================================<br/>
 	 */
-	public static class DataSourceBox extends H2DataSourceBox {
+	public static class DataSourceBox extends MySqlDataSourceBox {
 	}
 
 	// H2Database memory database connection URL
@@ -36,7 +36,7 @@ public class DataSourceConfig {
 	// MySql connection URL
 	public static class MySqlDataSourceBox extends HikariCPBox {
 		{
-			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true&useSSL=false");
+			setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false");
 			setProperty("driverClassName", "com.mysql.jdbc.Driver");
 			setProperty("username", "root");// change to your user & password
 			setProperty("password", "root888");

@@ -1,6 +1,6 @@
 package activerecordtext;
 
-import static com.github.drinkjava2.jdbpro.DbPro.param;
+ import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import java.util.List;
 import java.util.Map;

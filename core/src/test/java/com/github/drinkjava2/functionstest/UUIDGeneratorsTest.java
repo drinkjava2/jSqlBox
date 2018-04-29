@@ -72,7 +72,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUID25() {
-		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID25Entity.class));
+		createAndRegTables(TableModelUtils.entity2Model(UUID25Entity.class));
 		UUID25Entity entity = new UUID25Entity();
 		ctx.insert(entity);
 	}
@@ -117,7 +117,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUID32() {
-		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID32Entity.class));
+		createAndRegTables(TableModelUtils.entity2Model(UUID32Entity.class));
 		UUID32Entity entity = new UUID32Entity();
 		ctx.insert(entity);
 	}
@@ -162,7 +162,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUID36() {
-		dropAndCreateDatabase(TableModelUtils.entity2Model(UUID36Entity.class));
+		createAndRegTables(TableModelUtils.entity2Model(UUID36Entity.class));
 		UUID36Entity entity = new UUID36Entity();
 		ctx.insert(entity);
 	}
@@ -209,7 +209,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUIDAny() {
-		dropAndCreateDatabase(TableModelUtils.entity2Model(UUIDAnyEntity.class));
+		createAndRegTables(TableModelUtils.entity2Model(UUIDAnyEntity.class));
 		UUIDAnyEntity entity = new UUIDAnyEntity();
 		ctx.insert(entity);
 	}

@@ -15,7 +15,7 @@
  */
 package com.github.drinkjava2.functionstest;
 
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.gpQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.gpQuery;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -110,7 +110,7 @@ public class HandlersTest extends TestBase {
 	public void init() {
 		super.init();
 		TableModel[] models = TableModelUtils.entity2Models(DemoUser.class);
-		dropAndCreateDatabase(models);
+		createAndRegTables(models);
 		for (int i = 0; i < 100; i++)
 			new DemoUser().put("id", "" + i).put("userName", "user" + i).put("age", i).insert();
 	}

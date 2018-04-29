@@ -1,17 +1,17 @@
 package com.github.drinkjava2.helloworld;
 
-import static com.github.drinkjava2.jdbpro.DbPro.PARA;
-import static com.github.drinkjava2.jdbpro.DbPro.PARA0;
-import static com.github.drinkjava2.jdbpro.DbPro.PARAMS;
-import static com.github.drinkjava2.jdbpro.DbPro.QUES;
-import static com.github.drinkjava2.jdbpro.DbPro.QUES0;
-import static com.github.drinkjava2.jdbpro.DbPro.VALUESQUES; 
-import static com.github.drinkjava2.jdbpro.DbPro.notNull; 
-import static com.github.drinkjava2.jdbpro.DbPro.param;
-import static com.github.drinkjava2.jdbpro.DbPro.put;
-import static com.github.drinkjava2.jdbpro.DbPro.question;
-import static com.github.drinkjava2.jdbpro.DbPro.sql;
-import static com.github.drinkjava2.jdbpro.DbPro.valuesQuestions;
+import static com.github.drinkjava2.jdbpro.JDBPRO.PARA;
+import static com.github.drinkjava2.jdbpro.JDBPRO.PARA0;
+import static com.github.drinkjava2.jdbpro.JDBPRO.PARAMS;
+import static com.github.drinkjava2.jdbpro.JDBPRO.QUES;
+import static com.github.drinkjava2.jdbpro.JDBPRO.QUES0;
+import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES; 
+import static com.github.drinkjava2.jdbpro.JDBPRO.notNull; 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jdbpro.JDBPRO.put;
+import static com.github.drinkjava2.jdbpro.JDBPRO.question;
+import static com.github.drinkjava2.jdbpro.JDBPRO.sql;
+import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;

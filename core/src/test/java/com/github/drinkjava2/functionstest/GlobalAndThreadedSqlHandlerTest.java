@@ -43,7 +43,7 @@ public class GlobalAndThreadedSqlHandlerTest extends TestBase {
 	public void init() {
 		super.init();
 		TableModel[] models = TableModelUtils.entity2Models(DemoUser.class);
-		dropAndCreateDatabase(models);
+		createAndRegTables(models);
 		for (int i = 1; i <= 100; i++)
 			new DemoUser().put("id", "" + i).put("userName", "user" + i).put("age", i).insert();
 

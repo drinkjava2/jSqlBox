@@ -19,6 +19,7 @@ import org.junit.Before;
 import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
@@ -32,11 +33,11 @@ public class TestBase {
 	protected DataSource dataSource;
 	protected Dialect dialect;
 	protected SqlBoxContext ctx;
+	protected TableModel[] tablesForTest;
 
 	@Before
 	public void init() {
 		SqlBoxContext.resetGlobalSqlBoxVariants();
-		
 		dataSource = BeanBox.getBean(DataSourceBox.class);
 		// dataSource = new HikariDataSource();
 		// dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
@@ -45,19 +46,22 @@ public class TestBase {
 		// dataSource.setPassword("");
 		// dataSource.setMaximumPoolSize(8);
 		// dataSource.setConnectionTimeout(2000);
-		dialect = Dialect.guessDialect(dataSource); 
+		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
- 
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+
 		// SqlBoxContext.setGlobalAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		if (tablesForTest != null)
+			createAndRegTables(tablesForTest);
 	}
 
 	@After
 	public void cleanUp() {
-		// dataSource.close();
-		BeanBox.defaultContext.close();
+		if (tablesForTest != null)
+			dropTables(tablesForTest);
+		tablesForTest = null;
+		BeanBox.defaultContext.close(); // IOC tool will close dataSource
 		SqlBoxContext.resetGlobalSqlBoxVariants();
 	}
 
@@ -77,25 +81,51 @@ public class TestBase {
 	}
 
 	/**
-	 * Drop and create database according given tableModels
+	 * Register tables, create and drop will done by TestBase
 	 */
-	public void dropAndCreateDatabase(TableModel... tableModels) {
-		String[] ddls = dialect.toDropDDL(tableModels);
-		quietExecuteDDLs(ddls);
-
-		ddls = dialect.toCreateDDL(tableModels);
-		quietExecuteDDLs(ddls);
+	public void regTables(TableModel... tableModels) {
+		this.tablesForTest = tableModels;
 	}
 
 	/**
-	 * Drop and create database according given tableModels
+	 * Register tables, create and drop will done by TestBase
 	 */
-	public void dropAndCreateDatabase(Class<?>... classes) {
-		String[] ddls = ctx.toDropAndCreateDDL(classes);
-		quietExecuteDDLs(ddls);
+	public void regTables(Class<?>... classes) {
+		this.tablesForTest = TableModelUtils.entity2Models(classes);
+	}
+
+	public void createAndRegTables(TableModel... tableModels) {
+		this.tablesForTest = tableModels;
+		createTables(tableModels);
+	}
+
+	public void createAndRegTables(Class<?>... classes) {
+		this.tablesForTest = TableModelUtils.entity2Models(classes);
+		createTables(tablesForTest);
+	}
+
+	public void createTables(TableModel... tableModels) {
+		String[] ddls = ctx.toCreateDDL(tableModels);
+		executeDDLs(ddls);
+	}
+
+	public void createTables(Class<?>... classes) {
+		String[] ddls = ctx.toCreateDDL(classes);
+		executeDDLs(ddls);
+	}
+
+	public void dropTables(TableModel... tableModels) {
+		String[] ddls = ctx.toDropDDL(tableModels);
+		executeDDLs(ddls);
+	}
+
+	public void dropTables(Class<?>... classes) {
+		String[] ddls = ctx.toDropDDL(classes);
+		executeDDLs(ddls);
 	}
 
 	public static void printTimeUsed(long startTimeMillis, String msg) {
 		System.out.println(String.format("%50s: %7s s", msg, (System.currentTimeMillis() - startTimeMillis) / 1000.0));
 	}
+
 }

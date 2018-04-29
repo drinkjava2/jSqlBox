@@ -61,7 +61,7 @@ public class BatchInsertTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
-		dropAndCreateDatabase(DummyUser.class);
+		createAndRegTables(DummyUser.class);
 	}
 
 	@Test

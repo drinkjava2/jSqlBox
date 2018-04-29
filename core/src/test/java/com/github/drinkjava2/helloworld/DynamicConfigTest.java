@@ -74,7 +74,7 @@ public class DynamicConfigTest extends TestBase {
 
 		// A new column dynamically created
 		t.addColumn("anotherColumn2").VARCHAR(10);
-		dropAndCreateDatabase(t);
+		createAndRegTables(t);
 
 		UserDemo u = new UserDemo();
 

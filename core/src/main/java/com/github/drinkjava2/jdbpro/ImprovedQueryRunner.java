@@ -81,22 +81,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * A ThreadLocal type tag to indicate current all SQL operations should be
 	 * cached
 	 */
-	private ThreadLocal<Boolean> batchEnabled = new ThreadLocal<Boolean>() {
-		@Override
-		protected Boolean initialValue() {
-			return false;
-		}
-	};
+	private ThreadLocal<Boolean> batchEnabled=new ThreadLocal<Boolean>(){@Override protected Boolean initialValue(){return false;}};
 
 	/**
 	 * A ThreadLocal type cache to store batch SQL and parameters
 	 */
-	private ThreadLocal<ArrayList<PreparedSQL>> sqlBatchCache = new ThreadLocal<ArrayList<PreparedSQL>>() {
-		@Override
-		protected ArrayList<PreparedSQL> initialValue() {
-			return new ArrayList<PreparedSQL>();
-		}
-	};
+	private ThreadLocal<ArrayList<PreparedSQL>> sqlBatchCache=new ThreadLocal<ArrayList<PreparedSQL>>(){@Override protected ArrayList<PreparedSQL>initialValue(){return new ArrayList<PreparedSQL>();}};
 
 	public ImprovedQueryRunner() {
 		super();
@@ -594,73 +584,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 		}
 	}
 
-	private void staticGlobalNextMethods_____________________() {// NOSONAR
-	}
-
-	public static DbProLogger getGlobalNextLogger() {
-		return globalNextLogger;
-	}
-
-	public static void setGlobalNextLogger(DbProLogger dbProLogger) {
-		ImprovedQueryRunner.globalNextLogger = dbProLogger;
-	}
-
-	public static Integer getGlobalNextBatchSize() {
-		return globalNextBatchSize;
-	}
-
-	public static void setGlobalNextBatchSize(Integer batchSize) {
-		ImprovedQueryRunner.globalNextBatchSize = batchSize;
-	}
-
-	public static SqlTemplateEngine getGlobalNextTemplateEngine() {
-		return globalNextTemplateEngine;
-	}
-
-	public static void setGlobalNextTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
-		ImprovedQueryRunner.globalNextTemplateEngine = sqlTemplateEngine;
-	}
-
-	public static Boolean getGlobalNextAllowShowSql() {
-		return globalNextAllowShowSql;
-	}
-
-	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
-		DbPro.globalNextAllowShowSql = allowShowSql;
-	}
-
-	public static ConnectionManager getGlobalNextConnectionManager() {
-		return globalNextConnectionManager;
-	}
-
-	public static void setGlobalNextConnectionManager(ConnectionManager globalConnectionManager) {
-		DbPro.globalNextConnectionManager = globalConnectionManager;
-	}
-
-	public static SqlHandler[] getGlobalNextSqlHandlers() {
-		return globalNextSqlHandlers;
-	}
-
-	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
-		globalNextSqlHandlers = sqlHandlers;
-	}
-
-	public static SpecialSqlItemPreparer getGlobalNextSpecialSqlItemPreparer() {
-		return globalNextSpecialSqlItemPreparer;
-	}
-
-	public static void setGlobalNextSpecialSqlItemPreparer(SpecialSqlItemPreparer globalNextSpecialSqlItemPreparer) {
-		ImprovedQueryRunner.globalNextSpecialSqlItemPreparer = globalNextSpecialSqlItemPreparer;
-	}
-
-	public static IocTool getGlobalNextIocTool() {
-		return globalNextIocTool;
-	}
-
-	public static void setGlobalNextIocTool(IocTool globalNextIocTool) {
-		ImprovedQueryRunner.globalNextIocTool = globalNextIocTool;
-	}
-
 	private void specialStaticMethods_____________________() {// NOSONAR
 	}
 
@@ -756,4 +679,70 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return iocTool;
 	}
 
+	private void staticGlobalNextMethods_____________________() {// NOSONAR
+	}
+
+	public static DbProLogger getGlobalNextLogger() {
+		return globalNextLogger;
+	}
+
+	public static void setGlobalNextLogger(DbProLogger dbProLogger) {
+		globalNextLogger = dbProLogger;
+	}
+
+	public static Integer getGlobalNextBatchSize() {
+		return globalNextBatchSize;
+	}
+
+	public static void setGlobalNextBatchSize(Integer batchSize) {
+		globalNextBatchSize = batchSize;
+	}
+
+	public static SqlTemplateEngine getGlobalNextTemplateEngine() {
+		return globalNextTemplateEngine;
+	}
+
+	public static void setGlobalNextTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
+		globalNextTemplateEngine = sqlTemplateEngine;
+	}
+
+	public static Boolean getGlobalNextAllowShowSql() {
+		return globalNextAllowShowSql;
+	}
+
+	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
+		DbPro.globalNextAllowShowSql = allowShowSql;
+	}
+
+	public static ConnectionManager getGlobalNextConnectionManager() {
+		return globalNextConnectionManager;
+	}
+
+	public static void setGlobalNextConnectionManager(ConnectionManager connectionManager) {
+		DbPro.globalNextConnectionManager = connectionManager;
+	}
+
+	public static SqlHandler[] getGlobalNextSqlHandlers() {
+		return globalNextSqlHandlers;
+	}
+
+	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
+		globalNextSqlHandlers = sqlHandlers;
+	}
+
+	public static SpecialSqlItemPreparer getGlobalNextSpecialSqlItemPreparer() {
+		return globalNextSpecialSqlItemPreparer;
+	}
+
+	public static void setGlobalNextSpecialSqlItemPreparer(SpecialSqlItemPreparer specialSqlItemPreparer) {
+		globalNextSpecialSqlItemPreparer = specialSqlItemPreparer;
+	}
+
+	public static IocTool getGlobalNextIocTool() {
+		return globalNextIocTool;
+	}
+
+	public static void setGlobalNextIocTool(IocTool nextIocTool) {
+		globalNextIocTool = nextIocTool;
+	}
 }
