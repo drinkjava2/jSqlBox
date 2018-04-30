@@ -42,8 +42,8 @@ public abstract class GuesserUtils {// NOSONAR
 	private static final Map<String, PreparedSQL> methodSQLCache = new ConcurrentHashMap<String, PreparedSQL>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class extended
-	 * from ActiveRecord
+	 * This is the method body to build an instance based on abstract class which
+	 * extended from ActiveRecord or implemented ActiveRecordSupport
 	 * 
 	 * @param activeClass
 	 * @return Object instance
@@ -136,8 +136,8 @@ public abstract class GuesserUtils {// NOSONAR
 				sqlAnno = (Sql) anno;
 			if (Handlers.class.equals(anno.annotationType())) {
 				Class<?>[] array = ((Handlers) anno).value();
-				for (Class<?> claz : array)  
-					 result.addHandler(claz, iocTool);
+				for (Class<?> claz : array)
+					result.addHandler(claz, iocTool);
 			}
 		}
 		String sql = null;

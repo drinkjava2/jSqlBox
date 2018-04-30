@@ -69,8 +69,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected SpecialSqlItemPreparer specialSqlItemPreparer = globalNextSpecialSqlItemPreparer;
 
 	/**
-	 * An Ioc tool is needed if want use SqlMapper style in ActiveRecord to build
-	 * SqlHandler instance from SqlHandler class in Annotations
+	 * An IOC tool is needed if want use SqlMapper style and Annotation has
+	 * parameters
 	 */
 	protected IocTool iocTool = globalNextIocTool;
 
@@ -81,12 +81,22 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * A ThreadLocal type tag to indicate current all SQL operations should be
 	 * cached
 	 */
-	private ThreadLocal<Boolean> batchEnabled=new ThreadLocal<Boolean>(){@Override protected Boolean initialValue(){return false;}};
+	private ThreadLocal<Boolean> batchEnabled = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return false;
+		}
+	};
 
 	/**
 	 * A ThreadLocal type cache to store batch SQL and parameters
 	 */
-	private ThreadLocal<ArrayList<PreparedSQL>> sqlBatchCache=new ThreadLocal<ArrayList<PreparedSQL>>(){@Override protected ArrayList<PreparedSQL>initialValue(){return new ArrayList<PreparedSQL>();}};
+	private ThreadLocal<ArrayList<PreparedSQL>> sqlBatchCache = new ThreadLocal<ArrayList<PreparedSQL>>() {
+		@Override
+		protected ArrayList<PreparedSQL> initialValue() {
+			return new ArrayList<PreparedSQL>();
+		}
+	};
 
 	public ImprovedQueryRunner() {
 		super();

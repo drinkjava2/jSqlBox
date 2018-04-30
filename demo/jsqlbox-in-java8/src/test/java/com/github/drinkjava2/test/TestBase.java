@@ -5,14 +5,15 @@ import org.junit.Assert;
 import org.junit.Before;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.test.refactor_sql.LambdSqlItemPreparer;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class TestBase {
-	SqlBoxContext ctx = null;
-	HikariDataSource ds = null;
+	protected SqlBoxContext ctx = null;
+	protected HikariDataSource ds = null;
 
 	/**
-	 * This is for Java6 and 7 how to use method name to support refector
+	 * This is for Java6 and 7 how to use method name to support refactor
 	 */
 	@Before
 	public void init() {
@@ -22,14 +23,24 @@ public class TestBase {
 		ds.setUsername("sa");
 		ds.setPassword("");
 
+		SqlBoxContext.resetGlobalSqlBoxVariants();
+		SqlBoxContext.setGlobalNextSpecialSqlItemPreparer(new LambdSqlItemPreparer());// for Java8
 		// SqlBoxContext.setGlobalNextAllowShowSql(true);
-		SqlBoxContext.setGlobalNextSpecialSqlItemPreparer(new LambdSqlItemPreparer());
 		ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		prepareTestData();
+	}
 
-		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);
+	@After
+	public void cleanup() {
+		deleteTestData();
+		ds.close();
+	}
+
+	public void prepareTestData() {
+		String[] ddlArray = ctx.toCreateDDL(User.class);
 		for (String ddl : ddlArray)
-			ctx.quiteExecute(ddl);
+			ctx.iExecute(ddl);
 
 		try {
 			ctx.nBatchBegin();
@@ -43,11 +54,11 @@ public class TestBase {
 			ctx.nBatchEnd();
 		}
 		Assert.assertEquals(100, ctx.iQueryForLongValue("select count(*) from usertb"));
-
 	}
 
-	@After
-	public void cleanup() {
-		ds.close();
+	public void deleteTestData() {
+		String[] ddlArray = ctx.toDropDDL(User.class);
+		for (String ddl : ddlArray)
+			ctx.iExecute(ddl);
 	}
 }

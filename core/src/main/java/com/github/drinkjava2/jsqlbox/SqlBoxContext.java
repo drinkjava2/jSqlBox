@@ -297,8 +297,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** Shortcut method equal to getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
-		if (SqlBoxContext.globalSqlBoxContext == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return SqlBoxContext.globalSqlBoxContext;
 	}
 

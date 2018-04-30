@@ -35,7 +35,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
 	/** Shortcut method equal to getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
-		return SqlBoxContext.gctx();
+		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
 	/** Return "SqlBox" String */
@@ -45,6 +45,29 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
 	public static void resetGlobalSqlBoxVariants() {
 		SqlBoxContext.resetGlobalSqlBoxVariants();
+	}
+
+	/**
+	 * Create a subClass instance of a abstract ActiveRecordSupport class
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T createMapper(Class<?> abstractClass) {
+		Class<?> childClass = GuesserUtils.createChildClass(abstractClass);
+		try {
+			return (T) childClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+	}
+
+	/**
+	 * Create a subClass instance of a abstract ActiveRecordSupport class and set it's
+	 * SqlBoxContext property
+	 */
+	public static <T> T createMapper(SqlBoxContext ctx, Class<?> abstractClass) {
+		T entity = createMapper(abstractClass);
+		SqlBoxUtils.findAndBindSqlBox(ctx, entity);
+		return entity;
 	}
 
 	protected void globalNxetMethods_____________________() {// NOSONAR

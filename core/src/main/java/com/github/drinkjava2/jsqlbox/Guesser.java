@@ -69,13 +69,13 @@ public interface Guesser {// NOSONAR
 			int callerPos = 0;
 			StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
 			for (StackTraceElement stack : stacks) {
-				callerPos++;
-				if ("com.github.drinkjava2.jsqlbox.ActiveRecord".equals(stack.getClassName())
+				callerPos++; 
+				if ("com.github.drinkjava2.jsqlbox.Guesser$SimpleGuesser".equals(stack.getClassName())
 						&& "guess".equals(stack.getMethodName()))
 					break;
 			}
-			String callerClassName = stacks[callerPos].getClassName();
-			String callerMethodName = stacks[callerPos].getMethodName();
+			String callerClassName = stacks[callerPos+1].getClassName();
+			String callerMethodName = stacks[callerPos+1].getMethodName();
 			Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
 			if (callerClass == null)
 				throw new SqlBoxException("Can not find class '" + callerClassName + "'");

@@ -5,8 +5,8 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.PARA0;
 import static com.github.drinkjava2.jdbpro.JDBPRO.PARAMS;
 import static com.github.drinkjava2.jdbpro.JDBPRO.QUES;
 import static com.github.drinkjava2.jdbpro.JDBPRO.QUES0;
-import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES; 
-import static com.github.drinkjava2.jdbpro.JDBPRO.notNull; 
+import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES;
+import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jdbpro.JDBPRO.put;
 import static com.github.drinkjava2.jdbpro.JDBPRO.question;
@@ -37,6 +37,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;
@@ -513,7 +514,7 @@ public class UsageAndSpeedTest {
 	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractUser user = ActiveRecord.createMapper(AbstractUser.class);
+		AbstractUser user = JSQLBOX.createMapper(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.ctx().iUpdate(user.updateUserPreparedSQL("Tom", "China"));

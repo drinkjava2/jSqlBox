@@ -17,14 +17,17 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * SqlBox is the configuration object, the most important part is "tableModel",
  * it represents a virtual model to database table
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
 public class SqlBox {
 	/** A TableModel instance */
 	TableModel tableModel;
 
-	/** Optional, a SqlBoxContext instance, usually used for ActiveRecord entity */
+	/**
+	 * Optional, a SqlBoxContext instance, usually used for ActiveRecordSupport
+	 * entity
+	 */
 	SqlBoxContext context;
 
 	// Shortcut method

@@ -24,21 +24,23 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public interface ActiveRecordSupport {
+public interface ActiveRecordSupport {// NOSONAR
 
-	/**
-	 * @return the binded SqlBox instance
-	 */
-	public SqlBox bindedBox();
+	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 
 	/**
 	 * @return the binded SqlBox instance, if no, create a new one and bind to
-	 *         entity
+	 *         entity and return it
 	 */
 	public SqlBox box();
 
 	/**
-	 * Bind a SqlBox instance to entity
+	 * @return the binded SqlBox, if no, return null;
+	 */
+	public SqlBox bindedBox();
+
+	/**
+	 * Bind a SqlBox instance to entity, if already binded, repalce with new one
 	 */
 	public void bindBox(SqlBox box);
 
@@ -93,18 +95,21 @@ public interface ActiveRecordSupport {
 	public ActiveRecordSupport putValues(Object... values);
 
 	/**
-	 * Based on current method @Sql annotated String or Text String and parameters,
-	 * guess a best fit query/update/delete/execute method and run it
+	 * In SqlMapper style, based on current method @Sql annotated String or Text(see
+	 * user manual) in comments(need put Java file in resources folder, see user
+	 * manual) and parameters, guess a best fit query/update/delete/execute method
+	 * and run it
 	 */
 	public <T> T guess(Object... params);
 
 	/**
-	 * Return current method's SQL String from @Sql annotated, or Text in
-	 * comments(this need put Java file in resources folder)
+	 * In SqlMapper style, return current method's SQL String based on current
+	 * method @Sql annotated String or Text(see user manual) in comments(need put
+	 * Java file in resources folder, see user manual) 
 	 */
 	public String guessSQL();
 
-	/** Return current method's prepared SQL */
+	/** In SqlMapper style, return current method's prepared SQL */
 	public PreparedSQL guessPreparedSQL(Object... params);
 
 	/** Switch to use another SqlBoxContext */

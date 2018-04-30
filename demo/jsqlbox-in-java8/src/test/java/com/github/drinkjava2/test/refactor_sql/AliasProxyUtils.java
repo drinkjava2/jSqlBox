@@ -1,4 +1,4 @@
-package com.github.drinkjava2.test;
+package com.github.drinkjava2.test.refactor_sql;
 
 import java.lang.reflect.Method;
 
@@ -12,6 +12,12 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
+/**
+ * AliasProxyUtils used to create alias proxy
+ * 
+ * @author Yong Zhu
+ * @since 1.7.0
+ */
 public class AliasProxyUtils {
 	public static ThreadLocal<AliasItemInfo> thdMethodName = new ThreadLocal<AliasItemInfo>();
 

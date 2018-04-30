@@ -12,22 +12,27 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * In DbPro or it's subClasses, if want us SqlMapper style and used handler
- * classes in annotation but it need inject constructor parameters, A IocTool is
- * needed, otherwise no need care about this property
+ * IocTool have a method getBean(Class<?> configClass) to create a bean instance
+ * from configClass class, note: result object type may different to configClass
+ * itself, that's why here called "configClass", an example can see
+ * testGuessAnnotationHasParam() unit test in HandlersTest.java
  * 
- * 
- * IocTool should have a method getBean(Class<?> configClass) to create a bean
- * instance from configClass class, note: result object type may different to
- * configClass itself, that's why here called "configClass"
- * 
- * An example can see testGuessAnnotationHasParam() unit test in
- * HandlersTest.java
- * 
+ * IocTool here is not used for transaction control, but usually can share use
+ * the same transaction control IOC tool.
  * 
  * @author Yong Zhu
  * @since 1.0.8
  */
 public interface IocTool {
+
+	/**
+	 * Create a bean instance from configClass class, note: result object type may
+	 * different to configClass itself, that's why here called "configClass", an
+	 * example can see testGuessAnnotationHasParam() unit test in HandlersTest.java
+	 * 
+	 * @param configClass
+	 *            The configuration class
+	 * @return The bean created from configuration class
+	 */
 	public <T> T getBean(Class<?> configClass);
 }

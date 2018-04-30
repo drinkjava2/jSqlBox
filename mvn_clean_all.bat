@@ -20,7 +20,7 @@ call mvn clean
 call mvn eclipse:clean
 
 cd..
-cd jsqlbox-lambda
+cd jsqlbox-in-java8
 call mvn clean
 call mvn eclipse:clean
 

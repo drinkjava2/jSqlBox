@@ -1,11 +1,11 @@
-package com.github.drinkjava2.test;
+package com.github.drinkjava2.test.refactor_sql;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SpecialSqlItem;
 import com.github.drinkjava2.jdbpro.SpecialSqlItemPreparer;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.test.AliasProxyUtils.AliasItemInfo;
+import com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.AliasItemInfo;
 
 public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 	public static interface ALIAS extends SpecialSqlItem {// a.col as a_col

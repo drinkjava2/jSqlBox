@@ -1,11 +1,11 @@
-package com.github.drinkjava2.test;
+package com.github.drinkjava2.test.refactor_sql;
 
-import static com.github.drinkjava2.jdbpro.DbPro.param;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQuery;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQueryForLongValue;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQueryForMapList;
-import static com.github.drinkjava2.test.AliasProxyUtils.createAliasProxy;
-import static com.github.drinkjava2.test.AliasProxyUtils.table;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForMapList;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.createAliasProxy;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.table;
 
 import java.util.List;
 
@@ -14,9 +14,11 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.test.LambdSqlItemPreparer.ALIAS;
-import com.github.drinkjava2.test.LambdSqlItemPreparer.COL;
-import com.github.drinkjava2.test.LambdSqlItemPreparer.C_ALIAS;
+import com.github.drinkjava2.test.TestBase;
+import com.github.drinkjava2.test.User;
+import com.github.drinkjava2.test.refactor_sql.LambdSqlItemPreparer.ALIAS;
+import com.github.drinkjava2.test.refactor_sql.LambdSqlItemPreparer.COL;
+import com.github.drinkjava2.test.refactor_sql.LambdSqlItemPreparer.C_ALIAS;
 
 /**
  * This is a demo shows how to write refactor-support SQL in Java8 by using
@@ -30,8 +32,8 @@ public class Java8LambdaTest extends TestBase {
 		Assert.assertEquals(100, giQueryForLongValue("select count(*) from usertb"));
 
 		List<User> totalUsers = giQuery(new EntityListHandler(User.class), "select u.** from usertb u");
-		Assert.assertEquals(100, totalUsers.size()); 
-		
+		Assert.assertEquals(100, totalUsers.size());
+
 		User u = createAliasProxy(User.class);
 		List<?> list1 = giQueryForMapList(new PrintSqlHandler(), //
 				"select "//

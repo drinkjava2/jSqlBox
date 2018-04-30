@@ -1,14 +1,14 @@
-package com.github.drinkjava2.test;
+package com.github.drinkjava2.test.refactor_sql;
 
-import static com.github.drinkjava2.jdbpro.DbPro.param;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQuery;
-import static com.github.drinkjava2.jsqlbox.SqlBoxContext.giQueryForMapList;
-import static com.github.drinkjava2.test.AliasProxyUtils.alias;
-import static com.github.drinkjava2.test.AliasProxyUtils.c_alias;
-import static com.github.drinkjava2.test.AliasProxyUtils.clean;
-import static com.github.drinkjava2.test.AliasProxyUtils.col;
-import static com.github.drinkjava2.test.AliasProxyUtils.createAliasProxy;
-import static com.github.drinkjava2.test.AliasProxyUtils.table;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForMapList;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.alias;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.c_alias;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.clean;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.col;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.createAliasProxy;
+import static com.github.drinkjava2.test.refactor_sql.AliasProxyUtils.table;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +17,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
+import com.github.drinkjava2.test.TestBase;
+import com.github.drinkjava2.test.User;
 
 /**
  * This is a demo shows how to write refactor-support SQL in Java6 and Java7.
