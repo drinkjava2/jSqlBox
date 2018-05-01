@@ -56,26 +56,15 @@
     </properties>
    
  <dependencies>   
-      <!-- jSqlBox depends on Apache Commons DbUtils latest version -->   
+      <!-- jSqlBox only depends on Apache Commons DbUtils. 
+           From 1.0.8 version, "jDialects, jTransactions, jDbPro" 3 modules be embedded as Java source code inside of 
+           jSqlBox to reduce jar dependency, but these 3 modules are separate projects each have its own Maven central releases.
+       -->   
     <dependency>
       <groupId>commons-dbutils</groupId>
       <artifactId>commons-dbutils</artifactId>
       <version>1.7</version>
     </dependency> 
-    
-     <!-- jSqlBox depends on jDialects latest version, jDialects is a database dialect tool -->
-  	<dependency>  
-		<groupId>com.github.drinkjava2</groupId>
-		<artifactId>jdialects</artifactId>  
-		<version>1.0.8</version>  
-	</dependency>
-	
-    <!-- jSqlBox depends on jTransactions latest version, jTransactions is a transaction tool -->
-  	<dependency>  
-		<groupId>com.github.drinkjava2</groupId>
-		<artifactId>jtransactions</artifactId>  
-		<version>1.0.1</version>  
-	</dependency>
     
     <!-- ==================================================================================================  -->
     <!-- Below dependencies are for unit test only, scope be set to "test"                                   -->
