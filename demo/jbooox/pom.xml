@@ -50,13 +50,6 @@
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
       <version>1.0.8</version>
-    </dependency>  
-    
-    <!-- jTransactions is a separate transaction tool, TinyTx and SpringTx is included -->
-    <dependency>
-        <groupId>com.github.drinkjava2</groupId>
-        <artifactId>jtransactions</artifactId>
-        <version>1.0.1</version>
     </dependency>
     
     <!-- jBeanBox is a IOC/AOP tool -->

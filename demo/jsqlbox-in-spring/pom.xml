@@ -21,24 +21,17 @@
 <!-- This demo is modified based on demo project https://github.com/Fruzenshtein/spr-mvc-hib 
      The changes are:
      1)Use jSqlBox replace Hibernate
-     2)Use H2 memory database to replace MySql to make it easy run
+     2)Use H2 memory database to replace MySql to make it without manually configuration
      3)Add HikariCP DataSource pool 
      4)Add build-helper-maven-plugin plugin to allow jSqlBox support multiple line Strings.
  -->
   
-    <!-- jSqlBox is a ORM tool based on Apache-DbUtils and jDialects-->
+    <!-- jSqlBox is a ORM tool depends on Apache Common DbUtils -->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>1.0.7</version>
+      <version>1.0.8</version>
     </dependency>  
-    
-    <!-- jTransactions is a separate transaction tool, TinyTx and SpringTx is included -->
-    <dependency>
-        <groupId>com.github.drinkjava2</groupId>
-        <artifactId>jtransactions</artifactId>
-        <version>1.0.1</version>
-    </dependency>
 
     <!-- H2Database memory database used for this demo -->
     <dependency>

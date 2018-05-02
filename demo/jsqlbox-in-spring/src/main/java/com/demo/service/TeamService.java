@@ -28,5 +28,9 @@ public class TeamService {
 	public List<Team> getTeams() {
 		return new Team().finaAllTeams();
 	}
+	
+	public Team getTeamByName(String name) {
+		return new Team().get
+	}
 
 }

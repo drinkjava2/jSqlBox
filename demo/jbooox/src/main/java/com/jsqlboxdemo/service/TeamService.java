@@ -2,6 +2,7 @@ package com.jsqlboxdemo.service;
 
 import java.util.List;
 
+import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.jsqlboxdemo.init.Initializer.Transaction;
 
@@ -33,7 +34,7 @@ public class TeamService {
 
 	@Transaction
 	public List<Team> listBigger(Integer rating) {
-		AbstractTeam team = AbstractTeam.createMapper(AbstractTeam.class);
+		AbstractTeam team = JSQLBOX.createMapper(AbstractTeam.class);
 		return team.queryAbstractRatingBiggerThan(rating);
 	}
 

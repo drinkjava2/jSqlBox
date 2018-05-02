@@ -1,6 +1,6 @@
 package com.github.drinkjava2.beetlsqldemo;
 
-import static com.github.drinkjava2.jdbpro.DbPro.put;
+import static com.github.drinkjava2.jdbpro.JDBPRO.put;
 
 import java.util.List;
 import java.util.Map;

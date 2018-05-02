@@ -15,7 +15,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 public class Initializer implements WebApplicationInitializer {
 
 	public void onStartup(ServletContext servletContext) throws ServletException {
- 
+
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.register(WebAppConfig.class);
 		servletContext.addListener(new ContextLoaderListener(ctx));
@@ -25,10 +25,10 @@ public class Initializer implements WebApplicationInitializer {
 		Dynamic servlet = servletContext.addServlet("dispatcher", new DispatcherServlet(ctx));
 		servlet.addMapping("/");
 		servlet.setLoadOnStartup(1);
-		
+
 		ctx.refresh();// force refresh
-		
-		//SqlBoxContext.setGlobalAllowShowSql(true);
+
+		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContext sqlCtx = ctx.getBean(SqlBoxContext.class);
 		SqlBoxContext.setGlobalSqlBoxContext(sqlCtx);
 
