@@ -16,20 +16,20 @@ public class Initializer implements WebApplicationInitializer {
 
 	public void onStartup(ServletContext servletContext) throws ServletException {
 
-		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
-		ctx.register(WebAppConfig.class);
-		servletContext.addListener(new ContextLoaderListener(ctx));
+		AnnotationConfigWebApplicationContext springCtx = new AnnotationConfigWebApplicationContext();
+		springCtx.register(WebAppConfig.class);
+		servletContext.addListener(new ContextLoaderListener(springCtx));
 
-		ctx.setServletContext(servletContext);
+		springCtx.setServletContext(servletContext);
 
-		Dynamic servlet = servletContext.addServlet("dispatcher", new DispatcherServlet(ctx));
+		Dynamic servlet = servletContext.addServlet("dispatcher", new DispatcherServlet(springCtx));
 		servlet.addMapping("/");
 		servlet.setLoadOnStartup(1);
 
-		ctx.refresh();// force refresh
+		springCtx.refresh();// force refresh
 
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
-		SqlBoxContext sqlCtx = ctx.getBean(SqlBoxContext.class);
+		SqlBoxContext sqlCtx = springCtx.getBean(SqlBoxContext.class);
 		SqlBoxContext.setGlobalSqlBoxContext(sqlCtx);
 
 		String[] ddls = sqlCtx.toDropAndCreateDDL(Team.class);

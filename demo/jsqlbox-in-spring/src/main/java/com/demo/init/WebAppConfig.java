@@ -1,17 +1,23 @@
 package com.demo.init;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
+import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
@@ -54,8 +60,28 @@ public class WebAppConfig {
 	public SqlBoxContext createDefaultSqlBoxContext() {
 		if (dataSource() != dataSource())
 			throw new AssertionError("I found Spring weird");
+		SqlBoxContextConfig config = new SqlBoxContextConfig();
+		config.setConnectionManager(CreateMySpringConnectionMG());
 		SqlBoxContext ctx = new SqlBoxContext(dataSource());
 		return ctx;
 	}
 
+	@Bean
+	public MySpringConnectionMG CreateMySpringConnectionMG() {
+		return new MySpringConnectionMG();
+	}
+
+	public static class MySpringConnectionMG implements ConnectionManager {
+
+		@Override
+		public Connection getConnection(DataSource ds) throws SQLException {
+			return DataSourceUtils.getConnection(ds);
+		}
+
+		@Override
+		public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
+			DataSourceUtils.releaseConnection(conn, ds);
+		}
+
+	}
 }

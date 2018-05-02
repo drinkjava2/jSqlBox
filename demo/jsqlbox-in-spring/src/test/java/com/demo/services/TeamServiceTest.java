@@ -4,11 +4,9 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.demo.TestBase;
 import com.demo.model.Team;
-import com.demo.service.TeamService;
 
 /**
  * This is unit test for services
@@ -26,7 +24,7 @@ public class TeamServiceTest extends TestBase {
 
 	@Test
 	public void ListEqualTest() {
-		List<Team> teams = teamServices.getTeam(id)
+		List<Team> teams = teamServices.getTeamByName("Team1");
 		Assert.assertEquals(1, teams.size());
 	}
  

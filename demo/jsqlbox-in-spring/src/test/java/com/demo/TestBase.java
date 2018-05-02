@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockServletContext;
 
 import com.demo.init.Initializer;
-import com.demo.service.TeamService; 
+import com.demo.service.TeamService;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
@@ -33,7 +33,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 public class TestBase {
 	@Autowired
 	public TeamService teamService;
-	
+
 	protected TeamService teamServices;
 	protected DataSource dataSource;
 	protected Dialect dialect;
@@ -45,14 +45,14 @@ public class TestBase {
 		initializer = new Initializer();
 		try {
 			initializer.onStartup(new MockServletContext());
-		} catch (ServletException e) { 
+		} catch (ServletException e) {
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	@After
 	public void cleanup() {
-		initializer.
+
 	}
 
 }
