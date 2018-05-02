@@ -1,5 +1,5 @@
 /*
- * jDialects, a tiny SQL dialect tool
+ * jDialects, a txCtx SQL dialect tool
  *
  * License: GNU Lesser General Public License (LGPL), version 2.1 or later. See
  * the lgpl.txt file in the root directory or

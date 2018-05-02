@@ -15,16 +15,12 @@
  */
 package com.github.drinkjava2.jtransactions;
 
-import org.aopalliance.intercept.MethodInterceptor;
-
 /**
- * A CommonTx implementation should implement MethodInterceptor interface, but
- * not all classes implemented MethodInterceptor interface are Transaction
- * service
+ * jTransactions 1.0.2
  * 
- * @author Yong Zhu
- * @since 1.0.0
+ * jTransactions is a separate project has its own Maven central releases,
+ * jTransactions source code be embedded inside of jSqlBox to reduce jSqlBox's
+ * jar dependency.
  */
-public interface CommonTx extends MethodInterceptor {
-
+public class PackageInfo {// NOSONAR
 }

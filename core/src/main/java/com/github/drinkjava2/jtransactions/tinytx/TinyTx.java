@@ -5,17 +5,16 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-import com.github.drinkjava2.jtransactions.CommonTx;
-
 /**
- * A tiny transaction interceptor
+ * A txCtx transaction MethodInterceptor
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class TinyTx implements CommonTx {
+public class TinyTx implements MethodInterceptor {
 	private static final TinyTxLogger logger = TinyTxLogger.getLog(TinyTx.class);
 	private static final TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
 
@@ -35,7 +34,7 @@ public class TinyTx implements CommonTx {
 	}
 
 	@Override
-	public Object invoke(MethodInvocation caller) {
+	public Object invoke(MethodInvocation caller) {//NOSONAR
 		if (cm.isInTransaction(ds)) {
 			try {
 				return caller.proceed();
@@ -45,7 +44,7 @@ public class TinyTx implements CommonTx {
 		} else {
 			Connection conn;
 			try {
-				conn = cm.getConnection(ds); 
+				conn = cm.getConnection(ds);
 				TinyTxRuntimeException.assertNotNull(conn, "Connection can not get from DataSource in invoke method");
 			} catch (Exception e) {
 				throw new TinyTxRuntimeException(e);
@@ -54,8 +53,8 @@ public class TinyTx implements CommonTx {
 			try {
 				cm.startTransaction(ds, conn);
 				conn.setTransactionIsolation(transactionIsolation);
-				conn.setAutoCommit(false); 
-				invokeResult = caller.proceed(); 
+				conn.setAutoCommit(false);
+				invokeResult = caller.proceed();
 				conn.commit();
 			} catch (Throwable t) {
 				if (conn != null)
@@ -65,7 +64,7 @@ public class TinyTx implements CommonTx {
 						logger.warn(e1.getMessage());
 					}
 				throw new TinyTxRuntimeException("TinyTx found a runtime Exception, transaction rollbacked.", t);
-			} finally {				
+			} finally {
 				cm.endTransaction(ds);
 				SQLException closeExp = null;
 				try {
