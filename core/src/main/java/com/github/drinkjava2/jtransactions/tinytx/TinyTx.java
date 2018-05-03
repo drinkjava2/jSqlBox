@@ -9,7 +9,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * A txCtx transaction MethodInterceptor
+ * A transaction MethodInterceptor
  * 
  * @author Yong Zhu
  * @since 1.0.0

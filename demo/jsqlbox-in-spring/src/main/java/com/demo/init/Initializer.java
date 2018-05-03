@@ -28,13 +28,11 @@ public class Initializer implements WebApplicationInitializer {
 
 		springCtx.refresh();// force refresh
 
-		SqlBoxContext.setGlobalNextAllowShowSql(true);
-		SqlBoxContext sqlCtx = springCtx.getBean(SqlBoxContext.class);
-		SqlBoxContext.setGlobalSqlBoxContext(sqlCtx);
+		SqlBoxContext sbCtx = springCtx.getBean(SqlBoxContext.class);
 
-		String[] ddls = sqlCtx.toDropAndCreateDDL(Team.class);
+		String[] ddls = sbCtx.toCreateDDL(Team.class);
 		for (String ddl : ddls)
-			sqlCtx.quiteExecute(ddl);
+			sbCtx.nExecute(ddl);
 		for (int i = 0; i < 5; i++)
 			new Team().put("name", "Team" + i, "rating", i * 10).insert();
 		System.out.println("========== com.jsqlboxdemo.init.Initializer initialized=====");

@@ -10,4 +10,5 @@ copy ROOT.war C:\Oracle\Middleware\Oracle_Home\user_projects\domains\base_domain
 
 call C:\Oracle\Middleware\Oracle_Home\user_projects\domains\base_domain\startWebLogic.cmd
 
-start http://127.0.0.1 
+rem To avoid input http://127.0.0.1/ROOT, need put a weblogic.xml file in web-inf folder
+start http://127.0.0.1/
