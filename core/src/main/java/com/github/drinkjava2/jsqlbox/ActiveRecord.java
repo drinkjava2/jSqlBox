@@ -103,8 +103,9 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public void useContext(SqlBoxContext ctx) {
+	public ActiveRecordSupport useContext(SqlBoxContext ctx) {
 		box().setContext(ctx);
+		return (ActiveRecord) this;
 	}
 
 	@SuppressWarnings("unchecked")

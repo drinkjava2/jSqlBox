@@ -23,8 +23,8 @@ package com.github.drinkjava2.jdbpro;
  */
 public class SqlItem {
 
-	public static final SqlItem USE_SLAVE = new SqlItem(SqlItemType.USE_SLAVE);
-	public static final SqlItem USE_MASTER = new SqlItem(SqlItemType.USE_MASTER);
+	public static final SqlItem MASTER = new SqlItem(SqlItemType.USE_MASTER);
+	public static final SqlItem SLAVE = new SqlItem(SqlItemType.USE_SLAVE);
 
 	private SqlItemType type;
 	private Object[] parameters;

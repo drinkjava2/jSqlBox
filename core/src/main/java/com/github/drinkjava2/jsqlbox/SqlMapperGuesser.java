@@ -24,8 +24,8 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * @author Yong Zhu
  * @since 1.0.8
  */
-public interface Guesser {// NOSONAR
-	public static final Guesser simpleGuesserInstance = new SimpleGuesser();
+public interface SqlMapperGuesser {// NOSONAR
+	public static final SqlMapperGuesser simpleGuesserInstance = new SimpleSqlMapperGuesser();
 
 	/**
 	 * Execute operation to access database, based on current method @Sql annotated
@@ -61,7 +61,7 @@ public interface Guesser {// NOSONAR
 	 */
 	public PreparedSQL doGuessPreparedSQL(SqlBoxContext ctx, Object entity, Object... params);
 
-	public static class SimpleGuesser implements Guesser {
+	public static class SimpleSqlMapperGuesser implements SqlMapperGuesser {
 
 		@Override
 		@SuppressWarnings("all")
@@ -70,7 +70,7 @@ public interface Guesser {// NOSONAR
 			StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
 			for (StackTraceElement stack : stacks) {
 				callerPos++; 
-				if ("com.github.drinkjava2.jsqlbox.Guesser$SimpleGuesser".equals(stack.getClassName())
+				if ("com.github.drinkjava2.jsqlbox.SqlMapperGuesser$SimpleSqlMapperGuesser".equals(stack.getClassName())
 						&& "guess".equals(stack.getMethodName()))
 					break;
 			}

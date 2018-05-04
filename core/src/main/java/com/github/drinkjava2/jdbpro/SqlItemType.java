@@ -38,5 +38,5 @@ public enum SqlItemType {
 
 	USE_SLAVE, // Force use slave DbPro
 
-	SHARDING, // Build a SHARDING type SqlItemType
+	SHARD, // Build a SHARD type SqlItem
 }

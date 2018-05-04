@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  The brand new Java persistence tool 全新的Java持久层工具
+  The brand new Java persistence tool Java持久层工具
 </p>
 
 <p align="center">

@@ -22,5 +22,5 @@ package com.github.drinkjava2.jdbpro;
  * @since 1.7.0.3
  */
 public enum SqlType {
-	EXECUTE, UPDATE, INSERT, QUERY, SCALAR
+	EXECUTE, UPDATE, INSERT, QUERY
 }

@@ -23,7 +23,8 @@ import com.github.drinkjava2.jdialects.Dialect;
  */
 public class SqlBoxContextConfig extends DbProConfig {
 	private Dialect dialect = SqlBoxContext.getGlobalNextDialect();
-	private Guesser guesser = SqlBoxContext.getGlobalNextGuesser();
+	private SqlMapperGuesser sqlMapperGuesser = SqlBoxContext.getGlobalNextSqlMapperGuesser();
+	
 
 	public Dialect getDialect() {
 		return dialect;
@@ -34,12 +35,12 @@ public class SqlBoxContextConfig extends DbProConfig {
 		return this;
 	}
 
-	public Guesser getGuesser() {
-		return guesser;
+	public SqlMapperGuesser getSqlMapperGuesser() {
+		return sqlMapperGuesser;
 	}
 
-	public void setGuesser(Guesser guesser) {
-		this.guesser = guesser;
+	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
+		this.sqlMapperGuesser = sqlMapperGuesser;
 	}
 
 }

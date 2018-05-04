@@ -29,6 +29,8 @@ public class DbProConfig {
 	private SqlTemplateEngine templateEngine = DbPro.getGlobalNextTemplateEngine();
 	private DbProLogger logger = DbPro.getGlobalNextLogger();
 	private Boolean allowSqlSql = DbPro.getGlobalNextAllowShowSql();
+	private Boolean useMaster = DbPro.getGlobalNextUseMaster();
+	private Boolean ussSlave = DbPro.getGlobalNextUseSlave();
 	private Integer batchSize = DbPro.getGlobalNextBatchSize();
 	private ConnectionManager connectionManager = DbPro.getGlobalNextConnectionManager();
 	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
@@ -103,6 +105,22 @@ public class DbProConfig {
 		if (slaves == null)
 			slaves = new ArrayList<DbPro>();
 		slaves.add(dbPro);
+	}
+
+	public Boolean getUseMaster() {
+		return useMaster;
+	}
+
+	public void setUseMaster(Boolean useMaster) {
+		this.useMaster = useMaster;
+	}
+
+	public Boolean getUssSlave() {
+		return ussSlave;
+	}
+
+	public void setUssSlave(Boolean ussSlave) {
+		this.ussSlave = ussSlave;
 	}
 
 }

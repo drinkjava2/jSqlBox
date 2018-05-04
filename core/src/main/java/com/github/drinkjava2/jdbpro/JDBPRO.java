@@ -38,7 +38,8 @@ public abstract class JDBPRO extends DbPro {
 	};
 
 	/**
-	 * Clear all ThreadLocal parameters first, then cache parameters in ThreadLocal
+	 * Clear all ThreadLocal parameters first, then cache parameters in
+	 * ThreadLocal
 	 * and return an empty String, a non parameter param0() call equal to
 	 * clearAllInlineThreadlocalParams()
 	 */
@@ -55,7 +56,8 @@ public abstract class JDBPRO extends DbPro {
 	}
 
 	/**
-	 * Build a PreparedSQL instance by given in-line style SQL and parameters stored
+	 * Build a PreparedSQL instance by given in-line style SQL and parameters
+	 * stored
 	 * in ThreadLocal
 	 * 
 	 * @param inlineSQL
@@ -70,7 +72,8 @@ public abstract class JDBPRO extends DbPro {
 	}
 
 	/**
-	 * Clear all ThreadLocal parameters first, then cache parameters in ThreadLocal,
+	 * Clear all ThreadLocal parameters first, then cache parameters in
+	 * ThreadLocal,
 	 * then return a "?" String
 	 */
 	public static String QUES0(Object... params) {// NOSONAR
@@ -154,4 +157,28 @@ public abstract class JDBPRO extends DbPro {
 	public static SqlItem put(Object... parameters) {
 		return new SqlItem(SqlItemType.PUT, parameters);
 	}
+
+	protected void shardingSqlItemMethods_____________________() {// NOSONAR
+	}
+
+	/** Build a "SHARD_All" type Shard SqlItem */
+	public static SqlItem shardAll(Class<?> entityClass) {
+		return new SqlItem(SqlItemType.SHARD, "SHARD_All", entityClass);
+	}
+
+	/** Build a "SHARD_IN" type Shard SqlItem */
+	public static SqlItem shardIn(Class<?> entityClass, Object... parameters) {
+		return new SqlItem(SqlItemType.SHARD, "SHARD_IN", parameters);
+	}
+
+	/** Build a "SHARD_EQUAL" type Shard SqlItem */
+	public static SqlItem shardEqual(Class<?> entityClass, Object... parameters) {
+		return new SqlItem(SqlItemType.SHARD, "SHARD_EQUAL", parameters);
+	}
+
+	/** Build a "SHARD_BETWEEN" type Shard SqlItem */
+	public static SqlItem shardBetween(Class<?> entityClass, Object... parameters) {
+		return new SqlItem(SqlItemType.SHARD, "SHARD_BETWEEN", parameters);
+	}
+
 }

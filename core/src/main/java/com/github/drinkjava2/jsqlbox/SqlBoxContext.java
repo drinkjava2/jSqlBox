@@ -46,7 +46,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	protected static SqlBoxContext globalSqlBoxContext = null;
 	protected static Dialect globalNextDialect = null;
-	protected static Guesser globalNextGuesser = Guesser.simpleGuesserInstance;
+	protected static SqlMapperGuesser globalNextSqlMapperGuesser = SqlMapperGuesser.simpleGuesserInstance;
 
 	/**
 	 * Dialect of current SqlBoxContext, optional
@@ -54,7 +54,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected Dialect dialect;
 
 	/** In SqlMapper style, A guesser needed to guess and execute SQL methods */
-	protected Guesser guesser = globalNextGuesser;
+	protected SqlMapperGuesser sqlMapperGuesser = globalNextSqlMapperGuesser;
 
 	public SqlBoxContext() {
 		super();
@@ -68,13 +68,13 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public SqlBoxContext(SqlBoxContextConfig config) {
 		super(config);
-		this.guesser = config.getGuesser();
+		this.sqlMapperGuesser = config.getSqlMapperGuesser();
 		this.dialect = config.getDialect();
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
 		super(ds, config);
-		this.guesser = config.getGuesser();
+		this.sqlMapperGuesser = config.getSqlMapperGuesser();
 		this.dialect = config.getDialect();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
@@ -84,12 +84,21 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	// =========getter & setter =======
+
 	public Dialect getDialect() {
 		return dialect;
 	}
 
-	public Guesser getGuesser() {
-		return guesser;
+	public void setDialect$(Dialect dialect) {
+		this.dialect = dialect;
+	}
+
+	public void setGuesser$(SqlMapperGuesser sqlMapperGuesser) {
+		this.sqlMapperGuesser = sqlMapperGuesser;
+	}
+
+	public SqlMapperGuesser getGuesser() {
+		return sqlMapperGuesser;
 	}
 
 	/**
@@ -267,6 +276,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Reset all global SqlBox variants to its old default values */
 	public static void resetGlobalSqlBoxVariants() {
 		globalNextAllowShowSql = false;
+		globalNextUseMaster = null;
+		globalNextUseSlave = null;
 		globalNextConnectionManager = null;
 		globalNextSqlHandlers = null;
 		globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
@@ -275,6 +286,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		globalNextDialect = null;
 		globalNextSpecialSqlItemPreparer = null;
 		globalSqlBoxContext = null;
+		globalNextSqlMapperGuesser = SqlMapperGuesser.simpleGuesserInstance;
 	}
 
 	public static SqlBoxContext getGlobalSqlBoxContext() {
@@ -299,12 +311,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContext.globalNextDialect;
 	}
 
-	public static Guesser getGlobalNextGuesser() {
-		return SqlBoxContext.globalNextGuesser;
+	public static SqlMapperGuesser getGlobalNextSqlMapperGuesser() {
+		return SqlBoxContext.globalNextSqlMapperGuesser;
 	}
 
-	public static void setGlobalNextGuesser(Guesser globalNextGuesser) {
-		SqlBoxContext.globalNextGuesser = globalNextGuesser;
+	public static void setGlobalNextSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
+		SqlBoxContext.globalNextSqlMapperGuesser = sqlMapperGuesser;
 	}
 
 	public static void setGlobalNextDialect(Dialect dialect) {

@@ -53,6 +53,8 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
 	protected static Boolean globalNextAllowShowSql = false;
+	protected static Boolean globalNextUseMaster = null;
+	protected static Boolean globalNextUseSlave = null;
 	protected static ConnectionManager globalNextConnectionManager = null;
 	protected static SqlHandler[] globalNextSqlHandlers = null;
 	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
@@ -64,6 +66,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = globalNextConnectionManager;
 	protected Boolean allowShowSQL = globalNextAllowShowSql;
+	protected Boolean useMaster = globalNextUseMaster;
+	protected Boolean useSlave = globalNextUseSlave;
 	protected DbProLogger logger = globalNextLogger;
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
@@ -152,7 +156,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to customise
+	 * Format SQL for logger output, subClass can override this method to
+	 * customise
 	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
@@ -299,7 +304,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * if no result found, SQLException may be threw if some SQL operation
+	 * Exception
 	 * happen.
 	 * 
 	 * @param sql
@@ -316,7 +322,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * if no result found, SQLException may be threw if some SQL operation
+	 * Exception
 	 * happen.
 	 * 
 	 * @param sql
@@ -335,6 +342,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
+		if (ps.getUseMaster() == null)
+			ps.setUseMaster(this.getUseMaster());
+		if (ps.getUseSlave() == null)
+			ps.setUseSlave(this.getUseSlave());
+
 		if (ps.getUseTemplate()) {
 			ps.setUseTemplate(false);
 			SqlTemplateEngine engine = ps.getTemplateEngine();
@@ -375,8 +387,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 			return this.runUpdate(ps);
 		case QUERY:
 			return this.runQuery(ps);
-		case SCALAR:
-			return this.runQueryForScalar(ps);
 		}
 		throw new DbProRuntimeException("Unknow SQL operation type");
 	}
@@ -397,13 +407,16 @@ public class ImprovedQueryRunner extends QueryRunner {
 					else
 						return (T) query(ps.getConnection(), ps.getSql(), ps.getResultSetHandler());
 				} else {
-					if (ps.isUseMaster() && ps.isUseSlave())
-						throw new DbProRuntimeException("Can not set both use Master and Slave");
 					if (ps.isUseMaster())
 						return runMasterQuery(ps);
-					if (ps.isUseSlave())
-						return runSlaveQuery(ps);
-					return runMasterOrSlaveQuery(ps);
+					if (ps.isUseSlave()) {
+						DbPro db = chooseOneSlave();
+						if (db == null)
+							throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
+						ps.setUseMaster(true);
+						return db.runQuery(ps);
+					}
+					return autoChooseAndRunMasterOrSlaveQuery(ps);
 				}
 			} catch (SQLException e) {
 				throw new DbProRuntimeException(e);
@@ -412,12 +425,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 			throw new DbProRuntimeException("A ResultSetHandler is required by query method");
 	}
 
-	private <T> T runMasterOrSlaveQuery(PreparedSQL ps) throws SQLException {
-		if (this.getSlaves() == null)
-			return runMasterQuery(ps);
-		if (this.getConnectionManager() != null && this.getConnectionManager().isInTransaction(this.getDataSource()))
+	private <T> T autoChooseAndRunMasterOrSlaveQuery(PreparedSQL ps) throws SQLException {
+		if (this.getSlaves() == null || this.getSlaves().isEmpty() || (this.getConnectionManager() != null
+				&& this.getConnectionManager().isInTransaction(this.getDataSource())))
 			return runMasterQuery(ps);// if in transaction, always use master
-		return runSlaveQuery(ps);
+		ps.setUseMaster(true);
+		DbPro db = chooseOneSlave();
+		if (db == null)
+			throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
+		return db.runQuery(ps);
 	}
 
 	private <T> T runMasterQuery(PreparedSQL ps) throws SQLException {
@@ -427,18 +443,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 			return (T) query(ps.getSql(), ps.getResultSetHandler());
 	}
 
-	private <T> T runSlaveQuery(PreparedSQL ps) throws SQLException {
-		return chooseOneSlave().runQuery(ps);
-	}
-
 	/**
-	 * @return A slave instance from current DbPro's slave list, default is random
-	 *         choose, subClass can override this method to customise choosing
-	 *         strategy
+	 * Choose a slave DbPro instance, default rule is random choose, subClass
+	 * can override this method to customize choosing strategy
+	 * 
+	 * @return A slave instance, if no found, return null;
 	 */
-	protected DbPro chooseOneSlave() {
+	private DbPro chooseOneSlave() {
 		if (this.slaves == null || this.slaves.isEmpty())
-			throw new DbProRuntimeException("Try to run a slave DbPro, but slaves list is null or empty");
+			return null;
 		return slaves.get(new Random().nextInt(slaves.size()));
 	}
 
@@ -525,7 +538,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object may
+	 * value if more than one column or more than 1 rows returned, a null object
+	 * may
 	 * return if no result found , DbProRuntimeException may be threw if some SQL
 	 * operation Exception happen.
 	 * 
@@ -566,7 +580,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is responsible
+	 *            The Connection to use to run the query. The caller is
+	 *            responsible
 	 *            for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
@@ -676,11 +691,102 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * @deprecated This method is not thread safe, but sometimes need use it for
-	 *             debugging purpose
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change allowShowSQL setting 
 	 */
-	public void setAllowShowSQL(Boolean bl) {
-		this.allowShowSQL = bl;
+	public void setAllowShowSQL$(Boolean allowShowSQL) {
+		this.allowShowSQL = allowShowSQL;
+	}
+	
+
+
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change sqlTemplateEngine setting
+	 */
+	public void setSqlTemplateEngine$(SqlTemplateEngine sqlTemplateEngine) {
+		this.sqlTemplateEngine = sqlTemplateEngine;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change connectionManager setting
+	 */
+	public void setConnectionManager$(ConnectionManager connectionManager) {
+		this.connectionManager = connectionManager;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change logger setting
+	 */ 
+	public void setLogger$(DbProLogger logger) {
+		this.logger = logger;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change batchSize setting
+	 */
+	public void setBatchSize$(Integer batchSize) {
+		this.batchSize = batchSize;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change sqlHandlers setting
+	 */
+	public void setSqlHandlers$(SqlHandler[] sqlHandlers) {
+		this.sqlHandlers = sqlHandlers;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change specialSqlItemPreparer setting
+	 */
+	public void setSpecialSqlItemPreparer$(SpecialSqlItemPreparer specialSqlItemPreparer) {
+		this.specialSqlItemPreparer = specialSqlItemPreparer;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change slaves setting
+	 */
+	public void setSlaves$(List<DbPro> slaves) {
+		this.slaves = slaves;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change iocTool setting
+	 */
+	public void setIocTool$(IocTool iocTool) {
+		this.iocTool = iocTool;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change useMaster setting
+	 */
+	public void setUseMaster$(Boolean useMaster) {
+		this.useMaster = useMaster;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
+	 * change useSlave setting
+	 */
+	public void setUseSlave$(Boolean useSlave) {
+		this.useSlave = useSlave;
+	}
+
+	public Boolean getUseMaster() {
+		return useMaster;
+	}
+
+	public Boolean getUseSlave() {
+		return useSlave;
 	}
 
 	public Boolean getAllowShowSQL() {
@@ -760,6 +866,22 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
 		DbPro.globalNextAllowShowSql = allowShowSql;
+	}
+
+	public static Boolean getGlobalNextUseMaster() {
+		return globalNextUseMaster;
+	}
+
+	public static void setGlobalNextUseMaster(Boolean globalNextUseMaster) {
+		ImprovedQueryRunner.globalNextUseMaster = globalNextUseMaster;
+	}
+
+	public static Boolean getGlobalNextUseSlave() {
+		return globalNextUseSlave;
+	}
+
+	public static void setGlobalNextUseSlave(Boolean globalNextUseSlave) {
+		ImprovedQueryRunner.globalNextUseSlave = globalNextUseSlave;
 	}
 
 	public static ConnectionManager getGlobalNextConnectionManager() {

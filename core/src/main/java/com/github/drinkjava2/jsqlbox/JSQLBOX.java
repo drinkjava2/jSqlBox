@@ -61,7 +61,8 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	}
 
 	/**
-	 * Create a subClass instance of a abstract ActiveRecordSupport class and set it's
+	 * Create a subClass instance of a abstract ActiveRecordSupport class and set
+	 * it's
 	 * SqlBoxContext property
 	 */
 	public static <T> T createMapper(SqlBoxContext ctx, Class<?> abstractClass) {
@@ -81,12 +82,12 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return SqlBoxContext.globalNextDialect;
 	}
 
-	public static Guesser getGlobalNextGuesser() {
-		return SqlBoxContext.globalNextGuesser;
+	public static SqlMapperGuesser getGlobalNextSqlMapperGuesser() {
+		return SqlBoxContext.globalNextSqlMapperGuesser;
 	}
 
-	public static void setGlobalNextGuesser(Guesser globalNextGuesser) {
-		SqlBoxContext.globalNextGuesser = globalNextGuesser;
+	public static void setGlobalNextSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
+		SqlBoxContext.globalNextSqlMapperGuesser = sqlMapperGuesser;
 	}
 
 	public static void setGlobalNextDialect(Dialect dialect) {

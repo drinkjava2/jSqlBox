@@ -80,7 +80,7 @@ public interface ActiveRecordSupport {// NOSONAR
 
 	/**
 	 * Link style set values for entity field, format like:
-	 * user.set("id","id1").set("name","Sam").set("address","Beijing","phone","12345",
+	 * user.put("id","id1").put("name","Sam").put("address","Beijing","phone","12345",
 	 * "email","abc@123.com")
 	 */
 	public ActiveRecordSupport put(Object... fieldAndValues);
@@ -112,7 +112,8 @@ public interface ActiveRecordSupport {// NOSONAR
 	/** In SqlMapper style, return current method's prepared SQL */
 	public PreparedSQL guessPreparedSQL(Object... params);
 
-	/** Switch to use another SqlBoxContext */
-	public void useContext(SqlBoxContext ctx);
+	/** Switch to use another SqlBoxContext 
+	 * @return */
+	public ActiveRecordSupport useContext(SqlBoxContext ctx);
 
 }

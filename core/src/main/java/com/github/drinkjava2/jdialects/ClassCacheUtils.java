@@ -14,7 +14,6 @@ package com.github.drinkjava2.jdialects;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * ClassCacheUtils is utility class to cache some info of classes read and write
@@ -41,7 +40,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 	protected static Map<Class<?>, Map<String, Object>> uniqueMethodCache = new ConcurrentHashMap<Class<?>, Map<String, Object>>();
 	protected static Map<Class<?>, Map<String, Method>> classReadMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
 	protected static Map<Class<?>, Map<String, Method>> classWriteMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
-	protected static Map<Class<?>, Field> boxFieldCache = new ConcurrentHashMap<Class<?>, Field>();
+	//protected static Map<Class<?>, Field> boxFieldCache = new ConcurrentHashMap<Class<?>, Field>();
 
 	protected static class ClassOrMethodNotExist {// NOSONAR
 	}
@@ -141,11 +140,11 @@ public abstract class ClassCacheUtils {// NOSONAR
 		classReadMethods.put(clazz, sortMap(readMethods));
 		classWriteMethods.put(clazz, sortMap(writeMethods));
 		// if (!ActiveRecordSupport.class.isAssignableFrom(clazz)) {
-		Field boxField = ReflectionUtils.findField(clazz, "box");
-		if (boxField != null && boxField.getType().getName().equals("com.github.drinkjava2.jsqlbox.SqlBox")) {// NOSONAR
-			ReflectionUtils.makeAccessible(boxField);
-			boxFieldCache.put(clazz, boxField);
-		}
+//		Field boxField = ReflectionUtils.findField(clazz, "box");
+//		if (boxField != null && boxField.getType().getName().equals("com.github.drinkjava2.jsqlbox.SqlBox")) {// NOSONAR
+//			ReflectionUtils.makeAccessible(boxField);
+//			boxFieldCache.put(clazz, boxField);
+//		}
 
 	}
 
@@ -179,16 +178,16 @@ public abstract class ClassCacheUtils {// NOSONAR
 		return getClassWriteMethods(clazz).get(fieldName);
 	}
 
-	/**
-	 * Return field box, this method is used for jSqlBox to directly access box
-	 * field to bind SqlBox instance to a entity with its box field
-	 */
-	public static Field getBoxField(Class<?> clazz) {
-		Map<String, Method> writeMethods = classWriteMethods.get(clazz);
-		if (writeMethods == null)
-			cacheReadWriteMethodsAndBoxField(clazz);
-		return boxFieldCache.get(clazz);
-	}
+//	/**
+//	 * Return field box, this method is used for jSqlBox to directly access box
+//	 * field to bind SqlBox instance to a entity with its box field
+//	 */
+//	public static Field getBoxField(Class<?> clazz) {
+//		Map<String, Method> writeMethods = classWriteMethods.get(clazz);
+//		if (writeMethods == null)
+//			cacheReadWriteMethodsAndBoxField(clazz);
+//		return boxFieldCache.get(clazz);
+//	}
 
 	/** Read value from entityBean field */
 	public static Object readValueFromBeanField(Object entityBean, String fieldName) {

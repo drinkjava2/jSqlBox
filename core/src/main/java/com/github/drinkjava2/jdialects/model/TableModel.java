@@ -65,13 +65,12 @@ public class TableModel {
 	private List<UniqueModel> uniqueConsts = new ArrayList<UniqueModel>();
 
 	/**
-	 * Map to which entityClass, this field is designed to ORM tool like jSqlBox use
+	 * Map to which entityClass, this field is designed to ORM tool to use
 	 */
 	private Class<?> entityClass;
 
 	/**
-	 * The alias name for this table, this field is designed to ORM tool like
-	 * jSqlBox use
+	 * The alias name for this table, this field is designed to ORM tool use
 	 */
 	private String alias;
 
