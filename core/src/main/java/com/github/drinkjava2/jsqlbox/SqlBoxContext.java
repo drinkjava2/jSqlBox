@@ -67,31 +67,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	public SqlBoxContext(SqlBoxContextConfig config) {
-		super();
-		this.connectionManager = config.getConnectionManager();
-		this.sqlTemplateEngine = config.getTemplateEngine();
-		this.allowShowSQL = config.getAllowSqlSql();
-		this.logger = config.getLogger();
-		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getSqlHandlers();
+		super(config);
 		this.guesser = config.getGuesser();
 		this.dialect = config.getDialect();
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
-		super(ds);
-		this.connectionManager = config.getConnectionManager();
-		this.sqlTemplateEngine = config.getTemplateEngine();
-		this.allowShowSQL = config.getAllowSqlSql();
-		this.logger = config.getLogger();
-		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getSqlHandlers();
+		super(ds, config);
 		this.guesser = config.getGuesser();
-		this.iocTool = config.getIocTool();
 		this.dialect = config.getDialect();
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
-
 	}
 
 	protected void coreMethods______________________________() {// NOSONAR

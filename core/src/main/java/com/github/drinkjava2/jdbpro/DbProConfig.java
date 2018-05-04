@@ -11,12 +11,16 @@
  */
 package com.github.drinkjava2.jdbpro;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
- * SqlBoxContextConfig class is used to store constructor parameters for build
- * SqlBoxContext
+ * DbProConfig class is used to store constructor parameters for build DbPro
+ * instance, this is a transient object, never try to re-use it, re-use it will
+ * break thread safe of jDbPro
  * 
  * @author Yong Zhu
  * @since 1.0.1
@@ -29,6 +33,7 @@ public class DbProConfig {
 	private ConnectionManager connectionManager = DbPro.getGlobalNextConnectionManager();
 	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
 	private IocTool iocTool = DbPro.getGlobalNextIocTool();
+	private List<DbPro> slaves;
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -84,6 +89,20 @@ public class DbProConfig {
 
 	public void setIocTool(IocTool iocTool) {
 		this.iocTool = iocTool;
+	}
+
+	public List<DbPro> getSlaves() {
+		return slaves;
+	}
+
+	public void setSlaves(List<DbPro> slaves) {
+		this.slaves = slaves;
+	}
+
+	public void addSlave(DbPro dbPro) {
+		if (slaves == null)
+			slaves = new ArrayList<DbPro>();
+		slaves.add(dbPro);
 	}
 
 }

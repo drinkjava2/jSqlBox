@@ -59,6 +59,7 @@ public class TinyTxConnectionManager implements ConnectionManager {
 		}
 	};
 
+	@Override
 	public boolean isInTransaction(DataSource ds) {
 		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null in isInTransaction method");
 		Boolean intx = threadLocalTransactionStatus.get().get(ds);

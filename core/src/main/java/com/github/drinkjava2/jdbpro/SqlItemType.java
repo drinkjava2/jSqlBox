@@ -32,5 +32,9 @@ public enum SqlItemType {
 
 	NOT_NULL, // Usage: NOT_NUL("user_name=?", name), only effect when name is not null
 
-	VALUES_QUESTIONS // Append a " values(?,?,?....?)" String at end of SQL
+	VALUES_QUESTIONS, // Append a " values(?,?,?....?)" String at end of SQL
+
+	USE_MASTER, // Force use master DbPro
+
+	USE_SLAVE // Force use slave DbPro
 }

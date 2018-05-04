@@ -40,6 +40,10 @@ public class PreparedSQL {
 	/** SQL Operation Type */
 	private SqlType type;
 
+	private boolean useMaster;// force use Master DbPro
+
+	private boolean useSlave;// force use Slave DbPros
+
 	/** Optional,Connection instance */
 	private Connection connection;
 
@@ -288,6 +292,22 @@ public class PreparedSQL {
 
 	public void setParams(Object[] params) {
 		this.params = params;
+	}
+
+	public boolean isUseMaster() {
+		return useMaster;
+	}
+
+	public void setUseMaster(boolean useMaster) {
+		this.useMaster = useMaster;
+	}
+
+	public boolean isUseSlave() {
+		return useSlave;
+	}
+
+	public void setUseSlave(boolean useSlave) {
+		this.useSlave = useSlave;
 	}
 
 }

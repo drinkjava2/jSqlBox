@@ -49,4 +49,10 @@ public interface ConnectionManager {
 	 */
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException;
 
+	/**
+	 * If a connection already be get from given dataSource, and the connection has
+	 * started a transaction, return true, otherwise return false
+	 */
+	boolean isInTransaction(DataSource ds);
+
 }

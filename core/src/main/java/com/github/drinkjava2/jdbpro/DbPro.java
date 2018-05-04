@@ -26,7 +26,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
-import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
  * DbPro is the enhanced version of Apache Commons DbUtils's QueryRunner, add
@@ -59,8 +58,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.allowShowSQL = config.getAllowSqlSql();
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
-		this.sqlHandlers = config.getSqlHandlers(); 
+		this.sqlHandlers = config.getSqlHandlers();
 		this.iocTool = config.getIocTool();
+		this.slaves = config.getSlaves();
 	}
 
 	public DbPro(DataSource ds, DbProConfig config) {
@@ -71,18 +71,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.logger = config.getLogger();
 		this.batchSize = config.getBatchSize();
 		this.sqlHandlers = config.getSqlHandlers();
-	}
-
-	public DbPro(DataSource ds, Object... args) {
-		super(ds);
-		for (Object arg : args) {
-			if (arg instanceof ConnectionManager)
-				this.connectionManager = (ConnectionManager) arg;
-			else if (arg instanceof SqlTemplateEngine)
-				this.sqlTemplateEngine = (SqlTemplateEngine) arg;
-			else if (arg instanceof DbProLogger)
-				this.logger = (DbProLogger) arg;
-		}
+		this.iocTool = config.getIocTool();
+		this.slaves = config.getSlaves();
 	}
 
 	/**
@@ -97,7 +87,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		}
 	}
 
-	
 	public void ________prepareMethods________() {// NOSONAR
 	}
 
@@ -154,7 +143,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 *            or instance / SqlHandler class or instance
 	 * @return a PreparedSQL instance
 	 */
-	private  PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
+	private PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
 		PreparedSQL result = new PreparedSQL();
@@ -198,6 +187,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				} else if (SqlItemType.SQL.equals(spm.getType())) {
 					for (Object pm : spm.getParameters())
 						sql.append(pm);
+				} else if (SqlItemType.USE_MASTER.equals(spm.getType())) {
+					result.setUseMaster(true);
+				} else if (SqlItemType.USE_SLAVE.equals(spm.getType())) {
+					result.setUseSlave(true);
 				} else if (SqlItemType.QUESTION_PARAM.equals(spm.getType())) {
 					int i = 0;
 					for (Object pm : spm.getParameters()) {
@@ -230,12 +223,12 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			else if (item instanceof ResultSetHandler)
 				result.setResultSetHandler((ResultSetHandler) item);
 			else if (item instanceof Class) {
-			  result.addHandler(item, this.getIocTool());
+				result.addHandler(item, this.getIocTool());
 			} else if (item instanceof SpecialSqlItem) {
-				if ( specialSqlItemPreparer  == null)
+				if (specialSqlItemPreparer == null)
 					throw new DbProRuntimeException(
 							"sqlItemPreparer not set, need call DbPro.setGlobalNextSpecialSqlItemPreparer() method first");
-				 specialSqlItemPreparer.doPrepare(result, sql, (SpecialSqlItem) item);
+				specialSqlItemPreparer.doPrepare(result, sql, (SpecialSqlItem) item);
 			} else {
 				if (iXxxStyle)
 					sql.append(item); // iXxxx style, unknown object is SQL piece
@@ -248,8 +241,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	// ============================================================================
-
-	
 
 	public void ________iXxxxStyles________() {// NOSONAR
 	}
