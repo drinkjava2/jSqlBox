@@ -156,8 +156,8 @@ public class SQLServer2005LimitHandler extends AbstractLimitHandler {
 	 *
 	 * @return List of aliases separated with comas or {@literal *}.
 	 */
-	protected String fillAliasInSelectClause(StringBuilder sb) {
-		//final String separator = System.lineSeparator();
+	protected String fillAliasInSelectClause(StringBuilder sb) {//NOSONAR
+		//final String separator = System.lineSeparator();//NOSONAR
 		final String separator =System.getProperty("line.separator");
 		final List<String> aliases = new LinkedList<String>();// NOSONAR
 		final int startPos = getSelectColumnsStartPosition(sb);
@@ -401,7 +401,7 @@ public class SQLServer2005LimitHandler extends AbstractLimitHandler {
 	 *            The SQL buffer.
 	 * @return list of {@code IgnoreRange} objects, never {@code null}.
 	 */
-	private static List<IgnoreRange> generateIgnoreRanges(String sql) {
+	private static List<IgnoreRange> generateIgnoreRanges(String sql) {//NOSONAR
 		List<IgnoreRange> ignoreRangeList = new ArrayList<IgnoreRange>();// NOSONAR
 
 		int depth = 0;

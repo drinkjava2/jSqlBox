@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
 public class DDLFormatter {
 
 	private static final String INITIAL_LINE = System.getProperty("line.separator") + "    ";
-	private static final String OTHER_LINES = System.getProperty("line.separator")+ "       ";
+	private static final String OTHER_LINES = System.getProperty("line.separator") + "       ";
 	/**
 	 * Singleton access
 	 */
@@ -67,10 +67,8 @@ public class DDLFormatter {
 			result.append(token);
 			if (isQuote(token)) {
 				quoted = !quoted;
-			} else if (!quoted) {
-				if ("is".equals(token)) {
-					result.append(OTHER_LINES);
-				}
+			} else if (!quoted && "is".equals(token)) {
+				result.append(OTHER_LINES);
 			}
 		}
 
@@ -86,10 +84,8 @@ public class DDLFormatter {
 			final String token = tokens.nextToken();
 			if (isQuote(token)) {
 				quoted = !quoted;
-			} else if (!quoted) {
-				if (isBreak(token)) {
-					result.append(OTHER_LINES);
-				}
+			} else if (!quoted && isBreak(token)) {
+					result.append(OTHER_LINES); 
 			}
 			result.append(token);
 		}
@@ -97,7 +93,7 @@ public class DDLFormatter {
 		return result.toString();
 	}
 
-	private String formatCreateTable(String sql) {
+	private String formatCreateTable(String sql) {//NOSONAR
 		final StringBuilder result = new StringBuilder(60).append(INITIAL_LINE);
 		final StringTokenizer tokens = new StringTokenizer(sql, "(,)'[]\"", true);
 

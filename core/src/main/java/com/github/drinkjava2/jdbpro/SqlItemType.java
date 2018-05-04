@@ -36,5 +36,7 @@ public enum SqlItemType {
 
 	USE_MASTER, // Force use master DbPro
 
-	USE_SLAVE // Force use slave DbPro
+	USE_SLAVE, // Force use slave DbPro
+
+	SHARDING, // Build a SHARDING type SqlItemType
 }

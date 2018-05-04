@@ -43,9 +43,9 @@ public class TableModel {
 	private String comment;
 
 	/**
-	 * Optional, If support engine like MySQL or MariaDB, add engineTail at the
-	 * end of "create table..." DDL, usually used to set encode String like "
-	 * DEFAULT CHARSET=utf8" for MySQL
+	 * Optional, If support engine like MySQL or MariaDB, add engineTail at the end
+	 * of "create table..." DDL, usually used to set encode String like " DEFAULT
+	 * CHARSET=utf8" for MySQL
 	 */
 	private String engineTail;
 
@@ -65,8 +65,7 @@ public class TableModel {
 	private List<UniqueModel> uniqueConsts = new ArrayList<UniqueModel>();
 
 	/**
-	 * Map to which entityClass, this field is designed to ORM tool like jSqlBox
-	 * use
+	 * Map to which entityClass, this field is designed to ORM tool like jSqlBox use
 	 */
 	private Class<?> entityClass;
 
@@ -141,8 +140,7 @@ public class TableModel {
 	}
 
 	/**
-	 * Add a sequence definition DDL, note: some dialects do not support
-	 * sequence
+	 * Add a sequence definition DDL, note: some dialects do not support sequence
 	 * 
 	 * @param name
 	 *            The name of sequence Java object itself
@@ -205,7 +203,6 @@ public class TableModel {
 				columnIter.remove();
 		return this;
 	}
-	
 
 	/**
 	 * Remove a FKey by given fkeyName
@@ -218,11 +215,10 @@ public class TableModel {
 				fkeyIter.remove();
 		return this;
 	}
-	 
 
 	/**
-	 * find column in tableModel by given columnName, if not found, add a new
-	 * column with columnName
+	 * find column in tableModel by given columnName, if not found, add a new column
+	 * with columnName
 	 */
 	public ColumnModel column(String columnName) {// NOSONAR
 		ColumnModel col = getColumn(columnName);
@@ -240,7 +236,7 @@ public class TableModel {
 	public ColumnModel addColumn(String columnName) {
 		DialectException.assureNotEmpty(columnName, "columnName can not be empty");
 		for (ColumnModel columnModel : columns)
-			if (columnName.equals(columnModel.getColumnName()))
+			if (columnName.equalsIgnoreCase(columnModel.getColumnName()))
 				throw new DialectException("ColumnModel name '" + columnName + "' already existed");
 		ColumnModel column = new ColumnModel(columnName);
 		addColumn(column);
@@ -252,8 +248,18 @@ public class TableModel {
 	 */
 	public ColumnModel getColumn(String columnName) {
 		for (ColumnModel columnModel : columns)
-			if (columnModel.getColumnName() != null && columnModel.getColumnName().equals(columnName))
+			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(columnName))
 				return columnModel;
+		return null;
+	}
+
+	/**
+	 * @return First found sharding Column , if not found , return null
+	 */
+	public ColumnModel getShardingColumn() {
+		for (ColumnModel columnModel : columns)
+			if (columnModel.getShardingSetting() != null)
+				return columnModel;// return first found only
 		return null;
 	}
 
@@ -327,9 +333,9 @@ public class TableModel {
 	}
 
 	/**
-	 * If support engine like MySQL or MariaDB, add engineTail at the end of
-	 * "create table..." DDL, usually used to set encode String like " DEFAULT
-	 * CHARSET=utf8" for MySQL
+	 * If support engine like MySQL or MariaDB, add engineTail at the end of "create
+	 * table..." DDL, usually used to set encode String like " DEFAULT CHARSET=utf8"
+	 * for MySQL
 	 */
 	public TableModel engineTail(String engineTail) {
 		this.engineTail = engineTail;
@@ -337,8 +343,8 @@ public class TableModel {
 	}
 
 	/**
-	 * Search and return the IdGenerator in this TableModel by its
-	 * generationType and name
+	 * Search and return the IdGenerator in this TableModel by its generationType
+	 * and name
 	 */
 	public IdGenerator getIdGenerator(GenerationType generationType, String name) {
 		return getIdGenerator(generationType, name, this.getIdGenerators());
@@ -494,5 +500,4 @@ public class TableModel {
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
-
 }

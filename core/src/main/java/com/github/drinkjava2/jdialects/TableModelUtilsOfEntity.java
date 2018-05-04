@@ -27,6 +27,7 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
  * @author Yong Zhu
  * @since 1.0.6
  */
+@SuppressWarnings("all")
 public abstract class TableModelUtilsOfEntity {// NOSONAR
 
 	private static Map<Class<?>, TableModel> tableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
@@ -309,6 +310,10 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 				// Id
 				if (!getFirstEntityAnno(field, "Id").isEmpty() || !getFirstEntityAnno(field, "PKey").isEmpty())
 					col.pkey();
+
+				// Is a sharding column?
+				if (!getFirstEntityAnno(field, "Sharding").isEmpty())
+					col.sharding();
 
 				col.setEntityField(entityfieldName);
 				col.setTableModel(model);

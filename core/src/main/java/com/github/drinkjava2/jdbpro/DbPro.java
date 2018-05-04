@@ -146,7 +146,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	private PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
-		PreparedSQL result = new PreparedSQL();
+		PreparedSQL predSQL = new PreparedSQL();
 		StringBuilder sql = new StringBuilder();
 		boolean foundSQL = false;
 		for (Object item : items) {
@@ -154,12 +154,12 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				if (iXxxStyle)
 					throw new DbProRuntimeException("In iXxxx style,  null value can not append as SQL piece");
 				else
-					result.addParam(null);
+					predSQL.addParam(null);
 			} else if (item instanceof String) {
 				if (iXxxStyle)
 					sql.append(item);
 				else if (foundSQL)
-					result.addParam(item);
+					predSQL.addParam(item);
 				else {
 					sql.append(item);
 					foundSQL = true;
@@ -172,42 +172,44 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				}
 				if (psItem.getParams() != null)
 					for (Object obj : psItem.getParams())
-						result.addParam(obj);
+						predSQL.addParam(obj);
 			} else if (item instanceof SqlTemplateEngine) {
-				result.setTemplateEngine((SqlTemplateEngine) item);
+				predSQL.setTemplateEngine((SqlTemplateEngine) item);
 			} else if (item instanceof Map<?, ?>) {
-				result.addTemplateMap((Map<String, Object>) item);
+				predSQL.addTemplateMap((Map<String, Object>) item);
 			} else if (item instanceof SqlItem) {
-				SqlItem spm = (SqlItem) item;
-				if (SqlItemType.PARAM.equals(spm.getType())) {
-					for (Object pm : spm.getParameters())
-						result.addParam(pm);
-				} else if (SqlItemType.PUT.equals(spm.getType())) {
-					result.addTemplateParam(spm);
-				} else if (SqlItemType.SQL.equals(spm.getType())) {
-					for (Object pm : spm.getParameters())
+				SqlItem sqItem = (SqlItem) item;
+				if (SqlItemType.PARAM.equals(sqItem.getType())) {
+					for (Object pm : sqItem.getParameters())
+						predSQL.addParam(pm);
+				} else if (SqlItemType.PUT.equals(sqItem.getType())) {
+					predSQL.addTemplateParam(sqItem);
+				} else if (SqlItemType.SQL.equals(sqItem.getType())) {
+					for (Object pm : sqItem.getParameters())
 						sql.append(pm);
-				} else if (SqlItemType.USE_MASTER.equals(spm.getType())) {
-					result.setUseMaster(true);
-				} else if (SqlItemType.USE_SLAVE.equals(spm.getType())) {
-					result.setUseSlave(true);
-				} else if (SqlItemType.QUESTION_PARAM.equals(spm.getType())) {
+				} else if (SqlItemType.USE_MASTER.equals(sqItem.getType())) {
+					predSQL.setUseMaster(true);
+				} else if (SqlItemType.USE_SLAVE.equals(sqItem.getType())) {
+					predSQL.setUseSlave(true);
+				} else if (SqlItemType.SHARDING.equals(sqItem.getType())) {
+					sql.append(getTableNameByShardingSqlItem(sqItem));
+				} else if (SqlItemType.QUESTION_PARAM.equals(sqItem.getType())) {
 					int i = 0;
-					for (Object pm : spm.getParameters()) {
-						result.addParam(pm);
+					for (Object pm : sqItem.getParameters()) {
+						predSQL.addParam(pm);
 						if (i > 0)
 							sql.append(",");
 						sql.append("?");
 						i++;
 					}
-				} else if (SqlItemType.NOT_NULL.equals(spm.getType())) {
-					if (spm.getParameters()[1] != null) {
-						sql.append(spm.getParameters()[0]);
-						result.addParam(spm.getParameters()[1]);
+				} else if (SqlItemType.NOT_NULL.equals(sqItem.getType())) {
+					if (sqItem.getParameters()[1] != null) {
+						sql.append(sqItem.getParameters()[0]);
+						predSQL.addParam(sqItem.getParameters()[1]);
 					}
-				} else if (SqlItemType.VALUES_QUESTIONS.equals(spm.getType())) {
+				} else if (SqlItemType.VALUES_QUESTIONS.equals(sqItem.getType())) {
 					sql.append(" values(");
-					for (int i = 0; i < result.getParamSize(); i++) {
+					for (int i = 0; i < predSQL.getParamSize(); i++) {
 						if (i > 0)
 							sql.append(",");
 						sql.append("?");
@@ -217,27 +219,31 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					// should never run here
 					throw new DbProRuntimeException("What the heck the param type is");
 			} else if (item instanceof Connection)
-				result.setConnection((Connection) item);
+				predSQL.setConnection((Connection) item);
 			else if (item instanceof SqlHandler)
-				result.addHandler((SqlHandler) item, this.getIocTool());
+				predSQL.addHandler((SqlHandler) item, this.getIocTool());
 			else if (item instanceof ResultSetHandler)
-				result.setResultSetHandler((ResultSetHandler) item);
+				predSQL.setResultSetHandler((ResultSetHandler) item);
 			else if (item instanceof Class) {
-				result.addHandler(item, this.getIocTool());
+				predSQL.addHandler(item, this.getIocTool());
 			} else if (item instanceof SpecialSqlItem) {
 				if (specialSqlItemPreparer == null)
 					throw new DbProRuntimeException(
 							"sqlItemPreparer not set, need call DbPro.setGlobalNextSpecialSqlItemPreparer() method first");
-				specialSqlItemPreparer.doPrepare(result, sql, (SpecialSqlItem) item);
+				specialSqlItemPreparer.doPrepare(predSQL, sql, (SpecialSqlItem) item);
 			} else {
 				if (iXxxStyle)
 					sql.append(item); // iXxxx style, unknown object is SQL piece
 				else
-					result.addParam(item); // pXxxx style, unknown object is parameter
+					predSQL.addParam(item); // pXxxx style, unknown object is parameter
 			}
 		}
-		result.setSql(sql.toString());
-		return result;
+		predSQL.setSql(sql.toString());
+		return predSQL;
+	}
+
+	protected String getTableNameByShardingSqlItem(SqlItem sqlItem) {
+		return null;// TODO here
 	}
 
 	// ============================================================================
