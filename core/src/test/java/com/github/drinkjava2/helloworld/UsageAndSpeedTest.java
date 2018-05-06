@@ -4,7 +4,6 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.PARA;
 import static com.github.drinkjava2.jdbpro.JDBPRO.PARA0;
 import static com.github.drinkjava2.jdbpro.JDBPRO.PARAMS;
 import static com.github.drinkjava2.jdbpro.JDBPRO.QUES;
-import static com.github.drinkjava2.jdbpro.JDBPRO.QUES0;
 import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES;
 import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
@@ -37,7 +36,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.annotation.Handlers;
@@ -85,10 +83,10 @@ public class UsageAndSpeedTest {
 	public void speedTest() throws Exception {
 		try {
 			PRINT_TIMEUSED = false;
-			REPEAT_TIMES = 20;// warm up
+			REPEAT_TIMES = 10;// warm up
 			runTestMethods();
 			PRINT_TIMEUSED = true;
-			REPEAT_TIMES = 20;
+			REPEAT_TIMES = 10;
 			System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
@@ -333,9 +331,9 @@ public class UsageAndSpeedTest {
 						+ " ,address" + PARA("Canada") //
 						+ ")"//
 						+ VALUESQUES(), PARAMS());
-				runner.execute("update users set " //
-						+ (name == null ? "" : "name=" + QUES0("Tom")) //
-						+ (age == null ? "" : "age=" + QUES0(age)) //
+				runner.execute("update users set " + PARA0() //
+						+ (name == null ? "" : "name=" + QUES("Tom")) //
+						+ (age == null ? "" : "age=" + QUES(age)) //
 						+ ", address=" + QUES("China")//
 						, PARAMS());
 				PARA0("Tom", "China");
@@ -514,7 +512,7 @@ public class UsageAndSpeedTest {
 	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractUser user = JSQLBOX.createMapper(AbstractUser.class);
+		AbstractUser user = SqlBoxContext.createMapper(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.insertOneUser("Sam", "Canada");
 			user.ctx().iUpdate(user.updateUserPreparedSQL("Tom", "China"));

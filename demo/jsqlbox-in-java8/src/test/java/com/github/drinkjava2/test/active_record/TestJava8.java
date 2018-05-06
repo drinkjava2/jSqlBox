@@ -15,7 +15,7 @@ import com.github.drinkjava2.test.TestBase;
  * interface to obtain CRUD methods instead of extends ActiveRecord class
  */
 
-public class UserTest extends TestBase implements ActiveRecordJava8 {
+public class TestJava8 extends TestBase implements ActiveRecordJava8 {
 	@Id
 	private String name;
 	private Integer age;
@@ -36,29 +36,29 @@ public class UserTest extends TestBase implements ActiveRecordJava8 {
 		this.age = age;
 	}
 
-	@Sql("select u.** from UserTest u where u.age>=?")
-	public List<UserTest> selectUsers(Integer age) {
+	@Sql("select u.** from TestJava8 u where u.age>=?")
+	public List<TestJava8> selectUsers(Integer age) {
 		return guess(age);
 	};
 
 	@Override
 	public void prepareTestData() {
-		for (String ddl : ctx.toCreateDDL(UserTest.class))
+		for (String ddl : ctx.toCreateDDL(TestJava8.class))
 			ctx.iExecute(ddl);
 		for (int i = 0; i < 100; i++)
-			new UserTest().put("name", "name" + i, "age", i).insert();
-		Assert.assertEquals(100, ctx.iQueryForLongValue("select count(*) from UserTest"));
+			new TestJava8().put("name", "name" + i, "age", i).insert();
+		Assert.assertEquals(100, ctx.iQueryForLongValue("select count(*) from TestJava8"));
 	}
 
 	@Override
 	public void deleteTestData() {
-		for (String ddl : ctx.toDropDDL(UserTest.class))
+		for (String ddl : ctx.toDropDDL(TestJava8.class))
 			ctx.iExecute(ddl);
 	}
 
 	@Test
 	public void doTest() {
-		List<UserTest> userList = new UserTest().selectUsers(50);
+		List<TestJava8> userList = new TestJava8().selectUsers(50);
 		Assert.assertEquals(50, userList.size());
 	}
 }

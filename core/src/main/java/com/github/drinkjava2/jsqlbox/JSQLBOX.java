@@ -12,13 +12,15 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.JDBPRO;
-import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdbpro.SqlItem;
+import com.github.drinkjava2.jdbpro.SqlItemType;
 
 /**
  * JSQLBOX store some public static methods, usually used for static import to
@@ -29,69 +31,27 @@ import com.github.drinkjava2.jdialects.Dialect;
  */
 public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
-	public static SqlBoxContext getGlobalSqlBoxContext() {
-		return SqlBoxContext.getGlobalSqlBoxContext();
-	}
-
-	/** Shortcut method equal to getGlobalSqlBoxContext() */
+	/** The Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
-	/** Return "SqlBox" String */
-	public static String getGlobalSqlBoxSuffix() {
-		return SqlBoxContext.globalSqlBoxSuffix;
+	protected void shardSqlItemMethods_____________________() {// NOSONAR
 	}
 
-	public static void resetGlobalSqlBoxVariants() {
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+	/** Build a "shardEqual" type Shard SqlItem */
+	public static SqlItem shardEqual(Object entityOrClass, Object shardKey) {
+		return new SqlItem(SqlItemType.SHARD, "EQUAL", entityOrClass, shardKey);
 	}
 
-	/**
-	 * Create a subClass instance of a abstract ActiveRecordSupport class
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T createMapper(Class<?> abstractClass) {
-		Class<?> childClass = GuesserUtils.createChildClass(abstractClass);
-		try {
-			return (T) childClass.newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
+	/** Build a "shardIn" type Shard SqlItem */
+	public static SqlItem shardIn(Object entityOrClass, Collection<?> shardKeys) {
+		return new SqlItem(SqlItemType.SHARD, "IN", entityOrClass, shardKeys);
 	}
 
-	/**
-	 * Create a subClass instance of a abstract ActiveRecordSupport class and set
-	 * it's
-	 * SqlBoxContext property
-	 */
-	public static <T> T createMapper(SqlBoxContext ctx, Class<?> abstractClass) {
-		T entity = createMapper(abstractClass);
-		SqlBoxUtils.findAndBindSqlBox(ctx, entity);
-		return entity;
-	}
-
-	protected void globalNxetMethods_____________________() {// NOSONAR
-	}
-
-	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {
-		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
-	}
-
-	public static Dialect getGlobalNextDialect() {
-		return SqlBoxContext.globalNextDialect;
-	}
-
-	public static SqlMapperGuesser getGlobalNextSqlMapperGuesser() {
-		return SqlBoxContext.globalNextSqlMapperGuesser;
-	}
-
-	public static void setGlobalNextSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
-		SqlBoxContext.globalNextSqlMapperGuesser = sqlMapperGuesser;
-	}
-
-	public static void setGlobalNextDialect(Dialect dialect) {
-		SqlBoxContext.globalNextDialect = dialect;
+	/** Build a "shardBetween" type Shard SqlItem */
+	public static SqlItem shardBetween(Object entityOrClass, Object shardKey1, Object shardKey2) {
+		return new SqlItem(SqlItemType.SHARD, "BETWEEN", entityOrClass, shardKey1, shardKey2);
 	}
 
 	//@formatter:off

@@ -24,7 +24,13 @@ import com.github.drinkjava2.jdialects.Dialect;
 public class SqlBoxContextConfig extends DbProConfig {
 	private Dialect dialect = SqlBoxContext.getGlobalNextDialect();
 	private SqlMapperGuesser sqlMapperGuesser = SqlBoxContext.getGlobalNextSqlMapperGuesser();
-	
+
+	public SqlBoxContextConfig() {
+		super();
+		if (this.getShardingTools() == null) {
+			this.setShardingTools(SqlBoxContext.getGlobalNextShardingTools());
+		}
+	}
 
 	public Dialect getDialect() {
 		return dialect;

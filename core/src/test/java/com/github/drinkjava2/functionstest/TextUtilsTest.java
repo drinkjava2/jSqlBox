@@ -31,6 +31,6 @@ public class TextUtilsTest {
 	@Test
 	public void doTextTest() {
 		String str = TextUtils.getJavaSourceCodeUTF8(AbstractUser.class);
-		Assert.assertTrue(str.indexOf("AbstractUser") > -1);
+		Assert.assertTrue(str.indexOf("set name=?, address=?") > -1);
 	}
 }

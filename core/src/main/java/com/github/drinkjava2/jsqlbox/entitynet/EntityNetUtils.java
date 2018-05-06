@@ -25,10 +25,8 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 
 /**
  * Store static methods about EntityNet
@@ -36,7 +34,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class EntityNetUtils {
+public class EntityNetUtils {// NOSONAR
 
 	/**
 	 * If nodeValidator is object, return it, otherwise it is a NodeValidator class,
@@ -118,7 +116,7 @@ public class EntityNetUtils {
 	/**
 	 * Transfer FKey values to ParentRelation list
 	 */
-	public static List<ParentRelation> transferFKeysToParentRelations(TableModel model, Object entity) {
+	public static List<ParentRelation> transferFKeysToParentRelations(TableModel model, Object entity) {// NOSONAR
 		List<ParentRelation> resultList = null;
 		for (FKeyModel fkey : model.getFkeyConstraints()) {
 			String refTable = fkey.getRefTableAndColumns()[0];
@@ -132,11 +130,11 @@ public class EntityNetUtils {
 					break;
 				}
 				if (fkeyValues.length() > 0)
-					fkeyValues += EntityNet.COMPOUND_VALUE_SEPARATOR;
+					fkeyValues += EntityNet.COMPOUND_VALUE_SEPARATOR;// NOSONAR
 				fkeyValues += fKeyValue;// NOSONAR
 
 				if (fkeyColumns.length() > 0)
-					fkeyColumns += EntityNet.COMPOUND_COLUMNNAME_SEPARATOR;
+					fkeyColumns += EntityNet.COMPOUND_COLUMNNAME_SEPARATOR;// NOSONAR
 				fkeyColumns += colNames;// NOSONAR
 			}
 			if (!StrUtils.isEmpty(fkeyColumns) && !StrUtils.isEmpty(fkeyValues) && !StrUtils.isEmpty(refTable)) {
@@ -235,26 +233,8 @@ public class EntityNetUtils {
 			return new TableModel[0];
 		TableModel[] result = new TableModel[netConfigs.length];
 		for (int i = 0; i < netConfigs.length; i++)
-			result[i] = singleNetConfigToModel(ctx, netConfigs[i]);
+			result[i] = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, netConfigs[i]);
 		return result;
-	}
-
-	/**
-	 * @param ctx
-	 * @param obj
-	 * @return A TableModel instance related this object
-	 */
-	public static TableModel singleNetConfigToModel(SqlBoxContext ctx, Object netConfig) {
-		if (netConfig == null)
-			throw new SqlBoxException("Can build TableModel configuration for null netConfig");
-		if (netConfig instanceof TableModel)
-			return (TableModel) netConfig;
-		else if (netConfig instanceof SqlBox)
-			return ((SqlBox) netConfig).getTableModel();
-		else if (netConfig instanceof Class)
-			return SqlBoxUtils.createSqlBox(ctx, (Class<?>) netConfig).getTableModel();
-		else
-			return SqlBoxUtils.findAndBindSqlBox(ctx, netConfig).getTableModel();
 	}
 
 }

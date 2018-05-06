@@ -12,7 +12,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.test.TestBase;
 import com.github.drinkjava2.test.User;
@@ -35,7 +34,7 @@ public class Java8LambdaTest extends TestBase {
 		Assert.assertEquals(100, totalUsers.size());
 
 		User u = createAliasProxy(User.class);
-		List<?> list1 = giQueryForMapList(new PrintSqlHandler(), //
+		List<?> list1 = giQueryForMapList( //
 				"select "//
 				, (ALIAS) u::getId//
 				, (C_ALIAS) u::getAddress //

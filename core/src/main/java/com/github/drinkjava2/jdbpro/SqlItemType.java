@@ -34,9 +34,13 @@ public enum SqlItemType {
 
 	VALUES_QUESTIONS, // Append a " values(?,?,?....?)" String at end of SQL
 
-	USE_MASTER, // Force use master DbPro
+	USE_AUTO, // User Master or Slave database determined by jDbPro automatically
 
-	USE_SLAVE, // Force use slave DbPro
+	USE_MASTER, // Force use master database DbPro
+
+	USE_SLAVE, // Force use slave database DbPro
+
+	USE_BOTH, // Force use slave database DbPro
 
 	SHARD, // Build a SHARD type SqlItem
 }

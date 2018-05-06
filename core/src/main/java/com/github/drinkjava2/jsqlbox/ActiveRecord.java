@@ -105,43 +105,43 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public ActiveRecordSupport useContext(SqlBoxContext ctx) {
 		box().setContext(ctx);
-		return (ActiveRecord) this;
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T insert() {
+	public <T> T insert(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.insert(this);
+		ctx.insert(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T update() {
+	public <T> T update(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.update(this);
+		ctx.update(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@Override
-	public void delete() {
+	public void delete(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.delete(this);
+		ctx.delete(this, optionalSqlItems);
 	}
 
 	@Override
-	public <T> T load(Object pkey) {
+	public <T> T load(Object pkey, Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.load(this.getClass(), pkey);
+		return ctx.load(this.getClass(), pkey, optionalSqlItems);
 	}
 
 	@Override
@@ -188,17 +188,17 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public <T> T guess(Object... params) {// NOSONAR
-		return ctx().getGuesser().guess(ctx(), this, params);
+		return ctx().getSqlMapperGuesser().guess(ctx(), this, params);
 	}
 
 	@Override
 	public String guessSQL() {
-		return ctx().getGuesser().guessSQL(ctx(), this);
+		return ctx().getSqlMapperGuesser().guessSQL(ctx(), this);
 	}
 
 	@Override
 	public PreparedSQL guessPreparedSQL(Object... params) {
-		return ctx().getGuesser().doGuessPreparedSQL(ctx(), this, params);
+		return ctx().getSqlMapperGuesser().doGuessPreparedSQL(ctx(), this, params);
 	}
 
 }

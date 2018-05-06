@@ -34,7 +34,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 public class TinyTxConnectionManager implements ConnectionManager {
 
-	private static class InnerTinyTxConnectionManager {
+	private static class InnerTinyTxConnectionManager {//NOSONAR
 		private static final TinyTxConnectionManager INSTANCE = new TinyTxConnectionManager();
 	}
 
@@ -52,48 +52,38 @@ public class TinyTxConnectionManager implements ConnectionManager {
 		}
 	};
 
-	private static final ThreadLocal<Map<DataSource, Boolean>> threadLocalTransactionStatus = new ThreadLocal<Map<DataSource, Boolean>>() {
-		@Override
-		protected Map<DataSource, Boolean> initialValue() {
-			return new HashMap<DataSource, Boolean>();
-		}
-	};
-
 	@Override
 	public boolean isInTransaction(DataSource ds) {
 		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null in isInTransaction method");
-		Boolean intx = threadLocalTransactionStatus.get().get(ds);
-		return intx == null ? false : intx;
+		return null != threadLocalConnections.get().get(ds);
 	}
 
 	public void startTransaction(DataSource ds, Connection conn) {
 		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null in startTransaction method");
-		threadLocalTransactionStatus.get().put(ds, true);
 		threadLocalConnections.get().put(ds, conn);
 	}
 
 	public void endTransaction(DataSource ds) {
 		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null in endTransaction method");
-		threadLocalTransactionStatus.get().put(ds, false);
 		threadLocalConnections.get().remove(ds);
 	}
 
 	@Override
 	public Connection getConnection(DataSource ds) throws SQLException {
 		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null");
-		Connection conn = null;
-		if (!isInTransaction(ds))
-			conn = ds.getConnection();
-		else
-			conn = threadLocalConnections.get().get(ds);
+		// Try get a connection already in current transaction
+		Connection conn = threadLocalConnections.get().get(ds);
+		if (conn == null)
+			conn = ds.getConnection(); // Have to get a new connection
 		TinyTxRuntimeException.assertNotNull(conn, "Fail to get a connection from DataSource");
 		return conn;
 	}
 
 	@Override
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		if (isInTransaction(ds)) {
-			// do nothing, connection will keep in Threadlocal
+		Connection saved = threadLocalConnections.get().get(ds);
+		if (saved != null && saved == conn) {
+			// Do nothing, because this connection is used in a current thread's transaction
 		} else {
 			if (conn != null)
 				conn.close();

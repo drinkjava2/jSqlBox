@@ -23,12 +23,36 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
  * @author Yong Zhu
  * @since 1.7.0.2
  */
+@SuppressWarnings("all")
 public class PrintSqlHandler extends DefaultOrderSqlHandler {
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		System.out.println("SQL: " + ps.getSql());// NOSONAR
-		System.out.println("Param:" + Arrays.deepToString(ps.getParams()));// NOSONAR
-		return runner.runPreparedSQL(ps);
+		StringBuffer sb = new StringBuffer();
+
+		sb.append("======PrintSqlHandler=========\n");
+		sb.append("| SQL:       " + ps.getSql()).append("\n");
+		sb.append("| Param:     " + Arrays.deepToString(ps.getParams())).append("\n");
+		long start = System.currentTimeMillis();
+		Object obj = runner.runPreparedSQL(ps);
+		long end = System.currentTimeMillis();
+		StackTraceElement[] steArray = Thread.currentThread().getStackTrace();
+		for (StackTraceElement st : steArray) {
+			if (st.getClassName().contains("lang.Thread"))
+				continue;
+			if (st.getClassName().contains(".drinkjava2.jdbpro"))
+				continue;
+			if (st.getClassName().contains(".drinkjava2.jsqlbox"))
+				continue;
+			sb.append("| Location:  " + st.getClassName() + "." + st.getMethodName() + "(" + st.getFileName() + ":"
+					+ st.getLineNumber() + ")").append("\n");
+			break;
+		}
+
+		sb.append("| Time use:  " + (end - start) + "ms").append("\n");
+		sb.append("==============================");
+		System.out.println(sb.toString());
+		return obj;
 	}
+
 }

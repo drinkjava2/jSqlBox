@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import com.github.drinkjava2.jdbpro.SpecialSqlItemPreparer;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.test.refactor_sql.LambdSqlItemPreparer;
 import com.zaxxer.hikari.HikariDataSource;
@@ -24,7 +25,8 @@ public class TestBase {
 		ds.setPassword("");
 
 		SqlBoxContext.resetGlobalSqlBoxVariants();
-		SqlBoxContext.setGlobalNextSpecialSqlItemPreparer(new LambdSqlItemPreparer());// for Java8
+		// LambdSqlItemPreparer only for Java8
+		SqlBoxContext.setGlobalNextSpecialSqlItemPreparers(new SpecialSqlItemPreparer[] { new LambdSqlItemPreparer() });
 		// SqlBoxContext.setGlobalNextAllowShowSql(true);
 		ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);

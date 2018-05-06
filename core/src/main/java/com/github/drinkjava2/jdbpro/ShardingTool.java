@@ -15,7 +15,8 @@
  */
 package com.github.drinkjava2.jdbpro;
 
-import javax.sql.DataSource;
+import com.github.drinkjava2.jdbpro.DbPro;
+import com.github.drinkjava2.jdbpro.SqlItem;
 
 /**
  * This interface defines some Sharding methods
@@ -27,18 +28,25 @@ import javax.sql.DataSource;
 public interface ShardingTool {// NOSONAR
 
 	/**
-	 * Add a DataSource 
+	 * @return Current ShardingTool's Strategy name, like "MOD", "RANGE"... , a
+	 *         Shard-SqlItem only be treated by ShardingTool has same Strategy name
+	 *         (Ignore Case)
 	 */
-	public void addDataSource(DataSource ds);
+	public String getStrategyName();
 
 	/**
-	 * Add a DataSource and give it a name
+	 * Dealing a SqlItemType.SHARD type SqlItem with same strategy name, return
+	 * table name String[]
+	 * 
+	 * @param dbPro
+	 * @param item
+	 *            The SqlItem, an example: new SqlItem(SqlItemType.SHARD,
+	 *            "shardBetween", entityOrClass, shardKey1, shardKey2)
+	 * @param shardingSetting
+	 *            The sharding setting String[], example: {"MOD","8"} or
+	 *            {"RANGE","2000000"}
+	 * @return
 	 */
-	public void addDataSource(DataSource ds, String name);
-
-	/**
-	 * Execute sharding, return a SqlItem, type is SqlType Sharding
-	 */
-	public SqlItem shard(Class<?> entityClass);
+	public String[] doSharding(DbPro dbPro, SqlItem sqlItem, String[] shardingSetting);
 
 }

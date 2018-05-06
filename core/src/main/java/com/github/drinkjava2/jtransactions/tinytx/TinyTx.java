@@ -73,7 +73,7 @@ public class TinyTx implements MethodInterceptor {
 					closeExp = e;
 				}
 				if (closeExp != null)
-					throw new TinyTxRuntimeException("Exception happen when release connection.", closeExp);
+					throw new TinyTxRuntimeException("Exception happen when release connection.", closeExp);//NOSONAR
 			}
 			return invokeResult;
 		}

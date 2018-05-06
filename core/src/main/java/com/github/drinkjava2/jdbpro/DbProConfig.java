@@ -29,12 +29,14 @@ public class DbProConfig {
 	private SqlTemplateEngine templateEngine = DbPro.getGlobalNextTemplateEngine();
 	private DbProLogger logger = DbPro.getGlobalNextLogger();
 	private Boolean allowSqlSql = DbPro.getGlobalNextAllowShowSql();
-	private Boolean useMaster = DbPro.getGlobalNextUseMaster();
-	private Boolean ussSlave = DbPro.getGlobalNextUseSlave();
-	private Integer batchSize = DbPro.getGlobalNextBatchSize();
 	private ConnectionManager connectionManager = DbPro.getGlobalNextConnectionManager();
-	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
 	private IocTool iocTool = DbPro.getGlobalNextIocTool();
+	private SqlItemType masterSlaveSelect = DbPro.getGlobalNextMasterSlaveSelect();
+	private Integer batchSize = DbPro.getGlobalNextBatchSize();
+	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
+	private SpecialSqlItemPreparer[] specialSqlItemPreparers = DbPro.getGlobalNextSpecialSqlItemPreparers();
+	protected ShardingTool[] shardingTools = DbPro.getGolbalNextShardingTools();
+
 	private List<DbPro> slaves;
 
 	public SqlTemplateEngine getTemplateEngine() {
@@ -107,20 +109,28 @@ public class DbProConfig {
 		slaves.add(dbPro);
 	}
 
-	public Boolean getUseMaster() {
-		return useMaster;
+	public SqlItemType getMasterSlaveSelect() {
+		return masterSlaveSelect;
 	}
 
-	public void setUseMaster(Boolean useMaster) {
-		this.useMaster = useMaster;
+	public void setMasterSlaveSelect(SqlItemType masterSlaveSelect) {
+		this.masterSlaveSelect = masterSlaveSelect;
 	}
 
-	public Boolean getUssSlave() {
-		return ussSlave;
+	public SpecialSqlItemPreparer[] getSpecialSqlItemPreparers() {
+		return specialSqlItemPreparers;
 	}
 
-	public void setUssSlave(Boolean ussSlave) {
-		this.ussSlave = ussSlave;
+	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
+		this.specialSqlItemPreparers = specialSqlItemPreparers;
+	}
+
+	public ShardingTool[] getShardingTools() {
+		return shardingTools;
+	}
+
+	public void setShardingTools(ShardingTool[] shardingTools) {
+		this.shardingTools = shardingTools;
 	}
 
 }

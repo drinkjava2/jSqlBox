@@ -53,26 +53,26 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
 	protected static Boolean globalNextAllowShowSql = false;
-	protected static Boolean globalNextUseMaster = null;
-	protected static Boolean globalNextUseSlave = null;
+	protected static SqlItemType globalNextMasterSlaveSelect = SqlItemType.USE_AUTO;
 	protected static ConnectionManager globalNextConnectionManager = null;
-	protected static SqlHandler[] globalNextSqlHandlers = null;
 	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
-	protected static SpecialSqlItemPreparer globalNextSpecialSqlItemPreparer = null;
 	protected static IocTool globalNextIocTool = null;
+	protected static SqlHandler[] globalNextSqlHandlers = null;
+	protected static SpecialSqlItemPreparer[] globalNextSpecialSqlItemPreparers = null;
+	protected static ShardingTool[] golbalNextShardingTools = null;
 
 	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = globalNextConnectionManager;
 	protected Boolean allowShowSQL = globalNextAllowShowSql;
-	protected Boolean useMaster = globalNextUseMaster;
-	protected Boolean useSlave = globalNextUseSlave;
+	protected SqlItemType masterSlaveSelect = globalNextMasterSlaveSelect;
 	protected DbProLogger logger = globalNextLogger;
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
-	protected SpecialSqlItemPreparer specialSqlItemPreparer = globalNextSpecialSqlItemPreparer;
+	protected SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers;
 	protected List<DbPro> slaves;
+	protected ShardingTool[] shardingTools = golbalNextShardingTools;
 
 	/**
 	 * An IOC tool is needed if want use SqlMapper style and Annotation has
@@ -156,8 +156,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to
-	 * customise
+	 * Format SQL for logger output, subClass can override this method to customise
 	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
@@ -304,8 +303,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation
-	 * Exception
+	 * if no result found, SQLException may be threw if some SQL operation Exception
 	 * happen.
 	 * 
 	 * @param sql
@@ -322,8 +320,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation
-	 * Exception
+	 * if no result found, SQLException may be threw if some SQL operation Exception
 	 * happen.
 	 * 
 	 * @param sql
@@ -342,10 +339,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
-		if (ps.getUseMaster() == null)
-			ps.setUseMaster(this.getUseMaster());
-		if (ps.getUseSlave() == null)
-			ps.setUseSlave(this.getUseSlave());
+		if (ps.getMasterSlaveSelect() == null)
+			ps.setMasterSlaveSelect(this.getMasterSlaveSelect());
 
 		if (ps.getUseTemplate()) {
 			ps.setUseTemplate(false);
@@ -356,6 +351,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			ps.setSql(rendered.getSql());
 			ps.setParams(rendered.getParams());
 		}
+
 		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty()) {
 			SqlHandler newPs = ps.getSqlHandlers().get(0);
 			ps.getSqlHandlers().remove(0);
@@ -365,7 +361,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** Execute real SQL operation according PreparedSql's SqlType */
-	protected Object runRealSqlMethod(PreparedSQL ps) {
+	public Object runRealSqlMethod(PreparedSQL ps) {
 		if (ps.getType() == null)
 			throw new DbProRuntimeException("PreparedSQL's type not set");
 
@@ -379,16 +375,72 @@ public class ImprovedQueryRunner extends QueryRunner {
 		}
 
 		switch (ps.getType()) {
-		case INSERT:
-			return this.runInsert(ps);
 		case EXECUTE:
-			return this.runExecute(ps);
 		case UPDATE:
-			return this.runUpdate(ps);
-		case QUERY:
-			return this.runQuery(ps);
+		case INSERT: {
+			if (SqlItemType.USE_MASTER.equals(ps.getMasterSlaveSelect())
+					|| SqlItemType.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+				return runWriteOperations(this, ps);
+			} else if (SqlItemType.USE_BOTH.equals(ps.getMasterSlaveSelect())) {
+				if (this.getSlaves() != null)
+					for (DbPro dbPro : this.getSlaves())
+						runWriteOperations(dbPro, ps);
+				return runWriteOperations(this, ps);
+			} else if (SqlItemType.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+				Object result = null;
+				if (this.getSlaves() == null || this.getSlaves().isEmpty())
+					throw new DbProRuntimeException("Try to write slaves but slave list not found");
+				for (DbPro dbPro : this.getSlaves())
+					result = runWriteOperations(dbPro, ps);
+				return result;
+			} else
+				throw new DbProRuntimeException("Should never run to here");
 		}
-		throw new DbProRuntimeException("Unknow SQL operation type");
+		case QUERY: {
+			if (SqlItemType.USE_MASTER.equals(ps.getMasterSlaveSelect())
+					|| SqlItemType.USE_BOTH.equals(ps.getMasterSlaveSelect()))
+				return this.runQuery(ps);
+			else if (SqlItemType.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+				DbPro db = chooseOneSlave();
+				if (db == null)
+					throw new DbProRuntimeException("Try to query on slave but slave list not found");
+				return db.runQuery(ps);
+			} else if (SqlItemType.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+				DbPro db = autoChooseMasterOrSlaveQuery(ps);
+				return db.runQuery(ps);
+			} else
+				throw new DbProRuntimeException("Should never run to here");
+		}
+		}
+		throw new DbProRuntimeException("Unknow SQL operation type " + ps.getType());
+	}
+
+	private Object runReadOperation(PreparedSQL ps) {
+		if (SqlItemType.USE_MASTER.equals(ps.getMasterSlaveSelect())
+				|| SqlItemType.USE_BOTH.equals(ps.getMasterSlaveSelect()))
+			return this.runQuery(ps);
+		else if (SqlItemType.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+			DbPro db = chooseOneSlave();
+			if (db == null)
+				throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
+			return db.runQuery(ps);
+		} else if (SqlItemType.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+			DbPro db = autoChooseMasterOrSlaveQuery(ps);
+			return db.runQuery(ps);
+		} else
+			throw new DbProRuntimeException("masterSlaveSelect property not set.");
+	}
+
+	private Object runWriteOperations(ImprovedQueryRunner dbPro, PreparedSQL ps) {
+		switch (ps.getType()) {
+		case INSERT:
+			return dbPro.runInsert(ps);
+		case EXECUTE:
+			return dbPro.runExecute(ps);
+		case UPDATE:
+			return dbPro.runUpdate(ps);
+		}
+		throw new DbProRuntimeException("Should never run to here");
 	}
 
 	/**
@@ -407,16 +459,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 					else
 						return (T) query(ps.getConnection(), ps.getSql(), ps.getResultSetHandler());
 				} else {
-					if (ps.isUseMaster())
-						return runMasterQuery(ps);
-					if (ps.isUseSlave()) {
-						DbPro db = chooseOneSlave();
-						if (db == null)
-							throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
-						ps.setUseMaster(true);
-						return db.runQuery(ps);
-					}
-					return autoChooseAndRunMasterOrSlaveQuery(ps);
+					if (ps.getParams() != null)
+						return (T) query(ps.getSql(), ps.getResultSetHandler(), ps.getParams());
+					else
+						return (T) query(ps.getSql(), ps.getResultSetHandler());
 				}
 			} catch (SQLException e) {
 				throw new DbProRuntimeException(e);
@@ -425,15 +471,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 			throw new DbProRuntimeException("A ResultSetHandler is required by query method");
 	}
 
-	private <T> T autoChooseAndRunMasterOrSlaveQuery(PreparedSQL ps) throws SQLException {
+	private DbPro autoChooseMasterOrSlaveQuery(PreparedSQL ps) {
 		if (this.getSlaves() == null || this.getSlaves().isEmpty() || (this.getConnectionManager() != null
 				&& this.getConnectionManager().isInTransaction(this.getDataSource())))
-			return runMasterQuery(ps);// if in transaction, always use master
-		ps.setUseMaster(true);
-		DbPro db = chooseOneSlave();
-		if (db == null)
+			return (DbPro) this;
+		DbPro slave = chooseOneSlave();
+		if (slave == null)
 			throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
-		return db.runQuery(ps);
+		return slave;
 	}
 
 	private <T> T runMasterQuery(PreparedSQL ps) throws SQLException {
@@ -444,8 +489,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Choose a slave DbPro instance, default rule is random choose, subClass
-	 * can override this method to customize choosing strategy
+	 * Choose a slave DbPro instance, default rule is random choose, subClass can
+	 * override this method to customize choosing strategy
 	 * 
 	 * @return A slave instance, if no found, return null;
 	 */
@@ -462,7 +507,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 *            The PreparedSQL
 	 * @return An object generated by ResultSetHandler
 	 */
-	private <T> T runInsert(PreparedSQL ps) {
+	protected <T> T runInsert(PreparedSQL ps) {
 		if (ps.getResultSetHandler() != null) {
 			try {
 				if (ps.getConnection() != null) {
@@ -490,7 +535,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 *            The PreparedSQL
 	 * @return The number of rows updated.
 	 */
-	private <T> T runExecute(PreparedSQL ps) {
+	protected <T> T runExecute(PreparedSQL ps) {
 		try {
 			if (ps.getResultSetHandler() != null) {
 				if (ps.getConnection() != null)
@@ -515,7 +560,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 *            The PreparedSQL
 	 * @return The number of rows updated
 	 */
-	private int runUpdate(PreparedSQL ps) {
+	protected int runUpdate(PreparedSQL ps) {
 		try {
 			if (ps.getResultSetHandler() != null) {
 				// Ignore ResultSetHandler for Update methods
@@ -538,8 +583,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object
-	 * may
+	 * value if more than one column or more than 1 rows returned, a null object may
 	 * return if no result found , DbProRuntimeException may be threw if some SQL
 	 * operation Exception happen.
 	 * 
@@ -580,8 +624,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is
-	 *            responsible
+	 *            The Connection to use to run the query. The caller is responsible
 	 *            for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
@@ -691,102 +734,99 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change allowShowSQL setting 
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change allowShowSQL setting
 	 */
 	public void setAllowShowSQL$(Boolean allowShowSQL) {
 		this.allowShowSQL = allowShowSQL;
+		if (this.getSlaves() != null) {
+			for (DbPro slave : this.getSlaves())
+				slave.setAllowShowSQL$(allowShowSQL);
+		}
 	}
-	
-
-
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change sqlTemplateEngine setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change sqlTemplateEngine setting
 	 */
 	public void setSqlTemplateEngine$(SqlTemplateEngine sqlTemplateEngine) {
 		this.sqlTemplateEngine = sqlTemplateEngine;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change connectionManager setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change connectionManager setting
 	 */
 	public void setConnectionManager$(ConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change logger setting
-	 */ 
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change logger setting
+	 */
 	public void setLogger$(DbProLogger logger) {
 		this.logger = logger;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change batchSize setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change batchSize setting
 	 */
 	public void setBatchSize$(Integer batchSize) {
 		this.batchSize = batchSize;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change sqlHandlers setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change sqlHandlers setting
 	 */
 	public void setSqlHandlers$(SqlHandler[] sqlHandlers) {
 		this.sqlHandlers = sqlHandlers;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change specialSqlItemPreparer setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change specialSqlItemPreparer setting
 	 */
-	public void setSpecialSqlItemPreparer$(SpecialSqlItemPreparer specialSqlItemPreparer) {
-		this.specialSqlItemPreparer = specialSqlItemPreparer;
+	public void setSpecialSqlItemPreparers$(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
+		this.specialSqlItemPreparers = specialSqlItemPreparers;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change slaves setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change slaves setting
 	 */
 	public void setSlaves$(List<DbPro> slaves) {
 		this.slaves = slaves;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change iocTool setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change iocTool setting
 	 */
 	public void setIocTool$(IocTool iocTool) {
 		this.iocTool = iocTool;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change useMaster setting
-	 */
-	public void setUseMaster$(Boolean useMaster) {
-		this.useMaster = useMaster;
+	public void setMasterSlaveSelect$(SqlItemType masterSlaveSelect) {
+		this.masterSlaveSelect = masterSlaveSelect;
+	}
+
+	public SqlItemType getMasterSlaveSelect() {
+		return masterSlaveSelect;
+	}
+
+	public ShardingTool[] getShardingTools() {
+		return shardingTools;
 	}
 
 	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but sometimes need use it to
-	 * change useSlave setting
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change shardingTools setting
 	 */
-	public void setUseSlave$(Boolean useSlave) {
-		this.useSlave = useSlave;
-	}
-
-	public Boolean getUseMaster() {
-		return useMaster;
-	}
-
-	public Boolean getUseSlave() {
-		return useSlave;
+	public void setShardingTools$(ShardingTool[] shardingTools) {
+		this.shardingTools = shardingTools;
 	}
 
 	public Boolean getAllowShowSQL() {
@@ -825,8 +865,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return sqlBatchCache;
 	}
 
-	public SpecialSqlItemPreparer getSpecialSqlItemPreparer() {
-		return specialSqlItemPreparer;
+	public SpecialSqlItemPreparer[] getSpecialSqlItemPreparers() {
+		return specialSqlItemPreparers;
 	}
 
 	public IocTool getIocTool() {
@@ -868,20 +908,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 		DbPro.globalNextAllowShowSql = allowShowSql;
 	}
 
-	public static Boolean getGlobalNextUseMaster() {
-		return globalNextUseMaster;
+	public static SqlItemType getGlobalNextMasterSlaveSelect() {
+		return globalNextMasterSlaveSelect;
 	}
 
-	public static void setGlobalNextUseMaster(Boolean globalNextUseMaster) {
-		ImprovedQueryRunner.globalNextUseMaster = globalNextUseMaster;
-	}
-
-	public static Boolean getGlobalNextUseSlave() {
-		return globalNextUseSlave;
-	}
-
-	public static void setGlobalNextUseSlave(Boolean globalNextUseSlave) {
-		ImprovedQueryRunner.globalNextUseSlave = globalNextUseSlave;
+	public static void setGlobalNextMasterSlaveSelect(SqlItemType globalNextMasterSlaveSelect) {
+		ImprovedQueryRunner.globalNextMasterSlaveSelect = globalNextMasterSlaveSelect;
 	}
 
 	public static ConnectionManager getGlobalNextConnectionManager() {
@@ -900,12 +932,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 		globalNextSqlHandlers = sqlHandlers;
 	}
 
-	public static SpecialSqlItemPreparer getGlobalNextSpecialSqlItemPreparer() {
-		return globalNextSpecialSqlItemPreparer;
+	public static SpecialSqlItemPreparer[] getGlobalNextSpecialSqlItemPreparers() {
+		return globalNextSpecialSqlItemPreparers;
 	}
 
-	public static void setGlobalNextSpecialSqlItemPreparer(SpecialSqlItemPreparer specialSqlItemPreparer) {
-		globalNextSpecialSqlItemPreparer = specialSqlItemPreparer;
+	public static void setGlobalNextSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
+		globalNextSpecialSqlItemPreparers = specialSqlItemPreparers;
 	}
 
 	public static IocTool getGlobalNextIocTool() {
@@ -914,5 +946,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public static void setGlobalNextIocTool(IocTool nextIocTool) {
 		globalNextIocTool = nextIocTool;
+	}
+
+	public static ShardingTool[] getGolbalNextShardingTools() {
+		return golbalNextShardingTools;
+	}
+
+	public static void setGolbalNextShardingTools(ShardingTool[] golbalNextShardingTools) {
+		ImprovedQueryRunner.golbalNextShardingTools = golbalNextShardingTools;
 	}
 }

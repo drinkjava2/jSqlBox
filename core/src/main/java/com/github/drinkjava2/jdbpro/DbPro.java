@@ -62,8 +62,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.sqlHandlers = config.getSqlHandlers();
 		this.iocTool = config.getIocTool();
 		this.slaves = config.getSlaves();
-		this.useMaster = config.getUseMaster();
-		this.useSlave = config.getUssSlave();
+		this.masterSlaveSelect = config.getMasterSlaveSelect();
+		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
 
 	public DbPro(DataSource ds, DbProConfig config) {
@@ -76,8 +76,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.sqlHandlers = config.getSqlHandlers();
 		this.iocTool = config.getIocTool();
 		this.slaves = config.getSlaves();
-		this.useMaster = config.getUseMaster();
-		this.useSlave = config.getUssSlave();
+		this.masterSlaveSelect = config.getMasterSlaveSelect();
+		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
 
 	/**
@@ -98,16 +98,14 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	/**
 	 * Prepare a PreparedSQL for pXxxx (Single SQL) style, pXxxx style only allow
 	 * single String (The first appeared) as SQL, unknown objects (include null)
-	 * will automatically looked as SQL parameters, more detail see doPrepare
-	 * method
+	 * will automatically looked as SQL parameters, more detail see doPrepare method
 	 */
 	public PreparedSQL pPrepare(Object... items) {
 		return doPrepare(false, items);
 	}
 
 	/**
-	 * Prepare a PreparedSQL for iXxxx (Single SQL) style, unknown objects
-	 * (include
+	 * Prepare a PreparedSQL for iXxxx (Single SQL) style, unknown objects (include
 	 * null) will automatically looked as SQL pieces, more detail see doPrepare
 	 * method
 	 */
@@ -133,33 +131,38 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * param() method, for example:
 	 * 
 	 * ctx.iQuery(new SimpleCacheHandler(), connection, "select u.** from users u
-	 * where u.age>?", param(20)," and u.id=?", param("001"),
-	 * MapListHandler.class);
+	 * where u.age>?", param(20)," and u.id=?", param("001"), MapListHandler.class);
 	 * 
 	 * 
-	 * pXxxx style only allow first appeared String as SQL, left unknown items
-	 * will
+	 * pXxxx style only allow first appeared String as SQL, left unknown items will
 	 * be treated as SQL parameters, for example:
 	 * 
-	 * ctx.pQuery(MapListHandler.class, "select * from users where age>? and
-	 * id=?",
-	 * 20 , "001" , connection, new PaginHandler(2,5), sql(" and name=?"), "Tom"
-	 * );
+	 * ctx.pQuery(MapListHandler.class, "select * from users where age>? and id=?",
+	 * 20 , "001" , connection, new PaginHandler(2,5), sql(" and name=?"), "Tom" );
 	 * 
 	 * In above examples connection and sqlHandlers are optional items, these
 	 * optional items can appear at anywhere
 	 * 
 	 * @param items
-	 *            SQL String / SQL Parameters / Connection / ResultSetHandler
-	 *            class
+	 *            SQL String / SQL Parameters / Connection / ResultSetHandler class
 	 *            or instance / SqlHandler class or instance
 	 * @return a PreparedSQL instance
 	 */
 	private PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
+		return realDoPrepare(null, null, iXxxStyle, items);
+
+	}
+
+	protected PreparedSQL realDoPrepare(PreparedSQL lastPreSql, StringBuilder lastSqlBuilder, boolean iXxxStyle,
+			Object... items) {
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
-		PreparedSQL predSQL = new PreparedSQL();
-		StringBuilder sql = new StringBuilder();
+		PreparedSQL predSQL = lastPreSql;
+		if (predSQL == null)
+			predSQL = new PreparedSQL();
+		StringBuilder sql = lastSqlBuilder;
+		if (sql == null)
+			sql = new StringBuilder();
 		boolean foundSQL = false;
 		for (Object item : items) {
 			if (item == null) {
@@ -200,9 +203,13 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					for (Object pm : sqItem.getParameters())
 						sql.append(pm);
 				} else if (SqlItemType.USE_MASTER.equals(sqItem.getType())) {
-					predSQL.setUseMaster(true);
+					predSQL.setMasterSlaveSelect(SqlItemType.USE_MASTER);
 				} else if (SqlItemType.USE_SLAVE.equals(sqItem.getType())) {
-					predSQL.setUseSlave(true);
+					predSQL.setMasterSlaveSelect(SqlItemType.USE_SLAVE);
+				} else if (SqlItemType.USE_AUTO.equals(sqItem.getType())) {
+					predSQL.setMasterSlaveSelect(SqlItemType.USE_AUTO);
+				} else if (SqlItemType.USE_BOTH.equals(sqItem.getType())) {
+					predSQL.setMasterSlaveSelect(SqlItemType.USE_BOTH);
 				} else if (SqlItemType.SHARD.equals(sqItem.getType())) {
 					sql.append(getTableNameByShardingSqlItem(sqItem));
 				} else if (SqlItemType.QUESTION_PARAM.equals(sqItem.getType())) {
@@ -239,16 +246,19 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			else if (item instanceof Class) {
 				predSQL.addHandler(item, this.getIocTool());
 			} else if (item instanceof SpecialSqlItem) {
-				if (specialSqlItemPreparer == null)
+				if (specialSqlItemPreparers == null)
 					throw new DbProRuntimeException(
-							"sqlItemPreparer not set, need call DbPro.setGlobalNextSpecialSqlItemPreparer() method first");
-				specialSqlItemPreparer.doPrepare(predSQL, sql, (SpecialSqlItem) item);
+							"SpecialSqlItem found but no specialSqlItemPreparers be set, please read user manual how to set SpecialSqlItemPreparers");
+				for (SpecialSqlItemPreparer spPreparer : specialSqlItemPreparers)
+					if (spPreparer.doPrepare(predSQL, sql, (SpecialSqlItem) item))
+						break;
 			} else {
-				if (iXxxStyle)
-					sql.append(item); // iXxxx style, unknown object is SQL piece
+				if (item.getClass().isArray()) {
+					realDoPrepare(predSQL, sql, iXxxStyle, (Object[]) item);
+				} else if (iXxxStyle)
+					sql.append(item); // iXxxx style, unknown is SQL piece
 				else
-					predSQL.addParam(item); // pXxxx style, unknown object is
-											// parameter
+					predSQL.addParam(item); // pXxxx style, unknown is parameter
 			}
 		}
 		predSQL.setSql(sql.toString());
@@ -256,7 +266,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	protected String getTableNameByShardingSqlItem(SqlItem sqlItem) {
-		return null;// TODO here
+		throw new DbProRuntimeException(
+				"getTableNameByShardingSqlItem only implemented by subClass of jDbPro like jSqlBox");
 	}
 
 	// ============================================================================
@@ -296,8 +307,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * In-line style execute query and force return a long value, runtime
-	 * exception
+	 * In-line style execute query and force return a long value, runtime exception
 	 * may throw if result can not be cast to long.
 	 */
 	public long iQueryForLongValue(Object... inlineSQL) {
@@ -312,8 +322,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * In-Line style execute query and force return a List<Map<String, Object>>
-	 * type
+	 * In-Line style execute query and force return a List<Map<String, Object>> type
 	 * result.
 	 */
 	public List<Map<String, Object>> iQueryForMapList(Object... items) {
@@ -343,10 +352,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 *            the in-line style SQL
 	 * @return An object generated by the handler.
 	 */
-	public int iInsert(Object... inlineSQL) {
+	public <T> T iInsert(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
 		ps.setType(SqlType.INSERT);
-		return (Integer) runPreparedSQL(ps);
+		return (T) runPreparedSQL(ps);
 	}
 
 	/**
@@ -354,8 +363,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * 
 	 * @param inlineSQL
 	 *            the in-line style SQL
-	 * @return A list of objects generated by the handler, or number of rows
-	 *         updated
+	 * @return A list of objects generated by the handler, or number of rows updated
 	 *         if no handler
 	 */
 	public <T> T iExecute(Object... inlineSQL) {
@@ -442,10 +450,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 *            the in-line style SQL
 	 * @return An object generated by the handler.
 	 */
-	public int pInsert(Object... items) {
+	public <T> T pInsert(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
 		ps.setType(SqlType.INSERT);
-		return (Integer) runPreparedSQL(ps);
+		return (T) runPreparedSQL(ps);
 	}
 
 	/**
@@ -453,8 +461,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * 
 	 * @param items
 	 *            the items
-	 * @return A list of objects generated by the handler, or number of rows
-	 *         updated
+	 * @return A list of objects generated by the handler, or number of rows updated
 	 *         if no handler
 	 */
 	public <T> T pExecute(Object... items) {
@@ -545,11 +552,11 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 *            the in-line style SQL
 	 * @return An object generated by the handler.
 	 */
-	public int tInsert(Object... items) {
+	public <T> T tInsert(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
 		ps.setUseTemplate(true);
 		ps.setType(SqlType.INSERT);
-		return (Integer) runPreparedSQL(ps);
+		return (T) runPreparedSQL(ps);
 	}
 
 	/**
@@ -557,8 +564,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * 
 	 * @param items
 	 *            the items
-	 * @return A list of objects generated by the handler, or number of rows
-	 *         updated
+	 * @return A list of objects generated by the handler, or number of rows updated
 	 *         if no handler
 	 */
 	public <T> T tExecute(Object... items) {
@@ -599,8 +605,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL
-	 * operation
+	 * if no result found , DbProRuntimeException may be threw if some SQL operation
 	 * Exception happen.
 	 * 
 	 * @param sql
@@ -690,10 +695,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns one
-	 * or
-	 * more result sets. Any parameters which are instances of
-	 * {@link OutParameter}
+	 * Execute an statement, including a stored procedure call, which returns one or
+	 * more result sets. Any parameters which are instances of {@link OutParameter}
 	 * will be registered as OUT parameters. Note: This method does not close
 	 * connection.
 	 * 
@@ -738,8 +741,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL
-	 * operation
+	 * if no result found , DbProRuntimeException may be threw if some SQL operation
 	 * Exception happen.
 	 * 
 	 * @param sql
@@ -833,10 +835,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns one
-	 * or
-	 * more result sets. Any parameters which are instances of
-	 * {@link OutParameter}
+	 * Execute an statement, including a stored procedure call, which returns one or
+	 * more result sets. Any parameters which are instances of {@link OutParameter}
 	 * will be registered as OUT parameters.
 	 * 
 	 * Use this method when: a) running SQL statements that return multiple result

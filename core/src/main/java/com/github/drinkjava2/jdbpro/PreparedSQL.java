@@ -40,9 +40,7 @@ public class PreparedSQL {
 	/** SQL Operation Type */
 	private SqlType type;
 
-	private Boolean useMaster;// force use Master DbPro
-
-	private Boolean useSlave;// force use Slave DbPros
+	private SqlItemType masterSlaveSelect;
 
 	/** Optional,Connection instance */
 	private Connection connection;
@@ -102,8 +100,7 @@ public class PreparedSQL {
 		sb.append("\ntype=").append(type);
 		sb.append("\nsql=").append(sql);
 		sb.append("\nparams=").append(Arrays.deepToString(params));
-		sb.append("\nuseMaster=").append(useMaster);
-		sb.append("\nuseSlave=").append(useSlave);
+		sb.append("\nmasterSlaveSelect=").append(masterSlaveSelect);
 		sb.append("\nconnection=").append(connection);
 		sb.append("\nresultSetHandler=").append(resultSetHandler);
 		sb.append("\nsqlHandlers=").append(sqlHandlers);
@@ -296,27 +293,12 @@ public class PreparedSQL {
 		this.params = params;
 	}
 
-	public boolean isUseMaster() {
-		return useMaster != null && useMaster;
+	public SqlItemType getMasterSlaveSelect() {
+		return masterSlaveSelect;
 	}
 
-	public Boolean getUseMaster() {
-		return useMaster;
+	public void setMasterSlaveSelect(SqlItemType masterSlaveSelect) {
+		this.masterSlaveSelect = masterSlaveSelect;
 	}
 
-	public void setUseMaster(Boolean useMaster) {
-		this.useMaster = useMaster;
-	}
-
-	public boolean isUseSlave() {
-		return useSlave != null && useSlave;
-	}
-
-	public Boolean getUseSlave() {
-		return useSlave;
-	}
-
-	public void setUseSlave(Boolean useSlave) {
-		this.useSlave = useSlave;
-	}
 }

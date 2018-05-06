@@ -65,18 +65,18 @@ public interface ActiveRecordSupport {// NOSONAR
 	public SqlBoxContext ctx();
 
 	/** Insert entity to database */
-	public <T> T insert();
+	public <T> T insert(Object... optionalSqlItems);
 
 	/** Update entity in database */
-	public <T> T update();
+	public <T> T update(Object... optionalSqlItems);
 
 	/** Delete entity in database */
-	public void delete();
+	public void delete(Object... optionalSqlItems);
 
 	/**
 	 * Load entity from database by primary key, key can be single value or Map
 	 */
-	public <T> T load(Object pkey);
+	public <T> T load(Object pkey, Object... optionalSqlItems);
 
 	/**
 	 * Link style set values for entity field, format like:
@@ -105,15 +105,18 @@ public interface ActiveRecordSupport {// NOSONAR
 	/**
 	 * In SqlMapper style, return current method's SQL String based on current
 	 * method @Sql annotated String or Text(see user manual) in comments(need put
-	 * Java file in resources folder, see user manual) 
+	 * Java file in resources folder, see user manual)
 	 */
 	public String guessSQL();
 
 	/** In SqlMapper style, return current method's prepared SQL */
 	public PreparedSQL guessPreparedSQL(Object... params);
 
-	/** Switch to use another SqlBoxContext 
-	 * @return */
+	/**
+	 * Switch to use another SqlBoxContext
+	 * 
+	 * @return
+	 */
 	public ActiveRecordSupport useContext(SqlBoxContext ctx);
 
 }

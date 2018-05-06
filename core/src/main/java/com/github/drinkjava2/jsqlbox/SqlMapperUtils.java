@@ -36,7 +36,7 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
  * @author Yong Zhu
  * @since 1.0.8
  */
-public abstract class GuesserUtils {// NOSONAR
+public abstract class SqlMapperUtils {// NOSONAR
 
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
 	private static final Map<String, PreparedSQL> methodSQLCache = new ConcurrentHashMap<String, PreparedSQL>();

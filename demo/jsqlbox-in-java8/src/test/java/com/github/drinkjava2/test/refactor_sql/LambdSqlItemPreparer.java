@@ -21,7 +21,7 @@ public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 	}
 
 	@Override
-	public void doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item) {
+	public boolean doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item) {
 		AliasProxyUtils.thdMethodName.remove();
 		if (item instanceof ALIAS) {
 			((ALIAS) item).get();
@@ -53,6 +53,7 @@ public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 			else
 				sql.append(new StringBuilder(a.alias).append(".").append(a.colName).toString());
 		} else
-			throw new SqlBoxException("Unknow SpecialSqlItem: " + item);
+			return false;// Not my job, return false to tell jSqlBox use other SpecialSqlItemPreparer
+		return true;
 	}
 }

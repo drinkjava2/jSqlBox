@@ -10,8 +10,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
@@ -80,14 +80,20 @@ public class WebAppConfig {
 	public static class MySpringConnectionManager implements ConnectionManager {
 
 		@Override
-		public Connection getConnection(DataSource ds) throws SQLException {
-			return DataSourceUtils.getConnection(ds);
+		public Connection getConnection(DataSource dataSource) throws SQLException {
+			return DataSourceUtils.getConnection(dataSource);
 		}
 
 		@Override
-		public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-			DataSourceUtils.releaseConnection(conn, ds);
+		public void releaseConnection(Connection conn, DataSource dataSource) throws SQLException {
+			DataSourceUtils.releaseConnection(conn, dataSource);
 		}
 
+		@Override
+		public boolean isInTransaction(DataSource dataSource) {
+			if (dataSource == null)
+				return false;
+			return null != TransactionSynchronizationManager.getResource(dataSource);
+		}
 	}
 }

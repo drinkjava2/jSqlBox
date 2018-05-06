@@ -31,6 +31,10 @@ public interface SpecialSqlItemPreparer {
 	 *            The StringBuilder instance used to build SQL
 	 * @param item
 	 *            The SpecialSqlItem instance
+	 * 
+	 * @return True if this SpecialSqlItem can be handled, otherwise return false to
+	 *         let system know to find other SpecialSqlItemPreparers to handle this
+	 *         item
 	 */
-	public void doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item);
+	public boolean doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item);
 }

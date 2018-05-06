@@ -15,6 +15,10 @@
  */
 package com.github.drinkjava2.jdbpro;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * SqlItem store SQL SqlItemType type and value array
  * 
@@ -23,8 +27,10 @@ package com.github.drinkjava2.jdbpro;
  */
 public class SqlItem {
 
-	public static final SqlItem MASTER = new SqlItem(SqlItemType.USE_MASTER);
-	public static final SqlItem SLAVE = new SqlItem(SqlItemType.USE_SLAVE);
+	public static final SqlItem USE_AUTO = new SqlItem(SqlItemType.USE_AUTO);
+	public static final SqlItem USE_MASTER = new SqlItem(SqlItemType.USE_MASTER);
+	public static final SqlItem USE_SLAVE = new SqlItem(SqlItemType.USE_SLAVE);
+	public static final SqlItem USE_BOTH = new SqlItem(SqlItemType.USE_BOTH);
 
 	private SqlItemType type;
 	private Object[] parameters;
@@ -61,4 +67,15 @@ public class SqlItem {
 				"SqlItem toString() method overrided, not allowed to change to String directly");
 	}
 
+	/**
+	 * Convert parameters in a collection to a SqlItem list
+	 */
+	public static List<Object> toParamSqlItemList(Collection<?> collection) {
+		List<Object> result = new ArrayList<Object>();
+		if (collection == null || collection.isEmpty())
+			return result;
+		for (Object obj : collection)
+			result.add(new SqlItem(SqlItemType.PARAM, obj));
+		return result;
+	}
 }

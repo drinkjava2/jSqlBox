@@ -53,7 +53,7 @@ public class TeamServiceTest {
 	}
 
 	@Test
-	public void listAllTest() {
+	public void listAllTest() { 
 		List<Team> teams = teamService.getTeams();
 		Assert.assertEquals(5, teams.size());
 	}

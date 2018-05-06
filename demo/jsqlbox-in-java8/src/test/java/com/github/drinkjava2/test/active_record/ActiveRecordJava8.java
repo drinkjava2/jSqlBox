@@ -75,8 +75,9 @@ public interface ActiveRecordJava8 extends ActiveRecordSupport {
 	}
 
 	@Override
-	public default void useContext(SqlBoxContext ctx) {
+	public default ActiveRecordSupport useContext(SqlBoxContext ctx) {
 		box().setContext(ctx);
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -159,17 +160,17 @@ public interface ActiveRecordJava8 extends ActiveRecordSupport {
 
 	@Override
 	public default <T> T guess(Object... params) {// NOSONAR
-		return ctx().getGuesser().guess(ctx(), this, params);
+		return ctx().getSqlMapperGuesser().guess(ctx(), this, params);
 	}
 
 	@Override
 	public default String guessSQL() {
-		return ctx().getGuesser().guessSQL(ctx(), this);
+		return ctx().getSqlMapperGuesser().guessSQL(ctx(), this);
 	}
 
 	@Override
 	public default PreparedSQL guessPreparedSQL(Object... params) {
-		return ctx().getGuesser().doGuessPreparedSQL(ctx(), this, params);
+		return ctx().getSqlMapperGuesser().doGuessPreparedSQL(ctx(), this, params);
 	}
 
 }

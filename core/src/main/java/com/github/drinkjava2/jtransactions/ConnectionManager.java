@@ -31,28 +31,20 @@ public interface ConnectionManager {
 	/**
 	 * A ConnectionManager implementation determine how to get connection from
 	 * DataSource or ThreadLocal or from Spring or JTA or some container...
-	 * 
-	 * @param dataSource
-	 * @return Connection instance
-	 * @throws SQLException
 	 */
-	public Connection getConnection(DataSource ds) throws SQLException;
+	public Connection getConnection(DataSource dataSource) throws SQLException;
 
 	/**
 	 * A ConnectionManager implementation determine how to close connection or
 	 * return connection to ThreadLocal or return to Spring or JTA or some
 	 * container...
-	 * 
-	 * @param con
-	 * @param dataSource
-	 * @throws SQLException
 	 */
-	public void releaseConnection(Connection conn, DataSource ds) throws SQLException;
+	public void releaseConnection(Connection conn, DataSource dataSource) throws SQLException;
 
 	/**
-	 * If a connection already be get from given dataSource, and the connection has
-	 * started a transaction, return true, otherwise return false
+	 * Check if a connection already be get from given dataSource and be cached as
+	 * it started a Transaction
 	 */
-	boolean isInTransaction(DataSource ds);
+	boolean isInTransaction(DataSource dataSource);
 
 }

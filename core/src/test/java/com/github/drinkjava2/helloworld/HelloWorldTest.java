@@ -45,7 +45,7 @@ public class HelloWorldTest {
 		ds.setMaximumPoolSize(8);
 		ds.setConnectionTimeout(2000);
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		String[] ddls = ctx.getDialect().toCreateDDL(HelloWorldTest.class);
+		String[] ddls = ctx.toCreateDDL(HelloWorldTest.class);
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
