@@ -85,9 +85,6 @@ public class ColumnModel {
 	 */
 	private String[] sharding = null;
 
-	/** Optional, is this a snowflake column? for ORM tool use only */
-	private Boolean snowflake = false;
-
 	public ColumnModel(String columnName) {
 		if (StrUtils.isEmpty(columnName))
 			DialectException.throwEX("columnName is not allowed empty");
@@ -126,7 +123,6 @@ public class ColumnModel {
 		col.idGeneratorName = idGeneratorName;
 		col.idGenerationType = idGenerationType;
 		col.sharding = sharding;
-		col.snowflake = snowflake;
 		return col;
 	}
 
@@ -253,6 +249,13 @@ public class ColumnModel {
 	public ColumnModel uuid36() {
 		makeSureTableModelExist();
 		this.idGenerationType = GenerationType.UUID36;
+		this.idGeneratorName = null;
+		return this;
+	}
+
+	public ColumnModel snowflake() {
+		makeSureTableModelExist();
+		this.idGenerationType = GenerationType.SNOWFLAKE;
 		this.idGeneratorName = null;
 		return this;
 	}
@@ -556,14 +559,6 @@ public class ColumnModel {
 
 	public void setSharding(String[] sharding) {
 		this.sharding = sharding;
-	}
-
-	public Boolean getSnowflake() {
-		return snowflake;
-	}
-
-	public void setSnowflake(Boolean snowflake) {
-		this.snowflake = snowflake;
 	}
 
 }

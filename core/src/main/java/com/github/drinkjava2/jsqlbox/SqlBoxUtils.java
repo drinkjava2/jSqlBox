@@ -155,7 +155,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 
 		if (boxClass == null) {
 			box = new SqlBox();
-			box.setTableModel(TableModelUtils.entity2Model(entityOrBoxClass));
+			box.setTableModel( TableModelUtils.entity2Model(entityOrBoxClass));
 			box.setEntityClass(entityOrBoxClass);
 		} else {
 			try {

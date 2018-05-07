@@ -15,6 +15,8 @@
  */
 package com.github.drinkjava2.jsqlbox.sharding;
 
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+
 /**
  * This interface defines some Sharding methods
  * 
@@ -26,6 +28,8 @@ public interface ShardingTool {// NOSONAR
 	/**
 	 * Dealing a sharding method
 	 * 
+	 * @param ctx
+	 *            Current SqlBoxContext instance
 	 * @param methodName
 	 *            A sharding method name, like shardEqual, shardIn, shardBetween...
 	 * @param entityOrClass
@@ -41,6 +45,15 @@ public interface ShardingTool {// NOSONAR
 	 *         implementation, otherwise return a String array of all founded table
 	 *         names, if not found return a empty String[]
 	 */
-	public String[] doSharding(String methodName, Object entityOrClass, Object firstValue, Object secondValue);
+	/**
+	 * @param ctx
+	 * @param methodName
+	 * @param entityOrClass
+	 * @param firstValue
+	 * @param secondValue
+	 * @return
+	 */
+	public String[] doSharding(SqlBoxContext ctx, String methodName, Object entityOrClass, Object firstValue,
+			Object secondValue);
 
 }

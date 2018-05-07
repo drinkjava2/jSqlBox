@@ -334,6 +334,8 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.uuid32();
 				if (existEntityAnno(field, "UUID36"))
 					col.uuid36();
+				if (existEntityAnno(field, "Snowflake"))
+					col.snowflake();
 
 				// GeneratedValue
 				Map<String, Object> gvMap = getFirstEntityAnno(field, "GeneratedValue");

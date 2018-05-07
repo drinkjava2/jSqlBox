@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import com.github.drinkjava2.jdbpro.DbProConfig;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
@@ -25,6 +26,7 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 public class SqlBoxContextConfig extends DbProConfig {
 	private Dialect dialect = SqlBoxContext.getGlobalNextDialect();
 	private SqlMapperGuesser sqlMapperGuesser = SqlBoxContext.getGlobalNextSqlMapperGuesser();
+	private SnowflakeCreator snowflakeCreator = SqlBoxContext.getGlobalNextSnowflakeCreator();
 	private ShardingTool[] shardingTools = SqlBoxContext.getGlobalNextShardingTools();
 
 	public SqlBoxContextConfig() {
@@ -54,6 +56,14 @@ public class SqlBoxContextConfig extends DbProConfig {
 
 	public void setShardingTools(ShardingTool[] shardingTools) {
 		this.shardingTools = shardingTools;
+	}
+
+	public SnowflakeCreator getSnowflakeCreator() {
+		return snowflakeCreator;
+	}
+
+	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {
+		this.snowflakeCreator = snowflakeCreator;
 	}
 
 }

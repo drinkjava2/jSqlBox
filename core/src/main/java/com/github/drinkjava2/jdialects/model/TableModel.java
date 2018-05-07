@@ -16,6 +16,7 @@ import com.github.drinkjava2.jdialects.id.AutoIdGenerator;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SequenceIdGenerator;
+import com.github.drinkjava2.jdialects.id.SnowflakeGenerator;
 import com.github.drinkjava2.jdialects.id.SortedUUIDGenerator;
 import com.github.drinkjava2.jdialects.id.TableIdGenerator;
 import com.github.drinkjava2.jdialects.id.TimeStampIdGenerator;
@@ -384,6 +385,8 @@ public class TableModel {
 			return UUID36Generator.INSTANCE;
 		case TIMESTAMP:
 			return TimeStampIdGenerator.INSTANCE;
+		case SNOWFLAKE:
+			return SnowflakeGenerator.INSTANCE;
 		default:
 			return null;
 		}

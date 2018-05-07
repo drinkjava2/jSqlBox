@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.id.SnowflakeGenerator;
+import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
@@ -54,6 +55,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected static SqlMapperGuesser globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
 	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { new ShardingModTool(),
 			new ShardingRangeTool() };
+	protected static SnowflakeCreator globalNextSnowflakeCreator = null;
 
 	/** Dialect of current SqlBoxContext, optional */
 	protected Dialect dialect = globalNextDialect;
@@ -61,34 +63,43 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** In SqlMapper style, A guesser needed to guess and execute SQL methods */
 	protected SqlMapperGuesser sqlMapperGuesser = globalNextSqlMapperGuesser;
 	protected ShardingTool[] shardingTools = globalNextShardingTools;
-	protected SnowflakeGenerator snowflakeGenerator=null;
+	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 
 	public SqlBoxContext() {
 		super();
 		this.dialect = globalNextDialect;
+		copyConfigs(null);
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
-		this.sqlMapperGuesser = globalNextSqlMapperGuesser;
-		this.shardingTools = globalNextShardingTools;
+		copyConfigs(null);
 	}
 
 	public SqlBoxContext(SqlBoxContextConfig config) {
 		super(config);
-		this.dialect = config.getDialect();
-		this.sqlMapperGuesser = config.getSqlMapperGuesser();
-		this.shardingTools = config.getShardingTools();
+		copyConfigs(config);
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
 		super(ds, config);
-		this.dialect = config.getDialect();
-		this.sqlMapperGuesser = config.getSqlMapperGuesser();
-		this.shardingTools = config.getShardingTools();
+		copyConfigs(config);
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
+	}
+
+	private void copyConfigs(SqlBoxContextConfig config) {
+		if (config == null) {
+			this.sqlMapperGuesser = globalNextSqlMapperGuesser;
+			this.shardingTools = globalNextShardingTools;
+			this.snowflakeCreator = globalNextSnowflakeCreator;
+		} else {
+			this.dialect = config.getDialect();
+			this.sqlMapperGuesser = config.getSqlMapperGuesser();
+			this.shardingTools = config.getShardingTools();
+			this.snowflakeCreator = globalNextSnowflakeCreator;
+		}
 	}
 
 	protected void coreMethods______________________________() {// NOSONAR
@@ -130,6 +141,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 */
 	public void setShardingToolsS(ShardingTool[] shardingTools) {
 		this.shardingTools = shardingTools;
+	}
+
+	public SnowflakeCreator getSnowflakeCreator() {
+		return snowflakeCreator;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change shardingTools setting
+	 */
+	public void setSnowflakeCreator$(SnowflakeCreator snowflakeCreator) {
+		this.snowflakeCreator = snowflakeCreator;
 	}
 
 	/**
@@ -193,6 +216,48 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Load an entity from database by key, key can be one object or a Map */
 	public <T> T load(Class<?> entityClass, Object pkey, Object... optionalSqlItems) {
 		return SqlBoxContextUtils.load(this, entityClass, pkey, optionalSqlItems);
+	}
+
+	/** Shortcut method to doSharding("shardEqual",entityOrClass, oneKey, null) */
+	public String shardEqual(Object entityOrClass, Object oneKey) {
+		return doSharding("shardEqual", entityOrClass, oneKey, null);
+	}
+
+	/**
+	 * Shortcut method to doSharding("shardIn",entityOrClass, keyCollection,null)
+	 */
+	public String shardIn(Object entityOrClass, Collection<?> keyCollection) {
+		return doSharding("shardIn", entityOrClass, keyCollection, null);
+	}
+
+	/**
+	 * Shortcut method to doSharding("shardBetween",entityOrClass, startKey,endKey)
+	 */
+	public String shardBetween(Object entityOrClass, Object startKey, Object endKey) {
+		return doSharding("shardBetween", entityOrClass, startKey, endKey);
+	}
+
+	/**
+	 * Use stored ShardingTools to do the sharding, only 1 table String is allowed
+	 */
+	private String doSharding(String method, Object entityOrClass, Object firstValue, Object secondValue) {
+		if (this.getShardingTools() == null || this.getShardingTools().length == 0)
+			throw new SqlBoxException("No ShardingTools set for current SqlBoxContext");
+		for (ShardingTool sh : this.getShardingTools()) {
+			String[] result = sh.doSharding(this, method, entityOrClass, firstValue, secondValue);
+			if (result != null) {
+				if (result.length == 0)
+					throw new SqlBoxException("Can not find sharding table of '" + method + "' method for target '"// NOSONAR
+							+ entityOrClass + "'");
+				if (result.length > 1)
+					throw new SqlBoxException("Found more than 1 sharding table of '" + method + "' method for target '"
+							+ entityOrClass
+							+ "', in jSqlBox current version, to solve this issue need write SQLs for each table and join result manually by yourself.");
+				return result[0];
+			}
+		}
+		throw new SqlBoxException(
+				"No ShardingTool can handle '" + method + "' method for target '" + entityOrClass + "'");
 	}
 
 	// ========== Dialect shortcut methods ===============
@@ -383,6 +448,14 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static void setGlobalNextShardingTools(ShardingTool[] globalNextShardingTools) {
 		SqlBoxContext.globalNextShardingTools = globalNextShardingTools;
+	}
+
+	public static SnowflakeCreator getGlobalNextSnowflakeCreator() {
+		return globalNextSnowflakeCreator;
+	}
+
+	public static void setGlobalNextSnowflakeCreator(SnowflakeCreator globalNextSnowflakeCreator) {
+		SqlBoxContext.globalNextSnowflakeCreator = globalNextSnowflakeCreator;
 	}
 
 }

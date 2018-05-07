@@ -70,7 +70,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
 	protected SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers;
-	protected List<DbPro> slaves;
+	protected DbPro[] slaves;
 
 	/**
 	 * An IOC tool is needed if want use SqlMapper style and Annotation has
@@ -386,7 +386,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				return runWriteOperations(this, ps);
 			} else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
 				Object result = null;
-				if (this.getSlaves() == null || this.getSlaves().isEmpty())
+				if (this.getSlaves() == null || this.getSlaves().length == 0)
 					throw new DbProRuntimeException("Try to write slaves but slave list not found");
 				for (DbPro dbPro : this.getSlaves())
 					result = runWriteOperations(dbPro, ps);
@@ -470,7 +470,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	private DbPro autoChooseMasterOrSlaveQuery(PreparedSQL ps) {
-		if (this.getSlaves() == null || this.getSlaves().isEmpty() || (this.getConnectionManager() != null
+		if (this.getSlaves() == null || this.getSlaves().length == 0 || (this.getConnectionManager() != null
 				&& this.getConnectionManager().isInTransaction(this.getDataSource())))
 			return (DbPro) this;
 		DbPro slave = chooseOneSlave();
@@ -493,9 +493,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * @return A slave instance, if no found, return null;
 	 */
 	private DbPro chooseOneSlave() {
-		if (this.slaves == null || this.slaves.isEmpty())
+		if (this.slaves == null || this.slaves.length == 0)
 			return null;
-		return slaves.get(new Random().nextInt(slaves.size()));
+		return slaves[(new Random().nextInt(slaves.length))];
 	}
 
 	/**
@@ -586,7 +586,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * operation Exception happen.
 	 * 
 	 * @param ps
-	 *            The PreparedSQL which included SQL、parameters and sqlHandlers(if
+	 *            The PreparedSQL which included SQL parameters and sqlHandlers(if
 	 *            have)
 	 * @return An Object or null, Object type determined by SQL content
 	 */
@@ -737,10 +737,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	public void setAllowShowSQL$(Boolean allowShowSQL) {
 		this.allowShowSQL = allowShowSQL;
-		if (this.getSlaves() != null) {
-			for (DbPro slave : this.getSlaves())
-				slave.setAllowShowSQL$(allowShowSQL);
-		}
 	}
 
 	/**
@@ -795,7 +791,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * This method is not thread safe, so put a "$" at method end to reminder, but
 	 * sometimes need use it to change slaves setting
 	 */
-	public void setSlaves$(List<DbPro> slaves) {
+	public void setSlaves$(DbPro[] slaves) {
 		this.slaves = slaves;
 	}
 
@@ -843,7 +839,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return connectionManager;
 	}
 
-	public List<DbPro> getSlaves() {
+	public DbPro[] getSlaves() {
 		return slaves;
 	}
 

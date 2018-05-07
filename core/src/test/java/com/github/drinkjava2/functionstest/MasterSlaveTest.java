@@ -95,12 +95,10 @@ public class MasterSlaveTest {
 
 	@Before
 	public void init() {
-		// SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
 		for (int i = 0; i < SLAVE_DATABASE_QTY; i++) {
 			slaveDs[i] = createNewH2DataSource("SlaveDB" + i);
 			slaves[i] = new SqlBoxContext(slaveDs[i]);
-			config.addSlave(slaves[i]);
 		}
 		masterDs = createNewH2DataSource("MasterDb");
 		ctx = new SqlBoxContext(masterDs, config);

@@ -46,4 +46,5 @@ public interface IdGenerator {// NOSONAR
 	 * AutoIdGenerator to create start numbers
 	 */
 	public Boolean dependOnAutoIdGenerator();
+
 }

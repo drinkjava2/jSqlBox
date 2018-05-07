@@ -19,7 +19,6 @@ import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.JDBPRO;
-import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
  * JSQLBOX store some public static methods, usually used for static import to
@@ -29,53 +28,27 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
  * @since 1.0.8
  */
 public abstract class JSQLBOX extends JDBPRO {// NOSONAR
-	protected static final ShardingTool[] shardingTools = SqlBoxContext.getGlobalNextShardingTools();
-
-	/**
-	 * By given entityOrClass(which has @sharding annotation or setting) and
-	 * shardKey value, return sharded tableName
-	 */
-	public static String shardEqual(Object entityOrClass, Object oneKey) {
-		return JSQLBOX.doSharding("shardEqual", entityOrClass, oneKey, null);
-	}
-
-	/**
-	 * By given entityOrClass(which has @sharding annotation or setting) and
-	 * shardKey collection, return sharded tableName
-	 */
-	public static String shardIn(Object entityOrClass, Collection<?> keyCollection) {
-		return JSQLBOX.doSharding("shardIn", entityOrClass, keyCollection, null);
-	}
-
-	/**
-	 * By given entityOrClass(which has @sharding annotation or setting) and start
-	 * and end range, return sharded tableName
-	 */
-	public static String shardBetween(Object entityOrClass, Object startKey, Object endKey) {
-		return JSQLBOX.doSharding("shardBetween", entityOrClass, startKey, endKey);
-	}
-
-	protected static String doSharding(String method, Object entityOrClass, Object firstValue, Object secondValue) {
-		for (ShardingTool sh : shardingTools) {
-			String[] result = sh.doSharding(method, entityOrClass, firstValue, secondValue);
-			if (result != null) {
-				if (result.length == 0)
-					throw new SqlBoxException("Can not find sharding table of '" + method + "' method for target '"// NOSONAR
-							+ entityOrClass + "'");
-				if (result.length > 1)
-					throw new SqlBoxException("Found more than 1 sharding table of '" + method + "' method for target '"
-							+ entityOrClass
-							+ "', in jSqlBox current version, to solve this issue need write SQLs for each table and join result manually by yourself.");
-				return result[0];
-			}
-		}
-		throw new SqlBoxException(
-				"No ShardingTool can handle '" + method + "' method for target '" + entityOrClass + "'");
-	}
-
-	/** The Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
+	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
+		if (SqlBoxContext.getGlobalSqlBoxContext() == null)
+			throw new SqlBoxException(
+					"Global SqlBoxContext needed, please use SqlBoxContext.setGlobalSqlBoxContext() method to set a global default SqlBoxContext");
 		return SqlBoxContext.getGlobalSqlBoxContext();
+	}
+
+	/** Shortcut method to gctx().shardEqual method */
+	public static String shardEqual(Object entityOrClass, Object oneKey) {
+		return gctx().shardEqual(entityOrClass, oneKey);
+	}
+
+	/** Shortcut method to gctx().shardIn method */
+	public static String shardIn(Object entityOrClass, Collection<?> keyCollection) {
+		return gctx().shardIn(entityOrClass, keyCollection);
+	}
+
+	/** Shortcut method to gctx().shardBetween method */
+	public static String shardBetween(Object entityOrClass, Object startKey, Object endKey) {
+		return gctx().shardBetween(entityOrClass, startKey, endKey);
 	}
 
 	//@formatter:off

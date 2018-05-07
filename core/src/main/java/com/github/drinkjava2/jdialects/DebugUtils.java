@@ -33,6 +33,9 @@ public abstract class DebugUtils {////NOSONAR
 		sb.append("type=" + c.getColumnType()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
 		sb.append("shardingSetting=" + c.getSharding()).append(", ");
+		sb.append("getIdGenerationType=" + c.getIdGenerationType()).append(", ");
+		sb.append("getIdGeneratorName=" + c.getIdGeneratorName()).append(", ");
+		sb.append("getIdGenerator=" + c.getIdGenerator()).append(", ");
 		sb.append("lengths=");
 		if (c.getLengths() != null)
 			for (Integer length : c.getLengths())

@@ -24,12 +24,12 @@ import org.apache.commons.dbutils.handlers.ArrayHandler;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
+import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -96,8 +96,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, entityBean);
 		checkBeanAndBoxExist(entityBean, box);
 		TableModel tableModel = box.getTableModel();
-		StringBuilder sb = new StringBuilder();
-		sb.append("insert into ").append(tableModel.getTableName()).append(" (");
+		String realTableName = tableModel.getTableName();
+		StringBuilder sb = new StringBuilder(" (");
 
 		List<Object> params = new ArrayList<Object>();
 		String identityFieldName = null;
@@ -107,14 +107,26 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (String fieldName : readMethods.keySet()) {
 			ColumnModel col = findMatchColumnForJavaField(fieldName, box);
 			if (!col.getTransientable() && col.getInsertable()) {
-				if (col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
+				if (col.getIdGenerationType() != null) {
+					if (col.getIdGenerator() == null)
+						throw new SqlBoxException("No IdGenerator found for column '" + col.getColumnName() + "'");
 					IdGenerator idGen = col.getIdGenerator();
-					if (GenerationType.IDENTITY.equals(idGen.getGenerationType())) {
+					if (GenerationType.IDENTITY.equals(idGen.getGenerationType())) {// Identity
 						if (identityFieldName != null)
 							throw new SqlBoxException(
-									"More than 1 identity field found for model '" + tableModel.getTableName() + "'");
+									"More than 1 identity field found for table '" + tableModel.getTableName() + "'");
+						identityType = col.getColumnType();
 						identityFieldName = fieldName;
-					} else {
+					} else if (GenerationType.SNOWFLAKE.equals(idGen.getGenerationType())) {// Snow
+						sb.append(col.getColumnName()).append(", ");
+						SnowflakeCreator snow = ctx.getSnowflakeCreator();
+						if (snow == null)
+							throw new SqlBoxException(
+									"Current SqlBoxContext no SnowflakeCreator found when try to create a Snowflake value");
+						Object id = snow.nextId();
+						params.add(id);
+						ClassCacheUtils.writeValueToBeanField(entityBean, fieldName, id);
+					} else {// Normal Id Generator
 						sb.append(col.getColumnName()).append(", ");
 						Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
 						params.add(id);
@@ -125,8 +137,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					sb.append(col.getColumnName()).append(", ");
 					params.add(value);
 				}
+
+				if (col.getSharding() != null) {
+					Object value = ClassCacheUtils.readValueFromBeanField(entityBean, fieldName);
+					realTableName = ctx.shardEqual(tableModel, value);
+				}
 			}
 		}
+		sb.insert(0, realTableName).insert(0, "insert into ");
 		if (!params.isEmpty())
 			sb.setLength(sb.length() - 2);// delete the last ", " character
 		sb.append(") values(").append(SqlBoxStrUtils.getQuestionsStr(params.size())).append(")");

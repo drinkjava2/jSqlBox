@@ -21,6 +21,7 @@ import java.util.Set;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
@@ -35,8 +36,9 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingRangeTool implements ShardingTool {
 
 	@Override
-	public String[] doSharding(String methodName, Object entityOrClass, Object firstValue, Object secondValue) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(null, entityOrClass);
+	public String[] doSharding(SqlBoxContext ctx, String methodName, Object entityOrClass, Object firstValue,
+			Object secondValue) {// NOSONAR
+		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
 		ColumnModel col = t.getShardingColumn();
 		if (col == null)
 			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");

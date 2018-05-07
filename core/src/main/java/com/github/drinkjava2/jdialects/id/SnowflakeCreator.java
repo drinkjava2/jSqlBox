@@ -10,35 +10,49 @@ import java.util.concurrent.atomic.AtomicLong;
  * 
  * https://github.com/twitter/snowflake
  * 
- * Usage: long id= new SnowflakeGenerator(3, 16).nextId(); <br/>
- * First parameter is datacenterId, 0~31 <br/>
- * Second parameter is workerId, 0~31
+ * Usage example: long id= new SnowflakeCreator(5L,5L, 18, 31).nextId(); <br/>
+ * 
+ * First parameter is datacenterIdBits, 1~9 bits<br/>
+ * Second parameter is workerIdBits, 1~9 bits<br/>
+ * note datacenterIdBits+workerIdBits should = 10 (2^10=1024 machine
+ * allowed)<br/>
+ * 3rd parameter is real datacenterId, 0~31 <br/>
+ * 4thparameter is real workerId, 0~31
  * 
  * @author downgoon
+ * @author Yong Z.
  */
 @SuppressWarnings("all")
-public class SnowflakeTool {
+public class SnowflakeCreator {
 
 	/*
-	 * bits allocations for timeStamp, datacenterId, workerId and sequence
+	 * bits allocations
 	 */
+
+	private long datacenterIdBits = 5L;
+	private long workerIdBits = 5L;
+	private final long datacenterId;
+	private final long workerId;
+
+	/*
+	 * max values of datacenterId and WorkerId
+	 */
+	private long maxDatacenterId = -1L ^ (-1L << datacenterIdBits); // 2^5-1
+	private long maxWorkerId = -1L ^ (-1L << workerIdBits); // 2^5-1
 
 	private final long unusedBits = 1L;
 	/**
 	 * 'time stamp' here is defined as the number of millisecond that have elapsed
-	 * since the {@link #epoch} given by users on {@link SnowflakeGenerator} instance
-	 * initialization
+	 * since the {@link #epoch} given by users on {@link SnowflakeGenerator}
+	 * instance initialization
 	 */
 	private final long timestampBits = 41L;
-	private final long datacenterIdBits = 5L;
-	private final long workerIdBits = 5L;
 	private final long sequenceBits = 12L;
 
 	/*
-	 * max values of timeStamp, workerId, datacenterId and sequence
+	 * max values of timeStamp and sequence
 	 */
-	private final long maxDatacenterId = -1L ^ (-1L << datacenterIdBits); // 2^5-1
-	private final long maxWorkerId = -1L ^ (-1L << workerIdBits); // 2^5-1
+
 	private final long maxSequence = -1L ^ (-1L << sequenceBits); // 2^12-1
 
 	/**
@@ -57,22 +71,6 @@ public class SnowflakeTool {
 	 * modified after initialization.
 	 */
 	private final long epoch = 1451606400000L;
-
-	/**
-	 * data center number the process running on, its value can't be modified after
-	 * initialization.
-	 * <p>
-	 * max: 2^5-1 range: [0,31]
-	 */
-	private final long datacenterId;
-
-	/**
-	 * machine or process number, its value can't be modified after initialization.
-	 * <p>
-	 * max: 2^5-1 range: [0,31]
-	 * 
-	 */
-	private final long workerId;
 
 	/**
 	 * the unique and incrementing sequence number scoped in only one period/unit
@@ -125,7 +123,13 @@ public class SnowflakeTool {
 	 * @param workerId
 	 *            machine or process number, value range: [0,31]
 	 */
-	public SnowflakeTool(long datacenterId, long workerId) {
+	public SnowflakeCreator(long datacenterIdBits, long workerIdBits, long datacenterId, long workerId) {
+		this.datacenterIdBits = datacenterIdBits;
+		this.workerIdBits = workerIdBits;
+
+		maxDatacenterId = -1L ^ (-1L << datacenterIdBits); // 2^5-1
+		maxWorkerId = -1L ^ (-1L << workerIdBits); // 2^5-1
+
 		if (datacenterId > maxDatacenterId || datacenterId < 0) {
 			throw new IllegalArgumentException(
 					String.format("datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
@@ -236,6 +240,11 @@ public class SnowflakeTool {
 		int lb = (int) (64 - offset);
 		int rb = (int) (64 - (offset + length));
 		return (-1L << lb) ^ (-1L << rb);
+	}
+
+	public static void main(String[] args) {
+		long id = new SnowflakeCreator(1, 9, 0, 31).nextId();
+		System.out.println(id);
 	}
 
 }

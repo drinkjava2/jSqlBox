@@ -36,7 +36,7 @@ public class DbProConfig {
 	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
 	private SpecialSqlItemPreparer[] specialSqlItemPreparers = DbPro.getGlobalNextSpecialSqlItemPreparers();
 
-	private List<DbPro> slaves;
+	private DbPro[] slaves;
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -94,18 +94,12 @@ public class DbProConfig {
 		this.iocTool = iocTool;
 	}
 
-	public List<DbPro> getSlaves() {
+	public DbPro[] getSlaves() {
 		return slaves;
 	}
 
-	public void setSlaves(List<DbPro> slaves) {
+	public void setSlaves(DbPro[] slaves) {
 		this.slaves = slaves;
-	}
-
-	public void addSlave(DbPro dbPro) {
-		if (slaves == null)
-			slaves = new ArrayList<DbPro>();
-		slaves.add(dbPro);
 	}
 
 	public SqlOption getMasterSlaveSelect() {
