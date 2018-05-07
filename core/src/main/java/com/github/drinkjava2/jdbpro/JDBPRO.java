@@ -25,6 +25,10 @@ import java.util.ArrayList;
  * @since 1.7.0.3
  */
 public abstract class JDBPRO extends DbPro {
+	public static final SqlOption USE_MASTER = SqlOption.USE_MASTER;
+	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
+	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
+	public static final SqlOption USE_AUTO = SqlOption.USE_AUTO;
 
 	protected void ________INLINE_Methods________() {// NOSONAR
 	}
@@ -107,21 +111,21 @@ public abstract class JDBPRO extends DbPro {
 
 	/** Return a SqlItemType.PARAM type SqlItem instance */
 	public static SqlItem param(Object... parameters) {
-		return new SqlItem(SqlItemType.PARAM, parameters);
+		return new SqlItem(SqlOption.PARAM, parameters);
 	}
 
 	/**
-	 * Cache parameters in ThreadLocal and return an empty String
+	 * Cache parameters and return an empty String
 	 */
 	public static SqlItem sql(Object... parameters) {
-		return new SqlItem(SqlItemType.SQL, parameters);
+		return new SqlItem(SqlOption.SQL, parameters);
 	}
 
 	/**
-	 * Cache parameters in ThreadLocal and return a "?" String
+	 * Cache parameters and return a "?" String
 	 */
 	public static SqlItem question(Object... parameters) {
-		return new SqlItem(SqlItemType.QUESTION_PARAM, parameters);
+		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
 	}
 
 	/**
@@ -134,15 +138,15 @@ public abstract class JDBPRO extends DbPro {
 	 * @return a SqlItem instance will be used by iPrepare method
 	 */
 	public static SqlItem notNull(String sqlPiece, Object param) {
-		return new SqlItem(SqlItemType.NOT_NULL, sqlPiece, param);
+		return new SqlItem(SqlOption.NOT_NULL, sqlPiece, param);
 	}
 
 	/**
 	 * Create "values(?,?,?...,?)" String according how many SQL parameters be
-	 * cached in ThreadLocal
+	 * cached
 	 */
 	public static SqlItem valuesQuestions() {
-		return new SqlItem(SqlItemType.VALUES_QUESTIONS);
+		return new SqlItem(SqlOption.VALUES_QUESTIONS);
 	}
 
 	/**
@@ -152,11 +156,7 @@ public abstract class JDBPRO extends DbPro {
 	 * Usage: put("key1",value1,"key2",value2...);
 	 */
 	public static SqlItem put(Object... parameters) {
-		return new SqlItem(SqlItemType.PUT, parameters);
+		return new SqlItem(SqlOption.PUT, parameters);
 	}
 
-	protected void shardingSqlItemMethods_____________________() {// NOSONAR
-	}
-
- 
 }

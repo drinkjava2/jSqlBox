@@ -24,7 +24,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public abstract class DebugUtils {
+public abstract class DebugUtils {////NOSONAR
 
 	public static String getColumnModelDebugInfo(ColumnModel c) {
 		StringBuilder sb = new StringBuilder();
@@ -32,6 +32,7 @@ public abstract class DebugUtils {
 		sb.append("transient=" + c.getTransientable()).append(", ");
 		sb.append("type=" + c.getColumnType()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
+		sb.append("shardingSetting=" + c.getSharding()).append(", ");
 		sb.append("lengths=");
 		if (c.getLengths() != null)
 			for (Integer length : c.getLengths())

@@ -13,17 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jsqlbox.sharding;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.DbPro;
-import com.github.drinkjava2.jdbpro.ShardingTool;
-import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * An simple implementation of ShardingTool to deal "RANGE" type sharding
@@ -34,57 +33,39 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  */
 
 public class ShardingRangeTool implements ShardingTool {
-	public static final ShardingRangeTool instance = new ShardingRangeTool();
 
 	@Override
-	public String getStrategyName() {
-		return "RANGE";
-	}
-
-	// shardingSetting for ShardingRangeTool should like below:
-	// "RANGE", 20000000
-
-	// SqlItem.getParameters should like one of below:
-	// "EQUAL", entityOrClass, shardKey
-	// "IN", entityOrClass, shardKeys
-	// "BETWEEN", entityOrClass, shardKey1, shardKey2
-
-	@Override
-	public String[] doSharding(DbPro dbPro, SqlItem sqlItem, String[] shardingSetting) {
-		Object[] params = sqlItem.getParameters();
-
-		SqlBoxContext ctx = (SqlBoxContext) dbPro;
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, params[1]);
+	public String[] doSharding(String methodName, Object entityOrClass, Object firstValue, Object secondValue) {// NOSONAR
+		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(null, entityOrClass);
 		ColumnModel col = t.getShardingColumn();
 		if (col == null)
-			throw new SqlBoxException("Not found sharding setting for entity '" + params[1] + "'");
+			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
 
-		Object firstKey = params[2];
-		if (firstKey == null)
+		// return null if is not "RANGE" sharding strategy
+		if (!"RANGE".equalsIgnoreCase(col.getSharding()[0]))
+			return null;// NOSONAR
+
+		if (firstValue == null)
 			throw new SqlBoxException("ShardKey value can not be null");
-		Object secondKey = null;
-		if (params.length >= 4)
-			secondKey = params[3];
-		String tableSize = shardingSetting[1];
 
-		String method = (String) params[0];
-		if ("EQUAL".equalsIgnoreCase(method)) {
-			return new String[] { calculateTableName(t.getTableName(), firstKey, tableSize) };
-		} else if ("IN".equalsIgnoreCase(method)) {
+		String tableSize = col.getSharding()[1];
+		if ("EQUAL".equalsIgnoreCase(methodName)) {
+			return new String[] { calculateTableName(t.getTableName(), firstValue, tableSize) };
+		} else if ("IN".equalsIgnoreCase(methodName)) {
 			Set<String> set = new HashSet<String>();
-			if (firstKey.getClass().isArray()) {
-				for (Object key : (Object[]) firstKey)
+			if (firstValue.getClass().isArray()) {
+				for (Object key : (Object[]) firstValue)
 					set.add(calculateTableName(t.getTableName(), key, tableSize));
-			} else if (firstKey instanceof Collection) {
-				for (Object key : (Collection<?>) firstKey)
+			} else if (firstValue instanceof Collection) {
+				for (Object key : (Collection<?>) firstValue)
 					set.add(calculateTableName(t.getTableName(), key, tableSize));
 			} else
-				set.add(calculateTableName(t.getTableName(), firstKey, tableSize));
+				set.add(calculateTableName(t.getTableName(), firstValue, tableSize));
 			return set.toArray(new String[set.size()]);
-		} else if ("BETWEEN".equalsIgnoreCase(method)) {
-			return calculateTableNames(t.getTableName(), firstKey, secondKey, tableSize);
+		} else if ("BETWEEN".equalsIgnoreCase(methodName)) {
+			return calculateTableNames(t.getTableName(), firstValue, secondValue, tableSize);
 		} else
-			throw new SqlBoxException("ShardingRangeTool does support sharding method '" + method + "' ");
+			throw new SqlBoxException("ShardingRangeTool does support sharding method '" + methodName + "' ");
 	}
 
 	/**
@@ -101,9 +82,9 @@ public class ShardingRangeTool implements ShardingTool {
 	 * Array
 	 */
 	private static String[] calculateTableNames(String tableName, Object firstKey, Object secondKey, String tableSize) {
-		long from = Long.parseLong((String) firstKey);
-		long last = Long.parseLong((String) secondKey);
-		long size = Long.parseLong(tableSize);
+		long from = Long.parseLong(String.valueOf(firstKey));
+		long last = Long.parseLong(String.valueOf(secondKey));
+		long size = Long.parseLong(String.valueOf(tableSize));
 		int firstTable = (int) (from / size);
 		int lastTable = (int) (last / size);
 		if (lastTable < firstTable)

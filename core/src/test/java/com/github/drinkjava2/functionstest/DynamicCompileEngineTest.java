@@ -8,6 +8,12 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
 
+/**
+ * Dynamic Compile Engine Test
+ * 
+ * @author Yong Zhu
+ * @since 1.7.0
+ */
 @SuppressWarnings("all")
 public class DynamicCompileEngineTest {
 	static String javaSrc=

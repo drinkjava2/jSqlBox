@@ -16,6 +16,7 @@
 package com.github.drinkjava2.jdbpro;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,20 +28,15 @@ import java.util.List;
  */
 public class SqlItem {
 
-	public static final SqlItem USE_AUTO = new SqlItem(SqlItemType.USE_AUTO);
-	public static final SqlItem USE_MASTER = new SqlItem(SqlItemType.USE_MASTER);
-	public static final SqlItem USE_SLAVE = new SqlItem(SqlItemType.USE_SLAVE);
-	public static final SqlItem USE_BOTH = new SqlItem(SqlItemType.USE_BOTH);
-
-	private SqlItemType type;
+	private SqlOption type;
 	private Object[] parameters;
 
 	public SqlItem(String sqlPiece) {
-		this.type = SqlItemType.SQL;
+		this.type = SqlOption.SQL;
 		this.parameters = new Object[] { sqlPiece };
 	}
 
-	public SqlItem(SqlItemType type, Object... parameters) {
+	public SqlItem(SqlOption type, Object... parameters) {
 		this.type = type;
 		this.parameters = parameters;
 	}
@@ -49,11 +45,11 @@ public class SqlItem {
 		return parameters;
 	}
 
-	public SqlItemType getType() {
+	public SqlOption getType() {
 		return type;
 	}
 
-	public void setType(SqlItemType type) {
+	public void setType(SqlOption type) {
 		this.type = type;
 	}
 
@@ -63,8 +59,7 @@ public class SqlItem {
 
 	@Override
 	public String toString() {
-		throw new DbProRuntimeException(
-				"SqlItem toString() method overrided, not allowed to change to String directly");
+		return Arrays.deepToString(this.getParameters());
 	}
 
 	/**
@@ -75,7 +70,7 @@ public class SqlItem {
 		if (collection == null || collection.isEmpty())
 			return result;
 		for (Object obj : collection)
-			result.add(new SqlItem(SqlItemType.PARAM, obj));
+			result.add(new SqlItem(SqlOption.PARAM, obj));
 		return result;
 	}
 }

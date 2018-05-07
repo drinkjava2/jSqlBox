@@ -83,7 +83,10 @@ public class ColumnModel {
 	/**
 	 * Optional, store the sharding strategy and parameters, for ORM tool use only
 	 */
-	private String[] shardingSetting = null;
+	private String[] sharding = null;
+
+	/** Optional, is this a snowflake column? for ORM tool use only */
+	private Boolean snowflake = false;
 
 	public ColumnModel(String columnName) {
 		if (StrUtils.isEmpty(columnName))
@@ -122,6 +125,8 @@ public class ColumnModel {
 		col.transientable = transientable;
 		col.idGeneratorName = idGeneratorName;
 		col.idGenerationType = idGenerationType;
+		col.sharding = sharding;
+		col.snowflake = snowflake;
 		return col;
 	}
 
@@ -192,7 +197,7 @@ public class ColumnModel {
 
 	/** Mark primary key, if more than one will build compound Primary key */
 	public ColumnModel sharding(String... shardingSetting) {
-		this.shardingSetting = shardingSetting;
+		this.sharding = shardingSetting;
 		return this;
 	}
 
@@ -545,12 +550,20 @@ public class ColumnModel {
 		this.transientable = transientable;
 	}
 
-	public String[] getShardingSetting() {
-		return shardingSetting;
+	public String[] getSharding() {
+		return sharding;
 	}
 
-	public void setShardingSetting(String[] shardingSetting) {
-		this.shardingSetting = shardingSetting;
+	public void setSharding(String[] sharding) {
+		this.sharding = sharding;
+	}
+
+	public Boolean getSnowflake() {
+		return snowflake;
+	}
+
+	public void setSnowflake(Boolean snowflake) {
+		this.snowflake = snowflake;
 	}
 
 }

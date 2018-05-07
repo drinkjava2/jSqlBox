@@ -20,17 +20,18 @@ import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
-import com.github.drinkjava2.jdbpro.ShardingTool;
-import com.github.drinkjava2.jdbpro.SqlItem;
-import com.github.drinkjava2.jdbpro.SqlItemType;
+import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.id.SnowflakeGenerator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
+import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
+import com.github.drinkjava2.jsqlbox.sharding.ShardingRangeTool;
+import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
  * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
@@ -51,16 +52,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected static SqlBoxContext globalSqlBoxContext = null;
 	protected static Dialect globalNextDialect = null;
 	protected static SqlMapperGuesser globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
-	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { ShardingModTool.instance,
-			ShardingRangeTool.instance };
+	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { new ShardingModTool(),
+			new ShardingRangeTool() };
 
-	/**
-	 * Dialect of current SqlBoxContext, optional
-	 */
-	protected Dialect dialect;
+	/** Dialect of current SqlBoxContext, optional */
+	protected Dialect dialect = globalNextDialect;
 
 	/** In SqlMapper style, A guesser needed to guess and execute SQL methods */
-	protected SqlMapperGuesser sqlMapperGuesser;
+	protected SqlMapperGuesser sqlMapperGuesser = globalNextSqlMapperGuesser;
+	protected ShardingTool[] shardingTools = globalNextShardingTools;
+	protected SnowflakeGenerator snowflakeGenerator=null;
 
 	public SqlBoxContext() {
 		super();
@@ -111,16 +112,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return sqlMapperGuesser;
 	}
 
-	@Override
-	public ShardingTool[] getShardingTools() {
-		return shardingTools;
-	}
-
-	@Override
-	public void setShardingTools$(ShardingTool[] shardingTools) {
-		this.shardingTools = shardingTools;
-	}
-
 	/**
 	 * This method is not thread safe, so put a "$" at method end to reminder, but
 	 * sometimes need use it to change sqlMapperGuesser setting
@@ -129,37 +120,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		this.sqlMapperGuesser = sqlMapperGuesser;
 	}
 
-	@Override
-	protected String getTableNameByShardingSqlItem(SqlItem sqlItem) {
-		if (sqlItem == null || sqlItem.getParameters() == null || sqlItem.getParameters().length < 2)
-			throw new SqlBoxException("Wrong format of sharding SqlItem '" + sqlItem + "'");
-		Object entityOrClass = sqlItem.getParameters()[1];
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(this, entityOrClass);
-		ColumnModel col = t.getShardingColumn();
-		if (col == null)
-			throw new SqlBoxException("No sharding column setting found for table '" + t.getTableName() + "'");
-		String[] setting = col.getShardingSetting();
-		if (setting == null || setting.length < 2)
-			throw new SqlBoxException("Wrong format of sharding setting of column '" + col.getColumnName()
-					+ "' in Table '" + t.getTableName() + "'");
-		if (this.getShardingTools() == null)
-			throw new SqlBoxException("Want do sharding operation but shardingTools not set, please read user manual.");
-		ShardingTool tool = null;
-		for (ShardingTool tl : this.getShardingTools())
-			if (tl.getStrategyName() != null && tl.getStrategyName().equalsIgnoreCase(setting[0])) {
-				tool = tl;
-				break;
-			}
-		if (tool == null)
-			throw new SqlBoxException("Try do sharding operation but can not find shardingTool to treate '" + setting[0]
-					+ "' type sharding SqlItem.");
-		String[] tables = tool.doSharding(this, sqlItem, setting);
-		if (tables == null || tables.length == 0)
-			throw new SqlBoxException("Did not find sharding table");
-		if (tables.length != 1)
-			throw new SqlBoxException(
-					"Found multiple tables but curren jSqlBox version does not support auto-join, you need manually solve this problem in program.");
-		return tables[0];
+	public ShardingTool[] getShardingTools() {
+		return shardingTools;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change shardingTools setting
+	 */
+	public void setShardingToolsS(ShardingTool[] shardingTools) {
+		this.shardingTools = shardingTools;
 	}
 
 	/**
@@ -359,9 +329,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Reset all global SqlBox variants to its old default values */
-	public static void resetGlobalSqlBoxVariants() {
+	public static void resetGlobalNextSqlBoxVariants() {
 		globalNextAllowShowSql = false;
-		globalNextMasterSlaveSelect = SqlItemType.USE_AUTO;
+		globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
 		globalNextConnectionManager = null;
 		globalNextSqlHandlers = null;
 		globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
@@ -369,8 +339,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		globalNextTemplateEngine = BasicSqlTemplate.instance();
 		globalNextDialect = null;
 		globalNextSpecialSqlItemPreparers = null;
-		globalSqlBoxContext = null;
 		globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
+		globalNextShardingTools = new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() };
 	}
 
 	public static SqlBoxContext getGlobalSqlBoxContext() {

@@ -53,7 +53,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
 	protected static Boolean globalNextAllowShowSql = false;
-	protected static SqlItemType globalNextMasterSlaveSelect = SqlItemType.USE_AUTO;
+	protected static SqlOption globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
 	protected static ConnectionManager globalNextConnectionManager = null;
 	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalNextBatchSize = 300;
@@ -61,18 +61,16 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected static IocTool globalNextIocTool = null;
 	protected static SqlHandler[] globalNextSqlHandlers = null;
 	protected static SpecialSqlItemPreparer[] globalNextSpecialSqlItemPreparers = null;
-	protected static ShardingTool[] golbalNextShardingTools = null;
 
 	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = globalNextConnectionManager;
 	protected Boolean allowShowSQL = globalNextAllowShowSql;
-	protected SqlItemType masterSlaveSelect = globalNextMasterSlaveSelect;
+	protected SqlOption masterSlaveSelect = globalNextMasterSlaveSelect;
 	protected DbProLogger logger = globalNextLogger;
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
 	protected SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers;
 	protected List<DbPro> slaves;
-	protected ShardingTool[] shardingTools = golbalNextShardingTools;
 
 	/**
 	 * An IOC tool is needed if want use SqlMapper style and Annotation has
@@ -378,15 +376,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 		case EXECUTE:
 		case UPDATE:
 		case INSERT: {
-			if (SqlItemType.USE_MASTER.equals(ps.getMasterSlaveSelect())
-					|| SqlItemType.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+			if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveSelect())
+					|| SqlOption.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
 				return runWriteOperations(this, ps);
-			} else if (SqlItemType.USE_BOTH.equals(ps.getMasterSlaveSelect())) {
+			} else if (SqlOption.USE_BOTH.equals(ps.getMasterSlaveSelect())) {
 				if (this.getSlaves() != null)
 					for (DbPro dbPro : this.getSlaves())
 						runWriteOperations(dbPro, ps);
 				return runWriteOperations(this, ps);
-			} else if (SqlItemType.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+			} else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
 				Object result = null;
 				if (this.getSlaves() == null || this.getSlaves().isEmpty())
 					throw new DbProRuntimeException("Try to write slaves but slave list not found");
@@ -397,15 +395,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 				throw new DbProRuntimeException("Should never run to here");
 		}
 		case QUERY: {
-			if (SqlItemType.USE_MASTER.equals(ps.getMasterSlaveSelect())
-					|| SqlItemType.USE_BOTH.equals(ps.getMasterSlaveSelect()))
+			if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveSelect())
+					|| SqlOption.USE_BOTH.equals(ps.getMasterSlaveSelect()))
 				return this.runQuery(ps);
-			else if (SqlItemType.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+			else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
 				DbPro db = chooseOneSlave();
 				if (db == null)
 					throw new DbProRuntimeException("Try to query on slave but slave list not found");
 				return db.runQuery(ps);
-			} else if (SqlItemType.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+			} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
 				DbPro db = autoChooseMasterOrSlaveQuery(ps);
 				return db.runQuery(ps);
 			} else
@@ -416,15 +414,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	private Object runReadOperation(PreparedSQL ps) {
-		if (SqlItemType.USE_MASTER.equals(ps.getMasterSlaveSelect())
-				|| SqlItemType.USE_BOTH.equals(ps.getMasterSlaveSelect()))
+		if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveSelect())
+				|| SqlOption.USE_BOTH.equals(ps.getMasterSlaveSelect()))
 			return this.runQuery(ps);
-		else if (SqlItemType.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+		else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
 			DbPro db = chooseOneSlave();
 			if (db == null)
 				throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
 			return db.runQuery(ps);
-		} else if (SqlItemType.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+		} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
 			DbPro db = autoChooseMasterOrSlaveQuery(ps);
 			return db.runQuery(ps);
 		} else
@@ -809,24 +807,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.iocTool = iocTool;
 	}
 
-	public void setMasterSlaveSelect$(SqlItemType masterSlaveSelect) {
+	public void setMasterSlaveSelect$(SqlOption masterSlaveSelect) {
 		this.masterSlaveSelect = masterSlaveSelect;
 	}
 
-	public SqlItemType getMasterSlaveSelect() {
+	public SqlOption getMasterSlaveSelect() {
 		return masterSlaveSelect;
-	}
-
-	public ShardingTool[] getShardingTools() {
-		return shardingTools;
-	}
-
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change shardingTools setting
-	 */
-	public void setShardingTools$(ShardingTool[] shardingTools) {
-		this.shardingTools = shardingTools;
 	}
 
 	public Boolean getAllowShowSQL() {
@@ -908,11 +894,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 		DbPro.globalNextAllowShowSql = allowShowSql;
 	}
 
-	public static SqlItemType getGlobalNextMasterSlaveSelect() {
+	public static SqlOption getGlobalNextMasterSlaveSelect() {
 		return globalNextMasterSlaveSelect;
 	}
 
-	public static void setGlobalNextMasterSlaveSelect(SqlItemType globalNextMasterSlaveSelect) {
+	public static void setGlobalNextMasterSlaveSelect(SqlOption globalNextMasterSlaveSelect) {
 		ImprovedQueryRunner.globalNextMasterSlaveSelect = globalNextMasterSlaveSelect;
 	}
 
@@ -948,11 +934,4 @@ public class ImprovedQueryRunner extends QueryRunner {
 		globalNextIocTool = nextIocTool;
 	}
 
-	public static ShardingTool[] getGolbalNextShardingTools() {
-		return golbalNextShardingTools;
-	}
-
-	public static void setGolbalNextShardingTools(ShardingTool[] golbalNextShardingTools) {
-		ImprovedQueryRunner.golbalNextShardingTools = golbalNextShardingTools;
-	}
 }

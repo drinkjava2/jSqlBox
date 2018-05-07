@@ -31,11 +31,10 @@ public class DbProConfig {
 	private Boolean allowSqlSql = DbPro.getGlobalNextAllowShowSql();
 	private ConnectionManager connectionManager = DbPro.getGlobalNextConnectionManager();
 	private IocTool iocTool = DbPro.getGlobalNextIocTool();
-	private SqlItemType masterSlaveSelect = DbPro.getGlobalNextMasterSlaveSelect();
+	private SqlOption masterSlaveSelect = DbPro.getGlobalNextMasterSlaveSelect();
 	private Integer batchSize = DbPro.getGlobalNextBatchSize();
 	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
 	private SpecialSqlItemPreparer[] specialSqlItemPreparers = DbPro.getGlobalNextSpecialSqlItemPreparers();
-	protected ShardingTool[] shardingTools = DbPro.getGolbalNextShardingTools();
 
 	private List<DbPro> slaves;
 
@@ -109,11 +108,11 @@ public class DbProConfig {
 		slaves.add(dbPro);
 	}
 
-	public SqlItemType getMasterSlaveSelect() {
+	public SqlOption getMasterSlaveSelect() {
 		return masterSlaveSelect;
 	}
 
-	public void setMasterSlaveSelect(SqlItemType masterSlaveSelect) {
+	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
 		this.masterSlaveSelect = masterSlaveSelect;
 	}
 
@@ -123,14 +122,6 @@ public class DbProConfig {
 
 	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
 		this.specialSqlItemPreparers = specialSqlItemPreparers;
-	}
-
-	public ShardingTool[] getShardingTools() {
-		return shardingTools;
-	}
-
-	public void setShardingTools(ShardingTool[] shardingTools) {
-		this.shardingTools = shardingTools;
 	}
 
 }

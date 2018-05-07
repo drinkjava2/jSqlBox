@@ -39,7 +39,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 	 * Store boxes binded to entities in a threadLocal WeakHashMap, after entity no
 	 * reference, SqlBox will be also be garage collected.
 	 */
-	public static ThreadLocal<WeakHashMap<Object, SqlBox>> boxCache = new ThreadLocal<WeakHashMap<Object, SqlBox>>() {
+	public static final ThreadLocal<WeakHashMap<Object, SqlBox>> boxCache = new ThreadLocal<WeakHashMap<Object, SqlBox>>() {
 		@Override
 		protected WeakHashMap<Object, SqlBox> initialValue() {
 			return new WeakHashMap<Object, SqlBox>();
@@ -137,7 +137,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 	/**
 	 * Create a SqlBox by given entity or entityClass
 	 */
-	public static SqlBox createSqlBox(SqlBoxContext ctx, Class<?> entityOrBoxClass) {
+	public static SqlBox createSqlBox(SqlBoxContext ctx, Class<?> entityOrBoxClass) {//NOSONAR
 		Class<?> boxClass = null;
 		if (entityOrBoxClass == null)
 			throw new SqlBoxException("Bean Or SqlBox class can not be null");

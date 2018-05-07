@@ -40,7 +40,7 @@ public class PreparedSQL {
 	/** SQL Operation Type */
 	private SqlType type;
 
-	private SqlItemType masterSlaveSelect;
+	private SqlOption masterSlaveSelect;
 
 	/** Optional,Connection instance */
 	private Connection connection;
@@ -293,11 +293,11 @@ public class PreparedSQL {
 		this.params = params;
 	}
 
-	public SqlItemType getMasterSlaveSelect() {
+	public SqlOption getMasterSlaveSelect() {
 		return masterSlaveSelect;
 	}
 
-	public void setMasterSlaveSelect(SqlItemType masterSlaveSelect) {
+	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
 		this.masterSlaveSelect = masterSlaveSelect;
 	}
 

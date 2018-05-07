@@ -31,7 +31,7 @@ public class BatchTest {
 	SqlBoxContext ctx = null;
 
 	{
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+		SqlBoxContext.resetGlobalNextSqlBoxVariants();
 		// SqlBoxContext.setGlobalAllowShowSql(true);
 
 		SqlBoxContext.setGlobalNextBatchSize(BUFFER_SIZE);

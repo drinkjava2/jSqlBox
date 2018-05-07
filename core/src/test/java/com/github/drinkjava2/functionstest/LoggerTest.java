@@ -23,12 +23,12 @@ import com.zaxxer.hikari.HikariDataSource;
 public class LoggerTest {
 	@Before
 	public void init() {
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+		SqlBoxContext.resetGlobalNextSqlBoxVariants();
 	}
 
 	@After
 	public void cleanUp() {
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+		SqlBoxContext.resetGlobalNextSqlBoxVariants();
 	}
 
 	private String name;

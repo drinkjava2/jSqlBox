@@ -59,6 +59,9 @@ public enum GenerationType {
 	
 	/** A TimeStamp */
 	TIMESTAMP,
+	
+	/** A Snowflake ID */
+	SNOWFLAKE,
 
 	/** Unknow or Customized IdGenerators */
 	OTHER

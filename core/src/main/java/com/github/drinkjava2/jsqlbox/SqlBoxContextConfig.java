@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import com.github.drinkjava2.jdbpro.DbProConfig;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
  * SqlBoxContextConfig class is used to store constructor parameters for build
@@ -24,12 +25,10 @@ import com.github.drinkjava2.jdialects.Dialect;
 public class SqlBoxContextConfig extends DbProConfig {
 	private Dialect dialect = SqlBoxContext.getGlobalNextDialect();
 	private SqlMapperGuesser sqlMapperGuesser = SqlBoxContext.getGlobalNextSqlMapperGuesser();
+	private ShardingTool[] shardingTools = SqlBoxContext.getGlobalNextShardingTools();
 
 	public SqlBoxContextConfig() {
 		super();
-		if (this.getShardingTools() == null) {
-			this.setShardingTools(SqlBoxContext.getGlobalNextShardingTools());
-		}
 	}
 
 	public Dialect getDialect() {
@@ -47,6 +46,14 @@ public class SqlBoxContextConfig extends DbProConfig {
 
 	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
 		this.sqlMapperGuesser = sqlMapperGuesser;
+	}
+
+	public ShardingTool[] getShardingTools() {
+		return shardingTools;
+	}
+
+	public void setShardingTools(ShardingTool[] shardingTools) {
+		this.shardingTools = shardingTools;
 	}
 
 }

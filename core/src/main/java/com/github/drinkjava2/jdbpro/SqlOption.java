@@ -21,26 +21,27 @@ package com.github.drinkjava2.jdbpro;
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public enum SqlItemType {
-	SQL, // Append a SQL String piece
+public enum SqlOption {
+	SQL, // Build a SQL String piece, need String type followed
 
-	PARAM, // Append a parameter or parameter array
+	PARAM, // Build SQL parameter or parameters, need Object types followed
 
 	PUT, // Append [key1,value1, key2,value2...] parameters array (for SqlTemplateEngine)
 
-	QUESTION_PARAM, // Append a "?" at end of SQL, append a parameter or parameter array
+	QUESTION_PARAM, // Append a "?" at end of SQL and append a parameter or parameter array
 
-	NOT_NULL, // Usage: NOT_NUL("user_name=?", name), only effect when name is not null
+	NOT_NULL, // Usage: NOT_NUL("user_name=?", name), when name is null, nothing will be
+				// appended into SQL and parameters
 
 	VALUES_QUESTIONS, // Append a " values(?,?,?....?)" String at end of SQL
 
-	USE_AUTO, // User Master or Slave database determined by jDbPro automatically
+	USE_AUTO, // Tell system to choose master or slave database automatically (write:master,
+				// read:if in Transaction use master otherwise use on slave)
 
-	USE_MASTER, // Force use master database DbPro
+	USE_MASTER, // Tell system force use master database (write:master, read:master)
 
-	USE_SLAVE, // Force use slave database DbPro
+	USE_SLAVE, // Tell system force use slave database (write:all slaves, read:one slave)
 
-	USE_BOTH, // Force use slave database DbPro
-
-	SHARD, // Build a SHARD type SqlItem
+	USE_BOTH, // Tell system force use master and slave database (write: master + all slaves,
+				// read: master)
 }

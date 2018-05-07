@@ -153,7 +153,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 
 	}
 
-	protected PreparedSQL realDoPrepare(PreparedSQL lastPreSql, StringBuilder lastSqlBuilder, boolean iXxxStyle,
+	protected PreparedSQL realDoPrepare(PreparedSQL lastPreSql, StringBuilder lastSqlBuilder, boolean iXxxStyle, // NOSONAR
 			Object... items) {
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
@@ -192,27 +192,27 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				predSQL.setTemplateEngine((SqlTemplateEngine) item);
 			} else if (item instanceof Map<?, ?>) {
 				predSQL.addTemplateMap((Map<String, Object>) item);
+			} else if (item instanceof SqlOption) {
+				if (SqlOption.USE_MASTER.equals(item)) {
+					predSQL.setMasterSlaveSelect(SqlOption.USE_MASTER);
+				} else if (SqlOption.USE_SLAVE.equals(item)) {
+					predSQL.setMasterSlaveSelect(SqlOption.USE_SLAVE);
+				} else if (SqlOption.USE_AUTO.equals(item)) {
+					predSQL.setMasterSlaveSelect(SqlOption.USE_AUTO);
+				} else if (SqlOption.USE_BOTH.equals(item)) {
+					predSQL.setMasterSlaveSelect(SqlOption.USE_BOTH);
+				}
 			} else if (item instanceof SqlItem) {
 				SqlItem sqItem = (SqlItem) item;
-				if (SqlItemType.PARAM.equals(sqItem.getType())) {
+				if (SqlOption.PARAM.equals(sqItem.getType())) {
 					for (Object pm : sqItem.getParameters())
 						predSQL.addParam(pm);
-				} else if (SqlItemType.PUT.equals(sqItem.getType())) {
+				} else if (SqlOption.PUT.equals(sqItem.getType())) {
 					predSQL.addTemplateParam(sqItem);
-				} else if (SqlItemType.SQL.equals(sqItem.getType())) {
+				} else if (SqlOption.SQL.equals(sqItem.getType())) {
 					for (Object pm : sqItem.getParameters())
 						sql.append(pm);
-				} else if (SqlItemType.USE_MASTER.equals(sqItem.getType())) {
-					predSQL.setMasterSlaveSelect(SqlItemType.USE_MASTER);
-				} else if (SqlItemType.USE_SLAVE.equals(sqItem.getType())) {
-					predSQL.setMasterSlaveSelect(SqlItemType.USE_SLAVE);
-				} else if (SqlItemType.USE_AUTO.equals(sqItem.getType())) {
-					predSQL.setMasterSlaveSelect(SqlItemType.USE_AUTO);
-				} else if (SqlItemType.USE_BOTH.equals(sqItem.getType())) {
-					predSQL.setMasterSlaveSelect(SqlItemType.USE_BOTH);
-				} else if (SqlItemType.SHARD.equals(sqItem.getType())) {
-					sql.append(getTableNameByShardingSqlItem(sqItem));
-				} else if (SqlItemType.QUESTION_PARAM.equals(sqItem.getType())) {
+				} else if (SqlOption.QUESTION_PARAM.equals(sqItem.getType())) {
 					int i = 0;
 					for (Object pm : sqItem.getParameters()) {
 						predSQL.addParam(pm);
@@ -221,12 +221,12 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 						sql.append("?");
 						i++;
 					}
-				} else if (SqlItemType.NOT_NULL.equals(sqItem.getType())) {
+				} else if (SqlOption.NOT_NULL.equals(sqItem.getType())) {
 					if (sqItem.getParameters()[1] != null) {
 						sql.append(sqItem.getParameters()[0]);
 						predSQL.addParam(sqItem.getParameters()[1]);
 					}
-				} else if (SqlItemType.VALUES_QUESTIONS.equals(sqItem.getType())) {
+				} else if (SqlOption.VALUES_QUESTIONS.equals(sqItem.getType())) {
 					sql.append(" values(");
 					for (int i = 0; i < predSQL.getParamSize(); i++) {
 						if (i > 0)
@@ -263,11 +263,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		}
 		predSQL.setSql(sql.toString());
 		return predSQL;
-	}
-
-	protected String getTableNameByShardingSqlItem(SqlItem sqlItem) {
-		throw new DbProRuntimeException(
-				"getTableNameByShardingSqlItem only implemented by subClass of jDbPro like jSqlBox");
 	}
 
 	// ============================================================================

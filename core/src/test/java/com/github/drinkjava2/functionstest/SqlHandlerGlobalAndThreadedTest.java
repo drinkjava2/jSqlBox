@@ -37,7 +37,7 @@ import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
  * 
  * @author Yong Zhu
  */
-public class GlobalAndThreadedSqlHandlerTest extends TestBase {
+public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 
 	@Before
 	public void init() {
@@ -90,7 +90,7 @@ public class GlobalAndThreadedSqlHandlerTest extends TestBase {
 			List<DemoUser> result2 = newCtx.pQuery("select u.** from DemoUser u where u.age>?", 10);
 			Assert.assertEquals(5l, result2.size());
 		} finally {
-			SqlBoxContext.resetGlobalSqlBoxVariants();
+			SqlBoxContext.resetGlobalNextSqlBoxVariants();
 		}
 	}
 

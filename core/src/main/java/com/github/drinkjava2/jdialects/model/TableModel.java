@@ -257,7 +257,7 @@ public class TableModel {
 	 */
 	public ColumnModel getShardingColumn() {
 		for (ColumnModel columnModel : columns)
-			if (columnModel.getShardingSetting() != null)
+			if (columnModel.getSharding() != null)
 				return columnModel;// return first found only
 		return null;
 	}

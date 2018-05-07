@@ -10,7 +10,6 @@ import com.zaxxer.hikari.HikariDataSource;
  * 
  * @author Yong Zhu
  *
- * @version 1.0.0
  * @since 1.0.0
  */
 public class DataSourceConfig {

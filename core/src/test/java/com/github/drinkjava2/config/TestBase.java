@@ -37,7 +37,7 @@ public class TestBase {
 
 	@Before
 	public void init() {
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+		SqlBoxContext.resetGlobalNextSqlBoxVariants();
 		dataSource = BeanBox.getBean(DataSourceBox.class);
 		// dataSource = new HikariDataSource();
 		// dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
@@ -62,7 +62,7 @@ public class TestBase {
 			dropTables(tablesForTest);
 		tablesForTest = null;
 		BeanBox.defaultContext.close(); // IOC tool will close dataSource
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+		SqlBoxContext.resetGlobalNextSqlBoxVariants();
 	}
 
 	public void executeDDLs(String[] ddls) {

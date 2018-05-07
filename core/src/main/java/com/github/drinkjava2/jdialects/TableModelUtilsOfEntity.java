@@ -312,9 +312,10 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.pkey();
 
 				// Is a sharding column?
-				if (!getFirstEntityAnno(field, "Sharding").isEmpty())
-					col.sharding();
-
+				Map<String, Object> shardingMap = getFirstEntityAnno(field, "Sharding"); 
+				if (!shardingMap.isEmpty())  
+					col.sharding((String[]) shardingMap.get("value"));  
+				
 				col.setEntityField(entityfieldName);
 				col.setTableModel(model);
 				// col will also set TableModel field point to its owner
