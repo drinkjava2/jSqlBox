@@ -23,7 +23,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 public class TinyTxTester {
 	SqlBoxContext ctx;
 	{
-		SqlBoxContext.resetGlobalNextSqlBoxVariants();
+		SqlBoxContext.resetGlobalVariants();
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
 		config.setConnectionManager(TinyTxConnectionManager.instance());
 		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class), config);

@@ -90,7 +90,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 			List<DemoUser> result2 = newCtx.pQuery("select u.** from DemoUser u where u.age>?", 10);
 			Assert.assertEquals(5l, result2.size());
 		} finally {
-			SqlBoxContext.resetGlobalNextSqlBoxVariants();
+			SqlBoxContext.resetGlobalVariants();
 		}
 	}
 

@@ -22,6 +22,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * Base class of unit test
@@ -37,19 +38,12 @@ public class TestBase {
 
 	@Before
 	public void init() {
-		SqlBoxContext.resetGlobalNextSqlBoxVariants();
+		SqlBoxContext.resetGlobalVariants();
 		dataSource = BeanBox.getBean(DataSourceBox.class);
-		// dataSource = new HikariDataSource();
-		// dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-		// dataSource.setDriverClassName("org.h2.Driver");
-		// dataSource.setUsername("sa");
-		// dataSource.setPassword("");
-		// dataSource.setMaximumPoolSize(8);
-		// dataSource.setConnectionTimeout(2000);
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
 
-		// SqlBoxContext.setGlobalAllowShowSql(true);
+		// SqlBoxContext.setGlobalNextAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 		if (tablesForTest != null)
@@ -62,7 +56,7 @@ public class TestBase {
 			dropTables(tablesForTest);
 		tablesForTest = null;
 		BeanBox.defaultContext.close(); // IOC tool will close dataSource
-		SqlBoxContext.resetGlobalNextSqlBoxVariants();
+		SqlBoxContext.resetGlobalVariants();
 	}
 
 	public void executeDDLs(String[] ddls) {
@@ -126,6 +120,17 @@ public class TestBase {
 
 	public static void printTimeUsed(long startTimeMillis, String msg) {
 		System.out.println(String.format("%50s: %7s s", msg, (System.currentTimeMillis() - startTimeMillis) / 1000.0));
+	}
+
+	public static HikariDataSource createH2_HikariDataSource(String h2DbName) {
+		HikariDataSource ds = new HikariDataSource();
+		ds.setJdbcUrl("jdbc:h2:mem:" + h2DbName + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		ds.setDriverClassName("org.h2.Driver");
+		ds.setUsername("sa");
+		ds.setPassword("");
+		ds.setMaximumPoolSize(8);
+		ds.setConnectionTimeout(2000);
+		return ds;
 	}
 
 }

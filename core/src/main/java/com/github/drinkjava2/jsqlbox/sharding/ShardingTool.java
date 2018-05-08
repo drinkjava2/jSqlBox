@@ -15,6 +15,7 @@
  */
 package com.github.drinkjava2.jsqlbox.sharding;
 
+import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
@@ -30,30 +31,13 @@ public interface ShardingTool {// NOSONAR
 	 * 
 	 * @param ctx
 	 *            Current SqlBoxContext instance
-	 * @param methodName
-	 *            A sharding method name, like shardEqual, shardIn, shardBetween...
-	 * @param entityOrClass
-	 *            A entity or Entity class or TableModel which has a @Sharding
-	 *            annotation or setting
-	 * @param firstValue
-	 *            The first value of sharding key, may be a object or collection,
-	 *            depends on different method
-	 * @param secondValue
-	 *            The second value of sharding keys, usually is a start-end pair
-	 *            object to mark a range
-	 * @return null if this @sharding annotation strategy is not fit to current
-	 *         implementation, otherwise return a String array of all founded table
-	 *         names, if not found return a empty String[]
+	 * @param sb
+	 *            StringBuilder instance used to append real sharding table name
+	 * @param item
+	 *            The SqlItem which stored sharding query parameters
+	 * @return A String[] or null if the sharding strategy is not fit for current
+	 *         implementation
 	 */
-	/**
-	 * @param ctx
-	 * @param methodName
-	 * @param entityOrClass
-	 * @param firstValue
-	 * @param secondValue
-	 * @return
-	 */
-	public String[] doSharding(SqlBoxContext ctx, String methodName, Object entityOrClass, Object firstValue,
-			Object secondValue);
+	public String[] doSharding(SqlBoxContext ctx, StringBuilder sb, SqlItem item);
 
 }

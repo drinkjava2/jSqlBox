@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -35,46 +36,65 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingModTool implements ShardingTool {
 
 	@Override
-	public String[] doSharding(SqlBoxContext ctx, String methodName, Object entityOrClass, Object firstValue,
-			Object secondValue) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
-		ColumnModel col = t.getShardingColumn();
-		if (col == null || col.getSharding() == null || col.getSharding().length == 0)
-			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
-
-		// return null if is not "MOD" sharding strategy
-		if (!"MOD".equalsIgnoreCase(col.getSharding()[0]))
-			return null;// NOSONAR
-		String modNumber = col.getSharding()[1];
-		if (firstValue == null)
-			throw new SqlBoxException("Shardkey value can not be null");
-
-		if ("shardEqual".equalsIgnoreCase(methodName)) {
-			return new String[] { calculateTableName(t.getTableName(), firstValue, modNumber) };
-		} else if ("shardIn".equalsIgnoreCase(methodName)) {
-			Set<String> set = new HashSet<String>();
-			if (firstValue.getClass().isArray()) {
-				for (Object key : (Object[]) firstValue)
-					set.add(calculateTableName(t.getTableName(), key, modNumber));
-			} else if (firstValue instanceof Collection) {
-				for (Object key : (Collection<?>) firstValue)
-					set.add(calculateTableName(t.getTableName(), key, modNumber));
-			} else
-				set.add(calculateTableName(t.getTableName(), firstValue, modNumber));
-			return set.toArray(new String[set.size()]);
-		} else if ("shardBetween".equalsIgnoreCase(methodName)) {
-			throw new SqlBoxException("ShardingModTool does not support shardBetween method");
-		} else
-			throw new SqlBoxException("ShardingModTool does support unknow method '" + methodName + "' ");
+	public String[] doSharding(SqlBoxContext ctx, StringBuilder sb, SqlItem item) {
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		 
+		return null;
 	}
 
-	/**
-	 * Give tableName, keyValue, mod number, calculate a tableName_x format String
-	 */
-	private static String calculateTableName(String tableName, Object keyValue, String modNumber) {
-		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
-		int mod = Integer.parseInt(modNumber);
-		return new StringBuffer(tableName).append("_").append(shardKeyValue % mod).toString();
-	}
+	
+	
+//	
+//	@Override
+//	public String[] doSharding(SqlBoxContext ctx, String methodName, Object entityOrClass, Object firstValue,
+//			Object secondValue) {// NOSONAR
+//		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
+//		ColumnModel col = t.getShardingColumn();
+//		if (col == null || col.getSharding() == null || col.getSharding().length == 0)
+//			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
+//
+//		// return null if is not "MOD" sharding strategy
+//		if (!"MOD".equalsIgnoreCase(col.getSharding()[0]))
+//			return null;// NOSONAR
+//		String modNumber = col.getSharding()[1];
+//		if (firstValue == null)
+//			throw new SqlBoxException("Shardkey value can not be null");
+//
+//		if ("shardEqual".equalsIgnoreCase(methodName)) {
+//			return new String[] { calculateTableName(t.getTableName(), firstValue, modNumber) };
+//		} else if ("shardIn".equalsIgnoreCase(methodName)) {
+//			Set<String> set = new HashSet<String>();
+//			if (firstValue.getClass().isArray()) {
+//				for (Object key : (Object[]) firstValue)
+//					set.add(calculateTableName(t.getTableName(), key, modNumber));
+//			} else if (firstValue instanceof Collection) {
+//				for (Object key : (Collection<?>) firstValue)
+//					set.add(calculateTableName(t.getTableName(), key, modNumber));
+//			} else
+//				set.add(calculateTableName(t.getTableName(), firstValue, modNumber));
+//			return set.toArray(new String[set.size()]);
+//		} else if ("shardBetween".equalsIgnoreCase(methodName)) {
+//			throw new SqlBoxException("ShardingModTool does not support shardBetween method");
+//		} else
+//			throw new SqlBoxException("ShardingModTool does support unknow method '" + methodName + "' ");
+//	}
+//
+//	/**
+//	 * Give tableName, keyValue, mod number, calculate a tableName_x format String
+//	 */
+//	private static String calculateTableName(String tableName, Object keyValue, String modNumber) {
+//		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
+//		int mod = Integer.parseInt(modNumber);
+//		return new StringBuffer(tableName).append("_").append(shardKeyValue % mod).toString();
+//	}
 
+ 
 }

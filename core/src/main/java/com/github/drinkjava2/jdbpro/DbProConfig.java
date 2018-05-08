@@ -11,9 +11,6 @@
  */
 package com.github.drinkjava2.jdbpro;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 

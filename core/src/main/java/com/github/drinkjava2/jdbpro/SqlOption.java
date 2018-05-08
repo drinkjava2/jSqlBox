@@ -44,4 +44,6 @@ public enum SqlOption {
 
 	USE_BOTH, // Tell system force use master and slave database (write: master + all slaves,
 				// read: master)
+
+	SHARD // Tell system this is a "Shard" SqlItem
 }

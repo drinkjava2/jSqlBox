@@ -21,6 +21,8 @@ import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
@@ -47,8 +49,8 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 public class SqlBoxContext extends DbPro {// NOSONAR
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
-	/** globalSqlBoxSuffix use to identify the SqlBox configuration class */
-	protected static String globalSqlBoxSuffix = "SqlBox";// NOSONAR
+	/** SQLBOX_SUFFIX use to identify the SqlBox configuration class */
+	public static final String SQLBOX_SUFFIX = "SqlBox";// NOSONAR
 
 	protected static SqlBoxContext globalSqlBoxContext = null;
 	protected static Dialect globalNextDialect = null;
@@ -218,47 +220,76 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entityClass, pkey, optionalSqlItems);
 	}
 
-	/** Shortcut method to doSharding("shardEqual",entityOrClass, oneKey, null) */
-	public String shardEqual(Object entityOrClass, Object oneKey) {
-		return doSharding("shardEqual", entityOrClass, oneKey, null);
+	public SqlItem shard(Object entityOrClass, Object shardKey) {
+		return new SqlItem(SqlOption.SHARD, entityOrClass, shardKey);
 	}
 
-	/**
-	 * Shortcut method to doSharding("shardIn",entityOrClass, keyCollection,null)
-	 */
-	public String shardIn(Object entityOrClass, Collection<?> keyCollection) {
-		return doSharding("shardIn", entityOrClass, keyCollection, null);
+	public SqlItem shard(Object entityOrClass, Object shardKey1, Object shardKey2) {
+		return new SqlItem(SqlOption.SHARD, entityOrClass, shardKey1, shardKey2);
 	}
 
-	/**
-	 * Shortcut method to doSharding("shardBetween",entityOrClass, startKey,endKey)
-	 */
-	public String shardBetween(Object entityOrClass, Object startKey, Object endKey) {
-		return doSharding("shardBetween", entityOrClass, startKey, endKey);
-	}
-
-	/**
-	 * Use stored ShardingTools to do the sharding, only 1 table String is allowed
-	 */
-	private String doSharding(String method, Object entityOrClass, Object firstValue, Object secondValue) {
-		if (this.getShardingTools() == null || this.getShardingTools().length == 0)
-			throw new SqlBoxException("No ShardingTools set for current SqlBoxContext");
+	@Override
+	protected void dealShard(DbPro dbPro, StringBuilder sql, SqlItem item) {
+		SqlBoxContext ctx = (SqlBoxContext) dbPro;
+		if (ctx.getShardingTools() == null || ctx.getShardingTools().length == 0)
+			throw new SqlBoxException("No shardingTools be set.");
 		for (ShardingTool sh : this.getShardingTools()) {
-			String[] result = sh.doSharding(this, method, entityOrClass, firstValue, secondValue);
+			String[] result = sh.doSharding(ctx, sql, item );
 			if (result != null) {
 				if (result.length == 0)
-					throw new SqlBoxException("Can not find sharding table of '" + method + "' method for target '"// NOSONAR
-							+ entityOrClass + "'");
+					throw new SqlBoxException(
+							"Can not find sharding table for target '" + item.getParameters()[0] + "'");
 				if (result.length > 1)
-					throw new SqlBoxException("Found more than 1 sharding table of '" + method + "' method for target '"
-							+ entityOrClass
-							+ "', in jSqlBox current version, to solve this issue need write SQLs for each table and join result manually by yourself.");
-				return result[0];
+					throw new SqlBoxException("Found more than 1 sharding tables for target '" + item.getParameters()[0]
+							+ "', jSqlBox current version does not support auto-join, to solve this issue you need write SQLs for each table and join result manually.");
+				sql.append(result[0]);
+				return;
 			}
 		}
-		throw new SqlBoxException(
-				"No ShardingTool can handle '" + method + "' method for target '" + entityOrClass + "'");
+		throw new SqlBoxException("No ShardingTool can handle target '" + item.getParameters()[0] + "'");
 	}
+//
+//	/** Shortcut method to doSharding("shardEqual",entityOrClass, oneKey, null) */
+//	public String shardEqual(Object entityOrClass, Object oneKey) {
+//		return doSharding("shardEqual", entityOrClass, oneKey, null);
+//	}
+//
+//	/**
+//	 * Shortcut method to doSharding("shardIn",entityOrClass, keyCollection,null)
+//	 */
+//	public String shardIn(Object entityOrClass, Collection<?> keyCollection) {
+//		return doSharding("shardIn", entityOrClass, keyCollection, null);
+//	}
+//
+//	/**
+//	 * Shortcut method to doSharding("shardBetween",entityOrClass, startKey,endKey)
+//	 */
+//	public String shardBetween(Object entityOrClass, Object startKey, Object endKey) {
+//		return doSharding("shardBetween", entityOrClass, startKey, endKey);
+//	}
+
+//	/**
+//	 * Use stored ShardingTools to do the sharding, only 1 table String is allowed
+//	 */
+//	private String doSharding(String method, Object entityOrClass, Object firstValue, Object secondValue) {
+//		if (this.getShardingTools() == null || this.getShardingTools().length == 0)
+//			throw new SqlBoxException("No ShardingTools set for current SqlBoxContext");
+//		for (ShardingTool sh : this.getShardingTools()) {
+//			String[] result = sh.doSharding(this, method, entityOrClass, firstValue, secondValue);
+//			if (result != null) {
+//				if (result.length == 0)
+//					throw new SqlBoxException("Can not find sharding table of '" + method + "' method for target '"// NOSONAR
+//							+ entityOrClass + "'");
+//				if (result.length > 1)
+//					throw new SqlBoxException("Found more than 1 sharding table of '" + method + "' method for target '"
+//							+ entityOrClass
+//							+ "', in jSqlBox current version, to solve this issue need write SQLs for each table and join result manually by yourself.");
+//				return result[0];
+//			}
+//		}
+//		throw new SqlBoxException(
+//				"No ShardingTool can handle '" + method + "' method for target '" + entityOrClass + "'");
+//	}
 
 	// ========== Dialect shortcut methods ===============
 	// ================================================================
@@ -394,7 +425,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Reset all global SqlBox variants to its old default values */
-	public static void resetGlobalNextSqlBoxVariants() {
+	public static void resetGlobalVariants() {
 		globalNextAllowShowSql = false;
 		globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
 		globalNextConnectionManager = null;
@@ -406,6 +437,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		globalNextSpecialSqlItemPreparers = null;
 		globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
 		globalNextShardingTools = new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() };
+		globalSqlBoxContext = null;
 	}
 
 	public static SqlBoxContext getGlobalSqlBoxContext() {
@@ -419,11 +451,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {
 		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
-	}
-
-	/** Return "SqlBox" String */
-	public static String getGlobalSqlBoxSuffix() {
-		return SqlBoxContext.globalSqlBoxSuffix;
 	}
 
 	public static Dialect getGlobalNextDialect() {

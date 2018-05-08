@@ -22,8 +22,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.TX;
+import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -36,10 +38,11 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /*- 
-Master (写操作: 主库              读操作：主表 )
-Auto   (写操作或开启事务: 主      读操作并且无事务：从库中随机选一个)
-Both   (写操作:主库和全部从库     读操作:只从主表读)
-Slave  (写操作:全部从库           读操作:从库中随机选一个) 
+Options: 
+USE_MASTER (写操作: 主库              读操作：主库)
+USE_AUTO   (写操作: 主                  读操作且无事务：从库随机选一个      读操作且有事务:主 )
+USE_BOTH   (写操作:主库和全部从库     读操作:主库)
+USE_SLAVE  (写操作:全部从库           读操作:从库随机选一个) 
 */
 
 /**
@@ -54,10 +57,7 @@ public class MasterSlaveTest {
 	final static int SLAVE_DATABASE_QTY = 20;
 	final static int SLAVE_TOTAL_ROWS = 5;
 	final static int MASTER_TOTAL_ROWS = 10;
-	SqlBoxContext ctx;
-	SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
-	public static HikariDataSource masterDs;
-	HikariDataSource[] slaveDs = new HikariDataSource[SLAVE_DATABASE_QTY];
+	SqlBoxContext master;
 
 	public static class TheUser extends ActiveRecord {
 		@Id
@@ -82,51 +82,38 @@ public class MasterSlaveTest {
 		}
 	}
 
-	private static HikariDataSource createNewH2DataSource(String name) {
-		HikariDataSource ds = new HikariDataSource();
-		ds.setJdbcUrl("jdbc:h2:mem:" + name + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-		ds.setDriverClassName("org.h2.Driver");
-		ds.setUsername("sa");
-		ds.setPassword("");
-		ds.setMaximumPoolSize(8);
-		ds.setConnectionTimeout(2000);
-		return ds;
-	}
-
 	@Before
 	public void init() {
-		SqlBoxContextConfig config = new SqlBoxContextConfig();
-		for (int i = 0; i < SLAVE_DATABASE_QTY; i++) {
-			slaveDs[i] = createNewH2DataSource("SlaveDB" + i);
-			slaves[i] = new SqlBoxContext(slaveDs[i]);
-		}
-		masterDs = createNewH2DataSource("MasterDb");
-		ctx = new SqlBoxContext(masterDs, config);
-		String[] ddls = ctx.toCreateDDL(TheUser.class);
+		SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
+		for (int i = 0; i < SLAVE_DATABASE_QTY; i++)
+			slaves[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i));
+		master = new SqlBoxContext(TestBase.createH2_HikariDataSource("MasterDb"));
+		master.setSlaves$(slaves);
+		String[] ddls = master.toCreateDDL(TheUser.class);
 		for (String ddl : ddls)
-			ctx.iExecute(ddl, USE_BOTH);
+			master.iExecute(ddl, USE_BOTH);
 
 		for (long j = 0; j < SLAVE_TOTAL_ROWS; j++)// insert 5 row in all slaves
-			new TheUser().useContext(ctx).put("id", j, "name", " Slave_Row" + j).insert(USE_SLAVE);
+			new TheUser().useContext(master).put("id", j, "name", " Slave_Row" + j).insert(USE_SLAVE);
 
 		for (long j = 0; j < MASTER_TOTAL_ROWS; j++)// insert 10 row in all slaves
-			new TheUser().useContext(ctx).put("id", j, "name", " Master_Row" + j).insert(USE_MASTER);
+			new TheUser().useContext(master).put("id", j, "name", " Master_Row" + j).insert(USE_MASTER);
 	}
 
 	@After
 	public void cleanup() {
-		for (String ddl : ctx.toDropDDL(TheUser.class))
-			ctx.iExecute(ddl, USE_BOTH);
-		for (int i = 0; i < SLAVE_DATABASE_QTY; i++)
-			slaveDs[i].close();
-		masterDs.close();
+		for (String ddl : master.toDropDDL(TheUser.class))
+			master.iExecute(ddl, USE_BOTH);
+		for (DbPro pro : master.getSlaves())
+			((HikariDataSource) pro.getDataSource()).close();
+		((HikariDataSource) master.getDataSource()).close();
 	}
 
 	@Test
 	public void testCreateTables() {
-		Assert.assertEquals(10L, ctx.iQueryForLongValue("select count(*) from TheUser", SqlOption.USE_MASTER));
-		Assert.assertEquals(5L, ctx.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
-		TheUser u = new TheUser().useContext(ctx).load(0, " or name=?", JSQLBOX.param("Tom"), USE_MASTER,
+		Assert.assertEquals(10L, master.iQueryForLongValue("select count(*) from TheUser", SqlOption.USE_MASTER));
+		Assert.assertEquals(5L, master.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
+		TheUser u = new TheUser().useContext(master).load(0, " or name=?", JSQLBOX.param("Tom"), USE_MASTER,
 				new PrintSqlHandler());
 		System.out.println(u.getName());
 	}
@@ -135,8 +122,8 @@ public class MasterSlaveTest {
 	public void testMasterSlaveUpdate() {
 		System.out.println("============Test testMasterSlaveUpdate==================");
 		// AutoChoose, not in Transaction, should use Master
-		ctx.pUpdate("update TheUser set name=? where id=3", "NewValue");
-		TheUser u1 = ctx.load(TheUser.class, 3L, USE_MASTER);
+		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
+		TheUser u1 = master.load(TheUser.class, 3L, USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
 	}
 
@@ -144,35 +131,38 @@ public class MasterSlaveTest {
 	public void testMasterSlaveQuery() {
 		System.out.println("============Test testMasterSlaveNoTransaction==================");
 		// AutoChoose, not in Transaction, should use slave
-		Assert.assertEquals(SLAVE_TOTAL_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
-		TheUser u1 = ctx.load(TheUser.class, 1L);
+		Assert.assertEquals(SLAVE_TOTAL_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
+		TheUser u1 = master.load(TheUser.class, 1L);
 		System.out.println(u1.getName());
 
 		// Force use master
-		Assert.assertEquals(MASTER_TOTAL_ROWS, ctx.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
-		TheUser u2 = ctx.load(TheUser.class, 1L, USE_MASTER);
+		Assert.assertEquals(MASTER_TOTAL_ROWS, master.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
+		TheUser u2 = master.load(TheUser.class, 1L, USE_MASTER);
 		System.out.println(u2.getName());
 
 		// Force use slave
-		Assert.assertEquals(SLAVE_TOTAL_ROWS, ctx.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
-		TheUser u3 = ctx.load(TheUser.class, 1L, USE_SLAVE);
+		Assert.assertEquals(SLAVE_TOTAL_ROWS, master.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
+		TheUser u3 = master.load(TheUser.class, 1L, USE_SLAVE);
 		System.out.println(u3.getName());
 	}
+
+	private static HikariDataSource txDataSource;
 
 	@Test
 	public void testMasterSlaveQueryInTransaction() {
 		System.out.println("============Test testMasterSlaveInTransaction==============");
-		SqlBoxContext.resetGlobalNextSqlBoxVariants();
+		SqlBoxContext.resetGlobalVariants();
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
 		config.setConnectionManager(TinyTxConnectionManager.instance());
-		for (int i = 0; i < slaves.length; i++)
-			config.addSlave(slaves[i]);
+		txDataSource = TestBase.createH2_HikariDataSource("MasterDb");
+		// Build another master but run in Transaction mode
+		SqlBoxContext MasterWithTx = new SqlBoxContext(txDataSource, config);
+		MasterWithTx.setSlaves$(master.getSlaves());
+		BeanBox.regAopAroundAnnotation(TX.class, TheTxBox.class);// AOP TX register
 
-		SqlBoxContext anotherCTX = new SqlBoxContext(masterDs, config);
-		BeanBox.regAopAroundAnnotation(TX.class, TheTxBox.class);// AOP register
-
-		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class);
-		tester.queryInTransaction(anotherCTX);
+		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // AOP proxy get
+		tester.queryInTransaction(MasterWithTx);
+		txDataSource.close();// don't forget close DataSource pool
 	}
 
 	@TX
@@ -189,15 +179,13 @@ public class MasterSlaveTest {
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_TOTAL_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
-		ctx.setMasterSlaveSelect$(SqlOption.USE_SLAVE); // $ series method is not thread safe, not recommend to use
-		TheUser u3 = new TheUser().useContext(ctx).load(1L);
+		TheUser u3 = new TheUser().useContext(ctx).load(1L, USE_SLAVE);
 		System.out.println(u3.getName());
-		ctx.setMasterSlaveSelect$(SqlOption.USE_AUTO);// Remember to restore to Auto type
 	}
 
 	public static class TheTxBox extends BeanBox {
 		{
-			this.setConstructor(TinyTx.class, masterDs, Connection.TRANSACTION_READ_COMMITTED);
+			this.setConstructor(TinyTx.class, txDataSource, Connection.TRANSACTION_READ_COMMITTED);
 		}
 	}
 

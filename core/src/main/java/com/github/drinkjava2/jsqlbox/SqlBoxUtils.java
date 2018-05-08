@@ -137,25 +137,24 @@ public abstract class SqlBoxUtils {// NOSONAR
 	/**
 	 * Create a SqlBox by given entity or entityClass
 	 */
-	public static SqlBox createSqlBox(SqlBoxContext ctx, Class<?> entityOrBoxClass) {//NOSONAR
+	public static SqlBox createSqlBox(SqlBoxContext ctx, Class<?> entityOrBoxClass) {// NOSONAR
 		Class<?> boxClass = null;
 		if (entityOrBoxClass == null)
 			throw new SqlBoxException("Bean Or SqlBox class can not be null");
 		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
 			boxClass = entityOrBoxClass;
 		if (boxClass == null)
-			boxClass = ClassCacheUtils
-					.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.getGlobalSqlBoxSuffix());
+			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.SQLBOX_SUFFIX);
 		if (boxClass == null)
-			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + "$"
-					+ entityOrBoxClass.getSimpleName() + SqlBoxContext.getGlobalSqlBoxSuffix());
+			boxClass = ClassCacheUtils.checkClassExist(
+					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + SqlBoxContext.SQLBOX_SUFFIX);
 		if (boxClass != null && !SqlBox.class.isAssignableFrom((Class<?>) boxClass))
 			boxClass = null;
 		SqlBox box = null;
 
 		if (boxClass == null) {
 			box = new SqlBox();
-			box.setTableModel( TableModelUtils.entity2Model(entityOrBoxClass));
+			box.setTableModel(TableModelUtils.entity2Model(entityOrBoxClass));
 			box.setEntityClass(entityOrBoxClass);
 		} else {
 			try {

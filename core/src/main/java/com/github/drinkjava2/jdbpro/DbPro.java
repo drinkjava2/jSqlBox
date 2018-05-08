@@ -234,9 +234,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 						sql.append("?");
 					}
 					sql.append(")");
-				} else
-					// should never run here
-					throw new DbProRuntimeException("What the heck the param type is");
+				} else if (SqlOption.SHARD.equals(sqItem.getType())) {
+					dealShard(this, sql, sqItem);
+				}
+				throw new DbProRuntimeException("What the heck the param type is");
 			} else if (item instanceof Connection)
 				predSQL.setConnection((Connection) item);
 			else if (item instanceof SqlHandler)
@@ -263,6 +264,11 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		}
 		predSQL.setSql(sql.toString());
 		return predSQL;
+	}
+
+	protected void dealShard(DbPro dbPro, StringBuilder sql, SqlItem item) {
+		throw new DbProRuntimeException(
+				"DbPro does not support Shard type SqlItem, subClass should override dealShard method.");
 	}
 
 	// ============================================================================

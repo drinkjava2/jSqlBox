@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -34,66 +35,74 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  */
 
 public class ShardingRangeTool implements ShardingTool {
-
 	@Override
-	public String[] doSharding(SqlBoxContext ctx, String methodName, Object entityOrClass, Object firstValue,
-			Object secondValue) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
-		ColumnModel col = t.getShardingColumn();
-		if (col == null)
-			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
-
-		// return null if is not "RANGE" sharding strategy
-		if (!"RANGE".equalsIgnoreCase(col.getSharding()[0]))
-			return null;// NOSONAR
-
-		if (firstValue == null)
-			throw new SqlBoxException("ShardKey value can not be null");
-
-		String tableSize = col.getSharding()[1];
-		if ("EQUAL".equalsIgnoreCase(methodName)) {
-			return new String[] { calculateTableName(t.getTableName(), firstValue, tableSize) };
-		} else if ("IN".equalsIgnoreCase(methodName)) {
-			Set<String> set = new HashSet<String>();
-			if (firstValue.getClass().isArray()) {
-				for (Object key : (Object[]) firstValue)
-					set.add(calculateTableName(t.getTableName(), key, tableSize));
-			} else if (firstValue instanceof Collection) {
-				for (Object key : (Collection<?>) firstValue)
-					set.add(calculateTableName(t.getTableName(), key, tableSize));
-			} else
-				set.add(calculateTableName(t.getTableName(), firstValue, tableSize));
-			return set.toArray(new String[set.size()]);
-		} else if ("BETWEEN".equalsIgnoreCase(methodName)) {
-			return calculateTableNames(t.getTableName(), firstValue, secondValue, tableSize);
-		} else
-			throw new SqlBoxException("ShardingRangeTool does support sharding method '" + methodName + "' ");
+	public String[] doSharding(SqlBoxContext ctx, StringBuilder sb, SqlItem item) {
+		// TODO Auto-generated method stub
+		return null;
 	}
+	
 
-	/**
-	 * Give tableName, keyValue, tableSize, calculate a tableName_x String
-	 */
-	private static String calculateTableName(String tableName, Object keyValue, String tableSize) {
-		long shardKeyValue = Long.parseLong((String) keyValue);
-		long size = Long.parseLong(tableSize);
-		return new StringBuffer(tableName).append("_").append(shardKeyValue / size).toString();
-	}
+//	@Override
+//	public String[] doSharding(SqlBoxContext ctx, String methodName, Object entityOrClass, Object firstValue,
+//			Object secondValue) {// NOSONAR
+//		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
+//		ColumnModel col = t.getShardingColumn();
+//		if (col == null)
+//			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
+//
+//		// return null if is not "RANGE" sharding strategy
+//		if (!"RANGE".equalsIgnoreCase(col.getSharding()[0]))
+//			return null;// NOSONAR
+//
+//		if (firstValue == null)
+//			throw new SqlBoxException("ShardKey value can not be null");
+//
+//		String tableSize = col.getSharding()[1];
+//		if ("EQUAL".equalsIgnoreCase(methodName)) {
+//			return new String[] { calculateTableName(t.getTableName(), firstValue, tableSize) };
+//		} else if ("IN".equalsIgnoreCase(methodName)) {
+//			Set<String> set = new HashSet<String>();
+//			if (firstValue.getClass().isArray()) {
+//				for (Object key : (Object[]) firstValue)
+//					set.add(calculateTableName(t.getTableName(), key, tableSize));
+//			} else if (firstValue instanceof Collection) {
+//				for (Object key : (Collection<?>) firstValue)
+//					set.add(calculateTableName(t.getTableName(), key, tableSize));
+//			} else
+//				set.add(calculateTableName(t.getTableName(), firstValue, tableSize));
+//			return set.toArray(new String[set.size()]);
+//		} else if ("BETWEEN".equalsIgnoreCase(methodName)) {
+//			return calculateTableNames(t.getTableName(), firstValue, secondValue, tableSize);
+//		} else
+//			throw new SqlBoxException("ShardingRangeTool does support sharding method '" + methodName + "' ");
+//	}
+//
+//	/**
+//	 * Give tableName, keyValue, tableSize, calculate a tableName_x String
+//	 */
+//	private static String calculateTableName(String tableName, Object keyValue, String tableSize) {
+//		long shardKeyValue = Long.parseLong((String) keyValue);
+//		long size = Long.parseLong(tableSize);
+//		return new StringBuffer(tableName).append("_").append(shardKeyValue / size).toString();
+//	}
+//
+//	/**
+//	 * Give tableName, firstKey, secondKey, tableSize, return a tableName_x String
+//	 * Array
+//	 */
+//	private static String[] calculateTableNames(String tableName, Object firstKey, Object secondKey, String tableSize) {
+//		long from = Long.parseLong(String.valueOf(firstKey));
+//		long last = Long.parseLong(String.valueOf(secondKey));
+//		long size = Long.parseLong(String.valueOf(tableSize));
+//		int firstTable = (int) (from / size);
+//		int lastTable = (int) (last / size);
+//		if (lastTable < firstTable)
+//			return new String[] {};
+//		String[] result = new String[lastTable - firstTable + 1];
+//		for (int i = firstTable; i <= lastTable; i++)
+//			result[i - firstTable] = new StringBuffer(tableName).append("_").append(i).toString();
+//		return result;
+//	}
 
-	/**
-	 * Give tableName, firstKey, secondKey, tableSize, return a tableName_x String
-	 * Array
-	 */
-	private static String[] calculateTableNames(String tableName, Object firstKey, Object secondKey, String tableSize) {
-		long from = Long.parseLong(String.valueOf(firstKey));
-		long last = Long.parseLong(String.valueOf(secondKey));
-		long size = Long.parseLong(String.valueOf(tableSize));
-		int firstTable = (int) (from / size);
-		int lastTable = (int) (last / size);
-		if (lastTable < firstTable)
-			return new String[] {};
-		String[] result = new String[lastTable - firstTable + 1];
-		for (int i = firstTable; i <= lastTable; i++)
-			result[i - firstTable] = new StringBuffer(tableName).append("_").append(i).toString();
-		return result;
-	}
+ 
 }

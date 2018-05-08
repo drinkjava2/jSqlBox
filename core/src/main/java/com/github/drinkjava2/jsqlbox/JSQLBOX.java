@@ -34,22 +34,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 			throw new SqlBoxException(
 					"Global SqlBoxContext needed, please use SqlBoxContext.setGlobalSqlBoxContext() method to set a global default SqlBoxContext");
 		return SqlBoxContext.getGlobalSqlBoxContext();
-	}
-
-	/** Shortcut method to gctx().shardEqual method */
-	public static String shardEqual(Object entityOrClass, Object oneKey) {
-		return gctx().shardEqual(entityOrClass, oneKey);
-	}
-
-	/** Shortcut method to gctx().shardIn method */
-	public static String shardIn(Object entityOrClass, Collection<?> keyCollection) {
-		return gctx().shardIn(entityOrClass, keyCollection);
-	}
-
-	/** Shortcut method to gctx().shardBetween method */
-	public static String shardBetween(Object entityOrClass, Object startKey, Object endKey) {
-		return gctx().shardBetween(entityOrClass, startKey, endKey);
-	}
+	} 
 
 	//@formatter:off
 		protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
