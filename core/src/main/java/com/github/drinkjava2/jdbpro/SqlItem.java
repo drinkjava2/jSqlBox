@@ -57,11 +57,6 @@ public class SqlItem {
 		this.parameters = parameters;
 	}
 
-	@Override
-	public String toString() {
-		return Arrays.deepToString(this.getParameters());
-	}
-
 	/**
 	 * Convert parameters in a collection to a SqlItem list
 	 */

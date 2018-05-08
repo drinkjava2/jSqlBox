@@ -113,27 +113,27 @@ public class ShardingModToolTest {
 
 	@Test
 	public void testSqlOnShardingTables() {// Test insert to sharding tables by SQL
-		for (int id = 0; id < 100; id++) {
-			String talbe = master.shardEqual(TheModUser.class, id);
-			master.iUpdate("insert into ", talbe, " (" //
-					, "id ", param(id) //
-					, ",name ", param(talbe + "_id" + id) //
-					, ") ", valuesQuestions(), USE_BOTH);
-		}
-
-		String table = master.shardEqual(TheModUser.class, 10);
-		TheModUser u = new TheModUser();
-		u.alias("u");
-		u.tableModel().setTableName(table);
-		List<TheModUser> users = master.iQuery(new EntityListHandler(TheModUser.class, u), "select u.** from ", table,
-				" u");
-		Assert.assertEquals(13, users.size());
-		System.out.println(users.get(0).getName());
-
-		List<Map<String, Object>> users2 = master.iQuery(new SSMapListHandler(User.class, u), "select u.** from ",
-				master.shardEqual(TheModUser.class, 10), " u", USE_SLAVE);
-		Assert.assertEquals(13, users2.size());
-		System.out.println(users2);
+//		for (int id = 0; id < 100; id++) {
+//			String talbe = master.shardEqual(TheModUser.class, id);
+//			master.iUpdate("insert into ", talbe, " (" //
+//					, "id ", param(id) //
+//					, ",name ", param(talbe + "_id" + id) //
+//					, ") ", valuesQuestions(), USE_BOTH);
+//		}
+//
+//		String table = master.shardEqual(TheModUser.class, 10);
+//		TheModUser u = new TheModUser();
+//		u.alias("u");
+//		u.tableModel().setTableName(table);
+//		List<TheModUser> users = master.iQuery(new EntityListHandler(TheModUser.class, u), "select u.** from ", table,
+//				" u");
+//		Assert.assertEquals(13, users.size());
+//		System.out.println(users.get(0).getName());
+//
+//		List<Map<String, Object>> users2 = master.iQuery(new SSMapListHandler(User.class, u), "select u.** from ",
+//				master.shardEqual(TheModUser.class, 10), " u", USE_SLAVE);
+//		Assert.assertEquals(13, users2.size());
+//		System.out.println(users2);
 	}
 
 	@Test
