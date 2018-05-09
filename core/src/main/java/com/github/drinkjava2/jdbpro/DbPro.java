@@ -63,6 +63,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.sqlHandlers = config.getSqlHandlers();
 		this.iocTool = config.getIocTool();
 		this.slaves = config.getSlaves();
+		this.masters = config.getMasters();
 		this.masterSlaveSelect = config.getMasterSlaveSelect();
 		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
@@ -77,6 +78,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.sqlHandlers = config.getSqlHandlers();
 		this.iocTool = config.getIocTool();
 		this.slaves = config.getSlaves();
+		this.masters = config.getMasters();
 		this.masterSlaveSelect = config.getMasterSlaveSelect();
 		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
@@ -97,19 +99,18 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Prepare a PreparedSQL for pXxxx (Single SQL) style, pXxxx style only
-	 * allow single String (The first appeared) as SQL, unknown objects (include
-	 * null) will automatically looked as SQL parameters, more detail see
-	 * doPrepare method
+	 * Prepare a PreparedSQL for pXxxx (Single SQL) style, pXxxx style only allow
+	 * single String (The first appeared) as SQL, unknown objects (include null)
+	 * will automatically looked as SQL parameters, more detail see doPrepare method
 	 */
 	public PreparedSQL pPrepare(Object... items) {
 		return doPrepare(false, items);
 	}
 
 	/**
-	 * Prepare a PreparedSQL for iXxxx (Single SQL) style, unknown objects
-	 * (include null) will automatically looked as SQL pieces, more detail see
-	 * doPrepare method
+	 * Prepare a PreparedSQL for iXxxx (Single SQL) style, unknown objects (include
+	 * null) will automatically looked as SQL pieces, more detail see doPrepare
+	 * method
 	 */
 	public PreparedSQL iPrepare(Object... items) {
 		return doPrepare(true, items);
@@ -132,24 +133,22 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * style, unknown items be treated as String, SQL parameters must written in
 	 * param() method, for example:
 	 * 
-	 * ctx.iQuery(new SimpleCacheHandler(), connection, "select u.** from users
-	 * u where u.age>?", param(20)," and u.id=?", param("001"),
-	 * MapListHandler.class);
+	 * ctx.iQuery(new SimpleCacheHandler(), connection, "select u.** from users u
+	 * where u.age>?", param(20)," and u.id=?", param("001"), MapListHandler.class);
 	 * 
 	 * 
-	 * pXxxx style only allow first appeared String as SQL, left unknown items
-	 * will be treated as SQL parameters, for example:
+	 * pXxxx style only allow first appeared String as SQL, left unknown items will
+	 * be treated as SQL parameters, for example:
 	 * 
-	 * ctx.pQuery(MapListHandler.class, "select * from users where age>? and
-	 * id=?", 20 , "001" , connection, new PaginHandler(2,5), sql(" and
-	 * name=?"), "Tom" );
+	 * ctx.pQuery(MapListHandler.class, "select * from users where age>? and id=?",
+	 * 20 , "001" , connection, new PaginHandler(2,5), sql(" and name=?"), "Tom" );
 	 * 
 	 * In above examples connection and sqlHandlers are optional items, these
 	 * optional items can appear at anywhere
 	 * 
 	 * @param items
-	 *            SQL String / SQL Parameters / Connection / ResultSetHandler
-	 *            class or instance / SqlHandler class or instance
+	 *            SQL String / SQL Parameters / Connection / ResultSetHandler class
+	 *            or instance / SqlHandler class or instance
 	 * @return a PreparedSQL instance
 	 */
 	private PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
@@ -238,7 +237,11 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 						sql.append("?");
 					}
 					sql.append(")");
-				} else if (SqlOption.SHARD.equals(sqItem.getType())) {
+				} else if (SqlOption.SWITCHTO.equals(sqItem.getType())) {
+					predSQL.setDbPro((DbPro) sqItem.getParameters()[0]);
+				} else if (SqlOption.SHARD_TABLE.equals(sqItem.getType())) {
+					dealShard(this, sql, sqItem);
+				} else if (SqlOption.SHARD_DATABASE.equals(sqItem.getType())) {
 					dealShard(this, sql, sqItem);
 				} else
 					throw new DbProRuntimeException("What the heck the param type is? " + sqItem.getType() + " "
@@ -273,7 +276,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 
 	protected void dealShard(DbPro dbPro, StringBuilder sql, SqlItem item) {
 		throw new DbProRuntimeException(
-				"DbPro does not support Shard type SqlItem, subClass should override dealShard method.");
+				"DbPro project does not support Shard type SqlItem, please use its subClass like SqlBoxContext in jSqlBox.");
 	}
 
 	// ============================================================================
@@ -297,9 +300,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute an In-line style query for an Object, only return the first row
-	 * and first column's value if more than one column or more than 1 rows
-	 * returned
+	 * Execute an In-line style query for an Object, only return the first row and
+	 * first column's value if more than one column or more than 1 rows returned
 	 * 
 	 * @param inlineSQL
 	 * @param params
@@ -314,8 +316,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * In-line style execute query and force return a long value, runtime
-	 * exception may throw if result can not be cast to long.
+	 * In-line style execute query and force return a long value, runtime exception
+	 * may throw if result can not be cast to long.
 	 */
 	public long iQueryForLongValue(Object... inlineSQL) {
 		return ((Number) iQueryForObject(inlineSQL)).longValue();// NOSONAR
@@ -329,8 +331,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * In-Line style execute query and force return a List<Map<String, Object>>
-	 * type result.
+	 * In-Line style execute query and force return a List<Map<String, Object>> type
+	 * result.
 	 */
 	public List<Map<String, Object>> iQueryForMapList(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
@@ -349,7 +351,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	public int iUpdate(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
 		ps.setType(SqlType.UPDATE);
-		System.out.println(ps.getDebugInfo());
 		return (Integer) runPreparedSQL(ps);
 	}
 
@@ -371,8 +372,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * 
 	 * @param inlineSQL
 	 *            the in-line style SQL
-	 * @return A list of objects generated by the handler, or number of rows
-	 *         updated if no handler
+	 * @return A list of objects generated by the handler, or number of rows updated
+	 *         if no handler
 	 */
 	public <T> T iExecute(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
@@ -413,8 +414,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * pXxxx style execute query and force return a long value, runtime
-	 * exception may throw if result can not be cast to long.
+	 * pXxxx style execute query and force return a long value, runtime exception
+	 * may throw if result can not be cast to long.
 	 */
 	public long pQueryForLongValue(Object... items) {
 		return ((Number) pQueryForObject(items)).longValue();// NOSONAR
@@ -428,8 +429,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * pXxxx style execute query and force return a List<Map<String, Object>>
-	 * type result.
+	 * pXxxx style execute query and force return a List<Map<String, Object>> type
+	 * result.
 	 */
 	public List<Map<String, Object>> pQueryForMapList(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
@@ -469,8 +470,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * 
 	 * @param items
 	 *            the items
-	 * @return A list of objects generated by the handler, or number of rows
-	 *         updated if no handler
+	 * @return A list of objects generated by the handler, or number of rows updated
+	 *         if no handler
 	 */
 	public <T> T pExecute(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
@@ -513,8 +514,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * pXxxx style execute query and force return a long value, runtime
-	 * exception may throw if result can not be cast to long.
+	 * pXxxx style execute query and force return a long value, runtime exception
+	 * may throw if result can not be cast to long.
 	 */
 	public long tQueryForLongValue(Object... items) {
 		return ((Number) tQueryForObject(items)).longValue();// NOSONAR
@@ -528,8 +529,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * pXxxx style execute query and force return a List<Map<String, Object>>
-	 * type result.
+	 * pXxxx style execute query and force return a List<Map<String, Object>> type
+	 * result.
 	 */
 	public List<Map<String, Object>> tQueryForMapList(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
@@ -572,8 +573,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * 
 	 * @param items
 	 *            the items
-	 * @return A list of objects generated by the handler, or number of rows
-	 *         updated if no handler
+	 * @return A list of objects generated by the handler, or number of rows updated
+	 *         if no handler
 	 */
 	public <T> T tExecute(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
@@ -583,8 +584,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * nXxxx style series methods are design to replace QueryRunner's xxxx
-	 * method, the difference is nXxxx methods do not throw SqlException
+	 * nXxxx style series methods are design to replace QueryRunner's xxxx method,
+	 * the difference is nXxxx methods do not throw SqlException
 	 */
 	public void ________nXxxxStyles________() {// NOSONAR
 
@@ -611,10 +612,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found , DbProRuntimeException may be threw if some
-	 * SQL operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found , DbProRuntimeException may be threw if some SQL operation
+	 * Exception happen.
 	 * 
 	 * @param sql
 	 * @param params
@@ -626,8 +627,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute query and force return a String object, no need catch
-	 * SQLException.
+	 * Execute query and force return a String object, no need catch SQLException.
 	 * 
 	 */
 	public String nQueryForString(Connection conn, String sql, Object... params) {
@@ -643,8 +643,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute query and force return a List<Map<String, Object>> type result,
-	 * no need catch SQLException.
+	 * Execute query and force return a List<Map<String, Object>> type result, no
+	 * need catch SQLException.
 	 */
 	public List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... params) {
 		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, conn, SingleTonHandlers.mapListHandler, sql, params);
@@ -704,14 +704,14 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns
-	 * one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters. Note: This
-	 * method does not close connection.
+	 * Execute an statement, including a stored procedure call, which returns one or
+	 * more result sets. Any parameters which are instances of {@link OutParameter}
+	 * will be registered as OUT parameters. Note: This method does not close
+	 * connection.
 	 * 
-	 * Use this method when: a) running SQL statements that return multiple
-	 * result sets; b) invoking a stored procedure that return result sets and
-	 * OUT parameters.
+	 * Use this method when: a) running SQL statements that return multiple result
+	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns
@@ -748,10 +748,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found , DbProRuntimeException may be threw if some
-	 * SQL operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found , DbProRuntimeException may be threw if some SQL operation
+	 * Exception happen.
 	 * 
 	 * @param sql
 	 * @param params
@@ -766,8 +766,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	// ============================================================================
 
 	/**
-	 * Execute query and force return a String object, no need catch
-	 * SQLException
+	 * Execute query and force return a String object, no need catch SQLException
 	 */
 	public String nQueryForString(String sql, Object... params) {
 		return String.valueOf(nQueryForObject(sql, params));
@@ -782,8 +781,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute query and force return a List<Map<String, Object>> type result,
-	 * no need catch SQLException
+	 * Execute query and force return a List<Map<String, Object>> type result, no
+	 * need catch SQLException
 	 */
 	public List<Map<String, Object>> nQueryForMapList(String sql, Object... params) {
 		PreparedSQL ps = new PreparedSQL(SqlType.QUERY, null, SingleTonHandlers.mapListHandler, sql, params);
@@ -845,13 +844,13 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Execute an statement, including a stored procedure call, which returns
-	 * one or more result sets. Any parameters which are instances of
-	 * {@link OutParameter} will be registered as OUT parameters.
+	 * Execute an statement, including a stored procedure call, which returns one or
+	 * more result sets. Any parameters which are instances of {@link OutParameter}
+	 * will be registered as OUT parameters.
 	 * 
-	 * Use this method when: a) running SQL statements that return multiple
-	 * result sets; b) invoking a stored procedure that return result sets and
-	 * OUT parameters.
+	 * Use this method when: a) running SQL statements that return multiple result
+	 * sets; b) invoking a stored procedure that return result sets and OUT
+	 * parameters.
 	 *
 	 * @param <T>
 	 *            The type of object that the handler returns

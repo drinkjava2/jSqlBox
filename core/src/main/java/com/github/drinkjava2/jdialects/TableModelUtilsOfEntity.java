@@ -314,7 +314,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 				// Is a sharding column?
 				Map<String, Object> shardingMap = getFirstEntityAnno(field, "Sharding"); 
 				if (!shardingMap.isEmpty())  
-					col.sharding((String[]) shardingMap.get("value"));  
+					col.shardTable((String[]) shardingMap.get("value"));  
 				
 				col.setEntityField(entityfieldName);
 				col.setTableModel(model);

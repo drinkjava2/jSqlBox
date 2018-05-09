@@ -150,6 +150,15 @@ public abstract class JDBPRO extends DbPro {
 	}
 
 	/**
+	 * Switch to another DbPro
+	 */
+	public static SqlItem switchTo(DbPro dpPro) {
+		return new SqlItem(SqlOption.SWITCHTO, dpPro);
+	}
+
+	
+	
+	/**
 	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
 	 * instance,
 	 * 

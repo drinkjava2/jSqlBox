@@ -11,13 +11,7 @@
  */
 package com.github.drinkjava2.functionstest;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
-
-import java.util.List;
-import java.util.Map;
+import static com.github.drinkjava2.jdbpro.JDBPRO.*;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -25,18 +19,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.functionstest.BatchTest.User;
-import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.annotation.jdia.Sharding;
+import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
+import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
 import com.github.drinkjava2.jdialects.annotation.jdia.Snowflake;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -48,116 +39,104 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class ShardingModToolTest {
 
-	final static int SLAVE_DATABASE_QTY = 20;
-	final static int SHARDING_TABLE_QTY = 30;
+	final static int MASTER_DATABASE_QTY = 5;
+	final static int SLAVE_DATABASE_QTY = 10; // Total is 10*5=50
+	final static int TABLE_QTY = 15; // Total is 50*15=750
 
-	SqlBoxContext master;
+	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
+	SqlBoxContext[][] slaves = new SqlBoxContext[MASTER_DATABASE_QTY][SLAVE_DATABASE_QTY];
 
 	public static class TheModUser extends ActiveRecord {
-		@Sharding({ "MOD", "8" })
+		@ShardTable({ "MOD", "8" })
 		@Snowflake
 		@Id
 		private Long id;
 
 		private String name;
 
-		public Long getId() {
-			return id;
-		}
+		@Snowflake
+		@ShardDatabase({ "MOD", "2" })
+		private Long databaseId;
 
-		public void setId(Long id) {
-			this.id = id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
+		//@formatter:off
+		public Long getId() {return id;}
+		public void setId(Long id) {this.id = id;}
+		public String getName() {return name;}
+		public void setName(String name) {this.name = name;}
+		public Long getDatabaseId() {return databaseId;}
+		public void setDatabaseId(Long databaseId) {this.databaseId = databaseId; } 
+		//@formatter:on
 	}
 
 	@Before
 	public void init() {
-		SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
-		for (int i = 0; i < SLAVE_DATABASE_QTY; i++) {
-			slaves[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i));
-			slaves[i].setSnowflakeCreator$(new SnowflakeCreator(5, 5, 0, i));
+		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
+			masters[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("masters" + i));
+			masters[i].setMasters$(masters);
+			masters[i].setSlaves$(slaves[i]);
+			masters[i].setSnowflakeCreator$(new SnowflakeCreator(5, 5, 0, i));
+			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
+				slaves[i][j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}
-		master = new SqlBoxContext(TestBase.createH2_HikariDataSource("MasterDb"));// master DS
-		master.setSnowflakeCreator$(new SnowflakeCreator(5, 5, 1, 0));
-		master.setSlaves$(slaves);
 
 		TableModel model = TableModelUtils.entity2Model(TheModUser.class);
-		for (int i = 0; i < SHARDING_TABLE_QTY; i++) {// Create master/salve tables
-			model.setTableName("TheModUser" + "_" + i);
-			for (String ddl : master.getDialect().toCreateDDL(model))
-				master.iExecute(ddl, USE_BOTH);
+		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
+			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
+				model.setTableName("TheModUser" + "_" + j);
+				for (String ddl : masters[i].getDialect().toCreateDDL(model))
+					masters[i].iExecute(ddl, USE_BOTH);
+			}
 		}
-
 	}
 
 	@After
 	public void cleanup() {
 		TableModel model = TableModelUtils.entity2Model(TheModUser.class);
-		for (int i = 0; i < SHARDING_TABLE_QTY; i++) {// drop master/salve tables
-			model.setTableName("TheModUser" + "_" + i);
-			for (String ddl : master.getDialect().toDropDDL(model))
-				master.iExecute(ddl, USE_BOTH);
+		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
+			for (int j = 0; j < TABLE_QTY; j++) {
+				model.setTableName("TheModUser" + "_" + j);
+				for (String ddl : masters[i].getDialect().toDropDDL(model))
+					masters[i].iExecute(ddl, USE_BOTH);
+			}
 		}
-		for (DbPro pro : master.getSlaves())
-			((HikariDataSource) pro.getDataSource()).close();
-		((HikariDataSource) master.getDataSource()).close();
+		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
+			((HikariDataSource) masters[i].getDataSource()).close();
+			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
+				((HikariDataSource) slaves[i][j].getDataSource()).close();
+		}
 	}
 
 	@Test
-	public void testSqlOnShardingTables() {// Test insert to sharding tables by SQL
-//		for (int id = 0; id < 100; id++) {
-//			String talbe = master.shardEqual(TheModUser.class, id);
-//			master.iUpdate("insert into ", talbe, " (" //
-//					, "id ", param(id) //
-//					, ",name ", param(talbe + "_id" + id) //
-//					, ") ", valuesQuestions(), USE_BOTH);
-//		}
-//
-//		String table = master.shardEqual(TheModUser.class, 10);
-//		TheModUser u = new TheModUser();
-//		u.alias("u");
-//		u.tableModel().setTableName(table);
-//		List<TheModUser> users = master.iQuery(new EntityListHandler(TheModUser.class, u), "select u.** from ", table,
-//				" u");
-//		Assert.assertEquals(13, users.size());
-//		System.out.println(users.get(0).getName());
-//
-//		List<Map<String, Object>> users2 = master.iQuery(new SSMapListHandler(User.class, u), "select u.** from ",
-//				master.shardEqual(TheModUser.class, 10), " u", USE_SLAVE);
-//		Assert.assertEquals(13, users2.size());
-//		System.out.println(users2);
+	public void testInsertSqlOnMaseterSlaveTables() {
+		masters[2].iExecute("insert into TheModUser_0 (id, name, databaseId) values(?,?,?)", param(1, "u1", 1),
+				USE_BOTH);
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0"));
+
+		masters[2].iExecute("insert into TheModUser_0 (id, name, databaseId) values(?,?,?)", param(1, "u2", 1),
+				switchTo(masters[3]), USE_BOTH);
+		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
+		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
+		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0"));
+
+		masters[2].iExecute("insert into TheModUser_0 (id, name, databaseId) values(?,?,?)", param(1, "u2", 1),
+				switchTo(masters[4]));// default insert to master only
+		Assert.assertEquals(1, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
+		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
+		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0"));
 	}
 
-	@Test
-	public void testActiveRecordOnShardingTables() {// Test insert to sharding tables by ActiveRecord
-		for (int i = 0; i < 50; i++)
-			new TheModUser().useContext(master).put("name", "master" + i).insert(USE_BOTH);
+	// @Test
+	public void testInsertSqlOnShardingTables() {//TODO
+		// new TheModUser().useContext(masters[2]).put("name", "user").insert();
 
-//		TheModUser u = new TheModUser().useContext(master).load(0);
-//		System.out.println(u.getName());
+	}
+	
+	
+	// @Test
+	public void testActiveRecordOnShardingTables() {//TODO
+		// new TheModUser().useContext(masters[2]).put("name", "user").insert();
 
-		// String table = shardEqual(TheModUser.class, 10);
-		// TheModUser u = new TheModUser();
-		// u.alias("u");
-		// u.tableModel().setTableName(table);
-		// List<TheModUser> users = ctx.iQuery(new EntityListHandler(TheModUser.class,
-		// u), "select u.** from ", table,
-		// " u");
-		// Assert.assertEquals(13, users.size());
-		// System.out.println(users.get(0).getName());
-		//
-		// List<Map<String, Object>> users2 = ctx.iQuery(new
-		// SSMapListHandler(User.class, u), "select u.** from ",
-		// shardEqual(TheModUser.class, 10), " u", USE_SLAVE);
-		// Assert.assertEquals(13, users2.size());
-		// System.out.println(users2);
 	}
 }

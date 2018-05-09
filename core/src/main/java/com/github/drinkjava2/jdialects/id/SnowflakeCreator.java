@@ -242,9 +242,4 @@ public class SnowflakeCreator {
 		return (-1L << lb) ^ (-1L << rb);
 	}
 
-	public static void main(String[] args) {
-		long id = new SnowflakeCreator(1, 9, 0, 31).nextId();
-		System.out.println(id);
-	}
-
 }

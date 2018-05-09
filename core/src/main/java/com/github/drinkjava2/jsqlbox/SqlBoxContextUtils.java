@@ -152,7 +152,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		iXxx.add(0, tableModel.getTableName());
 		if (optionalSqlItems != null)
 			for (Object item : optionalSqlItems)
-				if (item != null && item instanceof SqlItem && SqlOption.SHARD.equals(((SqlItem) item).getType()))
+				if (item != null && item instanceof SqlItem && SqlOption.SHARD_TABLE.equals(((SqlItem) item).getType()))
 					iXxx.add(0, item);
 
 		iXxx.add(0, "insert into ");
@@ -162,12 +162,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 		if (optionalSqlItems != null)
 			for (Object item : optionalSqlItems)
-				if (!(item != null && item instanceof SqlItem && SqlOption.SHARD.equals(((SqlItem) item).getType())))
+				if (!(item != null && item instanceof SqlItem && SqlOption.SHARD_TABLE.equals(((SqlItem) item).getType())))
 					iXxx.add(item);
 
-		for (Object object : iXxx) {
-			System.out.println(""+object);			
-		}
+ 
 		
 		int result = ctx.iUpdate(iXxx.toArray(new Object[iXxx.size()]));
 		if (ctx.isBatchEnabled())
@@ -178,99 +176,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 		return result;
 	}
-
-	// /**
-	// * Insert entityBean into database, and change ID fields to values
-	// generated
-	// by
-	// * IdGenerator (identity or sequence or UUID...)
-	// */
-	// public static int insert(SqlBoxContext ctx, Object entityBean, Object...
-	// optionalSqlItems) {// NOSONAR
-	// SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, entityBean);
-	// checkBeanAndBoxExist(entityBean, box);
-	// TableModel tableModel = box.getTableModel();
-	// String realTableName = tableModel.getTableName();
-	// StringBuilder sb = new StringBuilder(" (");
-	//
-	// List<Object> params = new ArrayList<Object>();
-	// String identityFieldName = null;
-	// Type identityType = null;
-	// Map<String, Method> readMethods =
-	// ClassCacheUtils.getClassReadMethods(entityBean.getClass());
-	//
-	// for (String fieldName : readMethods.keySet()) {
-	// ColumnModel col = findMatchColumnForJavaField(fieldName, box);
-	// if (!col.getTransientable() && col.getInsertable()) {
-	// if (col.getIdGenerationType() != null) {
-	// if (col.getIdGenerator() == null)
-	// throw new SqlBoxException("No IdGenerator found for column '" +
-	// col.getColumnName() + "'");
-	// IdGenerator idGen = col.getIdGenerator();
-	// if (GenerationType.IDENTITY.equals(idGen.getGenerationType())) {//
-	// Identity
-	// if (identityFieldName != null)
-	// throw new SqlBoxException(
-	// "More than 1 identity field found for table '" +
-	// tableModel.getTableName() +
-	// "'");
-	// identityType = col.getColumnType();
-	// identityFieldName = fieldName;
-	// } else if (GenerationType.SNOWFLAKE.equals(idGen.getGenerationType()))
-	// {//
-	// Snow
-	// sb.append(col.getColumnName()).append(", ");
-	// SnowflakeCreator snow = ctx.getSnowflakeCreator();
-	// if (snow == null)
-	// throw new SqlBoxException(
-	// "Current SqlBoxContext no SnowflakeCreator found when try to create a
-	// Snowflake value");
-	// Object id = snow.nextId();
-	// params.add(id);
-	// ClassCacheUtils.writeValueToBeanField(entityBean, fieldName, id);
-	// } else {// Normal Id Generator
-	// sb.append(col.getColumnName()).append(", ");
-	// Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
-	// params.add(id);
-	// ClassCacheUtils.writeValueToBeanField(entityBean, fieldName, id);
-	// }
-	// } else {
-	// Object value = ClassCacheUtils.readValueFromBeanField(entityBean,
-	// fieldName);
-	// sb.append(col.getColumnName()).append(", ");
-	// params.add(value);
-	// }
-	//
-	// if (col.getSharding() != null) {
-	// Object value = ClassCacheUtils.readValueFromBeanField(entityBean,
-	// fieldName);
-	// realTableName = ctx.shardEqual(tableModel, value);
-	// }
-	// }
-	// }
-	// sb.insert(0, realTableName).insert(0, "insert into ");
-	// if (!params.isEmpty())
-	// sb.setLength(sb.length() - 2);// delete the last ", " character
-	// sb.append(")
-	// values(").append(SqlBoxStrUtils.getQuestionsStr(params.size())).append(")");
-	//
-	// List<Object> sqlItemList = SqlItem.toParamSqlItemList(params);
-	// if (optionalSqlItems != null)
-	// for (Object item : optionalSqlItems)
-	// sqlItemList.add(item);
-	//
-	// int result = ctx.iUpdate(sb.toString(), sqlItemList.toArray(new
-	// Object[sqlItemList.size()]));
-	// if (ctx.isBatchEnabled())
-	// return result;
-	// if (identityFieldName != null) {// write identity id to Bean field
-	// Object identityId = IdentityIdGenerator.INSTANCE.getNextID(ctx,
-	// ctx.getDialect(), identityType);
-	// ClassCacheUtils.writeValueToBeanField(entityBean, identityFieldName,
-	// identityId);
-	// }
-	// return result;
-	// }
 
 	/** Update entityBean according primary key */
 	public static int update(SqlBoxContext ctx, Object entityBean, Object... optionalSqlItems) {

@@ -24,7 +24,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public abstract class DebugUtils {////NOSONAR
+public abstract class DebugUtils {//// NOSONAR
 
 	public static String getColumnModelDebugInfo(ColumnModel c) {
 		StringBuilder sb = new StringBuilder();
@@ -32,10 +32,11 @@ public abstract class DebugUtils {////NOSONAR
 		sb.append("transient=" + c.getTransientable()).append(", ");
 		sb.append("type=" + c.getColumnType()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
-		sb.append("shardingSetting=" + c.getSharding()).append(", ");
-		sb.append("getIdGenerationType=" + c.getIdGenerationType()).append(", ");
-		sb.append("getIdGeneratorName=" + c.getIdGeneratorName()).append(", ");
-		sb.append("getIdGenerator=" + c.getIdGenerator()).append(", ");
+		sb.append("shardTable=" + c.getShardTable()).append(", ");
+		sb.append("shardDatabase=" + c.getShardDatabase()).append(", ");
+		sb.append("idGenerationType=" + c.getIdGenerationType()).append(", ");
+		sb.append("idGeneratorName=" + c.getIdGeneratorName()).append(", ");
+		sb.append("idGenerator=" + c.getIdGenerator()).append(", ");
 		sb.append("lengths=");
 		if (c.getLengths() != null)
 			for (Integer length : c.getLengths())

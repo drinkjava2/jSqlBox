@@ -11,8 +11,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * To mark this column is a sharding column, one table only allow 1 column be
- * marked as sharding column
+ * To mark this column is a ShardDatabase column, one table only allow 1 column
+ * be marked as ShardDatabase column
  * 
  * @author Yong Zhu
  * @since 1.0.5
@@ -20,6 +20,6 @@ import java.lang.annotation.Target;
 
 @Target(FIELD)
 @Retention(RUNTIME)
-public @interface Sharding {
+public @interface ShardDatabase {
 	String[] value();
 }

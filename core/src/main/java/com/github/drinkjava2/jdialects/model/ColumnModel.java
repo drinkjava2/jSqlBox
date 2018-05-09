@@ -80,10 +80,11 @@ public class ColumnModel {
 	/** If this is a Transient type, for ORM tool use only */
 	private Boolean transientable = false;
 
-	/**
-	 * Optional, store the sharding strategy and parameters, for ORM tool use only
-	 */
-	private String[] sharding = null;
+	/** ShardTable strategy and parameters, for ORM tool use only */
+	private String[] shardTable = null;
+
+	/** ShardDatabase strategy and parameters, for ORM tool use only */
+	private String[] shardDatabase = null;
 
 	public ColumnModel(String columnName) {
 		if (StrUtils.isEmpty(columnName))
@@ -122,7 +123,8 @@ public class ColumnModel {
 		col.transientable = transientable;
 		col.idGeneratorName = idGeneratorName;
 		col.idGenerationType = idGenerationType;
-		col.sharding = sharding;
+		col.shardTable = shardTable;
+		col.shardDatabase = shardDatabase;
 		return col;
 	}
 
@@ -191,9 +193,15 @@ public class ColumnModel {
 		return this;
 	}
 
-	/** Mark primary key, if more than one will build compound Primary key */
-	public ColumnModel sharding(String... shardingSetting) {
-		this.sharding = shardingSetting;
+	/** Mark is a shartTable column, for ORM tool use */
+	public ColumnModel shardTable(String... shardTable) {
+		this.shardTable = shardTable;
+		return this;
+	}
+
+	/** Mark is a shartDatabase column, for ORM tool use */
+	public ColumnModel shardDatabase(String... shardDatabase) {
+		this.shardDatabase = shardDatabase;
 		return this;
 	}
 
@@ -553,12 +561,20 @@ public class ColumnModel {
 		this.transientable = transientable;
 	}
 
-	public String[] getSharding() {
-		return sharding;
+	public String[] getShardTable() {
+		return shardTable;
 	}
 
-	public void setSharding(String[] sharding) {
-		this.sharding = sharding;
+	public void setShardTable(String[] shardTable) {
+		this.shardTable = shardTable;
+	}
+
+	public String[] getShardDatabase() {
+		return shardDatabase;
+	}
+
+	public void setShardDatabase(String[] shardDatabase) {
+		this.shardDatabase = shardDatabase;
 	}
 
 }

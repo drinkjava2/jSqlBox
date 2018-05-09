@@ -40,7 +40,11 @@ public class PreparedSQL {
 	/** SQL Operation Type */
 	private SqlType type;
 
+	/** Choose use master or slave options */
 	private SqlOption masterSlaveSelect;
+
+	/** Switch use another dbPro if given */
+	private DbPro dbPro;
 
 	/** Optional,Connection instance */
 	private Connection connection;
@@ -299,6 +303,14 @@ public class PreparedSQL {
 
 	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
 		this.masterSlaveSelect = masterSlaveSelect;
+	}
+
+	public DbPro getDbPro() {
+		return dbPro;
+	}
+
+	public void setDbPro(DbPro dbPro) {
+		this.dbPro = dbPro;
 	}
 
 }

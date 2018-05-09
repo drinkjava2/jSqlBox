@@ -254,11 +254,21 @@ public class TableModel {
 	}
 
 	/**
-	 * @return First found sharding Column , if not found , return null
+	 * @return First found ShardTable Column , if not found , return null
 	 */
-	public ColumnModel getShardingColumn() {
+	public ColumnModel getShardTableColumn() {
 		for (ColumnModel columnModel : columns)
-			if (columnModel.getSharding() != null)
+			if (columnModel.getShardTable() != null)
+				return columnModel;// return first found only
+		return null;
+	}
+	
+	/**
+	 * @return First found ShardDatabase Column , if not found , return null
+	 */
+	public ColumnModel getShardDatabaseColumn() {
+		for (ColumnModel columnModel : columns)
+			if (columnModel.getShardDatabase() != null)
 				return columnModel;// return first found only
 		return null;
 	}

@@ -32,8 +32,8 @@ public class DbProConfig {
 	private Integer batchSize = DbPro.getGlobalNextBatchSize();
 	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
 	private SpecialSqlItemPreparer[] specialSqlItemPreparers = DbPro.getGlobalNextSpecialSqlItemPreparers();
-
 	private DbPro[] slaves;
+	private DbPro[] masters;
 
 	public SqlTemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -97,6 +97,14 @@ public class DbProConfig {
 
 	public void setSlaves(DbPro[] slaves) {
 		this.slaves = slaves;
+	}
+
+	public DbPro[] getMasters() {
+		return masters;
+	}
+
+	public void setMasters(DbPro[] masters) {
+		this.masters = masters;
 	}
 
 	public SqlOption getMasterSlaveSelect() {

@@ -221,11 +221,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	public SqlItem shard(Object entityOrClass, Object shardKey) {
-		return new SqlItem(SqlOption.SHARD, entityOrClass, shardKey);
+		return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey);
 	}
 
 	public SqlItem shard(Object entityOrClass, Object shardKey1, Object shardKey2) {
-		return new SqlItem(SqlOption.SHARD, entityOrClass, shardKey1, shardKey2);
+		return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey1, shardKey2);
 	}
 
 	@Override

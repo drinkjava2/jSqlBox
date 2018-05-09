@@ -71,6 +71,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
 	protected SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers;
 	protected DbPro[] slaves;
+	protected DbPro[] masters;
 
 	/**
 	 * An IOC tool is needed if want use SqlMapper style and Annotation has
@@ -337,6 +338,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
+		if (ps.getDbPro() != null) {
+			DbPro pro = ps.getDbPro();
+			ps.setDbPro(null);
+			return pro.runPreparedSQL(ps);
+		}
 		if (ps.getMasterSlaveSelect() == null)
 			ps.setMasterSlaveSelect(this.getMasterSlaveSelect());
 
@@ -731,12 +737,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 	private void normalGetterSetters_____________________() {// NOSONAR
 	}
 
+	public Boolean getAllowShowSQL() {
+		return allowShowSQL;
+	}
+
 	/**
 	 * This method is not thread safe, so put a "$" at method end to reminder, but
 	 * sometimes need use it to change allowShowSQL setting
 	 */
 	public void setAllowShowSQL$(Boolean allowShowSQL) {
 		this.allowShowSQL = allowShowSQL;
+	}
+
+	public SqlTemplateEngine getSqlTemplateEngine() {
+		return sqlTemplateEngine;
 	}
 
 	/**
@@ -747,12 +761,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.sqlTemplateEngine = sqlTemplateEngine;
 	}
 
+	public ConnectionManager getConnectionManager() {
+		return connectionManager;
+	}
+
 	/**
 	 * This method is not thread safe, so put a "$" at method end to reminder, but
 	 * sometimes need use it to change connectionManager setting
 	 */
 	public void setConnectionManager$(ConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
+	}
+
+	public DbProLogger getLogger() {
+		return logger;
 	}
 
 	/**
@@ -763,12 +785,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.logger = logger;
 	}
 
+	public Integer getBatchSize() {
+		return batchSize;
+	}
+
 	/**
 	 * This method is not thread safe, so put a "$" at method end to reminder, but
 	 * sometimes need use it to change batchSize setting
 	 */
 	public void setBatchSize$(Integer batchSize) {
 		this.batchSize = batchSize;
+	}
+
+	public SqlHandler[] getSqlHandlers() {
+		return sqlHandlers;
 	}
 
 	/**
@@ -779,12 +809,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.sqlHandlers = sqlHandlers;
 	}
 
+	public SpecialSqlItemPreparer[] getSpecialSqlItemPreparers() {
+		return specialSqlItemPreparers;
+	}
+
 	/**
 	 * This method is not thread safe, so put a "$" at method end to reminder, but
 	 * sometimes need use it to change specialSqlItemPreparer setting
 	 */
 	public void setSpecialSqlItemPreparers$(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
 		this.specialSqlItemPreparers = specialSqlItemPreparers;
+	}
+
+	public DbPro[] getSlaves() {
+		return slaves;
 	}
 
 	/**
@@ -795,6 +833,22 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.slaves = slaves;
 	}
 
+	public DbPro[] getMasters() {
+		return masters;
+	}
+
+	/**
+	 * This method is not thread safe, so put a "$" at method end to reminder, but
+	 * sometimes need use it to change slaves setting
+	 */
+	public void setMasters$(DbPro[] masters) {
+		this.masters = masters;
+	}
+
+	public IocTool getIocTool() {
+		return iocTool;
+	}
+
 	/**
 	 * This method is not thread safe, so put a "$" at method end to reminder, but
 	 * sometimes need use it to change iocTool setting
@@ -803,56 +857,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.iocTool = iocTool;
 	}
 
-	public void setMasterSlaveSelect$(SqlOption masterSlaveSelect) {
-		this.masterSlaveSelect = masterSlaveSelect;
-	}
-
 	public SqlOption getMasterSlaveSelect() {
 		return masterSlaveSelect;
 	}
 
-	public Boolean getAllowShowSQL() {
-		return allowShowSQL;
-	}
-
-	public DbProLogger getLogger() {
-		return logger;
-	}
-
-	public Integer getBatchSize() {
-		return batchSize;
+	public void setMasterSlaveSelect$(SqlOption masterSlaveSelect) {
+		this.masterSlaveSelect = masterSlaveSelect;
 	}
 
 	public boolean isBatchEnabled() {
 		return batchEnabled.get();
 	}
 
-	public SqlTemplateEngine getSqlTemplateEngine() {
-		return sqlTemplateEngine;
-	}
-
-	public SqlHandler[] getSqlHandlers() {
-		return sqlHandlers;
-	}
-
-	public ConnectionManager getConnectionManager() {
-		return connectionManager;
-	}
-
-	public DbPro[] getSlaves() {
-		return slaves;
-	}
-
 	public ThreadLocal<ArrayList<PreparedSQL>> getSqlBatchCache() {
 		return sqlBatchCache;
-	}
-
-	public SpecialSqlItemPreparer[] getSpecialSqlItemPreparers() {
-		return specialSqlItemPreparers;
-	}
-
-	public IocTool getIocTool() {
-		return iocTool;
 	}
 
 	private void staticGlobalNextMethods_____________________() {// NOSONAR
