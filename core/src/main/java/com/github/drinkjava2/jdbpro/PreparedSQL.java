@@ -43,8 +43,8 @@ public class PreparedSQL {
 	/** Choose use master or slave options */
 	private SqlOption masterSlaveSelect;
 
-	/** Switch use another dbPro if given */
-	private DbPro dbPro;
+	/** Switch to use another dbPro */
+	private DbPro switchTo;
 
 	/** Optional,Connection instance */
 	private Connection connection;
@@ -127,8 +127,8 @@ public class PreparedSQL {
 	}
 
 	/**
-	 * Add map content to current template map, if keys already exist will use new
-	 * value replace
+	 * Add map content to current template map, if keys already exist will use
+	 * new value replace
 	 */
 	public void addTemplateMap(Map<String, Object> map) {
 		if (map == null)
@@ -305,12 +305,12 @@ public class PreparedSQL {
 		this.masterSlaveSelect = masterSlaveSelect;
 	}
 
-	public DbPro getDbPro() {
-		return dbPro;
+	public DbPro getSwitchTo() {
+		return switchTo;
 	}
 
-	public void setDbPro(DbPro dbPro) {
-		this.dbPro = dbPro;
+	public void setSwitchTo(DbPro switchTo) {
+		this.switchTo = switchTo;
 	}
 
 }

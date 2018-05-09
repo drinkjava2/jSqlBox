@@ -88,7 +88,7 @@ public class MasterSlaveTest {
 		for (int i = 0; i < SLAVE_DATABASE_QTY; i++)
 			slaves[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i));
 		master = new SqlBoxContext(TestBase.createH2_HikariDataSource("MasterDb"));
-		master.setSlaves$(slaves);
+		master.setSlaves(slaves);
 		String[] ddls = master.toCreateDDL(TheUser.class);
 		for (String ddl : ddls)
 			master.iExecute(ddl, USE_BOTH);
@@ -157,7 +157,7 @@ public class MasterSlaveTest {
 		txDataSource = TestBase.createH2_HikariDataSource("MasterDb");
 		// Build another master but run in Transaction mode
 		SqlBoxContext MasterWithTx = new SqlBoxContext(txDataSource, config);
-		MasterWithTx.setSlaves$(master.getSlaves());
+		MasterWithTx.setSlaves(master.getSlaves());
 		BeanBox.regAopAroundAnnotation(TX.class, TheTxBox.class);// AOP TX register
 
 		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // AOP proxy get

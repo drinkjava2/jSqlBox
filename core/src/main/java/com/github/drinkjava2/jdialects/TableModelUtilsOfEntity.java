@@ -311,10 +311,15 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 				if (!getFirstEntityAnno(field, "Id").isEmpty() || !getFirstEntityAnno(field, "PKey").isEmpty())
 					col.pkey();
 
-				// Is a sharding column?
-				Map<String, Object> shardingMap = getFirstEntityAnno(field, "Sharding"); 
-				if (!shardingMap.isEmpty())  
-					col.shardTable((String[]) shardingMap.get("value"));  
+				// Is a ShardTable column?
+				Map<String, Object> shardTableMap = getFirstEntityAnno(field, "ShardTable"); 
+				if (!shardTableMap.isEmpty())  
+					col.shardTable((String[]) shardTableMap.get("value"));  
+				
+			    // Is ShardDatabase?
+				Map<String, Object> shardDatabaseMap = getFirstEntityAnno(field, "ShardDatabase"); 
+				if (!shardDatabaseMap.isEmpty())  
+					col.shardDatabase((String[]) shardDatabaseMap.get("value"));
 				
 				col.setEntityField(entityfieldName);
 				col.setTableModel(model);

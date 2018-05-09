@@ -72,6 +72,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers;
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
+	protected String name;
 
 	/**
 	 * An IOC tool is needed if want use SqlMapper style and Annotation has
@@ -155,8 +156,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to customise
-	 * SQL format
+	 * Format SQL for logger output, subClass can override this method to
+	 * customise SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -300,10 +301,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	// DbUtils style methods, throw SQLException
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found, SQLException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -317,10 +318,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found, SQLException may be threw if some SQL operation Exception
-	 * happen.
+	 * Query for an Object, only return the first row and first column's value
+	 * if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found, SQLException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -334,13 +335,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * This is the core method of whole project, handle a PreparedSQL instance and
-	 * return a result
+	 * This is the core method of whole project, handle a PreparedSQL instance
+	 * and return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
-		if (ps.getDbPro() != null) {
-			DbPro pro = ps.getDbPro();
-			ps.setDbPro(null);
+		if (ps.getSwitchTo() != null) {
+			DbPro pro = ps.getSwitchTo();
+			ps.setSwitchTo(null);
 			return pro.runPreparedSQL(ps);
 		}
 		if (ps.getMasterSlaveSelect() == null)
@@ -493,8 +494,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Choose a slave DbPro instance, default rule is random choose, subClass can
-	 * override this method to customize choosing strategy
+	 * Choose a slave DbPro instance, default rule is random choose, subClass
+	 * can override this method to customize choosing strategy
 	 * 
 	 * @return A slave instance, if no found, return null;
 	 */
@@ -587,13 +588,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found , DbProRuntimeException may be threw if some SQL
-	 * operation Exception happen.
+	 * value if more than one column or more than 1 rows returned, a null object
+	 * may return if no result found , DbProRuntimeException may be threw if
+	 * some SQL operation Exception happen.
 	 * 
 	 * @param ps
-	 *            The PreparedSQL which included SQL parameters and sqlHandlers(if
-	 *            have)
+	 *            The PreparedSQL which included SQL parameters and
+	 *            sqlHandlers(if have)
 	 * @return An Object or null, Object type determined by SQL content
 	 */
 	private <T> T runQueryForScalar(PreparedSQL ps) {
@@ -628,8 +629,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is responsible
-	 *            for closing this Connection.
+	 *            The Connection to use to run the query. The caller is
+	 *            responsible for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
 	 * @param params
@@ -741,11 +742,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return allowShowSQL;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change allowShowSQL setting
-	 */
-	public void setAllowShowSQL$(Boolean allowShowSQL) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setAllowShowSQL(Boolean allowShowSQL) {
 		this.allowShowSQL = allowShowSQL;
 	}
 
@@ -753,11 +751,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return sqlTemplateEngine;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change sqlTemplateEngine setting
-	 */
-	public void setSqlTemplateEngine$(SqlTemplateEngine sqlTemplateEngine) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setSqlTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
 		this.sqlTemplateEngine = sqlTemplateEngine;
 	}
 
@@ -765,11 +760,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return connectionManager;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change connectionManager setting
-	 */
-	public void setConnectionManager$(ConnectionManager connectionManager) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setConnectionManager(ConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 	}
 
@@ -777,11 +769,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return logger;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change logger setting
-	 */
-	public void setLogger$(DbProLogger logger) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setLogger(DbProLogger logger) {
 		this.logger = logger;
 	}
 
@@ -789,11 +778,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return batchSize;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change batchSize setting
-	 */
-	public void setBatchSize$(Integer batchSize) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setBatchSize(Integer batchSize) {
 		this.batchSize = batchSize;
 	}
 
@@ -801,11 +787,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return sqlHandlers;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change sqlHandlers setting
-	 */
-	public void setSqlHandlers$(SqlHandler[] sqlHandlers) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setSqlHandlers(SqlHandler[] sqlHandlers) {
 		this.sqlHandlers = sqlHandlers;
 	}
 
@@ -813,11 +796,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return specialSqlItemPreparers;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change specialSqlItemPreparer setting
-	 */
-	public void setSpecialSqlItemPreparers$(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
 		this.specialSqlItemPreparers = specialSqlItemPreparers;
 	}
 
@@ -825,11 +805,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return slaves;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change slaves setting
-	 */
-	public void setSlaves$(DbPro[] slaves) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setSlaves(DbPro[] slaves) {
 		this.slaves = slaves;
 	}
 
@@ -837,11 +814,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return masters;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change slaves setting
-	 */
-	public void setMasters$(DbPro[] masters) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setMasters(DbPro[] masters) {
 		this.masters = masters;
 	}
 
@@ -849,11 +823,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return iocTool;
 	}
 
-	/**
-	 * This method is not thread safe, so put a "$" at method end to reminder, but
-	 * sometimes need use it to change iocTool setting
-	 */
-	public void setIocTool$(IocTool iocTool) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setIocTool(IocTool iocTool) {
 		this.iocTool = iocTool;
 	}
 
@@ -861,8 +832,18 @@ public class ImprovedQueryRunner extends QueryRunner {
 		return masterSlaveSelect;
 	}
 
-	public void setMasterSlaveSelect$(SqlOption masterSlaveSelect) {
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
 		this.masterSlaveSelect = masterSlaveSelect;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public boolean isBatchEnabled() {

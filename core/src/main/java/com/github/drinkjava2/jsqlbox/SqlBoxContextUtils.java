@@ -36,6 +36,7 @@ import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
  * SqlBoxContextUtils is utility class store static methods about SqlBoxContext
@@ -91,6 +92,27 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 		return result;
 	}
+	
+
+	public  static String handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object shardKey1, Object shardKey2) {
+		if (ctx.getShardingTools() == null || ctx.getShardingTools().length == 0)
+			throw new SqlBoxException("No shardingTools be set."); 
+		String table = null;
+		for (ShardingTool sh : ctx.getShardingTools()) {
+			String[] result = sh.handleShardTable(ctx, entityOrClass, shardKey1, shardKey2);
+			if (result != null) {
+				if (result.length == 0)
+					throw new SqlBoxException("Can not find sharding table for target '" + entityOrClass + "'");
+				if (result.length > 1)
+					throw new SqlBoxException("Found more than 1 sharding tables for target '" + entityOrClass
+							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardTable search condition");
+				table = result[0];
+				break;
+			}
+		}
+		return table;
+	}
+	
 
 	/**
 	 * Insert entityBean into database, and change ID fields to values generated
@@ -100,13 +122,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, entityBean);
 		checkBeanAndBoxExist(entityBean, box);
 		TableModel tableModel = box.getTableModel();
-
 		List<Object> iXxx = new ArrayList<Object>();
 
 		String identityFieldName = null;
 		Type identityType = null;
 		Map<String, Method> readMethods = ClassCacheUtils.getClassReadMethods(entityBean.getClass());
 
+		iXxx.add(0, " (");
+		boolean foundColumnToInsert = false;
+		SqlItem shardTableItem = null;
 		for (String fieldName : readMethods.keySet()) {
 			ColumnModel col = findMatchColumnForJavaField(fieldName, box);
 			if (!col.getTransientable() && col.getInsertable()) {
@@ -129,12 +153,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 						Object id = snow.nextId();
 						iXxx.add(param(id));
 						iXxx.add(", ");
+						foundColumnToInsert = true;
 						ClassCacheUtils.writeValueToBeanField(entityBean, fieldName, id);
 					} else {// Normal Id Generator
 						iXxx.add(col.getColumnName());
 						Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
 						iXxx.add(param(id));
 						iXxx.add(", ");
+						foundColumnToInsert = true;
 						ClassCacheUtils.writeValueToBeanField(entityBean, fieldName, id);
 					}
 				} else {
@@ -142,34 +168,37 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					iXxx.add(col.getColumnName());
 					iXxx.add(new SqlItem(SqlOption.PARAM, value));
 					iXxx.add(", ");
-				}
+					foundColumnToInsert = true;
+				} 
+				
+				if (col.getShardDatabase() != null) //Sharding database?
+					iXxx.add(ctx.shardDatabase(tableModel, ClassCacheUtils.readValueFromBeanField(entityBean, fieldName)));
+
+				// move shardTable at front
+				if (col.getShardTable() != null)
+					shardTableItem = ctx.shardTable(tableModel,
+							ClassCacheUtils.readValueFromBeanField(entityBean, fieldName));
 			}
 		}
-		if (!iXxx.isEmpty())
+		if (foundColumnToInsert)
 			iXxx.remove(iXxx.size() - 1);// delete the last ", " character
-		iXxx.add(0, " (");
 
-		iXxx.add(0, tableModel.getTableName());
-		if (optionalSqlItems != null)
-			for (Object item : optionalSqlItems)
-				if (item != null && item instanceof SqlItem && SqlOption.SHARD_TABLE.equals(((SqlItem) item).getType()))
-					iXxx.add(0, item);
-
-		iXxx.add(0, "insert into ");
+		if (shardTableItem != null) //Sharding table?
+			iXxx.add(0, shardTableItem);
+		else
+			iXxx.add(0, tableModel.getTableName());
 		
-		iXxx.add(") ");
-		iXxx.add(valuesQuestions());
+		iXxx.add(0, "insert into ");// insert into xxx (
+		iXxx.add(") "); // insert into xxx ()
+		iXxx.add(valuesQuestions()); // insert into xxx () values(?,?)
 
-		if (optionalSqlItems != null)
+		if (optionalSqlItems != null) // optional SqlItems put at end
 			for (Object item : optionalSqlItems)
-				if (!(item != null && item instanceof SqlItem && SqlOption.SHARD_TABLE.equals(((SqlItem) item).getType())))
-					iXxx.add(item);
+				iXxx.add(0, item);
 
- 
-		
 		int result = ctx.iUpdate(iXxx.toArray(new Object[iXxx.size()]));
 		if (ctx.isBatchEnabled())
-			return result;
+			return result; // in batch mode, no need fetch Identity value
 		if (identityFieldName != null) {// write identity id to Bean field
 			Object identityId = IdentityIdGenerator.INSTANCE.getNextID(ctx, ctx.getDialect(), identityType);
 			ClassCacheUtils.writeValueToBeanField(entityBean, identityFieldName, identityId);
@@ -282,7 +311,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 		SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, entity);
 		TableModel model = box.getTableModel();
-		String realTableName = model.getTableName();
 
 		StringBuilder sb = new StringBuilder("select ");
 		List<Object> pkParams = new ArrayList<Object>();

@@ -12,7 +12,6 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.sql.Connection;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 			throw new SqlBoxException(
 					"Global SqlBoxContext needed, please use SqlBoxContext.setGlobalSqlBoxContext() method to set a global default SqlBoxContext");
 		return SqlBoxContext.getGlobalSqlBoxContext();
-	} 
+	}
 
 	//@formatter:off
 		protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 

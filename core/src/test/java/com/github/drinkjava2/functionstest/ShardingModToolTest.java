@@ -11,7 +11,11 @@
  */
 package com.github.drinkjava2.functionstest;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.*;
+import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
+import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
+import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jdbpro.JDBPRO.switchTo;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -40,11 +44,10 @@ import com.zaxxer.hikari.HikariDataSource;
 public class ShardingModToolTest {
 
 	final static int MASTER_DATABASE_QTY = 5;
-	final static int SLAVE_DATABASE_QTY = 10; // Total is 10*5=50
-	final static int TABLE_QTY = 15; // Total is 50*15=750
+	final static int SLAVE_DATABASE_QTY = 10; // each master has 10 slaves
+	final static int TABLE_QTY = 15; // each table be sharded to 15 tables
 
 	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
-	SqlBoxContext[][] slaves = new SqlBoxContext[MASTER_DATABASE_QTY][SLAVE_DATABASE_QTY];
 
 	public static class TheModUser extends ActiveRecord {
 		@ShardTable({ "MOD", "8" })
@@ -55,7 +58,7 @@ public class ShardingModToolTest {
 		private String name;
 
 		@Snowflake
-		@ShardDatabase({ "MOD", "2" })
+		@ShardDatabase({ "MOD", "3" })
 		private Long databaseId;
 
 		//@formatter:off
@@ -71,12 +74,13 @@ public class ShardingModToolTest {
 	@Before
 	public void init() {
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
+			SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
 			masters[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("masters" + i));
-			masters[i].setMasters$(masters);
-			masters[i].setSlaves$(slaves[i]);
-			masters[i].setSnowflakeCreator$(new SnowflakeCreator(5, 5, 0, i));
+			masters[i].setMasters(masters);
+			masters[i].setSlaves(slaves);
+			masters[i].setSnowflakeCreator(new SnowflakeCreator(5, 5, 0, i));
 			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
-				slaves[i][j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
+				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}
 
 		TableModel model = TableModelUtils.entity2Model(TheModUser.class);
@@ -102,12 +106,12 @@ public class ShardingModToolTest {
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			((HikariDataSource) masters[i].getDataSource()).close();
 			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
-				((HikariDataSource) slaves[i][j].getDataSource()).close();
+				((HikariDataSource) masters[i].getSlaves()[j].getDataSource()).close();
 		}
 	}
 
 	@Test
-	public void testInsertSqlOnMaseterSlaveTables() {
+	public void testInsertSqlOnMaseterSlave() {
 		masters[2].iExecute("insert into TheModUser_0 (id, name, databaseId) values(?,?,?)", param(1, "u1", 1),
 				USE_BOTH);
 		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
@@ -127,16 +131,27 @@ public class ShardingModToolTest {
 		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0"));
 	}
 
-	// @Test
-	public void testInsertSqlOnShardingTables() {//TODO
-		// new TheModUser().useContext(masters[2]).put("name", "user").insert();
+	@Test
+	public void testActiveRecordOnMasterSlaves() {
+		new TheModUser().useContext(masters[2]).put("name", "user").insert(USE_BOTH);
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0"));
+
+		new TheModUser().useContext(masters[2]).put("name", "user").insert(USE_BOTH, switchTo(masters[3]));
+		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
+		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
+		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0"));
+
+		new TheModUser().useContext(masters[2]).put("name", "user").insert(switchTo(masters[4]));
+		Assert.assertEquals(1, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
+		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
+		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0"));
 
 	}
-	
-	
-	// @Test
-	public void testActiveRecordOnShardingTables() {//TODO
-		// new TheModUser().useContext(masters[2]).put("name", "user").insert();
 
+	// @Test
+	public void testInsertSqlOnShardingTables() {// TODO
 	}
+
 }

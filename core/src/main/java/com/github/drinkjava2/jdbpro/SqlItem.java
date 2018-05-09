@@ -16,7 +16,6 @@
 package com.github.drinkjava2.jdbpro;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
