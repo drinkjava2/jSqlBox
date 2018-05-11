@@ -59,6 +59,7 @@ public class SqlItem {
 	/**
 	 * Convert parameters in a collection to a SqlItem list
 	 */
+	@Deprecated
 	public static List<Object> toParamSqlItemList(Collection<?> collection) {
 		List<Object> result = new ArrayList<Object>();
 		if (collection == null || collection.isEmpty())

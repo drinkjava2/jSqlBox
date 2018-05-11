@@ -15,7 +15,6 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jdbpro.JDBPRO.switchTo;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -79,6 +78,7 @@ public class ShardingModToolTest {
 			masters[i].setMasters(masters);
 			masters[i].setSlaves(slaves);
 			masters[i].setSnowflakeCreator(new SnowflakeCreator(5, 5, 0, i));
+			masters[i].setName("Master" + i);
 			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
 				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}
@@ -119,35 +119,32 @@ public class ShardingModToolTest {
 		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0"));
 
 		masters[2].iExecute("insert into TheModUser_0 (id, name, databaseId) values(?,?,?)", param(1, "u2", 1),
-				switchTo(masters[3]), USE_BOTH);
+				masters[3], USE_BOTH);
 		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
 		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
 		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0"));
 
 		masters[2].iExecute("insert into TheModUser_0 (id, name, databaseId) values(?,?,?)", param(1, "u2", 1),
-				switchTo(masters[4]));// default insert to master only
+				masters[4]);// default insert to master only
 		Assert.assertEquals(1, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
 		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
 		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0"));
 	}
 
 	@Test
-	public void testActiveRecordOnMasterSlaves() {
-		new TheModUser().useContext(masters[2]).put("name", "user").insert(USE_BOTH);
-		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
-		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
-		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from TheModUser_0"));
+	public void testActiveRecordOnMasterSlaves() {// TODO XA or TCC transaction for multiple databases
+		// ActiveRecord mode, here I don't know saved to which database and which table
+		TheModUser u = new TheModUser().useContext(masters[2]).put("name", "user").insert(USE_BOTH);
+		String realTable = u.ctx().doShardTable(u, u.getId());
+		SqlBoxContext realCtx = u.ctx().doShardDatabase(u, u.getDatabaseId());
+		realCtx.setAllowShowSQL(true);
+		Assert.assertEquals(1, u.ctx().iQueryForLongValue("select count(*) from ", realTable, USE_SLAVE, realCtx));
+		Assert.assertEquals(1, u.ctx().iQueryForLongValue("select count(*) from ", realTable, USE_MASTER, realCtx));
+		Assert.assertEquals(1, u.ctx().iQueryForLongValue("select count(*) from ", realTable, USE_SLAVE, realCtx));
 
-		new TheModUser().useContext(masters[2]).put("name", "user").insert(USE_BOTH, switchTo(masters[3]));
-		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
-		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
-		Assert.assertEquals(1, masters[3].iQueryForLongValue("select count(*) from TheModUser_0"));
-
-		new TheModUser().useContext(masters[2]).put("name", "user").insert(switchTo(masters[4]));
-		Assert.assertEquals(1, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_MASTER));
-		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0", USE_SLAVE));
-		Assert.assertEquals(0, masters[4].iQueryForLongValue("select count(*) from TheModUser_0"));
-
+		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);
+		TheModUser u2 = new TheModUser().load(u.getId());
+		System.out.println(u2.getName());
 	}
 
 	// @Test

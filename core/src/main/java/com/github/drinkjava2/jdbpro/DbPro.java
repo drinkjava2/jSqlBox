@@ -240,7 +240,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				} else if (SqlOption.SWITCHTO.equals(sqItem.getType())) {
 					predSQL.setSwitchTo((DbPro) sqItem.getParameters()[0]);
 				} else if (SqlOption.SHARD_TABLE.equals(sqItem.getType())) {
-					handleShardTable(predSQL,sql, sqItem);
+					handleShardTable(predSQL, sql, sqItem);
 				} else if (SqlOption.SHARD_DATABASE.equals(sqItem.getType())) {
 					handleShardDatabase(predSQL, sql, sqItem);
 				} else
@@ -248,6 +248,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 							+ Arrays.deepToString(sqItem.getParameters()));
 			} else if (item instanceof Connection)
 				predSQL.setConnection((Connection) item);
+			else if (item instanceof DbPro)
+				predSQL.setSwitchTo((DbPro) item);
 			else if (item instanceof SqlHandler)
 				predSQL.addHandler((SqlHandler) item, this.getIocTool());
 			else if (item instanceof ResultSetHandler)
@@ -277,23 +279,31 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	/**
 	 * handleShardTable is designed for subClass
 	 * 
-	 * @param predSQL The PreparedSQL instance
-	 * @param sql The StringBuilder instance
-	 * @param item The SqlItem which type is SqlOption.SHARD_TABLE
+	 * @param predSQL
+	 *            The PreparedSQL instance
+	 * @param sql
+	 *            The StringBuilder instance
+	 * @param item
+	 *            The SqlItem which type is SqlOption.SHARD_TABLE 
+	 * @return The ShardTable name
 	 */
-	protected void handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) { 
+	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
 		throw new DbProRuntimeException(
 				"DbPro project haven't implemeted handleShardTable method, a subClass instance is required");
 	}
-	
+
 	/**
 	 * handleShardTable is designed for subClass
 	 * 
-	 * @param predSQL The PreparedSQL instance
-	 * @param sql The StringBuilder instance will store SQL
-	 * @param item The SqlItem which type is SqlOption.SHARD_DATABASE
-	 */ 
-	protected void handleShardDatabase(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
+	 * @param predSQL
+	 *            The PreparedSQL instance
+	 * @param sql
+	 *            The StringBuilder instance will store SQL
+	 * @param item
+	 *            The SqlItem which type is SqlOption.SHARD_DATABASE
+	 * @return The shardDbPro
+	 */
+	protected DbPro handleShardDatabase(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
 		throw new DbProRuntimeException(
 				"DbPro project haven't implemeted handleShardDatabase method, a subClass instance is required");
 	}

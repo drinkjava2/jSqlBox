@@ -11,13 +11,14 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.util.Arrays;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDatabase;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTable;
+
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.jbeanbox.springsrc.StringUtils;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
@@ -101,62 +102,51 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			this.dialect = config.getDialect();
 			this.sqlMapperGuesser = config.getSqlMapperGuesser();
 			this.shardingTools = config.getShardingTools();
-			this.snowflakeCreator = globalNextSnowflakeCreator;
+			this.snowflakeCreator = config.getSnowflakeCreator();
 		}
 	}
 
 	protected void coreMethods______________________________() {// NOSONAR
 	}
 
+	/** Reset all global SqlBox variants to its old default values */
+	public static void resetGlobalVariants() {
+		globalNextAllowShowSql = false;
+		globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
+		globalNextConnectionManager = null;
+		globalNextSqlHandlers = null;
+		globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
+		globalNextBatchSize = 300;
+		globalNextTemplateEngine = BasicSqlTemplate.instance();
+		globalNextDialect = null;
+		globalNextSpecialSqlItemPreparers = null;
+		globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
+		globalNextShardingTools = new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() };
+		globalSqlBoxContext = null;
+	}
+
+	/** Shortcut method equal to getGlobalSqlBoxContext() */
+	public static SqlBoxContext gctx() {
+		return SqlBoxContext.globalSqlBoxContext;
+	}
+
+	public static SqlBoxContext getGlobalSqlBoxContext() {
+		return SqlBoxContext.globalSqlBoxContext;
+	}
+
 	// =========getter & setter =======
 
-	public Dialect getDialect() {
-		return dialect;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setDialect(Dialect dialect) {// NOSONAR
-		this.dialect = dialect;
-	}
-
-	public SqlMapperGuesser getSqlMapperGuesser() {
-		return sqlMapperGuesser;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {// NOSONAR
-		this.sqlMapperGuesser = sqlMapperGuesser;
-	}
-
-	public ShardingTool[] getShardingTools() {
-		return shardingTools;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setShardingTools(ShardingTool[] shardingTools) {
-		this.shardingTools = shardingTools;
-	}
-
-	public SnowflakeCreator getSnowflakeCreator() {
-		return snowflakeCreator;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {
-		this.snowflakeCreator = snowflakeCreator;
-	}
-
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new
-	 * one and bind on entityBean
+	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
+	 * and bind on entityBean
 	 */
 	public SqlBox getSqlBox(Object entityBean) {
 		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
 	}
 
 	/**
-	 * Create a subClass instance of a abstract ActiveRecordSupport class based
-	 * on default global SqlBoxContext
+	 * Create a subClass instance of a abstract ActiveRecordSupport class based on
+	 * default global SqlBoxContext
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T createMapper(Class<?> abstractClass) {
@@ -169,8 +159,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a subClass instance of a abstract ActiveRecordSupport class based
-	 * on given SqlBoxContext
+	 * Create a subClass instance of a abstract ActiveRecordSupport class based on
+	 * given SqlBoxContext
 	 */
 	public static <T> T createMapper(SqlBoxContext ctx, Class<?> abstractClass) {
 		T entity = createMapper(abstractClass);
@@ -209,54 +199,45 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entityClass, pkey, optionalSqlItems);
 	}
 
-	public SqlItem shardTable(Object entityOrClass, Object... shardKey) {
-		return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey, null);
+	public String doShardTable(Object entityOrClass, Object... shardvalues) {
+		SqlItem item = shardTable(entityOrClass, shardvalues);
+		String table = SqlBoxContextUtils.handleShardTable(this, item.getParameters()[0], item.getParameters()[1],
+				item.getParameters()[2]);
+		if (table == null)
+			throw new SqlBoxException("No found ShardingTool can handle target '" + entityOrClass + "' ");
+		return table;
 	}
 
-	public SqlItem shardTable(Object entityOrClass, Object shardKey1, Object shardKey2) {
-		return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey1, shardKey2);
-	}
-
-	public SqlItem shardTableStr(Object entityOrClass, Object... shardKey) {
-		return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey, null);
-	}
-
-	@Override
-	protected void handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
- 		String table = SqlBoxContextUtils.handleShardTable(this, item.getParameters()[0], item.getParameters()[1], item.getParameters()[2]);
-		if (table == null)//TODO here
-			xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-			throw new SqlBoxException(
-					"No ShardingTool can handle target '" + Arrays.deepToString(item.getParameters()) + "'");
-	}
- 
-
-	@Override
-	protected void handleShardDatabase(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
-		if (this.getMasters() == null || this.getMasters().length == 0)
-			throw new SqlBoxException(
-					"Current SqlBoxContext did not set masters property but try do shardDatabase opertation.");
-		Object entityOrClass = item.getParameters()[0];
-		Object shardKey1 = item.getParameters()[1];
-		Object shardKey2 = item.getParameters()[2];
-
-		SqlBoxContext ctx = null;
-		for (ShardingTool sh : this.getShardingTools()) {
-			SqlBoxContext[] result = sh.handleShardDatabase(this, entityOrClass, shardKey1, shardKey2);
-			if (result != null) {
-				if (result.length == 0)
-					throw new SqlBoxException("Can not find master SqlBoxContext for '" + entityOrClass + "'");
-				if (result.length > 1)
-					throw new SqlBoxException("Found more than 1 SqlBoxContext tables for target '" + entityOrClass
-							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardDatabase search condition.");
-				ctx = result[0];
-				break;
-			}
-		}
+	public SqlBoxContext doShardDatabase(Object entityOrClass, Object... shardvalues) {
+		SqlItem item = shardDatabase(entityOrClass, shardvalues);
+		SqlBoxContext ctx = SqlBoxContextUtils.handleShardDatabase(this, item.getParameters()[0],
+				item.getParameters()[1], item.getParameters()[2]);
 		if (ctx == null)
-			throw new SqlBoxException(
-					"No ShardingTool can handle target '" + Arrays.deepToString(item.getParameters()) + "'");
-		else predSQL.setSwitchTo(ctx);
+			throw new SqlBoxException("Not found ShardingTool can handle entity '" + entityOrClass + "'  ");
+		return ctx;
+	}
+
+ 
+	@Override
+	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
+		String table = SqlBoxContextUtils.handleShardTable(this, item.getParameters()[0], item.getParameters()[1],
+				item.getParameters()[2]);
+		if (table == null)
+			throw new SqlBoxException("No ShardingTool can handle target '" + item.getParameters()[0] + "'");
+		else
+			sql.append(table);
+		return table;
+	}
+
+	@Override
+	protected DbPro handleShardDatabase(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
+		SqlBoxContext ctx = SqlBoxContextUtils.handleShardDatabase(this, item.getParameters()[0],
+				item.getParameters()[1], item.getParameters()[2]);
+		if (ctx == null)
+			throw new SqlBoxException("No ShardingTool can handle entity '" + item.getParameters()[0] + "'");
+		else
+			predSQL.setSwitchTo(ctx);
+		return ctx;
 	}
 
 	// ========== Dialect shortcut methods ===============
@@ -335,8 +316,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to
-	 * improve loading speed
+	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
+	 * loading speed
 	 */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return EntityNetFactory.createEntityNet(this, true, configObjects);
@@ -392,29 +373,45 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return this.netLoad(entityClass).getAllEntityList(entityClass);
 	}
 
-	/** Reset all global SqlBox variants to its old default values */
-	public static void resetGlobalVariants() {
-		globalNextAllowShowSql = false;
-		globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
-		globalNextConnectionManager = null;
-		globalNextSqlHandlers = null;
-		globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
-		globalNextBatchSize = 300;
-		globalNextTemplateEngine = BasicSqlTemplate.instance();
-		globalNextDialect = null;
-		globalNextSpecialSqlItemPreparers = null;
-		globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
-		globalNextShardingTools = new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() };
-		globalSqlBoxContext = null;
+	protected void getteSetters__________________________() {// NOSONAR
 	}
 
-	public static SqlBoxContext getGlobalSqlBoxContext() {
-		return SqlBoxContext.globalSqlBoxContext;
+	// =========getter & setter =======
+
+	public Dialect getDialect() {
+		return dialect;
 	}
 
-	/** Shortcut method equal to getGlobalSqlBoxContext() */
-	public static SqlBoxContext gctx() {
-		return SqlBoxContext.globalSqlBoxContext;
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setDialect(Dialect dialect) {// NOSONAR
+		this.dialect = dialect;
+	}
+
+	public SqlMapperGuesser getSqlMapperGuesser() {
+		return sqlMapperGuesser;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {// NOSONAR
+		this.sqlMapperGuesser = sqlMapperGuesser;
+	}
+
+	public ShardingTool[] getShardingTools() {
+		return shardingTools;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setShardingTools(ShardingTool[] shardingTools) {
+		this.shardingTools = shardingTools;
+	}
+
+	public SnowflakeCreator getSnowflakeCreator() {
+		return snowflakeCreator;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {
+		this.snowflakeCreator = snowflakeCreator;
 	}
 
 	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {

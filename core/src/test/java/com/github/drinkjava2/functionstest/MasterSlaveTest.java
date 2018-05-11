@@ -38,7 +38,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /*- 
-Options: 
+SqlOptions: 
 USE_MASTER (写操作: 主库              读操作：主库)
 USE_AUTO   (写操作: 主                  读操作且无事务：从库随机选一个      读操作且有事务:主 )
 USE_BOTH   (写操作:主库和全部从库     读操作:主库)
@@ -55,8 +55,8 @@ USE_SLAVE  (写操作:全部从库           读操作:从库随机选一个)
 
 public class MasterSlaveTest {
 	final static int SLAVE_DATABASE_QTY = 20;
-	final static int SLAVE_TOTAL_ROWS = 5;
-	final static int MASTER_TOTAL_ROWS = 10;
+	final static int SLAVE_RECORD_ROWS = 5;
+	final static int MASTER_RECORD_ROWS = 10;
 	SqlBoxContext master;
 
 	public static class TheUser extends ActiveRecord {
@@ -93,10 +93,10 @@ public class MasterSlaveTest {
 		for (String ddl : ddls)
 			master.iExecute(ddl, USE_BOTH);
 
-		for (long j = 0; j < SLAVE_TOTAL_ROWS; j++)// insert 5 row in all slaves
+		for (long j = 0; j < SLAVE_RECORD_ROWS; j++)// insert 5 row in all slaves
 			new TheUser().useContext(master).put("id", j, "name", " Slave_Row" + j).insert(USE_SLAVE);
 
-		for (long j = 0; j < MASTER_TOTAL_ROWS; j++)// insert 10 row in all slaves
+		for (long j = 0; j < MASTER_RECORD_ROWS; j++)// insert 10 row in all slaves
 			new TheUser().useContext(master).put("id", j, "name", " Master_Row" + j).insert(USE_MASTER);
 	}
 
@@ -131,17 +131,17 @@ public class MasterSlaveTest {
 	public void testMasterSlaveQuery() {
 		System.out.println("============Test testMasterSlaveNoTransaction==================");
 		// AutoChoose, not in Transaction, should use slave
-		Assert.assertEquals(SLAVE_TOTAL_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
+		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
 		TheUser u1 = master.load(TheUser.class, 1L);
 		System.out.println(u1.getName());
 
 		// Force use master
-		Assert.assertEquals(MASTER_TOTAL_ROWS, master.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
+		Assert.assertEquals(MASTER_RECORD_ROWS, master.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
 		TheUser u2 = master.load(TheUser.class, 1L, USE_MASTER);
 		System.out.println(u2.getName());
 
 		// Force use slave
-		Assert.assertEquals(SLAVE_TOTAL_ROWS, master.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
+		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
 		TheUser u3 = master.load(TheUser.class, 1L, USE_SLAVE);
 		System.out.println(u3.getName());
 	}
@@ -168,17 +168,17 @@ public class MasterSlaveTest {
 	@TX
 	public void queryInTransaction(SqlBoxContext ctx) {
 		// AutoChoose, in Transaction, should use master
-		Assert.assertEquals(MASTER_TOTAL_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
+		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
 		TheUser u1 = ctx.load(TheUser.class, 1L);
 		System.out.println(u1.getName());
 
 		// Force use master
-		Assert.assertEquals(MASTER_TOTAL_ROWS, ctx.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
+		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
 		TheUser u2 = ctx.load(TheUser.class, 1L, USE_MASTER);
 		System.out.println(u2.getName());
 
 		// Force use slave
-		Assert.assertEquals(SLAVE_TOTAL_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
+		Assert.assertEquals(SLAVE_RECORD_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
 		TheUser u3 = new TheUser().useContext(ctx).load(1L, USE_SLAVE);
 		System.out.println(u3.getName());
 	}

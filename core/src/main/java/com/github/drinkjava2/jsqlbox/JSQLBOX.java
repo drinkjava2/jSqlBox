@@ -18,6 +18,9 @@ import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.JDBPRO;
+import com.github.drinkjava2.jdbpro.SqlItem;
+import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
 /**
  * JSQLBOX store some public static methods, usually used for static import to
@@ -33,6 +36,36 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 			throw new SqlBoxException(
 					"Global SqlBoxContext needed, please use SqlBoxContext.setGlobalSqlBoxContext() method to set a global default SqlBoxContext");
 		return SqlBoxContext.getGlobalSqlBoxContext();
+	}
+
+	public static PaginHandler pagin(int pageNumber, int pageSize) {
+		return new PaginHandler(pageNumber, pageSize);
+	}
+
+	public static SqlItem shardTable(Object entityOrClass, Object... shardvalues) {
+		if (shardvalues == null || shardvalues.length < 1 || shardvalues.length > 2)
+			throw new SqlBoxException("shardValues should have 1 or 2 values");
+		if (shardvalues.length == 1)
+			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[0], null);
+		else
+			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[0], shardvalues[1]);
+	}
+
+	public static SqlItem shardDatabase(Object entityOrClass, Object... shardvalues) {
+		if (shardvalues == null || shardvalues.length < 1 || shardvalues.length > 2)
+			throw new SqlBoxException("shardValues should have 1 or 2 values");
+		if (shardvalues.length == 1)
+			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[0], null);
+		else
+			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[0], shardvalues[1]);
+	}
+
+	public static String gDoShardTable(Object entityOrClass, Object... shardvalues) {
+		return gctx().doShardTable(entityOrClass, shardvalues);
+	}
+
+	public static SqlBoxContext gDoShardDatabase(Object entityOrClass, Object... shardvalues) {
+		return gctx().doShardDatabase(entityOrClass, shardvalues);
 	}
 
 	//@formatter:off

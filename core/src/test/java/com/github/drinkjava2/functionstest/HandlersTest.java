@@ -15,7 +15,9 @@
  */
 package com.github.drinkjava2.functionstest;
 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.gpQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -55,6 +57,7 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
  * 
  * @author Yong Zhu
  */
+@SuppressWarnings("all")
 public class HandlersTest extends TestBase {
 
 	@Table(name = "DemoUser")
@@ -214,14 +217,27 @@ public class HandlersTest extends TestBase {
 
 	@Test
 	public void testPaginHandler() {
-		List<Map<String, Object>> result = gpQuery(new SSMapListHandler(DemoUser.class), new PaginHandler(2, 5),
-				"select u.** from DemoUser u where u.age>?", 0);
-		Assert.assertTrue(result.size() == 5);
+		List<Map<String, Object>> result1 = gpQuery(new MapListHandler(),
+				gctx().getDialect().pagin(2, 5, "select u.* from DemoUser u where u.age>?"), 0);
+		Assert.assertTrue(result1.size() == 5);
 
-		List<DemoUser> users = gpQuery(new EntityListHandler(DemoUser.class), new PaginHandler(2, 5),
-				"select u.** from DemoUser u where u.age>?", 0);
-		Assert.assertTrue(users.size() == 5);
+		List<Map<String, Object>> result2 = gpQuery(new MapListHandler(),
+				gctx().pagin(2, 5, "select u.* from DemoUser u where u.age>?"), 0);
+		Assert.assertTrue(result2.size() == 5);
 
+		List<DemoUser> users1 = gpQuery(new EntityListHandler(DemoUser.class), new PaginHandler(2, 5),
+				"select u.** from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(users1.size() == 5);
+
+		List<DemoUser> users2 = gpQuery(new EntityListHandler(DemoUser.class),
+				"select u.** from DemoUser u where u.age>?", 0, pagin(2, 5));
+		Assert.assertTrue(users2.size() == 5);
+
+		SqlBoxContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));
+		List<DemoUser> users3 = gpQuery(new EntityListHandler(DemoUser.class),
+				"select u.** from DemoUser u where u.age>?", 0);
+		Assert.assertTrue(users3.size() == 5);
+		SqlBoxContext.setThreadLocalSqlHandlers(null);
 	}
 
 	@Test
