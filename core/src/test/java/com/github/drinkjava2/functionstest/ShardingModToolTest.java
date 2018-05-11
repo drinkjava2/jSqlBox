@@ -143,7 +143,7 @@ public class ShardingModToolTest {
 		Assert.assertEquals(1, u.ctx().iQueryForLongValue("select count(*) from ", realTable, USE_SLAVE, realCtx));
 
 		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);
-		TheModUser u2 = new TheModUser().load(u.getId());
+		TheModUser u2 = new TheModUser().put("id",u.getId()).load();
 		System.out.println(u2.getName());
 	}
 

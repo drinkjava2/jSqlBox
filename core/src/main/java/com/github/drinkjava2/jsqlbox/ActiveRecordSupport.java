@@ -74,9 +74,9 @@ public interface ActiveRecordSupport {// NOSONAR
 	public void delete(Object... optionalSqlItems);
 
 	/**
-	 * Load entity from database by primary key, key can be single value or Map
+	 * Load entity from database by primary key, shardTable and shardDatabase fields if have
 	 */
-	public <T> T load(Object pkey, Object... optionalSqlItems);
+	public <T> T load(Object... optionalSqlItems);
 
 	/**
 	 * Link style set values for entity field, format like:

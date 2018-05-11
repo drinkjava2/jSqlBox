@@ -137,11 +137,11 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public <T> T load(Object pkey, Object... optionalSqlItems) {
+	public <T> T load(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.load(this.getClass(), pkey, optionalSqlItems);
+		return ctx.load(this,  optionalSqlItems);
 	}
 
 	@Override

@@ -131,12 +131,12 @@ public class EntityNetDemoTest extends TestBase {
 		new User().put("id", "u1").put("userName", "user1").insert();
 		Assert.assertEquals(1, ctx.nQueryForLongValue("select count(*) from usertb"));
 
-		User u = new User().load("u1");
+		User u = new User().put("id","u1").load();
 		Assert.assertEquals("user1", u.getUserName());
 
 		u.setUserName("user2");
 		u.update();
-		Assert.assertEquals("user2", ((User) (new User().load("u1"))).getUserName());
+		Assert.assertEquals("user2", ((User) (new User().put("name","u1").load())).getUserName());
 
 		u.delete();
 		Assert.assertEquals(0, ctx.nQueryForLongValue("select count(*) from usertb"));

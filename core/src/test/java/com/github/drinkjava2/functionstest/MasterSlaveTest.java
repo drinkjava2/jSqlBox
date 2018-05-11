@@ -113,7 +113,7 @@ public class MasterSlaveTest {
 	public void testCreateTables() {
 		Assert.assertEquals(10L, master.iQueryForLongValue("select count(*) from TheUser", SqlOption.USE_MASTER));
 		Assert.assertEquals(5L, master.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
-		TheUser u = new TheUser().useContext(master).load(0, " or name=?", JSQLBOX.param("Tom"), USE_MASTER,
+		TheUser u = new TheUser().useContext(master).put("id",0).load(" or name=?", JSQLBOX.param("Tom"), USE_MASTER,
 				new PrintSqlHandler());
 		System.out.println(u.getName());
 	}
@@ -179,7 +179,7 @@ public class MasterSlaveTest {
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
-		TheUser u3 = new TheUser().useContext(ctx).load(1L, USE_SLAVE);
+		TheUser u3 = new TheUser().useContext(ctx).put("id",1).load(USE_SLAVE);
 		System.out.println(u3.getName());
 	}
 

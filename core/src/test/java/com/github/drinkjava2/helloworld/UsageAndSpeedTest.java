@@ -422,7 +422,7 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void activeRecordStyle() {
+	public void activeRecordStyle() {//TODO: debug at here
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		UserAR user = new UserAR();
 		user.useContext(ctx); // Use ctx as SqlBoxContext
@@ -432,7 +432,7 @@ public class UsageAndSpeedTest {
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			UserAR user2 = user.load("Sam");
+			UserAR user2 = new UserAR().useContext(ctx).put("name","Sam").load();
 			user2.delete();
 		}
 	}

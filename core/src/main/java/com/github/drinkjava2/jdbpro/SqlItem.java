@@ -57,6 +57,7 @@ public class SqlItem {
 	}
 
 	/**
+	 * Will delete this method soon
 	 * Convert parameters in a collection to a SqlItem list
 	 */
 	@Deprecated
