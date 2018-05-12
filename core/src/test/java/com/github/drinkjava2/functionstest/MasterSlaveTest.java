@@ -113,7 +113,7 @@ public class MasterSlaveTest {
 	public void testCreateTables() {
 		Assert.assertEquals(10L, master.iQueryForLongValue("select count(*) from TheUser", SqlOption.USE_MASTER));
 		Assert.assertEquals(5L, master.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
-		TheUser u = new TheUser().useContext(master).put("id",0).load(" or name=?", JSQLBOX.param("Tom"), USE_MASTER,
+		TheUser u = new TheUser().useContext(master).loadById(0L," or name=?", JSQLBOX.param("Tom"), USE_MASTER,
 				new PrintSqlHandler());
 		System.out.println(u.getName());
 	}
@@ -123,7 +123,7 @@ public class MasterSlaveTest {
 		System.out.println("============Test testMasterSlaveUpdate==================");
 		// AutoChoose, not in Transaction, should use Master
 		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
-		TheUser u1 = master.load(TheUser.class, 3L, USE_MASTER);
+		TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
 	}
 
@@ -132,17 +132,17 @@ public class MasterSlaveTest {
 		System.out.println("============Test testMasterSlaveNoTransaction==================");
 		// AutoChoose, not in Transaction, should use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
-		TheUser u1 = master.load(TheUser.class, 1L);
+		TheUser u1 = master.loadById(TheUser.class, 1L);
 		System.out.println(u1.getName());
 
 		// Force use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, master.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
-		TheUser u2 = master.load(TheUser.class, 1L, USE_MASTER);
+		TheUser u2 = master.loadById(TheUser.class, 1L, USE_MASTER);
 		System.out.println(u2.getName());
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
-		TheUser u3 = master.load(TheUser.class, 1L, USE_SLAVE);
+		TheUser u3 = master.loadById(TheUser.class, 1L, USE_SLAVE);
 		System.out.println(u3.getName());
 	}
 
@@ -169,17 +169,17 @@ public class MasterSlaveTest {
 	public void queryInTransaction(SqlBoxContext ctx) {
 		// AutoChoose, in Transaction, should use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
-		TheUser u1 = ctx.load(TheUser.class, 1L);
+		TheUser u1 = ctx.loadById(TheUser.class, 1L);
 		System.out.println(u1.getName());
 
 		// Force use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
-		TheUser u2 = ctx.load(TheUser.class, 1L, USE_MASTER);
+		TheUser u2 = ctx.loadById(TheUser.class, 1L, USE_MASTER);
 		System.out.println(u2.getName());
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
-		TheUser u3 = new TheUser().useContext(ctx).put("id",1).load(USE_SLAVE);
+		TheUser u3 = new TheUser().useContext(ctx).put("id",1L).load(USE_SLAVE);
 		System.out.println(u3.getName());
 	}
 

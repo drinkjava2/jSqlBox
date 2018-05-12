@@ -416,13 +416,13 @@ public class UsageAndSpeedTest {
 			ctx.insert(user);
 			user.setAddress("China");
 			ctx.update(user);
-			UserPOJO sam2 = ctx.load(UserPOJO.class, "Sam");
+			UserPOJO sam2 = ctx.loadById(UserPOJO.class, "Sam");
 			ctx.delete(sam2);
 		}
 	}
 
 	@Test
-	public void activeRecordStyle() {//TODO: debug at here
+	public void activeRecordStyle() {// TODO: debug at here
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		UserAR user = new UserAR();
 		user.useContext(ctx); // Use ctx as SqlBoxContext
@@ -432,7 +432,7 @@ public class UsageAndSpeedTest {
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			UserAR user2 = new UserAR().useContext(ctx).put("name","Sam").load();
+			UserAR user2 = new UserAR().useContext(ctx).loadById("Sam");
 			user2.delete();
 		}
 	}
@@ -448,7 +448,7 @@ public class UsageAndSpeedTest {
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			UserAR user2 = ctx.load(UserAR.class, "Sam");
+			UserAR user2 = ctx.loadById(UserAR.class, "Sam");
 			user2.delete();
 		}
 	}
@@ -534,50 +534,60 @@ public class UsageAndSpeedTest {
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
 		config.setTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
 		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			UserAR user = new UserAR("Sam", "Canada");
-			UserAR tom = new UserAR("Tom", "China");
-			ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", put("user", user));
-			ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom));
-			Assert.assertEquals(1L,
-					ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
-							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
-			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
-					put("$t", tom), put("$nm", "name"));
-		}
+		UserAR user = new UserAR("Sam", "Canada");
+		UserAR tom = new UserAR("Tom", "China");
+		ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", put("user", user));
+		ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom));
+		Assert.assertEquals(1L,
+				ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
+						put("name", "Tom"), put("addr", "China"), put("$col", "name")));
+		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom), put("$t", tom),
+				put("$nm", "name"));
 	}
 
 	@Test
 	public void tXxxDynamicChangeTemplateEngine() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlTemplateEngine engine = new BasicSqlTemplate("[", "]", true, true);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			UserAR user = new UserAR("Sam", "Canada");
-			UserAR tom = new UserAR("Tom", "China");
-			ctx.tExecute("insert into users (name, address) values(#{user.name}, #{user.address})", put("user", user));
-			ctx.tExecute(engine, "update users set name=[user.name], address=[user.address]", put("user", tom));
-			Assert.assertEquals(1L,
-					ctx.tQueryForObject(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
-							put("name", "Tom"), put("addr", "China"), put("$col", "name")));
-			ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom),
-					put("$t", tom), put("$nm", "name"), engine);
-		}
+		UserAR user = new UserAR("Sam", "Canada");
+		UserAR tom = new UserAR("Tom", "China");
+		ctx.tExecute("insert into users (name, address) values(#{user.name}, #{user.address})", put("user", user));
+		ctx.tExecute(engine, "update users set name=[user.name], address=[user.address]", put("user", tom));
+		Assert.assertEquals(1L,
+				ctx.tQueryForObject(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
+						put("name", "Tom"), put("addr", "China"), put("$col", "name")));
+		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom), put("$t", tom),
+				put("$nm", "name"), engine);
 	}
 
 	/** Use const String can make SQL support Java Bean field refactoring */
 	@Test
 	public void iXxxxSupportRefactor() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.iExecute("insert into ", UserAR.TABLE, " ( ", //
-					UserAR.NAME, ",", param("Sam"), //
-					UserAR.ADDRESS, " ", param("Canada"), //
-					") ", valuesQuestions());
-			ctx.iExecute("delete from users where ", //
-					UserAR.NAME, "=", question("Sam"), //
-					" or ", UserAR.ADDRESS, "=", question("Canada")//
-			);
-		}
+		ctx.iExecute("insert into ", UserAR.TABLE, " ( ", //
+				UserAR.NAME, ",", param("Sam"), //
+				UserAR.ADDRESS, " ", param("Canada"), //
+				") ", valuesQuestions());
+		ctx.iExecute("delete from users where ", //
+				UserAR.NAME, "=", question("Sam"), //
+				" or ", UserAR.ADDRESS, "=", question("Canada")//
+		);
+	}
+
+	@Test
+	public void activeRecordLoadByIdMap() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		UserAR user = new UserAR();
+		user.useContext(ctx); // Use ctx as SqlBoxContext
+		user.setName("Sam");
+		user.setAddress("Canada");
+		user.insert();
+		user.setAddress("China");
+		user.update();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("name", "Sam");
+		UserAR user2 = new UserAR().useContext(ctx).loadById(map);
+		user2.delete();
 	}
 
 	@Test
@@ -586,25 +596,23 @@ public class UsageAndSpeedTest {
 		final String name = "Tom";
 		final String age = null;
 		final String address = "China";
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.iExecute("insert into users (", //
-					notNull(" name", name), //
-					notNull(" ,age ", age), //
-					" ,address ", param(address), //
-					") ", valuesQuestions());
-			ctx.pExecute("update users set ", //
-					notNull(" name=?,", name), //
-					notNull(" age=?,", age), //
-					sql(" address=? "), address //
-			);
-			Assert.assertEquals(1L, ctx.iQueryForLongValue(//
-					"select count(*) from users where 1=1 ", //
-					notNull(" and name=? ", name), //
-					"Someother".equals(name) ? ctx.iPrepare(" and Someother>?  ", param(name)) : "", //
-					"China".equals(address) ? ctx.pPrepare(" and address=?  ", address) : ""//
-			));
-			ctx.nExecute("delete from users");
-		}
+		ctx.iExecute("insert into users (", //
+				notNull(" name", name), //
+				notNull(" ,age ", age), //
+				" ,address ", param(address), //
+				") ", valuesQuestions());
+		ctx.pExecute("update users set ", //
+				notNull(" name=?,", name), //
+				notNull(" age=?,", age), //
+				sql(" address=? "), address //
+		);
+		Assert.assertEquals(1L, ctx.iQueryForLongValue(//
+				"select count(*) from users where 1=1 ", //
+				notNull(" and name=? ", name), //
+				"Someother".equals(name) ? ctx.iPrepare(" and Someother>?  ", param(name)) : "", //
+				"China".equals(address) ? ctx.pPrepare(" and address=?  ", address) : ""//
+		));
+		ctx.nExecute("delete from users");
 	}
 
 }

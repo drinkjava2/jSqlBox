@@ -51,7 +51,7 @@ public class PojoClassBindTest extends TestBase {
 		PojoBeanSample pojo = new PojoBeanSample();
 		pojo.setField1("test");
 		ctx.insert(pojo);
-		PojoBeanSample pojo2 = ctx.load(PojoBeanSample.class, "test");
+		PojoBeanSample pojo2 = ctx.loadById(PojoBeanSample.class, "test");
 		Assert.assertEquals("test", pojo2.getField1());
 		System.out.println(pojo2.getField1());
 	}

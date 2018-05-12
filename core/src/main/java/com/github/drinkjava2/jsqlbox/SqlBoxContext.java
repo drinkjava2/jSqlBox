@@ -198,6 +198,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> T load(Object entityBean,  Object... optionalSqlItems) {
 		return SqlBoxContextUtils.load(this, entityBean, optionalSqlItems);
 	}
+	
+	/** Load an entity from database by key, key can be one object or a Map */
+	public <T> T loadById(Class<T> entityClass, Object idOrIdMap, Object... optionalSqlItems) {
+		return  SqlBoxContextUtils.loadById(this, entityClass,idOrIdMap, optionalSqlItems);
+	}
 
 	public String doShardTable(Object entityOrClass, Object... shardvalues) {
 		SqlItem item = shardTable(entityOrClass, shardvalues);

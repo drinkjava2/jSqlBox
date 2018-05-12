@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
+import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
@@ -42,9 +43,9 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class ShardingModToolTest {
 
-	final static int MASTER_DATABASE_QTY = 5;
-	final static int SLAVE_DATABASE_QTY = 10; // each master has 10 slaves
-	final static int TABLE_QTY = 15; // each table be sharded to 15 tables
+	final static int MASTER_DATABASE_QTY = 7;
+	final static int SLAVE_DATABASE_QTY = 7; // each master has 16 slaves
+	final static int TABLE_QTY = 8; // each table be sharded to 15 tables
 
 	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
 
@@ -57,7 +58,7 @@ public class ShardingModToolTest {
 		private String name;
 
 		@Snowflake
-		@ShardDatabase({ "MOD", "3" })
+		@ShardDatabase({ "MOD", "7" })
 		private Long databaseId;
 
 		//@formatter:off
@@ -132,19 +133,20 @@ public class ShardingModToolTest {
 	}
 
 	@Test
-	public void testActiveRecordOnMasterSlaves() {// TODO XA or TCC transaction for multiple databases
+	public void testActiveRecordOnMasterSlaves() {// TODO XA or TCC transaction
+		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random set one
 		// ActiveRecord mode, here I don't know saved to which database and which table
-		TheModUser u = new TheModUser().useContext(masters[2]).put("name", "user").insert(USE_BOTH);
+		TheModUser u = new TheModUser().put("name", "user").insert(USE_BOTH); 
 		String realTable = u.ctx().doShardTable(u, u.getId());
+		System.out.println("realTable"+realTable);
 		SqlBoxContext realCtx = u.ctx().doShardDatabase(u, u.getDatabaseId());
-		realCtx.setAllowShowSQL(true);
-		Assert.assertEquals(1, u.ctx().iQueryForLongValue("select count(*) from ", realTable, USE_SLAVE, realCtx));
-		Assert.assertEquals(1, u.ctx().iQueryForLongValue("select count(*) from ", realTable, USE_MASTER, realCtx));
-		Assert.assertEquals(1, u.ctx().iQueryForLongValue("select count(*) from ", realTable, USE_SLAVE, realCtx));
+		System.out.println("realCtx"+realCtx);
 
-		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);
-		TheModUser u2 = new TheModUser().put("id",u.getId()).load();
-		System.out.println(u2.getName());
+
+		TheModUser u2 = new TheModUser();
+		u2.setId(u.getId());
+		u2.setDatabaseId(u.getDatabaseId());
+		u2.load(new PrintSqlHandler());
 	}
 
 	// @Test
