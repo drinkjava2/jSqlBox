@@ -1,0 +1,2 @@
+1) jSqlBox support Java6, but all demo need run on Java8, all demos can use "mvn test" command to run unit test.
+2) jbooox and jsqlbox-in-spring are web-app demos, a web-server like Tomcat or WebLogic is needed.
