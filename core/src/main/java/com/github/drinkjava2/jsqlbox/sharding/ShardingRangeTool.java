@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -36,19 +37,31 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingRangeTool implements ShardingTool {
 
 	@Override
-	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object shardKey1, Object shardkey2) {
+	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
 		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
 		ColumnModel col = t.getShardTableColumn();
 		if (col == null)
 			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
-
 		if (!"RANGE".equalsIgnoreCase(col.getShardTable()[0]))
 			return null;// NOSONAR
-
-		if (shardKey1 == null)
-			throw new SqlBoxException("ShardKey value can not be null");
-
 		String tableSize = col.getShardTable()[1];
+
+		Object shardKey1 = null;
+		Object shardkey2 = null;
+		if (shardkey == null || shardkey.length == 0) {
+			if (entityOrClass instanceof Class)
+				throw new SqlBoxException("entityOrClass need ShardTable key value");
+			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
+		} else if (shardkey.length == 1) {
+			shardKey1 = shardkey[0];
+		} else {
+			shardKey1 = shardkey[0];
+			shardkey2 = shardkey[1];
+		}
+		if (shardKey1 == null)
+			throw new SqlBoxException("ShardTable key value can not be null");
+
+ 
 		if (shardkey2 != null) {
 			return calculateTableNames(t.getTableName(), shardKey1, shardkey2, tableSize);
 		} else {
@@ -69,21 +82,32 @@ public class ShardingRangeTool implements ShardingTool {
 	}
 
 	@Override
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object shardKey1,
-			Object shardkey2) {
+	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
 
 		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
-		ColumnModel col = t.getShardTableColumn();
+		ColumnModel col = t.getShardDatabaseColumn();
 		if (col == null)
 			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
-
-		if (!"RANGE".equalsIgnoreCase(col.getShardTable()[0]))
+		if (!"RANGE".equalsIgnoreCase(col.getShardDatabase()[0]))
 			return null;// NOSONAR
-
+		String tableSize = col.getShardDatabase()[1];
+		
+		Object shardKey1 = null;
+		Object shardkey2 = null;
+		if (shardkey == null || shardkey.length == 0) {
+			if (entityOrClass instanceof Class)
+				throw new SqlBoxException("entityOrClass need ShardDatabase key value");
+			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
+		} else if (shardkey.length == 1) {
+			shardKey1 = shardkey[0];
+		} else {
+			shardKey1 = shardkey[0];
+			shardkey2 = shardkey[1];
+		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("ShardKey value can not be null");
+			throw new SqlBoxException("ShardDatabase key value can not be null");
 
-		String tableSize = col.getShardTable()[1];
+ 
 		if (shardkey2 != null) {
 			return calculateDatabases(ctx, shardKey1, shardkey2, tableSize);
 		} else {
@@ -106,14 +130,14 @@ public class ShardingRangeTool implements ShardingTool {
 	 * Give tableName, keyValue, tableSize, calculate a tableName_x String
 	 */
 	private static String calculateTableName(String tableName, Object keyValue, String tableSize) {
-		long shardKeyValue = Long.parseLong((String) keyValue);
+		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
 		long size = Long.parseLong(tableSize);
 		return new StringBuffer(tableName).append("_").append(shardKeyValue / size).toString();
 	}
 
 	/**
-	 * Give tableName, firstKey, secondKey, tableSize, return a tableName_x
-	 * String Array
+	 * Give tableName, firstKey, secondKey, tableSize, return a tableName_x String
+	 * Array
 	 */
 	private static String[] calculateTableNames(String tableName, Object firstKey, Object secondKey, String tableSize) {
 		long from = Long.parseLong(String.valueOf(firstKey));
@@ -130,8 +154,8 @@ public class ShardingRangeTool implements ShardingTool {
 	}
 
 	private static SqlBoxContext calculateDatabase(SqlBoxContext ctx, Object keyValue, String tableSize) {
-		long shardKeyValue = Long.parseLong((String) keyValue);
-		long size = Long.parseLong(tableSize);
+		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
+		long size = Long.parseLong(String.valueOf(tableSize));
 		return (SqlBoxContext) ctx.getMasters()[(int) (shardKeyValue / size)];
 	}
 

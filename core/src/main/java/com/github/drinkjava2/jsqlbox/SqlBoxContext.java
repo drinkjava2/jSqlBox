@@ -11,9 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDatabase;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTable;
-
 import java.util.List;
 import java.util.Map;
 
@@ -168,6 +165,20 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return entity;
 	}
 
+	public String getShardedTB(Object entityOrClass, Object... shardvalues) { 
+		String table = SqlBoxContextUtils.getShardedTB(this,entityOrClass, shardvalues);
+		if (table == null)
+			throw new SqlBoxException("No found ShardingTool can handle target '" + entityOrClass + "' ");
+		return table;
+	}
+
+	public SqlBoxContext getShardedDB(Object entityOrClass, Object... shardvalues) {
+		SqlBoxContext ctx = SqlBoxContextUtils.getShardedDB(this,entityOrClass, shardvalues);
+		if (ctx == null)
+			throw new SqlBoxException("Not found ShardingTool can handle entity '" + entityOrClass + "' ");
+		return ctx;
+	}
+
 	/** Create a new instance and bind current SqlBoxContext to it */
 	public void create(Class<?> entityClass) {
 		Object entity = null;
@@ -195,40 +206,27 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T load(Object entityBean,  Object... optionalSqlItems) {
+	public <T> T load(Object entityBean, Object... optionalSqlItems) {
 		return SqlBoxContextUtils.load(this, entityBean, optionalSqlItems);
 	}
-	
+
 	/** Load an entity from database by key, key can be one object or a Map */
 	public <T> T loadById(Class<T> entityClass, Object idOrIdMap, Object... optionalSqlItems) {
-		return  SqlBoxContextUtils.loadById(this, entityClass,idOrIdMap, optionalSqlItems);
+		return SqlBoxContextUtils.loadById(this, entityClass, idOrIdMap, optionalSqlItems);
 	}
 
-	public String doShardTable(Object entityOrClass, Object... shardvalues) {
-		SqlItem item = shardTable(entityOrClass, shardvalues);
-		String table = SqlBoxContextUtils.handleShardTable(this, item.getParameters()[0], item.getParameters()[1],
-				item.getParameters()[2]);
-		if (table == null)
-			throw new SqlBoxException("No found ShardingTool can handle target '" + entityOrClass + "' ");
-		return table;
-	}
-
-	public SqlBoxContext doShardDatabase(Object entityOrClass, Object... shardvalues) {
-		SqlItem item = shardDatabase(entityOrClass, shardvalues);
-		SqlBoxContext ctx = SqlBoxContextUtils.handleShardDatabase(this, item.getParameters()[0],
-				item.getParameters()[1], item.getParameters()[2]);
-		if (ctx == null)
-			throw new SqlBoxException("Not found ShardingTool can handle entity '" + entityOrClass + "'  ");
-		return ctx;
-	}
-
- 
 	@Override
 	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
-		String table = SqlBoxContextUtils.handleShardTable(this, item.getParameters()[0], item.getParameters()[1],
-				item.getParameters()[2]);
+		Object[] params = item.getParameters();
+		String table = null;
+		if (params.length == 1)
+			table = SqlBoxContextUtils.getShardedTB(this, params[0]);
+		else if (params.length == 2)
+			table = SqlBoxContextUtils.getShardedTB(this, params[0], params[1]);
+		else
+			table = SqlBoxContextUtils.getShardedTB(this, params[0], params[1], params[2]);
 		if (table == null)
-			throw new SqlBoxException("No ShardingTool can handle target '" + item.getParameters()[0] + "'");
+			throw new SqlBoxException("No ShardingTool can handle target '" + params[0] + "'");
 		else
 			sql.append(table);
 		return table;
@@ -236,10 +234,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	@Override
 	protected DbPro handleShardDatabase(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
-		SqlBoxContext ctx = SqlBoxContextUtils.handleShardDatabase(this, item.getParameters()[0],
-				item.getParameters()[1], item.getParameters()[2]);
+		Object[] params = item.getParameters();
+		SqlBoxContext ctx = null;
+		if (params.length == 1)
+			ctx = SqlBoxContextUtils.getShardedDB(this, params[0]);
+		else if (params.length == 2)
+			ctx = SqlBoxContextUtils.getShardedDB(this, params[0], params[1]);
+		else
+			ctx = SqlBoxContextUtils.getShardedDB(this, params[0], params[1], params[2]);
 		if (ctx == null)
-			throw new SqlBoxException("No ShardingTool can handle entity '" + item.getParameters()[0] + "'");
+			throw new SqlBoxException("No ShardingTool can handle target '" + params[0] + "'");
 		else
 			predSQL.setSwitchTo(ctx);
 		return ctx;

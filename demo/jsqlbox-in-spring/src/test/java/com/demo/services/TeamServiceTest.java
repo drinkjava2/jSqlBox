@@ -15,6 +15,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import com.demo.init.BaseTestConfig;
 import com.demo.model.Team;
 import com.demo.service.TeamService;
+import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
@@ -40,7 +41,7 @@ public class TeamServiceTest {
 		for (String ddl : ddls)
 			sbCtx.nExecute(ddl);
 		for (int i = 0; i < 5; i++)
-			new Team().put("name", "Team" + i, "rating", i * 10).insert();
+			new Team().put("name", "Team" + i, "rating", i * 10).insert(new PrintSqlHandler());
 		System.out.println("========== TeamServiceTest initialized=====");
 	}
 

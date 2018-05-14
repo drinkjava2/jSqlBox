@@ -24,7 +24,7 @@ public class TestBase {
 		ds.setUsername("sa");
 		ds.setPassword("");
 
-		SqlBoxContext.resetGlobalSqlBoxVariants();
+		SqlBoxContext.resetGlobalVariants();
 		// LambdSqlItemPreparer only for Java8
 		SqlBoxContext.setGlobalNextSpecialSqlItemPreparers(new SpecialSqlItemPreparer[] { new LambdSqlItemPreparer() });
 		// SqlBoxContext.setGlobalNextAllowShowSql(true);

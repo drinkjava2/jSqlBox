@@ -50,10 +50,9 @@ public class PrintSqlHandler extends DefaultOrderSqlHandler {
 			break;
 		}
 
-		sb.append("| Time use:  " + (end - start) + "ms");
+		sb.append("| Time use:  " + (end - start) + "ms\n");
 		if(!StrUtils.isEmpty(runner.getName()))
-			 sb.append(" - from "+runner.getName());
-		sb.append("\n");
+			 sb.append("| DB:        "+runner.getName()).append("\n");
 		sb.append("==============================");
 		System.out.println(sb.toString());
 		return obj;

@@ -15,10 +15,6 @@
  */
 package com.github.drinkjava2.jdbpro;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 /**
  * SqlItem store SQL SqlItemType type and value array
  * 
@@ -56,17 +52,4 @@ public class SqlItem {
 		this.parameters = parameters;
 	}
 
-	/**
-	 * Will delete this method soon
-	 * Convert parameters in a collection to a SqlItem list
-	 */
-	@Deprecated
-	public static List<Object> toParamSqlItemList(Collection<?> collection) {
-		List<Object> result = new ArrayList<Object>();
-		if (collection == null || collection.isEmpty())
-			return result;
-		for (Object obj : collection)
-			result.add(new SqlItem(SqlOption.PARAM, obj));
-		return result;
-	}
 }

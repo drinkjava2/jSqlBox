@@ -26,27 +26,32 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 public interface ShardingTool {// NOSONAR
 	/**
-	 * Dealing a SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey1, optionalShardKey2) item, return real table names array
+	 * Dealing a SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey1,
+	 * optionalShardKey2) item, return real table names array
 	 * 
 	 * @param ctx
 	 *            Current SqlBoxContext instance
-	 * @param item
-	 *            The SqlItem which stored sharding query parameters
-	 * @return A String[] stored table names or null if the sharding strategy is not fit for current
-	 *         implementation
+	 * @param entityOrClass
+	 *            The entity or class need do sharding
+	 * @param shardKey
+	 *            The shard key or keys
+	 * @return A String[] stored table names or null if the sharding strategy is not
+	 *         fit for current implementation
 	 */
-	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object shardKey1, Object shardkey2);
-	
+	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardKey);
+
 	/**
 	 * Dealing a ShardTable SqlItem, return real master SqlBoxContexts array
 	 * 
 	 * @param ctx
 	 *            Current SqlBoxContext instance
-	 * @param item
-	 *            The SqlItem which stored sharding query parameters
-	 * @return A SqlBoxContext[] stored master SqlBoxContexts or null if the sharding strategy is not fit for current
-	 *         implementation
+	 * @param entityOrClass
+	 *            The entity or class need do sharding
+	 * @param shardKey
+	 *            The shard key or keys
+	 * @return A SqlBoxContext[] stored master SqlBoxContexts or null if the
+	 *         sharding strategy is not fit for current implementation
 	 */
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object shardKey1, Object shardkey2);
+	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardKey);
 
 }

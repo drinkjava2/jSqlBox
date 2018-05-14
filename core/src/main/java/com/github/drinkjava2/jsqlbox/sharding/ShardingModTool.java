@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -35,7 +36,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingModTool implements ShardingTool {
 
 	@Override
-	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object shardKey1, Object shardkey2) {
+	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
 		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
 		ColumnModel col = t.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
@@ -44,10 +45,22 @@ public class ShardingModTool implements ShardingTool {
 		// return null if is not "MOD" shardTable strategy
 		if (!"MOD".equalsIgnoreCase(col.getShardTable()[0]))
 			return null;// NOSONAR
-
 		String modNumber = col.getShardTable()[1];
+
+		Object shardKey1 = null;
+		Object shardkey2 = null;
+		if (shardkey == null || shardkey.length == 0) {
+			if (entityOrClass instanceof Class)
+				throw new SqlBoxException("entityOrClass need ShardTable key value");
+			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
+		} else if (shardkey.length == 1) {
+			shardKey1 = shardkey[0];
+		} else {
+			shardKey1 = shardkey[0];
+			shardkey2 = shardkey[1];
+		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("Shardkey value can not be null");
+			throw new SqlBoxException("ShardTable key value can not be null");
 
 		Set<String> set = new HashSet<String>();
 
@@ -68,8 +81,7 @@ public class ShardingModTool implements ShardingTool {
 	}
 
 	@Override
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object shardKey1, // NOSONAR
-			Object shardkey2) {
+	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
 		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
 
 		ColumnModel col = t.getShardDatabaseColumn();
@@ -79,10 +91,22 @@ public class ShardingModTool implements ShardingTool {
 		// return null if is not "MOD" shardTable strategy
 		if (!"MOD".equalsIgnoreCase(col.getShardDatabase()[0]))
 			return null;// NOSONAR
-
 		String modNumber = col.getShardDatabase()[1];
+
+		Object shardKey1 = null;
+		Object shardkey2 = null;
+		if (shardkey == null || shardkey.length == 0) {
+			if (entityOrClass instanceof Class)
+				throw new SqlBoxException("entityOrClass need ShardDatabase key value");
+			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
+		} else if (shardkey.length == 1) {
+			shardKey1 = shardkey[0];
+		} else {
+			shardKey1 = shardkey[0];
+			shardkey2 = shardkey[1];
+		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("Shardkey value can not be null");
+			throw new SqlBoxException("ShardDatabase key value can not be null");
 
 		Set<SqlBoxContext> set = new HashSet<SqlBoxContext>();
 

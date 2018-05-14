@@ -82,38 +82,47 @@ public interface ActiveRecordJava8 extends ActiveRecordSupport {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public default <T> T insert() {
+	public default <T> T insert(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.insert(this);
+		ctx.insert(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public default <T> T update() {
+	public default <T> T update(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.update(this);
+		ctx.update(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@Override
-	public default void delete() {
+	public default void delete(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.delete(this);
+		ctx.delete(this, optionalSqlItems);
 	}
 
 	@Override
-	public default <T> T load(Object pkey) {
+	public default <T> T load(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.load(this.getClass(), pkey);
+		return ctx.load(this, optionalSqlItems);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public default <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
+		SqlBoxContext ctx = ctx();
+		if (ctx == null)
+			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+		return  ctx.loadById((Class<T>)this.getClass(), idOrIdMap, optionalSqlItems);
 	}
 
 	@Override

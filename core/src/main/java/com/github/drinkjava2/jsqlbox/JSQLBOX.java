@@ -42,32 +42,26 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return new PaginHandler(pageNumber, pageSize);
 	}
 
-	public static SqlItem shardTable(Object entityOrClass, Object... shardvalues) {
-		if (shardvalues == null || shardvalues.length < 1 || shardvalues.length > 2)
-			throw new SqlBoxException("shardValues should have 1 or 2 values");
-		if (shardvalues.length == 1)
-			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[0], null);
+ 
+	public static SqlItem shardTB(Object entityOrClass, Object... shardvalues) { 
+		if (shardvalues.length == 0)
+			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass);
+		else if (shardvalues.length == 1)
+			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[0]);
 		else
-			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[0], shardvalues[1]);
+			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[1]);
 	}
 
-	public static SqlItem shardDatabase(Object entityOrClass, Object... shardvalues) {
-		if (shardvalues == null || shardvalues.length < 1 || shardvalues.length > 2)
-			throw new SqlBoxException("shardValues should have 1 or 2 values");
-		if (shardvalues.length == 1)
-			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[0], null);
+ 
+	public static SqlItem shardDB(Object entityOrClass, Object... shardvalues) {
+		if (shardvalues.length == 0)
+			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass);
+		else if (shardvalues.length == 1)
+			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[0]);
 		else
-			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[0], shardvalues[1]);
+			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[1]);
 	}
-
-	public static String gDoShardTable(Object entityOrClass, Object... shardvalues) {
-		return gctx().doShardTable(entityOrClass, shardvalues);
-	}
-
-	public static SqlBoxContext gDoShardDatabase(Object entityOrClass, Object... shardvalues) {
-		return gctx().doShardDatabase(entityOrClass, shardvalues);
-	}
-
+	 
 	//@formatter:off
 		protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
 		public static <T> T giQuery(Object... inlineSQL) {return SqlBoxContext.gctx().iQuery(inlineSQL);}
@@ -76,7 +70,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		public static String giQueryForString(Object... inlineSQL) {return SqlBoxContext.gctx().iQueryForString(inlineSQL);}
 		public static List<Map<String, Object>> giQueryForMapList(Object... items) {return SqlBoxContext.gctx().iQueryForMapList(items);}
 		public static int giUpdate(Object... inlineSQL) {return SqlBoxContext.gctx().iUpdate(inlineSQL);}
-		public static int giInsert(Object... inlineSQL) {return SqlBoxContext.gctx().iInsert(inlineSQL);}
+		public static <T> T giInsert(Object... inlineSQL) {return SqlBoxContext.gctx().iInsert(inlineSQL);}
 		public static <T> T giExecute(Object... inlineSQL) {return SqlBoxContext.gctx().iExecute(inlineSQL); }
 		 
 		public static <T> T gpQuery(Object... inlineSQL) {return SqlBoxContext.gctx().pQuery(inlineSQL);}
@@ -85,7 +79,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		public static String gpQueryForString(Object... inlineSQL) {return SqlBoxContext.gctx().pQueryForString(inlineSQL);}
 		public static List<Map<String, Object>> gpQueryForMapList(Object... items) {return SqlBoxContext.gctx().pQueryForMapList(items);}
 		public static int gpUpdate(Object... inlineSQL) {return SqlBoxContext.gctx().pUpdate(inlineSQL);}
-		public static int gpInsert(Object... inlineSQL) {return SqlBoxContext.gctx().pInsert(inlineSQL);}
+		public static <T> T gpInsert(Object... inlineSQL) {return SqlBoxContext.gctx().pInsert(inlineSQL);}
 		public static <T> T gpExecute(Object... inlineSQL) {return SqlBoxContext.gctx().pExecute(inlineSQL); } 
 
 		public static <T> T gtQuery(Object... items) {return SqlBoxContext.gctx().tQuery(items);}
@@ -94,7 +88,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		public static String gtQueryForString(Object... items) {return SqlBoxContext.gctx().tQueryForString(items);}
 		public static List<Map<String, Object>> gtQueryForMapList(Object... items) {return SqlBoxContext.gctx().tQueryForMapList(items);}
 		public static int gtUpdate(Object... items) {return SqlBoxContext.gctx().tUpdate(items);}
-		public static int gtInsert(Object... items) {return SqlBoxContext.gctx().tInsert(items);}
+		public static <T> T gtInsert(Object... items) {return SqlBoxContext.gctx().tInsert(items);}
 		public static <T> T gtExecute(Object... items) {return SqlBoxContext.gctx().tExecute(items);}
 		
 		public static <T> T gnQuery(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {return SqlBoxContext.gctx().nQuery(conn, rsh, sql, params);}

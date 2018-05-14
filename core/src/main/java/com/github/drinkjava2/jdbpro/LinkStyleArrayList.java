@@ -27,22 +27,9 @@ import java.util.ArrayList;
 @SuppressWarnings("serial")
 public class LinkStyleArrayList<T> extends ArrayList<T> {
 
-	/*
-	 * use append instead
-	 */
-	@Deprecated
-	@Override
-	public boolean add(T element) {
-		return super.add(element);
-	}
-
-	/*
-	 * Use insert instead
-	 */
-	@Deprecated
-	@Override
-	public void add(int index, T element) {
-		super.add(index, element);
+	public LinkStyleArrayList<T> frontAdd(T element) {
+		super.add(0, element);
+		return this;
 	}
 
 	public LinkStyleArrayList<T> append(T element) {

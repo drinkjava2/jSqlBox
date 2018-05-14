@@ -29,9 +29,7 @@ import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
-import com.github.drinkjava2.jdialects.annotation.jdia.Snowflake;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -44,7 +42,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.0
  */
 
-public class ShardingModToolTest {
+public class ShardingRangeToolTest {
 
 	final static int MASTER_DATABASE_QTY = 7;
 	final static int SLAVE_DATABASE_QTY = 7; // each master has 7 slaves
@@ -53,15 +51,15 @@ public class ShardingModToolTest {
 	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
 
 	public static class TheUser extends ActiveRecord {
-		@ShardTable({ "MOD", "8" })
-		@Snowflake
+		// 0~99 store in database0, 100~199 store in database1...
+		@ShardTable({ "RANGE", "100" })
 		@Id
 		private Long id;
 
 		private String name;
 
-		@Snowflake
-		@ShardDatabase({ "MOD", "7" })
+		// 0~9 store in database0, 10~99 store in database1...
+		@ShardDatabase({ "RANGE", "10" })
 		private Long databaseId;
 
 		//@formatter:off
@@ -81,7 +79,6 @@ public class ShardingModToolTest {
 			masters[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("masters" + i));
 			masters[i].setMasters(masters);
 			masters[i].setSlaves(slaves);
-			masters[i].setSnowflakeCreator(new SnowflakeCreator(5, 5, 0, i));
 			masters[i].setName("Master" + i);
 			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
 				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
@@ -116,24 +113,28 @@ public class ShardingModToolTest {
 
 	@Test
 	public void testInsertSQLs() {
-		masters[2].iExecute("insert into ", shardTB(TheUser.class, 10), shardDB(TheUser.class, 3),
-				" (id, name, databaseId) values(?,?,?)", param(10, "u1", 3), USE_BOTH, new PrintSqlHandler());
-		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from ", shardTB(TheUser.class, 10),
-				shardDB(TheUser.class, 3), USE_SLAVE, new PrintSqlHandler()));
-		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from ", shardTB(TheUser.class, 10),
-				shardDB(TheUser.class, 3)));
+		long tbID = 301L;
+		long dbID = 21L;
+		System.out.println(masters[2].getShardedDB(TheUser.class, dbID).getName());
+		masters[2].iExecute("insert into ", shardTB(TheUser.class, tbID), shardDB(TheUser.class, dbID),
+				" (id, name, databaseId) values(?,?,?)", param(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from ", shardTB(TheUser.class, tbID),
+				shardDB(TheUser.class, dbID), USE_SLAVE, new PrintSqlHandler()));
+		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from ", shardTB(TheUser.class, tbID),
+				shardDB(TheUser.class, dbID)));
 	}
 
 	@Test
 	public void testActiveRecord() {// issue XA or TCC transaction needed
 		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
+		TheUser u1 = new TheUser();
+		u1.setId(301L);
+		u1.setDatabaseId(21L);
+		u1.setName("Tom");
 
-		// Don't know saved to where
-		TheUser u1 = new TheUser().put("name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
-
-		Assert.assertEquals(masters[4].getShardedDB(TheUser.class, u1.getDatabaseId()).getName(),
-				u1.ctx().getShardedDB(u1).getName());
-		Assert.assertEquals(masters[4].getShardedTB(TheUser.class, u1.getId()), u1.ctx().getShardedTB(u1));
+		u1.insert(USE_BOTH, new PrintSqlHandler()); // Don't know saved to where
+		Assert.assertEquals("Master2", u1.ctx().getShardedDB(u1).getName());
+		Assert.assertEquals("TheUser_3", u1.ctx().getShardedTB(u1));
 
 		u1.setName("Sam");
 		u1.update(USE_BOTH, new PrintSqlHandler());
@@ -141,12 +142,13 @@ public class ShardingModToolTest {
 		TheUser u2 = new TheUser();
 		u2.setId(u1.getId());
 		u2.setDatabaseId(u1.getDatabaseId());
-		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use slave
+		u2.load(new PrintSqlHandler(), " and name=?", param("Sam"), new PrintSqlHandler()); // use slave
 		Assert.assertEquals("Sam", u2.getName());
 
-		u2.delete(new PrintSqlHandler());// only deleted master
+		u2.delete(new PrintSqlHandler());// only deleted master except use "USE_BOTH" option
 		Assert.assertEquals(0, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2), USE_MASTER));
-		Assert.assertEquals(1, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2)));// slave exist
+		Assert.assertEquals(1, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2)));
+
 	}
 
 }
