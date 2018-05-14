@@ -25,5 +25,11 @@ call mvn clean
 call mvn eclipse:clean
 
 cd..
+cd jsqlbox-xa-atomikos
+call mvn clean
+call mvn eclipse:clean
+
+
+cd..
 cd..
 

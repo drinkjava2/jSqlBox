@@ -17,7 +17,12 @@ call mvn eclipse:eclipse
 
 cd..
 cd jsqlbox-in-java8
+call mvn eclipse:eclipse 
+
+cd..
+cd jsqlbox-xa-atomikos
 call mvn eclipse:eclipse
+
 
 cd..
 cd..
