@@ -13,18 +13,27 @@ package jsqlboxtx;
 
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
 
-import org.h2.jdbcx.JdbcConnectionPool;
+import org.h2.jdbcx.JdbcDataSource;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.jta.JtaTransactionManager;
 
+import com.atomikos.icatch.jta.UserTransactionImp;
+import com.atomikos.icatch.jta.UserTransactionManager;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.atomikos.jdbc.AtomikosSQLException;
+import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.TX;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-
-import junit.framework.Assert;
 
 /**
  * ActiveRecordDemoTest of jSqlBox configurations
@@ -35,41 +44,83 @@ import junit.framework.Assert;
 
 public class XATransactionTest {
 
-	final static int MASTER_DATABASE_QTY = 3; // total 3 databases
-	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
+	final static int MASTER_DATABASE_QTY = 2; // total 2 databases
+	final static SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
+	final static AtomikosDataSourceBean[] xaDataSources = new AtomikosDataSourceBean[MASTER_DATABASE_QTY];
 
 	@Before
 	public void init() {
-		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);// random choose 1 as default context
+		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
-			masters[i] = new SqlBoxContext(JdbcConnectionPool.create(
-					"jdbc:h2:mem:Database" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""));
+			JdbcDataSource ds = new JdbcDataSource();
+			ds.setUrl("jdbc:h2:mem:H2DB" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			ds.setUser("sa");
+			ds.setPassword("");
+			xaDataSources[i] = new AtomikosDataSourceBean();
+			xaDataSources[i].setUniqueResourceName("xads" + i);
+			xaDataSources[i].setXaDataSource(ds);
+			xaDataSources[i].setPoolSize(5);
+			try {
+				xaDataSources[i].init();
+			} catch (AtomikosSQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			masters[i] = new SqlBoxContext(xaDataSources[i]);
 			masters[i].setMasters(masters);
-			masters[i].setName("Master" + i);
+
 		}
-		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);
+		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);// random choose 1
 		TableModel model = TableModelUtils.entity2Model(Bank.class);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++)
-			for (String ddl : masters[i].getDialect().toCreateDDL(model))
+			for (String ddl : masters[i].toCreateDDL(model))
 				masters[i].iExecute(ddl);
 	}
 
-	public void doInsertAccount() {
-		new Bank().put("userId", 0L, "balance", 100L).insert();
-		new Bank().put("userId", 1L, "balance", 100L).insert();
-		new Bank().put("userId", 2L, "balance", 1 / 0).insert();// throw exception
+	@After
+	public void cleanup() {
+		for (AtomikosDataSourceBean ds : xaDataSources) {
+			ds.close();
+		}
+		// Did not close dataSource pools because no other unit tests use them
+	}
+
+	@TX
+	public void doInsertThreeAccount() {
+		new Bank().put("bankId", 0L, "balance", 100L).insert(); // Also rollback
+		Assert.assertEquals(1, giQueryForLongValue("select count(*) from bank", masters[0]));
+		new Bank().put("bankId", 1L, "balance" + 1 / 0, -100L).insert();// rollback
+	}
+
+	public static class SpringJtaBox extends BeanBox {
+		public TransactionInterceptor create() {
+			JtaTransactionManager jta = new JtaTransactionManager();
+			jta.setUserTransaction(new UserTransactionImp());
+			
+			UserTransactionManager tm = new UserTransactionManager();
+			tm.setForceShutdown(true);
+			jta.setTransactionManager(tm);
+			jta.setAllowCustomIsolationLevels(true);
+			
+			TransactionInterceptor i=null;
+			
+			//SpringTxImp a= new SpringTxImp(jta, SpringTxImp.ISOLATION_READ_COMMITTED);
+			return i;
+		}
 	}
 
 	@Test
-	public void testNonXATransaction() {
+	public void testXATransaction() {
+		BeanBox.regAopAroundAnnotation(TX.class, SpringJtaBox.class);
+		XATransactionTest tester = BeanBox.getBean(XATransactionTest.class);
 		try {
-			doInsertAccount();
+			tester.doInsertThreeAccount();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
-		Assert.assertEquals(1L, giQueryForLongValue("select count(*) from account", masters[0]));
-		Assert.assertEquals(1L, giQueryForLongValue("select count(*) from account", masters[1]));
-		Assert.assertEquals(0L, giQueryForLongValue("select count(*) from account", masters[2]));// Non XA
+		Assert.assertEquals(0, giQueryForLongValue("select count(*) from bank", masters[0]));
+		Assert.assertEquals(0, giQueryForLongValue("select count(*) from bank", masters[1]));
+
 	}
 
 	public static class Bank extends ActiveRecord {
