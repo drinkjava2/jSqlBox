@@ -61,13 +61,15 @@ public class NonXATransactionTest {
 
 	@After
 	public void cleanup() {
-		// Did not close dataSource pools because no other unit tests use them
+		for (SqlBoxContext ctx : masters)
+			((JdbcConnectionPool) ctx.getDataSource()).dispose();
+		BeanBox.defaultContext.close();
 	}
 
 	@TX
-	public void doInsertThreeAccount() {
+	public void insertAccount() {
 		new Bank().put("bankId", 0L, "balance", 100L).insert(); // committed
-		new Bank().put("bankId", 1L, "balance" + 1 / 0, -100L).insert();// rollbacked
+		new Bank().put("bankId", 1L, "balance", 1 / 0).insert();// Div 0!
 	}
 
 	public static class TinyTxBox extends BeanBox {
@@ -77,13 +79,13 @@ public class NonXATransactionTest {
 	}
 
 	@Test
-	public void testNonXATransaction() {
+	public void doTest() {
 		BeanBox.regAopAroundAnnotation(TX.class, TinyTxBox.class);
 		NonXATransactionTest tester = BeanBox.getBean(NonXATransactionTest.class);
 		try {
-			tester.doInsertThreeAccount();
+			tester.insertAccount();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Div 0 RuntimeException happened, but 1 database did not rollback ");
 		}
 		Assert.assertEquals(1L, giQueryForLongValue("select count(*) from bank", masters[0]));
 		Assert.assertEquals(0L, giQueryForLongValue("select count(*) from bank", masters[1]));

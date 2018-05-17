@@ -66,10 +66,10 @@ public class XATransactionTest {
 		public void setBalance(Long balance) {this.balance = balance;}
 	}
 	
-	public static class SpringJtaBox extends BeanBox {
+	public static class SpringTxIBox extends BeanBox {
 		public TransactionInterceptor create() {
-			JtaTransactionManager springJta = new JtaTransactionManager();
-			springJta.setUserTransaction(new UserTransactionImp());
+			JtaTransactionManager springJM = new JtaTransactionManager();
+			springJM.setUserTransaction(new UserTransactionImp());
 
 			UserTransactionManager um = new UserTransactionManager();
 			um.setForceShutdown(true);
@@ -78,19 +78,19 @@ public class XATransactionTest {
 			} catch (SystemException e) {
 				e.printStackTrace();
 			}
-			springJta.setTransactionManager(um);
-			springJta.setAllowCustomIsolationLevels(true);
+			springJM.setTransactionManager(um);
+			springJM.setAllowCustomIsolationLevels(true);
 			Properties props = new Properties();
 			props.put("*", "PROPAGATION_REQUIRED, ISOLATION_READ_COMMITTED");
-			TransactionInterceptor springTxI = new TransactionInterceptor(springJta, props);
+			TransactionInterceptor springTxI = new TransactionInterceptor(springJM, props);
 			return springTxI;
 		}
 	}
 	
 	@Before
 	public void init() {
-		BeanBox.regAopAroundAnnotation(TX.class, SpringJtaBox.class);
-		BeanBox.getBean(SpringJtaBox.class);// Not lazy!
+		BeanBox.regAopAroundAnnotation(TX.class, SpringTxIBox.class); 
+		BeanBox.getBean(SpringTxIBox.class);// Not lazy!
 
 		masters = new SqlBoxContext[MASTER_DATABASE_QTY];
 		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
@@ -125,22 +125,36 @@ public class XATransactionTest {
 	}
 
 	@TX
-	public void doInsertThreeAccount() {
+	public void insertAccountsBad() {
 		new Bank().put("bankId", 0L, "balance", 100L).insert();
 		Assert.assertEquals(1, giQueryForLongValue("select count(*) from bank", masters[0]));
-		System.out.println("1 record inserted in database0, but will rollback");
-		new Bank().put("bankId", 1L, "balance" + 1 / 0, -100L).insert();// div 0!
+		System.out.println("In insertAccountsBad() method, 1 record inserted in database0, but will rollback");
+		new Bank().put("bankId", 1L, "balance", 100L).insert();
+ 		new Bank().put("bankId", 2L, "balance" ,  1 / 0).insert();// div 0!
+	} 
+	
+	@TX
+	public void insertAccountsGood() {
+		new Bank().put("bankId", 0L, "balance", 100L).insert();
+		new Bank().put("bankId", 1L, "balance", 100L).insert(); 
+		new Bank().put("bankId", 2L, "balance" , 100L).insert(); 
 	} 
 
 	@Test
 	public void testXATransaction() {
 		XATransactionTest tester = BeanBox.getBean(XATransactionTest.class);
 		try {
-			tester.doInsertThreeAccount();
+			tester.insertAccountsBad();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Div 0 RuntimeException caused no records be inserted into any database.");
 		}
 		Assert.assertEquals(0, giQueryForLongValue("select count(*) from bank", masters[0]));
-		Assert.assertEquals(0, giQueryForLongValue("select count(*) from bank", masters[1])); 
+		Assert.assertEquals(0, giQueryForLongValue("select count(*) from bank", masters[1]));
+		Assert.assertEquals(0, giQueryForLongValue("select count(*) from bank", masters[2])); 
+		
+		tester.insertAccountsGood();
+		Assert.assertEquals(1, giQueryForLongValue("select count(*) from bank", masters[0]));
+		Assert.assertEquals(1, giQueryForLongValue("select count(*) from bank", masters[1]));
+		Assert.assertEquals(1, giQueryForLongValue("select count(*) from bank", masters[2])); 
 	} 
 }
