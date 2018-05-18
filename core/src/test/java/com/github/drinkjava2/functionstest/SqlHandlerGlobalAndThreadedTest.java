@@ -29,6 +29,7 @@ import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
@@ -81,7 +82,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 				"select u.** from DemoUser u where u.age>?", 10);
 		Assert.assertEquals(90l, result.size());
 
-		SqlBoxContext.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(), new FirstPrintHandler(),
+		SqlBoxContextConfig.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(), new FirstPrintHandler(),
 				new PaginHandler(2, 5));
 		SqlBoxContext.setThreadLocalSqlHandlers(new EntityListHandler(DemoUser.class));
 		try {

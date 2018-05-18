@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jdbpro;
 
+import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
+import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
@@ -23,15 +25,26 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.0.1
  */
 public class DbProConfig {
-	private SqlTemplateEngine templateEngine = DbPro.getGlobalNextTemplateEngine();
-	private DbProLogger logger = DbPro.getGlobalNextLogger();
-	private Boolean allowSqlSql = DbPro.getGlobalNextAllowShowSql();
-	private ConnectionManager connectionManager = DbPro.getGlobalNextConnectionManager();
-	private IocTool iocTool = DbPro.getGlobalNextIocTool();
-	private SqlOption masterSlaveSelect = DbPro.getGlobalNextMasterSlaveSelect();
-	private Integer batchSize = DbPro.getGlobalNextBatchSize();
-	private SqlHandler[] sqlHandlers = DbPro.getGlobalNextSqlHandlers();
-	private SpecialSqlItemPreparer[] specialSqlItemPreparers = DbPro.getGlobalNextSpecialSqlItemPreparers();
+	protected static Boolean globalNextAllowShowSql = false;
+	protected static SqlOption globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
+	protected static ConnectionManager globalNextConnectionManager = null;
+	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
+	protected static Integer globalNextBatchSize = 300;
+	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
+	protected static IocTool globalNextIocTool = null;
+	protected static SqlHandler[] globalNextSqlHandlers = null;
+	protected static SpecialSqlItemPreparer[] globalNextSpecialSqlItemPreparers = null;
+	
+	
+	private SqlTemplateEngine templateEngine = globalNextTemplateEngine;
+	private DbProLogger logger = globalNextLogger;
+	private Boolean allowSqlSql = globalNextAllowShowSql;
+	private ConnectionManager connectionManager = globalNextConnectionManager;
+	private IocTool iocTool =globalNextIocTool ;
+	private SqlOption masterSlaveSelect = globalNextMasterSlaveSelect ;
+	private Integer batchSize = globalNextBatchSize ;
+	private SqlHandler[] sqlHandlers = globalNextSqlHandlers ;
+	private SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers ;
 	private DbPro[] slaves;
 	private DbPro[] masters;
 
@@ -123,4 +136,78 @@ public class DbProConfig {
 		this.specialSqlItemPreparers = specialSqlItemPreparers;
 	}
 
+	protected void staticGlobalNextMethods_____________________() {// NOSONAR
+	}
+
+	public static DbProLogger getGlobalNextLogger() {
+		return globalNextLogger;
+	}
+
+	public static void setGlobalNextLogger(DbProLogger dbProLogger) {
+		globalNextLogger = dbProLogger;
+	}
+
+	public static Integer getGlobalNextBatchSize() {
+		return globalNextBatchSize;
+	}
+
+	public static void setGlobalNextBatchSize(Integer batchSize) {
+		globalNextBatchSize = batchSize;
+	}
+
+	public static SqlTemplateEngine getGlobalNextTemplateEngine() {
+		return globalNextTemplateEngine;
+	}
+
+	public static void setGlobalNextTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
+		globalNextTemplateEngine = sqlTemplateEngine;
+	}
+
+	public static Boolean getGlobalNextAllowShowSql() {
+		return globalNextAllowShowSql;
+	}
+
+	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
+		 globalNextAllowShowSql = allowShowSql;
+	}
+
+	public static SqlOption getGlobalNextMasterSlaveSelect() {
+		return globalNextMasterSlaveSelect;
+	}
+
+	public static void setGlobalNextMasterSlaveSelect(SqlOption  masterSlaveOption) {
+		 globalNextMasterSlaveSelect = masterSlaveOption;
+	}
+
+	public static ConnectionManager getGlobalNextConnectionManager() {
+		return globalNextConnectionManager;
+	}
+
+	public static void setGlobalNextConnectionManager(ConnectionManager connectionManager) {
+	 globalNextConnectionManager = connectionManager;
+	}
+
+	public static SqlHandler[] getGlobalNextSqlHandlers() {
+		return globalNextSqlHandlers;
+	}
+
+	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
+		globalNextSqlHandlers = sqlHandlers;
+	}
+
+	public static SpecialSqlItemPreparer[] getGlobalNextSpecialSqlItemPreparers() {
+		return globalNextSpecialSqlItemPreparers;
+	}
+
+	public static void setGlobalNextSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
+		globalNextSpecialSqlItemPreparers = specialSqlItemPreparers;
+	}
+
+	public static IocTool getGlobalNextIocTool() {
+		return globalNextIocTool;
+	}
+
+	public static void setGlobalNextIocTool(IocTool nextIocTool) {
+		globalNextIocTool = nextIocTool;
+	}
 }

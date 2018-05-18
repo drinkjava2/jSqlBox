@@ -28,6 +28,8 @@ cd..
 cd jsqlbox-xa-atomikos
 call mvn clean
 call mvn eclipse:clean
+del tmlog*.log
+del tmlog.lck
 
 
 cd..

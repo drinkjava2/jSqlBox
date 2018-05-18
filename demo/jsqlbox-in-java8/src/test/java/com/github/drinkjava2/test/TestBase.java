@@ -6,6 +6,7 @@ import org.junit.Before;
 
 import com.github.drinkjava2.jdbpro.SpecialSqlItemPreparer;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.test.refactor_sql.LambdSqlItemPreparer;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -26,7 +27,7 @@ public class TestBase {
 
 		SqlBoxContext.resetGlobalVariants();
 		// LambdSqlItemPreparer only for Java8
-		SqlBoxContext.setGlobalNextSpecialSqlItemPreparers(new SpecialSqlItemPreparer[] { new LambdSqlItemPreparer() });
+		SqlBoxContextConfig.setGlobalNextSpecialSqlItemPreparers(new SpecialSqlItemPreparer[] { new LambdSqlItemPreparer() });
 		// SqlBoxContext.setGlobalNextAllowShowSql(true);
 		ctx = new SqlBoxContext(ds);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);

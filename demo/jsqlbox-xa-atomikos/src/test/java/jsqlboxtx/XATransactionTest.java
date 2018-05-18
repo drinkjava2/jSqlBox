@@ -38,6 +38,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 
 /**
  * ActiveRecordDemoTest of jSqlBox configurations
@@ -93,7 +94,7 @@ public class XATransactionTest {
 		BeanBox.getBean(SpringTxIBox.class);// Not lazy!
 
 		masters = new SqlBoxContext[MASTER_DATABASE_QTY];
-		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
+		SqlBoxContextConfig.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			JdbcDataSource ds = new JdbcDataSource();
 			ds.setUrl("jdbc:h2:mem:H2DB" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");

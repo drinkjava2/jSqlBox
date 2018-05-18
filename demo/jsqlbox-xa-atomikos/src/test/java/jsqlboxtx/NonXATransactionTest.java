@@ -29,6 +29,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
@@ -46,7 +47,7 @@ public class NonXATransactionTest {
 
 	@Before
 	public void init() {
-		SqlBoxContext.setGlobalNextConnectionManager(TinyTxConnectionManager.instance());
+		SqlBoxContextConfig.setGlobalNextConnectionManager(TinyTxConnectionManager.instance());
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			masters[i] = new SqlBoxContext(JdbcConnectionPool.create(
 					"jdbc:h2:mem:Database" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""));

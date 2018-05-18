@@ -41,7 +41,7 @@ public class PreparedSQL {
 	private SqlType type;
 
 	/** Choose use master or slave options */
-	private SqlOption masterSlaveSelect;
+	private SqlOption masterSlaveOption;
 
 	/** Switch to use another dbPro */
 	private DbPro switchTo;
@@ -104,7 +104,7 @@ public class PreparedSQL {
 		sb.append("\ntype=").append(type);
 		sb.append("\nsql=").append(sql);
 		sb.append("\nparams=").append(Arrays.deepToString(params));
-		sb.append("\nmasterSlaveSelect=").append(masterSlaveSelect);
+		sb.append("\nmasterSlaveSelect=").append(masterSlaveOption);
 		sb.append("\nconnection=").append(connection);
 		sb.append("\nresultSetHandler=").append(resultSetHandler);
 		sb.append("\nsqlHandlers=").append(sqlHandlers);
@@ -298,11 +298,11 @@ public class PreparedSQL {
 	}
 
 	public SqlOption getMasterSlaveSelect() {
-		return masterSlaveSelect;
+		return masterSlaveOption;
 	}
 
 	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
-		this.masterSlaveSelect = masterSlaveSelect;
+		this.masterSlaveOption = masterSlaveSelect;
 	}
 
 	public DbPro getSwitchTo() {

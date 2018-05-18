@@ -22,7 +22,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
  * EntityListHandler is the SqlHandler used explain the Entity query SQL (For
- * example 'select u.** from users u') and return a List<Entity> instance
+ * example 'select u.** from users u') and return a List<entityObject> instance
  * 
  * @author Yong Zhu
  * @since 1.0.0

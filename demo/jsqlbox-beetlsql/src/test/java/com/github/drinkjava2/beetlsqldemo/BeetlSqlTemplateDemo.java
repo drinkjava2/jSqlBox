@@ -22,6 +22,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -49,8 +50,8 @@ public class BeetlSqlTemplateDemo {
 		SQLManager sqlManager = new SQLManager(dbstyle, loader, source, nc, new Interceptor[] {});
 		// Set BeetlSqlTempalte as global default template engine
 
-		SqlBoxContext.setGlobalNextTemplateEngine(new BeetlSqlTempalte(sqlManager));
-		SqlBoxContext.setGlobalNextAllowShowSql(true); // Log output
+		SqlBoxContextConfig.setGlobalNextTemplateEngine(new BeetlSqlTempalte(sqlManager));
+		SqlBoxContextConfig.setGlobalNextAllowShowSql(true); // Log output
 		SqlBoxContext ctx = new SqlBoxContext(ds); // Here you go
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 

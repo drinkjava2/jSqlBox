@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectLogger;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -59,16 +60,16 @@ public class LoggerTest {
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-		SqlBoxContext.setGlobalNextAllowShowSql(true);
+		SqlBoxContextConfig.setGlobalNextAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(LoggerTest.class))
 			ctx.quiteExecute(ddl);
 		LoggerTest t = new LoggerTest();
 		t.setName("Tom");
 		ctx.insert(t);
-		SqlBoxContext.getGlobalNextLogger().info("Logger test message3 output ok");
-		SqlBoxContext.getGlobalNextLogger().info("Logger test message4 output ok");
-		SqlBoxContext.setGlobalNextAllowShowSql(false);
+		SqlBoxContextConfig.getGlobalNextLogger().info("Logger test message3 output ok");
+		SqlBoxContextConfig.getGlobalNextLogger().info("Logger test message4 output ok");
+		SqlBoxContextConfig.setGlobalNextAllowShowSql(false);
 	}
 
 }

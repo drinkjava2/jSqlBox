@@ -21,6 +21,7 @@ import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
 import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
@@ -52,23 +53,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public static final String SQLBOX_SUFFIX = "SqlBox";// NOSONAR
 
 	protected static SqlBoxContext globalSqlBoxContext = null;
-	protected static Dialect globalNextDialect = null;
-	protected static SqlMapperGuesser globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
-	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { new ShardingModTool(),
-			new ShardingRangeTool() };
-	protected static SnowflakeCreator globalNextSnowflakeCreator = null;
 
 	/** Dialect of current SqlBoxContext, optional */
-	protected Dialect dialect = globalNextDialect;
+	protected Dialect dialect = SqlBoxContextConfig.globalNextDialect;
 
 	/** In SqlMapper style, A guesser needed to guess and execute SQL methods */
-	protected SqlMapperGuesser sqlMapperGuesser = globalNextSqlMapperGuesser;
-	protected ShardingTool[] shardingTools = globalNextShardingTools;
-	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
+	protected SqlMapperGuesser sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
+	protected ShardingTool[] shardingTools = SqlBoxContextConfig.globalNextShardingTools;
+	protected SnowflakeCreator snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
 
 	public SqlBoxContext() {
 		super();
-		this.dialect = globalNextDialect;
+		this.dialect = SqlBoxContextConfig.globalNextDialect;
 		copyConfigs(null);
 	}
 
@@ -92,9 +88,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	private void copyConfigs(SqlBoxContextConfig config) {
 		if (config == null) {
-			this.sqlMapperGuesser = globalNextSqlMapperGuesser;
-			this.shardingTools = globalNextShardingTools;
-			this.snowflakeCreator = globalNextSnowflakeCreator;
+			this.sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
+			this.shardingTools = SqlBoxContextConfig.globalNextShardingTools;
+			this.snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
 		} else {
 			this.dialect = config.getDialect();
 			this.sqlMapperGuesser = config.getSqlMapperGuesser();
@@ -108,17 +104,19 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** Reset all global SqlBox variants to its old default values */
 	public static void resetGlobalVariants() {
-		globalNextAllowShowSql = false;
-		globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
-		globalNextConnectionManager = null;
-		globalNextSqlHandlers = null;
-		globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
-		globalNextBatchSize = 300;
-		globalNextTemplateEngine = BasicSqlTemplate.instance();
-		globalNextDialect = null;
-		globalNextSpecialSqlItemPreparers = null;
-		globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
-		globalNextShardingTools = new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() };
+		SqlBoxContextConfig.setGlobalNextAllowShowSql(false);
+		SqlBoxContextConfig.setGlobalNextMasterSlaveSelect(SqlOption.USE_AUTO);
+		SqlBoxContextConfig.setGlobalNextConnectionManager(null);
+		SqlBoxContextConfig.setGlobalNextSqlHandlers((SqlHandler[]) null);
+		SqlBoxContextConfig.setGlobalNextLogger(DefaultDbProLogger.getLog(ImprovedQueryRunner.class));
+		SqlBoxContextConfig.setGlobalNextBatchSize(300);
+		SqlBoxContextConfig.setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
+		SqlBoxContextConfig.setGlobalNextDialect(null);
+		SqlBoxContextConfig.setGlobalNextSpecialSqlItemPreparers(null);
+		SqlBoxContextConfig.setGlobalNextSqlMapperGuesser(SqlMapperDefaultGuesser.instance);
+		SqlBoxContextConfig
+				.setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
+		SqlBoxContextConfig.setGlobalNextIocTool(null);
 		globalSqlBoxContext = null;
 	}
 
@@ -165,15 +163,15 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return entity;
 	}
 
-	public String getShardedTB(Object entityOrClass, Object... shardvalues) { 
-		String table = SqlBoxContextUtils.getShardedTB(this,entityOrClass, shardvalues);
+	public String getShardedTB(Object entityOrClass, Object... shardvalues) {
+		String table = SqlBoxContextUtils.getShardedTB(this, entityOrClass, shardvalues);
 		if (table == null)
 			throw new SqlBoxException("No found ShardingTool can handle target '" + entityOrClass + "' ");
 		return table;
 	}
 
 	public SqlBoxContext getShardedDB(Object entityOrClass, Object... shardvalues) {
-		SqlBoxContext ctx = SqlBoxContextUtils.getShardedDB(this,entityOrClass, shardvalues);
+		SqlBoxContext ctx = SqlBoxContextUtils.getShardedDB(this, entityOrClass, shardvalues);
 		if (ctx == null)
 			throw new SqlBoxException("Not found ShardingTool can handle entity '" + entityOrClass + "' ");
 		return ctx;
@@ -425,38 +423,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {
 		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
-	}
-
-	public static Dialect getGlobalNextDialect() {
-		return SqlBoxContext.globalNextDialect;
-	}
-
-	public static SqlMapperGuesser getGlobalNextSqlMapperGuesser() {
-		return SqlBoxContext.globalNextSqlMapperGuesser;
-	}
-
-	public static void setGlobalNextSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
-		SqlBoxContext.globalNextSqlMapperGuesser = sqlMapperGuesser;
-	}
-
-	public static void setGlobalNextDialect(Dialect dialect) {
-		SqlBoxContext.globalNextDialect = dialect;
-	}
-
-	public static ShardingTool[] getGlobalNextShardingTools() {
-		return globalNextShardingTools;
-	}
-
-	public static void setGlobalNextShardingTools(ShardingTool[] globalNextShardingTools) {
-		SqlBoxContext.globalNextShardingTools = globalNextShardingTools;
-	}
-
-	public static SnowflakeCreator getGlobalNextSnowflakeCreator() {
-		return globalNextSnowflakeCreator;
-	}
-
-	public static void setGlobalNextSnowflakeCreator(SnowflakeCreator globalNextSnowflakeCreator) {
-		SqlBoxContext.globalNextSnowflakeCreator = globalNextSnowflakeCreator;
 	}
 
 }

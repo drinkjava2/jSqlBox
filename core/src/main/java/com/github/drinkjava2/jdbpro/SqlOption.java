@@ -34,9 +34,10 @@ public enum SqlOption {
 				// appended into SQL and parameters
 
 	VALUES_QUESTIONS, // Append a " values(?,?,?....?)" String at end of SQL
-	
+
 	SWITCHTO, // Switch to another DbPro or subClass instance to run the SQL
 
+	// ------Master_Slave Options-------
 	USE_AUTO, // Tell system to choose master or slave database automatically (write:master,
 				// read:if in Transaction use master otherwise use on slave)
 
@@ -47,7 +48,8 @@ public enum SqlOption {
 	USE_BOTH, // Tell system force use master and slave database (write: master + all slaves,
 				// read: master)
 
+	// -------Sharding Options--------
 	SHARD_TABLE, // Tell system this is a "SHARD_TABLE" SqlItem
-	
+
 	SHARD_DATABASE // Tell system this is a "SHARD_DATABASE" SqlItem
 }
