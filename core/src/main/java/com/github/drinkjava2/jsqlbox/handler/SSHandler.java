@@ -19,9 +19,9 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
 
 /**
  * SSHandler is used to explain alias.** to real columns in SQL, transient
@@ -142,7 +142,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	public String explainNetQuery(SqlBoxContext ctx, String sqlString) {// NOSONAR
 		SqlBoxException.assureNotEmpty(sqlString, "Sql can not be empty");
 		String sql = SqlBoxStrUtils.formatSQL(sqlString);
-		TableModel[] configModels = EntityNetUtils.objectConfigsToModels(ctx, netConfigObjects);
+		TableModel[] configModels = SqlBoxContextUtils.objectConfigsToModels(ctx, netConfigObjects);
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
 			pos = sql.indexOf(".##");

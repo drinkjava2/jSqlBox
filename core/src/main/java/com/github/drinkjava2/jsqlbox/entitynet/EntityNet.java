@@ -26,6 +26,9 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
  * EntityNet is a child project to build entity net. it's a memory based Object
@@ -34,17 +37,17 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * mapping to relational database's tables, the relationship in Neo4j is call
  * "Edge", but in EntityNet is still called relationship, just exactly use the
  * existed relational database's foreign key constraints. If want use EntityNet
- * but don't want output FKey constraint in DDL, can build fake FKeyModels by
- * setting "ddl=false" (see jDialects project).
+ * but don't want output foreign key constraint in DDL, can build fake
+ * FKeyModels by setting "ddl=false" (see jDialects project).
  * 
- * Some benefits to use a graph database than relational database:<br/>
+ * Some benefits to use a graph database than traditional database:<br/>
  * 1) No need write complicated join SQLs. <br/>
- * 2) Working in memory, much quicker browse speed between connected nodes than
- * access database tables stored on hard disk. <br/>
+ * 2) Working in memory, much quicker browse speed between nodes than access
+ * database records stored on hard disk. <br/>
  * 3) Can use pure Java language do browsing search.
  * 
  * EntityNet class is not thread safe. If want use it as a global cache,
- * programmer need use synchronized method to serialize write it, like use a
+ * programmer need use synchronized method to serialize modify it, like use a
  * HashMap in multiple threads environment.
  * 
  * @author Yong Zhu
@@ -59,8 +62,8 @@ public class EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdValSpr_";
 
 	/**
-	 * ConfigModels is virtual meta data of EntityNet, and also store O-R
-	 * mapping info related to database
+	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
+	 * info related to database
 	 */
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
@@ -68,14 +71,14 @@ public class EntityNet {
 	// entityClass, nodeID, node
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
-	/** Default query cache in TinyNet is disabled */
+	/** Default query cache in EntityNet is disabled */
 	private Boolean allowQueryCache = false;
 
 	/**
 	 * queryCache cache search result after do a path serach <br/>
 	 * 
 	 * QueryCache will be filled when all of these conditions meet: <br/>
-	 * 1)TinyNet's cacheable is true (default) <br/>
+	 * 1)EntityNet's cacheable is true (default) <br/>
 	 * 2)Path's cacheable is true (default)<br/>
 	 * 3)Path's checker should be null or a Checker class <br/>
 	 * 4)For Path Chain, all child Paths should cacheable
@@ -97,6 +100,43 @@ public class EntityNet {
 
 	public EntityNet(List<Map<String, Object>> listMap, TableModel... models) {
 		addMapList(listMap, models);
+	}
+
+	/** Create a EntityNet instance by given listMap and configs */
+	public static EntityNet createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
+		return new EntityNet(listMap, configs);
+	}
+
+	/**
+	 * Create a EntityNet instance, load data from database buy given loadKeyOnly
+	 * and configObjects parameters
+	 * 
+	 * @param ctx
+	 *            A SqlBoxContext instance
+	 * @param loadKeyOnly
+	 *            If true will only load PKey and FKeys field, otherwise load all
+	 *            columns
+	 * @param configObjects
+	 *            netConfigs array, can be entity class, entity, SqlBox or
+	 *            TableModel instance
+	 * @return The EntityNet
+	 */
+	public static EntityNet createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
+		if (configObjects == null || configObjects.length == 0)
+			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
+		TableModel[] models = SqlBoxContextUtils.objectConfigsToModels(ctx, configObjects);
+		EntityNet net = new EntityNet();
+		String starOrSharp = loadKeyOnly ? ".##" : ".**";
+		for (TableModel t : models) {
+			List<Map<String, Object>> mapList = null;
+			String alias = t.getAlias();
+			if (StrUtils.isEmpty(alias))
+				alias = t.getTableName();
+			mapList = ctx.iQuery(new SSMapListHandler(t),
+					"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
+			net.addMapList(mapList, t);
+		}
+		return net;
 	}
 
 	/**
@@ -188,7 +228,7 @@ public class EntityNet {
 	}
 
 	/**
-	 * Add an entity to TinyNet, if already have same PKEY entity exist, if old
+	 * Add an entity to EntityNet, if already have same PKEY entity exist, if old
 	 * entity field is never loaded from database, will put new entity's value
 	 */
 	protected void addOrJoinEntity(Object entity, TableModel tableModel, Set<String> loadedFields) {
@@ -203,7 +243,7 @@ public class EntityNet {
 	}
 
 	/**
-	 * Add or join an node into TinyNet body, if old node with same ID already
+	 * Add or join an node into EntityNet body, if old node with same ID already
 	 * exist, join loaded fields and ParentRelation
 	 */
 	protected void addOrJoinOneNodeToBody(Node node) {
@@ -296,7 +336,7 @@ public class EntityNet {
 		return (T) node.getEntity();
 	}
 
-	/** Return EntityNode list in TinyNet which type is entityClass */
+	/** Return EntityNode list in EntityNet which type is entityClass */
 	public Set<Node> getAllNodeSet(Class<?> entityClass) {
 		Set<Node> result = new LinkedHashSet<Node>();
 		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
@@ -306,12 +346,12 @@ public class EntityNet {
 		return result;
 	}
 
-	/** Return entity set in TinyNet which type is entityClass */
+	/** Return entity set in EntityNet which type is entityClass */
 	public <T> Set<T> getAllEntitySet(Class<T> entityClass) {
 		return EntityNetUtils.nodeCollection2EntitySet(getAllNodeSet(entityClass));
 	}
 
-	/** Return entity List in TinyNet which type is entityClass */
+	/** Return entity List in EntityNet which type is entityClass */
 	public <T> List<T> getAllEntityList(Class<T> entityClass) {
 		return EntityNetUtils.nodeCollection2EntityList(getAllNodeSet(entityClass));
 	}
@@ -319,7 +359,7 @@ public class EntityNet {
 	// ============= Find methods=============================
 
 	/**
-	 * Find entity set in TinyNet by given path and entity input array
+	 * Find entity set in EntityNet by given path and entity input array
 	 */
 	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Object... entities) {
 		Set<Node> input = EntityNetUtils.entityArray2NodeSet(this, entities);
@@ -329,7 +369,7 @@ public class EntityNet {
 	}
 
 	/**
-	 * Find entity set in TinyNet by given path and entity input collection
+	 * Find entity set in EntityNet by given path and entity input collection
 	 */
 	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Collection<Object> entityCollection) {
 		Set<Node> input = new LinkedHashSet<Node>();
@@ -344,7 +384,7 @@ public class EntityNet {
 	}
 
 	/**
-	 * Find entity set map in TinyNet by given path and entity input array
+	 * Find entity set map in EntityNet by given path and entity input array
 	 */
 	public Map<Class<?>, Set<Object>> findEntityMap(Path path, Object... entities) {
 		Map<Class<?>, Set<Node>> nodeMap = findNodeMapByEntities(path, entities);
@@ -352,7 +392,7 @@ public class EntityNet {
 	}
 
 	/**
-	 * Find node set in TinyNet by given path and entity input array
+	 * Find node set in EntityNet by given path and entity input array
 	 */
 	public Map<Class<?>, Set<Node>> findNodeMapByEntities(Path path, Object... entities) {
 		Set<Node> input = EntityNetUtils.entityArray2NodeSet(this, entities);
@@ -360,7 +400,7 @@ public class EntityNet {
 	}
 
 	/**
-	 * Find node set in TinyNet by given path and entity input collection
+	 * Find node set in EntityNet by given path and entity input collection
 	 */
 	public Map<Class<?>, Set<Node>> findNodeMapByEntityCollection(Path path, Collection<Object> entityCollection) {
 		Set<Node> input = new LinkedHashSet<Node>();

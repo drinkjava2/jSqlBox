@@ -69,7 +69,7 @@ public class EntityNetQueryTest extends TestBase {
 
 		List<Map<String, Object>> listMap = gpQuery(MapListHandler.class,
 				"select u.id as u_id, u.userName as u_userName from usertb as u");
-		ctx.netJoinList(net, listMap, new User().alias("u"));// userName joined
+		ctx.netJoin(net, listMap, new User().alias("u"));// userName joined
 
 		Assert.assertEquals(2, net.size());
 		users = net.getAllEntityList(User.class);
@@ -97,7 +97,7 @@ public class EntityNetQueryTest extends TestBase {
 
 		List<Map<String, Object>> listMap2 = gpQuery(new SSMapListHandler(Email.class),
 				"select e.** from emailtb e");
-		ctx.netJoinList(net, listMap2);
+		ctx.netJoin(net, listMap2);
 
 		Assert.assertEquals(2, net.size());
 		emailNode = net.getOneNode(Email.class, "e1");

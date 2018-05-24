@@ -468,5 +468,28 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		else
 			return SqlBoxUtils.findAndBindSqlBox(ctx, entityOrClass).getTableModel();
 	}
+	
+
+	/**
+	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
+	 * or entity Bean
+	 * 
+	 * <pre>
+	 * 1. TableModel instance, will use it
+	 * 2. SqlBox instance, will use its tableModel
+	 * 3. Class, will call ctx.createSqlBox() to create a SqlBox instance and use its tableModel
+	 * 4. Object, will call SqlBoxUtils.findAndBindSqlBox() to create a SqlBox instance
+	 * </pre>
+	 */
+	public static TableModel[] objectConfigsToModels(SqlBoxContext ctx, Object[] netConfigs) {
+		if (netConfigs == null || netConfigs.length == 0)
+			return new TableModel[0];
+		TableModel[] result = new TableModel[netConfigs.length];
+		for (int i = 0; i < netConfigs.length; i++)
+			result[i] = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, netConfigs[i]);
+		return result;
+	}
+	
+	
 
 }

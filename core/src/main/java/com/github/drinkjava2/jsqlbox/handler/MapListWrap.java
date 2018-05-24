@@ -17,8 +17,8 @@ import java.util.Map;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * MapListWrap is a POJO to store a MapList + config pair, usually will be used
- * to build or join into an EntityNet soon.
+ * MapListWrap is a POJO to store a List<Map<String, Object>> + TableModel[]
+ * pair, usually used to build or join into an EntityNet.
  * 
  * @author Yong Zhu
  * @since 1.0.8

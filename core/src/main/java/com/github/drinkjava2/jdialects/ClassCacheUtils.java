@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
-
+ 
 /**
  * ClassCacheUtils is utility class to cache some info of classes read and write
  * method
@@ -139,13 +137,6 @@ public abstract class ClassCacheUtils {// NOSONAR
 		}
 		classReadMethods.put(clazz, sortMap(readMethods));
 		classWriteMethods.put(clazz, sortMap(writeMethods));
-		// if (!ActiveRecordSupport.class.isAssignableFrom(clazz)) {
-//		Field boxField = ReflectionUtils.findField(clazz, "box");
-//		if (boxField != null && boxField.getType().getName().equals("com.github.drinkjava2.jsqlbox.SqlBox")) {// NOSONAR
-//			ReflectionUtils.makeAccessible(boxField);
-//			boxFieldCache.put(clazz, boxField);
-//		}
-
 	}
 
 	/** Return cached class read methods to avoid each time use reflect */
@@ -178,17 +169,6 @@ public abstract class ClassCacheUtils {// NOSONAR
 		return getClassWriteMethods(clazz).get(fieldName);
 	}
 
-//	/**
-//	 * Return field box, this method is used for jSqlBox to directly access box
-//	 * field to bind SqlBox instance to a entity with its box field
-//	 */
-//	public static Field getBoxField(Class<?> clazz) {
-//		Map<String, Method> writeMethods = classWriteMethods.get(clazz);
-//		if (writeMethods == null)
-//			cacheReadWriteMethodsAndBoxField(clazz);
-//		return boxFieldCache.get(clazz);
-//	}
-
 	/** Read value from entityBean field */
 	public static Object readValueFromBeanField(Object entityBean, String fieldName) {
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
@@ -215,7 +195,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 
 	/**
 	 * Create a new Object by given entityClass, if any exception happen, throw
-	 * {@link SqlBoxException}
+	 * {@link DialectException}
 	 */
 	public static Object createNewEntity(Class<?> entityClass) {
 		try {

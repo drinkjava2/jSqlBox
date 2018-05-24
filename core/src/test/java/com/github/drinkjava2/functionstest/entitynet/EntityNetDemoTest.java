@@ -254,14 +254,14 @@ public class EntityNetDemoTest extends TestBase {
 
 		List<Map<String, Object>> mapList2 = gpQuery(new SSMapListHandler(Email.class),
 				"select e.id as e_id from emailtb as e");
-		ctx.netJoinList(net, mapList2, new Email().alias("e"));
+		ctx.netJoin(net, mapList2, new Email().alias("e"));
 		Assert.assertEquals(15, net.size());
 
 		MapListWrap wrap = gpQuery(
 				new SSMapListWrapHandler(Role.class, UserRole.class, RolePrivilege.class, Privilege.class),
 				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
 		Assert.assertEquals(900, wrap.getMapList().size());
-		ctx.netJoinList(net, wrap);
+		ctx.netJoin(net, wrap);
 		Assert.assertEquals(37, net.size());
 	}
 

@@ -75,16 +75,16 @@ public class PathUtils {
 	 * 
 	 * @param path The start path
 	 * @param target The target table name or target class
-	 * @param net The TinyNet instance
+	 * @param net The EntityNet instance
 	 */
 	static void calculateAutoPath(EntityNet net, Path path) {
 		if (path.getAutoPathTarget() == null)
 			return;
 		if (net == null)
-			throw new EntityNetException("To calculate auto path, TinyNet instance can not be null");
+			throw new EntityNetException("To calculate auto path, EntityNet instance can not be null");
 		Map<Class<?>, TableModel> models = net.getConfigModels();
 		if (models == null || models.isEmpty())
-			throw new EntityNetException("To calculate auto path, TinyNet's configModels can not be empty");
+			throw new EntityNetException("To calculate auto path, EntityNet's configModels can not be empty");
 		Class<?> from = findClassByTarget(net, path.getTarget());
 		Class<?> to = findClassByTarget(net, path.autoPathTarget);
 		EntityNetException.assureNotNull(from, "Can not find 'From' target when calculate auto path");

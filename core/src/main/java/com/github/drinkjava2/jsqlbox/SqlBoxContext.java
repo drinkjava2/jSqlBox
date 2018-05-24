@@ -29,8 +29,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetFactory;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetUtils;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetBuilder;
 import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingRangeTool;
@@ -61,6 +60,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected SqlMapperGuesser sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
 	protected ShardingTool[] shardingTools = SqlBoxContextConfig.globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
+	private EntityNetBuilder entityNetBuilder = new EntityNetBuilder(this);
 
 	public SqlBoxContext() {
 		super();
@@ -312,72 +312,57 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	// ================================================================
-	protected void entityNetAboutMethods__________________________() {// NOSONAR
+	protected void entityNetShortcutMethods__________________________() {// NOSONAR
 	}
 
-	/**
-	 * Create a EntityNet by given configurations, load all columns
-	 */
+	/** Create a EntityNet by given configurations, load all columns */
 	public EntityNet netLoad(Object... configObjects) {
-		return EntityNetFactory.createEntityNet(this, false, configObjects);
+		return entityNetBuilder.loadAll(configObjects);
 	}
 
-	/**
-	 * Create a EntityNet instance but only load PKey and FKeys columns to improve
-	 * loading speed
-	 */
+	/** Create a EntityNet instance but only load PKey and FKeys columns */
 	public EntityNet netLoadSketch(Object... configObjects) {
-		return EntityNetFactory.createEntityNet(this, true, configObjects);
+		return entityNetBuilder.loadSketch(configObjects);
 	}
 
 	/** Create a EntityNet by given list and netConfigs */
 	public EntityNet netCreate(List<Map<String, Object>> listMap, Object... configObjects) {
-		TableModel[] result = EntityNetUtils.objectConfigsToModels(this, configObjects);
-		if (result == null || result.length == 0)
-			throw new SqlBoxException("No entity class config found");
-		return EntityNetFactory.createEntityNet(listMap, result);
+		return entityNetBuilder.create(listMap, configObjects);
 	}
 
-	/** Create a EntityNet by given list and netConfigs */
+	/** Create a EntityNet by given MapListWrap */
 	public EntityNet netCreate(MapListWrap mapListWrap) {
-		if (mapListWrap.getConfig() == null || mapListWrap.getConfig().length == 0)
-			throw new SqlBoxException("No entity class config found");
-		return EntityNetFactory.createEntityNet(mapListWrap.getMapList(), mapListWrap.getConfig());
+		return entityNetBuilder.create(mapListWrap);
 	}
 
 	/** Join list and netConfigs to existed EntityNet */
-	@SuppressWarnings("unchecked")
-	public <T> T netJoinList(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
-		TableModel[] result = EntityNetUtils.objectConfigsToModels(this, configObjects);
-		return (T) net.addMapList(listMap, result);
+	public <T> T netJoin(EntityNet net, List<Map<String, Object>> listMap, Object... configObjects) {
+		return entityNetBuilder.join(net, listMap, configObjects);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T netJoinList(EntityNet net, MapListWrap mapListWrap) {
-		return (T) net.addMapList(mapListWrap.getMapList(), mapListWrap.getConfig());
+	/** Join MapListWrap to existed EntityNet */
+	public <T> T netJoin(EntityNet net, MapListWrap mapListWrap) {
+		return entityNetBuilder.join(net, mapListWrap);
 	}
 
 	/** Add an entity to existed EntityNet */
 	public void netAddEntity(EntityNet net, Object entity) {
-		SqlBox box = SqlBoxUtils.findAndBindSqlBox(this, entity);
-		net.addEntity(entity, box.getTableModel());
+		entityNetBuilder.addEntity(net, entity);
 	}
 
 	/** Remove an entity from EntityNet */
 	public void netRemoveEntity(EntityNet net, Object entity) {
-		SqlBox box = SqlBoxUtils.findAndBindSqlBox(this, entity);
-		net.removeEntity(entity, box.getTableModel());
+		entityNetBuilder.removeEntity(net, entity);
 	}
 
 	/** Update an entity in EntityNet */
 	public void netUpdateEntity(EntityNet net, Object entity) {
-		SqlBox box = SqlBoxUtils.findAndBindSqlBox(this, entity);
-		net.updateEntity(entity, box.getTableModel());
+		entityNetBuilder.updateEntity(net, entity);
 	}
 
 	/** Shortcut method, load all entities as list */
-	public <T> List<T> netLoadAllEntityList(Class<T> entityClass) {
-		return this.netLoad(entityClass).getAllEntityList(entityClass);
+	public <T> List<T> netLoadAsEntityList(Class<T> entityClass) {
+		return entityNetBuilder.loadAsEntityList(entityClass);
 	}
 
 	protected void getteSetters__________________________() {// NOSONAR
