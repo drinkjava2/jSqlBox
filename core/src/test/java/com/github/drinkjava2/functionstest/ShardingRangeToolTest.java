@@ -58,7 +58,7 @@ public class ShardingRangeToolTest {
 
 		private String name;
 
-		// 0~9 store in database0, 10~99 store in database1...
+		// 0~9 store in database0, 10~19 store in database1...
 		@ShardDatabase({ "RANGE", "10" })
 		private Long databaseId;
 
@@ -111,10 +111,11 @@ public class ShardingRangeToolTest {
 		}
 	}
 
+	static long tbID = 301L;
+	static long dbID = 21L;
+
 	@Test
 	public void testInsertSQLs() {
-		long tbID = 301L;
-		long dbID = 21L;
 		System.out.println(masters[2].getShardedDB(TheUser.class, dbID).getName());
 		masters[2].iExecute("insert into ", shardTB(TheUser.class, tbID), shardDB(TheUser.class, dbID),
 				" (id, name, databaseId) values(?,?,?)", param(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
@@ -125,14 +126,10 @@ public class ShardingRangeToolTest {
 	}
 
 	@Test
-	public void testActiveRecord() {// issue XA or TCC transaction needed
+	public void testActiveRecord() {// issue: XA or TCC transaction needed
 		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
 		TheUser u1 = new TheUser();
-		u1.setId(301L);
-		u1.setDatabaseId(21L);
-		u1.setName("Tom");
-
-		u1.insert(USE_BOTH, new PrintSqlHandler()); // Don't know saved to where
+		u1.put("id", tbID, "databaseId", dbID, "name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals("Master2", u1.ctx().getShardedDB(u1).getName());
 		Assert.assertEquals("TheUser_3", u1.ctx().getShardedTB(u1));
 
@@ -142,10 +139,12 @@ public class ShardingRangeToolTest {
 		TheUser u2 = new TheUser();
 		u2.setId(u1.getId());
 		u2.setDatabaseId(u1.getDatabaseId());
-		u2.load(new PrintSqlHandler(), " and name=?", param("Sam"), new PrintSqlHandler()); // use slave
+		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use
+																		// slave
 		Assert.assertEquals("Sam", u2.getName());
 
-		u2.delete(new PrintSqlHandler());// only deleted master except use "USE_BOTH" option
+		u2.delete(new PrintSqlHandler());// only deleted master except use
+											// "USE_BOTH" option
 		Assert.assertEquals(0, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2), USE_MASTER));
 		Assert.assertEquals(1, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2)));
 

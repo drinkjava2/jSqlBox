@@ -26,7 +26,6 @@ import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.TX;
 import com.github.drinkjava2.jdbpro.DbPro;
-import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -93,13 +92,11 @@ public class MasterSlaveTest {
 		for (String ddl : ddls)
 			master.iExecute(ddl, USE_BOTH);
 
-		for (long j = 0; j < SLAVE_RECORD_ROWS; j++)// insert 5 row in all
-													// slaves
-			new TheUser().useContext(master).put("id", j, "name", " Slave_Row" + j).insert(USE_SLAVE);
+		for (long j = 0; j < SLAVE_RECORD_ROWS; j++)// insert 5 row in slaves
+			new TheUser().useContext(master).put("id", j, "name", "Slave_Row" + j).insert(USE_SLAVE);
 
-		for (long j = 0; j < MASTER_RECORD_ROWS; j++)// insert 10 row in all
-														// slaves
-			new TheUser().useContext(master).put("id", j, "name", " Master_Row" + j).insert(USE_MASTER);
+		for (long j = 0; j < MASTER_RECORD_ROWS; j++)// insert 10 row in masters
+			new TheUser().useContext(master).put("id", j, "name", "Master_Row" + j).insert(USE_MASTER);
 	}
 
 	@After
@@ -113,7 +110,7 @@ public class MasterSlaveTest {
 
 	@Test
 	public void testCreateTables() {
-		Assert.assertEquals(10L, master.iQueryForLongValue("select count(*) from TheUser", SqlOption.USE_MASTER));
+		Assert.assertEquals(10L, master.iQueryForLongValue("select count(*) from TheUser", USE_MASTER));
 		Assert.assertEquals(5L, master.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
 		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", JSQLBOX.param("Tom"), USE_MASTER,
 				new PrintSqlHandler());
@@ -127,6 +124,8 @@ public class MasterSlaveTest {
 		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
 		TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
+		TheUser u2 = master.loadById(TheUser.class, 3L, USE_SLAVE);
+		Assert.assertEquals("Slave_Row3", u2.getName());
 	}
 
 	@Test
@@ -135,18 +134,18 @@ public class MasterSlaveTest {
 		// AutoChoose, not in Transaction, should use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
 		TheUser u1 = master.loadById(TheUser.class, 1L);
-		System.out.println(u1.getName());
+		Assert.assertEquals("Slave_Row1", u1.getName());
 
 		// Force use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, master.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
 		TheUser u2 = master.loadById(TheUser.class, 1L, USE_MASTER);
-		System.out.println(u2.getName());
+		Assert.assertEquals("Master_Row1", u2.getName());
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS,
 				master.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
 		TheUser u3 = master.loadById(TheUser.class, 1L, USE_SLAVE);
-		System.out.println(u3.getName());
+		Assert.assertEquals("Slave_Row1", u3.getName());
 	}
 
 	private static HikariDataSource txDataSource;
@@ -162,11 +161,7 @@ public class MasterSlaveTest {
 		SqlBoxContext MasterWithTx = new SqlBoxContext(txDataSource, config);
 		MasterWithTx.setSlaves(master.getSlaves());
 		BeanBox.regAopAroundAnnotation(TX.class, TheTxBox.class);// AOP TX
-																	// register
-
-		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // AOP
-																			// proxy
-																			// get
+		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // Proxy
 		tester.queryInTransaction(MasterWithTx);
 		txDataSource.close();// don't forget close DataSource pool
 	}
@@ -176,17 +171,17 @@ public class MasterSlaveTest {
 		// AutoChoose, in Transaction, should use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
 		TheUser u1 = ctx.loadById(TheUser.class, 1L);
-		System.out.println(u1.getName());
+		Assert.assertEquals("Master_Row1", u1.getName());
 
 		// Force use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
 		TheUser u2 = ctx.loadById(TheUser.class, 1L, USE_MASTER);
-		System.out.println(u2.getName());
+		Assert.assertEquals("Master_Row1", u2.getName());
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
 		TheUser u3 = new TheUser().useContext(ctx).put("id", 1L).load(USE_SLAVE);
-		System.out.println(u3.getName());
+		Assert.assertEquals("Slave_Row1", u3.getName());
 	}
 
 	public static class TheTxBox extends BeanBox {
