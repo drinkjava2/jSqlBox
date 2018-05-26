@@ -156,7 +156,7 @@ public class EntityNetQueryTest extends TestBase {
 
 		System.out.println("user selected2:" + result.get(User.class).size());
 		System.out.println("email selected2:" + result.get(Email.class).size());
-		net.setAllowQueryCache(true);
+
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
 			result = net.findNodeMapByEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
@@ -177,7 +177,7 @@ public class EntityNetQueryTest extends TestBase {
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
 		EntityNet net = ctx.netLoad(new User(), Email.class);
-		net.setAllowQueryCache(true);
+ 
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
@@ -219,7 +219,7 @@ public class EntityNetQueryTest extends TestBase {
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 
 		// Set validator class will cache query result
-		net.setAllowQueryCache(true);
+ 
 		start = System.currentTimeMillis();
 		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(MyBeanValidator.class);
 		for (int i = 0; i < queyrTimes; i++) {

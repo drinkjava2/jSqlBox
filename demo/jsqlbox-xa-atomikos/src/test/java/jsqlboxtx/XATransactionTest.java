@@ -11,7 +11,7 @@
  */
 package jsqlboxtx;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 
 import java.util.Properties;
 
@@ -48,7 +48,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
  */
 
 public class XATransactionTest {
-	static int DATABASE_QTY = 3; 
+	static int DATABASE_QTY = 3;
 	static SqlBoxContext[] masters = new SqlBoxContext[DATABASE_QTY];
 	static AtomikosDataSourceBean[] xaDataSources = new AtomikosDataSourceBean[DATABASE_QTY];
 	static UserTransactionManager um;
@@ -71,8 +71,8 @@ public class XATransactionTest {
 	@Before
 	public void init() {
 		BeanBox.regAopAroundAnnotation(TX.class, SpringTxIBox.class);
-		BeanBox.getBean(SpringTxIBox.class);// Force initialize lazy!
-		 
+		BeanBox.getBean(SpringTxIBox.class);// Force initialize
+
 		SqlBoxContextConfig.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < DATABASE_QTY; i++) {
 			JdbcDataSource ds = new JdbcDataSource();

@@ -15,9 +15,7 @@ public class TreeNode extends ActiveRecord {
 
 	String comments;
 	Integer line;
-	Integer treeLevel;
-	Integer tempno;
-	Integer temporder;
+	Integer lvl;
 
 	public TreeNode() {
 		// default public constructor
@@ -59,27 +57,12 @@ public class TreeNode extends ActiveRecord {
 		this.line = line;
 	}
 
-	public Integer getTreeLevel() {
-		return treeLevel;
+	public Integer getLvl() {
+		return lvl;
 	}
 
-	public void setTreeLevel(Integer treeLevel) {
-		this.treeLevel = treeLevel;
+	public void setLvl(Integer lvl) {
+		this.lvl = lvl;
 	}
 
-	public Integer getTempno() {
-		return tempno;
-	}
-
-	public void setTempno(Integer tempno) {
-		this.tempno = tempno;
-	}
-
-	public Integer getTemporder() {
-		return temporder;
-	}
-
-	public void setTemporder(Integer temporder) {
-		this.temporder = temporder;
-	}
 }

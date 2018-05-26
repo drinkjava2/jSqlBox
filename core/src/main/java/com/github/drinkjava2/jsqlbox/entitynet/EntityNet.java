@@ -71,9 +71,6 @@ public class EntityNet {
 	// entityClass, nodeID, node
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
 
-	/** Default query cache in EntityNet is disabled */
-	private Boolean allowQueryCache = false;
-
 	/**
 	 * queryCache cache search result after do a path serach <br/>
 	 * 
@@ -456,7 +453,7 @@ public class EntityNet {
 				throw new EntityNetException("'S' type can only be used on path start");
 			// Check if cached
 			Map<Integer, Set<Node>> rootCache = queryCache.get("ROOT");
-			if (this.allowQueryCache && path.getCacheable() && pathId != null && (rootCache != null)) {
+			if ( path.getCacheable() && pathId != null && (rootCache != null)) {
 				Set<Node> cachedNodes = rootCache.get(pathId);
 				if (cachedNodes != null)
 					selected = cachedNodes;
@@ -464,7 +461,7 @@ public class EntityNet {
 				Collection<Node> nodesToCheck = getAllNodeSet(targetClass);
 				validateSelected(level, path, selected, nodesToCheck);
 				// cache it if allow cache
-				if (this.allowQueryCache && path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
+				if (path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
 					cacheSelected("ROOT", pathUniqueString, selected);
 				}
 			}
@@ -473,7 +470,7 @@ public class EntityNet {
 		if ("C".equalsIgnoreCase(type0) && input != null && !input.isEmpty()) {
 			for (Node inputNode : input) {
 				Map<Integer, Set<Node>> childCache = queryCache.get(inputNode.getId());
-				if (this.allowQueryCache && path.getCacheable() && pathId != null && childCache != null) {
+				if (path.getCacheable() && pathId != null && childCache != null) {
 					Set<Node> cachedNodes = childCache.get(pathId);
 					if (cachedNodes != null)
 						selected.addAll(cachedNodes);
@@ -495,7 +492,7 @@ public class EntityNet {
 					validateSelected(level, path, selected, nodesToCheck);
 
 					// now cached childNodes on parentNode
-					if (this.allowQueryCache && path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
+					if (path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
 						cacheSelected(inputNode.getId(), pathUniqueString, selected);
 					}
 				}
@@ -520,7 +517,7 @@ public class EntityNet {
 					}
 				validateSelected(level, path, selected, nodesToCheck);
 				// now cached childNodes on parentNode
-				if (this.allowQueryCache && path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
+				if (path.getCacheable() && !StrUtils.isEmpty(pathUniqueString)) {
 					cacheSelected(inputNode.getId(), pathUniqueString, selected);
 				}
 			}
@@ -581,15 +578,6 @@ public class EntityNet {
 	/** Get the EntityNet Body map */
 	public Map<Class<?>, LinkedHashMap<String, Node>> getBody() {
 		return body;
-	}
-
-	public Boolean getAllowQueryCache() {
-		return allowQueryCache;
-	}
-
-	public void setAllowQueryCache(Boolean allowQueryCache) {
-		this.cleanAllQueryCaches();
-		this.allowQueryCache = allowQueryCache;
-	}
+	} 
 
 }
