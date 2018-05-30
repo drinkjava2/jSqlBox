@@ -41,7 +41,7 @@ public class EntityNetTreeTest extends TestBase {
 
 	@Test
 	public void testSearchTreeChild() {
-		EntityNet net = ctx.netLoad(TreeNode.class);
+		EntityNet net = ctx.netLoadAll(TreeNode.class);
 		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class,
 				new Path("S+", TreeNode.class).where("id=? or id=?", "B", "D").nextPath("C*", TreeNode.class, "pid"));
 		for (TreeNode node : TreeNodes)
@@ -51,7 +51,7 @@ public class EntityNetTreeTest extends TestBase {
 
 	@Test
 	public void testSearchTreeChild2() {
-		EntityNet net = ctx.netLoad(TreeNode.class);
+		EntityNet net = ctx.netLoadAll(TreeNode.class);
 		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class, new Path("C*", TreeNode.class, "pid"),
 				new TreeNode("B"), new TreeNode("D"));
 		for (TreeNode node : TreeNodes)
@@ -61,7 +61,7 @@ public class EntityNetTreeTest extends TestBase {
 
 	@Test
 	public void testSearchTreeParent() {
-		EntityNet net = ctx.netLoad(TreeNode.class);
+		EntityNet net = ctx.netLoadAll(TreeNode.class);
 		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class,
 				new Path("S-", TreeNode.class).where("id='F' or id='K'").nextPath("P*", TreeNode.class, "pid"));
 		for (TreeNode node : TreeNodes)

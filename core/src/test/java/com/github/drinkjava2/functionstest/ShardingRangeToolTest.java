@@ -51,7 +51,7 @@ public class ShardingRangeToolTest {
 	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
 
 	public static class TheUser extends ActiveRecord {
-		// 0~99 store in database0, 100~199 store in database1...
+		// 0~99 store in TheUser_0, 100~199 store in TheUser_1...
 		@ShardTable({ "RANGE", "100" })
 		@Id
 		private Long id;
@@ -139,15 +139,13 @@ public class ShardingRangeToolTest {
 		TheUser u2 = new TheUser();
 		u2.setId(u1.getId());
 		u2.setDatabaseId(u1.getDatabaseId());
-		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use
-																		// slave
+		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use slave
 		Assert.assertEquals("Sam", u2.getName());
 
 		u2.delete(new PrintSqlHandler());// only deleted master except use
 											// "USE_BOTH" option
 		Assert.assertEquals(0, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2), USE_MASTER));
 		Assert.assertEquals(1, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2)));
-
 	}
 
 }

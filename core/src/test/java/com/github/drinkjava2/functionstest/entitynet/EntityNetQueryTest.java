@@ -21,7 +21,6 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
-import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
@@ -51,7 +50,7 @@ public class EntityNetQueryTest extends TestBase {
 		List<User> users = gpQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?", 10);
 		Assert.assertEquals(2, users.size());
 
-		List<User> users2 = giQuery(new EntityListHandler(User.class,  new User().alias("u")),
+		List<User> users2 = giQuery(new EntityListHandler(User.class, new User().alias("u")),
 				"select u.id as u_id, u.age as u_age from usertb u where u.age>?", param(10));
 
 		Assert.assertEquals(2, users2.size());
@@ -69,7 +68,7 @@ public class EntityNetQueryTest extends TestBase {
 
 		List<Map<String, Object>> listMap = gpQuery(MapListHandler.class,
 				"select u.id as u_id, u.userName as u_userName from usertb as u");
-		ctx.netJoin(net, listMap, new User().alias("u"));// userName joined
+		net.add(listMap, new User().alias("u"));// userName joined
 
 		Assert.assertEquals(2, net.size());
 		users = net.getAllEntityList(User.class);
@@ -88,16 +87,14 @@ public class EntityNetQueryTest extends TestBase {
 		MapListWrap wrap = gpQuery(new SSMapListWrapHandler(new Email().alias("e")),
 				"select e.id as e_id from emailtb e");
 		System.out.println(wrap.getMapList());
-		System.out.println(DebugUtils.getTableModelsDebugInfo(wrap.getConfig()));
 
 		EntityNet net = (EntityNet) ctx.netCreate(wrap);
 		Assert.assertEquals(2, net.size());
 		Node emailNode = net.getOneNode(Email.class, "e1");
 		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId
 
-		List<Map<String, Object>> listMap2 = gpQuery(new SSMapListHandler(Email.class),
-				"select e.** from emailtb e");
-		ctx.netJoin(net, listMap2);
+		List<Map<String, Object>> listMap2 = gpQuery(new SSMapListHandler(Email.class), "select e.** from emailtb e");
+		net.add(listMap2);// alias still is e
 
 		Assert.assertEquals(2, net.size());
 		emailNode = net.getOneNode(Email.class, "e1");
@@ -112,7 +109,7 @@ public class EntityNetQueryTest extends TestBase {
 		for (int i = 1; i <= sampleSize; i++) {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
-		EntityNet net = ctx.netLoad(new User(), Email.class);
+		EntityNet net = ctx.netLoadAll(new User(), Email.class);
 
 		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
 		Assert.assertEquals(0, users2.size());
@@ -142,7 +139,7 @@ public class EntityNetQueryTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		EntityNet net = ctx.netLoad(new User(), Email.class);
+		EntityNet net = ctx.netLoadAll(new User(), Email.class);
 
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
@@ -176,8 +173,8 @@ public class EntityNetQueryTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		EntityNet net = ctx.netLoad(new User(), Email.class);
- 
+		EntityNet net = ctx.netLoadAll(new User(), Email.class);
+
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
@@ -207,7 +204,7 @@ public class EntityNetQueryTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		EntityNet net = ctx.netLoad(User.class, Email.class);
+		EntityNet net = ctx.netLoadAll(User.class, Email.class);
 		long start = System.currentTimeMillis();
 		Set<Email> emails = null;
 		// Set validator instance will not cache query result
@@ -219,7 +216,7 @@ public class EntityNetQueryTest extends TestBase {
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 
 		// Set validator class will cache query result
- 
+
 		start = System.currentTimeMillis();
 		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(MyBeanValidator.class);
 		for (int i = 0; i < queyrTimes; i++) {
@@ -240,7 +237,7 @@ public class EntityNetQueryTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		EntityNet net = ctx.netLoad(User.class, Email.class);
+		EntityNet net = ctx.netLoadAll(User.class, Email.class);
 		long start = System.currentTimeMillis();
 		Set<Email> emails = null;
 		// Set expression query parameters will not cache query result
@@ -273,7 +270,7 @@ public class EntityNetQueryTest extends TestBase {
 			for (int j = 0; j < sampleSize; j++)
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
-		EntityNet net = ctx.netLoad(new User(), Email.class);
+		EntityNet net = ctx.netLoadAll(new User(), Email.class);
 		Map<Class<?>, Set<Node>> result = null;
 		long start = System.currentTimeMillis();
 
@@ -290,14 +287,14 @@ public class EntityNetQueryTest extends TestBase {
 	public void testAddEntity() {
 		System.out.println("==============testAddEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
-		EntityNet net = ctx.netLoad(User.class);
+		EntityNet net = ctx.netLoadAll(User.class);
 		Assert.assertEquals(1, net.size());
 
 		User u2 = new User();
 		u2.setId("u2");
 		u2.setUserName("user2");
 		u2.insert();
-		ctx.netAddEntity(net, u2);
+		net.addEntity(u2);
 
 		Assert.assertEquals(2, net.size());
 
@@ -310,10 +307,10 @@ public class EntityNetQueryTest extends TestBase {
 		System.out.println("==============testRemoveEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
-		EntityNet net = ctx.netLoad(User.class);
+		EntityNet net = ctx.netLoadAll(User.class);
 		Assert.assertEquals(2, net.size());
 		User u2 = net.getOneEntity(User.class, "u2");
-		ctx.netRemoveEntity(net, u2);
+		net.removeEntity(u2);
 		Assert.assertEquals(1, net.size());
 	}
 
@@ -322,11 +319,11 @@ public class EntityNetQueryTest extends TestBase {
 		System.out.println("==============testUpdateEntity================ ");
 		new User().put("id", "u1").put("userName", "user1").insert();
 		new User().put("id", "u2").put("userName", "user2").insert();
-		EntityNet net = ctx.netLoad(User.class);
+		EntityNet net = ctx.netLoadAll(User.class);
 		Assert.assertEquals(2, net.size());
 		User u2 = net.getOneEntity(User.class, "u2");
 		u2.setUserName("newName");
-		ctx.netUpdateEntity(net, u2);
+		net.updateEntity(u2);
 
 		u2 = net.getOneEntity(User.class, "u2");
 		Assert.assertEquals("newName", u2.getUserName());

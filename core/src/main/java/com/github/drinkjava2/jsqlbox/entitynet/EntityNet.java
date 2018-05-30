@@ -26,8 +26,11 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
+import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
@@ -61,6 +64,9 @@ public class EntityNet {
 	/** Used to combine compound key column values into a single String */
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdValSpr_";
 
+	/** SqlBoxContext instance */
+	SqlBoxContext sqlBoxContext;
+
 	/**
 	 * ConfigModels is virtual meta data of EntityNet, and also store O-R mapping
 	 * info related to database
@@ -92,16 +98,19 @@ public class EntityNet {
 
 	private Map<String, Integer> pathIdCache = new HashMap<String, Integer>();
 
-	public EntityNet() {
+ 
+	public EntityNet(SqlBoxContext sqlBoxContext) {
+		this.sqlBoxContext = sqlBoxContext;
+	}
+ 
+	/** Create a EntityNet by given configurations, load all columns */
+	public EntityNet loadAll(Object... configObjects) {
+		return loadAllOrSketch(false, configObjects);
 	}
 
-	public EntityNet(List<Map<String, Object>> listMap, TableModel... models) {
-		addMapList(listMap, models);
-	}
-
-	/** Create a EntityNet instance by given listMap and configs */
-	public static EntityNet createEntityNet(List<Map<String, Object>> listMap, TableModel[] configs) {
-		return new EntityNet(listMap, configs);
+	/** Create a EntityNet instance but only load PKey and FKeys columns */
+	public EntityNet loadSketch(Object... configObjects) {
+		return loadAllOrSketch(true, configObjects);
 	}
 
 	/**
@@ -110,28 +119,27 @@ public class EntityNet {
 	 * 
 	 * @param ctx
 	 *            A SqlBoxContext instance
-	 * @param loadKeyOnly
-	 *            If true will only load PKey and FKeys field, otherwise load all
-	 *            columns
+	 * @param loadSketchOnly
+	 *            If true will only load PKey and FKeys field only
 	 * @param configObjects
 	 *            netConfigs array, can be entity class, entity, SqlBox or
 	 *            TableModel instance
 	 * @return The EntityNet
 	 */
-	public static EntityNet createEntityNet(SqlBoxContext ctx, boolean loadKeyOnly, Object... configObjects) {
+	private EntityNet loadAllOrSketch(boolean loadSketchOnly, Object... configObjects) {
 		if (configObjects == null || configObjects.length == 0)
 			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
-		TableModel[] models = SqlBoxContextUtils.objectConfigsToModels(ctx, configObjects);
-		EntityNet net = new EntityNet();
-		String starOrSharp = loadKeyOnly ? ".##" : ".**";
+		TableModel[] models = SqlBoxContextUtils.objectConfigsToModels(sqlBoxContext, configObjects);
+		EntityNet net = new EntityNet(sqlBoxContext);
+		String starOrSharp = loadSketchOnly ? ".##" : ".**";
 		for (TableModel t : models) {
 			List<Map<String, Object>> mapList = null;
 			String alias = t.getAlias();
 			if (StrUtils.isEmpty(alias))
 				alias = t.getTableName();
-			mapList = ctx.iQuery(new SSMapListHandler(t),
+			mapList = sqlBoxContext.iQuery(new SSMapListHandler(t),
 					"select " + alias + starOrSharp + " from " + t.getTableName() + " as " + alias);
-			net.addMapList(mapList, t);
+			net.add(mapList, t);
 		}
 		return net;
 	}
@@ -143,10 +151,12 @@ public class EntityNet {
 	 * @param modelConfigs
 	 * @return EntityNet it self
 	 */
-	public EntityNet addMapList(List<Map<String, Object>> listMap, TableModel... configs) {
+	public EntityNet add(List<Map<String, Object>> listMap, Object... configObjects) {
 		if (listMap == null)
 			throw new EntityNetException("Can not join null listMap");
-		// clean query caches
+
+		TableModel[] configs = SqlBoxContextUtils.objectConfigsToModels(sqlBoxContext, configObjects);
+
 		cleanAllQueryCaches();
 
 		EntityNetUtils.checkModelHasEntityClassAndAlias(configs);
@@ -164,6 +174,11 @@ public class EntityNet {
 			addOneRowMapList(map);
 		}
 		return this;
+	}
+
+	/** Join MapListWrap to existed EntityNet */
+	public EntityNet add(MapListWrap mapListWrap) {
+		return add(mapListWrap.getMapList(), mapListWrap.getConfig());
 	}
 
 	private void cleanAllQueryCaches() {
@@ -203,7 +218,10 @@ public class EntityNet {
 	/**
 	 * Add a Entity into entity net
 	 */
-	public void addEntity(Object entity, TableModel tableModel) {
+	public void addEntity(Object entity) {
+		SqlBox box = SqlBoxUtils.findAndBindSqlBox(sqlBoxContext, entity);
+		TableModel tableModel = box.getTableModel();
+
 		cleanAllQueryCaches();
 		Set<String> loadedFields = new HashSet<String>();
 		for (ColumnModel col : tableModel.getColumns())
@@ -212,16 +230,18 @@ public class EntityNet {
 	}
 
 	/** Remove entity from current entityNet */
-	public void removeEntity(Object entity, TableModel tableModel) {
+	public void removeEntity(Object entity) {
+		SqlBox box = SqlBoxUtils.findAndBindSqlBox(sqlBoxContext, entity);
+		TableModel tableModel = box.getTableModel();
 		cleanAllQueryCaches();
 		String id = EntityNetUtils.buildNodeId(tableModel, entity);
 		body.get(entity.getClass()).remove(id);
 	}
 
 	/** Update entity in current entityNet */
-	public void updateEntity(Object entity, TableModel tableModel) {
-		removeEntity(entity, tableModel);
-		addEntity(entity, tableModel);
+	public void updateEntity(Object entity) {
+		removeEntity(entity);
+		addEntity(entity);
 	}
 
 	/**
@@ -453,7 +473,7 @@ public class EntityNet {
 				throw new EntityNetException("'S' type can only be used on path start");
 			// Check if cached
 			Map<Integer, Set<Node>> rootCache = queryCache.get("ROOT");
-			if ( path.getCacheable() && pathId != null && (rootCache != null)) {
+			if (path.getCacheable() && pathId != null && (rootCache != null)) {
 				Set<Node> cachedNodes = rootCache.get(pathId);
 				if (cachedNodes != null)
 					selected = cachedNodes;
@@ -569,15 +589,55 @@ public class EntityNet {
 		rootCache.put(pathId, selected);
 	}
 
-	// getter & setter=======
-	/** Get SqlBoxContextConfig models */
+	protected void getteSetters__________________________() {// NOSONAR
+	}
+
 	public Map<Class<?>, TableModel> getConfigModels() {
 		return configModels;
 	}
 
-	/** Get the EntityNet Body map */
+	public void setConfigModels(Map<Class<?>, TableModel> configModels) {
+		this.configModels = configModels;
+	}
+
 	public Map<Class<?>, LinkedHashMap<String, Node>> getBody() {
 		return body;
-	} 
+	}
+
+	public void setBody(Map<Class<?>, LinkedHashMap<String, Node>> body) {
+		this.body = body;
+	}
+
+	public Map<String, Map<Integer, Set<Node>>> getQueryCache() {
+		return queryCache;
+	}
+
+	public void setQueryCache(Map<String, Map<Integer, Set<Node>>> queryCache) {
+		this.queryCache = queryCache;
+	}
+
+	public int getCurrentPathId() {
+		return currentPathId;
+	}
+
+	public void setCurrentPathId(int currentPathId) {
+		this.currentPathId = currentPathId;
+	}
+
+	public Map<String, Integer> getPathIdCache() {
+		return pathIdCache;
+	}
+
+	public void setPathIdCache(Map<String, Integer> pathIdCache) {
+		this.pathIdCache = pathIdCache;
+	}
+
+	public SqlBoxContext getSqlBoxContext() {
+		return sqlBoxContext;
+	}
+
+	public void setSqlBoxContext(SqlBoxContext sqlBoxContext) {
+		this.sqlBoxContext = sqlBoxContext;
+	}
 
 }

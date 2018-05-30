@@ -34,7 +34,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
- * ActiveRecordDemoTest of jSqlBox configurations
+ * Non-XA Transaction test, H2 + jBeanBox + jSqlBox + jTransaction
  * 
  * @author Yong Zhu
  * @since 1.0.0

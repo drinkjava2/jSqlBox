@@ -145,7 +145,7 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testPathFind() {
 		insertDemoData();
-		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		EntityNet net = ctx.netLoadAll(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path("S-", User.class).where("id='u1' or id='u2'").nextPath("C-", UserRole.class, "userId")
 						.nextPath("P-", Role.class, "rid").nextPath("C-", RolePrivilege.class, "rid")
@@ -158,7 +158,7 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testAutoPath() {
 		insertDemoData();
-		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		EntityNet net = ctx.netLoadAll(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class));
 		for (Privilege privilege : privileges)
@@ -167,9 +167,9 @@ public class EntityNetDemoTest extends TestBase {
 	}
 
 	@Test
-	public void testAutoPathAndBind() {// TODO here
+	public void testAutoPathAndBind() {
 		insertDemoData();
-		EntityNet net = ctx.netLoad(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
+		EntityNet net = ctx.netLoadAll(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class));
 		for (Privilege privilege : privileges)
@@ -180,7 +180,7 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testReturnDifferentType() {
 		insertDemoData();
-		EntityNet net = ctx.netLoad(new User(), new Email());
+		EntityNet net = ctx.netLoadAll(new User(), new Email());
 		Map<Class<?>, Set<Object>> result = net
 				.findEntityMap(new Path("S+", Email.class).nextPath("P+", User.class, "userId"));
 		System.out.println("user selected:" + result.get(User.class).size());
@@ -190,7 +190,7 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testAutoPath2() {
 		insertDemoData();
-		EntityNet net = ctx.netLoad(new Email(), new User(), new Role(), Privilege.class, UserRole.class,
+		EntityNet net = ctx.netLoadAll(new Email(), new User(), new Role(), Privilege.class, UserRole.class,
 				RolePrivilege.class);
 		Set<Privilege> privileges = net.findEntitySet(Privilege.class,
 				new Path(Email.class).setValidator(new EmailValidator()).autoPath(Privilege.class));
@@ -210,8 +210,8 @@ public class EntityNetDemoTest extends TestBase {
 	@Test
 	public void testloadEntityNet() {
 		insertDemoData();
-		EntityNet net = ctx.netLoad(new User(), Email.class, Address.class, new Role(), Privilege.class, UserRole.class,
-				RolePrivilege.class);
+		EntityNet net = ctx.netLoadAll(new User(), Email.class, Address.class, new Role(), Privilege.class,
+				UserRole.class, RolePrivilege.class);
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 
@@ -254,14 +254,14 @@ public class EntityNetDemoTest extends TestBase {
 
 		List<Map<String, Object>> mapList2 = gpQuery(new SSMapListHandler(Email.class),
 				"select e.id as e_id from emailtb as e");
-		ctx.netJoin(net, mapList2, new Email().alias("e"));
+		net.add(mapList2, new Email().alias("e"));
 		Assert.assertEquals(15, net.size());
 
 		MapListWrap wrap = gpQuery(
 				new SSMapListWrapHandler(Role.class, UserRole.class, RolePrivilege.class, Privilege.class),
 				"select r.**, ur.**, rp.**, p.** from roletb r, userroletb ur, RolePrivilegetb rp, privilegetb p");
 		Assert.assertEquals(900, wrap.getMapList().size());
-		ctx.netJoin(net, wrap);
+		net.add(wrap);
 		Assert.assertEquals(37, net.size());
 	}
 

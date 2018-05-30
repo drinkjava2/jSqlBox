@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -21,7 +22,7 @@ import java.util.Set;
  * relationship allowed in EntityNet system, exact like Relational Database, so
  * it's easy to translate a Relational Database into an EntityNet.
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
 public class Node {
@@ -30,14 +31,14 @@ public class Node {
 	 */
 	String id;
 
-	/** The entity instance */
+	/** The string-value map, this is original data loaded from database */
+	Map<String, Object> map;
+
+	/** The entity instance, this is translated from map value  */
 	Object entity;
 
 	/** Mark how many fields loaded from database */
 	Set<String> loadedFields = new HashSet<String>();
-
-	/// ** Mark how many fields be modified */
-	// Set<String> modifiedFields;
 
 	private List<ParentRelation> parentRelations;
 
@@ -71,6 +72,14 @@ public class Node {
 
 	public void setLoadedFields(Set<String> loadedFields) {
 		this.loadedFields = loadedFields;
+	}
+
+	public Map<String, Object> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, Object> map) {
+		this.map = map;
 	}
 
 }

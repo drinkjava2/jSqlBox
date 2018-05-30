@@ -26,13 +26,13 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 @SuppressWarnings("all")
 public class MapListWrap {
 	List<Map<String, Object>> mapList;
-	TableModel[] config; // the config tableModels
+	Object[] config; // the config objects
 
 	public MapListWrap() {
 		// Default public Constructor
 	}
 
-	public MapListWrap(List<Map<String, Object>> mapList, TableModel[] config) {
+	public MapListWrap(List<Map<String, Object>> mapList, Object[] config) {
 		this.mapList = mapList;
 		this.config = config;
 	}
@@ -45,11 +45,11 @@ public class MapListWrap {
 		this.mapList = mapList;
 	}
 
-	public TableModel[] getConfig() {
+	public Object[] getConfig() {
 		return config;
 	}
 
-	public void setConfig(TableModel[] config) {
+	public void setConfig(Object[] config) {
 		this.config = config;
 	}
 

@@ -422,7 +422,7 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void activeRecordStyle() {// TODO: debug at here
+	public void activeRecordStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		UserAR user = new UserAR();
 		user.useContext(ctx); // Use ctx as SqlBoxContext

@@ -41,7 +41,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 
 /**
- * ActiveRecordDemoTest of jSqlBox configurations
+ * Atomikos Transaction test, H2 + jBeanBox + jSqlBox + Spring XA + Atomikos
  * 
  * @author Yong Zhu
  * @since 1.0.0
