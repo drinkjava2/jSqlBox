@@ -63,7 +63,7 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u2").put("userName", "user2").insert();
 		EntityNet net = ctx.netLoadSketch(User.class);
 		Assert.assertEquals(2, net.size());
-		List<User> users = net.getEntityList(User.class);
+		List<User> users = net.selectEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
 		List<Map<String, Object>> listMap = gpQuery(MapListHandler.class,
@@ -71,7 +71,7 @@ public class EntityNetQueryTest extends TestBase {
 		net.add(listMap, new User().alias("u"));// userName joined
 
 		Assert.assertEquals(2, net.size());
-		users = net.getEntityList(User.class);
+		users = net.selectEntityList(User.class);
 		Assert.assertNotNull(users.get(0).getUserName());
 	}
 
@@ -90,14 +90,14 @@ public class EntityNetQueryTest extends TestBase {
 
 		EntityNet net = (EntityNet) ctx.netCreate(wrap);
 		Assert.assertEquals(2, net.size());
-		Node emailNode = net.getOneNode(Email.class, "e1");
+		Node emailNode = net.selectOneNode(Email.class, "e1");
 		Assert.assertNull(emailNode.getParentRelations());// e1 have no userId
 
 		List<Map<String, Object>> listMap2 = gpQuery(new SSMapListHandler(Email.class), "select e.** from emailtb e");
 		net.add(listMap2);// alias still is e
 
 		Assert.assertEquals(2, net.size());
-		emailNode = net.getOneNode(Email.class, "e1");
+		emailNode = net.selectOneNode(Email.class, "e1");
 		Assert.assertNotNull(emailNode.getParentRelations());
 	}
 
@@ -111,12 +111,12 @@ public class EntityNetQueryTest extends TestBase {
 		}
 		EntityNet net = ctx.netLoadAll(new User(), Email.class);
  
-		Set<User> users1 = net.runPath(new Path("S-", User.class)).getEntitySet(User.class);
+		Set<User> users1 = net.runPath(new Path("S-", User.class)).selectEntitySet(User.class);
 		Assert.assertEquals(0, users1.size());
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			Set<User> users2 = net.runPath(new Path("S+", User.class)).getEntitySet(User.class);
+			Set<User> users2 = net.runPath(new Path("S+", User.class)).selectEntitySet(User.class);
 			Assert.assertTrue(users2.size() > 0);
 		}
 		printTimeUsed(start, "Find self");
@@ -136,7 +136,7 @@ public class EntityNetQueryTest extends TestBase {
 		Map<Class<?>, Set<Object>> result = null;
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.runPath(new Path("S+", User.class).nextPath("C+", Email.class, "userId")).getEntitySetMap();
+			result = net.runPath(new Path("S+", User.class).nextPath("C+", Email.class, "userId")).selectEntitySetMap();
 		}
 		printTimeUsed(start, "Find Childs with Cache");
 		System.out.println("user selected2:" + result.get(User.class).size());
@@ -167,7 +167,7 @@ public class EntityNetQueryTest extends TestBase {
 		Set<Email> emails = null;
 		Path p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(new MyBeanValidator());
 		for (int i = 0; i < queyrTimes; i++)
-			emails = net.runPath(p).getEntitySet(Email.class);
+			emails = net.runPath(p).selectEntitySet(Email.class);
 		printTimeUsed(start, "Bean Validator instance ");
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 	}
@@ -190,7 +190,7 @@ public class EntityNetQueryTest extends TestBase {
 		Path p = new Path("S-", User.class).where("age>?", 10).nextPath("C+", Email.class, "userId")
 				.where("id startwith ? or emailName=?", "email1", "Bar");
 		for (int i = 0; i < queyrTimes; i++)
-			emails = net.runPath(p).getEntitySet(Email.class);
+			emails = net.runPath(p).selectEntitySet(Email.class);
 		printTimeUsed(start, "Validate by expression with parameters");
 		Assert.assertEquals(180, emails.size());
 
@@ -199,7 +199,7 @@ public class EntityNetQueryTest extends TestBase {
 		p = new Path("S-", User.class).where("age>10").nextPath("C+", Email.class, "userId")
 				.where("id startwith 'email1' or emailName='Bar'");
 		for (int i = 0; i < queyrTimes; i++)
-			emails = net.runPath(p).getEntitySet(Email.class);
+			emails = net.runPath(p).selectEntitySet(Email.class);
 		printTimeUsed(start, "Validate by expression no parameters");
 		Assert.assertEquals(180, emails.size());
 	}
@@ -220,7 +220,7 @@ public class EntityNetQueryTest extends TestBase {
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.runPath(new Path("S+", Email.class).nextPath("P+", User.class, "userId")).getEntitySetMap();
+			result = net.runPath(new Path("S+", Email.class).nextPath("P+", User.class, "userId")).selectEntitySetMap();
 		}
 		printTimeUsed(start, "Find parent (no cache)");
 		System.out.println("user selected2:" + result.get(User.class).size());
@@ -242,7 +242,7 @@ public class EntityNetQueryTest extends TestBase {
 
 		Assert.assertEquals(2, net.size());
 
-		User u = net.getOneEntity(User.class, "u2");
+		User u = net.selectOneEntity(User.class, "u2");
 		Assert.assertEquals("user2", u.getUserName());
 	}
 
@@ -253,7 +253,7 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u2").put("userName", "user2").insert();
 		EntityNet net = ctx.netLoadAll(User.class);
 		Assert.assertEquals(2, net.size());
-		User u2 = net.getOneEntity(User.class, "u2");
+		User u2 = net.selectOneEntity(User.class, "u2");
 		net.removeEntity(u2);
 		Assert.assertEquals(1, net.size());
 	}
@@ -265,11 +265,11 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u2").put("userName", "user2").insert();
 		EntityNet net = ctx.netLoadAll(User.class);
 		Assert.assertEquals(2, net.size());
-		User u2 = net.getOneEntity(User.class, "u2");
+		User u2 = net.selectOneEntity(User.class, "u2");
 		u2.setUserName("newName");
 		net.updateEntity(u2);
 
-		u2 = net.getOneEntity(User.class, "u2");
+		u2 = net.selectOneEntity(User.class, "u2");
 		Assert.assertEquals("newName", u2.getUserName());
 	}
 }

@@ -335,7 +335,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** Shortcut method, load all entities as list */
 	public <T> List<T> netLoadAsEntityList(Class<T> entityClass) {
-		return new EntityNet(this).loadAll(entityClass).getEntityList(entityClass);
+		return new EntityNet(this).loadAll(entityClass).selectEntityList(entityClass);
 	}
 
 	protected void getteSetters__________________________() {// NOSONAR

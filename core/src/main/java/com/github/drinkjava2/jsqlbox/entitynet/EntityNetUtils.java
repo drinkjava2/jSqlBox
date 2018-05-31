@@ -13,6 +13,8 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,6 +27,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * Store static methods about EntityNet
@@ -35,8 +38,8 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public class EntityNetUtils {// NOSONAR
 
 	/**
-	 * If nodeValidator is object, return it, otherwise it is a NodeValidator class,
-	 * build a new instance as return
+	 * If nodeValidator is object, return it, otherwise it is a NodeValidator
+	 * class, build a new instance as return
 	 */
 	@SuppressWarnings("unchecked")
 	public static NodeValidator getOrBuildValidator(Object nodeValidator) {
@@ -66,7 +69,8 @@ public class EntityNetUtils {// NOSONAR
 	}
 
 	/**
-	 * Check if each TableModel has entityClass and Alias, if no, throw exception
+	 * Check if each TableModel has entityClass and Alias, if no, throw
+	 * exception
 	 */
 	public static void checkModelHasEntityClassAndAlias(TableModel... models) {
 		if (models != null && models.length > 0)// Join models
@@ -82,33 +86,66 @@ public class EntityNetUtils {// NOSONAR
 	/**
 	 * Join PKey values into one String, used for node ID
 	 */
-	public static String buildNodeId(EntityNet net, Object entity) {
+	public static String buildNodeIdFromEntity(EntityNet net, Object entity) {
 		if (entity == null)
 			return null;
 		if (net.getConfigModels() == null)
 			return null;
-		return buildNodeId(net.getConfigModels().get(entity.getClass()), entity);
+		return buildNodeIdFromEntity(net.getConfigModels().get(entity.getClass()), entity);
 	}
 
 	/**
 	 * Join PKey values into one String, used for node ID
 	 */
-	public static String buildNodeId(TableModel model, Object entity) {
+	public static String buildNodeIdFromEntity(TableModel model, Object entity) {
 		if (model == null || entity == null)
 			return null;
-		StringBuilder sb = new StringBuilder();
-		for (ColumnModel col : model.getColumns()) {
+		Map<String, Object> idMap = new HashMap<String, Object>();
+		int keyCount = 0;
+		ColumnModel keyColumn = null;
+		for (ColumnModel col : model.getColumns()) // Single key
 			if (col.getPkey() && !col.getTransientable()) {
 				EntityNetException.assureNotEmpty(col.getEntityField(),
 						"EntityField not found for FKey column '" + col.getColumnName() + "'");
+				keyCount++;
+				if (keyCount > 1)
+					break;
+				keyColumn = col;
+			}
+		if (keyCount == 0)
+			throw new EntityNetException("No prime key setting found for entity " + entity);
+		if (keyCount == 1)
+			return ClassCacheUtils.readValueFromBeanField(entity, keyColumn.getEntityField()).toString();
+
+		for (ColumnModel col : model.getColumns()) // compound key
+			if (col.getPkey() && !col.getTransientable())
+				idMap.put(col.getEntityField(), ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField()));
+		return buildNodeIdFromIdOrIdMap(idMap);
+	}
+
+	/** Build Node id from unknown entityIdOrIdMap */
+	@SuppressWarnings("all")
+	public static String buildNodeIdFromIdOrIdMap(Object entity) {
+		SqlBoxException.assureNotNull(entity, "Id can not be null.");
+		if (entity instanceof Map) {
+			Map<String, Object> mp = (Map<String, Object>) entity;
+			List<String> keys = new ArrayList(mp.keySet());// Sort
+			Collections.sort(keys, new Comparator() {
+				public int compare(Object o1, Object o2) {
+					return o1.toString().compareTo(o2.toString());
+				}
+			});
+			StringBuilder sb = new StringBuilder();
+			for (String key : keys) {
 				if (sb.length() > 0)
 					sb.append(EntityNet.COMPOUND_COLUMNNAME_SEPARATOR);
-				sb.append(ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField()));
+				sb.append(mp.get(key));
 			}
-		}
-		if (sb.length() == 0)
-			throw new EntityNetException("Table '" + model.getTableName() + "' no Prime Key columns set");
-		return sb.toString();
+			if (sb.length() == 0)
+				throw new EntityNetException("Id Map can not be empty");
+			return sb.toString();
+		} else
+			return entity.toString();
 	}
 
 	/**
@@ -151,7 +188,7 @@ public class EntityNetUtils {// NOSONAR
 		Map<String, Node> map = net.getBody().get(entity.getClass());
 		if (map == null)
 			return null;
-		return map.get(EntityNetUtils.buildNodeId(net, entity));
+		return map.get(EntityNetUtils.buildNodeIdFromEntity(net, entity));
 	}
 
 	/** Convert entity array to Node set */
@@ -219,6 +256,7 @@ public class EntityNetUtils {// NOSONAR
 	public static EntityNet nodeSetMapToEntityNet(EntityNet net, Map<Class<?>, Set<Node>> nodeMap) {
 		EntityNet newNet = new EntityNet(net.getSqlBoxContext());
 		newNet.setRowData(net.getRowData());
+		newNet.setConfigModels(net.getConfigModels());
 		for (Entry<Class<?>, Set<Node>> entry : nodeMap.entrySet())
 			newNet.addNodes(entry.getValue());
 		return newNet;

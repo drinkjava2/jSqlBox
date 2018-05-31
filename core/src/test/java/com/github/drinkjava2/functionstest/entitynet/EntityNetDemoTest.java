@@ -149,7 +149,7 @@ public class EntityNetDemoTest extends TestBase {
 		Set<Privilege> privileges = net.runPath(new Path("S-", User.class).where("id='u1' or id='u2'")
 				.nextPath("C-", UserRole.class, "userId").nextPath("P-", Role.class, "rid")
 				.nextPath("C-", RolePrivilege.class, "rid").nextPath("P+", Privilege.class, "pid"))
-				.getEntitySet(Privilege.class);
+				.selectEntitySet(Privilege.class);
 		for (Privilege privilege : privileges)
 			System.out.print(privilege.getId() + " ");
 		Assert.assertEquals(3, privileges.size());
@@ -161,7 +161,7 @@ public class EntityNetDemoTest extends TestBase {
 		EntityNet net = ctx.netLoadAll(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net
 				.runPath(new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class))
-				.getEntitySet(Privilege.class);
+				.selectEntitySet(Privilege.class);
 		;
 		for (Privilege privilege : privileges)
 			System.out.print(privilege.getId() + " ");
@@ -174,7 +174,7 @@ public class EntityNetDemoTest extends TestBase {
 		EntityNet net = ctx.netLoadAll(new User(), new Role(), Privilege.class, UserRole.class, RolePrivilege.class);
 		Set<Privilege> privileges = net
 				.runPath(new Path(User.class).where("id='u1' or id='u2'").autoPath(Privilege.class))
-				.getEntitySet(Privilege.class);
+				.selectEntitySet(Privilege.class);
 		for (Privilege privilege : privileges)
 			System.out.print(privilege.getId() + " ");
 		Assert.assertEquals(3, privileges.size());
@@ -185,7 +185,7 @@ public class EntityNetDemoTest extends TestBase {
 		insertDemoData();
 		EntityNet net = ctx.netLoadAll(new User(), new Email());
 		Map<Class<?>, Set<Object>> result = net.runPath(new Path("S+", Email.class).nextPath("P+", User.class, "userId"))
-				.getEntitySetMap();
+				.selectEntitySetMap();
 		Assert.assertEquals(3, result.get(User.class).size());
 		Assert.assertEquals(5, result.get(Email.class).size());
 	}
@@ -197,7 +197,7 @@ public class EntityNetDemoTest extends TestBase {
 				RolePrivilege.class);
 		Set<Privilege> privileges = net
 				.runPath(new Path(Email.class).setValidator(new EmailValidator()).autoPath(Privilege.class))
-				.getEntitySet(Privilege.class);
+				.selectEntitySet(Privilege.class);
 		;
 		for (Privilege privilege : privileges)
 			System.out.println(privilege.getId());
@@ -220,7 +220,7 @@ public class EntityNetDemoTest extends TestBase {
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 
-		List<User> users = net.getEntityList(User.class);
+		List<User> users = net.selectEntityList(User.class);
 		Assert.assertEquals(5, users.size());
 		Assert.assertEquals("user1", users.get(0).getUserName());
 		System.out.println(users.get(0).getUserName());
@@ -234,7 +234,7 @@ public class EntityNetDemoTest extends TestBase {
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 
-		List<User> users = net.getEntityList(User.class);
+		List<User> users = net.selectEntityList(User.class);
 		Assert.assertEquals(5, users.size());
 		Assert.assertEquals(null, users.get(0).getUserName());
 	}
@@ -246,7 +246,7 @@ public class EntityNetDemoTest extends TestBase {
 				"select u.**, e.** from usertb u, emailtb e where u.id=e.userId");
 		Assert.assertEquals(8, net.size());
 		EntityNet newNet = net.runPath(new Path(User.class).where("id='u1' or id='u2'").autoPath(Email.class));
-		Set<Email> emails = newNet.getEntitySet(Email.class);
+		Set<Email> emails = newNet.selectEntitySet(Email.class);
 		Assert.assertEquals(4, emails.size());
 	}
 
