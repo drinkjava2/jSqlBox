@@ -110,14 +110,14 @@ public class EntityNetQueryTest extends TestBase {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
 		EntityNet net = ctx.netLoadAll(new User(), Email.class);
-
-		Set<User> users2 = net.findEntitySet(User.class, new Path("S-", User.class));
-		Assert.assertEquals(0, users2.size());
+ 
+		Set<User> users1 = net.runPath(new Path("S-", User.class)).getEntitySet(User.class);
+		Assert.assertEquals(0, users1.size());
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class));
-			Assert.assertTrue(users.size() > 0);
+			Set<User> users2 = net.runPath(new Path("S+", User.class)).getEntitySet(User.class);
+			Assert.assertTrue(users2.size() > 0);
 		}
 		printTimeUsed(start, "Find self");
 	}
@@ -133,10 +133,10 @@ public class EntityNetQueryTest extends TestBase {
 		}
 		EntityNet net = ctx.netLoadAll(new User(), Email.class);
 
-		Map<Class<?>, Set<Node>> result = null;
+		Map<Class<?>, Set<Object>> result = null;
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeMapByEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
+			result = net.runPath(new Path("S+", User.class).nextPath("C+", Email.class, "userId")).getEntitySetMap();
 		}
 		printTimeUsed(start, "Find Childs with Cache");
 		System.out.println("user selected2:" + result.get(User.class).size());
@@ -153,7 +153,7 @@ public class EntityNetQueryTest extends TestBase {
 	}
 
 	@Test
-	public void testValidateByBeanValidator() {// no cache
+	public void testValidateByBeanValidator() {
 		System.out.println("==============testValidateByBeanValidator================ ");
 		int sampleSize = 30;
 		int queyrTimes = 60;
@@ -165,22 +165,10 @@ public class EntityNetQueryTest extends TestBase {
 		EntityNet net = ctx.netLoadAll(User.class, Email.class);
 		long start = System.currentTimeMillis();
 		Set<Email> emails = null;
-		// Set validator instance will not cache query result
 		Path p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(new MyBeanValidator());
-		for (int i = 0; i < queyrTimes; i++) {
-			emails = net.findEntitySet(Email.class, p);
-		}
-		printTimeUsed(start, "Bean Validator instance (No Cache)");
-		Assert.assertEquals(sampleSize * sampleSize, emails.size());
-
-		// Set validator class will cache query result
-
-		start = System.currentTimeMillis();
-		p = new Path("S-", User.class).nextPath("C+", Email.class, "userId").setValidator(MyBeanValidator.class);
-		for (int i = 0; i < queyrTimes; i++) {
-			emails = net.findEntitySet(Email.class, p);
-		}
-		printTimeUsed(start, "Bean Validator instance (Has Cache)");
+		for (int i = 0; i < queyrTimes; i++)
+			emails = net.runPath(p).getEntitySet(Email.class);
+		printTimeUsed(start, "Bean Validator instance ");
 		Assert.assertEquals(sampleSize * sampleSize, emails.size());
 	}
 
@@ -201,19 +189,17 @@ public class EntityNetQueryTest extends TestBase {
 		// Set expression query parameters will not cache query result
 		Path p = new Path("S-", User.class).where("age>?", 10).nextPath("C+", Email.class, "userId")
 				.where("id startwith ? or emailName=?", "email1", "Bar");
-		for (int i = 0; i < queyrTimes; i++) {
-			emails = net.findEntitySet(Email.class, p);
-		}
+		for (int i = 0; i < queyrTimes; i++)
+			emails = net.runPath(p).getEntitySet(Email.class);
 		printTimeUsed(start, "Validate by expression with parameters");
 		Assert.assertEquals(180, emails.size());
 
-		// Do not have query parameters will cause query result be cached
+		// Do not have query parameters
 		start = System.currentTimeMillis();
 		p = new Path("S-", User.class).where("age>10").nextPath("C+", Email.class, "userId")
 				.where("id startwith 'email1' or emailName='Bar'");
-		for (int i = 0; i < queyrTimes; i++) {
-			emails = net.findEntitySet(Email.class, p);
-		}
+		for (int i = 0; i < queyrTimes; i++)
+			emails = net.runPath(p).getEntitySet(Email.class);
 		printTimeUsed(start, "Validate by expression no parameters");
 		Assert.assertEquals(180, emails.size());
 	}
@@ -229,12 +215,12 @@ public class EntityNetQueryTest extends TestBase {
 				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
 		}
 		EntityNet net = ctx.netLoadAll(new User(), Email.class);
-		Map<Class<?>, Set<Node>> result = null;
+		Map<Class<?>, Set<Object>> result = null;
 		long start = System.currentTimeMillis();
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeMapByEntities(new Path("S+", Email.class).nextPath("P+", User.class, "userId"));
+			result = net.runPath(new Path("S+", Email.class).nextPath("P+", User.class, "userId")).getEntitySetMap();
 		}
 		printTimeUsed(start, "Find parent (no cache)");
 		System.out.println("user selected2:" + result.get(User.class).size());

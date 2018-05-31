@@ -325,6 +325,10 @@ public class EntityNet {
 		return size;
 	}
 
+	public boolean isEmpty() {
+		return 0 == size();
+	}
+
 	/** Return a Node by given entityClass and nodeId */
 	public Node getOneNode(Class<?> entityClass, String nodeId) {
 		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
@@ -357,6 +361,15 @@ public class EntityNet {
 		return EntityNetUtils.nodeCollection2EntitySet(getNodeSet(entityClass));
 	}
 
+	/** Return entity set in EntityNet which type is entityClass */
+	@SuppressWarnings("unchecked")
+	public Map<Class<?>, Set<Object>> getEntitySetMap() {
+		Map<Class<?>, Set<Object>> result = new HashMap<Class<?>, Set<Object>>();
+		for (Class<?> claz : body.keySet())
+			result.put(claz, this.getEntitySet((Class<Object>) claz));
+		return result;
+	}
+
 	/** Return entity List in EntityNet which type is entityClass */
 	public <T> List<T> getEntityList(Class<T> entityClass) {
 		return EntityNetUtils.nodeCollection2EntityList(getNodeSet(entityClass));
@@ -365,74 +378,34 @@ public class EntityNet {
 	// ============= Find methods=============================
 
 	/**
-	 * Find entity set in EntityNet by given path and entity input array
+	 * Run a Path condition, return a new created EntityNet according the path
+	 * 
+	 * @param path
+	 *            The path instance
+	 * @param input
+	 *            Optional input entities
+	 * @return A new EntityNet instance
 	 */
-	@Deprecated
-	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Object... entities) {
-		Set<Node> input = EntityNetUtils.entityArray2NodeSet(this, entities);
-		Map<Class<?>, Set<Node>> nodeMapSet = findNodeMapByNodeCollection(path, input);
-		Set<Node> nodeSet = nodeMapSet.get(targetEntityClass);
-		return EntityNetUtils.nodeCollection2EntitySet(nodeSet);
-	}
-
-	/**
-	 * Find entity set in EntityNet by given path and entity input collection
-	 */
-	@Deprecated
-	public <T> Set<T> findEntitySet(Class<T> targetEntityClass, Path path, Collection<Object> entityCollection) {
-		Set<Node> input = new LinkedHashSet<Node>();
-		for (Object entity : entityCollection) {
-			Node node = EntityNetUtils.entity2Node(this, entity);
-			if (node != null)
-				input.add(node);
+	public EntityNet runPath(Path path, Object... input) {// NOSONAR
+		Map<Class<?>, Set<Node>> output = new HashMap<Class<?>, Set<Node>>();
+		List<Node> inputNodes = null;
+		if (input != null) {
+			inputNodes = new ArrayList<Node>();
+			for (Object obj : input)
+				if (obj != null) {
+					if (obj instanceof Node)
+						inputNodes.add((Node) obj);
+					else {
+						Node node = EntityNetUtils.entity2Node(this, obj);
+						if (node != null)
+							inputNodes.add(node);
+					}
+				}
 		}
-		Map<Class<?>, Set<Node>> nodeMapSet = findNodeMapByNodeCollection(path, input);
-		Set<Node> nodeSet = nodeMapSet.get(targetEntityClass);
-		return EntityNetUtils.nodeCollection2EntitySet(nodeSet);
-	}
-
-	/**
-	 * Find entity set map in EntityNet by given path and entity input array
-	 */
-	@Deprecated
-	public Map<Class<?>, Set<Object>> findEntityMap(Path path, Object... entities) {
-		Map<Class<?>, Set<Node>> nodeMap = findNodeMapByEntities(path, entities);
-		return EntityNetUtils.nodeSetMapToEntitySetMap(nodeMap);
-	}
-
-	/**
-	 * Find node set in EntityNet by given path and entity input array
-	 */
-	@Deprecated
-	public Map<Class<?>, Set<Node>> findNodeMapByEntities(Path path, Object... entities) {
-		Set<Node> input = EntityNetUtils.entityArray2NodeSet(this, entities);
-		return findNodeMapByNodeCollection(path, input);
-	}
-
-	/**
-	 * Find node set in EntityNet by given path and entity input collection
-	 */
-	@Deprecated
-	public Map<Class<?>, Set<Node>> findNodeMapByEntityCollection(Path path, Collection<Object> entityCollection) {
-		Set<Node> input = new LinkedHashSet<Node>();
-		for (Object entity : entityCollection) {
-			Node node = EntityNetUtils.entity2Node(this, entity);
-			if (node != null)
-				input.add(node);
-		}
-		return findNodeMapByNodeCollection(path, input);
-	}
-
-	/**
-	 * Find Node Map by Node collection
-	 */
-	@Deprecated
-	public Map<Class<?>, Set<Node>> findNodeMapByNodeCollection(Path path, Collection<Node> input) {
-		Map<Class<?>, Set<Node>> result = new HashMap<Class<?>, Set<Node>>();
 		Path topPath = path.getTopPath();
 		topPath.initializePath(this);
-		findNodeSetforNodes(0, topPath, input, result);
-		return result;
+		realRunPath(0, topPath, inputNodes, output);
+		return EntityNetUtils.nodeSetMapToEntityNet(this, output);
 	}
 
 	/**
@@ -448,8 +421,7 @@ public class EntityNet {
 	 *            The output node collection
 	 * @return Related node set
 	 */
-	@Deprecated
-	private void findNodeSetforNodes(Integer level, Path path, Collection<Node> input,
+	private void realRunPath(Integer level, Path path, Collection<Node> input, // NOSONAR
 			Map<Class<?>, Set<Node>> result) {
 		if (level > 1000)
 			throw new EntityNetException(
@@ -522,84 +494,10 @@ public class EntityNet {
 			throw new EntityNetException("Search depth >10000, this may caused by careless programming.");
 
 		if ("*".equals(type1) && !selected.isEmpty())
-			findNodeSetforNodes(level + 1, path, selected, result);
+			realRunPath(level + 1, path, selected, result);
 
 		if (path.getNextPath() != null) {
-			findNodeSetforNodes(level + 1, path.getNextPath(), selected, result);
-		}
-	}
-
-	private void runPath(Integer level, Path path, Collection<Node> input, EntityNet output) {
-		if (level > 1000)
-			throw new EntityNetException(
-					"Search level beyond 1000, this may caused by a circular reference path chain.");
-		TableModel model = path.getTargetModel();
-		String type0 = path.getType().substring(0, 1);
-		String type1 = path.getType().substring(1, 2);
-		Class<?> targetClass = model.getEntityClass();
-
-		Set<Node> selected = new LinkedHashSet<Node>();
-		// Start
-		if ("S".equalsIgnoreCase(type0)) {
-			if (level != 0)
-				throw new EntityNetException("'S' type can only be used on path start");
-
-			Collection<Node> nodesToCheck = getNodeSet(targetClass);
-			validateSelected(level, path, selected, nodesToCheck);
-		} else
-		// Child
-		if ("C".equalsIgnoreCase(type0) && input != null && !input.isEmpty()) {
-			for (Node inputNode : input) {
-
-				// Find childNodes meat class/columns/id condition
-				Set<Node> nodesToCheck = new LinkedHashSet<Node>();
-				for (Entry<String, Node> cNode : body.get(targetClass).entrySet()) {
-					List<ParentRelation> prs = cNode.getValue().getParentRelations();
-					if (prs != null)
-						for (ParentRelation pr : prs) {
-							if (inputNode.getId().equals(pr.getParentId())
-									&& pr.getRefColumns().equalsIgnoreCase(path.getRefColumns())) {
-								nodesToCheck.add(cNode.getValue());
-								break;
-							}
-						}
-				}
-
-				validateSelected(level, path, selected, nodesToCheck);
-			}
-		} else
-		// Parent
-		if ("P".equalsIgnoreCase(type0) && input != null && !input.isEmpty()) {
-			String targetTableName = model.getTableName();
-			EntityNetException.assureNotEmpty(targetTableName, "targetTableName can not be null");
-			for (Node inputNode : input) {
-				// Find parent nodes meat tableName/refColumns/nodeId condition
-				Set<Node> nodesToCheck = new LinkedHashSet<Node>();
-				List<ParentRelation> prs = inputNode.getParentRelations();
-				if (prs != null)
-					for (ParentRelation pr : prs) {
-						if (targetTableName.equalsIgnoreCase(pr.getParentTable())
-								&& path.getRefColumns().equalsIgnoreCase(pr.getRefColumns())) {
-							Node node = this.getOneNode(targetClass, pr.getParentId());
-							if (node != null)
-								nodesToCheck.add(node);
-						}
-					}
-				validateSelected(level, path, selected, nodesToCheck);
-			}
-		}
-
-		if ("+".equals(type1) || "*".equals(type1))
-			output.addNodes(selected); 
-
-		if (level > 10000)
-			throw new EntityNetException("Search depth >10000, this may caused by careless programming.");
-
-		if ("*".equals(type1) && !selected.isEmpty())
-			runPath(level + 1, path, selected, output);
-
-		if (path.getNextPath() != null) {
-			runPath(level + 1, path.getNextPath(), selected, output);
+			realRunPath(level + 1, path.getNextPath(), selected, result);
 		}
 	}
 

@@ -24,7 +24,7 @@ public class EntityNetTreeTest extends TestBase {
 		createAndRegTables(models);
 		new TreeNode().putFields("id", "comments", "pid", "line", "lvl");
 		new TreeNode().putValues("A", "found a bug", null, 1, 1).insert();
-		new TreeNode().putValues("B", "is a worm?", "A", 2,2).insert();
+		new TreeNode().putValues("B", "is a worm?", "A", 2, 2).insert();
 		new TreeNode().putValues("E", "no", "B", 3, 3).insert();
 		new TreeNode().putValues("F", "is a bug", "B", 4, 3).insert();
 		new TreeNode().putValues("C", "oh, a bug", "A", 5, 2).insert();
@@ -42,8 +42,9 @@ public class EntityNetTreeTest extends TestBase {
 	@Test
 	public void testSearchTreeChild() {
 		EntityNet net = ctx.netLoadAll(TreeNode.class);
-		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class,
-				new Path("S+", TreeNode.class).where("id=? or id=?", "B", "D").nextPath("C*", TreeNode.class, "pid"));
+		Set<TreeNode> TreeNodes = net.runPath(
+				new Path("S+", TreeNode.class).where("id=? or id=?", "B", "D").nextPath("C*", TreeNode.class, "pid"))
+				.getEntitySet(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(9, TreeNodes.size());
@@ -52,8 +53,9 @@ public class EntityNetTreeTest extends TestBase {
 	@Test
 	public void testSearchTreeChild2() {
 		EntityNet net = ctx.netLoadAll(TreeNode.class);
-		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class, new Path("C*", TreeNode.class, "pid"),
-				new TreeNode("B"), new TreeNode("D"));
+		Set<TreeNode> TreeNodes = net
+				.runPath(new Path("C*", TreeNode.class, "pid"), new TreeNode("B"), new TreeNode("D"))
+				.getEntitySet(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(7, TreeNodes.size());
@@ -62,18 +64,20 @@ public class EntityNetTreeTest extends TestBase {
 	@Test
 	public void testSearchTreeParent() {
 		EntityNet net = ctx.netLoadAll(TreeNode.class);
-		Set<TreeNode> TreeNodes = net.findEntitySet(TreeNode.class,
-				new Path("S-", TreeNode.class).where("id='F' or id='K'").nextPath("P*", TreeNode.class, "pid"));
+		Set<TreeNode> TreeNodes = net
+				.runPath(new Path("S-", TreeNode.class).where("id='F' or id='K'").nextPath("P*", TreeNode.class, "pid"))
+				.getEntitySet(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(4, TreeNodes.size());
 	}
-	
+
 	@Test
-	public void subTreeSearch() {//see https://my.oschina.net/drinkjava2/blog/1818631 
+	public void subTreeSearch() {// see https://my.oschina.net/drinkjava2/blog/1818631
 		EntityNet net = ctx.pQuery(new EntityNetHandler(TreeNode.class),
-				"select t.** from treenodetb t where t.line>=? and t.line< (select min(line) from treenodetb where line>? and lvl<=?)",7,7,2);
-		List<TreeNode> TreeNodes = net.getEntityList(TreeNode.class); 
+				"select t.** from treenodetb t where t.line>=? and t.line< (select min(line) from treenodetb where line>? and lvl<=?)",
+				7, 7, 2);
+		List<TreeNode> TreeNodes = net.getEntityList(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(6, TreeNodes.size());

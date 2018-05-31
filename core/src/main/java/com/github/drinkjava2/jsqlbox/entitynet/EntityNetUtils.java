@@ -214,6 +214,14 @@ public class EntityNetUtils {// NOSONAR
 			result.add((T) node.getEntity());
 		return result;
 	}
- 
+
+	/** Convert a Node Set Map to an entity set map */
+	public static EntityNet nodeSetMapToEntityNet(EntityNet net, Map<Class<?>, Set<Node>> nodeMap) {
+		EntityNet newNet = new EntityNet(net.getSqlBoxContext());
+		newNet.setRowData(net.getRowData());
+		for (Entry<Class<?>, Set<Node>> entry : nodeMap.entrySet())
+			newNet.addNodes(entry.getValue());
+		return newNet;
+	}
 
 }

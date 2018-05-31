@@ -41,10 +41,6 @@ public class Path {
 	/** The reference table name or entity class */
 	Object target;
 
-	Class<?> bindTarget;
-
-	String bindField;
-
 	/** A String expression condition should return true or false */
 	String expression;
 
@@ -186,12 +182,6 @@ public class Path {
 		checkIfModifyInitialized();
 		this.expression = expression;
 		this.expressionParams = expressionParams;
-		return this;
-	}
-
-	public Path bind(Class<?> bindTarget, String bindField) {
-		this.bindTarget = bindTarget;
-		this.bindField = bindField;
 		return this;
 	}
 
