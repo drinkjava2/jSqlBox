@@ -61,7 +61,7 @@ public class EntityListHandler extends EntityNetHandler {
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		EntityNet net = (EntityNet) super.handle(runner, ps);
-		return net.getAllEntityList(targetClass);
+		return net.getEntityList(targetClass);
 	}
 
 }

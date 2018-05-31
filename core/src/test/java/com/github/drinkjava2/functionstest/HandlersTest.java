@@ -145,7 +145,7 @@ public class HandlersTest extends TestBase {
 	@Test
 	public void testEntityNetHandler() {
 		EntityNet net = gpQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
-		List<DemoUser> result = net.getAllEntityList(DemoUser.class);
+		List<DemoUser> result = net.getEntityList(DemoUser.class);
 		Assert.assertTrue(result.size() == 99);
 	}
 

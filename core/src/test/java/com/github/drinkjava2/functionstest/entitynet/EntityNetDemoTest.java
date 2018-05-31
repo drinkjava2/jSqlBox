@@ -215,7 +215,7 @@ public class EntityNetDemoTest extends TestBase {
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 
-		List<User> users = net.getAllEntityList(User.class);
+		List<User> users = net.getEntityList(User.class);
 		Assert.assertEquals(5, users.size());
 		Assert.assertEquals("user1", users.get(0).getUserName());
 		System.out.println(users.get(0).getUserName());
@@ -229,7 +229,7 @@ public class EntityNetDemoTest extends TestBase {
 		Assert.assertEquals(37, net.size());
 		System.out.println(net.size());
 
-		List<User> users = net.getAllEntityList(User.class);
+		List<User> users = net.getEntityList(User.class);
 		Assert.assertEquals(5, users.size());
 		Assert.assertEquals(null, users.get(0).getUserName());
 	}

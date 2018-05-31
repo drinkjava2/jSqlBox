@@ -73,7 +73,7 @@ public class EntityNetTreeTest extends TestBase {
 	public void subTreeSearch() {//see https://my.oschina.net/drinkjava2/blog/1818631 
 		EntityNet net = ctx.pQuery(new EntityNetHandler(TreeNode.class),
 				"select t.** from treenodetb t where t.line>=? and t.line< (select min(line) from treenodetb where line>? and lvl<=?)",7,7,2);
-		List<TreeNode> TreeNodes = net.getAllEntityList(TreeNode.class); 
+		List<TreeNode> TreeNodes = net.getEntityList(TreeNode.class); 
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(6, TreeNodes.size());

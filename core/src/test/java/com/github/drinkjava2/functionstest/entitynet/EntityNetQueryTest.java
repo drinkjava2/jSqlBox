@@ -63,7 +63,7 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u2").put("userName", "user2").insert();
 		EntityNet net = ctx.netLoadSketch(User.class);
 		Assert.assertEquals(2, net.size());
-		List<User> users = net.getAllEntityList(User.class);
+		List<User> users = net.getEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
 		List<Map<String, Object>> listMap = gpQuery(MapListHandler.class,
@@ -71,7 +71,7 @@ public class EntityNetQueryTest extends TestBase {
 		net.add(listMap, new User().alias("u"));// userName joined
 
 		Assert.assertEquals(2, net.size());
-		users = net.getAllEntityList(User.class);
+		users = net.getEntityList(User.class);
 		Assert.assertNotNull(users.get(0).getUserName());
 	}
 
@@ -116,56 +116,14 @@ public class EntityNetQueryTest extends TestBase {
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < queyrTimes; i++) {
-			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(false));
+			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class));
 			Assert.assertTrue(users.size() > 0);
 		}
-		printTimeUsed(start, "Find self No Cache");
-
-		start = System.currentTimeMillis();
-		for (int i = 0; i < queyrTimes; i++) {
-			Set<User> users = net.findEntitySet(User.class, new Path("S+", User.class).setCacheable(true));
-			Assert.assertTrue(users.size() > 0);
-		}
-		printTimeUsed(start, "Find self With Cache");
+		printTimeUsed(start, "Find self");
 	}
 
 	@Test
-	public void testFindChild() {
-		System.out.println("==============testFindChild================ ");
-		int sampleSize = 30;
-		int queyrTimes = 30;
-		for (int i = 0; i < sampleSize; i++) {
-			new User().put("id", "usr" + i).put("userName", "user" + i).insert();
-			for (int j = 0; j < sampleSize; j++)
-				new Email().put("id", "email" + i + "_" + j, "userId", "usr" + i).insert();
-		}
-		EntityNet net = ctx.netLoadAll(new User(), Email.class);
-
-		Map<Class<?>, Set<Node>> result = null;
-		long start = System.currentTimeMillis();
-
-		start = System.currentTimeMillis();
-		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeMapByEntities(new Path("S+", User.class).setCacheable(false)
-					.nextPath("C+", Email.class, "userId").setCacheable(false));
-		}
-		printTimeUsed(start, "Find Childs no Cache");
-
-		System.out.println("user selected2:" + result.get(User.class).size());
-		System.out.println("email selected2:" + result.get(Email.class).size());
-
-		start = System.currentTimeMillis();
-		for (int i = 0; i < queyrTimes; i++) {
-			result = net.findNodeMapByEntities(new Path("S+", User.class).nextPath("C+", Email.class, "userId"));
-		}
-		printTimeUsed(start, "Find Childs with Cache");
-
-		System.out.println("user selected2:" + result.get(User.class).size());
-		System.out.println("email selected2:" + result.get(Email.class).size());
-	}
-
-	@Test
-	public void testFindChild2() {// This unit test will put on user manual
+	public void testFindChild() {// This unit test will put on user manual
 		int sampleSize = 30;
 		int queyrTimes = 30;
 		for (int i = 0; i < sampleSize; i++) {

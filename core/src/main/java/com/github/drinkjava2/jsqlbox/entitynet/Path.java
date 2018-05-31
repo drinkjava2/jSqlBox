@@ -42,6 +42,7 @@ public class Path {
 	Object target;
 
 	Class<?> bindTarget;
+
 	String bindField;
 
 	/** A String expression condition should return true or false */
@@ -60,15 +61,11 @@ public class Path {
 	/** Next Path, used for build a linked path chain */
 	Path nextPath;
 
-	/** Not allow cache */
-	Boolean cacheable = false;
-
 	// ==================inside used fields======================
 	// Initialize some fields to improve speed
 	Boolean initialized = false;
 	NodeValidator validatorInstance;
 
-	String uniqueStringId;
 	String joinedColumns;
 
 	TableModel targetModel;
@@ -161,7 +158,6 @@ public class Path {
 			joinedColumns = EntityNetUtils.buildJoinedColumns(refs);
 		if (this.getNextPath() != null)
 			this.getNextPath().initializePath(net);
-		initializeUniqueIdString();
 		initialized = true;
 	}
 
@@ -177,42 +173,6 @@ public class Path {
 		String s1 = type.substring(1, 2);
 		if (!("+".equals(s1) || "-".equals(s1) || "*".equals(s1)))
 			throw new EntityNetException("Illegal type charactor: '" + s1 + "'");
-	}
-
-	/**
-	 * Get a unique Id String represent this path if it's a "FIXED" path, the id
-	 * will be used as query cache key Return null if the path is not a "FIXED"
-	 * type, for example it has query parameters.
-	 */
-	public void initializeUniqueIdString() {
-		uniqueStringId = null;
-		String next = null;
-		if (!cacheable)
-			return;
-		if (validator != null && validator instanceof NodeValidator)
-			return;
-		if ("C*".equalsIgnoreCase(type) || "P*".equalsIgnoreCase(type))
-			return;
-		if (nextPath != null) {
-			next = nextPath.getUniqueIdString();
-			if (StrUtils.isEmpty(next))
-				return;
-		}
-		if (expressionParams != null && expressionParams.length > 0)
-			return;
-		StringBuilder sb = new StringBuilder()//
-				.append("type:").append(type)//
-				.append(",target:").append(target)//
-				.append(",exp:").append(expression)//
-				.append(",validator:").append(validator);
-		if (refs != null) {
-			sb.append(",columns:");
-			for (String colName : refs)
-				sb.append(colName);
-		}
-		if (!StrUtils.isEmpty(next))
-			sb.append(",Next:").append(next);
-		uniqueStringId = sb.toString();
 	}
 
 	/**
@@ -266,13 +226,6 @@ public class Path {
 			return validatorInstance;
 		else
 			throw new EntityNetException("Try to get NodeValidator on a Path not initialized");
-	}
-
-	public String getUniqueIdString() {
-		if (initialized)
-			return uniqueStringId;
-		else
-			throw new EntityNetException("Try to get UniqueIdString on a Path not initialized");
 	}
 
 	// =====Getter & Setter ==============
@@ -330,16 +283,6 @@ public class Path {
 		return this;
 	}
 
-	public Boolean getCacheable() {
-		return cacheable;
-	}
-
-	public Path setCacheable(Boolean cacheable) {
-		checkIfModifyInitialized();
-		this.cacheable = cacheable;
-		return this;
-	}
-
 	public String getExpression() {
 		return expression;
 	}
@@ -356,6 +299,7 @@ public class Path {
 		return this;
 	}
 
+	@SuppressWarnings("all")
 	public String getDebugInfo(int level) {
 		String sp = "";
 		for (int i = 0; i < level; i++)
@@ -380,10 +324,6 @@ public class Path {
 
 	public NodeValidator getValidatorInstance() {
 		return validatorInstance;
-	}
-
-	public String getUniqueStringId() {
-		return uniqueStringId;
 	}
 
 	public Object getAutoPathTarget() {

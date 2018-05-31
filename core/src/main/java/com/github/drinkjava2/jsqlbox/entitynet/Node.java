@@ -13,7 +13,6 @@ package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,10 +30,7 @@ public class Node {
 	 */
 	String id;
 
-	/** The string-value map, this is original data loaded from database */
-	Map<String, Object> map;
-
-	/** The entity instance, this is translated from map value  */
+	/** The entity instance, this is translated from map value */
 	Object entity;
 
 	/** Mark how many fields loaded from database */
@@ -72,14 +68,6 @@ public class Node {
 
 	public void setLoadedFields(Set<String> loadedFields) {
 		this.loadedFields = loadedFields;
-	}
-
-	public Map<String, Object> getMap() {
-		return map;
-	}
-
-	public void setMap(Map<String, Object> map) {
-		this.map = map;
 	}
 
 }
