@@ -18,7 +18,6 @@ package com.github.drinkjava2.functionstest;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID36;
@@ -72,7 +71,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUID25() {
-		createAndRegTables(TableModelUtils.entity2Model(UUID25Entity.class));
+		createAndRegTables(UUID25Entity.class);
 		UUID25Entity entity = new UUID25Entity();
 		ctx.insert(entity);
 	}
@@ -117,7 +116,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUID32() {
-		createAndRegTables(TableModelUtils.entity2Model(UUID32Entity.class));
+		createAndRegTables(UUID32Entity.class);
 		UUID32Entity entity = new UUID32Entity();
 		ctx.insert(entity);
 	}
@@ -162,7 +161,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUID36() {
-		createAndRegTables(TableModelUtils.entity2Model(UUID36Entity.class));
+		createAndRegTables(UUID36Entity.class);
 		UUID36Entity entity = new UUID36Entity();
 		ctx.insert(entity);
 	}
@@ -209,7 +208,7 @@ public class UUIDGeneratorsTest extends TestBase {
 
 	@Test
 	public void testUUIDAny() {
-		createAndRegTables(TableModelUtils.entity2Model(UUIDAnyEntity.class));
+		createAndRegTables(UUIDAnyEntity.class);
 		UUIDAnyEntity entity = new UUIDAnyEntity();
 		ctx.insert(entity);
 	}

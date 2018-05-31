@@ -21,8 +21,6 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
-import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.DefaultNodeValidator;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Node;
@@ -36,9 +34,8 @@ public class EntityNetQueryTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
-		TableModel[] models = TableModelUtils.entity2Models(User.class, Email.class, Address.class, Role.class,
-				Privilege.class, UserRole.class, RolePrivilege.class);
-		createAndRegTables(models);
+		createAndRegTables(User.class, Email.class, Address.class, Role.class, Privilege.class, UserRole.class,
+				RolePrivilege.class);
 	}
 
 	@Test
@@ -110,7 +107,7 @@ public class EntityNetQueryTest extends TestBase {
 			new User().put("id", "u" + i).put("userName", "user" + i).insert();
 		}
 		EntityNet net = ctx.netLoadAll(new User(), Email.class);
- 
+
 		Set<User> users1 = net.runPath(new Path("S-", User.class)).selectEntitySet(User.class);
 		Assert.assertEquals(0, users1.size());
 

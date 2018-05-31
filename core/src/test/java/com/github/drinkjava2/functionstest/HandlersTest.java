@@ -112,8 +112,7 @@ public class HandlersTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
-		TableModel[] models = TableModelUtils.entity2Models(DemoUser.class);
-		createAndRegTables(models);
+		createAndRegTables(DemoUser.class);
 		for (int i = 0; i < 100; i++)
 			new DemoUser().put("id", "" + i).put("userName", "user" + i).put("age", i).insert();
 	}

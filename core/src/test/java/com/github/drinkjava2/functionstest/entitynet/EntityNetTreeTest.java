@@ -20,8 +20,7 @@ public class EntityNetTreeTest extends TestBase {
 	public void init() {
 		super.init();
 		// ctx.setAllowShowSQL(true);
-		TableModel[] models = TableModelUtils.entity2Models(TreeNode.class);
-		createAndRegTables(models);
+		createAndRegTables(TreeNode.class);
 		new TreeNode().putFields("id", "comments", "pid", "line", "lvl");
 		new TreeNode().putValues("A", "found a bug", null, 1, 1).insert();
 		new TreeNode().putValues("B", "is a worm?", "A", 2, 2).insert();
