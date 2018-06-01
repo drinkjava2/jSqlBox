@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.entitynet;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,10 +25,13 @@ import java.util.Set;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.ActiveRecordSupport;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
 
 /**
  * Store static methods about EntityNet
@@ -38,8 +42,8 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class EntityNetUtils {// NOSONAR
 
 	/**
-	 * If nodeValidator is object, return it, otherwise it is a NodeValidator
-	 * class, build a new instance as return
+	 * If nodeValidator is object, return it, otherwise it is a NodeValidator class,
+	 * build a new instance as return
 	 */
 	@SuppressWarnings("unchecked")
 	public static NodeValidator getOrBuildValidator(Object nodeValidator) {
@@ -69,8 +73,7 @@ public class EntityNetUtils {// NOSONAR
 	}
 
 	/**
-	 * Check if each TableModel has entityClass and Alias, if no, throw
-	 * exception
+	 * Check if each TableModel has entityClass and Alias, if no, throw exception
 	 */
 	public static void checkModelHasEntityClassAndAlias(TableModel... models) {
 		if (models != null && models.length > 0)// Join models
@@ -94,10 +97,9 @@ public class EntityNetUtils {// NOSONAR
 		return buildNodeIdFromEntity(net.getConfigModels().get(entity.getClass()), entity);
 	}
 
-	/**
-	 * Join PKey values into one String, used for node ID
-	 */
 	public static String buildNodeIdFromEntity(TableModel model, Object entity) {
+		if (entity == null)
+			return null;
 		if (model == null || entity == null)
 			return null;
 		Map<String, Object> idMap = new HashMap<String, Object>();
@@ -108,27 +110,27 @@ public class EntityNetUtils {// NOSONAR
 				EntityNetException.assureNotEmpty(col.getEntityField(),
 						"EntityField not found for FKey column '" + col.getColumnName() + "'");
 				keyCount++;
-				if (keyCount > 1)
+				if (keyCount > 1)// compound key found
 					break;
 				keyColumn = col;
 			}
 		if (keyCount == 0)
 			throw new EntityNetException("No prime key setting found for entity " + entity);
 		if (keyCount == 1)
-			return ClassCacheUtils.readValueFromBeanField(entity, keyColumn.getEntityField()).toString();
+			return ClassCacheUtils.readValueFromBeanField(entity, keyColumn.getEntityField()).toString();//NOSONAR
 
 		for (ColumnModel col : model.getColumns()) // compound key
 			if (col.getPkey() && !col.getTransientable())
 				idMap.put(col.getEntityField(), ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField()));
-		return buildNodeIdFromIdOrIdMap(idMap);
+		return buildNodeIdFromEntityOrIdOrMap(idMap);
 	}
 
 	/** Build Node id from unknown entityIdOrIdMap */
 	@SuppressWarnings("all")
-	public static String buildNodeIdFromIdOrIdMap(Object entity) {
-		SqlBoxException.assureNotNull(entity, "Id can not be null.");
-		if (entity instanceof Map) {
-			Map<String, Object> mp = (Map<String, Object>) entity;
+	public static String buildNodeIdFromEntityOrIdOrMap(Object entityId) {
+		SqlBoxException.assureNotNull(entityId, "Id can not be null.");
+		if (entityId instanceof Map) {
+			Map<String, Object> mp = (Map<String, Object>) entityId;
 			List<String> keys = new ArrayList(mp.keySet());// Sort
 			Collections.sort(keys, new Comparator() {
 				public int compare(Object o1, Object o2) {
@@ -144,14 +146,23 @@ public class EntityNetUtils {// NOSONAR
 			if (sb.length() == 0)
 				throw new EntityNetException("Id Map can not be empty");
 			return sb.toString();
-		} else
-			return entity.toString();
+		} else {
+			if (entityId instanceof ActiveRecordSupport)
+				return buildNodeIdFromEntity(SqlBoxUtils.findBox(entityId).getTableModel(), entityId);
+
+			Annotation[] anno = entityId.getClass().getAnnotations();
+			for (Annotation annotation : anno)
+				if (Entity.class.equals(annotation.annotationType()))
+					return buildNodeIdFromEntity(SqlBoxUtils.findBox(entityId).getTableModel(), entityId);
+			return entityId.toString();
+		}
 	}
 
 	/**
 	 * Transfer FKey values to ParentRelation list
 	 */
-	public static List<ParentRelation> transferFKeysToParentRelations(TableModel model, Object entity) {// NOSONAR
+	public static List<ParentRelation> transferFKeysToParentRelations(EntityNet net, Object entity) {// NOSONAR
+		TableModel model = net.getConfigModels().get(entity.getClass());
 		List<ParentRelation> resultList = null;
 		for (FKeyModel fkey : model.getFkeyConstraints()) {
 			String refTable = fkey.getRefTableAndColumns()[0];

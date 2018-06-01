@@ -79,7 +79,7 @@ public class EntityNet {
 	/** The body of the EntityNet */
 	// entityClass, nodeID, node
 	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
- 
+
 	protected void constructors__________________________() {// NOSONAR
 	}
 
@@ -141,9 +141,9 @@ public class EntityNet {
 	public EntityNet add(List<Map<String, Object>> listMap, Object... configObjects) {
 		if (listMap == null)
 			throw new EntityNetException("Can not join null listMap");
-	
+
 		TableModel[] configs = SqlBoxContextUtils.objectConfigsToModels(sqlBoxContext, configObjects);
-	
+
 		EntityNetUtils.checkModelHasEntityClassAndAlias(configs);
 		if (configs != null && configs.length > 0)// Join models
 			for (TableModel tb : configs) {
@@ -191,7 +191,7 @@ public class EntityNet {
 				}
 			}
 			if (entity != null)
-				this.addOrJoinEntity(entity, model, loadedFields);
+				this.addOrJoinEntity(entity, loadedFields);
 		}
 	}
 
@@ -201,18 +201,15 @@ public class EntityNet {
 	public void addEntity(Object entity) {
 		SqlBox box = SqlBoxUtils.findAndBindSqlBox(sqlBoxContext, entity);
 		TableModel tableModel = box.getTableModel();
-
 		Set<String> loadedFields = new HashSet<String>();
 		for (ColumnModel col : tableModel.getColumns())
 			loadedFields.add(col.getEntityField());
-		addOrJoinEntity(entity, tableModel, loadedFields);
+		addOrJoinEntity(entity, loadedFields);
 	}
 
 	/** Remove entity from current entityNet */
 	public void removeEntity(Object entity) {
-		SqlBox box = SqlBoxUtils.findAndBindSqlBox(sqlBoxContext, entity);
-		TableModel tableModel = box.getTableModel();
-		String id = EntityNetUtils.buildNodeIdFromEntity(tableModel, entity);
+		String id = EntityNetUtils.buildNodeIdFromEntity(this, entity);
 		body.get(entity.getClass()).remove(id);
 	}
 
@@ -226,9 +223,9 @@ public class EntityNet {
 	 * Add an entity to EntityNet, if already have same PKEY entity exist, if old
 	 * entity field is never loaded from database, will put new entity's value
 	 */
-	protected void addOrJoinEntity(Object entity, TableModel tableModel, Set<String> loadedFields) {
-		String id = EntityNetUtils.buildNodeIdFromEntity(tableModel, entity);
-		List<ParentRelation> parentRelations = EntityNetUtils.transferFKeysToParentRelations(tableModel, entity);
+	protected void addOrJoinEntity(Object entity, Set<String> loadedFields) {
+		String id = EntityNetUtils.buildNodeIdFromEntity(this, entity);
+		List<ParentRelation> parentRelations = EntityNetUtils.transferFKeysToParentRelations(this, entity);
 		Node node = new Node();
 		node.setEntity(entity);
 		node.setParentRelations(parentRelations);
@@ -329,7 +326,7 @@ public class EntityNet {
 	}
 
 	// ============= Find methods=============================
-	
+
 	/**
 	 * Run a Path, return a new created EntityNet according the path
 	 * 
@@ -383,20 +380,20 @@ public class EntityNet {
 		String type0 = path.getType().substring(0, 1);
 		String type1 = path.getType().substring(1, 2);
 		Class<?> targetClass = model.getEntityClass();
-	
+
 		Set<Node> selected = new LinkedHashSet<Node>();
 		// Start
 		if ("S".equalsIgnoreCase(type0)) {
 			if (level != 0)
 				throw new EntityNetException("'S' type can only be used on path start");
-	
+
 			Collection<Node> nodesToCheck = selectNodeSet(targetClass);
 			validateSelected(level, path, selected, nodesToCheck);
 		} else
 		// Child
 		if ("C".equalsIgnoreCase(type0) && input != null && !input.isEmpty()) {
 			for (Node inputNode : input) {
-	
+
 				// Find childNodes meat class/columns/id condition
 				Set<Node> nodesToCheck = new LinkedHashSet<Node>();
 				for (Entry<String, Node> cNode : body.get(targetClass).entrySet()) {
@@ -410,7 +407,7 @@ public class EntityNet {
 							}
 						}
 				}
-	
+
 				validateSelected(level, path, selected, nodesToCheck);
 			}
 		} else
@@ -439,16 +436,16 @@ public class EntityNet {
 			nodes = new LinkedHashSet<Node>();
 			result.put(targetClass, nodes);
 		}
-	
+
 		if ("+".equals(type1) || "*".equals(type1))
 			nodes.addAll(selected);
-	
+
 		if (level > 10000)
 			throw new EntityNetException("Search depth >10000, this may caused by careless programming.");
-	
+
 		if ("*".equals(type1) && !selected.isEmpty())
 			realRunPath(level + 1, path, selected, result);
-	
+
 		if (path.getNextPath() != null) {
 			realRunPath(level + 1, path.getNextPath(), selected, result);
 		}
@@ -462,17 +459,15 @@ public class EntityNet {
 			if (checker.validateNode(node, level, selected.size(), path))
 				selected.add(node);
 	}
-	
 
 	public EntityNet bind() {
-		//TODO: work on here
+		// TODO: work on here
 		return this;
 	}
-	
 
 	protected void select__________________________() {// NOSONAR
 	}
-	
+
 	/** Return a Node by given entityClass and nodeId */
 	public Node selectOneNode(Class<?> entityClass, String nodeId) {
 		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
@@ -491,11 +486,13 @@ public class EntityNet {
 		return result;
 	}
 
-	/** Return a entity by given entityClass and entityId or Id HashMap<String,Object> */
+	/**
+	 * Return a entity by given entityClass and entityId or Id
+	 * HashMap<String,Object>
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> T selectOneEntity(Class<?> entityClass, Object entityIdOrIdMap) {
-		//TODO: unit test for entity with compound keys
-		Node node = selectOneNode(entityClass,  EntityNetUtils.buildNodeIdFromIdOrIdMap(  entityIdOrIdMap ));
+		Node node = selectOneNode(entityClass, EntityNetUtils.buildNodeIdFromEntityOrIdOrMap(entityIdOrIdMap));
 		if (node == null)
 			return null;
 		return (T) node.getEntity();
@@ -520,8 +517,6 @@ public class EntityNet {
 		return result;
 	}
 
-	
-
 	// ============= Find methods=============================
 
 	protected void getteSetters__________________________() {// NOSONAR
@@ -541,7 +536,7 @@ public class EntityNet {
 
 	public void setBody(Map<Class<?>, LinkedHashMap<String, Node>> body) {
 		this.body = body;
-	} 
+	}
 
 	public SqlBoxContext getSqlBoxContext() {
 		return sqlBoxContext;

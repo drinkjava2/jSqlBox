@@ -16,6 +16,7 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDB;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTB;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -33,6 +34,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
+import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
@@ -351,18 +353,25 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * map<String,Object>
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T putIdValue(SqlBoxContext ctx, T bean, Object idOrIdMap) {
-		if (idOrIdMap instanceof Map<?, ?>) {
-			Map<String, Object> idMap = (Map<String, Object>) idOrIdMap;
+	public static <T> T putIdValue(SqlBoxContext ctx, T bean, Object entityId) {
+		if (entityId instanceof Map) { // MAP for compound key
+			Map<String, Object> idMap = (Map<String, Object>) entityId;
 			for (Entry<String, Object> item : idMap.entrySet())
 				ClassCacheUtils.writeValueToBeanField(bean, item.getKey(), item.getValue());
 		} else {
+			if (entityId instanceof ActiveRecordSupport)
+				return (T) entityId;
+			Annotation[] anno = entityId.getClass().getAnnotations();
+			for (Annotation annotation : anno)
+				if (Entity.class.equals(annotation.annotationType()))
+					return (T) entityId;// Entity for compound key or Single key
+
 			SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, bean);
 			TableModel tableModel = box.getTableModel();
 			for (ColumnModel col : tableModel.getColumns())
 				if (col.getPkey()) {
-					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), idOrIdMap);
-					break;
+					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
+					break;// Single Key value
 				}
 		}
 		return bean;
@@ -372,7 +381,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object... optionalSqlItems) {// NOSONAR
 		try {
 			T bean = entityClass.newInstance();
-			putIdValue(ctx, bean, idOrIdMap);
+			bean = putIdValue(ctx, bean, idOrIdMap);
 			return load(ctx, bean, optionalSqlItems);
 		} catch (Exception e) {
 			throw new SqlBoxException(e);
@@ -468,7 +477,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		else
 			return SqlBoxUtils.findAndBindSqlBox(ctx, entityOrClass).getTableModel();
 	}
-	
 
 	/**
 	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
@@ -489,7 +497,5 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			result[i] = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, netConfigs[i]);
 		return result;
 	}
-	
-	
 
 }

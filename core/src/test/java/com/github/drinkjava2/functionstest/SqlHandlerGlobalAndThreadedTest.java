@@ -26,8 +26,6 @@ import com.github.drinkjava2.functionstest.HandlersTest.DemoUser;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
-import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;

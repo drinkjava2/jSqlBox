@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
-import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "usertb")
@@ -21,13 +20,10 @@ public class User extends ActiveRecord {
 
 	Integer age;
 
-	@Transient
 	Address address;
 
-	@Transient
 	List<Role> roleList;
 
-	@Transient
 	Set<Privilege> privilegeSet;
 
 	public String getId() {

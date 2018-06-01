@@ -9,8 +9,6 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.functionstest.entitynet.entities.TreeNode;
-import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.entitynet.Path;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;

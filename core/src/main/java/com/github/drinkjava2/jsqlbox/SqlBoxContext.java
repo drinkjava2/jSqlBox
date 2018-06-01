@@ -191,24 +191,24 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContextUtils.insert(this, entity, optionalSqlItems);
 	}
 
-	/** Update an entity in database by its ID columns */
+	/** Update an entity in database */
 	public int update(Object entity, Object... optionalSqlItems) {
 		return SqlBoxContextUtils.update(this, entity, optionalSqlItems);
 	}
 
-	/** Delete an entity in database by its ID columns */
+	/** Delete an entity in database  */
 	public void delete(Object entity, Object... optionalSqlItems) {
 		SqlBoxContextUtils.delete(this, entity, optionalSqlItems);
 	}
 
-	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T load(Object entityBean, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.load(this, entityBean, optionalSqlItems);
+	/** Load an entity from database */
+	public <T> T load(Object entity, Object... optionalSqlItems) {
+		return SqlBoxContextUtils.load(this, entity, optionalSqlItems);
 	}
 
 	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T loadById(Class<T> entityClass, Object idOrIdMap, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.loadById(this, entityClass, idOrIdMap, optionalSqlItems);
+	public <T> T loadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {
+		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionalSqlItems);
 	}
 
 	@Override

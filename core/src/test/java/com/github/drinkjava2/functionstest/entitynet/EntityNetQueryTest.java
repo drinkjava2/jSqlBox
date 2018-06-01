@@ -227,18 +227,16 @@ public class EntityNetQueryTest extends TestBase {
 	@Test
 	public void testAddEntity() {
 		System.out.println("==============testAddEntity================ ");
-		new User().put("id", "u1").put("userName", "user1").insert();
-		EntityNet net = ctx.netLoadAll(User.class);
-		Assert.assertEquals(1, net.size());
-
+		new User().put("id", "u1").put("userName", "user1").insert(); 
+		EntityNet net = ctx.netLoadAll(User.class); 
+		Assert.assertEquals(1, net.size());  
 		User u2 = new User();
 		u2.setId("u2");
 		u2.setUserName("user2");
 		u2.insert();
 		net.addEntity(u2);
 
-		Assert.assertEquals(2, net.size());
-
+		Assert.assertEquals(2, net.size()); 
 		User u = net.selectOneEntity(User.class, "u2");
 		Assert.assertEquals("user2", u.getUserName());
 	}
