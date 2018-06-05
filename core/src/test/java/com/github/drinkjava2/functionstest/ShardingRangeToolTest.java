@@ -72,6 +72,7 @@ public class ShardingRangeToolTest {
 		//@formatter:on
 	}
 
+	@SuppressWarnings("deprecation")
 	@Before
 	public void init() {
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {

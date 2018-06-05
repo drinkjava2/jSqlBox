@@ -115,14 +115,23 @@ public interface ActiveRecordJava8 extends ActiveRecordSupport {
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx.load(this, optionalSqlItems);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public default <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return  ctx.loadById((Class<T>)this.getClass(), idOrIdMap, optionalSqlItems);
+		return ctx.loadById((Class<T>) this.getClass(), idOrIdMap, optionalSqlItems);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public default <T> T loadByQuery(Object... sqlItems) {
+		SqlBoxContext ctx = ctx();
+		if (ctx == null)
+			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+		return ctx.loadByQuery((Class<T>) this.getClass(), sqlItems);
 	}
 
 	@Override

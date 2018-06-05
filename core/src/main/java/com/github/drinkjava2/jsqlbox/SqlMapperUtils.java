@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.text.html.FormSubmitEvent.MethodType;
+
 import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
@@ -102,12 +104,13 @@ public abstract class SqlMapperUtils {// NOSONAR
 	}
 
 	/** Automatically guess the sqlHandlers */
-	public static void autoGuessHandler(Object entity, PreparedSQL ps, String sql, Method method) {
+	public static void autoGuessHandler(Object entity, PreparedSQL ps, String sql, Method method) { 
 		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty())
 			return;
 		if (ps.getResultSetHandler() != null)
 			return;
 		String methodType = method.getGenericReturnType().toString();
+		System.out.println(methodType);
 		if (sql.indexOf(".**") > -1) {
 			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
 				ps.addSqlHandler(new SSMapListHandler(entity.getClass()));

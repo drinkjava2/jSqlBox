@@ -11,16 +11,14 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
+import com.github.drinkjava2.jdbpro.DbProRuntimeException;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SingleTonHandlers;
+import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxUtils;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
  * EntityListHandler is the SqlHandler used explain the Entity query SQL (For
@@ -30,23 +28,40 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class EntityListHandler extends DefaultOrderSqlHandler {
+public class EntityListHandlerbad extends EntityNetHandler {
 	protected final Class<?> targetClass;
 
-	public EntityListHandler(Class<?> targetClass) {
+	public EntityListHandlerbad(Class<?> targetClass, Object... netConfigObjects) {
+		super(netConfigObjects);
 		this.targetClass = targetClass;
+	}
+
+	public EntityListHandlerbad(Class<?> targetClass) {
+		super(targetClass);
+		this.targetClass = targetClass;
+	}
+
+	public EntityListHandlerbad(String alias, Class<?> targetClass) {
+		super(toTableModel(alias, targetClass));
+		this.targetClass = targetClass;
+	}
+
+	public static TableModel toTableModel(String alias, Class<?> targetClass) {
+		try {
+			Object o = targetClass.newInstance();
+			SqlBox box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx(), targetClass);
+			TableModel tb = box.getTableModel();
+			tb.setAlias(alias);
+			return tb;
+		} catch (Exception e) {
+			throw new DbProRuntimeException(e);
+		}
 	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
-		List<Map<String, Object>> maps = (List<Map<String, Object>>) runner.runPreparedSQL(ps);
-		List<Object> entityList = new ArrayList<Object>();
-		for (Map<String, Object> row : maps) {
-			Object entity = SqlBoxContextUtils.mapToEntityBean((SqlBoxContext) runner, targetClass, row);
-			entityList.add(entity);
-		}
-		return entityList;
+		EntityNet net = (EntityNet) super.handle(runner, ps);
+		return net.selectEntityList(targetClass);
 	}
 
 }

@@ -331,7 +331,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		if (ps.getSwitchTo() != null) {
 			DbPro pro = ps.getSwitchTo();
 			ps.setSwitchTo(null);
-			return pro.runPreparedSQL(ps);
+			return pro.runPreparedSQL(ps);//SwitchTo run
 		}
 		if (ps.getMasterSlaveSelect() == null)
 			ps.setMasterSlaveSelect(this.getMasterSlaveSelect());
@@ -732,7 +732,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setAllowShowSQL(Boolean allowShowSQL) {
+	@Deprecated
+	public void setAllowShowSQL(Boolean allowShowSQL) {//NOSONAR
 		this.allowShowSQL = allowShowSQL;
 	}
 
@@ -741,6 +742,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
+	@Deprecated
 	public void setSqlTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
 		this.sqlTemplateEngine = sqlTemplateEngine;
 	}
@@ -750,6 +752,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
+	@Deprecated
 	public void setConnectionManager(ConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 	}
@@ -759,6 +762,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
+	@Deprecated
 	public void setLogger(DbProLogger logger) {
 		this.logger = logger;
 	}
@@ -768,7 +772,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setBatchSize(Integer batchSize) {
+	@Deprecated
+	public void setBatchSize(Integer batchSize) {//NOSONAR
 		this.batchSize = batchSize;
 	}
 
@@ -777,7 +782,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setSqlHandlers(SqlHandler[] sqlHandlers) {
+	@Deprecated
+	public void setSqlHandlers(SqlHandler[] sqlHandlers) {//NOSONAR
 		this.sqlHandlers = sqlHandlers;
 	}
 
@@ -786,7 +792,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
+	@Deprecated
+	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {//NOSONAR
 		this.specialSqlItemPreparers = specialSqlItemPreparers;
 	}
 
@@ -795,7 +802,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setSlaves(DbPro[] slaves) {
+	@Deprecated
+	public void setSlaves(DbPro[] slaves) {//NOSONAR
 		this.slaves = slaves;
 	}
 
@@ -804,7 +812,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setMasters(DbPro[] masters) {
+	@Deprecated
+	public void setMasters(DbPro[] masters) {//NOSONAR
 		this.masters = masters;
 	}
 
@@ -813,7 +822,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setIocTool(IocTool iocTool) {
+	@Deprecated
+	public void setIocTool(IocTool iocTool) {//NOSONAR
 		this.iocTool = iocTool;
 	}
 
@@ -822,7 +832,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
+	@Deprecated
+	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {//NOSONAR
 		this.masterSlaveSelect = masterSlaveSelect;
 	}
 

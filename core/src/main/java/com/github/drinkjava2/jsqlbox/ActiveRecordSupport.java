@@ -82,6 +82,10 @@ public interface ActiveRecordSupport {// NOSONAR
 	/**  Load entity by given id (P-Key) or id Map  */
 	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems);
 	
+	/**  Load entity by given query  */
+	public <T> T loadByQuery(Object... sqlItems);
+	
+	
 	/**
 	 * Link style set values for entity field, format like:
 	 * user.put("id","id1").put("name","Sam").put("address","Beijing","phone","12345",

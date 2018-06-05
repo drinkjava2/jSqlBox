@@ -42,8 +42,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return new PaginHandler(pageNumber, pageSize);
 	}
 
- 
-	public static SqlItem shardTB(Object entityOrClass, Object... shardvalues) { 
+	public static SqlItem shardTB(Object entityOrClass, Object... shardvalues) {
 		if (shardvalues.length == 0)
 			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass);
 		else if (shardvalues.length == 1)
@@ -52,7 +51,6 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[1]);
 	}
 
- 
 	public static SqlItem shardDB(Object entityOrClass, Object... shardvalues) {
 		if (shardvalues.length == 0)
 			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass);
@@ -61,10 +59,36 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		else
 			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[1]);
 	}
-	 
+
 	//@formatter:off
+		protected void gXxxxCrudMethods_____________________() {}// NOSONAR 
+		
+		public static void gInsert(Object entity, Object... optionalSqlItems) {
+			gctx().insert(entity, optionalSqlItems); 
+		}
+ 
+		public static int gUpdate(Object entity, Object... optionalSqlItems) { 
+			return gctx().update(entity, optionalSqlItems);
+		}
+ 
+		public static  void gDelete(Object entity, Object... optionalSqlItems) {
+			  gctx().delete(entity, optionalSqlItems);
+		}
+ 
+		public static <T> T gLoad(Object entity, Object... optionalSqlItems) {
+			return gctx().load(entity, optionalSqlItems);
+		}
+ 
+		public static <T> T gLoadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {
+			return gctx().loadById(entityClass, entityId, optionalSqlItems);
+		}
+
+		public static <T> T gLoadByQuery(Class<T> entityClass, Object... sqlItems) {
+			return gctx().loadByQuery(entityClass, sqlItems);
+		}
+		
 		protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
-		public static <T> T giQuery(Object... inlineSQL) {return SqlBoxContext.gctx().iQuery(inlineSQL);}
+		public static <T> T giQuery(Object... inlineSQL) {return  gctx().iQuery(inlineSQL);}
 		public static <T> T giQueryForObject(Object... inlineSQL) {return SqlBoxContext.gctx().iQueryForObject(inlineSQL);}
 		public static long giQueryForLongValue(Object... inlineSQL) {return SqlBoxContext.gctx().iQueryForLongValue(inlineSQL);}
 		public static String giQueryForString(Object... inlineSQL) {return SqlBoxContext.gctx().iQueryForString(inlineSQL);}

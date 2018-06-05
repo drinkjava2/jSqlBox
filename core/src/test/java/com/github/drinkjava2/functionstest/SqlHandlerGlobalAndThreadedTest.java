@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.functionstest.HandlersTest.DemoUser;
+import com.github.drinkjava2.functionstest.SqlHandlersTest.DemoUser;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
@@ -76,7 +76,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 	@Test
 	public void testHandlers() {
 		List<DemoUser> result = ctx.pQuery(new EntityListHandler(DemoUser.class), PrintSqlHandler.class,
-				"select u.** from DemoUser u where u.age>?", 10);
+				"select u.* from DemoUser u where u.age>?", 10);
 		Assert.assertEquals(90l, result.size());
 
 		SqlBoxContextConfig.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(), new FirstPrintHandler(),
@@ -85,7 +85,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 		try {
 
 			SqlBoxContext newCtx = new SqlBoxContext(ctx.getDataSource());
-			List<DemoUser> result2 = newCtx.pQuery("select u.** from DemoUser u where u.age>?", 10);
+			List<DemoUser> result2 = newCtx.pQuery("select u.* from DemoUser u where u.age>?", 10);
 			Assert.assertEquals(5l, result2.size());
 		} finally {
 			SqlBoxContext.resetGlobalVariants();

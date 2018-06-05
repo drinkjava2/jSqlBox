@@ -28,15 +28,24 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 public class SimpleCacheHandler extends DefaultOrderSqlHandler {
 
 	/** A simple thread-safe LRU Cache with 500 items capacity */
-	private static final Map<String, Object> cache = Collections.synchronizedMap(new LRULinkedHashMap(500));
+	private Map<String, Object> cache;
 
-	private int aliveSeconds;
+	private int aliveSeconds = 1000;
+	private int capacity = 500;
 
 	public SimpleCacheHandler() {
-		aliveSeconds = 1000;// default alive time is 1000 seconds
+		cache = Collections.synchronizedMap(new LRULinkedHashMap(capacity));
 	}
 
-	public SimpleCacheHandler(int aliveSeconds) {
+	public int getAliveSeconds() {
+		return aliveSeconds;
+	}
+
+	public int getCapacity() {
+		return capacity;
+	}
+
+	public SimpleCacheHandler(int capacity, int aliveSeconds) {
 		if (aliveSeconds <= 1)
 			this.aliveSeconds = 1;
 		else if (aliveSeconds <= 10)
@@ -49,6 +58,13 @@ public class SimpleCacheHandler extends DefaultOrderSqlHandler {
 			this.aliveSeconds = 10000;
 		else
 			this.aliveSeconds = 100000;
+		this.capacity = capacity;
+		cache = Collections.synchronizedMap(new LRULinkedHashMap(capacity));
+	}
+
+	/** Call this method to manually clear cache */
+	public void clearCache() {
+		cache.clear();
 	}
 
 	private String createKey(PreparedSQL ps) {
@@ -65,11 +81,6 @@ public class SimpleCacheHandler extends DefaultOrderSqlHandler {
 		result = runner.runPreparedSQL(ps);
 		cache.put(key, new Object[] { null, result });
 		return result;
-	}
-
-	/** Call this method to manually clear cache */
-	public static void clearCache() {
-		cache.clear();
 	}
 
 	@SuppressWarnings("serial")

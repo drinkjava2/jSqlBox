@@ -54,5 +54,12 @@ public class SqlBoxException extends RuntimeException {
 			throw new SqlBoxException(
 					optionMessages.length == 0 ? "Assert error, String parameter can not be empty" : optionMessages[0]);
 	}
+	
+	/** Assure true, optionMessages is optional */
+	public static void assureTrue(Boolean isTrue, String... optionMessages) {
+		if (!isTrue)
+			throw new SqlBoxException(
+					optionMessages.length == 0 ? "Assert error, Result should be true" : optionMessages[0]);
+	}
 
 }

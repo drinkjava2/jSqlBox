@@ -12,12 +12,15 @@ import java.util.concurrent.atomic.AtomicLong;
  * 
  * Usage example: long id= new SnowflakeCreator(5L,5L, 18, 31).nextId(); <br/>
  * 
- * First parameter is datacenterIdBits, 1~9 bits<br/>
- * Second parameter is workerIdBits, 1~9 bits<br/>
- * note datacenterIdBits+workerIdBits should = 10 (2^10=1024 machine
- * allowed)<br/>
- * 3rd parameter is real datacenterId, 0~31 <br/>
- * 4thparameter is real workerId, 0~31
+ * P1 is datacenterIdBits, 1~9 bits<br/>
+ * P2 is workerIdBits, 1~9 bits<br/>
+ * P3 is real datacenterId, 0 to 511 <br/>
+ * P4 is real workerId, 0 to 511
+ * 
+ * Should:  P1 + P2 = 10 (2^10=1024)
+ * 
+ * Should:  P3 + P4 < 1024
+ * 
  * 
  * @author downgoon
  * @author Yong Z.

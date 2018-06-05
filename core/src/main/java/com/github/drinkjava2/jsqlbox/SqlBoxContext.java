@@ -175,42 +175,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
-	/** Create a new instance and bind current SqlBoxContext to it */
-	public void create(Class<?> entityClass) {
-		Object entity = null;
-		try {
-			entity = entityClass.newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
-		SqlBoxUtils.findAndBindSqlBox(this, entity);
-	}
-
-	/** Insert an entity to database */
-	public void insert(Object entity, Object... optionalSqlItems) {
-		SqlBoxContextUtils.insert(this, entity, optionalSqlItems);
-	}
-
-	/** Update an entity in database */
-	public int update(Object entity, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.update(this, entity, optionalSqlItems);
-	}
-
-	/** Delete an entity in database  */
-	public void delete(Object entity, Object... optionalSqlItems) {
-		SqlBoxContextUtils.delete(this, entity, optionalSqlItems);
-	}
-
-	/** Load an entity from database */
-	public <T> T load(Object entity, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.load(this, entity, optionalSqlItems);
-	}
-
-	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T loadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionalSqlItems);
-	}
-
 	@Override
 	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
 		Object[] params = item.getParameters();
@@ -245,8 +209,50 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
-	// ========== Dialect shortcut methods ===============
-	// ================================================================
+	protected void crudMethods______________________________() {// NOSONAR
+	}
+
+	/** Create a new instance and bind current SqlBoxContext to it */
+	public void create(Class<?> entityClass) {
+		Object entity = null;
+		try {
+			entity = entityClass.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException(e);
+		}
+		SqlBoxUtils.findAndBindSqlBox(this, entity);
+	}
+
+	/** Insert an entity to database */
+	public void insert(Object entity, Object... optionalSqlItems) {
+		SqlBoxContextUtils.insert(this, entity, optionalSqlItems);
+	}
+
+	/** Update an entity in database */
+	public int update(Object entity, Object... optionalSqlItems) {
+		return SqlBoxContextUtils.update(this, entity, optionalSqlItems);
+	}
+
+	/** Delete an entity in database */
+	public void delete(Object entity, Object... optionalSqlItems) {
+		SqlBoxContextUtils.delete(this, entity, optionalSqlItems);
+	}
+
+	/** Load an entity from database */
+	public <T> T load(Object entity, Object... optionalSqlItems) {
+		return SqlBoxContextUtils.load(this, entity, optionalSqlItems);
+	}
+
+	/** Load an entity from database by key, key can be one object or a Map */
+	public <T> T loadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {
+		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionalSqlItems);
+	}
+
+	public <T> T loadByQuery(Class<T> entityClass, Object... sqlItems) {
+		return SqlBoxContextUtils.loadByQuery(this, entityClass, sqlItems);
+	}
+
+	// ========== Dialect shortcut methods =============== 
 	protected void dialectShortcutMethods__________________________() {// NOSONAR
 	}
 
@@ -348,6 +354,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
+	@Deprecated
 	public void setDialect(Dialect dialect) {// NOSONAR
 		this.dialect = dialect;
 	}
@@ -357,6 +364,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
+	@Deprecated
 	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {// NOSONAR
 		this.sqlMapperGuesser = sqlMapperGuesser;
 	}
@@ -366,7 +374,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setShardingTools(ShardingTool[] shardingTools) {
+	@Deprecated
+	public void setShardingTools(ShardingTool[] shardingTools) {// NOSONAR
 		this.shardingTools = shardingTools;
 	}
 
@@ -375,7 +384,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {
+	@Deprecated
+	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {// NOSONAR
 		this.snowflakeCreator = snowflakeCreator;
 	}
 

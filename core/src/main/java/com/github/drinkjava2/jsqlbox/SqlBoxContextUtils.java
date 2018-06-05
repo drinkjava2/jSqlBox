@@ -41,6 +41,7 @@ import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetException;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
@@ -377,6 +378,40 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return bean;
 	}
 
+	public static <T> T loadByQuery(SqlBoxContext ctx, Class<T> entityClass, Object... sqlItems) {
+		List<Map<String, Object>> rows = ctx.iQueryForMapList(sqlItems);
+		if (rows == null || rows.isEmpty())
+			throw new SqlBoxException("No no record found in database.");
+		if (rows.size() > 1)
+			throw new SqlBoxException("More than 1 record found in database.");
+		Map<String, Object> oneRow = rows.get(0);
+		return mapToEntityBean(ctx, entityClass, oneRow);
+	}
+
+	/** Convert one row data into EntityBean */
+	public static <T> T mapToEntityBean(SqlBoxContext ctx, Class<T> entityClass, Map<String, Object> oneRow) {
+		if (oneRow == null || oneRow.isEmpty())
+			throw new SqlBoxException("Can not use null or empty row to convert to EntityBean");
+		@SuppressWarnings("unchecked")
+		T bean = (T) ClassCacheUtils.createNewEntity(entityClass);
+		SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, bean);
+		TableModel model = box.getTableModel();
+		for (ColumnModel col : model.getColumns()) {
+			boolean foundValue = false;
+			for (Entry<String, Object> row : oneRow.entrySet()) {
+				if (row.getKey().equalsIgnoreCase(col.getColumnName())) {
+					foundValue = true;
+					EntityNetException.assureNotEmpty(col.getEntityField(),
+							"EntityField not found for column '" + col.getColumnName() + "'");
+					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), row.getValue());
+				}
+			}
+			if (col.getPkey() && !foundValue)
+				throw new SqlBoxException("One prime-key not set value: '" + col.getColumnName() + "'");
+		}
+		return bean;
+	}
+
 	public static <T> T loadById(SqlBoxContext ctx, Class<T> entityClass, Object idOrIdMap,
 			Object... optionalSqlItems) {// NOSONAR
 		try {
@@ -390,7 +425,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	@SuppressWarnings("unchecked")
 	public static <T> T load(SqlBoxContext ctx, Object entityBean, Object... optionalSqlItems) {// NOSONAR
-		SqlBoxException.assureNotNull(entityBean, "entityClass can not be null");
+		SqlBoxException.assureNotNull(entityBean, "entityBean can not be null");
 
 		SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, entityBean);
 		TableModel tableModel = box.getTableModel();

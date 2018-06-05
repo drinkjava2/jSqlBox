@@ -58,7 +58,7 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
-public class HandlersTest extends TestBase {
+public class SqlHandlersTest extends TestBase {
 
 	@Table(name = "DemoUser")
 	public static class DemoUser extends ActiveRecord {
@@ -91,13 +91,13 @@ public class HandlersTest extends TestBase {
 			this.age = age;
 		}
 
-		@Sql("select u.** from DemoUser u where u.age>?")
+		@Sql("select u.* from DemoUser u where u.age>?")
 		public List<DemoUser> selectAgeBiggerThan1(Integer age) {
 			return this.guess(age);
 		}
 
 		@Handlers({ EntityListHandlerCfg.class })
-		@Sql("select u.id as u_id from DemoUser u where u.age>?")
+		@Sql("select * from DemoUser u where u.age>?")
 		public List<DemoUser> selectAgeBiggerThan2(Integer age) {
 			return this.guess(age);
 		}
@@ -105,7 +105,7 @@ public class HandlersTest extends TestBase {
 
 	public static class EntityListHandlerCfg extends BeanBox {
 		public EntityListHandler create() {
-			return new EntityListHandler("u", DemoUser.class);
+			return new EntityListHandler(DemoUser.class);
 		}
 	}
 
@@ -151,27 +151,19 @@ public class HandlersTest extends TestBase {
 	@Test
 	public void testEntityListHandler2() {
 		List<DemoUser> result = gpQuery(PrintSqlHandler.class, new EntityListHandler(DemoUser.class),
-				"select u.** from DemoUser u where u.age>=?", 90);
+				"select * from DemoUser where age>=?", 90);
 		Assert.assertTrue(result.size() == 10);
 
-		result = gpQuery(new EntityListHandler("u", DemoUser.class),
-				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		result = gpQuery(new EntityListHandler(DemoUser.class), "select * from DemoUser where age>=?", 90);
 		Assert.assertTrue(result.size() == 10);
 
-		result = gpQuery(new EntityListHandler(DemoUser.class, new DemoUser().alias("u")),
-				"select u.id as u_id from DemoUser u where u.age>=?", 90);
+		result = gpQuery(new EntityListHandler(DemoUser.class), "select * from DemoUser u where age>=?", 90);
 		Assert.assertTrue(result.size() == 10);
 
-		TableModel t = new DemoUser().tableModel();
-		t.setAlias("u");
-		result = gpQuery(new EntityListHandler(DemoUser.class, t), "select u.id as u_id from DemoUser u where u.age>=?",
-				90);
+		result = gpQuery(new EntityListHandler(DemoUser.class), "select * from DemoUser where  age>=?", 90);
 		Assert.assertTrue(result.size() == 10);
 
-		SqlBox b = new DemoUser().box();
-		b.getTableModel().setAlias("u");
-		result = gpQuery(new EntityListHandler(DemoUser.class, b), "select u.id as u_id from DemoUser u where u.age>=?",
-				90);
+		result = gpQuery(new EntityListHandler(DemoUser.class), "select u.* from DemoUser u where u.age>=?", 90);
 		Assert.assertTrue(result.size() == 10);
 	}
 
@@ -181,14 +173,14 @@ public class HandlersTest extends TestBase {
 
 		for (int i = 0; i < 10; i++) {// warm up
 			gpQuery(new SimpleCacheHandler(), new EntityListHandler(DemoUser.class),
-					"select u.** from DemoUser u where u.age>?", 0);
-			gpQuery(new EntityListHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
+					"select u.* from DemoUser u where u.age>?", 0);
+			gpQuery(new EntityListHandler(DemoUser.class), "select u.* from DemoUser u where u.age>?", 0);
 		}
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
 			List<DemoUser> result = gpQuery(new SimpleCacheHandler(), new EntityListHandler(DemoUser.class),
-					"select u.** from DemoUser u where u.age>?", 0);
+					"select u.* from DemoUser u where u.age>?", 0);
 			Assert.assertTrue(result.size() == 99);
 		}
 		long end = System.currentTimeMillis();
@@ -198,7 +190,7 @@ public class HandlersTest extends TestBase {
 		start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
 			List<DemoUser> result = gpQuery(new EntityListHandler(DemoUser.class),
-					"select u.** from DemoUser u where u.age>?", 0);
+					"select u.* from DemoUser u where u.age>?", 0);
 			Assert.assertTrue(result.size() == 99);
 		}
 		end = System.currentTimeMillis();
@@ -225,16 +217,16 @@ public class HandlersTest extends TestBase {
 		Assert.assertTrue(result2.size() == 5);
 
 		List<DemoUser> users1 = gpQuery(new EntityListHandler(DemoUser.class), new PaginHandler(2, 5),
-				"select u.** from DemoUser u where u.age>?", 0);
+				"select u.* from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(users1.size() == 5);
 
 		List<DemoUser> users2 = gpQuery(new EntityListHandler(DemoUser.class),
-				"select u.** from DemoUser u where u.age>?", 0, pagin(2, 5));
+				"select u.* from DemoUser u where u.age>?", 0, pagin(2, 5));
 		Assert.assertTrue(users2.size() == 5);
 
 		SqlBoxContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));
 		List<DemoUser> users3 = gpQuery(new EntityListHandler(DemoUser.class),
-				"select u.** from DemoUser u where u.age>?", 0);
+				"select u.* from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(users3.size() == 5);
 		SqlBoxContext.setThreadLocalSqlHandlers(null);
 	}

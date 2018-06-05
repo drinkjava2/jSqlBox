@@ -44,11 +44,10 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u1").put("userName", "user1").put("age", 10).insert();
 		new User().put("id", "u2").put("userName", "user2").put("age", 20).insert();
 		new User().put("id", "u3").put("userName", "user3").put("age", 30).insert();
-		List<User> users = gpQuery(new EntityListHandler(User.class), "select u.** from usertb u where u.age>?", 10);
+		List<User> users = gpQuery(new EntityListHandler(User.class), "select * from usertb where age>?", 10);
 		Assert.assertEquals(2, users.size());
 
-		List<User> users2 = giQuery(new EntityListHandler(User.class, new User().alias("u")),
-				"select u.id as u_id, u.age as u_age from usertb u where u.age>?", param(10));
+		List<User> users2 = giQuery(new EntityListHandler(User.class), "select * from usertb where age>?", param(10));
 
 		Assert.assertEquals(2, users2.size());
 	}
@@ -227,16 +226,16 @@ public class EntityNetQueryTest extends TestBase {
 	@Test
 	public void testAddEntity() {
 		System.out.println("==============testAddEntity================ ");
-		new User().put("id", "u1").put("userName", "user1").insert(); 
-		EntityNet net = ctx.netLoadAll(User.class); 
-		Assert.assertEquals(1, net.size());  
+		new User().put("id", "u1").put("userName", "user1").insert();
+		EntityNet net = ctx.netLoadAll(User.class);
+		Assert.assertEquals(1, net.size());
 		User u2 = new User();
 		u2.setId("u2");
 		u2.setUserName("user2");
 		u2.insert();
 		net.addEntity(u2);
 
-		Assert.assertEquals(2, net.size()); 
+		Assert.assertEquals(2, net.size());
 		User u = net.selectOneEntity(User.class, "u2");
 		Assert.assertEquals("user2", u.getUserName());
 	}

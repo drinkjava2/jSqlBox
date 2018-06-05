@@ -12,7 +12,6 @@
 package com.github.drinkjava2.helloworld;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
@@ -35,8 +34,7 @@ public class HelloWorldTest {
 		this.name = name;
 	}
 
-	@Test
-	public void doTest() {
+	public static void main(String[] args) {
 		HikariDataSource ds = new HikariDataSource();
 		ds.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		ds.setDriverClassName("org.h2.Driver");
@@ -55,4 +53,5 @@ public class HelloWorldTest {
 		Assert.assertEquals("ActiveRecordDemoTest", ctx.pQueryForString("select name from HelloWorldTest"));
 		ds.close();
 	}
+
 }

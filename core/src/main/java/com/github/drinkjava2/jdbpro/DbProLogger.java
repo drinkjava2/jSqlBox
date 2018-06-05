@@ -44,7 +44,7 @@ public interface DbProLogger {
 		private Logger jdkLogger;
 		private static boolean firstRun = true;
 		private static boolean enableLog = true;
-
+		private static boolean exceptionfoundforinvoke=false;
 		static {
 			firstRun = false;
 		}
@@ -59,16 +59,16 @@ public interface DbProLogger {
 				commonLoggerInfoMethod = commonLogger.getClass().getMethod("info", Object.class);
 				commonLoggerWarnMethod = commonLogger.getClass().getMethod("warn", Object.class);
 				commonLoggerErrorMethod = commonLogger.getClass().getMethod("error", Object.class);
+				commonLoggerInfoMethod.invoke(commonLogger, " ");
 			} catch (Exception e) {
-				// do nothing
+				exceptionfoundforinvoke=true; 
 			}
 
-			if (commonLogger == null || commonLoggerWarnMethod == null) {
+			if (exceptionfoundforinvoke) {
 				if (firstRun)
 					System.err.println(
 							"DbProLogger failed to load org.apache.commons.logging.LogFactory. Use JDK logger.");// NOSONAR
-				jdkLogger = Logger.getLogger(targetClass.getName());// use JDK
-																	// log
+				jdkLogger = Logger.getLogger(targetClass.getName());  
 			} else if (firstRun)
 				System.out.println("org.apache.commons.logging.LogFactory loaded, DbProLogger use it as logger.");// NOSONAR
 		}

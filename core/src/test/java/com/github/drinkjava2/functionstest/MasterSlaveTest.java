@@ -81,6 +81,7 @@ public class MasterSlaveTest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Before
 	public void init() {
 		SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
@@ -122,7 +123,8 @@ public class MasterSlaveTest {
 		System.out.println("============Test testMasterSlaveUpdate==================");
 		// AutoChoose, not in Transaction, should use Master
 		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
-		TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
+		//TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
+		TheUser u1 =new TheUser().useContext(master).put("id", 3L).load(USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
 		TheUser u2 = master.loadById(TheUser.class, 3L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row3", u2.getName());
@@ -150,6 +152,7 @@ public class MasterSlaveTest {
 
 	private static HikariDataSource txDataSource;
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testMasterSlaveQueryInTransaction() {
 		System.out.println("============Test testMasterSlaveInTransaction==============");

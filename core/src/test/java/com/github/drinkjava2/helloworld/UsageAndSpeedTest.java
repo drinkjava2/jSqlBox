@@ -591,6 +591,18 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
+	public void activeRecordLoadByQuery() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		UserAR user = new UserAR();
+		user.useContext(ctx); // Use ctx as SqlBoxContext
+		user.setName("Sam");
+		user.setAddress("Canada");
+		user.insert();
+		UserAR user2 = new UserAR().useContext(ctx).loadByQuery("select * from ", UserAR.TABLE);
+		Assert.assertEquals("Sam", user2.getName()); 
+	}
+
+	@Test
 	public void conditionsQuery() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		final String name = "Tom";
