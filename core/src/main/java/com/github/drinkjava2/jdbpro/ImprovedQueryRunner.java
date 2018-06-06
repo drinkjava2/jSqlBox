@@ -336,7 +336,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		if (ps.getMasterSlaveSelect() == null)
 			ps.setMasterSlaveSelect(this.getMasterSlaveSelect());
 
-		if (ps.getUseTemplate()) {
+		if (  ps.getUseTemplate()!=null && ps.getUseTemplate()) {
 			ps.setUseTemplate(false);
 			SqlTemplateEngine engine = ps.getTemplateEngine();
 			if (engine == null)

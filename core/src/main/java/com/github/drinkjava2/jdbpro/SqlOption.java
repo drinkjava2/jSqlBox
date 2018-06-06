@@ -16,12 +16,14 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * SqlItemType type is an enum type
+ * SqlOption is a property in SqlItem, this property tell system how to analyse
+ * a SqlItem
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
  */
 public enum SqlOption {
+	// ------- Sql text or param items--------------------
 	SQL, // Build a SQL String piece, need String type followed
 
 	PARAM, // Build SQL parameter or parameters, need Object types followed
@@ -35,7 +37,13 @@ public enum SqlOption {
 
 	VALUES_QUESTIONS, // Append a " values(?,?,?....?)" String at end of SQL
 
-	SWITCHTO, // Switch to another DbPro or subClass instance to run the SQL
+	// ----------Special Items------------ 
+	SWITCHTO, // Switch to another DbPro or subClass(like SqlBoxContext) instance to run the SQL
+	
+	HANDLER, // ResultSetHandler or SqlHandler class or instance
+	  
+	// -----------Control option--------------
+	USE_TEMPLATE, //force use template style  
 
 	// ------Master_Slave Options-------
 	USE_AUTO, // Tell system to choose master or slave database automatically (write:master,

@@ -19,9 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.swing.text.html.FormSubmitEvent.MethodType;
-
-import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
@@ -41,7 +38,6 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 public abstract class SqlMapperUtils {// NOSONAR
 
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
-	private static final Map<String, PreparedSQL> methodSQLCache = new ConcurrentHashMap<String, PreparedSQL>();
 
 	/**
 	 * This is the method body to build an instance based on abstract class which
@@ -104,13 +100,12 @@ public abstract class SqlMapperUtils {// NOSONAR
 	}
 
 	/** Automatically guess the sqlHandlers */
-	public static void autoGuessHandler(Object entity, PreparedSQL ps, String sql, Method method) { 
+	public static void autoGuessHandler(Object entity, PreparedSQL ps, String sql, Method method) {
 		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty())
 			return;
 		if (ps.getResultSetHandler() != null)
 			return;
 		String methodType = method.getGenericReturnType().toString();
-		System.out.println(methodType);
 		if (sql.indexOf(".**") > -1) {
 			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
 				ps.addSqlHandler(new SSMapListHandler(entity.getClass()));
@@ -120,48 +115,6 @@ public abstract class SqlMapperUtils {// NOSONAR
 			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
 				ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
 		}
-	}
-
-	/** Get the PreparedSQL from a abstract method, but do not set parameters */
-	public static PreparedSQL getPreparedSqlAndHandles(String callerClassName, Method callerMethod, IocTool iocTool) {// NOSONAR
-		// key is only inside used by cache
-		String key = callerClassName + "@#$^!" + callerMethod.getName();
-		PreparedSQL result = methodSQLCache.get(key);
-		if (result != null)
-			return result.newCopy();
-		else
-			result = new PreparedSQL();
-
-		Annotation[] annos = callerMethod.getAnnotations();
-		Sql sqlAnno = null;
-		for (Annotation anno : annos) {
-			if (Sql.class.equals(anno.annotationType()))
-				sqlAnno = (Sql) anno;
-			if (Handlers.class.equals(anno.annotationType())) {
-				Class<?>[] array = ((Handlers) anno).value();
-				for (Class<?> claz : array)
-					result.addHandler(claz, iocTool);
-			}
-		}
-		String sql = null;
-		if (sqlAnno != null)
-			sql = sqlAnno.value()[0];
-		else {
-			String src = null;
-			try {
-				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
-			} catch (Exception e) {
-				throw new SqlBoxException("Method '" + callerMethod.getName() + "' in '" + callerClassName
-						+ "' have no Sql annotation or text.");
-			}
-			sql = StrUtils.substringAfter(src, callerMethod.getName() + "(");
-			sql = StrUtils.substringBetween(sql, "/*-", "*/");
-		}
-		if (sql != null)
-			sql = sql.trim();
-		result.setSql(sql);
-		methodSQLCache.put(key, result);
-		return result.newCopy();
 	}
 
 	public static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName, Object... params) {
@@ -192,6 +145,42 @@ public abstract class SqlMapperUtils {// NOSONAR
 			}
 		methodParamNamesCache.put(key, l.toArray(new String[l.size()]));
 		return l.toArray(new String[l.size()]);
+	}
+
+	/** Get the sql and handlers object[], if sql is null, put object[0]=null */
+	public static String getSqlOfMethod(String callerClassName, Method callerMethod) {// NOSONAR
+		Annotation[] annos = callerMethod.getAnnotations();
+		String sql = null;
+		for (Annotation anno : annos)
+			if (Sql.class.equals(anno.annotationType())) {
+				sql = ((Sql) anno).value()[0];
+				break;
+			}
+		if (sql == null) {
+			String src = null;
+			try {
+				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
+				sql = StrUtils.substringAfter(src, callerMethod.getName() + "(");
+				sql = StrUtils.substringBetween(sql, "/*-", "*/");
+			} catch (Exception e) {// NOSONAR
+			}
+		}
+		if (sql != null)
+			sql = sql.trim();
+		return sql;
+	}
+
+	/** Get the sql and handlers object[], if sql is null, put object[0]=null */
+	public static Class<?>[] getHandlerClazsOfMethod(Method callerMethod) {// NOSONAR
+		List<Object> result = new ArrayList<Object>();
+		Annotation[] annos = callerMethod.getAnnotations();
+		for (Annotation anno : annos)
+			if (Handlers.class.equals(anno.annotationType())) {
+				Class<?>[] array = ((Handlers) anno).value();
+				for (Class<?> claz : array)
+					result.add(claz);
+			}
+		return result.toArray(new Class<?>[result.size()]);
 	}
 
 }

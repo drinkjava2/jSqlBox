@@ -24,6 +24,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * @author Yong Zhu
  * @since 1.0.8
  */
+@SuppressWarnings("unchecked")
 public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 	public static final SqlMapperGuesser instance = new SqlMapperDefaultGuesser();
 
@@ -46,51 +47,7 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		return theGuessBody(ctx, entity, callerClassName, callerMethod, params);
-	}
-
-	/**
-	 * The main logic part of guess, SubClass can override this method to do
-	 * different guess logic
-	 * 
-	 * @param ctx
-	 *            The SqlBoxContext instance
-	 * @param entity
-	 *            The ActiveRecord entity
-	 * @param callerClassName
-	 *            The caller Class Name
-	 * @param callerMethod
-	 *            The caller Method
-	 * @param params
-	 *            The SQL params
-	 * @return T The Result
-	 */
-	@SuppressWarnings("unchecked")
-	protected <T> T theGuessBody(SqlBoxContext ctx, Object entity, String callerClassName, Method callerMethod,
-			Object... params) {
-		PreparedSQL ps = SqlMapperUtils.getPreparedSqlAndHandles(callerClassName, callerMethod, ctx.getIocTool());
-		String sql = ps.getSql().trim();
-		if (StrUtils.startsWithIgnoreCase(sql, "select"))
-			ps.setType(SqlType.QUERY);
-		else if (StrUtils.startsWithIgnoreCase(sql, "delete"))
-			ps.setType(SqlType.UPDATE);
-		else if (StrUtils.startsWithIgnoreCase(sql, "update"))
-			ps.setType(SqlType.UPDATE);
-		else if (StrUtils.startsWithIgnoreCase(sql, "insert"))
-			ps.setType(SqlType.UPDATE);
-		else
-			ps.setType(SqlType.EXECUTE);// execute
-		boolean hasQuestionMark = sql.indexOf('?') > -1;
-		boolean useTemplate = sql.indexOf(':') > -1 || sql.indexOf("#{") > -1;
-		ps.setUseTemplate(useTemplate);
-		if (useTemplate && hasQuestionMark)
-			throw new SqlBoxException(
-					"guess() method can not determine use template or normal style for SQL '" + sql + "'");
-		if (useTemplate)
-			ps.setTemplateParamMap(SqlMapperUtils.buildParamMap(callerClassName, callerMethod.getName(), params));
-		else
-			ps.setParams(params);
-		SqlMapperUtils.autoGuessHandler(entity, ps, sql, callerMethod); // guess handler
+		PreparedSQL ps = buildPreparedSQL(ctx, callerClassName, callerMethod, params);
 		return (T) ctx.runPreparedSQL(ps);
 	}
 
@@ -112,8 +69,7 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		PreparedSQL sp = SqlMapperUtils.getPreparedSqlAndHandles(callerClassName, callerMethod, ctx.getIocTool());
-		return sp.getSql();
+		return SqlMapperUtils.getSqlOfMethod(callerClassName, callerMethod);
 	}
 
 	@Override
@@ -135,9 +91,36 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 
-		PreparedSQL sp = SqlMapperUtils.getPreparedSqlAndHandles(callerClassName, callerMethod, ctx.getIocTool());
-		sp.setParams(params);
-		return sp;
+		return buildPreparedSQL(ctx, callerClassName, callerMethod, params);
+	}
+
+	private PreparedSQL buildPreparedSQL(SqlBoxContext ctx, String callerClassName, Method callerMethod,
+			Object... params) {
+		String sql = SqlMapperUtils.getSqlOfMethod(callerClassName, callerMethod);
+		Class<?>[] handlesClazs = SqlMapperUtils.getHandlerClazsOfMethod(callerMethod);
+		Object[] newParams = new Object[1 + handlesClazs.length + params.length];
+		newParams[0] = sql;
+		int i = 1;
+		for (Class<?> handlesClaz : handlesClazs)
+			newParams[i++] = handlesClaz; 
+		for (Object para : params)
+			newParams[i++] = para;
+
+		PreparedSQL ps = ctx.pPrepare(newParams);
+		if (ps.getType() == null)
+			if (StrUtils.startsWithIgnoreCase(ps.getSql(), "select"))
+				ps.setType(SqlType.QUERY);
+			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "delete"))
+				ps.setType(SqlType.UPDATE);
+			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "update"))
+				ps.setType(SqlType.UPDATE);
+			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "insert"))
+				ps.setType(SqlType.UPDATE);
+			else
+				throw new SqlBoxException(
+						"Can not guess SqlType, only can guess SQL started with select/delete/update/insert, need manually set SqlType");
+		ps.ifNullSetUseTemplate(sql.indexOf(':') > -1 || sql.indexOf('{') > -1 || sql.indexOf('[') > -1);
+		return ps;
 	}
 
 }

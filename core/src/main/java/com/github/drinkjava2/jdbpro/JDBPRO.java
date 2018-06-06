@@ -29,6 +29,8 @@ public abstract class JDBPRO extends DbPro {
 	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
 	public static final SqlOption USE_AUTO = SqlOption.USE_AUTO;
+	public static final SqlOption USE_TEMPLATE = SqlOption.USE_TEMPLATE;
+	
 
 	protected void ________INLINE_Methods________() {// NOSONAR
 	}

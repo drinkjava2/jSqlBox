@@ -36,6 +36,5 @@ public abstract class SingleTonHandlers {// NOSONAR
 	public static final ScalarHandler<?> scalarHandler = new ScalarHandler<Object>();
 	public static final ArrayHandler arrayHandler = new ArrayHandler();
 	public static final ArrayListHandler arrayListHandler = new ArrayListHandler();
-	public static final ColumnListHandler<?> columnListHandler = new ColumnListHandler<Object>();
-
+	public static final ColumnListHandler<?> columnListHandler = new ColumnListHandler<Object>(); 
 }

@@ -57,6 +57,6 @@ public interface SqlTemplateEngine {
 	 * 
 	 * @return PreparedSQL instance
 	 */
-	public PreparedSQL render(String sqlTemplateOrSqlID, Map<String, Object> paramMap );
+	public PreparedSQL render(String sqlTemplateOrSqlID, Map<String, Object> paramMap);
 
 }

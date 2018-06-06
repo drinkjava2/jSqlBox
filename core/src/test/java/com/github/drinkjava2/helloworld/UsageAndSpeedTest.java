@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
@@ -210,7 +210,7 @@ public class UsageAndSpeedTest {
 			this.guess(name, address);
 		};
 
-		@Handlers(MapListHandler.class)
+		@Handlers(PrintSqlHandler.class)
 		@Sql("select * from users where name=? and address=?")
 		public List<Map<String, Object>> selectUsers(String name, String address) {
 			return this.guess(name, address);

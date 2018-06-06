@@ -166,104 +166,13 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		StringBuilder sql = lastSqlBuilder;
 		if (sql == null)
 			sql = new StringBuilder();
-		boolean foundSQL = false;
 		for (Object item : items) {
 			if (item == null) {
 				if (iXxxStyle)
 					throw new DbProRuntimeException("In iXxxx style,  null value can not append as SQL piece");
 				else
 					predSQL.addParam(null);
-			} else if (item instanceof String) {
-				if (iXxxStyle)
-					sql.append(item);
-				else if (foundSQL)
-					predSQL.addParam(item);
-				else {
-					sql.append(item);
-					foundSQL = true;
-				}
-			} else if (item instanceof PreparedSQL) {
-				PreparedSQL psItem = (PreparedSQL) item;
-				if (psItem.getSql() != null) {
-					sql.append(psItem.getSql());
-					foundSQL = true;
-				}
-				if (psItem.getParams() != null)
-					for (Object obj : psItem.getParams())
-						predSQL.addParam(obj);
-			} else if (item instanceof SqlTemplateEngine) {
-				predSQL.setTemplateEngine((SqlTemplateEngine) item);
-			} else if (item instanceof Map<?, ?>) {
-				predSQL.addTemplateMap((Map<String, Object>) item);
-			} else if (item instanceof SqlOption) {
-				if (SqlOption.USE_MASTER.equals(item)) {
-					predSQL.setMasterSlaveSelect(SqlOption.USE_MASTER);
-				} else if (SqlOption.USE_SLAVE.equals(item)) {
-					predSQL.setMasterSlaveSelect(SqlOption.USE_SLAVE);
-				} else if (SqlOption.USE_AUTO.equals(item)) {
-					predSQL.setMasterSlaveSelect(SqlOption.USE_AUTO);
-				} else if (SqlOption.USE_BOTH.equals(item)) {
-					predSQL.setMasterSlaveSelect(SqlOption.USE_BOTH);
-				}
-			} else if (item instanceof SqlItem) {
-				SqlItem sqItem = (SqlItem) item;
-				if (SqlOption.PARAM.equals(sqItem.getType())) {
-					for (Object pm : sqItem.getParameters())
-						predSQL.addParam(pm);
-				} else if (SqlOption.PUT.equals(sqItem.getType())) {
-					predSQL.addTemplateParam(sqItem);
-				} else if (SqlOption.SQL.equals(sqItem.getType())) {
-					for (Object pm : sqItem.getParameters())
-						sql.append(pm);
-				} else if (SqlOption.QUESTION_PARAM.equals(sqItem.getType())) {
-					int i = 0;
-					for (Object pm : sqItem.getParameters()) {
-						predSQL.addParam(pm);
-						if (i > 0)
-							sql.append(",");
-						sql.append("?");
-						i++;
-					}
-				} else if (SqlOption.NOT_NULL.equals(sqItem.getType())) {
-					if (sqItem.getParameters()[1] != null) {
-						sql.append(sqItem.getParameters()[0]);
-						predSQL.addParam(sqItem.getParameters()[1]);
-					}
-				} else if (SqlOption.VALUES_QUESTIONS.equals(sqItem.getType())) {
-					sql.append(" values(");
-					for (int i = 0; i < predSQL.getParamSize(); i++) {
-						if (i > 0)
-							sql.append(",");
-						sql.append("?");
-					}
-					sql.append(")");
-				} else if (SqlOption.SWITCHTO.equals(sqItem.getType())) {
-					predSQL.setSwitchTo((DbPro) sqItem.getParameters()[0]);
-				} else if (SqlOption.SHARD_TABLE.equals(sqItem.getType())) {
-					handleShardTable(predSQL, sql, sqItem);
-				} else if (SqlOption.SHARD_DATABASE.equals(sqItem.getType())) {
-					handleShardDatabase(predSQL, sql, sqItem);
-				} else
-					throw new DbProRuntimeException("What the heck the param type is? " + sqItem.getType() + " "
-							+ Arrays.deepToString(sqItem.getParameters()));
-			} else if (item instanceof Connection)
-				predSQL.setConnection((Connection) item);
-			else if (item instanceof DbPro)
-				predSQL.setSwitchTo((DbPro) item);
-			else if (item instanceof SqlHandler)
-				predSQL.addHandler((SqlHandler) item, this.getIocTool());
-			else if (item instanceof ResultSetHandler)
-				predSQL.setResultSetHandler((ResultSetHandler) item);
-			else if (item instanceof Class) {
-				predSQL.addHandler(item, this.getIocTool());
-			} else if (item instanceof SpecialSqlItem) {
-				if (specialSqlItemPreparers == null)
-					throw new DbProRuntimeException(
-							"SpecialSqlItem found but no specialSqlItemPreparers be set, please read user manual how to set SpecialSqlItemPreparers");
-				for (SpecialSqlItemPreparer spPreparer : specialSqlItemPreparers)
-					if (spPreparer.doPrepare(predSQL, sql, (SpecialSqlItem) item))
-						break;
-			} else {
+			} else if (!dealItem(iXxxStyle, predSQL, sql, item)) {
 				if (item.getClass().isArray()) {
 					realDoPrepare(predSQL, sql, iXxxStyle, (Object[]) item);
 				} else if (iXxxStyle)
@@ -277,6 +186,109 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
+	 * Here deal a non-null items, if can analyse it, return true, otherwise return
+	 * false
+	 */
+	private boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
+		if (item instanceof String) {
+			if (iXxxStyle)
+				sql.append(item);
+			else if (sql.length() > 0)
+				predSQL.addParam(item);
+			else
+				sql.append(item);
+		} else if (item instanceof PreparedSQL) {
+			PreparedSQL psItem = (PreparedSQL) item;
+			if (psItem.getSql() != null)
+				sql.append(psItem.getSql());
+			if (psItem.getParams() != null)
+				for (Object obj : psItem.getParams())
+					predSQL.addParam(obj);
+		} else if (item instanceof SqlTemplateEngine) {
+			predSQL.setTemplateEngine((SqlTemplateEngine) item);
+		} else if (item instanceof Map<?, ?>) {
+			predSQL.addTemplateMap((Map<String, Object>) item);
+		} else if (item instanceof SqlOption) {
+			if (SqlOption.USE_MASTER.equals(item)) {
+				predSQL.setMasterSlaveSelect(SqlOption.USE_MASTER);
+			} else if (SqlOption.USE_SLAVE.equals(item)) {
+				predSQL.setMasterSlaveSelect(SqlOption.USE_SLAVE);
+			} else if (SqlOption.USE_AUTO.equals(item)) {
+				predSQL.setMasterSlaveSelect(SqlOption.USE_AUTO);
+			} else if (SqlOption.USE_BOTH.equals(item)) {
+				predSQL.setMasterSlaveSelect(SqlOption.USE_BOTH);
+			} else if (SqlOption.USE_TEMPLATE.equals(item)) {
+				predSQL.setUseTemplate(true);
+			}
+		} else if (item instanceof SqlItem) {
+			SqlItem sqItem = (SqlItem) item;
+			if (SqlOption.PARAM.equals(sqItem.getType())) {
+				for (Object pm : sqItem.getParameters())
+					predSQL.addParam(pm);
+			} else if (SqlOption.PUT.equals(sqItem.getType())) {
+				predSQL.addTemplateParam(sqItem);
+			} else if (SqlOption.SQL.equals(sqItem.getType())) {
+				for (Object pm : sqItem.getParameters())
+					sql.append(pm);
+			} else if (SqlOption.QUESTION_PARAM.equals(sqItem.getType())) {
+				int i = 0;
+				for (Object pm : sqItem.getParameters()) {
+					predSQL.addParam(pm);
+					if (i > 0)
+						sql.append(",");
+					sql.append("?");
+					i++;
+				}
+			} else if (SqlOption.NOT_NULL.equals(sqItem.getType())) {
+				if (sqItem.getParameters()[1] != null) {
+					sql.append(sqItem.getParameters()[0]);
+					predSQL.addParam(sqItem.getParameters()[1]);
+				}
+			} else if (SqlOption.VALUES_QUESTIONS.equals(sqItem.getType())) {
+				sql.append(" values(");
+				for (int i = 0; i < predSQL.getParamSize(); i++) {
+					if (i > 0)
+						sql.append(",");
+					sql.append("?");
+				}
+				sql.append(")");
+			} else if (SqlOption.SWITCHTO.equals(sqItem.getType())) {
+				predSQL.setSwitchTo((DbPro) sqItem.getParameters()[0]);
+			} else if (SqlOption.SHARD_TABLE.equals(sqItem.getType())) {
+				handleShardTable(predSQL, sql, sqItem);
+			} else if (SqlOption.SHARD_DATABASE.equals(sqItem.getType())) {
+				handleShardDatabase(predSQL, sql, sqItem);
+			} else
+				throw new DbProRuntimeException("What the heck the param type is? " + sqItem.getType() + " "
+						+ Arrays.deepToString(sqItem.getParameters()));
+		} else if (item instanceof Connection)
+			predSQL.setConnection((Connection) item);
+		else if (item instanceof DbPro)
+			predSQL.setSwitchTo((DbPro) item);
+		else if (item instanceof SqlHandler)
+			predSQL.addHandler((SqlHandler) item);
+		else if (item instanceof ResultSetHandler)
+			predSQL.setResultSetHandler((ResultSetHandler) item);
+		else if (item instanceof Class) {
+			if (this.getIocTool() == null)
+				throw new DbProRuntimeException("Found a sqlItem is class type :'" + item + "', IocTool setting needed.");
+			Object obj = this.getIocTool().getBean((Class) item);
+			if (obj == null)
+				throw new DbProRuntimeException("IocTool return a null object for class '" + item + "'"); 
+			return dealItem(iXxxStyle, predSQL, sql, obj);
+		} else if (item instanceof SpecialSqlItem) {
+			if (specialSqlItemPreparers == null)
+				throw new DbProRuntimeException(
+						"SpecialSqlItem found but no specialSqlItemPreparers be set, please read user manual how to set SpecialSqlItemPreparers");
+			for (SpecialSqlItemPreparer spPreparer : specialSqlItemPreparers)
+				if (spPreparer.doPrepare(predSQL, sql, (SpecialSqlItem) item))
+					break;
+		} else
+			return false;
+		return true;
+	}
+
+	/**
 	 * handleShardTable is designed for subClass
 	 * 
 	 * @param predSQL
@@ -284,7 +296,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * @param sql
 	 *            The StringBuilder instance
 	 * @param item
-	 *            The SqlItem which type is SqlOption.SHARD_TABLE 
+	 *            The SqlItem which type is SqlOption.SHARD_TABLE
 	 * @return The ShardTable name
 	 */
 	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
@@ -324,7 +336,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T iQuery(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
-		ps.setType(SqlType.QUERY);
+		ps.ifNullSetType(SqlType.QUERY);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -338,7 +350,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T iQueryForObject(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
-		ps.setType(SqlType.QUERY);
+		ps.ifNullSetType(SqlType.QUERY);
 		if (ps.getResultSetHandler() == null)
 			ps.setResultSetHandler(new ScalarHandler<T>(1));
 		return (T) runPreparedSQL(ps);
@@ -365,8 +377,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public List<Map<String, Object>> iQueryForMapList(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.addHandler(new MapListHandler(), this.getIocTool());
-		ps.setType(SqlType.QUERY);
+		ps.addHandler(new MapListHandler());
+		ps.ifNullSetType(SqlType.QUERY);
 		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
 
@@ -379,7 +391,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public int iUpdate(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
-		ps.setType(SqlType.UPDATE);
+		ps.ifNullSetType(SqlType.UPDATE);
 		return (Integer) runPreparedSQL(ps);
 	}
 
@@ -392,7 +404,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T iInsert(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
-		ps.setType(SqlType.INSERT);
+		ps.ifNullSetType(SqlType.INSERT);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -406,7 +418,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T iExecute(Object... inlineSQL) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(inlineSQL);
-		ps.setType(SqlType.EXECUTE);
+		ps.ifNullSetType(SqlType.EXECUTE);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -422,7 +434,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T pQuery(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
-		ps.setType(SqlType.QUERY);
+		ps.ifNullSetType(SqlType.QUERY);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -436,7 +448,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T pQueryForObject(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
-		ps.setType(SqlType.QUERY);
+		ps.ifNullSetType(SqlType.QUERY);
 		if (ps.getResultSetHandler() == null)
 			ps.setResultSetHandler(new ScalarHandler<T>(1));
 		return (T) runPreparedSQL(ps);
@@ -463,8 +475,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public List<Map<String, Object>> pQueryForMapList(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
-		ps.addHandler(new MapListHandler(), this.getIocTool());
-		ps.setType(SqlType.QUERY);
+		ps.addHandler(new MapListHandler());
+		ps.ifNullSetType(SqlType.QUERY);
 		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
 
@@ -477,7 +489,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public int pUpdate(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
-		ps.setType(SqlType.UPDATE);
+		ps.ifNullSetType(SqlType.UPDATE);
 		return (Integer) runPreparedSQL(ps);
 	}
 
@@ -490,7 +502,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T pInsert(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
-		ps.setType(SqlType.INSERT);
+		ps.ifNullSetType(SqlType.INSERT);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -504,7 +516,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T pExecute(Object... items) {
 		PreparedSQL ps = pPrepareAndInsertHandlers(items);
-		ps.setType(SqlType.EXECUTE);
+		ps.ifNullSetType(SqlType.EXECUTE);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -520,8 +532,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T tQuery(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.setUseTemplate(true);
-		ps.setType(SqlType.QUERY);
+		ps.ifNullSetUseTemplate(true);
+		ps.ifNullSetType(SqlType.QUERY);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -535,8 +547,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T tQueryForObject(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.setUseTemplate(true);
-		ps.setType(SqlType.QUERY);
+		ps.ifNullSetUseTemplate(true);
+		ps.ifNullSetType(SqlType.QUERY);
 		if (ps.getResultSetHandler() == null)
 			ps.setResultSetHandler(new ScalarHandler<T>(1));
 		return (T) runPreparedSQL(ps);
@@ -563,9 +575,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public List<Map<String, Object>> tQueryForMapList(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.setUseTemplate(true);
-		ps.addHandler(new MapListHandler(), this.getIocTool());
-		ps.setType(SqlType.QUERY);
+		ps.ifNullSetUseTemplate(true);
+		ps.addHandler(new MapListHandler());
+		ps.ifNullSetType(SqlType.QUERY);
 		return (List<Map<String, Object>>) runPreparedSQL(ps);
 	}
 
@@ -578,8 +590,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public int tUpdate(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.setUseTemplate(true);
-		ps.setType(SqlType.UPDATE);
+		ps.ifNullSetUseTemplate(true);
+		ps.ifNullSetType(SqlType.UPDATE);
 		return (Integer) runPreparedSQL(ps);
 	}
 
@@ -592,8 +604,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T tInsert(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.setUseTemplate(true);
-		ps.setType(SqlType.INSERT);
+		ps.ifNullSetUseTemplate(true);
+		ps.ifNullSetType(SqlType.INSERT);
 		return (T) runPreparedSQL(ps);
 	}
 
@@ -607,8 +619,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public <T> T tExecute(Object... items) {
 		PreparedSQL ps = iPrepareAndInsertHandlers(items);
-		ps.setUseTemplate(true);
-		ps.setType(SqlType.EXECUTE);
+		ps.ifNullSetUseTemplate(true);
+		ps.ifNullSetType(SqlType.EXECUTE);
 		return (T) runPreparedSQL(ps);
 	}
 

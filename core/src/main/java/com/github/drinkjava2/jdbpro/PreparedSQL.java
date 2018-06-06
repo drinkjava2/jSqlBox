@@ -35,6 +35,7 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
  * @author Yong Zhu
  * @since 1.7.0
  */
+@SuppressWarnings("rawtypes")
 public class PreparedSQL {
 
 	/** SQL Operation Type */
@@ -56,7 +57,7 @@ public class PreparedSQL {
 	private Object[] params;
 
 	/** If set true, will use templateEngine to render SQL */
-	private Boolean useTemplate = false;
+	private Boolean useTemplate = null;
 
 	/** Optional, store a SqlTemplateEngine used only for this PreparedSQL */
 	private SqlTemplateEngine templateEngine;
@@ -127,8 +128,8 @@ public class PreparedSQL {
 	}
 
 	/**
-	 * Add map content to current template map, if keys already exist will use
-	 * new value replace
+	 * Add map content to current template map, if keys already exist will use new
+	 * value replace
 	 */
 	public void addTemplateMap(Map<String, Object> map) {
 		if (map == null)
@@ -178,35 +179,27 @@ public class PreparedSQL {
 		this.resultSetHandler = rsh;
 	}
 
-	/**
-	 * @param handlerOrHandlerClass
-	 *            a SqlHandler or ResultSetHandler instance or class
-	 * @return true if added
-	 */
-	@SuppressWarnings("rawtypes")
-	public void addHandler(Object handlerOrHandlerClass, IocTool iocTool) {
-		if (handlerOrHandlerClass == null)
-			throw new DbProRuntimeException("Handler Or Handler class can not be null");
-		if (handlerOrHandlerClass instanceof ResultSetHandler)
-			setResultSetHandler(((ResultSetHandler) handlerOrHandlerClass));
-		else if (handlerOrHandlerClass instanceof SqlHandler)
-			addSqlHandler((SqlHandler) handlerOrHandlerClass);
-		else if (handlerOrHandlerClass instanceof Class) {
-			Class itemClass = (Class) handlerOrHandlerClass;
-			try {
-				if (ResultSetHandler.class.isAssignableFrom(itemClass))
-					setResultSetHandler((ResultSetHandler) itemClass.newInstance());
-				else if (SqlHandler.class.isAssignableFrom(itemClass))
-					addSqlHandler((SqlHandler) itemClass.newInstance());
-				else {
-					Object handler = iocTool.getBean((Class<?>) handlerOrHandlerClass);
-					addHandler(handler, null);
-				}
-			} catch (Exception e) {
-				throw new DbProRuntimeException(e);
-			}
-		} else
-			throw new DbProRuntimeException("Can not create handler instance for '" + handlerOrHandlerClass + "'");
+	public void addHandler(ResultSetHandler handler) {
+		setResultSetHandler(handler);
+	}
+
+	public void addHandler(SqlHandler handler) {
+		addSqlHandler(handler);
+	}
+
+	public void addNoParamHandlerByClass(Class handlerClass) {
+		if (handlerClass == null)
+			throw new DbProRuntimeException("HandlerClass can not be null");
+		try {
+			if (ResultSetHandler.class.isAssignableFrom(handlerClass))
+				setResultSetHandler((ResultSetHandler) handlerClass.newInstance());
+			else if (SqlHandler.class.isAssignableFrom(handlerClass))
+				addSqlHandler((SqlHandler) handlerClass.newInstance());
+			else
+				throw new DbProRuntimeException("ResultSetHandler class or SqlHandler class required");
+		} catch (Exception e) {
+			throw new DbProRuntimeException(e);
+		}
 	}
 
 	public Object[] getParams() {
@@ -227,6 +220,18 @@ public class PreparedSQL {
 				ImprovedQueryRunner.setThreadLocalSqlHandlers((SqlHandler[]) null);
 			}
 		}
+	}
+
+	/** If current type is null, set with new type value */
+	public void ifNullSetType(SqlType type) {
+		if (this.type == null)
+			this.type = type;
+	}
+
+	/** If current type is null, set with new type value */
+	public void ifNullSetUseTemplate(Boolean useTemplate) {
+		if (this.useTemplate == null)
+			this.useTemplate = useTemplate;
 	}
 
 	protected void GetterSetters_________________________() {// NOSONAR

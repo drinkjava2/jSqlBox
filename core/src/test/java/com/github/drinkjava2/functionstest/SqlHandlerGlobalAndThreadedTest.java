@@ -75,7 +75,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 
 	@Test
 	public void testHandlers() {
-		List<DemoUser> result = ctx.pQuery(new EntityListHandler(DemoUser.class), PrintSqlHandler.class,
+		List<DemoUser> result = ctx.pQuery(new EntityListHandler(DemoUser.class), new PrintSqlHandler(),
 				"select u.* from DemoUser u where u.age>?", 10);
 		Assert.assertEquals(90l, result.size());
 

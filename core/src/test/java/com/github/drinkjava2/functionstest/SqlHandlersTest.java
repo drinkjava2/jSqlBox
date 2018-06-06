@@ -93,7 +93,7 @@ public class SqlHandlersTest extends TestBase {
 
 		@Sql("select u.* from DemoUser u where u.age>?")
 		public List<DemoUser> selectAgeBiggerThan1(Integer age) {
-			return this.guess(age);
+			return this.guess(age, new EntityListHandler(DemoUser.class));
 		}
 
 		@Handlers({ EntityListHandlerCfg.class })
@@ -150,7 +150,7 @@ public class SqlHandlersTest extends TestBase {
 
 	@Test
 	public void testEntityListHandler2() {
-		List<DemoUser> result = gpQuery(PrintSqlHandler.class, new EntityListHandler(DemoUser.class),
+		List<DemoUser> result = gpQuery(new PrintSqlHandler(), new EntityListHandler(DemoUser.class),
 				"select * from DemoUser where age>=?", 90);
 		Assert.assertTrue(result.size() == 10);
 
@@ -253,8 +253,8 @@ public class SqlHandlersTest extends TestBase {
 
 	@Test
 	public void testMyAroundSqlHandler() throws SQLException {
-		List<Map<String, Object>> result2 = gpQuery(MyDemoAroundSqlHandler.class, new MapListHandler(),
-				PrintSqlHandler.class, new MyDemoAroundSqlHandler(), "select u.* from DemoUser u where u.age>?", 50);
+		List<Map<String, Object>> result2 = gpQuery(new MyDemoAroundSqlHandler(), new MapListHandler(),
+				new PrintSqlHandler(), new MyDemoAroundSqlHandler(), "select u.* from DemoUser u where u.age>?", 50);
 		Assert.assertEquals(49, result2.size());
 	}
 
