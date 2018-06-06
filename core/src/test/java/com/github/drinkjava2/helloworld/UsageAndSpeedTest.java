@@ -5,9 +5,9 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.PARA0;
 import static com.github.drinkjava2.jdbpro.JDBPRO.PARAMS;
 import static com.github.drinkjava2.jdbpro.JDBPRO.QUES;
 import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES;
+import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 import static com.github.drinkjava2.jdbpro.JDBPRO.question;
 import static com.github.drinkjava2.jdbpro.JDBPRO.sql;
 import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
@@ -216,7 +215,14 @@ public class UsageAndSpeedTest {
 		public List<Map<String, Object>> selectUsers(String name, String address) {
 			return this.guess(name, address);
 		};
+		
+		@New(MapListHandler.class)
+		@Sql("select * from users where name=:name and address=:address")
+		public List<Map<String, Object>> selectUsers2(String name, String address) {
+			return this.guess(name, address);
+		};
 
+		
 		@Sql("delete from users where name=? or address=?")
 		public void deleteUsers(String name, String address) {
 			this.guess(name, address);
@@ -526,7 +532,7 @@ public class UsageAndSpeedTest {
 		}
 	}
 
-	public void otherTestsNotForSpeedTest______________() {
+	protected void belowNotdoSpeedTest_______________________() {
 		// below methods are test usages only, not join to speed test
 	}
 
@@ -628,4 +634,16 @@ public class UsageAndSpeedTest {
 		ctx.nExecute("delete from users");
 	}
 
+	@Test
+	public void sqlMapperSqlAnnoUseTemplateEngine() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
+		UserMapper user = new UserMapper();
+			user.insertOneUser("Sam", "Canada");
+			user.updateAllUser("Tom", "China");
+			List<Map<String, Object>> users = user.selectUsers2("Tom", "China");
+			Assert.assertEquals(1, users.size());
+			user.deleteUsers("Tom", "China");
+			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
+	}
 }

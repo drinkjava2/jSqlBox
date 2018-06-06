@@ -19,16 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
-import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
  * Store some public static methods of Guesser
@@ -99,24 +95,7 @@ public abstract class SqlMapperUtils {// NOSONAR
 		TextUtils.javaFileCache.put(fullClassName, childClassSrc);
 		return childClass;
 	}
-
-	/** Automatically guess the sqlHandlers */
-	public static void autoGuessHandler(Object entity, PreparedSQL ps, String sql, Method method) {
-		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty())
-			return;
-		if (ps.getResultSetHandler() != null)
-			return;
-		String methodType = method.getGenericReturnType().toString();
-		if (sql.indexOf(".**") > -1) {
-			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
-				ps.addSqlHandler(new SSMapListHandler(entity.getClass()));
-			else if (methodType.startsWith("java.util.List"))
-				ps.addSqlHandler(new EntityListHandler(entity.getClass()));
-		} else {
-			if ("java.util.List<java.util.Map<java.lang.String, java.lang.Object>>".equals(methodType))
-				ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
-		}
-	}
+ 
 
 	public static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName, Object... params) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -129,6 +108,7 @@ public abstract class SqlMapperUtils {// NOSONAR
 		return map;
 	}
 
+	/** Get method name String[], this method only works for Text support case, i.e., put java in resouce folder */
 	public static String[] getMethodParamNames(String classFullName, String callerMethodName) {
 		String key = classFullName + "@#!$^" + callerMethodName;
 		if (methodParamNamesCache.containsKey(key))

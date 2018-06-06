@@ -132,13 +132,13 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	}
 
 	@Override
-	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap) {
+	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap, Object[] unbindedParams) {
 		if(paramMap==null)
 			throw new BasicSqlTemplateException("In BasicSqlTemplate, paramMap can not be null");
 		String newSql = sqlTemplate;
 		if (allowColonAsDelimiter)
 			newSql = translateColonToDelimiter(sqlTemplate);
-		return doRender(newSql, paramMap);
+		return doRender(newSql, paramMap,   unbindedParams);
 	}
 
 	/**
@@ -154,9 +154,12 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	 *            End Delimiter of SQL Template
 	 * @return A PreparedSQL instance
 	 */
-	private PreparedSQL doRender(String template, Map<String, Object> paramMap) {
+	private PreparedSQL doRender(String template, Map<String, Object> paramMap, Object[] unbindedParams) {
 		if (template == null)
 			throw new NullPointerException("Template can not be null");
+		int unbindedParamsPos=0; //if unbindedParams not empty, it means will use unbindedParams to fill place holders
+		if(unbindedParams!=null && unbindedParams.length>0 && !paramMap.isEmpty())
+			throw new BasicSqlTemplateException("UnbindedParams can not mixed use with paramMap in BasicSqlTemplate");
 		StringBuilder sql = new StringBuilder();
 		StringBuilder keyNameSB = new StringBuilder();
 		List<Object> paramList = new ArrayList<Object>();
@@ -241,8 +244,9 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 					}
 				} else {
 					String paramKey = (directRep && dollarKeyForDollarPlaceHolder) ? "$" + key : key;
-					if (!paramMap.containsKey(paramKey))
-						throwEX("No parameter found for '" + paramKey + "' in template: " + template);
+					if (!paramMap.containsKey(paramKey)) { 
+						throwEX("No parameter bound for '" + paramKey + "' in template: " + template);
+					}
 					if (directRep) {
 						sql.append(paramMap.get(paramKey));
 					} else {
@@ -252,7 +256,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 				}
 				keyNameSB.setLength(0);
 			}
-			// Debug: "" + c + " " + status + " " + directRep; //NOSONAR
+			 work at here error
 			if (status == 0)
 				sql.append(c);
 			else if (status == 2)

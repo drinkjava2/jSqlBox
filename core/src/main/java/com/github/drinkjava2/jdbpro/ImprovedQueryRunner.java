@@ -341,7 +341,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			SqlTemplateEngine engine = ps.getTemplateEngine();
 			if (engine == null)
 				engine = this.sqlTemplateEngine;
-			PreparedSQL rendered = engine.render(ps.getSql(), ps.getTemplateParamMap());
+			PreparedSQL rendered = engine.render(ps.getSql(), ps.getTemplateParamMap(), ps.getParams());
 			ps.setSql(rendered.getSql());
 			ps.setParams(rendered.getParams());
 		}
