@@ -166,8 +166,16 @@ public abstract class JDBPRO extends DbPro {
 	 * 
 	 * Usage: put("key1",value1,"key2",value2...);
 	 */
-	public static SqlItem put(Object... parameters) {
+	public static SqlItem bind(Object... parameters) {
 		return new SqlItem(SqlOption.PUT, parameters);
 	}
+	
+	/**
+	 * Create a SqlOption.IOC_OBJECT type SqlItem instance, args will create instance by IocTool
+	 */
+	public static SqlItem iocObject(Class<?>... args) {
+		return new SqlItem(SqlOption.IOC_OBJECT, (Object[])args);
+	}
+	
 
 }

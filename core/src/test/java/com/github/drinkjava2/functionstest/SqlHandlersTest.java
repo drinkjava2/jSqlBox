@@ -36,15 +36,12 @@ import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
-import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
-import com.github.drinkjava2.jsqlbox.annotation.Handlers;
+import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
@@ -96,7 +93,7 @@ public class SqlHandlersTest extends TestBase {
 			return this.guess(age, new EntityListHandler(DemoUser.class));
 		}
 
-		@Handlers({ EntityListHandlerCfg.class })
+		@Ioc(EntityListHandlerCfg.class)
 		@Sql("select * from DemoUser u where u.age>?")
 		public List<DemoUser> selectAgeBiggerThan2(Integer age) {
 			return this.guess(age);

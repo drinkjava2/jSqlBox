@@ -40,7 +40,7 @@ public enum SqlOption {
 	// ----------Special Items------------ 
 	SWITCHTO, // Switch to another DbPro or subClass(like SqlBoxContext) instance to run the SQL
 	
-	HANDLER, // ResultSetHandler or SqlHandler class or instance
+	IOC_OBJECT,//Object will created by IocTool
 	  
 	// -----------Control option--------------
 	USE_TEMPLATE, //force use template style  

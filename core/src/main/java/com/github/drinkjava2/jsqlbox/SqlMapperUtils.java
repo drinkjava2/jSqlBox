@@ -23,7 +23,8 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jsqlbox.annotation.Handlers;
+import com.github.drinkjava2.jsqlbox.annotation.Ioc;
+import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
@@ -40,8 +41,8 @@ public abstract class SqlMapperUtils {// NOSONAR
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class which
-	 * extended from ActiveRecord or implemented ActiveRecordSupport
+	 * This is the method body to build an instance based on abstract class
+	 * which extended from ActiveRecord or implemented ActiveRecordSupport
 	 * 
 	 * @param activeClass
 	 * @return Object instance
@@ -147,7 +148,7 @@ public abstract class SqlMapperUtils {// NOSONAR
 		return l.toArray(new String[l.size()]);
 	}
 
-	/** Get the sql and handlers object[], if sql is null, put object[0]=null */
+	/** Get the sql from @Sql annotation or text */
 	public static String getSqlOfMethod(String callerClassName, Method callerMethod) {// NOSONAR
 		Annotation[] annos = callerMethod.getAnnotations();
 		String sql = null;
@@ -170,15 +171,21 @@ public abstract class SqlMapperUtils {// NOSONAR
 		return sql;
 	}
 
-	/** Get the sql and handlers object[], if sql is null, put object[0]=null */
-	public static Class<?>[] getHandlerClazsOfMethod(Method callerMethod) {// NOSONAR
+	/** Get the @New and @Ioc annotation values */
+	public static Class<?>[] getNewOrIocAnnotation(Class<?> annotation, Method callerMethod) {// NOSONAR
 		List<Object> result = new ArrayList<Object>();
 		Annotation[] annos = callerMethod.getAnnotations();
 		for (Annotation anno : annos)
-			if (Handlers.class.equals(anno.annotationType())) {
-				Class<?>[] array = ((Handlers) anno).value();
-				for (Class<?> claz : array)
-					result.add(claz);
+			if (annotation.equals(anno.annotationType())) {
+				if (New.class.equals(annotation)) {
+					Class<?>[] array = ((New) anno).value();
+					for (Class<?> claz : array)
+						result.add(claz);
+				} else {
+					Class<?>[] array = ((Ioc) anno).value();
+					for (Class<?> claz : array)
+						result.add(claz);
+				}
 			}
 		return result.toArray(new Class<?>[result.size()]);
 	}

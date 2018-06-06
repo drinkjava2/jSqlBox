@@ -133,6 +133,8 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 
 	@Override
 	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap) {
+		if(paramMap==null)
+			throw new BasicSqlTemplateException("In BasicSqlTemplate, paramMap can not be null");
 		String newSql = sqlTemplate;
 		if (allowColonAsDelimiter)
 			newSql = translateColonToDelimiter(sqlTemplate);

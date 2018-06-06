@@ -62,7 +62,7 @@ public class EntityNetQueryTest extends TestBase {
 		List<User> users = net.selectEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
-		List<Map<String, Object>> listMap = gpQuery(MapListHandler.class,
+		List<Map<String, Object>> listMap = gpQuery(new MapListHandler(),
 				"select u.id as u_id, u.userName as u_userName from usertb as u");
 		net.add(listMap, new User().alias("u"));// userName joined
 

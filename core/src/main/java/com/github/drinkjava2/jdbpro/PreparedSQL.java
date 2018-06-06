@@ -279,6 +279,8 @@ public class PreparedSQL {
 	}
 
 	public Map<String, Object> getTemplateParamMap() {
+		if (templateParamMap == null)
+			return new HashMap<String, Object>();
 		return templateParamMap;
 	}
 

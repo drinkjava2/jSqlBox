@@ -22,15 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies SqlHandler classes or ResultSetHandler class above a method
+ * Specifies a Class array which will built by IOC Tools
  */
 @Target({ METHOD })
 @Retention(RUNTIME)
 
-public @interface Handlers {
+public @interface Ioc {
 	/**
-	 * The SqlHandler classes (can more than 1 ) or ResultSetHandler Class(no more
-	 * than 1)
+	 * The Object classes (can more than 1 )
 	 */
 	Class<?>[] value();
 }

@@ -218,8 +218,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			} else if (SqlOption.USE_BOTH.equals(item)) {
 				predSQL.setMasterSlaveSelect(SqlOption.USE_BOTH);
 			} else if (SqlOption.USE_TEMPLATE.equals(item)) {
-				predSQL.setUseTemplate(true);
-			}
+				predSQL.setUseTemplate(true); 
+			} else throw new DbProRuntimeException("Un-analyzed SqlOption:"+item); 
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			if (SqlOption.PARAM.equals(sqItem.getType())) {
@@ -258,8 +258,15 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				handleShardTable(predSQL, sql, sqItem);
 			} else if (SqlOption.SHARD_DATABASE.equals(sqItem.getType())) {
 				handleShardDatabase(predSQL, sql, sqItem);
-			} else
-				throw new DbProRuntimeException("What the heck the param type is? " + sqItem.getType() + " "
+			} else if (SqlOption.IOC_OBJECT.equals(sqItem.getType())) {
+				if (this.getIocTool() == null)
+					throw new DbProRuntimeException(
+							"A IocTool setting required to deal an IocObject, please read user manual.");
+				for (Object claz : sqItem.getParameters()) {
+					Object obj = this.getIocTool().getBean((Class) claz);
+					dealItem(iXxxStyle, predSQL, sql, obj);
+				}
+			}else throw new DbProRuntimeException("Un-analyzed SqlItem: " + sqItem.getType() + " "
 						+ Arrays.deepToString(sqItem.getParameters()));
 		} else if (item instanceof Connection)
 			predSQL.setConnection((Connection) item);
@@ -270,12 +277,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		else if (item instanceof ResultSetHandler)
 			predSQL.setResultSetHandler((ResultSetHandler) item);
 		else if (item instanceof Class) {
-			if (this.getIocTool() == null)
-				throw new DbProRuntimeException("Found a sqlItem is class type :'" + item + "', IocTool setting needed.");
-			Object obj = this.getIocTool().getBean((Class) item);
-			if (obj == null)
-				throw new DbProRuntimeException("IocTool return a null object for class '" + item + "'"); 
-			return dealItem(iXxxStyle, predSQL, sql, obj);
+				throw new DbProRuntimeException("Found a sqlItem is class type :'" + item + "', currently is not allowed.");
 		} else if (item instanceof SpecialSqlItem) {
 			if (specialSqlItemPreparers == null)
 				throw new DbProRuntimeException(

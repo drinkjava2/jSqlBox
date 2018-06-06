@@ -1,6 +1,7 @@
 package activerecordtext;
 
- import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+ import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import com.github.drinkjava2.helloworld.UsageAndSpeedTest.UserAR;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jsqlbox.TextUtils;
-import com.github.drinkjava2.jsqlbox.annotation.Handlers;
+import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
@@ -35,7 +36,7 @@ public class TextedUser extends UserAR {
 	      set name=?, address=?
 	*/
 
-	@Handlers(MapListHandler.class)
+	@New(MapListHandler.class)
 	public List<Map<String, Object>> selectUsers(String name, String address) {
 		return this.guess(name, address);
 	};
@@ -51,20 +52,19 @@ public class TextedUser extends UserAR {
 	 delete from users where name=? or address=?
 	*/
 
-	@Handlers(MapListHandler.class)
+	@New(MapListHandler.class)
 	public List<Map<String, Object>> selectUsersMapListByText(String name, String address) {
-		return this.guess(name, address);
+		return this.guess(bind("name"), bind("address"));
 	};
 	/*-
 	   select *
 	   from  users 
 	      where 
-	         name=:name 
-	         and address=:address
+	         name=:name and address=:address 
 	 */
 
 	public List<Map<String, Object>> selectUsersMapListByText2(String name, String address) {
-		return this.guess(name, address);
+		return this.guess(bind("name", name), bind("address", address));
 	};
 	/*-
 	   select u.** 

@@ -14,9 +14,13 @@ package com.github.drinkjava2.jsqlbox;
 import java.lang.reflect.Method;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlItem;
+import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.SqlType;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jsqlbox.annotation.Ioc;
+import com.github.drinkjava2.jsqlbox.annotation.New;
 
 /**
  * Guess and execute the SQL for a annotated ActiveRecord entity's method
@@ -48,6 +52,8 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
 		PreparedSQL ps = buildPreparedSQL(ctx, callerClassName, callerMethod, params);
+		
+		System.out.println(ps.getDebugInfo());
 		return (T) ctx.runPreparedSQL(ps);
 	}
 
@@ -97,16 +103,23 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 	private PreparedSQL buildPreparedSQL(SqlBoxContext ctx, String callerClassName, Method callerMethod,
 			Object... params) {
 		String sql = SqlMapperUtils.getSqlOfMethod(callerClassName, callerMethod);
-		Class<?>[] handlesClazs = SqlMapperUtils.getHandlerClazsOfMethod(callerMethod);
-		Object[] newParams = new Object[1 + handlesClazs.length + params.length];
-		newParams[0] = sql;
+		Class<?>[] newClasses = SqlMapperUtils.getNewOrIocAnnotation(New.class, callerMethod);
+		Class<?>[] iocClasses = SqlMapperUtils.getNewOrIocAnnotation(Ioc.class, callerMethod);
+		Object[] realParams = new Object[1 + newClasses.length + iocClasses.length+ params.length];
+		realParams[0] = sql;
 		int i = 1;
-		for (Class<?> handlesClaz : handlesClazs)
-			newParams[i++] = handlesClaz; 
+		for (Class<?> newClaz : newClasses)
+			try {
+				realParams[i++] = newClaz.newInstance();
+			} catch (Exception e){ 
+				throw new SqlBoxException(e);
+			} 
+		for (Class<?> iocClaz : iocClasses) 
+				realParams[i++] = new SqlItem(SqlOption.IOC_OBJECT, iocClaz);
 		for (Object para : params)
-			newParams[i++] = para;
+			realParams[i++] = para;
 
-		PreparedSQL ps = ctx.pPrepare(newParams);
+		PreparedSQL ps = ctx.pPrepare(realParams);
 		if (ps.getType() == null)
 			if (StrUtils.startsWithIgnoreCase(ps.getSql(), "select"))
 				ps.setType(SqlType.QUERY);

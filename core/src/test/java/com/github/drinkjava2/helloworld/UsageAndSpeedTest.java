@@ -7,7 +7,7 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.QUES;
 import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES;
 import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jdbpro.JDBPRO.put;
+import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 import static com.github.drinkjava2.jdbpro.JDBPRO.question;
 import static com.github.drinkjava2.jdbpro.JDBPRO.sql;
 import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.junit.After;
 import org.junit.Assert;
@@ -38,7 +39,7 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
-import com.github.drinkjava2.jsqlbox.annotation.Handlers;
+import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -210,7 +211,7 @@ public class UsageAndSpeedTest {
 			this.guess(name, address);
 		};
 
-		@Handlers(PrintSqlHandler.class)
+		@New(MapListHandler.class)
 		@Sql("select * from users where name=? and address=?")
 		public List<Map<String, Object>> selectUsers(String name, String address) {
 			return this.guess(name, address);
@@ -395,13 +396,13 @@ public class UsageAndSpeedTest {
 			UserAR tom = new UserAR("Tom", "China");
 			paramMap.put("user", sam);
 			ctx2.tExecute("insert into users (name, address) values(#{user.name},:user.address)", paramMap);
-			ctx2.tExecute("update users set name=#{user.name}, address=:user.address", put("user", tom));
+			ctx2.tExecute("update users set name=#{user.name}, address=:user.address", bind("user", tom));
 			Assert.assertEquals(1L,
 					ctx2.tQueryForObject("select count(*) from users where name=#{name} and address=:addr",
-							put("name", "Tom", "addr", "China")));
+							bind("name", "Tom", "addr", "China")));
 			ctx2.tExecute("delete from users where "//
-					, " name=:name ", put("name", "Tom")//
-					, " or address=#{address}", put("address", "China")//
+					, " name=:name ", bind("name", "Tom")//
+					, " or address=#{address}", bind("address", "China")//
 			);
 		}
 	}
@@ -536,13 +537,13 @@ public class UsageAndSpeedTest {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
 		UserAR user = new UserAR("Sam", "Canada");
 		UserAR tom = new UserAR("Tom", "China");
-		ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", put("user", user));
-		ctx.tExecute("update users set name=[user.name], address=[user.address]", put("user", tom));
+		ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", bind("user", user));
+		ctx.tExecute("update users set name=[user.name], address=[user.address]", bind("user", tom));
 		Assert.assertEquals(1L,
 				ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
-						put("name", "Tom"), put("addr", "China"), put("$col", "name")));
-		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom), put("$t", tom),
-				put("$nm", "name"));
+						bind("name", "Tom"), bind("addr", "China"), bind("$col", "name")));
+		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
+				bind("$nm", "name"));
 	}
 
 	@Test
@@ -551,13 +552,13 @@ public class UsageAndSpeedTest {
 		SqlTemplateEngine engine = new BasicSqlTemplate("[", "]", true, true);
 		UserAR user = new UserAR("Sam", "Canada");
 		UserAR tom = new UserAR("Tom", "China");
-		ctx.tExecute("insert into users (name, address) values(#{user.name}, #{user.address})", put("user", user));
-		ctx.tExecute(engine, "update users set name=[user.name], address=[user.address]", put("user", tom));
+		ctx.tExecute("insert into users (name, address) values(#{user.name}, #{user.address})", bind("user", user));
+		ctx.tExecute(engine, "update users set name=[user.name], address=[user.address]", bind("user", tom));
 		Assert.assertEquals(1L,
 				ctx.tQueryForObject(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
-						put("name", "Tom"), put("addr", "China"), put("$col", "name")));
-		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", put("u", tom), put("$t", tom),
-				put("$nm", "name"), engine);
+						bind("name", "Tom"), bind("addr", "China"), bind("$col", "name")));
+		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
+				bind("$nm", "name"), engine);
 	}
 
 	/** Use const String can make SQL support Java Bean field refactoring */
