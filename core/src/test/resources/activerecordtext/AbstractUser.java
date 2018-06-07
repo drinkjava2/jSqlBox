@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
@@ -24,10 +23,10 @@ public abstract class AbstractUser extends TextedUser {
 	@Sql("delete from users where name=? or address=?")
 	public abstract void deleteAbsUser(String name, String address);
 
-	public abstract PreparedSQL updateUserPreparedSQL(String name, String address);
+	public abstract void updateUserPreparedSQL(String name, String address);
 	/*- 
 	   update users 
-	      set name=?, address=?
+	      set name=:name, address=:address
 	*/
 
 	@New(MapListHandler.class)
@@ -41,31 +40,30 @@ public abstract class AbstractUser extends TextedUser {
 	         and  address=:address
 	 */
 
-	public static class  EntityListHandlerBox extends BeanBox{
-		public EntityListHandler create() {
-			return new EntityListHandler(TextedUser.class);
-		} 
-	}
-	
 	@Ioc(EntityListHandlerBox.class)
 	public abstract List<TextedUser> selectAbstractUserListUnBind(String name, String address);
 	/*-
-	   select u.** 
+	   select u.*
 	   from 
 	   users u
 	      where 
-	         u.name=? and address=?
+	         u.name=:name and address=:address
 	 */
-	 
-	
+
+	public static class EntityListHandlerBox extends BeanBox {
+		public EntityListHandler create() {
+			return new EntityListHandler(TextedUser.class);
+		}
+	}
+
 	@Ioc(EntityListHandlerBox.class)
 	public abstract List<TextedUser> selectAbstractUserListBind(String name, TextedUser u);
 	/*-
-	   select u.** 
+	   select u.* 
 	   from 
 	   users u
 	      where 
-	         u.name=:name and address=#{u.address}?
+	         u.name=:name and address=#{u.address}
 	 */
 
 }

@@ -522,20 +522,26 @@ public class UsageAndSpeedTest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		ctx.setIocTool(new IocTool() {
+			public <T> T getBean(Class<?> configClass) {
+				return BeanBox.getBean(configClass);
+			}
+		});
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractUser user = SqlBoxContext.createMapper(AbstractUser.class);
+		AbstractUser mapper = SqlBoxContext.createMapper(AbstractUser.class);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			user.insertOneUser("Sam", "Canada");
-			user.ctx().iUpdate(user.updateUserPreparedSQL("Tom", "China"));
-			List<Map<String, Object>> users = user.selectUserListMap("Tom", "China");
+			mapper.insertOneUser("Sam", "Canada");
+			mapper.updateUserPreparedSQL("Tom", "China");
+			List<Map<String, Object>> users = mapper.selectUserListMap("Tom", "China");
 			Assert.assertEquals(1, users.size());
-			List<TextedUser> users2 = user.selectAbstractUserListUnBind("Tom", "China");
+			List<TextedUser> users2 = mapper.selectAbstractUserListUnBind("Tom", "China");
 			Assert.assertEquals(1, users2.size());
-			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from	 users"));
+			mapper.deleteUsers("Tom", "China");
+			Assert.assertEquals(0, mapper.ctx().pQueryForLongValue("select count(*) from	 users"));
 		}
 	}
 
@@ -671,18 +677,18 @@ public class UsageAndSpeedTest {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		ctx.setIocTool(new IocTool() {
-			@Override
 			public <T> T getBean(Class<?> configClass) {
 				return BeanBox.getBean(configClass);
 			}
 		});
 		AbstractUser mapper = SqlBoxContext.createMapper(AbstractUser.class);
 		mapper.insertOneUser("Sam", "Canada");
-		mapper.ctx().iUpdate(mapper.updateUserPreparedSQL("Tom", "China"));
+		mapper.updateUserPreparedSQL("Tom", "China");
 		List<TextedUser> users2 = mapper.selectAbstractUserListUnBind("Tom", "China");
 		Assert.assertEquals(1, users2.size());
 
-		List<TextedUser> users3 = mapper.selectAbstractUserListBind("Tom", users2.get(0));
+		TextedUser u = users2.get(0);
+		List<TextedUser> users3 = mapper.selectAbstractUserListBind("Tom", u);
 		Assert.assertEquals(1, users3.size());
 	}
 }

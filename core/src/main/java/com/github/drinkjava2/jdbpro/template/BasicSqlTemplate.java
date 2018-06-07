@@ -52,7 +52,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	private static final String DIRECT_REPLACE_START_DELIMITER = "${";
 	private static final String DIRECT_REPLACE_END_DELIMITER = "}";
 
-	/** A lazy initialisation singleton pattern */
+	/** A lazy initialization singleton pattern */
 	private static class InnerBasicSqlTemplate {
 		private InnerBasicSqlTemplate() {
 		}

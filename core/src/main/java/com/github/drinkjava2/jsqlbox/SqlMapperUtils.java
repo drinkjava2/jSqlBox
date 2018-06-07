@@ -33,6 +33,7 @@ import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
  * @since 1.0.8
  */
 public abstract class SqlMapperUtils {// NOSONAR
+	public static final String CHILD_SUFFIX="_Child";
 
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
 
@@ -44,7 +45,7 @@ public abstract class SqlMapperUtils {// NOSONAR
 	 * @return Object instance
 	 */
 	public static Class<?> createChildClass(Class<?> abstractClass) {
-		String fullClassName = abstractClass.getName() + "_Child";
+		String fullClassName = abstractClass.getName() + CHILD_SUFFIX;
 		Class<?> check = ClassCacheUtils.checkClassExist(fullClassName);
 		if (check != null)
 			return check;
@@ -81,7 +82,8 @@ public abstract class SqlMapperUtils {// NOSONAR
 				if (i != 0)
 					sb.append(",");
 				String trimedStr = params[i].trim();
-				sb.append(StrUtils.substringAfterLast(trimedStr, " "));
+				String pm=StrUtils.substringAfterLast(trimedStr, " ");
+				sb.append("bind(\"").append(pm).append("\", ").append(pm).append(")");
 			}
 			sb.append(");}");
 			body = StrUtils.substringAfter(heading, ";");
@@ -130,8 +132,6 @@ public abstract class SqlMapperUtils {// NOSONAR
 
 	/** Get the sql from @Sql annotation or text */
 	public static String getSqlOfMethod(String callerClassName, Method callerMethod) {// NOSONAR
-		System.out.println("callerClassName="+callerClassName);
-		System.out.println("callerMethod="+callerMethod);
 		Annotation[] annos = callerMethod.getAnnotations();
 		String sql = null;
 		for (Annotation anno : annos)

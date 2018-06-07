@@ -261,7 +261,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			} else if (SqlOption.IOC_OBJECT.equals(sqItem.getType())) {
 				if (this.getIocTool() == null)
 					throw new DbProRuntimeException(
-							"A IocTool setting required to deal an IocObject, please read user manual.");
+							"A IocTool setting required to deal an @Ioc or ioc() method, please read user manual.");
 				for (Object claz : sqItem.getParameters()) {
 					Object obj = this.getIocTool().getBean((Class) claz);
 					dealItem(iXxxStyle, predSQL, sql, obj);

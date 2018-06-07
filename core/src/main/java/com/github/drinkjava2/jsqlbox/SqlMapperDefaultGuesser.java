@@ -19,7 +19,6 @@ import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.SqlType;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 
@@ -46,13 +45,15 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		}
 		String callerClassName = stacks[callerPos + 1].getClassName();
 		String callerMethodName = stacks[callerPos + 1].getMethodName();
+		if (callerClassName.endsWith(SqlMapperUtils.CHILD_SUFFIX))
+			callerClassName = callerClassName.substring(0,
+					callerClassName.length() - SqlMapperUtils.CHILD_SUFFIX.length());
 		Class<?> callerClass = ClassCacheUtils.checkClassExist(callerClassName);
 		if (callerClass == null)
 			throw new SqlBoxException("Can not find class '" + callerClassName + "'");
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		ReflectionUtils.makeAccessible(callerMethod);
 		PreparedSQL ps = buildPreparedSQL(ctx, callerClassName, callerMethod, params);
 		return (T) ctx.runPreparedSQL(ps);
 	}
@@ -75,7 +76,6 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		ReflectionUtils.makeAccessible(callerMethod);
 		return SqlMapperUtils.getSqlOfMethod(callerClassName, callerMethod);
 	}
 
@@ -97,8 +97,8 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		ReflectionUtils.makeAccessible(callerMethod);
-		return buildPreparedSQL(ctx, callerClassName, callerMethod, params);
+		PreparedSQL ps= buildPreparedSQL(ctx, callerClassName, callerMethod, params);
+		return ps;
 	}
 
 	private PreparedSQL buildPreparedSQL(SqlBoxContext ctx, String callerClassName, Method callerMethod,
