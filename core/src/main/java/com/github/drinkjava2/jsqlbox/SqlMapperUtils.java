@@ -130,6 +130,8 @@ public abstract class SqlMapperUtils {// NOSONAR
 
 	/** Get the sql from @Sql annotation or text */
 	public static String getSqlOfMethod(String callerClassName, Method callerMethod) {// NOSONAR
+		System.out.println("callerClassName="+callerClassName);
+		System.out.println("callerMethod="+callerMethod);
 		Annotation[] annos = callerMethod.getAnnotations();
 		String sql = null;
 		for (Annotation anno : annos)

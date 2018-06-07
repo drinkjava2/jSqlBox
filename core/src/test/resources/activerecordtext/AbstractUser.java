@@ -5,9 +5,12 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 /**
  * This is a sample to show put SQL in multiple line Strings(Text) for a
@@ -38,13 +41,31 @@ public abstract class AbstractUser extends TextedUser {
 	         and  address=:address
 	 */
 
-	public abstract List<AbstractUser> selectAbstractUserList(String name, String address);
+	public static class  EntityListHandlerBox extends BeanBox{
+		public EntityListHandler create() {
+			return new EntityListHandler(TextedUser.class);
+		} 
+	}
+	
+	@Ioc(EntityListHandlerBox.class)
+	public abstract List<TextedUser> selectAbstractUserListUnBind(String name, String address);
 	/*-
 	   select u.** 
 	   from 
 	   users u
 	      where 
 	         u.name=? and address=?
+	 */
+	 
+	
+	@Ioc(EntityListHandlerBox.class)
+	public abstract List<TextedUser> selectAbstractUserListBind(String name, TextedUser u);
+	/*-
+	   select u.** 
+	   from 
+	   users u
+	      where 
+	         u.name=:name and address=#{u.address}?
 	 */
 
 }

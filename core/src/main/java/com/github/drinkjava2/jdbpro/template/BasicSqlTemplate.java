@@ -109,36 +109,17 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '.';
 	}
 
-	private String translateColonToDelimiter(String sql) {
-		StringBuilder sb = new StringBuilder();
-		int status = 0;// status 0:normal, 1:in parameter
-		for (int i = 0; i < sql.length(); i++) {
-			char c = sql.charAt(i);
-			if (status == 0 && c != ':')
-				sb.append(c);
-			else if (status == 0 && c == ':') {
-				sb.append(startDelimiter);
-				status = 1;
-			} else if (status == 1 && isParamChars(c))
-				sb.append(c);
-			else {
-				sb.append(endDelimiter).append(c);
-				status = 0;
-			}
-		}
-		if (status == 1)
-			sb.append(endDelimiter);
-		return sb.toString();
-	}
-
 	@Override
-	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap, Object[] unbindedParams) {
-		if(paramMap==null)
+	public PreparedSQL render(String sqlTemplate, Map<String, Object> paramMap, Object[] unbindParams) {
+		if (paramMap == null)
 			throw new BasicSqlTemplateException("In BasicSqlTemplate, paramMap can not be null");
+		if (!paramMap.isEmpty() && unbindParams != null && unbindParams.length > 0)
+			throw new BasicSqlTemplateException(
+					"Can not use paramMap or unbindParams at same time in BasicSqlTemplate.");
 		String newSql = sqlTemplate;
 		if (allowColonAsDelimiter)
 			newSql = translateColonToDelimiter(sqlTemplate);
-		return doRender(newSql, paramMap,   unbindedParams);
+		return doRender(newSql, paramMap, unbindParams);
 	}
 
 	/**
@@ -148,18 +129,19 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	 *            A SQL Template String
 	 * @param paramMap
 	 *            A Map stored SQL parameters
-	 * @param startDelimiter
-	 *            Start Delimiter of SQL Template
-	 * @param endDelimiter
-	 *            End Delimiter of SQL Template
-	 * @return A PreparedSQL instance
+	 * @param unbindedParams
+	 *            Optional, unbinded params,
+	 * @return A PreparedSQL instance which filled SQL and Params
 	 */
-	private PreparedSQL doRender(String template, Map<String, Object> paramMap, Object[] unbindedParams) {
+	private PreparedSQL doRender(String template, Map<String, Object> paramMap, Object[] unbindParams) {
 		if (template == null)
 			throw new NullPointerException("Template can not be null");
-		int unbindedParamsPos=0; //if unbindedParams not empty, it means will use unbindedParams to fill place holders
-		if(unbindedParams!=null && unbindedParams.length>0 && !paramMap.isEmpty())
-			throw new BasicSqlTemplateException("UnbindedParams can not mixed use with paramMap in BasicSqlTemplate");
+		int unbindParamPos = 0;
+		List<Object> realUnbindParam = null;// unbindParams has some direct replace String, need kick out
+		boolean unbindMode = unbindParams != null && unbindParams.length > 0;
+		if (unbindMode)
+			realUnbindParam = new ArrayList<Object>();
+
 		StringBuilder sql = new StringBuilder();
 		StringBuilder keyNameSB = new StringBuilder();
 		List<Object> paramList = new ArrayList<Object>();
@@ -218,45 +200,63 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 
 					String paramKey = (directRep && dollarKeyForDollarPlaceHolder) ? "$" + beanName : beanName;
 					boolean hasValue = paramMap.containsKey(paramKey);
-					if (!hasValue)
-						throwEX("Not found bean '" + paramKey + "' when render template: " + template);
 
-					Object bean = paramMap.get(paramKey);
-					PropertyDescriptor pd = null;
-					try {
-						pd = new PropertyDescriptor(propertyName, bean.getClass());
-					} catch (IntrospectionException e1) {
-						throwEX("IntrospectionException happen when get bean property '" + key + "' in template: "
-								+ template, e1);
-					}
-					Method method = pd.getReadMethod();
-					Object beanProperty = null;
-					try {
-						beanProperty = method.invoke(bean);
-					} catch (Exception e1) {
-						throwEX("Exception happen when read bean property '" + key + "' in template: " + template, e1);
-					}
-					if (directRep) {
-						sql.append(beanProperty);
-					} else {
-						sql.append("?");
-						paramList.add(beanProperty);
+					if (unbindMode) {// unbindMode
+						if (directRep)
+							sql.append(unbindParams[unbindParamPos++]);
+						else {
+							sql.append("?");
+							realUnbindParam.add(unbindParams[unbindParamPos++]);
+						}
+					} else {// template mode
+						if (!hasValue)
+							throwEX("Not found bean '" + paramKey + "' when render template: " + template);
+						Object bean = paramMap.get(paramKey);
+						PropertyDescriptor pd = null;
+						try {
+							pd = new PropertyDescriptor(propertyName, bean.getClass());
+						} catch (IntrospectionException e1) {
+							throwEX("IntrospectionException happen when get bean property '" + key + "' in template: "
+									+ template, e1);
+						}
+						Method method = pd.getReadMethod();
+						Object beanProperty = null;
+						try {
+							beanProperty = method.invoke(bean);
+						} catch (Exception e1) {
+							throwEX("Exception happen when read bean property '" + key + "' in template: " + template,
+									e1);
+						}
+						if (directRep) {
+							sql.append(beanProperty);
+						} else {
+							sql.append("?");
+							paramList.add(beanProperty);
+						}
 					}
 				} else {
-					String paramKey = (directRep && dollarKeyForDollarPlaceHolder) ? "$" + key : key;
-					if (!paramMap.containsKey(paramKey)) { 
-						throwEX("No parameter bound for '" + paramKey + "' in template: " + template);
-					}
-					if (directRep) {
-						sql.append(paramMap.get(paramKey));
-					} else {
-						sql.append("?");
-						paramList.add(paramMap.get(paramKey));
+					if (unbindMode) {
+						if (directRep)
+							sql.append(unbindParams[unbindParamPos++]);
+						else {
+							sql.append("?");
+							realUnbindParam.add(unbindParams[unbindParamPos++]);
+						}
+					} else { // template mode
+						String paramKey = (directRep && dollarKeyForDollarPlaceHolder) ? "$" + key : key;
+						if (!paramMap.containsKey(paramKey)) {
+							throwEX("No parameter bind for '" + paramKey + "' in template: " + template);
+						}
+						if (directRep) {
+							sql.append(paramMap.get(paramKey));
+						} else {
+							sql.append("?");
+							paramList.add(paramMap.get(paramKey));
+						}
 					}
 				}
 				keyNameSB.setLength(0);
 			}
-			 work at here error
 			if (status == 0)
 				sql.append(c);
 			else if (status == 2)
@@ -267,8 +267,34 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 		PreparedSQL sp = new PreparedSQL();
 		sql.setLength(sql.length() - 1);
 		sp.setSql(sql.toString());
-		sp.setParams(paramList.toArray());
+		if (unbindMode)
+			sp.setParams(realUnbindParam.toArray(new Object[realUnbindParam.size()]));
+		else
+			sp.setParams(paramList.toArray());
 		return sp;
+	}
+
+	/** Translate colon to delimiter, for example: user to #{user} */
+	private String translateColonToDelimiter(String sql) {
+		StringBuilder sb = new StringBuilder();
+		int status = 0;// status 0:normal, 1:in parameter
+		for (int i = 0; i < sql.length(); i++) {
+			char c = sql.charAt(i);
+			if (status == 0 && c != ':')
+				sb.append(c);
+			else if (status == 0 && c == ':') {
+				sb.append(startDelimiter);
+				status = 1;
+			} else if (status == 1 && isParamChars(c))
+				sb.append(c);
+			else {
+				sb.append(endDelimiter).append(c);
+				status = 0;
+			}
+		}
+		if (status == 1)
+			sb.append(endDelimiter);
+		return sb.toString();
 	}
 
 	private static void throwEX(String message, Exception... cause) {

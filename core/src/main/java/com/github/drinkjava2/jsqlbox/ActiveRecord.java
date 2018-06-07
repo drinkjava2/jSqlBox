@@ -14,6 +14,8 @@ package com.github.drinkjava2.jsqlbox;
 import java.lang.reflect.Method;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlItem;
+import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -217,6 +219,16 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public PreparedSQL guessPreparedSQL(Object... params) {
 		return ctx().getSqlMapperGuesser().doGuessPreparedSQL(ctx(), this, params);
+	}
+	
+	/**
+	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
+	 * instance,
+	 * 
+	 * Usage: put("key1",value1,"key2",value2...);
+	 */
+	public static SqlItem bind(Object... parameters) {
+		return new SqlItem(SqlOption.PUT, parameters);
 	}
 
 }

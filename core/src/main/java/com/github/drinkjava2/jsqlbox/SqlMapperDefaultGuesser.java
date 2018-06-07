@@ -19,6 +19,7 @@ import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.SqlType;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 
@@ -51,9 +52,8 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
+		ReflectionUtils.makeAccessible(callerMethod);
 		PreparedSQL ps = buildPreparedSQL(ctx, callerClassName, callerMethod, params);
-		
-		System.out.println(ps.getDebugInfo());
 		return (T) ctx.runPreparedSQL(ps);
 	}
 
@@ -75,6 +75,7 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
+		ReflectionUtils.makeAccessible(callerMethod);
 		return SqlMapperUtils.getSqlOfMethod(callerClassName, callerMethod);
 	}
 
@@ -96,7 +97,7 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-
+		ReflectionUtils.makeAccessible(callerMethod);
 		return buildPreparedSQL(ctx, callerClassName, callerMethod, params);
 	}
 
@@ -105,17 +106,17 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		String sql = SqlMapperUtils.getSqlOfMethod(callerClassName, callerMethod);
 		Class<?>[] newClasses = SqlMapperUtils.getNewOrIocAnnotation(New.class, callerMethod);
 		Class<?>[] iocClasses = SqlMapperUtils.getNewOrIocAnnotation(Ioc.class, callerMethod);
-		Object[] realParams = new Object[1 + newClasses.length + iocClasses.length+ params.length];
+		Object[] realParams = new Object[1 + newClasses.length + iocClasses.length + params.length];
 		realParams[0] = sql;
 		int i = 1;
 		for (Class<?> newClaz : newClasses)
 			try {
 				realParams[i++] = newClaz.newInstance();
-			} catch (Exception e){ 
+			} catch (Exception e) {
 				throw new SqlBoxException(e);
-			} 
-		for (Class<?> iocClaz : iocClasses) 
-				realParams[i++] = new SqlItem(SqlOption.IOC_OBJECT, iocClaz);
+			}
+		for (Class<?> iocClaz : iocClasses)
+			realParams[i++] = new SqlItem(SqlOption.IOC_OBJECT, iocClaz);
 		for (Object para : params)
 			realParams[i++] = para;
 

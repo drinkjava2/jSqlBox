@@ -1,6 +1,5 @@
 package activerecordtext;
 
- import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import java.util.List;
@@ -14,6 +13,7 @@ import com.github.drinkjava2.jsqlbox.TextUtils;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
+import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
  * This is a sample to show put SQL in multiple line Strings(Text), a
@@ -54,7 +54,7 @@ public class TextedUser extends UserAR {
 
 	@New(MapListHandler.class)
 	public List<Map<String, Object>> selectUsersMapListByText(String name, String address) {
-		return this.guess(bind("name"), bind("address"));
+		return this.guess(bind("name", name, "address", address));
 	};
 	/*-
 	   select *
@@ -64,10 +64,10 @@ public class TextedUser extends UserAR {
 	 */
 
 	public List<Map<String, Object>> selectUsersMapListByText2(String name, String address) {
-		return this.guess(bind("name", name), bind("address", address));
+		return this.guess(name, address, new SSMapListHandler(TextedUser.class));
 	};
 	/*-
-	   select u.** 
+	   select u.**
 	   from  users u 
 	         where 
 	         u.name=:name 
@@ -75,10 +75,10 @@ public class TextedUser extends UserAR {
 	 */
 
 	public List<TextedUser> selectUsersByText2(String name, String address) {
-		return this.guess(name, address);
+		return this.guess(name, address, new EntityListHandler(TextedUser.class));
 	}
 	/*-
-	   select u.** 
+	   select *
 	   from 
 	   users u
 	      where 
@@ -89,7 +89,7 @@ public class TextedUser extends UserAR {
 		return this.ctx().iQuery(new EntityListHandler(TextedUser.class), this.guessSQL(), param(name), param(address));
 	}
 	/*-
-	   select u.** 
+	   select * 
 	   from 
 	   users u
 	      where 
