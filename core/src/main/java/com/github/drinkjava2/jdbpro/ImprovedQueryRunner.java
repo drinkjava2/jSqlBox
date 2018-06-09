@@ -49,7 +49,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @since 1.7.0
  */
 @SuppressWarnings({ "all" })
-public class ImprovedQueryRunner extends QueryRunner { 
+public class ImprovedQueryRunner extends QueryRunner {
 
 	protected SqlTemplateEngine sqlTemplateEngine = DbProConfig.globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = DbProConfig.globalNextConnectionManager;
@@ -145,8 +145,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	// =========== Explain SQL about methods========================
 	/**
-	 * Format SQL for logger output, subClass can override this method to
-	 * customise SQL format
+	 * Format SQL for logger output, subClass can override this method to customise
+	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		return "SQL: " + sql;
@@ -290,10 +290,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	// DbUtils style methods, throw SQLException
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found, SQLException may be threw if some SQL
-	 * operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -307,10 +307,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Query for an Object, only return the first row and first column's value
-	 * if more than one column or more than 1 rows returned, a null object may
-	 * return if no result found, SQLException may be threw if some SQL
-	 * operation Exception happen.
+	 * Query for an Object, only return the first row and first column's value if
+	 * more than one column or more than 1 rows returned, a null object may return
+	 * if no result found, SQLException may be threw if some SQL operation Exception
+	 * happen.
 	 * 
 	 * @param sql
 	 *            The SQL
@@ -324,19 +324,19 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * This is the core method of whole project, handle a PreparedSQL instance
-	 * and return a result
+	 * This is the core method of whole project, handle a PreparedSQL instance and
+	 * return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
 		if (ps.getSwitchTo() != null) {
 			DbPro pro = ps.getSwitchTo();
 			ps.setSwitchTo(null);
-			return pro.runPreparedSQL(ps);//SwitchTo run
+			return pro.runPreparedSQL(ps);// SwitchTo run
 		}
-		if (ps.getMasterSlaveSelect() == null)
-			ps.setMasterSlaveSelect(this.getMasterSlaveSelect());
+		if (ps.getMasterSlaveOption() == null)
+			ps.setMasterSlaveOption(this.getMasterSlaveSelect());
 
-		if (  ps.getUseTemplate()!=null && ps.getUseTemplate()) {
+		if (ps.getUseTemplate() != null && ps.getUseTemplate()) {
 			ps.setUseTemplate(false);
 			SqlTemplateEngine engine = ps.getTemplateEngine();
 			if (engine == null)
@@ -346,10 +346,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 			ps.setParams(rendered.getParams());
 		}
 
-		if (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty()) {
-			SqlHandler newPs = ps.getSqlHandlers().get(0);
+		while (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty()) {
+			SqlHandler handler = ps.getSqlHandlers().get(0);
 			ps.getSqlHandlers().remove(0);
-			return newPs.handle(this, ps);
+			if (!ps.isDisabledHandler(handler))
+				return handler.handle(this, ps);
 		}
 		return runRealSqlMethod(ps);
 	}
@@ -372,15 +373,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 		case EXECUTE:
 		case UPDATE:
 		case INSERT: {
-			if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveSelect())
-					|| SqlOption.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+			if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveOption())
+					|| SqlOption.USE_AUTO.equals(ps.getMasterSlaveOption())) {
 				return runWriteOperations(this, ps);
-			} else if (SqlOption.USE_BOTH.equals(ps.getMasterSlaveSelect())) {
+			} else if (SqlOption.USE_BOTH.equals(ps.getMasterSlaveOption())) {
 				if (this.getSlaves() != null)
 					for (DbPro dbPro : this.getSlaves())
 						runWriteOperations(dbPro, ps);
 				return runWriteOperations(this, ps);
-			} else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+			} else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveOption())) {
 				Object result = null;
 				if (this.getSlaves() == null || this.getSlaves().length == 0)
 					throw new DbProRuntimeException("Try to write slaves but slave list not found");
@@ -391,15 +392,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 				throw new DbProRuntimeException("Should never run to here");
 		}
 		case QUERY: {
-			if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveSelect())
-					|| SqlOption.USE_BOTH.equals(ps.getMasterSlaveSelect()))
+			if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveOption())
+					|| SqlOption.USE_BOTH.equals(ps.getMasterSlaveOption()))
 				return this.runQuery(ps);
-			else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+			else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveOption())) {
 				DbPro db = chooseOneSlave();
 				if (db == null)
 					throw new DbProRuntimeException("Try to query on slave but slave list not found");
 				return db.runQuery(ps);
-			} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+			} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveOption())) {
 				DbPro db = autoChooseMasterOrSlaveQuery(ps);
 				return db.runQuery(ps);
 			} else
@@ -410,15 +411,15 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	private Object runReadOperation(PreparedSQL ps) {
-		if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveSelect())
-				|| SqlOption.USE_BOTH.equals(ps.getMasterSlaveSelect()))
+		if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveOption())
+				|| SqlOption.USE_BOTH.equals(ps.getMasterSlaveOption()))
 			return this.runQuery(ps);
-		else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveSelect())) {
+		else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveOption())) {
 			DbPro db = chooseOneSlave();
 			if (db == null)
 				throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
 			return db.runQuery(ps);
-		} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveSelect())) {
+		} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveOption())) {
 			DbPro db = autoChooseMasterOrSlaveQuery(ps);
 			return db.runQuery(ps);
 		} else
@@ -483,8 +484,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
-	 * Choose a slave DbPro instance, default rule is random choose, subClass
-	 * can override this method to customize choosing strategy
+	 * Choose a slave DbPro instance, default rule is random choose, subClass can
+	 * override this method to customize choosing strategy
 	 * 
 	 * @return A slave instance, if no found, return null;
 	 */
@@ -577,13 +578,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/**
 	 * Query for an scalar Object, only return the first row and first column's
-	 * value if more than one column or more than 1 rows returned, a null object
-	 * may return if no result found , DbProRuntimeException may be threw if
-	 * some SQL operation Exception happen.
+	 * value if more than one column or more than 1 rows returned, a null object may
+	 * return if no result found , DbProRuntimeException may be threw if some SQL
+	 * operation Exception happen.
 	 * 
 	 * @param ps
-	 *            The PreparedSQL which included SQL parameters and
-	 *            sqlHandlers(if have)
+	 *            The PreparedSQL which included SQL parameters and sqlHandlers(if
+	 *            have)
 	 * @return An Object or null, Object type determined by SQL content
 	 */
 	private <T> T runQueryForScalar(PreparedSQL ps) {
@@ -618,8 +619,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
 	 *
 	 * @param conn
-	 *            The Connection to use to run the query. The caller is
-	 *            responsible for closing this Connection.
+	 *            The Connection to use to run the query. The caller is responsible
+	 *            for closing this Connection.
 	 * @param sql
 	 *            The SQL to execute.
 	 * @param params
@@ -733,7 +734,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setAllowShowSQL(Boolean allowShowSQL) {//NOSONAR
+	public void setAllowShowSQL(Boolean allowShowSQL) {// NOSONAR
 		this.allowShowSQL = allowShowSQL;
 	}
 
@@ -773,7 +774,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setBatchSize(Integer batchSize) {//NOSONAR
+	public void setBatchSize(Integer batchSize) {// NOSONAR
 		this.batchSize = batchSize;
 	}
 
@@ -783,7 +784,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setSqlHandlers(SqlHandler[] sqlHandlers) {//NOSONAR
+	public void setSqlHandlers(SqlHandler[] sqlHandlers) {// NOSONAR
 		this.sqlHandlers = sqlHandlers;
 	}
 
@@ -793,7 +794,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {//NOSONAR
+	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {// NOSONAR
 		this.specialSqlItemPreparers = specialSqlItemPreparers;
 	}
 
@@ -803,7 +804,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setSlaves(DbPro[] slaves) {//NOSONAR
+	public void setSlaves(DbPro[] slaves) {// NOSONAR
 		this.slaves = slaves;
 	}
 
@@ -813,7 +814,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setMasters(DbPro[] masters) {//NOSONAR
+	public void setMasters(DbPro[] masters) {// NOSONAR
 		this.masters = masters;
 	}
 
@@ -823,7 +824,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setIocTool(IocTool iocTool) {//NOSONAR
+	public void setIocTool(IocTool iocTool) {// NOSONAR
 		this.iocTool = iocTool;
 	}
 
@@ -833,7 +834,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {//NOSONAR
+	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {// NOSONAR
 		this.masterSlaveSelect = masterSlaveSelect;
 	}
 
@@ -853,7 +854,5 @@ public class ImprovedQueryRunner extends QueryRunner {
 	public ThreadLocal<ArrayList<PreparedSQL>> getSqlBatchCache() {
 		return sqlBatchCache;
 	}
-
- 
 
 }

@@ -12,6 +12,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -126,5 +127,15 @@ public interface ActiveRecordSupport {// NOSONAR
 	 * @return
 	 */
 	public ActiveRecordSupport useContext(SqlBoxContext ctx);
+	
+	
+	/**
+	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
+	 * instance,
+	 * 
+	 * Usage: put("key1",value1,"key2",value2...);
+	 */
+	public SqlItem bind(Object... parameters);
+
 
 }

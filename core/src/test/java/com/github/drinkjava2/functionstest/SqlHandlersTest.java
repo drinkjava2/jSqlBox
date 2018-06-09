@@ -34,6 +34,8 @@ import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.SqlItem;
+import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -236,6 +238,13 @@ public class SqlHandlersTest extends TestBase {
 		List<Map<String, Object>> result2 = gpQuery(new MapListHandler(), new PrintSqlHandler(),
 				"select u.* from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(result2.size() == 99);
+	}
+
+	@Test
+	public void testEnableDisableSqlHandler() throws SQLException {
+		List<Map<String, Object>> result2 = gpQuery(new MapListHandler(), new PrintSqlHandler(),
+				new SqlItem(SqlOption.ENABLE_HANDLERS),
+				"select u.* from DemoUser u where u.age>?", 0);
 	}
 
 	public static class MyDemoAroundSqlHandler extends DefaultOrderSqlHandler {

@@ -1,14 +1,3 @@
-/*
- * Copyright 2016 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
- * applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
- * OF ANY KIND, either express or implied. See the License for the specific
- * language governing permissions and limitations under the License.
- */
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
@@ -21,83 +10,61 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * Entity class extended from ActiveRecord or implements ActiveRecordSupport
- * interface will get CRUD methods, see below difference in jSqlBox to save
- * ActiveRecord entity and normal entity(POJO) into database:
- * 
- * <pre>
- * ActiveRecord style:   
- * 
- *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
- *    SqlBoxContext.setDefaultContext(ctx);           
- *    entity.insert(); 
- * 
- *    or 
- *    
- *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
- *    entity.box().setContext(ctx);
- *    entity.insert();
- *    
- *    
- * Data Mapper style (for POJO entity):   
- *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
- *    ctx.insert(entity);
- * 
- * </pre>
- * 
- * @author Yong Zhu
- * @since 1.0.0
+ * ActiveEntity is a interface has default methods only supported for
+ * Java8+, so in Java8 and above, a POJO can implements ActiveEntity
+ * interface to obtain CRUD methods instead of extends ActiveRecord class
  */
-public class ActiveRecord implements ActiveRecordSupport {
-	SqlBox box;
+
+public interface ActiveEntity extends ActiveRecordSupport {
 
 	@Override
-	public SqlBox box() {
-		if (box == null)
+	public default SqlBox box() {
+		SqlBox box = SqlBoxUtils.findBoxOfPOJO(this);
+		if (box == null) {
 			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx(), this.getClass());
+			SqlBoxUtils.bindBoxToPOJO(this, box);
+		}
 		return box;
 	}
 
 	@Override
-	public SqlBox bindedBox() {
-		return box;
+	public default SqlBox bindedBox() {
+		return SqlBoxUtils.findBoxOfPOJO(this);
 	}
 
 	@Override
-	public void bindBox(SqlBox box) {
-		if (box == null)
-			throw new SqlBoxException("Can not bind null SqlBox to entity");
-		this.box = box;
+	public default void bindBox(SqlBox box) {
+		SqlBoxUtils.bindBoxToPOJO(this, box);
 	}
 
 	@Override
-	public void unbindBox() {
-		box = null;
+	public default void unbindBox() {
+		SqlBoxUtils.unbindBoxOfPOJO(this);
 	}
 
 	@Override
-	public TableModel tableModel() {
+	public default TableModel tableModel() {
 		return box().getTableModel();
 	}
 
 	@Override
-	public ColumnModel columnModel(String columnName) {
+	public default ColumnModel columnModel(String columnName) {
 		return box().getTableModel().getColumn(columnName);
 	}
 
 	@Override
-	public String table() {
+	public default String table() {
 		return box().getTableModel().getTableName();
 	}
 
 	@Override
-	public ActiveRecordSupport alias(String alias) {
+	public default ActiveRecordSupport alias(String alias) {
 		box().getTableModel().setAlias(alias);
 		return this;
 	}
 
 	@Override
-	public SqlBoxContext ctx() {
+	public default SqlBoxContext ctx() {
 		SqlBox theBox = box();
 		if (theBox.getContext() == null)
 			theBox.setContext(SqlBoxContext.getGlobalSqlBoxContext());
@@ -105,14 +72,14 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public ActiveRecordSupport useContext(SqlBoxContext ctx) {
+	public default ActiveRecordSupport useContext(SqlBoxContext ctx) {
 		box().setContext(ctx);
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T insert(Object... optionalSqlItems) {
+	public default <T> T insert(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
@@ -122,7 +89,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T update(Object... optionalSqlItems) {
+	public default <T> T update(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
@@ -131,7 +98,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public void delete(Object... optionalSqlItems) {
+	public default void delete(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
@@ -139,7 +106,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public <T> T load(Object... optionalSqlItems) {
+	public default <T> T load(Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
@@ -148,7 +115,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
+	public default <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
@@ -157,7 +124,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T loadByQuery(Object... sqlItems) {
+	public default <T> T loadByQuery(Object... sqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
@@ -165,7 +132,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public ActiveRecordSupport put(Object... fieldAndValues) {
+	public default ActiveRecordSupport put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {
 			String field = (String) fieldAndValues[i * 2];
 			Object value = fieldAndValues[i * 2 + 1];
@@ -180,13 +147,13 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public ActiveRecordSupport putFields(String... fieldNames) {
+	public default ActiveRecordSupport putFields(String... fieldNames) {
 		lastTimePutFieldsCache.set(fieldNames);
 		return this;
 	}
 
 	@Override
-	public ActiveRecordSupport putValues(Object... values) {
+	public default ActiveRecordSupport putValues(Object... values) {
 		String[] fields = lastTimePutFieldsCache.get();
 		if (values.length == 0 || fields == null || fields.length == 0)
 			throw new SqlBoxException("putValues fields or values can not be empty");
@@ -207,23 +174,22 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public <T> T guess(Object... params) {// NOSONAR
+	public default <T> T guess(Object... params) {// NOSONAR
 		return ctx().getSqlMapperGuesser().guess(ctx(), this, params);
 	}
 
 	@Override
-	public String guessSQL() {
+	public default String guessSQL() {
 		return ctx().getSqlMapperGuesser().guessSQL(ctx(), this);
 	}
 
 	@Override
-	public PreparedSQL guessPreparedSQL(Object... params) {
+	public default PreparedSQL guessPreparedSQL(Object... params) {
 		return ctx().getSqlMapperGuesser().doGuessPreparedSQL(ctx(), this, params);
 	}
 
 	@Override
-	public SqlItem bind(Object... parameters) {
-		return new SqlItem(SqlOption.BIND, parameters);
+	public default SqlItem bind(Object... parameters) {
+		return new SqlItem(SqlOption.PUT, parameters);
 	}
-
 }

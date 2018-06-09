@@ -71,6 +71,9 @@ public class PreparedSQL {
 	/** Optional,ResultSetHandler instance */
 	private ResultSetHandler<?> resultSetHandler;
 
+	/** If this is not null, this type handler will not execute */
+	private List<Class<?>> disabledHandlers;
+
 	public PreparedSQL() {// default constructor
 	}
 
@@ -94,6 +97,8 @@ public class PreparedSQL {
 		ps.setTemplateParamMap(this.templateParamMap);
 		ps.setSqlHandlers(this.sqlHandlers);
 		ps.setResultSetHandler(this.resultSetHandler);
+		ps.setDisabledHandlers(this.disabledHandlers);
+		ps.setMasterSlaveOption(this.masterSlaveOption);
 		return ps;
 	}
 
@@ -112,6 +117,8 @@ public class PreparedSQL {
 		sb.append("\nuseTemplate=").append(useTemplate);
 		sb.append("\ntemplateEngine=").append(templateEngine);
 		sb.append("\ntemplateParams=").append(templateParamMap);
+		sb.append("\ndisabledHandlers=").append(disabledHandlers);
+		sb.append("\nmasterSlaveOption=").append(masterSlaveOption);
 		sb.append("\n");
 		return sb.toString();
 	}
@@ -160,6 +167,28 @@ public class PreparedSQL {
 			}
 		}
 		sqlHandlers.add(sqlHandler);
+	}
+
+	public void disableHandlers(Object[] handlersClass) {
+		if (handlersClass == null || handlersClass.length == 0)
+			throw new DbProRuntimeException("disableHandlers method need at least 1 parameter");
+		if (disabledHandlers == null)
+			disabledHandlers = new ArrayList<Class<?>>();
+		for (Object obj : handlersClass)
+			disabledHandlers.add((Class<?>) obj);
+	}
+
+	public boolean isDisabledHandler(Object handler) {
+		if (disabledHandlers == null || disabledHandlers.isEmpty())
+			return false; 
+		for (Class<?> disabled : disabledHandlers)
+			if (disabled.equals(handler.getClass()))
+				return true;
+		return false;
+	}
+
+	public void enableAllHandlers() {
+		disabledHandlers = null;
 	}
 
 	public int getParamSize() {
@@ -304,12 +333,8 @@ public class PreparedSQL {
 		this.params = params;
 	}
 
-	public SqlOption getMasterSlaveSelect() {
-		return masterSlaveOption;
-	}
-
-	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
-		this.masterSlaveOption = masterSlaveSelect;
+	public void setMasterSlaveOption(SqlOption masterSlaveOption) {
+		this.masterSlaveOption = masterSlaveOption;
 	}
 
 	public DbPro getSwitchTo() {
@@ -318,6 +343,18 @@ public class PreparedSQL {
 
 	public void setSwitchTo(DbPro switchTo) {
 		this.switchTo = switchTo;
+	}
+
+	public SqlOption getMasterSlaveOption() {
+		return masterSlaveOption;
+	}
+
+	public List<Class<?>> getDisabledHandlers() {
+		return disabledHandlers;
+	}
+
+	public void setDisabledHandlers(List<Class<?>> disabledHandlers) {
+		this.disabledHandlers = disabledHandlers;
 	}
 
 }

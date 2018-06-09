@@ -471,10 +471,13 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			for (Object item : optionalSqlItems)
 				jSQL.append(item);
 
-		jSQL.append(SingleTonHandlers.arrayHandler);
-		Object[] values = ctx.iQuery(jSQL.toObjectArray());
-		if (values == null || values.length == 0)
+		jSQL.append(SingleTonHandlers.arrayListHandler);
+		List<Object[]> valuesList = ctx.iQuery(jSQL.toObjectArray());
+		if(valuesList.isEmpty())
 			throw new SqlBoxException("Try to load entity but no record found in database");
+		if(valuesList.size()>1)
+			throw new SqlBoxException("Try to load entity but more than 1 record found in database");
+		Object[] values=valuesList.get(0);
 		try {
 			for (int i = 0; i < values.length; i++) {
 				Method writeMethod = writeMethods.get(allFieldNames.get(i));

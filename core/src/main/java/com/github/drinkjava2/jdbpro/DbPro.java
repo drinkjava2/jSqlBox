@@ -210,27 +210,29 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			predSQL.addTemplateMap((Map<String, Object>) item);
 		} else if (item instanceof SqlOption) {
 			if (SqlOption.USE_MASTER.equals(item)) {
-				predSQL.setMasterSlaveSelect(SqlOption.USE_MASTER);
+				predSQL.setMasterSlaveOption(SqlOption.USE_MASTER);
 			} else if (SqlOption.USE_SLAVE.equals(item)) {
-				predSQL.setMasterSlaveSelect(SqlOption.USE_SLAVE);
+				predSQL.setMasterSlaveOption(SqlOption.USE_SLAVE);
 			} else if (SqlOption.USE_AUTO.equals(item)) {
-				predSQL.setMasterSlaveSelect(SqlOption.USE_AUTO);
+				predSQL.setMasterSlaveOption(SqlOption.USE_AUTO);
 			} else if (SqlOption.USE_BOTH.equals(item)) {
-				predSQL.setMasterSlaveSelect(SqlOption.USE_BOTH);
+				predSQL.setMasterSlaveOption(SqlOption.USE_BOTH);
 			} else if (SqlOption.USE_TEMPLATE.equals(item)) {
-				predSQL.setUseTemplate(true); 
-			} else throw new DbProRuntimeException("Un-analyzed SqlOption:"+item); 
+				predSQL.setUseTemplate(true);
+			} else
+				throw new DbProRuntimeException("Un-analyzed SqlOption:" + item);
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
-			if (SqlOption.PARAM.equals(sqItem.getType())) {
+			SqlOption sqlItemType = sqItem.getType();
+			if (SqlOption.PARAM.equals(sqlItemType)) {
 				for (Object pm : sqItem.getParameters())
 					predSQL.addParam(pm);
-			} else if (SqlOption.PUT.equals(sqItem.getType())) {
+			} else if (SqlOption.BIND.equals(sqlItemType)) {
 				predSQL.addTemplateParam(sqItem);
-			} else if (SqlOption.SQL.equals(sqItem.getType())) {
+			} else if (SqlOption.SQL.equals(sqlItemType)) {
 				for (Object pm : sqItem.getParameters())
 					sql.append(pm);
-			} else if (SqlOption.QUESTION_PARAM.equals(sqItem.getType())) {
+			} else if (SqlOption.QUESTION_PARAM.equals(sqlItemType)) {
 				int i = 0;
 				for (Object pm : sqItem.getParameters()) {
 					predSQL.addParam(pm);
@@ -239,12 +241,16 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					sql.append("?");
 					i++;
 				}
-			} else if (SqlOption.NOT_NULL.equals(sqItem.getType())) {
-				if (sqItem.getParameters()[1] != null) {
-					sql.append(sqItem.getParameters()[0]);
-					predSQL.addParam(sqItem.getParameters()[1]);
+			} else if (SqlOption.NOT_NULL.equals(sqlItemType)) {
+				Object[] args = sqItem.getParameters();
+				if (args.length < 2)
+					throw new DbProRuntimeException("NOT_NULL type SqlItem need at least 2 args");
+				if (args[args.length - 1] != null) {
+					for (int i = 0; i < args.length - 1; i++)
+						dealItem(true, predSQL, sql, args[i]);// in NOT_NULL type, force use i style
+					predSQL.addParam(args[args.length - 1]);
 				}
-			} else if (SqlOption.VALUES_QUESTIONS.equals(sqItem.getType())) {
+			} else if (SqlOption.VALUES_QUESTIONS.equals(sqlItemType)) {
 				sql.append(" values(");
 				for (int i = 0; i < predSQL.getParamSize(); i++) {
 					if (i > 0)
@@ -252,13 +258,17 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					sql.append("?");
 				}
 				sql.append(")");
-			} else if (SqlOption.SWITCHTO.equals(sqItem.getType())) {
+			} else if (SqlOption.ENABLE_HANDLERS.equals(sqlItemType)) {
+				predSQL.enableAllHandlers();
+			} else if (SqlOption.DISABLE_HANDLERS.equals(sqlItemType)) {
+				predSQL.disableHandlers((Object[]) sqItem.getParameters());
+			} else if (SqlOption.SWITCHTO.equals(sqlItemType)) {
 				predSQL.setSwitchTo((DbPro) sqItem.getParameters()[0]);
-			} else if (SqlOption.SHARD_TABLE.equals(sqItem.getType())) {
+			} else if (SqlOption.SHARD_TABLE.equals(sqlItemType)) {
 				handleShardTable(predSQL, sql, sqItem);
-			} else if (SqlOption.SHARD_DATABASE.equals(sqItem.getType())) {
+			} else if (SqlOption.SHARD_DATABASE.equals(sqlItemType)) {
 				handleShardDatabase(predSQL, sql, sqItem);
-			} else if (SqlOption.IOC_OBJECT.equals(sqItem.getType())) {
+			} else if (SqlOption.IOC_OBJECT.equals(sqlItemType)) {
 				if (this.getIocTool() == null)
 					throw new DbProRuntimeException(
 							"A IocTool setting required to deal an @Ioc or ioc() method, please read user manual.");
@@ -266,8 +276,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					Object obj = this.getIocTool().getBean((Class) claz);
 					dealItem(iXxxStyle, predSQL, sql, obj);
 				}
-			}else throw new DbProRuntimeException("Un-analyzed SqlItem: " + sqItem.getType() + " "
-						+ Arrays.deepToString(sqItem.getParameters()));
+			} else
+				throw new DbProRuntimeException(
+						"Un-analyzed SqlItem: " + sqlItemType + " " + Arrays.deepToString(sqItem.getParameters()));
 		} else if (item instanceof Connection)
 			predSQL.setConnection((Connection) item);
 		else if (item instanceof DbPro)
@@ -277,7 +288,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		else if (item instanceof ResultSetHandler)
 			predSQL.setResultSetHandler((ResultSetHandler) item);
 		else if (item instanceof Class) {
-				throw new DbProRuntimeException("Found a sqlItem is class type :'" + item + "', currently is not allowed.");
+			throw new DbProRuntimeException("Found a sqlItem is class type :'" + item + "', currently is not allowed.");
 		} else if (item instanceof SpecialSqlItem) {
 			if (specialSqlItemPreparers == null)
 				throw new DbProRuntimeException(

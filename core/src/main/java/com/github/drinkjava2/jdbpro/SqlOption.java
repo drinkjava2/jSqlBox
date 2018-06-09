@@ -23,12 +23,12 @@ package com.github.drinkjava2.jdbpro;
  * @since 1.7.0.3
  */
 public enum SqlOption {
-	// ------- Sql text or param items--------------------
-	SQL, // Build a SQL String piece, need String type followed
+	//@formatter:off
+	SQL, // A SQL String piece 
 
-	PARAM, // Build SQL parameter or parameters, need Object types followed
+	PARAM, //  SQL parameter or parameters, need Object types followed
 
-	PUT, // Append [key1,value1, key2,value2...] parameters array (for SqlTemplateEngine)
+	BIND, // BIND Key-Values pairs "key1,value1, key2,value2..."  for SqlTemplateEngine 
 
 	QUESTION_PARAM, // Append a "?" at end of SQL and append a parameter or parameter array
 
@@ -45,6 +45,10 @@ public enum SqlOption {
 	// -----------Control option--------------
 	USE_TEMPLATE, //force use template style  
 
+	DISABLE_HANDLERS, //disable handles according given handlers' class
+	
+	ENABLE_HANDLERS, //disable handles according given handlers' class
+	
 	// ------Master_Slave Options-------
 	USE_AUTO, // Tell system to choose master or slave database automatically (write:master,
 				// read:if in Transaction use master otherwise use on slave)

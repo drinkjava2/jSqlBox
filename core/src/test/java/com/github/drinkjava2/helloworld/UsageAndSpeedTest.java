@@ -634,7 +634,7 @@ public class UsageAndSpeedTest {
 				" ,address ", param(address), //
 				") ", valuesQuestions());
 		ctx.pExecute("update users set ", //
-				notNull(" name=?,", name), //
+				notNull(" name","=", "?, ", name), //
 				notNull(" age=?,", age), //
 				sql(" address=? "), address //
 		);

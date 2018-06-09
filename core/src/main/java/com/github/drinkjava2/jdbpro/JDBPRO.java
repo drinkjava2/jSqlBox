@@ -30,7 +30,6 @@ public abstract class JDBPRO extends DbPro {
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
 	public static final SqlOption USE_AUTO = SqlOption.USE_AUTO;
 	public static final SqlOption USE_TEMPLATE = SqlOption.USE_TEMPLATE;
-	
 
 	protected void ________INLINE_Methods________() {// NOSONAR
 	}
@@ -131,16 +130,14 @@ public abstract class JDBPRO extends DbPro {
 	}
 
 	/**
-	 * If param is not null, then append sqlPiece
+	 * If last param is not null, then add all items in SQL
 	 * 
-	 * @param sqlPiece
-	 *            The SQL piece will be appended
 	 * @param param
 	 *            The param
 	 * @return a SqlItem instance will be used by iPrepare method
 	 */
-	public static SqlItem notNull(String sqlPiece, Object param) {
-		return new SqlItem(SqlOption.NOT_NULL, sqlPiece, param);
+	public static SqlItem notNull(Object... items) {
+		return new SqlItem(SqlOption.NOT_NULL, items);
 	}
 
 	/**
@@ -158,8 +155,6 @@ public abstract class JDBPRO extends DbPro {
 		return new SqlItem(SqlOption.SWITCHTO, dpPro);
 	}
 
-	
-	
 	/**
 	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
 	 * instance,
@@ -167,15 +162,22 @@ public abstract class JDBPRO extends DbPro {
 	 * Usage: put("key1",value1,"key2",value2...);
 	 */
 	public static SqlItem bind(Object... parameters) {
-		return new SqlItem(SqlOption.PUT, parameters);
+		return new SqlItem(SqlOption.BIND, parameters);
 	}
-	
+
 	/**
-	 * Create a SqlOption.IOC_OBJECT type SqlItem instance, args will create instance by IocTool
+	 * Create a SqlOption.IOC_OBJECT type SqlItem instance, args will create
+	 * instance by IocTool
 	 */
 	public static SqlItem ioc(Class<?>... args) {
-		return new SqlItem(SqlOption.IOC_OBJECT, (Object[])args);
+		return new SqlItem(SqlOption.IOC_OBJECT, (Object[]) args);
 	}
-	
 
+	/**
+	 * Create a SqlOption.IOC_OBJECT type SqlItem instance, args will create
+	 * instance by IocTool
+	 */
+	public static SqlItem disableHandlers(Class<?>... args) {
+		return new SqlItem(SqlOption.DISABLE_HANDLERS, (Object[]) args);
+	}
 }

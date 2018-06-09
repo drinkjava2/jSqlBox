@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +26,12 @@ import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingRangeTool;
@@ -64,17 +67,20 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		super();
 		this.dialect = SqlBoxContextConfig.globalNextDialect;
 		copyConfigs(null);
+		findAndExecuteInitializer();
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
 		copyConfigs(null);
+		findAndExecuteInitializer();
 	}
 
 	public SqlBoxContext(SqlBoxContextConfig config) {
 		super(config);
 		copyConfigs(config);
+		findAndExecuteInitializer();
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
@@ -82,6 +88,20 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		copyConfigs(config);
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
+		findAndExecuteInitializer();
+	}
+
+	private void findAndExecuteInitializer() {
+		Class<?> callerClass = ClassCacheUtils
+				.checkClassExist("com.github.drinkjava2.jsqlbox.SqlBoxContextInitializer");
+		if (callerClass == null)
+			return;// not found 
+		try {
+			Method initMethod = callerClass.getMethod("initialize", SqlBoxContext.class);
+			initMethod.invoke(null, this);
+		} catch (Exception e) {
+			throw new SqlBoxException("SqlBoxContextInitializer found but failed call it's initialize method.");
+		}
 	}
 
 	private void copyConfigs(SqlBoxContextConfig config) {
@@ -251,8 +271,20 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> T loadByQuery(Class<T> entityClass, Object... sqlItems) {
 		return SqlBoxContextUtils.loadByQuery(this, entityClass, sqlItems);
 	}
+	
+	public <T> List<T> iQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
+		return this.iQuery(new EntityListHandler(entityClass ),   sqlItems);
+	}
+	
+	public <T> List<T> pQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
+		return this.pQuery(new EntityListHandler(entityClass ),   sqlItems);
+	}
+	
+	public <T> List<T> tQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
+		return this.tQuery(new EntityListHandler(entityClass ),   sqlItems);
+	}
 
-	// ========== Dialect shortcut methods =============== 
+	// ========== Dialect shortcut methods ===============
 	protected void dialectShortcutMethods__________________________() {// NOSONAR
 	}
 
