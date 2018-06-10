@@ -26,7 +26,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 public class DbProConfig {
 	protected static Boolean globalNextAllowShowSql = false;
-	protected static SqlOption globalNextMasterSlaveSelect = SqlOption.USE_AUTO;
+	protected static SqlOption globalNextMasterSlaveOption = SqlOption.USE_AUTO;
 	protected static ConnectionManager globalNextConnectionManager = null;
 	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
 	protected static Integer globalNextBatchSize = 300;
@@ -41,7 +41,7 @@ public class DbProConfig {
 	private Boolean allowSqlSql = globalNextAllowShowSql;
 	private ConnectionManager connectionManager = globalNextConnectionManager;
 	private IocTool iocTool =globalNextIocTool ;
-	private SqlOption masterSlaveSelect = globalNextMasterSlaveSelect ;
+	private SqlOption masterSlaveOption = globalNextMasterSlaveOption ;
 	private Integer batchSize = globalNextBatchSize ;
 	private SqlHandler[] sqlHandlers = globalNextSqlHandlers ;
 	private SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers ;
@@ -121,11 +121,11 @@ public class DbProConfig {
 	}
 
 	public SqlOption getMasterSlaveSelect() {
-		return masterSlaveSelect;
+		return masterSlaveOption;
 	}
 
 	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
-		this.masterSlaveSelect = masterSlaveSelect;
+		this.masterSlaveOption = masterSlaveSelect;
 	}
 
 	public SpecialSqlItemPreparer[] getSpecialSqlItemPreparers() {
@@ -171,12 +171,12 @@ public class DbProConfig {
 		 globalNextAllowShowSql = allowShowSql;
 	}
 
-	public static SqlOption getGlobalNextMasterSlaveSelect() {
-		return globalNextMasterSlaveSelect;
+	public static SqlOption getGlobalNextMasterSlaveOption() {
+		return globalNextMasterSlaveOption;
 	}
 
-	public static void setGlobalNextMasterSlaveSelect(SqlOption  masterSlaveOption) {
-		 globalNextMasterSlaveSelect = masterSlaveOption;
+	public static void setGlobalNextMasterSlaveOption(SqlOption  masterSlaveOption) {
+		 globalNextMasterSlaveOption = masterSlaveOption;
 	}
 
 	public static ConnectionManager getGlobalNextConnectionManager() {

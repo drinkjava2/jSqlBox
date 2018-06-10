@@ -41,7 +41,7 @@ public class EntityNetTreeTest extends TestBase {
 		EntityNet net = ctx.netLoadAll(TreeNode.class);
 		Set<TreeNode> TreeNodes = net.runPath(
 				new Path("S+", TreeNode.class).where("id=? or id=?", "B", "D").nextPath("C*", TreeNode.class, "pid"))
-				.selectEntitySet(TreeNode.class);
+				.pickEntitySet(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(9, TreeNodes.size());
@@ -52,7 +52,7 @@ public class EntityNetTreeTest extends TestBase {
 		EntityNet net = ctx.netLoadAll(TreeNode.class);
 		Set<TreeNode> TreeNodes = net
 				.runPath(new Path("C*", TreeNode.class, "pid"), new TreeNode("B"), new TreeNode("D"))
-				.selectEntitySet(TreeNode.class);
+				.pickEntitySet(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(7, TreeNodes.size());
@@ -63,7 +63,7 @@ public class EntityNetTreeTest extends TestBase {
 		EntityNet net = ctx.netLoadAll(TreeNode.class);
 		Set<TreeNode> TreeNodes = net
 				.runPath(new Path("S-", TreeNode.class).where("id='F' or id='K'").nextPath("P*", TreeNode.class, "pid"))
-				.selectEntitySet(TreeNode.class);
+				.pickEntitySet(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(4, TreeNodes.size());

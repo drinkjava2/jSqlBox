@@ -54,7 +54,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected SqlTemplateEngine sqlTemplateEngine = DbProConfig.globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = DbProConfig.globalNextConnectionManager;
 	protected Boolean allowShowSQL = DbProConfig.globalNextAllowShowSql;
-	protected SqlOption masterSlaveSelect = DbProConfig.globalNextMasterSlaveSelect;
+	protected SqlOption masterSlaveOption = DbProConfig.globalNextMasterSlaveOption;
 	protected DbProLogger logger = DbProConfig.globalNextLogger;
 	protected Integer batchSize = DbProConfig.globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = DbProConfig.globalNextSqlHandlers;
@@ -334,7 +334,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			return pro.runPreparedSQL(ps);// SwitchTo run
 		}
 		if (ps.getMasterSlaveOption() == null)
-			ps.setMasterSlaveOption(this.getMasterSlaveSelect());
+			ps.setMasterSlaveOption(this.getMasterSlaveOption());
 
 		if (ps.getUseTemplate() != null && ps.getUseTemplate()) {
 			ps.setUseTemplate(false);
@@ -828,14 +828,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.iocTool = iocTool;
 	}
 
-	public SqlOption getMasterSlaveSelect() {
-		return masterSlaveSelect;
+	public SqlOption getMasterSlaveOption() {
+		return masterSlaveOption;
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
 	@Deprecated
-	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {// NOSONAR
-		this.masterSlaveSelect = masterSlaveSelect;
+	public void setMasterSlaveOption(SqlOption masterSlaveOption) {// NOSONAR
+		this.masterSlaveOption = masterSlaveOption;
 	}
 
 	public String getName() {

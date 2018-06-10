@@ -120,13 +120,13 @@ public class CompoundPKeyTest extends TestBase {
 		idMap.put("firstName", "Sam");
 		idMap.put("middleName", "Y");
 		idMap.put("age", 5);
-		CmpEntity entity = net.selectOneEntity(CmpEntity.class, idMap);
+		CmpEntity entity = net.pickOneEntity(CmpEntity.class, idMap);
 		Assert.assertEquals(new Integer(5), entity.getAge());
 
 		// Entity as entityId
 		CmpEntity entityBean = new CmpEntity();
 		entityBean.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 6);
-		CmpEntity entity2 = net.selectOneEntity(CmpEntity.class, entityBean);
+		CmpEntity entity2 = net.pickOneEntity(CmpEntity.class, entityBean);
 		Assert.assertEquals(new Integer(6), entity2.getAge());
 	}
 

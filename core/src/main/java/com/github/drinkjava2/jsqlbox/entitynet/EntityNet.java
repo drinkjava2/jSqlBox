@@ -387,7 +387,7 @@ public class EntityNet {
 			if (level != 0)
 				throw new EntityNetException("'S' type can only be used on path start");
 
-			Collection<Node> nodesToCheck = selectNodeSet(targetClass);
+			Collection<Node> nodesToCheck = pickNodeSet(targetClass);
 			validateSelected(level, path, selected, nodesToCheck);
 		} else
 		// Child
@@ -423,7 +423,7 @@ public class EntityNet {
 					for (ParentRelation pr : prs) {
 						if (targetTableName.equalsIgnoreCase(pr.getParentTable())
 								&& path.getRefColumns().equalsIgnoreCase(pr.getRefColumns())) {
-							Node node = this.selectOneNode(targetClass, pr.getParentId());
+							Node node = this.pickOneNode(targetClass, pr.getParentId());
 							if (node != null)
 								nodesToCheck.add(node);
 						}
@@ -468,16 +468,16 @@ public class EntityNet {
 	protected void select__________________________() {// NOSONAR
 	}
 
-	/** Return a Node by given entityClass and nodeId */
-	public Node selectOneNode(Class<?> entityClass, String nodeId) {
+	/** Pick a Node by given entityClass and nodeId */
+	public Node pickOneNode(Class<?> entityClass, String nodeId) {
 		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
 		if (nodesMap == null)
 			return null;
 		return nodesMap.get(nodeId);
 	}
 
-	/** Return EntityNode list in EntityNet which type is entityClass */
-	public Set<Node> selectNodeSet(Class<?> entityClass) {
+	/** Pick Node set in EntityNet which type is entityClass */
+	public Set<Node> pickNodeSet(Class<?> entityClass) {
 		Set<Node> result = new LinkedHashSet<Node>();
 		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
 		if (nodesMap == null || nodesMap.isEmpty())
@@ -487,33 +487,33 @@ public class EntityNet {
 	}
 
 	/**
-	 * Return a entity by given entityClass and entityId or Id
+	 * Pick a entity by given entityClass and entityId or Id
 	 * HashMap<String,Object>
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T selectOneEntity(Class<?> entityClass, Object entityIdOrIdMap) {
-		Node node = selectOneNode(entityClass, EntityNetUtils.buildNodeIdFromEntityOrIdOrMap(entityIdOrIdMap));
+	public <T> T pickOneEntity(Class<?> entityClass, Object entityIdOrIdMap) {
+		Node node = pickOneNode(entityClass, EntityNetUtils.buildNodeIdFromEntityOrIdOrMap(entityIdOrIdMap));
 		if (node == null)
 			return null;
 		return (T) node.getEntity();
 	}
 
-	/** Return entity set in EntityNet which type is entityClass */
-	public <T> Set<T> selectEntitySet(Class<T> entityClass) {
-		return EntityNetUtils.nodeCollection2EntitySet(selectNodeSet(entityClass));
+	/** Pick entity set in EntityNet which type is entityClass */
+	public <T> Set<T> pickEntitySet(Class<T> entityClass) {
+		return EntityNetUtils.nodeCollection2EntitySet(pickNodeSet(entityClass));
 	}
 
-	/** Return entity List in EntityNet which type is entityClass */
+	/** Pick entity List in EntityNet which type is entityClass */
 	public <T> List<T> selectEntityList(Class<T> entityClass) {
-		return EntityNetUtils.nodeCollection2EntityList(selectNodeSet(entityClass));
+		return EntityNetUtils.nodeCollection2EntityList(pickNodeSet(entityClass));
 	}
 
-	/** Return entity set in EntityNet which type is entityClass */
+	/** Pick entity set in EntityNet which type is entityClass */
 	@SuppressWarnings("unchecked")
-	public Map<Class<?>, Set<Object>> selectEntitySetMap() {
+	public Map<Class<?>, Set<Object>> pickEntitySetMap() {
 		Map<Class<?>, Set<Object>> result = new HashMap<Class<?>, Set<Object>>();
 		for (Class<?> claz : body.keySet())
-			result.put(claz, this.selectEntitySet((Class<Object>) claz));
+			result.put(claz, this.pickEntitySet((Class<Object>) claz));
 		return result;
 	}
 

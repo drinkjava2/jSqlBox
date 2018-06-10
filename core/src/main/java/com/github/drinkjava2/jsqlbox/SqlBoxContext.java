@@ -123,7 +123,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Reset all global SqlBox variants to its old default values */
 	public static void resetGlobalVariants() {
 		SqlBoxContextConfig.setGlobalNextAllowShowSql(false);
-		SqlBoxContextConfig.setGlobalNextMasterSlaveSelect(SqlOption.USE_AUTO);
+		SqlBoxContextConfig.setGlobalNextMasterSlaveOption(SqlOption.USE_AUTO);
 		SqlBoxContextConfig.setGlobalNextConnectionManager(null);
 		SqlBoxContextConfig.setGlobalNextSqlHandlers((SqlHandler[]) null);
 		SqlBoxContextConfig.setGlobalNextLogger(DefaultDbProLogger.getLog(ImprovedQueryRunner.class));
@@ -371,11 +371,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return new EntityNet(this).loadSketch(configObjects);
 	}
 
-	/** Shortcut method, load all entities as list */
-	public <T> List<T> netLoadAsEntityList(Class<T> entityClass) {
-		return new EntityNet(this).loadAll(entityClass).selectEntityList(entityClass);
-	}
-
+  
 	protected void getteSetters__________________________() {// NOSONAR
 	}
 

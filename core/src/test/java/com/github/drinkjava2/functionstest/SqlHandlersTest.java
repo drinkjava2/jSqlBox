@@ -244,7 +244,7 @@ public class SqlHandlersTest extends TestBase {
 	public void testEnableDisableSqlHandler() throws SQLException {
 		List<Map<String, Object>> result2 = gpQuery(new MapListHandler(), new PrintSqlHandler(),
 				new SqlItem(SqlOption.ENABLE_HANDLERS),
-				"select u.* from DemoUser u where u.age>?", 0);
+				"select u.* from DemoUser u where u.age>?", 0, new SqlItem(SqlOption.DISABLE_HANDLERS, PrintSqlHandler.class));
 	}
 
 	public static class MyDemoAroundSqlHandler extends DefaultOrderSqlHandler {

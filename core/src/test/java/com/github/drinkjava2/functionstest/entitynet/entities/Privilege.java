@@ -9,6 +9,7 @@ public class Privilege extends ActiveRecord {
 	@Id
 	String id;
 	String privilegeName;
+	User user;
 
 	public String getId() {
 		return id;

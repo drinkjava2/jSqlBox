@@ -64,7 +64,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.iocTool = config.getIocTool();
 		this.slaves = config.getSlaves();
 		this.masters = config.getMasters();
-		this.masterSlaveSelect = config.getMasterSlaveSelect();
+		this.masterSlaveOption = config.getMasterSlaveSelect();
 		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
 
@@ -79,7 +79,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.iocTool = config.getIocTool();
 		this.slaves = config.getSlaves();
 		this.masters = config.getMasters();
-		this.masterSlaveSelect = config.getMasterSlaveSelect();
+		this.masterSlaveOption = config.getMasterSlaveSelect();
 		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
 

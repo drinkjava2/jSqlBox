@@ -26,7 +26,7 @@ public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 			((ALIAS) item).get();
 			AliasItemInfo a = AliasProxyUtil.thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
-				throw new SqlBoxException("Column name not found.");
+				throw new SqlBoxException("Column name not found.");//NOSONAR
 			if (StrUtils.isEmpty(a.alias))
 				sql.append(a.colName);
 			else

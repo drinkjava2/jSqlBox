@@ -190,6 +190,6 @@ public interface ActiveEntity extends ActiveRecordSupport {
 
 	@Override
 	public default SqlItem bind(Object... parameters) {
-		return new SqlItem(SqlOption.PUT, parameters);
+		return new SqlItem(SqlOption.BIND, parameters);
 	}
 }

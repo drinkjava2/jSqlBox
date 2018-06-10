@@ -1,6 +1,5 @@
 package com.github.drinkjava2.test;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
@@ -9,7 +8,6 @@ import static com.github.drinkjava2.jsqlbox.JSQLBOX.giExecute;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQuery;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForMapList;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
 
 import java.util.List;
 
@@ -49,14 +47,7 @@ public class Java8EampleTest {
 		for (String ddl : gctx().toDropDDL(User.class))
 			gctx().iExecute(ddl);
 	}
-
-	@Test
-	public void pageQuery() {
-		User u = createAliasProxy(User.class);
-		List<User> users= new User().pageQuery(pagin(2, 10), notNull(" and ", (COL) u::getAge, ">?", "10"));
-		Assert.assertEquals(10, users.size());
-	}
-
+ 
 	@Test
 	public void lambdaTest() {
 		Assert.assertEquals(100, giQueryForLongValue("select count(*) from usertb"));
