@@ -173,6 +173,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				else
 					predSQL.addParam(null);
 			} else if (!dealItem(iXxxStyle, predSQL, sql, item)) {
+				if (item instanceof SqlItem)
+					throw new DbProRuntimeException(
+							"One SqlItem did not find explainer, type=" + ((SqlItem) item).getType());
 				if (item.getClass().isArray()) {
 					realDoPrepare(predSQL, sql, iXxxStyle, (Object[]) item);
 				} else if (iXxxStyle)
@@ -187,9 +190,10 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 
 	/**
 	 * Here deal a non-null items, if can analyse it, return true, otherwise return
-	 * false
+	 * false, subclass (like SqlBoxContext) can override this method to deal more
+	 * trick.
 	 */
-	private boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
+	protected boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
 		if (item instanceof String) {
 			if (iXxxStyle)
 				sql.append(item);
@@ -277,8 +281,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					dealItem(iXxxStyle, predSQL, sql, obj);
 				}
 			} else
-				throw new DbProRuntimeException(
-						"Un-analyzed SqlItem: " + sqlItemType + " " + Arrays.deepToString(sqItem.getParameters()));
+				return false;
 		} else if (item instanceof Connection)
 			predSQL.setConnection((Connection) item);
 		else if (item instanceof DbPro)

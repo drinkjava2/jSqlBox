@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
@@ -423,6 +424,9 @@ public class TableModel {
 		return null;
 	}
 
+	public String getDebugInfo() {
+		return DebugUtils.getTableModelDebugInfo(this);
+	}
 	// getter & setter=========================
 
 	public String getTableName() {

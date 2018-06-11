@@ -44,14 +44,8 @@ public class TinyTxTest {
 	}
 
 	@Test
-	public void doTest() {
-
-		TinyTxTest tester = BeanBox.getBean(TinyTxTest.class);
-
-		try {
-			ctx.nExecute("drop table user_tb ");
-		} catch (Exception e) {
-		}
+	public void doTest() { 
+		TinyTxTest tester = BeanBox.getBean(TinyTxTest.class); 
 		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
 
 		Assert.assertEquals(0L, ctx.nQueryForLongValue("select count(*) from user_tb "));
@@ -66,6 +60,8 @@ public class TinyTxTest {
 			System.out.println("div/0 exception found, tx_Insert2 should roll back");
 		}
 		Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
+		
+		ctx.nExecute("drop table user_tb");
 		BeanBox.defaultContext.close();// Release DataSource Pool
 	}
 

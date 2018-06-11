@@ -110,7 +110,7 @@ public class CompoundPKeyTest extends TestBase {
 		EntityNet net = ctx.netLoadAll(CmpEntity.class);
 		long start = System.currentTimeMillis();
 		Path p = new Path("S+", CmpEntity.class).where("age>=?", 50);
-		List<CmpEntity> entities = net.runPath(p).selectEntityList(CmpEntity.class);
+		List<CmpEntity> entities = net.runPath(p).pickEntityList(CmpEntity.class);
 		printTimeUsed(start, "Bean Validator instance ");
 		Assert.assertEquals(50, entities.size());
 

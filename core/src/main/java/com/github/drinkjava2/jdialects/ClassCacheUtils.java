@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
- 
+
 /**
  * ClassCacheUtils is utility class to cache some info of classes read and write
  * method
@@ -38,7 +38,8 @@ public abstract class ClassCacheUtils {// NOSONAR
 	protected static Map<Class<?>, Map<String, Object>> uniqueMethodCache = new ConcurrentHashMap<Class<?>, Map<String, Object>>();
 	protected static Map<Class<?>, Map<String, Method>> classReadMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
 	protected static Map<Class<?>, Map<String, Method>> classWriteMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
-	//protected static Map<Class<?>, Field> boxFieldCache = new ConcurrentHashMap<Class<?>, Field>();
+	// protected static Map<Class<?>, Field> boxFieldCache = new
+	// ConcurrentHashMap<Class<?>, Field>();
 
 	protected static class ClassOrMethodNotExist {// NOSONAR
 	}
@@ -65,14 +66,14 @@ public abstract class ClassCacheUtils {// NOSONAR
 			return null;
 		}
 	}
-	
+
 	public static void registerClass(Class<?> clazz) {
 		classExistCache.put(clazz.getName(), clazz);
 	}
 
 	/**
-	 * Check if a unique method name exists in class, if exist return the
-	 * method, otherwise return null
+	 * Check if a unique method name exists in class, if exist return the method,
+	 * otherwise return null
 	 */
 	public static Method checkMethodExist(Class<?> clazz, String uniqueMethodName) {
 		if (clazz == null || StrUtils.isEmpty(uniqueMethodName))
@@ -189,7 +190,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 		try {
 			writeMethod.invoke(entityBean, value);
 		} catch (Exception e) {
-			throw new DialectException("fieldName '" + fieldName + "' can not write with value '" + value+"'", e);
+			throw new DialectException("fieldName '" + fieldName + "' can not write with value '" + value + "'", e);
 		}
 	}
 

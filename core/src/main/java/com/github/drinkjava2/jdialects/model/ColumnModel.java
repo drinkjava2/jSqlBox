@@ -8,6 +8,7 @@ package com.github.drinkjava2.jdialects.model;
 import java.util.Iterator;
 import java.util.List;
 
+import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
@@ -372,6 +373,10 @@ public class ColumnModel {
 		return this;
 	}
 
+	public String getDebugInfo() {
+		return DebugUtils.getColumnModelDebugInfo(this);
+	}
+	
 	//@formatter:off shut off eclipse's formatter
 	public ColumnModel LONG() {this.columnType=Type.BIGINT;return this;} 
 	public ColumnModel BOOLEAN() {this.columnType=Type.BOOLEAN;return this;} 

@@ -143,7 +143,7 @@ public class SqlHandlersTest extends TestBase {
 	@Test
 	public void testEntityNetHandler() {
 		EntityNet net = gpQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
-		List<DemoUser> result = net.selectEntityList(DemoUser.class);
+		List<DemoUser> result = net.pickEntityList(DemoUser.class);
 		Assert.assertTrue(result.size() == 99);
 	}
 

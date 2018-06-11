@@ -70,7 +70,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 							tb.setAlias(alias);
 						else {
 							if (!alias.equalsIgnoreCase(tb.getAlias()))
-								throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias");
+								throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias '"+tb.getAlias() +"'");
 						}
 						for (ColumnModel col : tb.getColumns()) {
 							if (!col.getTransientable())

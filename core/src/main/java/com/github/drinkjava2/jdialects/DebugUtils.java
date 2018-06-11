@@ -58,7 +58,7 @@ public abstract class DebugUtils {//// NOSONAR
 	}
 
 	public static String getTableModelDebugInfo(TableModel model) {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder("\r=======================================================");
 		sb.append("\rtableName=" + model.getTableName()).append("\r");
 		sb.append("getEntityClass=" + model.getEntityClass()).append("\r");
 		sb.append("getAlias=" + model.getAlias()).append("\r");

@@ -95,7 +95,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		Class<?> callerClass = ClassCacheUtils
 				.checkClassExist("com.github.drinkjava2.jsqlbox.SqlBoxContextInitializer");
 		if (callerClass == null)
-			return;// not found 
+			return;// not found
 		try {
 			Method initMethod = callerClass.getMethod("initialize", SqlBoxContext.class);
 			initMethod.invoke(null, this);
@@ -145,6 +145,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static SqlBoxContext getGlobalSqlBoxContext() {
 		return SqlBoxContext.globalSqlBoxContext;
+	}
+
+	/**
+	 * Override DbPro's dealItem to deal SqlBoxContext's SqlItem
+	 */
+	@Override
+	protected boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
+		if (super.dealItem(iXxxStyle, predSQL, sql, item))
+			return true;
+		else {
+			return false;
+			}
 	}
 
 	// =========getter & setter =======
@@ -271,17 +283,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> T loadByQuery(Class<T> entityClass, Object... sqlItems) {
 		return SqlBoxContextUtils.loadByQuery(this, entityClass, sqlItems);
 	}
-	
+
 	public <T> List<T> iQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
-		return this.iQuery(new EntityListHandler(entityClass ),   sqlItems);
+		return this.iQuery(new EntityListHandler(entityClass), sqlItems);
 	}
-	
+
 	public <T> List<T> pQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
-		return this.pQuery(new EntityListHandler(entityClass ),   sqlItems);
+		return this.pQuery(new EntityListHandler(entityClass), sqlItems);
 	}
-	
+
 	public <T> List<T> tQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
-		return this.tQuery(new EntityListHandler(entityClass ),   sqlItems);
+		return this.tQuery(new EntityListHandler(entityClass), sqlItems);
 	}
 
 	// ========== Dialect shortcut methods ===============
@@ -348,7 +360,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	// ================================================================
-	protected void entityNetShortcutMethods__________________________() {// NOSONAR
+	protected void entityNetAboutMethods__________________________() {// NOSONAR
 	}
 
 	/** Create a EntityNet by given list and netConfigs */
@@ -369,9 +381,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Create a EntityNet instance but only load PKey and FKeys columns */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return new EntityNet(this).loadSketch(configObjects);
-	}
-
-  
+	} 
+	
 	protected void getteSetters__________________________() {// NOSONAR
 	}
 

@@ -74,7 +74,7 @@ public class EntityNetTreeTest extends TestBase {
 		EntityNet net = ctx.pQuery(new EntityNetHandler(TreeNode.class),
 				"select t.** from treenodetb t where t.line>=? and t.line< (select min(line) from treenodetb where line>? and lvl<=?)",
 				7, 7, 2);
-		List<TreeNode> TreeNodes = net.selectEntityList(TreeNode.class);
+		List<TreeNode> TreeNodes = net.pickEntityList(TreeNode.class);
 		for (TreeNode node : TreeNodes)
 			System.out.print(node.getId() + " ");
 		Assert.assertEquals(6, TreeNodes.size());

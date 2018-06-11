@@ -26,9 +26,9 @@ import java.util.Set;
  */
 public class Node {
 	/**
-	 * A String ID by combining PKey column values into one String
+	 * A Object ID, can only be String, Integer, Long... primary java type
 	 */
-	String id;
+	Object id;
 
 	/** The entity instance, this is translated from map value */
 	Object entity;
@@ -38,11 +38,11 @@ public class Node {
 
 	private List<ParentRelation> parentRelations;
 
-	public String getId() {
+	public Object getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Object id) {
 		this.id = id;
 	}
 

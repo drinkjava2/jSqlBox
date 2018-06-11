@@ -89,19 +89,20 @@ public class EntityNetUtils {// NOSONAR
 	/**
 	 * Join PKey values into one String, used for node ID
 	 */
-	public static String buildNodeIdFromEntity(EntityNet net, Object entity) {
+	public static Object buildNodeIdFromEntity(EntityNet net, Object entity) {
 		if (entity == null)
 			return null;
-		if (net.getConfigModels() == null)
+		if (net==null || net.getConfigModels() == null)
 			return null;
 		return buildNodeIdFromEntity(net.getConfigModels().get(entity.getClass()), entity);
 	}
 
-	public static String buildNodeIdFromEntity(TableModel model, Object entity) {
+	public static Object buildNodeIdFromEntity(TableModel model, Object entity) {
 		if (entity == null)
 			return null;
 		if (model == null || entity == null)
 			return null;
+
 		Map<String, Object> idMap = new HashMap<String, Object>();
 		int keyCount = 0;
 		ColumnModel keyColumn = null;
@@ -114,22 +115,22 @@ public class EntityNetUtils {// NOSONAR
 					break;
 				keyColumn = col;
 			}
-		if (keyCount == 0)
+		if (keyCount == 0 || keyColumn==null)
 			throw new EntityNetException("No prime key setting found for entity " + entity);
-		if (keyCount == 1)
-			return ClassCacheUtils.readValueFromBeanField(entity, keyColumn.getEntityField()).toString();//NOSONAR
+		if (keyCount == 1)  
+			return ClassCacheUtils.readValueFromBeanField(entity, keyColumn.getEntityField());  
 
 		for (ColumnModel col : model.getColumns()) // compound key
 			if (col.getPkey() && !col.getTransientable())
 				idMap.put(col.getEntityField(), ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField()));
-		return buildNodeIdFromEntityOrIdOrMap(idMap);
+		return buildNodeIdFromUnknow(idMap);
 	}
 
 	/** Build Node id from unknown entityIdOrIdMap */
 	@SuppressWarnings("all")
-	public static String buildNodeIdFromEntityOrIdOrMap(Object entityId) {
+	public static Object buildNodeIdFromUnknow(Object entityId) {
 		SqlBoxException.assureNotNull(entityId, "Id can not be null.");
-		if (entityId instanceof Map) {
+		if (entityId instanceof Map) {//map
 			Map<String, Object> mp = (Map<String, Object>) entityId;
 			List<String> keys = new ArrayList(mp.keySet());// Sort
 			Collections.sort(keys, new Comparator() {
@@ -147,14 +148,14 @@ public class EntityNetUtils {// NOSONAR
 				throw new EntityNetException("Id Map can not be empty");
 			return sb.toString();
 		} else {
-			if (entityId instanceof ActiveRecordSupport)
+			if (entityId instanceof ActiveRecordSupport)//ActiveRecord or ActiveEntity
 				return buildNodeIdFromEntity(SqlBoxUtils.findBox(entityId).getTableModel(), entityId);
 
 			Annotation[] anno = entityId.getClass().getAnnotations();
 			for (Annotation annotation : anno)
-				if (Entity.class.equals(annotation.annotationType()))
+				if (Entity.class.equals(annotation.annotationType()))//Has @Entity anno?
 					return buildNodeIdFromEntity(SqlBoxUtils.findBox(entityId).getTableModel(), entityId);
-			return entityId.toString();
+			return entityId.toString(); //treat as a value!
 		}
 	}
 
@@ -196,7 +197,7 @@ public class EntityNetUtils {// NOSONAR
 	public static Node entity2Node(EntityNet net, Object entity) {
 		if (entity == null)
 			return null;
-		Map<String, Node> map = net.getBody().get(entity.getClass());
+		Map<Object, Node> map = net.getBody().get(entity.getClass());
 		if (map == null)
 			return null;
 		return map.get(EntityNetUtils.buildNodeIdFromEntity(net, entity));

@@ -59,7 +59,7 @@ public class EntityNetQueryTest extends TestBase {
 		new User().put("id", "u2").put("userName", "user2").insert();
 		EntityNet net = ctx.netLoadSketch(User.class);
 		Assert.assertEquals(2, net.size());
-		List<User> users = net.selectEntityList(User.class);
+		List<User> users = net.pickEntityList(User.class);
 		Assert.assertNull(users.get(0).getUserName());
 
 		List<Map<String, Object>> listMap = gpQuery(new MapListHandler(),
@@ -67,7 +67,7 @@ public class EntityNetQueryTest extends TestBase {
 		net.add(listMap, new User().alias("u"));// userName joined
 
 		Assert.assertEquals(2, net.size());
-		users = net.selectEntityList(User.class);
+		users = net.pickEntityList(User.class);
 		Assert.assertNotNull(users.get(0).getUserName());
 	}
 

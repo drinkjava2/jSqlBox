@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.entitynet;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public class EntityNet {
 
 	/** The body of the EntityNet */
 	// entityClass, nodeID, node
-	private Map<Class<?>, LinkedHashMap<String, Node>> body = new HashMap<Class<?>, LinkedHashMap<String, Node>>();
+	private Map<Class<?>, LinkedHashMap<Object, Node>> body = new HashMap<Class<?>, LinkedHashMap<Object, Node>>();
 
 	protected void constructors__________________________() {// NOSONAR
 	}
@@ -209,7 +210,7 @@ public class EntityNet {
 
 	/** Remove entity from current entityNet */
 	public void removeEntity(Object entity) {
-		String id = EntityNetUtils.buildNodeIdFromEntity(this, entity);
+		Object id = EntityNetUtils.buildNodeIdFromEntity(this, entity);
 		body.get(entity.getClass()).remove(id);
 	}
 
@@ -224,7 +225,9 @@ public class EntityNet {
 	 * entity field is never loaded from database, will put new entity's value
 	 */
 	protected void addOrJoinEntity(Object entity, Set<String> loadedFields) {
-		String id = EntityNetUtils.buildNodeIdFromEntity(this, entity);
+		Object id = EntityNetUtils.buildNodeIdFromEntity(this, entity);
+		if (id == null)
+			return;
 		List<ParentRelation> parentRelations = EntityNetUtils.transferFKeysToParentRelations(this, entity);
 		Node node = new Node();
 		node.setEntity(entity);
@@ -284,9 +287,9 @@ public class EntityNet {
 		EntityNetException.assureNotNull(node, "Can not add null node");
 		EntityNetException.assureNotNull(node.getEntity(), "Can not add node with null entity");
 		Class<?> entityClass = node.getEntity().getClass();
-		LinkedHashMap<String, Node> nodeMap = body.get(entityClass);
+		LinkedHashMap<Object, Node> nodeMap = body.get(entityClass);
 		if (nodeMap == null) {
-			nodeMap = new LinkedHashMap<String, Node>();
+			nodeMap = new LinkedHashMap<Object, Node>();
 			body.put(entityClass, nodeMap);
 		}
 		nodeMap.put(node.getId(), node);
@@ -305,7 +308,7 @@ public class EntityNet {
 	private Node findNode(Node node) {
 		if (node == null || node.getEntity() == null)
 			return null;
-		LinkedHashMap<String, Node> nodes = body.get(node.getEntity().getClass());
+		LinkedHashMap<Object, Node> nodes = body.get(node.getEntity().getClass());
 		if (nodes == null)
 			return null;
 		return nodes.get(node.getId());
@@ -314,7 +317,7 @@ public class EntityNet {
 	/** Return total how many nodes */
 	public int size() {
 		int size = 0;
-		for (LinkedHashMap<String, Node> map : body.values()) {
+		for (LinkedHashMap<Object, Node> map : body.values()) {
 			size += map.size();
 		}
 		return size;
@@ -396,7 +399,7 @@ public class EntityNet {
 
 				// Find childNodes meat class/columns/id condition
 				Set<Node> nodesToCheck = new LinkedHashSet<Node>();
-				for (Entry<String, Node> cNode : body.get(targetClass).entrySet()) {
+				for (Entry<Object, Node> cNode : body.get(targetClass).entrySet()) {
 					List<ParentRelation> prs = cNode.getValue().getParentRelations();
 					if (prs != null)
 						for (ParentRelation pr : prs) {
@@ -460,17 +463,58 @@ public class EntityNet {
 				selected.add(node);
 	}
 
-	public EntityNet bind() {
-		// TODO: work on here
+	protected void giveAndPick__________________________() {// NOSONAR
+		//TODO: work at give methods
+	}
+
+	/**
+	 * Give a's value to b's field "a" or "aList" or "aSet"
+	 */
+	public EntityNet give(Class<?> a, Class<?> b) {
+		return give(a, b, a.getSimpleName());
+	}
+
+	/**
+	 * Give a's value to b's field "bFieldName"
+	 */
+	public EntityNet give(Class<?> a, Class<?> b, String fd) {
+		String upFieldname = StrUtils.toUpperCaseFirstOne(fd);
+		String bSetMethodName = "get" + upFieldname;
+		Method bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
+		if (bSetMethod != null)
+			doGive(a, b, bSetMethodName, bSetMethod);
+		else {
+			bSetMethodName = bSetMethodName + "List";
+			bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
+			if (bSetMethod != null)
+				doGive(a, b, bSetMethodName, bSetMethod);
+			else {
+				bSetMethodName = "get" + bSetMethodName + "Set";
+				bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
+				if (bSetMethod != null)
+					doGive(a, b, bSetMethodName, bSetMethod);
+			}
+		}
 		return this;
 	}
 
-	protected void select__________________________() {// NOSONAR
+	/**
+	 * Give a's value to b's field "a" or "aList" or "aSet" <br/>
+	 * And Give b's value to a's field "b" or "bList" or "bSet"
+	 */
+	public EntityNet giveBoth(Class a, Class b) {
+		give(a, b, a.getSimpleName());
+		give(b, a, b.getSimpleName());
+		return this;
+	}
+
+	private void doGive(Class a, Class b, String bFieldName, Method bMethod) {
+
 	}
 
 	/** Pick a Node by given entityClass and nodeId */
-	public Node pickOneNode(Class<?> entityClass, String nodeId) {
-		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
+	public Node pickOneNode(Class<?> entityClass, Object nodeId) {
+		LinkedHashMap<Object, Node> nodesMap = body.get(entityClass);
 		if (nodesMap == null)
 			return null;
 		return nodesMap.get(nodeId);
@@ -479,7 +523,7 @@ public class EntityNet {
 	/** Pick Node set in EntityNet which type is entityClass */
 	public Set<Node> pickNodeSet(Class<?> entityClass) {
 		Set<Node> result = new LinkedHashSet<Node>();
-		LinkedHashMap<String, Node> nodesMap = body.get(entityClass);
+		LinkedHashMap<Object, Node> nodesMap = body.get(entityClass);
 		if (nodesMap == null || nodesMap.isEmpty())
 			return result;
 		result.addAll(nodesMap.values());
@@ -487,12 +531,11 @@ public class EntityNet {
 	}
 
 	/**
-	 * Pick a entity by given entityClass and entityId or Id
-	 * HashMap<String,Object>
+	 * Pick a entity by given entityClass and entityId or Id HashMap<String,Object>
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T pickOneEntity(Class<?> entityClass, Object entityIdOrIdMap) {
-		Node node = pickOneNode(entityClass, EntityNetUtils.buildNodeIdFromEntityOrIdOrMap(entityIdOrIdMap));
+		Node node = pickOneNode(entityClass, EntityNetUtils.buildNodeIdFromUnknow(entityIdOrIdMap));
 		if (node == null)
 			return null;
 		return (T) node.getEntity();
@@ -504,7 +547,7 @@ public class EntityNet {
 	}
 
 	/** Pick entity List in EntityNet which type is entityClass */
-	public <T> List<T> selectEntityList(Class<T> entityClass) {
+	public <T> List<T> pickEntityList(Class<T> entityClass) {
 		return EntityNetUtils.nodeCollection2EntityList(pickNodeSet(entityClass));
 	}
 
@@ -530,11 +573,11 @@ public class EntityNet {
 		this.configModels = configModels;
 	}
 
-	public Map<Class<?>, LinkedHashMap<String, Node>> getBody() {
+	public Map<Class<?>, LinkedHashMap<Object, Node>> getBody() {
 		return body;
 	}
 
-	public void setBody(Map<Class<?>, LinkedHashMap<String, Node>> body) {
+	public void setBody(Map<Class<?>, LinkedHashMap<Object, Node>> body) {
 		this.body = body;
 	}
 
