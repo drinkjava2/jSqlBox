@@ -464,23 +464,17 @@ public class EntityNet {
 	}
 
 	protected void giveAndPick__________________________() {// NOSONAR
-		//TODO: work at give methods
+		// TODO: work at give methods
 	}
 
 	/**
 	 * Give a's value to b's field "a" or "aList" or "aSet"
 	 */
 	public EntityNet give(Class<?> a, Class<?> b) {
-		return give(a, b, a.getSimpleName());
-	}
-
-	/**
-	 * Give a's value to b's field "bFieldName"
-	 */
-	public EntityNet give(Class<?> a, Class<?> b, String fd) {
-		String upFieldname = StrUtils.toUpperCaseFirstOne(fd);
-		String bSetMethodName = "get" + upFieldname;
+		String upFieldname = StrUtils.toUpperCaseFirstOne(a.getSimpleName());
+		String bSetMethodName = "set" + upFieldname;
 		Method bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
+		boolean found = false;
 		if (bSetMethod != null)
 			doGive(a, b, bSetMethodName, bSetMethod);
 		else {
@@ -489,12 +483,14 @@ public class EntityNet {
 			if (bSetMethod != null)
 				doGive(a, b, bSetMethodName, bSetMethod);
 			else {
-				bSetMethodName = "get" + bSetMethodName + "Set";
+				bSetMethodName = "set" + bSetMethodName + "Set";
 				bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
 				if (bSetMethod != null)
 					doGive(a, b, bSetMethodName, bSetMethod);
 			}
 		}
+		if (!found)
+			throw new EntityNetException("Can not find set methods set"+upFieldname+"/List/Set in class '" + b + "'");
 		return this;
 	}
 
@@ -502,9 +498,23 @@ public class EntityNet {
 	 * Give a's value to b's field "a" or "aList" or "aSet" <br/>
 	 * And Give b's value to a's field "b" or "bList" or "bSet"
 	 */
-	public EntityNet giveBoth(Class a, Class b) {
-		give(a, b, a.getSimpleName());
-		give(b, a, b.getSimpleName());
+	public EntityNet giveBoth(Class<?> a, Class<?> b) {
+		give(a, b);
+		give(b, a);
+		return this;
+	}
+
+	/**
+	 * Give a's value to b's field "bFieldName"
+	 */
+	public EntityNet give(Class<?> a, Class<?> b, String fd) {
+		String upFieldname = StrUtils.toUpperCaseFirstOne(fd);
+		String bSetMethodName = "set" + upFieldname;
+		Method bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
+		if (bSetMethod != null)
+			doGive(a, b, bSetMethodName, bSetMethod);
+		else
+			throw new EntityNetException("Can not find set method '" + bSetMethodName + "' in class '" + b + "'");
 		return this;
 	}
 
