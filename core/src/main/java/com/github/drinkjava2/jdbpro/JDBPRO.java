@@ -170,7 +170,7 @@ public abstract class JDBPRO extends DbPro {
 	 * instance by IocTool
 	 */
 	public static SqlItem ioc(Class<?>... args) {
-		return new SqlItem(SqlOption.IOC_OBJECT, (Object[]) args);
+		return new SqlItem(SqlOption.IOC, (Object[]) args);
 	}
 
 	/**

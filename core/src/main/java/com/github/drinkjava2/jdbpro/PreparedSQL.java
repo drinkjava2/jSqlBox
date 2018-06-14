@@ -39,7 +39,7 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 public class PreparedSQL {
 
 	/** SQL Operation Type */
-	private SqlType type;
+	private SqlOption type;
 
 	/** Choose use master or slave options */
 	private SqlOption masterSlaveOption;
@@ -77,7 +77,7 @@ public class PreparedSQL {
 	public PreparedSQL() {// default constructor
 	}
 
-	public PreparedSQL(SqlType type, Connection conn, ResultSetHandler<?> rsh, String sql, Object... params) {
+	public PreparedSQL(SqlOption type, Connection conn, ResultSetHandler<?> rsh, String sql, Object... params) {
 		this.type = type;
 		this.connection = conn;
 		this.resultSetHandler = rsh;
@@ -252,7 +252,7 @@ public class PreparedSQL {
 	}
 
 	/** If current type is null, set with new type value */
-	public void ifNullSetType(SqlType type) {
+	public void ifNullSetType(SqlOption type) {
 		if (this.type == null)
 			this.type = type;
 	}
@@ -267,11 +267,11 @@ public class PreparedSQL {
 		// === below this line are normal getter && setter======
 	}
 
-	public SqlType getType() {
+	public SqlOption getType() {
 		return type;
 	}
 
-	public void setType(SqlType type) {
+	public void setType(SqlOption type) {
 		this.type = type;
 	}
 

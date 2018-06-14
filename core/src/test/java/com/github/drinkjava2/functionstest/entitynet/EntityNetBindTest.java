@@ -1,8 +1,5 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +13,6 @@ import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
-import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 
 public class EntityNetBindTest extends TestBase {
 	{
@@ -44,59 +40,27 @@ public class EntityNetBindTest extends TestBase {
 		new Email().putValues("e4", "email4", "u2").insert();
 		new Email().putValues("e5", "email5", "u3").insert();
 
-		Role r = new Role();
-		r.setId("r1");
-		r.setRoleName("role1");
-		r.insert();
-		r.setId("r2");
-		r.setRoleName("role2");
-		r.insert();
-		r.setId("r3");
-		r.setRoleName("role3");
-		r.insert();
-		r.setId("r4");
-		r.setRoleName("role4");
-		r.insert();
-		r.setId("r5");
-		r.setRoleName("role5");
-		r.insert();
+		new Role().putFields("id", "roleName");
+		new Role().putValues("r1", "role1").insert();
+		new Role().putValues("r2", "role2").insert();
+		new Role().putValues("r3", "role3").insert();
+		new Role().putValues("r4", "role4").insert();
+		new Role().putValues("r5", "role5").insert();
 
-		Privilege p = new Privilege();
-		p.setId("p1");
-		p.setPrivilegeName("privilege1");
-		p.insert();
-		p.setId("p2");
-		p.setPrivilegeName("privilege2");
-		p.insert();
-		p.setId("p3");
-		p.setPrivilegeName("privilege3");
-		p.insert();
-		p.setId("p4");
-		p.setPrivilegeName("privilege4");
-		p.insert();
-		p.setId("p5");
-		p.setPrivilegeName("privilege5");
-		p.insert();
+		new Privilege().putFields("id", "privilegeName");
+		new Privilege().putValues("p1", "privilege1").insert();
+		new Privilege().putValues("p2", "privilege2").insert();
+		new Privilege().putValues("p3", "privilege3").insert();
+		new Privilege().putValues("p4", "privilege4").insert();
+		new Privilege().putValues("p5", "privilege5").insert();
 
-		UserRole ur = new UserRole();
-		ur.setUserId("u1");
-		ur.setRid("r1");
-		ur.insert();
-		ur.setUserId("u2");
-		ur.setRid("r1");
-		ur.insert();
-		ur.setUserId("u2");
-		ur.setRid("r2");
-		ur.insert();
-		ur.setUserId("u2");
-		ur.setRid("r3");
-		ur.insert();
-		ur.setUserId("u3");
-		ur.setRid("r4");
-		ur.insert();
-		ur.setUserId("u4");
-		ur.setRid("r1");
-		ur.insert();
+		new UserRole().putFields("userId", "rid");
+		new UserRole().putValues("u1", "r1").insert();
+		new UserRole().putValues("u2", "r1").insert();
+		new UserRole().putValues("u2", "r2").insert();
+		new UserRole().putValues("u2", "r3").insert();
+		new UserRole().putValues("u3", "r4").insert();
+		new UserRole().putValues("u4", "r1").insert();
 
 		new RolePrivilege().putFields("rid", "pid");
 		new RolePrivilege().putValues("r1", "p1").insert();
@@ -110,17 +74,15 @@ public class EntityNetBindTest extends TestBase {
 	@Test
 	public void testAutoPath() {
 		insertDemoData();
-		EntityNet net= ctx.iQuery(
+		EntityNet net = ctx.iQuery(
 				new EntityNetHandler(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class), //
 				"select  u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ", //
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
-				" left join privilegetb p on p.id=rp.pid "); 
+				" left join privilegetb p on p.id=rp.pid ");
 		System.out.println(net.size());
-		Assert.assertEquals(24, net.size());
-		
+		Assert.assertEquals(24, net.size()); 
 	}
-	 
 
 }

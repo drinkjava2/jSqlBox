@@ -798,6 +798,21 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.specialSqlItemPreparers = specialSqlItemPreparers;
 	}
 
+	/**
+	 * This method is not thread safe, suggest only use at program starting
+	 */
+	@Deprecated
+	public void addSpecialSqlItemPreparer(SpecialSqlItemPreparer specialSqlItemPreparer) {// NOSONAR
+		if (this.specialSqlItemPreparers == null || this.specialSqlItemPreparers.length == 0) {
+			this.specialSqlItemPreparers = new SpecialSqlItemPreparer[] { specialSqlItemPreparer };
+		} else {
+			SpecialSqlItemPreparer[] newArray = new SpecialSqlItemPreparer[specialSqlItemPreparers.length + 1];
+			System.arraycopy(specialSqlItemPreparers, 0, newArray, 0, specialSqlItemPreparers.length);
+			newArray[ specialSqlItemPreparers.length] =  specialSqlItemPreparer;
+			this.specialSqlItemPreparers = newArray;
+		}
+	}
+
 	public DbPro[] getSlaves() {
 		return slaves;
 	}

@@ -16,7 +16,6 @@ import java.lang.reflect.Method;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
-import com.github.drinkjava2.jdbpro.SqlType;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
@@ -116,20 +115,20 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 				throw new SqlBoxException(e);
 			}
 		for (Class<?> iocClaz : iocClasses)
-			realParams[i++] = new SqlItem(SqlOption.IOC_OBJECT, iocClaz);
+			realParams[i++] = new SqlItem(SqlOption.IOC, iocClaz);
 		for (Object para : params)
 			realParams[i++] = para;
 
 		PreparedSQL ps = ctx.pPrepare(realParams);
 		if (ps.getType() == null)
 			if (StrUtils.startsWithIgnoreCase(ps.getSql(), "select"))
-				ps.setType(SqlType.QUERY);
+				ps.setType(SqlOption.QUERY);
 			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "delete"))
-				ps.setType(SqlType.UPDATE);
+				ps.setType(SqlOption.UPDATE);
 			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "update"))
-				ps.setType(SqlType.UPDATE);
+				ps.setType(SqlOption.UPDATE);
 			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "insert"))
-				ps.setType(SqlType.UPDATE);
+				ps.setType(SqlOption.UPDATE);
 			else
 				throw new SqlBoxException(
 						"Can not guess SqlType, only can guess SQL started with select/delete/update/insert, need manually set SqlType");

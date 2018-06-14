@@ -75,11 +75,11 @@ public class EntityNet {
 	private Map<Class<?>, TableModel> configModels = new HashMap<Class<?>, TableModel>();
 
 	/** The row Data loaded from database */
-	private List<Map<String, Object>> rowData = new ArrayList<Map<String, Object>>();
+	private List<Map<String, Object>> rowEntity = new ArrayList<Map<String, Object>>();
 
 	/** The body of the EntityNet */
 	// entityClass, nodeID, node
-	private Map<Class<?>, LinkedHashMap<Object, Node>> body = new HashMap<Class<?>, LinkedHashMap<Object, Node>>();
+	private Map<Class<?>, LinkedHashMap<Object, Node>> body;
 
 	protected void constructors__________________________() {// NOSONAR
 	}
@@ -171,6 +171,7 @@ public class EntityNet {
 	 * Assembly one row of Map List to Entities, according net's configModels
 	 */
 	protected void addOneRowMapList(Map<String, Object> oneRow) {
+		Map<Class<?>, Object> rowEntityMap = new HashMap<Class<?>, Object>();
 		for (TableModel model : this.configModels.values()) {
 			Object entity = null;
 			String alias = model.getAlias();
@@ -191,9 +192,29 @@ public class EntityNet {
 					}
 				}
 			}
-			if (entity != null)
-				this.addOrJoinEntity(entity, loadedFields);
+			if (entity != null) {
+				// TODO: delete relationship
+				/*-
+				 * *. Delete relationship to save time?
+				 * *. Do not keep OneRowEntity in EntityNet but assembly according "give" immediately? 
+				 * 
+				 * 2. As relationship deleted, to search according Path will cost more time.
+				 * 3. But usually the relationship depends on SQL to line up related records on one line
+				 */
+				rowEntityMap.put(entity.getClass(), entity);
+				this.addOrJoinEntity(entity, loadedFields);// TODO: delete relationship to save time
+			}
 		}
+		this.addOneRowEntity(oneRow);
+	}
+
+	private void addOneRowEntity(Object entity) {
+		SqlBox box = SqlBoxUtils.findAndBindSqlBox(sqlBoxContext, entity);
+		TableModel tableModel = box.getTableModel();
+		Set<String> loadedFields = new HashSet<String>();
+		for (ColumnModel col : tableModel.getColumns())
+			loadedFields.add(col.getEntityField());
+		addOrJoinEntity(entity, loadedFields);
 	}
 
 	/**
@@ -211,7 +232,7 @@ public class EntityNet {
 	/** Remove entity from current entityNet */
 	public void removeEntity(Object entity) {
 		Object id = EntityNetUtils.buildNodeIdFromEntity(this, entity);
-		body.get(entity.getClass()).remove(id);
+		getBody().get(entity.getClass()).remove(id);
 	}
 
 	/** Update entity in current entityNet */
@@ -287,10 +308,10 @@ public class EntityNet {
 		EntityNetException.assureNotNull(node, "Can not add null node");
 		EntityNetException.assureNotNull(node.getEntity(), "Can not add node with null entity");
 		Class<?> entityClass = node.getEntity().getClass();
-		LinkedHashMap<Object, Node> nodeMap = body.get(entityClass);
+		LinkedHashMap<Object, Node> nodeMap = getBody().get(entityClass);
 		if (nodeMap == null) {
 			nodeMap = new LinkedHashMap<Object, Node>();
-			body.put(entityClass, nodeMap);
+			getBody().put(entityClass, nodeMap);
 		}
 		nodeMap.put(node.getId(), node);
 	}
@@ -308,7 +329,7 @@ public class EntityNet {
 	private Node findNode(Node node) {
 		if (node == null || node.getEntity() == null)
 			return null;
-		LinkedHashMap<Object, Node> nodes = body.get(node.getEntity().getClass());
+		LinkedHashMap<Object, Node> nodes = getBody().get(node.getEntity().getClass());
 		if (nodes == null)
 			return null;
 		return nodes.get(node.getId());
@@ -317,7 +338,7 @@ public class EntityNet {
 	/** Return total how many nodes */
 	public int size() {
 		int size = 0;
-		for (LinkedHashMap<Object, Node> map : body.values()) {
+		for (LinkedHashMap<Object, Node> map : getBody().values()) {
 			size += map.size();
 		}
 		return size;
@@ -399,7 +420,7 @@ public class EntityNet {
 
 				// Find childNodes meat class/columns/id condition
 				Set<Node> nodesToCheck = new LinkedHashSet<Node>();
-				for (Entry<Object, Node> cNode : body.get(targetClass).entrySet()) {
+				for (Entry<Object, Node> cNode : getBody().get(targetClass).entrySet()) {
 					List<ParentRelation> prs = cNode.getValue().getParentRelations();
 					if (prs != null)
 						for (ParentRelation pr : prs) {
@@ -471,60 +492,37 @@ public class EntityNet {
 	 * Give a's value to b's field "a" or "aList" or "aSet"
 	 */
 	public EntityNet give(Class<?> a, Class<?> b) {
-		String upFieldname = StrUtils.toUpperCaseFirstOne(a.getSimpleName());
-		String bSetMethodName = "set" + upFieldname;
-		Method bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
-		boolean found = false;
-		if (bSetMethod != null)
-			doGive(a, b, bSetMethodName, bSetMethod);
-		else {
-			bSetMethodName = bSetMethodName + "List";
-			bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
-			if (bSetMethod != null)
-				doGive(a, b, bSetMethodName, bSetMethod);
-			else {
-				bSetMethodName = "set" + bSetMethodName + "Set";
-				bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
-				if (bSetMethod != null)
-					doGive(a, b, bSetMethodName, bSetMethod);
-			}
-		}
-		if (!found)
-			throw new EntityNetException("Can not find set methods set"+upFieldname+"/List/Set in class '" + b + "'");
-		return this;
+		return give(a, b, a.getSimpleName());
 	}
 
 	/**
-	 * Give a's value to b's field "a" or "aList" or "aSet" <br/>
-	 * And Give b's value to a's field "b" or "bList" or "bSet"
+	 * Give a's value to b's field "bFieldName" <br/>
+	 * For example, give(user.class, role.class) equal to role1.setUser(user1),
+	 * role2.setUser(user2)... if role1 and user1 appear in same line...
+	 * 
+	 * give(role.class, user.class, "roleList") equal to
+	 * user.setRoleList(r1,r2,r3...) if r1, r2, r3 appear in same line with user
+	 * 
 	 */
-	public EntityNet giveBoth(Class<?> a, Class<?> b) {
-		give(a, b);
-		give(b, a);
+	public EntityNet give(Class<?> a, Class<?> b, String bFieldName) {
+		String upFieldname = StrUtils.toUpperCaseFirstOne(bFieldName);
+		String name = "get" + upFieldname;
+		Method get = ClassCacheUtils.checkMethodExist(b, name);
+		if (get == null)
+			throw new EntityNetException("Can not find get method '" + name + "' in class '" + b + "'");
+
+		name = "set" + upFieldname;
+		Method set = ClassCacheUtils.checkMethodExist(b, name);
+		if (set == null)
+			throw new EntityNetException("Can not find set method '" + name + "' in class '" + b + "'");
+		// role.user user.roleList user.roleSet user.roleMap role.user
+
 		return this;
-	}
-
-	/**
-	 * Give a's value to b's field "bFieldName"
-	 */
-	public EntityNet give(Class<?> a, Class<?> b, String fd) {
-		String upFieldname = StrUtils.toUpperCaseFirstOne(fd);
-		String bSetMethodName = "set" + upFieldname;
-		Method bSetMethod = ClassCacheUtils.checkMethodExist(b, bSetMethodName);
-		if (bSetMethod != null)
-			doGive(a, b, bSetMethodName, bSetMethod);
-		else
-			throw new EntityNetException("Can not find set method '" + bSetMethodName + "' in class '" + b + "'");
-		return this;
-	}
-
-	private void doGive(Class a, Class b, String bFieldName, Method bMethod) {
-
 	}
 
 	/** Pick a Node by given entityClass and nodeId */
 	public Node pickOneNode(Class<?> entityClass, Object nodeId) {
-		LinkedHashMap<Object, Node> nodesMap = body.get(entityClass);
+		LinkedHashMap<Object, Node> nodesMap = getBody().get(entityClass);
 		if (nodesMap == null)
 			return null;
 		return nodesMap.get(nodeId);
@@ -533,7 +531,7 @@ public class EntityNet {
 	/** Pick Node set in EntityNet which type is entityClass */
 	public Set<Node> pickNodeSet(Class<?> entityClass) {
 		Set<Node> result = new LinkedHashSet<Node>();
-		LinkedHashMap<Object, Node> nodesMap = body.get(entityClass);
+		LinkedHashMap<Object, Node> nodesMap = getBody().get(entityClass);
 		if (nodesMap == null || nodesMap.isEmpty())
 			return result;
 		result.addAll(nodesMap.values());
@@ -565,7 +563,7 @@ public class EntityNet {
 	@SuppressWarnings("unchecked")
 	public Map<Class<?>, Set<Object>> pickEntitySetMap() {
 		Map<Class<?>, Set<Object>> result = new HashMap<Class<?>, Set<Object>>();
-		for (Class<?> claz : body.keySet())
+		for (Class<?> claz : getBody().keySet())
 			result.put(claz, this.pickEntitySet((Class<Object>) claz));
 		return result;
 	}
@@ -584,6 +582,8 @@ public class EntityNet {
 	}
 
 	public Map<Class<?>, LinkedHashMap<Object, Node>> getBody() {
+		if (body == null)
+			body = new HashMap<Class<?>, LinkedHashMap<Object, Node>>();
 		return body;
 	}
 
@@ -599,12 +599,12 @@ public class EntityNet {
 		this.sqlBoxContext = sqlBoxContext;
 	}
 
-	public List<Map<String, Object>> getRowData() {
-		return rowData;
+	public List<Map<String, Object>> getRowEntity() {
+		return rowEntity;
 	}
 
-	public void setRowData(List<Map<String, Object>> rowData) {
-		this.rowData = rowData;
+	public void setRowEntity(List<Map<String, Object>> rowEntity) {
+		this.rowEntity = rowEntity;
 	}
 
 }

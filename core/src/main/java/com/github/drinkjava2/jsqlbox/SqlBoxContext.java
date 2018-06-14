@@ -154,11 +154,20 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
 		if (super.dealItem(iXxxStyle, predSQL, sql, item))
 			return true;
-		else {
-			return false;
-			}
-	}
+		else if (item instanceof SqlItem) {
+			SqlItem sqItem = (SqlItem) item;
+			SqlOption sqlItemType = sqItem.getType();
+			if (SqlOption.SHARD_TABLE.equals(sqlItemType))
+				handleShardTable(predSQL, sql, sqItem);
+			else if (SqlOption.SHARD_DATABASE.equals(sqlItemType))
+				handleShardDatabase(predSQL, sql, sqItem);
+			else
+				return false;
 
+		} else
+			return false;
+		return true;
+	}
 	// =========getter & setter =======
 
 	/**
@@ -207,7 +216,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
-	@Override
 	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
 		Object[] params = item.getParameters();
 		String table = null;
@@ -224,7 +232,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return table;
 	}
 
-	@Override
 	protected DbPro handleShardDatabase(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
 		Object[] params = item.getParameters();
 		SqlBoxContext ctx = null;
@@ -381,8 +388,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Create a EntityNet instance but only load PKey and FKeys columns */
 	public EntityNet netLoadSketch(Object... configObjects) {
 		return new EntityNet(this).loadSketch(configObjects);
-	} 
-	
+	}
+
 	protected void getteSetters__________________________() {// NOSONAR
 	}
 

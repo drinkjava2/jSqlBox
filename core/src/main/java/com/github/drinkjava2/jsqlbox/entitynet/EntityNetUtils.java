@@ -92,7 +92,7 @@ public class EntityNetUtils {// NOSONAR
 	public static Object buildNodeIdFromEntity(EntityNet net, Object entity) {
 		if (entity == null)
 			return null;
-		if (net==null || net.getConfigModels() == null)
+		if (net == null || net.getConfigModels() == null)
 			return null;
 		return buildNodeIdFromEntity(net.getConfigModels().get(entity.getClass()), entity);
 	}
@@ -115,10 +115,10 @@ public class EntityNetUtils {// NOSONAR
 					break;
 				keyColumn = col;
 			}
-		if (keyCount == 0 || keyColumn==null)
+		if (keyCount == 0 || keyColumn == null)
 			throw new EntityNetException("No prime key setting found for entity " + entity);
-		if (keyCount == 1)  
-			return ClassCacheUtils.readValueFromBeanField(entity, keyColumn.getEntityField());  
+		if (keyCount == 1)
+			return ClassCacheUtils.readValueFromBeanField(entity, keyColumn.getEntityField());
 
 		for (ColumnModel col : model.getColumns()) // compound key
 			if (col.getPkey() && !col.getTransientable())
@@ -130,7 +130,7 @@ public class EntityNetUtils {// NOSONAR
 	@SuppressWarnings("all")
 	public static Object buildNodeIdFromUnknow(Object entityId) {
 		SqlBoxException.assureNotNull(entityId, "Id can not be null.");
-		if (entityId instanceof Map) {//map
+		if (entityId instanceof Map) {// map
 			Map<String, Object> mp = (Map<String, Object>) entityId;
 			List<String> keys = new ArrayList(mp.keySet());// Sort
 			Collections.sort(keys, new Comparator() {
@@ -148,14 +148,14 @@ public class EntityNetUtils {// NOSONAR
 				throw new EntityNetException("Id Map can not be empty");
 			return sb.toString();
 		} else {
-			if (entityId instanceof ActiveRecordSupport)//ActiveRecord or ActiveEntity
+			if (entityId instanceof ActiveRecordSupport)// ActiveRecord or ActiveEntity
 				return buildNodeIdFromEntity(SqlBoxUtils.findBox(entityId).getTableModel(), entityId);
 
 			Annotation[] anno = entityId.getClass().getAnnotations();
 			for (Annotation annotation : anno)
-				if (Entity.class.equals(annotation.annotationType()))//Has @Entity anno?
+				if (Entity.class.equals(annotation.annotationType()))// Has @Entity anno?
 					return buildNodeIdFromEntity(SqlBoxUtils.findBox(entityId).getTableModel(), entityId);
-			return entityId.toString(); //treat as a value!
+			return entityId.toString(); // treat as a value!
 		}
 	}
 
@@ -267,7 +267,7 @@ public class EntityNetUtils {// NOSONAR
 	/** Convert a Node Set Map to an entity set map */
 	public static EntityNet nodeSetMapToEntityNet(EntityNet net, Map<Class<?>, Set<Node>> nodeMap) {
 		EntityNet newNet = new EntityNet(net.getSqlBoxContext());
-		newNet.setRowData(net.getRowData());
+		newNet.setRowEntity(net.getRowEntity());
 		newNet.setConfigModels(net.getConfigModels());
 		for (Entry<Class<?>, Set<Node>> entry : nodeMap.entrySet())
 			newNet.addNodes(entry.getValue());

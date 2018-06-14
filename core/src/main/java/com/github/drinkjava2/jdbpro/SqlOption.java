@@ -23,45 +23,80 @@ package com.github.drinkjava2.jdbpro;
  * @since 1.7.0.3
  */
 public enum SqlOption {
-	//@formatter:off
-	SQL, // A SQL String piece 
+	/** A SQL String piece */
+	SQL,
 
-	PARAM, //  SQL parameter or parameters, need Object types followed
+	/** SQL parameter or parameters, need Object types followed */
+	PARAM,
 
-	BIND, // BIND Key-Values pairs "key1,value1, key2,value2..."  for SqlTemplateEngine 
+	/** Append a "?" at end of SQL and append a parameter or parameter array */
+	QUESTION_PARAM,
+	/** BIND Key-Values pairs "key1,value1, key2,value2..." for SqlTemplateEngine */
+	BIND, //
 
-	QUESTION_PARAM, // Append a "?" at end of SQL and append a parameter or parameter array
+	/**
+	 * Usage: NOT_NUL("user_name=?", name), when name is null, nothing will be
+	 * appended into SQL and parameters
+	 */
+	NOT_NULL,
 
-	NOT_NULL, // Usage: NOT_NUL("user_name=?", name), when name is null, nothing will be
-				// appended into SQL and parameters
+	/** Append a " values(?,?,?....?)" String at end of SQL */
+	VALUES_QUESTIONS,
 
-	VALUES_QUESTIONS, // Append a " values(?,?,?....?)" String at end of SQL
+	// ----------Special Items------------
+	/**
+	 * Switch to another DbPro or subClass(like SqlBoxContext) instance to run the
+	 * SQL
+	 */
+	SWITCHTO,
 
-	// ----------Special Items------------ 
-	SWITCHTO, // Switch to another DbPro or subClass(like SqlBoxContext) instance to run the SQL
-	
-	IOC_OBJECT,//Object will created by IocTool
-	  
-	// -----------Control option--------------
-	USE_TEMPLATE, //force use template style  
+	/** Object will created by IocTool */
+	IOC,
 
-	DISABLE_HANDLERS, //disable handles according given handlers' class
-	
-	ENABLE_HANDLERS, //disable handles according given handlers' class
-	
+	/** Disable handles according given handlers' class */
+	DISABLE_HANDLERS, //
+
+	/** Disable handles according given handlers' class */
+	ENABLE_HANDLERS,
+
+	/** Tell system this is a "SHARD_TABLE" SqlItem */
+	SHARD_TABLE,
+
+	/** Tell system this is a "SHARD_DATABASE" SqlItem */
+	SHARD_DATABASE,
+
+	// =============Control option==================
+	/** Force use template style */
+	USE_TEMPLATE,
+
 	// ------Master_Slave Options-------
-	USE_AUTO, // Tell system to choose master or slave database automatically (write:master,
-				// read:if in Transaction use master otherwise use on slave)
+	/**
+	 * Tell system to choose master or slave database automatically (write:master,
+	 * read:if in Transaction use master otherwise use on slave)
+	 */
+	USE_AUTO,
+	/** Tell system force use master database (write:master, read:master) */
+	USE_MASTER,
 
-	USE_MASTER, // Tell system force use master database (write:master, read:master)
+	/** Tell system force use slave database (write:all slaves, read:one slave) */
+	USE_SLAVE, //
 
-	USE_SLAVE, // Tell system force use slave database (write:all slaves, read:one slave)
+	/**
+	 * Tell system force use master and slave database (write: master + all slaves,
+	 * read: master)
+	 */
+	USE_BOTH,
 
-	USE_BOTH, // Tell system force use master and slave database (write: master + all slaves,
-				// read: master)
+	// ------Sql Operation type--------
+	/** It's a EXECUTE type SQL */
+	EXECUTE,
 
-	// -------Sharding Options--------
-	SHARD_TABLE, // Tell system this is a "SHARD_TABLE" SqlItem
+	/** It's a UPDATE type SQL */
+	UPDATE,
 
-	SHARD_DATABASE // Tell system this is a "SHARD_DATABASE" SqlItem
+	/** It's a INSERT type SQL */
+	INSERT,
+
+	/** It's a QUERY type SQL */
+	QUERY
 }
