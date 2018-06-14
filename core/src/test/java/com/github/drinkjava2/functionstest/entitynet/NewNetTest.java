@@ -1,6 +1,5 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
@@ -11,10 +10,9 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
+import com.github.drinkjava2.jsqlbox.entitynet.NewNet;
 
-public class EntityNetBindTest extends TestBase {
+public class NewNetTest extends TestBase {
 	{
 		regTables(User.class, Email.class, Address.class, Role.class, Privilege.class, UserRole.class,
 				RolePrivilege.class);
@@ -74,15 +72,14 @@ public class EntityNetBindTest extends TestBase {
 	@Test
 	public void testAutoPath() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(
-				new EntityNetHandler(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class), //
-				"select  u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
-				" left join userroletb ur on u.id=ur.userid ", //
-				" left join roletb r on ur.rid=r.id ", //
-				" left join roleprivilegetb rp on rp.rid=r.id ", //
-				" left join privilegetb p on p.id=rp.pid ");
-		System.out.println(net.size());
-		Assert.assertEquals(24, net.size()); 
+		NewNet net = new NewNet(ctx)
+				.config(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class).give("u", "r")
+				.joinQuery("select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+						" left join userroletb ur on u.id=ur.userid ", //
+						" left join roletb r on ur.rid=r.id ", //
+						" left join roleprivilegetb rp on rp.rid=r.id ", //
+						" left join privilegetb p on p.id=rp.pid ");
+		System.out.println(net.getRowData());
 	}
 
 }

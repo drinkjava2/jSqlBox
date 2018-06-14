@@ -60,10 +60,10 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 public class EntityNet {
 
 	/** Used to combine compound key column names into a single String */
-	public static final String COMPOUND_COLUMNNAME_SEPARATOR = "_CpdIdSpr_";
+	public static final String COMPOUND_COLUMNNAME_SEPARATOR = "_CpdCLSpr_";
 
 	/** Used to combine compound key column values into a single String */
-	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdValSpr_";
+	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdVlSpr_";
 
 	/** SqlBoxContext instance */
 	SqlBoxContext sqlBoxContext;
