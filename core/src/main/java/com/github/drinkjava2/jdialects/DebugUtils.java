@@ -28,7 +28,7 @@ public abstract class DebugUtils {//// NOSONAR
 
 	public static String getColumnModelDebugInfo(ColumnModel c) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("columnName=" + c.getColumnName()).append(", ");
+ 		sb.append("columnName=" + c.getColumnName()).append(", ");
 		sb.append("transient=" + c.getTransientable()).append(", ");
 		sb.append("type=" + c.getColumnType()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
@@ -64,6 +64,7 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("getAlias=" + model.getAlias()).append("\r");
 		sb.append(getFkeyDebugInfo(model));
 		List<ColumnModel> columns = model.getColumns();
+		sb.append("Columns:\r");
 		for (ColumnModel column : columns)
 			sb.append(getColumnModelDebugInfo(column)).append("\r");
 

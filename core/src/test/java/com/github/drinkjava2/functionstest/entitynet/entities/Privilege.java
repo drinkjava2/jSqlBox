@@ -27,4 +27,12 @@ public class Privilege extends ActiveRecord {
 		this.privilegeName = privilegeName;
 	}
 
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
 }

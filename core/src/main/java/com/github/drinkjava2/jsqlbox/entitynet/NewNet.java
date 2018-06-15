@@ -11,14 +11,22 @@
  */
 package com.github.drinkjava2.jsqlbox.entitynet;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
@@ -31,6 +39,8 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
  * @since 1.0.0
  */
 public class NewNet {
+	/** Used to combine compound key column values into a single String */
+	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdVlSpr_";
 
 	/** NewNet depends on SqlBoxContext */
 	SqlBoxContext ctx;
@@ -38,22 +48,13 @@ public class NewNet {
 	/** Models, Map<alias, tableModels> */
 	private Map<String, TableModel> configs = new LinkedHashMap<String, TableModel>();
 
-	private List<String[]> gives = new ArrayList<String[]>();
+	private List<String[]> givesList = new ArrayList<String[]>();
 
 	/** The row Data loaded from database, List<Map<colName, colValue>> */
 	private List<Map<String, Object>> rowData = new ArrayList<Map<String, Object>>();
 
-	/**
-	 * The row entity loaded from database, List<Map<alias, entity>>, repeated
-	 * entity may found
-	 */
-	private List<Map<String, Object>> rowEntity = new ArrayList<Map<String, Object>>();
-
-	/**
-	 * The body of the NewNet Map<alias, LinkedHashMap<entityId, entity>>, no
-	 * repeated entity
-	 */
-	private Map<Class<?>, LinkedHashMap<Object, Node>> body;
+	/** The body of entity net, Map<alias, Map<entityId, entity>> */
+	private Map<String, LinkedHashMap<Object, Object>> body = new HashMap<String, LinkedHashMap<Object, Object>>();
 
 	protected void constructor__________________________() {// NOSONAR
 	}
@@ -71,21 +72,20 @@ public class NewNet {
 			TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, object);
 			EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 			String alias = t.getAlias();
-			if (StrUtils.isEmpty(alias))
-				alias = t.getEntityClass().getSimpleName().substring(0, 1).toLowerCase();
-			if (configs.containsKey(alias)) {
+			if (StrUtils.isEmpty(alias)) {
 				StringBuilder sb = new StringBuilder();
 				char[] chars = t.getEntityClass().getSimpleName().toCharArray();
 				for (char c : chars)
 					if (c >= 'A' && c <= 'Z')
 						sb.append(c);
 				alias = sb.toString().toLowerCase();
-				if (configs.containsKey(alias)) {
-					throw new EntityNetException("Duplicated alias '" + alias + "' for class '" + t.getEntityClass()
-							+ "' found, need use configOne method manually set alias.");
-				}
 			}
 			EntityNetException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
+			if (configs.containsKey(alias)) {
+				throw new EntityNetException("Duplicated alias '" + alias + "' for class '" + t.getEntityClass()
+						+ "' found, need use configOne method manually set alias.");
+			}
+			t.setAlias(alias);
 			configs.put(alias, t);
 		}
 		return this;
@@ -104,38 +104,209 @@ public class NewNet {
 	}
 
 	/** Give a's value to b's aField */
-	public NewNet give(String a, String b) {
-		TableModel t = configs.get(a);
-		EntityNetException.assureNotNull(t, "Not found config for alias '" + a + "'");
-		EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
-		give(a, b, StrUtils.toLowerCaseFirstOne(t.getEntityClass().getSimpleName()));
+	public NewNet giveBoth(String a, String b) {
+		give(a, b);
+		give(b, a);
 		return this;
+	}
+
+	/** Give a's value to b's aField */
+	public NewNet give(String a, String b) {
+		TableModel aModel = configs.get(a);
+		EntityNetException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
+		EntityNetException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
+		String fieldName = StrUtils.toLowerCaseFirstOne(aModel.getEntityClass().getSimpleName());
+
+		TableModel bModel = configs.get(b);
+		EntityNetException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
+		EntityNetException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
+
+		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName);
+		if (readMethod != null) {
+			give(a, b, StrUtils.toLowerCaseFirstOne(fieldName));
+			return this;
+		}
+
+		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "List");
+		if (readMethod != null) {
+			give(a, b, fieldName + "List");
+			return this;
+		}
+
+		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Set");
+		if (readMethod != null) {
+			give(a, b, fieldName + "Set");
+			return this;
+		}
+		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Map");
+		if (readMethod != null) {
+			give(a, b, fieldName + "Map");
+			return this;
+		}
+
+		throw new EntityNetException("Not found field '" + fieldName + "' or '" + fieldName + "List/Set/Map' in class /"
+				+ bModel.getEntityClass());
 	}
 
 	/** Give a's value to b's someField */
 	public NewNet give(String a, String b, String someField) {
-		gives.add(new String[] { a, b, someField });
+		givesList.add(new String[] { a, b, someField });
 		return this;
 	}
-	
 
 	/** Execute a query and join result into current NewNet */
 	@SuppressWarnings("unchecked")
-	public NewNet joinQuery(Object... sqlItems) {
+	public NewNet query(Object... sqlItems) {
 		PreparedSQL ps = ctx.iPrepare(sqlItems);
 		ps.addHandler(new SSMapListHandler(configs.values().toArray(new Object[configs.size()])));
 		ps.setType(SqlOption.QUERY);
 		List<Map<String, Object>> result = (List<Map<String, Object>>) ctx.runPreparedSQL(ps);
-		for (Map<String, Object> map : result)
+		for (Map<String, Object> map : result) {
 			rowData.add(map);
-		if (gives != null && !gives.isEmpty()) {
-			doGive();
+			translateToEntities(map);
+			if (!givesList.isEmpty())
+				doGive(map);
 		}
 		return this;
 	}
 
-	private void doGive() {
-		// TODO
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> List<T> pickAsEntityList(String alias) {
+		return (List<T>) new ArrayList(body.get(alias).values());
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> Set<T> pickAsEntitySet(String alias) {
+		return (Set<T>) new LinkedHashSet(body.get(alias).values());
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	public <T> Map<Object, T> pickAsEntityMap(String alias) {
+		return (Map<Object, T>) body.get(alias);
+	}
+
+	/** Translate one row map list to entity objects, put into entity net body */
+	private void translateToEntities(Map<String, Object> oneRow) {
+		for (Entry<String, TableModel> config : this.configs.entrySet()) {
+			TableModel model = config.getValue();
+			String alias = config.getKey();
+
+			// find and build entityID
+			Object entityId = buildEntityId(oneRow, model, alias);
+			if (entityId == null)
+				continue;// not found entity ID columns
+			Object entity = getOneEntity(alias, entityId);
+
+			// create new Entity
+			if (entity == null) {
+				entity = createEntity(oneRow, model, alias);
+				this.putOneEntity(alias, entityId, entity);
+			}
+			oneRow.put(alias, entity);// In this row, add entities directly
+			oneRow.put("#" + alias, entityId); // In this row, add entityIds
+		}
+	}
+
+	/** Give values according gives setting for oneRow */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void doGive(Map<String, Object> oneRow) {// NOSONAR
+		for (String[] gives : givesList) {
+			String fromAlias = gives[0];
+			String toAlias = gives[1];
+			Object from = oneRow.get(fromAlias);
+			Object to = oneRow.get(toAlias);
+			String tofield = gives[2];
+			EntityNetException.assureNotEmpty(tofield);
+			if (from != null && to != null) {
+				TableModel toModel = configs.get(toAlias);
+				ColumnModel col = toModel.getColumnByColOrFieldName(tofield);
+				Method readMethod = ClassCacheUtils.getClassFieldReadMethod(toModel.getEntityClass(),
+						col.getEntityField());
+				Class<?> fieldType = readMethod.getReturnType();
+				if (fieldType.isAssignableFrom(List.class)) {
+					List list = (List) ClassCacheUtils.readValueFromBeanField(to, tofield);
+					if (list == null)
+						list = new ArrayList<Object>();
+					if (!list.contains(from))
+						list.add(from);
+					ClassCacheUtils.writeValueToBeanField(to, tofield, list);
+				} else if (fieldType.isAssignableFrom(Set.class)) {
+					Set set = (Set) ClassCacheUtils.readValueFromBeanField(to, tofield);
+					if (set == null)
+						set = new HashSet<Object>();
+					if (!set.contains(from))
+						set.add(from);
+					ClassCacheUtils.writeValueToBeanField(to, tofield, set);
+				} else if (fieldType.isAssignableFrom(Map.class)) {
+					Map map = (Map) ClassCacheUtils.readValueFromBeanField(to, tofield);
+					if (map == null)
+						map = new HashMap();
+					Object entityId = oneRow.get("#" + fromAlias);
+					EntityNetException.assureNotNull(entityId, "Can not find entityId for '" + fromAlias + "'");
+					if (!map.containsKey(entityId))
+						map.put(entityId, from);
+					ClassCacheUtils.writeValueToBeanField(to, tofield, map);
+				} else {// No matter what type, give "from" value to "to"
+					ClassCacheUtils.writeValueToBeanField(to, tofield, from);
+				}
+			}
+		}
+	}
+
+	private Object createEntity(Map<String, Object> oneRow, TableModel model, String alias) {
+		Object entity;
+		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
+		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
+			for (ColumnModel col : model.getColumns()) {
+				if (col.getTransientable())
+					continue;
+				if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
+					EntityNetException.assureNotEmpty(col.getEntityField(),
+							"EntityField not set for column '" + col.getColumnName() + "'");
+					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
+				}
+			}
+		}
+		return entity;
+	}
+
+	private Object buildEntityId(Map<String, Object> oneRow, TableModel model, String alias) {
+		Object entityId = null;
+		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
+			for (ColumnModel col : model.getColumns()) {
+				if (col.getTransientable() || !col.getPkey())
+					continue;
+				int pkCount = 0;
+
+				if (row.getKey().equalsIgnoreCase(
+						new StringBuilder(alias).append("_").append(col.getColumnName()).toString())) {
+					pkCount++;
+					if (pkCount == 1)
+						entityId = row.getValue();
+					else {
+						entityId = new StringBuilder("").append(entityId).append(COMPOUND_VALUE_SEPARATOR)
+								.append(row.getValue()).toString();
+					}
+				}
+			}
+		}
+		return entityId;
+	}
+
+	public void putOneEntity(String alias, Object entityId, Object entity) {
+		LinkedHashMap<Object, Object> entityMap = body.get(alias);
+		if (entityMap == null) {
+			entityMap = new LinkedHashMap<Object, Object>();
+			body.put(alias, entityMap);
+		}
+		entityMap.put(entityId, entity);
+	}
+
+	public Object getOneEntity(String alias, Object entityId) {
+		Map<Object, Object> entityMap = body.get(alias);
+		if (entityMap == null)
+			return null;
+		return entityMap.get(entityId);
 	}
 
 	protected void getterSetter__________________________() {// NOSONAR
@@ -168,31 +339,47 @@ public class NewNet {
 		return this;
 	}
 
-	public List<Map<String, Object>> getRowEntity() {
-		return rowEntity;
+	public List<String[]> getGivesList() {
+		return givesList;
 	}
 
-	public NewNet setRowEntity(List<Map<String, Object>> rowEntity) {
-		this.rowEntity = rowEntity;
+	public String getDebugInfo() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\r\n=========givesList=========\r\n");
+		for (String[] gives : givesList) {
+			for (String str : gives) {
+				sb.append(str + " ");
+			}
+			sb.append("\r\n");
+		}
+		sb.append("\r\n=========configs=========\r\n");
+		for (TableModel tb : configs.values()) {
+			sb.append(tb.getDebugInfo());
+		}
+		sb.append("\r\n=========rowData=========\r\n");
+		for (Map<String, Object> row : rowData) {
+			sb.append(row.toString()).append("\r\n");
+		}
+
+		sb.append("\r\n=========body=========\r\n");
+		for (LinkedHashMap<Object, Object> row : body.values()) {
+			sb.append(row.toString()).append("\r\n");
+		}
+		return sb.toString();
+
+	}
+
+	public NewNet setGivesList(List<String[]> givesList) {
+		this.givesList = givesList;
 		return this;
 	}
 
-	public Map<Class<?>, LinkedHashMap<Object, Node>> getBody() {
+	public Map<String, LinkedHashMap<Object, Object>> getBody() {
 		return body;
 	}
 
-	public NewNet setBody(Map<Class<?>, LinkedHashMap<Object, Node>> body) {
+	public void setBody(Map<String, LinkedHashMap<Object, Object>> body) {
 		this.body = body;
-		return this;
-	}
-
-	public List<String[]> getGives() {
-		return gives;
-	}
-
-	public NewNet setGives(List<String[]> gives) {
-		this.gives = gives;
-		return this;
 	}
 
 }

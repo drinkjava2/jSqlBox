@@ -1,5 +1,8 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
+import java.util.List;
+import java.util.Set;
+
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
@@ -73,13 +76,42 @@ public class NewNetTest extends TestBase {
 	public void testAutoPath() {
 		insertDemoData();
 		NewNet net = new NewNet(ctx)
-				.config(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class).give("u", "r")
-				.joinQuery("select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+				.config(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class)
+				.give("r", "u", "roleList").giveBoth("p", "u")
+				.query("select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 						" left join userroletb ur on u.id=ur.userid ", //
 						" left join roletb r on ur.rid=r.id ", //
 						" left join roleprivilegetb rp on rp.rid=r.id ", //
-						" left join privilegetb p on p.id=rp.pid ");
-		System.out.println(net.getRowData());
+						" left join privilegetb p on p.id=rp.pid ", //
+						" order by u.id, ur.id, r.id, rp.id, p.id");
+		System.out.println(net.getDebugInfo());
+
+		List<User> userList = net.pickAsEntityList("u");
+		for (User u : userList) {
+			System.out.println("User:" + u.getId());
+
+			List<Role> roles = u.getRoleList();
+			if (roles != null)
+				for (Role r : roles) {
+					System.out.println("  Roles:" + r.getId());
+				}
+
+			Set<Privilege> privileges = u.getPrivilegeSet();
+			if (privileges != null)
+				for (Privilege privilege : privileges) {
+					System.out.println("  Privilege:" + privilege.getId());
+				}
+		}
+
+		System.out.println("===========================");
+		Set<Privilege> privileges = net.pickAsEntitySet("p");
+		for (Privilege p : privileges) {
+			System.out.println("Privilege:" + p.getId());
+			User u = p.getUser();
+			if (u != null)
+				System.out.println("  User:" + p.getUser().getId());
+		}
+
 	}
 
 }

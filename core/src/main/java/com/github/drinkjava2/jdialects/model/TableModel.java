@@ -253,6 +253,19 @@ public class TableModel {
 				return columnModel;
 		return null;
 	}
+	
+	/**
+	 * Return ColumnModel object by columnName, if not found, return null;
+	 */
+	public ColumnModel getColumnByColOrFieldName(String colOrFieldName) {
+		for (ColumnModel columnModel : columns) {
+			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(colOrFieldName))
+				return columnModel;
+			if( columnModel.getEntityField()!=null && columnModel.getEntityField().equalsIgnoreCase( colOrFieldName ))
+				return columnModel;
+			}
+		return null;
+	}
 
 	/**
 	 * @return First found ShardTable Column , if not found , return null
