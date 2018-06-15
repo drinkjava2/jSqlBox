@@ -47,26 +47,26 @@ public abstract class DebugUtils {//// NOSONAR
 
 	public static String getFkeyDebugInfo(TableModel t) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Fkeys:\r");
+		sb.append("Fkeys:\r\n");
 		for (FKeyModel k : t.getFkeyConstraints()) {
 			sb.append("FkeyName=" + k.getFkeyName());
 			sb.append(", ColumnNames=" + k.getColumnNames());
 			sb.append(", RefTableAndColumns=" + Arrays.deepToString(k.getRefTableAndColumns()));
-			sb.append("\r");
+			sb.append("\r\n");
 		}
 		return sb.toString();
 	}
 
 	public static String getTableModelDebugInfo(TableModel model) {
-		StringBuilder sb = new StringBuilder("\r=======================================================");
-		sb.append("\rtableName=" + model.getTableName()).append("\r");
-		sb.append("getEntityClass=" + model.getEntityClass()).append("\r");
-		sb.append("getAlias=" + model.getAlias()).append("\r");
+		StringBuilder sb = new StringBuilder("\r\n=======================================================\r\n");
+		sb.append("tableName=" + model.getTableName()).append("\r\n");
+		sb.append("getEntityClass=" + model.getEntityClass()).append("\r\n");
+		sb.append("getAlias=" + model.getAlias()).append("\r\n");
 		sb.append(getFkeyDebugInfo(model));
 		List<ColumnModel> columns = model.getColumns();
-		sb.append("Columns:\r");
+		sb.append("Columns:\r\n");
 		for (ColumnModel column : columns)
-			sb.append(getColumnModelDebugInfo(column)).append("\r");
+			sb.append(getColumnModelDebugInfo(column)).append("\r\n");
 
 		return sb.toString();
 	}

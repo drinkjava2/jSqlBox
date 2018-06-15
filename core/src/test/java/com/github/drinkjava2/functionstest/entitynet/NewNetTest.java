@@ -86,7 +86,7 @@ public class NewNetTest extends TestBase {
 						" order by u.id, ur.id, r.id, rp.id, p.id");
 		System.out.println(net.getDebugInfo());
 
-		List<User> userList = net.pickAsEntityList("u");
+		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
 
@@ -104,7 +104,7 @@ public class NewNetTest extends TestBase {
 		}
 
 		System.out.println("===========================");
-		Set<Privilege> privileges = net.pickAsEntitySet("p");
+		Set<Privilege> privileges = net.pickEntitySet("p");
 		for (Privilege p : privileges) {
 			System.out.println("Privilege:" + p.getId());
 			User u = p.getUser();

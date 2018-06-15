@@ -90,9 +90,18 @@ public class NewNet {
 		}
 		return this;
 	}
+	 
+	
+	/** Config entity1, alias1, entity2, alias2... */
+	public NewNet configAlias(Object... args) {
+		for (int i = 0; i < args.length/2; i++) 
+			configOneAlias(args[i*2], (String)args[i*2+1]);
+		return this;
+	}
+
 
 	/** Config one entity */
-	public NewNet configOne(Object entityOrModel, String alias) {
+	private NewNet configOneAlias(Object entityOrModel, String alias) {
 		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrModel);
 		EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 		EntityNetException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
@@ -150,6 +159,8 @@ public class NewNet {
 
 	/** Give a's value to b's someField */
 	public NewNet give(String a, String b, String someField) {
+		EntityNetException.assureNotEmpty(someField, "give field parameter can not be empty for '"+b+"'");
+		
 		givesList.add(new String[] { a, b, someField });
 		return this;
 	}
@@ -171,17 +182,17 @@ public class NewNet {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> List<T> pickAsEntityList(String alias) {
+	public <T> List<T> pickEntityList(String alias) {
 		return (List<T>) new ArrayList(body.get(alias).values());
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> Set<T> pickAsEntitySet(String alias) {
+	public <T> Set<T> pickEntitySet(String alias) {
 		return (Set<T>) new LinkedHashSet(body.get(alias).values());
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	public <T> Map<Object, T> pickAsEntityMap(String alias) {
+	public <T> Map<Object, T> pickEntityMap(String alias) {
 		return (Map<Object, T>) body.get(alias);
 	}
 
