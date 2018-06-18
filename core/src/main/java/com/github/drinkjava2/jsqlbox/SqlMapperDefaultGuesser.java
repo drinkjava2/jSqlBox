@@ -120,15 +120,15 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 			realParams[i++] = para;
 
 		PreparedSQL ps = ctx.pPrepare(realParams);
-		if (ps.getType() == null)
+		if (ps.getOperationType() == null)
 			if (StrUtils.startsWithIgnoreCase(ps.getSql(), "select"))
-				ps.setType(SqlOption.QUERY);
+				ps.setOperationType(SqlOption.QUERY);
 			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "delete"))
-				ps.setType(SqlOption.UPDATE);
+				ps.setOperationType(SqlOption.UPDATE);
 			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "update"))
-				ps.setType(SqlOption.UPDATE);
+				ps.setOperationType(SqlOption.UPDATE);
 			else if (StrUtils.startsWithIgnoreCase(ps.getSql(), "insert"))
-				ps.setType(SqlOption.UPDATE);
+				ps.setOperationType(SqlOption.UPDATE);
 			else
 				throw new SqlBoxException(
 						"Can not guess SqlType, only can guess SQL started with select/delete/update/insert, need manually set SqlType");

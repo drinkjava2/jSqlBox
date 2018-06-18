@@ -31,10 +31,10 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
  */
 @SuppressWarnings("all")
 public class EntityListHandler extends DefaultOrderSqlHandler {
-	protected final Class<?> targetClass;
+	protected final Object config;
 
-	public EntityListHandler(Class<?> targetClass) {
-		this.targetClass = targetClass;
+	public EntityListHandler(Object config) {
+		this.config = config;
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class EntityListHandler extends DefaultOrderSqlHandler {
 		List<Map<String, Object>> maps = (List<Map<String, Object>>) runner.runPreparedSQL(ps);
 		List<Object> entityList = new ArrayList<Object>();
 		for (Map<String, Object> row : maps) {
-			Object entity = SqlBoxContextUtils.mapToEntityBean((SqlBoxContext) runner, targetClass, row);
+			Object entity = SqlBoxContextUtils.mapToEntityBean((SqlBoxContext) runner, config, row);
 			entityList.add(entity);
 		}
 		return entityList;

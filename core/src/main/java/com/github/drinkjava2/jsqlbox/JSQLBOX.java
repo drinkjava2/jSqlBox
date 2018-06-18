@@ -42,6 +42,24 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return new PaginHandler(pageNumber, pageSize);
 	}
 
+	/** Create a model configurations,  */
+	public static SqlItem config(Object... models) {
+		return new SqlItem("config", models);
+	}
+	
+	/** Create model configurations with alias, usage model1, alias1, model2, alias2.... */
+	public static SqlItem configAlias(Object... modelsAndAlias) {
+		return new SqlItem("configAlias", modelsAndAlias);
+	}
+	
+	public static SqlItem give(String from, String to) {
+		return new SqlItem("give", from, to);
+	}
+	
+	public static SqlItem giveBoth(String from, String to) {
+		return new SqlItem("giveBoth", from, to);
+	}
+	
 	public static SqlItem noPagin() {
 		return new SqlItem(SqlOption.DISABLE_HANDLERS, PaginHandler.class);
 	}
@@ -71,6 +89,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		public static int gUpdate(Object entity, Object... optionalSqlItems) { return gctx().update(entity, optionalSqlItems); } 
 		public static  void gDelete(Object entity, Object... optionalSqlItems) { gctx().delete(entity, optionalSqlItems); } 
 		public static <T> T gLoad(Object entity, Object... optionalSqlItems) { return gctx().load(entity, optionalSqlItems); } 
+		public static <T> List<T> gLoadAll(Class<T> entityClass, Object... optionalSqlItems) { return gctx().loadAll(entityClass, optionalSqlItems); } 
 		public static <T> T gLoadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {return gctx().loadById(entityClass, entityId, optionalSqlItems);}
 		public static <T> T gLoadByQuery(Class<T> entityClass, Object... sqlItems) { return gctx().loadByQuery(entityClass, sqlItems); }
 		

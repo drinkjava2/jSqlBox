@@ -33,12 +33,12 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
- * NewNet
+ * OrmQuery
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class NewNet {
+public class OrmQry {
 	/** Used to combine compound key column values into a single String */
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdVlSpr_";
 
@@ -50,7 +50,10 @@ public class NewNet {
 
 	private List<String[]> givesList = new ArrayList<String[]>();
 
-	/** The row Data loaded from database, List<Map<colName, colValue>> */
+	/**
+	 * The row Data loaded from database, List<Map<colName, colValue>> or <"u",
+	 * entity> or <"#u",entityId>
+	 */
 	private List<Map<String, Object>> rowData = new ArrayList<Map<String, Object>>();
 
 	/** The body of entity net, Map<alias, Map<entityId, entity>> */
@@ -59,7 +62,7 @@ public class NewNet {
 	protected void constructor__________________________() {// NOSONAR
 	}
 
-	public NewNet(SqlBoxContext ctx) {
+	public OrmQry(SqlBoxContext ctx) {
 		this.ctx = ctx;
 	}
 
@@ -67,9 +70,9 @@ public class NewNet {
 	}
 
 	/** Config, parameters can be entity or entity class or TableModel */
-	public NewNet config(Object... entityOrModel) {
+	public OrmQry config(Object... entityOrModel) {
 		for (Object object : entityOrModel) {
-			TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, object);
+			TableModel t = SqlBoxContextUtils.objectConfigToModel(ctx, object);
 			EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 			String alias = t.getAlias();
 			if (StrUtils.isEmpty(alias)) {
@@ -90,19 +93,17 @@ public class NewNet {
 		}
 		return this;
 	}
-	 
-	
+
 	/** Config entity1, alias1, entity2, alias2... */
-	public NewNet configAlias(Object... args) {
-		for (int i = 0; i < args.length/2; i++) 
-			configOneAlias(args[i*2], (String)args[i*2+1]);
+	public OrmQry configAlias(Object... args) {
+		for (int i = 0; i < args.length / 2; i++)
+			configOneAlias(args[i * 2], (String) args[i * 2 + 1]);
 		return this;
 	}
 
-
 	/** Config one entity */
-	private NewNet configOneAlias(Object entityOrModel, String alias) {
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrModel);
+	private OrmQry configOneAlias(Object entityOrModel, String alias) {
+		TableModel t = SqlBoxContextUtils.objectConfigToModel(ctx, entityOrModel);
 		EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 		EntityNetException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
 		t.setAlias(alias);
@@ -113,14 +114,14 @@ public class NewNet {
 	}
 
 	/** Give a's value to b's aField */
-	public NewNet giveBoth(String a, String b) {
+	public OrmQry giveBoth(String a, String b) {
 		give(a, b);
 		give(b, a);
 		return this;
 	}
 
 	/** Give a's value to b's aField */
-	public NewNet give(String a, String b) {
+	public OrmQry give(String a, String b) {
 		TableModel aModel = configs.get(a);
 		EntityNetException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
 		EntityNetException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
@@ -130,47 +131,48 @@ public class NewNet {
 		EntityNetException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
 		EntityNetException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
 
+		boolean found = false;
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName);
 		if (readMethod != null) {
 			give(a, b, StrUtils.toLowerCaseFirstOne(fieldName));
-			return this;
+			found = true;
 		}
 
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "List");
 		if (readMethod != null) {
 			give(a, b, fieldName + "List");
-			return this;
+			found = true;
 		}
 
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Set");
 		if (readMethod != null) {
 			give(a, b, fieldName + "Set");
-			return this;
+			found = true;
 		}
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Map");
 		if (readMethod != null) {
 			give(a, b, fieldName + "Map");
-			return this;
+			found = true;
 		}
-
-		throw new EntityNetException("Not found field '" + fieldName + "' or '" + fieldName + "List/Set/Map' in class /"
-				+ bModel.getEntityClass());
+		if (!found)
+			throw new EntityNetException("Not found field '" + fieldName + "' or '" + fieldName
+					+ "List/Set/Map' in class /" + bModel.getEntityClass());
+		return this;
 	}
 
 	/** Give a's value to b's someField */
-	public NewNet give(String a, String b, String someField) {
-		EntityNetException.assureNotEmpty(someField, "give field parameter can not be empty for '"+b+"'");
-		
+	public OrmQry give(String a, String b, String someField) {
+		EntityNetException.assureNotEmpty(someField, "give field parameter can not be empty for '" + b + "'");
 		givesList.add(new String[] { a, b, someField });
 		return this;
 	}
 
 	/** Execute a query and join result into current NewNet */
 	@SuppressWarnings("unchecked")
-	public NewNet query(Object... sqlItems) {
+	public OrmQry query(Object... sqlItems) {
 		PreparedSQL ps = ctx.iPrepare(sqlItems);
 		ps.addHandler(new SSMapListHandler(configs.values().toArray(new Object[configs.size()])));
-		ps.setType(SqlOption.QUERY);
+		ps.setOperationType(SqlOption.QUERY);
 		List<Map<String, Object>> result = (List<Map<String, Object>>) ctx.runPreparedSQL(ps);
 		for (Map<String, Object> map : result) {
 			rowData.add(map);
@@ -230,33 +232,36 @@ public class NewNet {
 			EntityNetException.assureNotEmpty(tofield);
 			if (from != null && to != null) {
 				TableModel toModel = configs.get(toAlias);
-				ColumnModel col = toModel.getColumnByColOrFieldName(tofield);
+				ColumnModel col = toModel.getColumn(tofield);
 				Method readMethod = ClassCacheUtils.getClassFieldReadMethod(toModel.getEntityClass(),
 						col.getEntityField());
 				Class<?> fieldType = readMethod.getReturnType();
 				if (fieldType.isAssignableFrom(List.class)) {
 					List list = (List) ClassCacheUtils.readValueFromBeanField(to, tofield);
-					if (list == null)
+					if (list == null) {
 						list = new ArrayList<Object>();
+						ClassCacheUtils.writeValueToBeanField(to, tofield, list);
+					}
 					if (!list.contains(from))
 						list.add(from);
-					ClassCacheUtils.writeValueToBeanField(to, tofield, list);
 				} else if (fieldType.isAssignableFrom(Set.class)) {
 					Set set = (Set) ClassCacheUtils.readValueFromBeanField(to, tofield);
-					if (set == null)
+					if (set == null) {
 						set = new HashSet<Object>();
+						ClassCacheUtils.writeValueToBeanField(to, tofield, set);
+					}
 					if (!set.contains(from))
 						set.add(from);
-					ClassCacheUtils.writeValueToBeanField(to, tofield, set);
 				} else if (fieldType.isAssignableFrom(Map.class)) {
 					Map map = (Map) ClassCacheUtils.readValueFromBeanField(to, tofield);
-					if (map == null)
+					if (map == null) {
 						map = new HashMap();
+						ClassCacheUtils.writeValueToBeanField(to, tofield, map);
+					}
 					Object entityId = oneRow.get("#" + fromAlias);
 					EntityNetException.assureNotNull(entityId, "Can not find entityId for '" + fromAlias + "'");
 					if (!map.containsKey(entityId))
 						map.put(entityId, from);
-					ClassCacheUtils.writeValueToBeanField(to, tofield, map);
 				} else {// No matter what type, give "from" value to "to"
 					ClassCacheUtils.writeValueToBeanField(to, tofield, from);
 				}
@@ -267,6 +272,7 @@ public class NewNet {
 	private Object createEntity(Map<String, Object> oneRow, TableModel model, String alias) {
 		Object entity;
 		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
+		ctx.getSqlBox(entity).setTableModel(model.newCopy());
 		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 			for (ColumnModel col : model.getColumns()) {
 				if (col.getTransientable())
@@ -327,7 +333,7 @@ public class NewNet {
 		return ctx;
 	}
 
-	public NewNet setCtx(SqlBoxContext ctx) {
+	public OrmQry setCtx(SqlBoxContext ctx) {
 		this.ctx = ctx;
 		return this;
 	}
@@ -336,7 +342,7 @@ public class NewNet {
 		return configs;
 	}
 
-	public NewNet setConfigs(Map<String, TableModel> configs) {
+	public OrmQry setConfigs(Map<String, TableModel> configs) {
 		this.configs = configs;
 		return this;
 	}
@@ -345,7 +351,7 @@ public class NewNet {
 		return rowData;
 	}
 
-	public NewNet setRowData(List<Map<String, Object>> rowData) {
+	public OrmQry setRowData(List<Map<String, Object>> rowData) {
 		this.rowData = rowData;
 		return this;
 	}
@@ -380,7 +386,7 @@ public class NewNet {
 
 	}
 
-	public NewNet setGivesList(List<String[]> givesList) {
+	public OrmQry setGivesList(List<String[]> givesList) {
 		this.givesList = givesList;
 		return this;
 	}

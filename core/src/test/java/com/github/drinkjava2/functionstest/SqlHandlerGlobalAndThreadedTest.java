@@ -82,8 +82,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 		SqlBoxContextConfig.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(), new FirstPrintHandler(),
 				new PaginHandler(2, 5));
 		SqlBoxContext.setThreadLocalSqlHandlers(new EntityListHandler(DemoUser.class));
-		try {
-
+		try { 
 			SqlBoxContext newCtx = new SqlBoxContext(ctx.getDataSource());
 			List<DemoUser> result2 = newCtx.pQuery("select u.* from DemoUser u where u.age>?", 10);
 			Assert.assertEquals(5l, result2.size());

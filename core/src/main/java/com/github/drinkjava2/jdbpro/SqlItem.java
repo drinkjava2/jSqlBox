@@ -24,16 +24,26 @@ package com.github.drinkjava2.jdbpro;
 public class SqlItem {
 
 	private SqlOption type;
+	private String name;
 	private Object[] parameters;
-
-	public SqlItem(String sqlPiece) {
-		this.type = SqlOption.SQL;
-		this.parameters = new Object[] { sqlPiece };
-	}
 
 	public SqlItem(SqlOption type, Object... parameters) {
 		this.type = type;
 		this.parameters = parameters;
+	}
+
+	public SqlItem(String name, Object... parameters) {
+		this.type = SqlOption.CARRIER;
+		this.name = name;
+		this.parameters = parameters;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Object[] getParameters() {

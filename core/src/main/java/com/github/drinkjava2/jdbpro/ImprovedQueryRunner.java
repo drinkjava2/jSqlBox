@@ -179,7 +179,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			result = this.nBatchFlush();
 		else if (!cached.isEmpty()) {
 			PreparedSQL last = cached.get(cached.size() - 1);
-			if (!last.getType().equals(ps.getType()) //
+			if (!last.getOperationType().equals(ps.getOperationType()) //
 					|| last.getConnection() != ps.getConnection() //
 					|| !last.getSql().equals(ps.getSql()) //
 					|| last.getParamSize() != ps.getParamSize()//
@@ -188,7 +188,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		}
 		sqlBatchCache.get().add(ps);
 
-		switch (ps.getType()) {
+		switch (ps.getOperationType()) {
 		case UPDATE:
 		case EXECUTE: {
 			result = 0;
@@ -199,7 +199,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			break;
 		}
 		default:
-			throw new DbProRuntimeException("Unknow batch sql operation type:" + ps.getType());
+			throw new DbProRuntimeException("Unknow batch sql operation type:" + ps.getOperationType());
 		}
 		return (T) result;
 	}
@@ -230,7 +230,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		}
 
 		if (batchEnabled.get()) {
-			switch (first.getType()) {
+			switch (first.getOperationType()) {
 			case UPDATE:
 			case EXECUTE: {
 				try {
@@ -258,7 +258,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				break;
 			}
 			default:
-				throw new DbProRuntimeException("Unknow batch sql operation type:" + first.getType());
+				throw new DbProRuntimeException("Unknow batch sql operation type:" + first.getOperationType());
 			}
 		}
 		sqlBatchCache.get().clear();
@@ -357,11 +357,11 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	/** Execute real SQL operation according PreparedSql's SqlType */
 	public Object runRealSqlMethod(PreparedSQL ps) {
-		if (ps.getType() == null)
+		if (ps.getOperationType() == null)
 			throw new DbProRuntimeException("PreparedSQL's type not set");
 
 		if (batchEnabled.get()) {
-			switch (ps.getType()) {
+			switch (ps.getOperationType()) {
 			case INSERT:
 			case EXECUTE:
 			case UPDATE:
@@ -369,7 +369,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			}
 		}
 
-		switch (ps.getType()) {
+		switch (ps.getOperationType()) {
 		case EXECUTE:
 		case UPDATE:
 		case INSERT: {
@@ -407,7 +407,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 				throw new DbProRuntimeException("Should never run to here");
 		}
 		}
-		throw new DbProRuntimeException("Unknow SQL operation type " + ps.getType());
+		throw new DbProRuntimeException("Unknow SQL operation type " + ps.getOperationType());
 	}
 
 	private Object runReadOperation(PreparedSQL ps) {
@@ -427,7 +427,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	private Object runWriteOperations(ImprovedQueryRunner dbPro, PreparedSQL ps) {
-		switch (ps.getType()) {
+		switch (ps.getOperationType()) {
 		case INSERT:
 			return dbPro.runInsert(ps);
 		case EXECUTE:

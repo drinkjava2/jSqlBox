@@ -316,8 +316,7 @@ public class StrUtils {
 		if (index >= 0) {
 			sb.append(originString.substring(pos, index));
 			sb.append(newPattern);
-			pos = index + patLen;
-			index = originString.indexOf(oldPattern, pos);
+			pos = index + patLen; 
 		}
 		sb.append(originString.substring(pos));
 		return sb.toString();

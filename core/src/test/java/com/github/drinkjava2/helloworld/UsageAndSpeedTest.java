@@ -85,10 +85,10 @@ public class UsageAndSpeedTest {
 	public void speedTest() throws Exception {
 		try {
 			PRINT_TIMEUSED = false;
-			REPEAT_TIMES = 10;// warm up
+			REPEAT_TIMES = 1;// warm up
 			runTestMethods();
 			PRINT_TIMEUSED = true;
-			REPEAT_TIMES = 10;// Change to 10000 to do speed test
+			REPEAT_TIMES = 1;// Change to 10000 to do speed test
 			System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
@@ -623,6 +623,34 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
+	public void dataMapperCrudTest() {
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		// ctx.setAllowShowSQL(true);
+		UserAR user = new UserAR();
+		for (int i = 1; i <= 10; i++) {
+			user.setName("Tom" + i);
+			user.setAddress("China" + i);
+			ctx.insert(user);
+		}
+		user = new UserAR();
+		user.setName("Tom8");
+		ctx.load(user);
+		Assert.assertEquals("China8", user.getAddress());
+
+		user = ctx.loadById(UserAR.class, "Tom7");
+		Assert.assertEquals("China7", user.getAddress());
+
+		user.setAddress("Canada");
+		ctx.update(user);
+		Assert.assertEquals("Canada",  ctx.loadById(UserAR.class, "Tom7").getAddress());
+
+		ctx.delete(user);
+		ctx.delete(user, " or name=?", param("Tom2"));
+
+		Assert.assertEquals(7, ctx.loadAll(UserAR.class, " where name>?", param("Tom1")).size());
+	}
+
+	@Test
 	public void conditionsQuery() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		final String name = "Tom";
@@ -634,7 +662,7 @@ public class UsageAndSpeedTest {
 				" ,address ", param(address), //
 				") ", valuesQuestions());
 		ctx.pExecute("update users set ", //
-				notNull(" name","=", "?, ", name), //
+				notNull(" name", "=", "?, ", name), //
 				notNull(" age=?,", age), //
 				sql(" address=? "), address //
 		);
@@ -657,12 +685,11 @@ public class UsageAndSpeedTest {
 		List<Map<String, Object>> users = user.selectUsersBindParam("Tom", "China");
 		Assert.assertEquals(1, users.size());
 	}
-
-	@SuppressWarnings("deprecation")
+ 
 	@Test
 	public void sqlMapperSqlAnnoUnbindParam() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		ctx.setAllowShowSQL(true);
+		//ctx.setAllowShowSQL(true);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		UserMapper user = new UserMapper();
 		user.insertOneUser("Sam", "Canada");

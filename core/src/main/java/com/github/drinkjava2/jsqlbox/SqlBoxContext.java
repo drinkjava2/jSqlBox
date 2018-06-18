@@ -14,6 +14,7 @@ package com.github.drinkjava2.jsqlbox;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -153,17 +154,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	@Override
 	protected boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
 		if (super.dealItem(iXxxStyle, predSQL, sql, item))
-			return true;
+			return true; // if super class DbPro can deal it, let it do
 		else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
 			if (SqlOption.SHARD_TABLE.equals(sqlItemType))
-				handleShardTable(predSQL, sql, sqItem);
+				handleShardTable(sql, sqItem);
 			else if (SqlOption.SHARD_DATABASE.equals(sqlItemType))
-				handleShardDatabase(predSQL, sql, sqItem);
+				handleShardDatabase(predSQL, sqItem);
 			else
 				return false;
-
 		} else
 			return false;
 		return true;
@@ -216,7 +216,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
-	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
+	protected String handleShardTable(StringBuilder sql, SqlItem item) {
 		Object[] params = item.getParameters();
 		String table = null;
 		if (params.length == 1)
@@ -232,7 +232,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return table;
 	}
 
-	protected DbPro handleShardDatabase(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
+	protected DbPro handleShardDatabase(PreparedSQL predSQL, SqlItem item) {
 		Object[] params = item.getParameters();
 		SqlBoxContext ctx = null;
 		if (params.length == 1)
@@ -248,59 +248,83 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
+	public <T> List<T> iQueryForEntityList(Object config, Object... optionItems) {
+		return this.iQuery(new EntityListHandler(config), optionItems);
+	}
+
+	public <T> List<T> pQueryForEntityList(Object config, Object... optionItems) {
+		return this.pQuery(new EntityListHandler(config), optionItems);
+	}
+
+	public <T> List<T> tQueryForEntityList(Object config, Object... optionItems) {
+		return this.tQuery(new EntityListHandler(config), optionItems);
+	}
+
 	protected void crudMethods______________________________() {// NOSONAR
 	}
 
-	/** Create a new instance and bind current SqlBoxContext to it */
-	public void create(Class<?> entityClass) {
-		Object entity = null;
-		try {
-			entity = entityClass.newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
-		SqlBoxUtils.findAndBindSqlBox(this, entity);
-	}
-
 	/** Insert an entity to database */
-	public void insert(Object entity, Object... optionalSqlItems) {
-		SqlBoxContextUtils.insert(this, entity, optionalSqlItems);
+	public void insert(Object entity, Object... optionItems) {
+		SqlBoxContextUtils.insert(this, entity, optionItems);
 	}
 
 	/** Update an entity in database */
-	public int update(Object entity, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.update(this, entity, optionalSqlItems);
+	public int update(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.update(this, entity, optionItems);
 	}
 
 	/** Delete an entity in database */
-	public void delete(Object entity, Object... optionalSqlItems) {
-		SqlBoxContextUtils.delete(this, entity, optionalSqlItems);
+	public void delete(Object entity, Object... optionItems) {
+		SqlBoxContextUtils.delete(this, entity, optionItems);
 	}
 
 	/** Load an entity from database */
-	public <T> T load(Object entity, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.load(this, entity, optionalSqlItems);
+	public <T> T load(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.load(this, entity, optionItems);
 	}
 
 	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T loadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {
-		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionalSqlItems);
+	public <T> T loadById(Class<T> config, Object entityId, Object... optionItems) {
+		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);
+	} 
+
+	/** Load an entity from database by query */
+	public <T> T loadByQuery(Class<T> config, Object... optionItems) {
+		return SqlBoxContextUtils.loadByQuery(this, config, optionItems);
+	}
+ 
+
+	/** Load all entity from database */
+	public <T> List<T> loadAll(Class<T> config, Object... optionItems) {
+		return SqlBoxContextUtils.loadAll(this, config, optionItems);
+	} 
+
+	protected void loadFieldsMethods______________________________() {// NOSONAR
 	}
 
-	public <T> T loadByQuery(Class<T> entityClass, Object... sqlItems) {
-		return SqlBoxContextUtils.loadByQuery(this, entityClass, sqlItems);
+	/** Find related field value by given fieldName */
+	public <T> T findField(Object bean, String fieldName, Object... optionItems) {
+		return null;
 	}
 
-	public <T> List<T> iQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
-		return this.iQuery(new EntityListHandler(entityClass), sqlItems);
+	/** Find related field value by given fieldType */
+	public <T> T findField(Object bean, Class<?> fieldType, Object... optionItems) {
+		return null;
 	}
 
-	public <T> List<T> pQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
-		return this.pQuery(new EntityListHandler(entityClass), sqlItems);
+	/** Find related fields if field type is fieldType List */
+	public <T> List<T> findFieldList(Object bean, Class<T> fieldType, Object... optionItems) {
+		return null;
 	}
 
-	public <T> List<T> tQueryForEntityList(Class<T> entityClass, Object... sqlItems) {
-		return this.tQuery(new EntityListHandler(entityClass), sqlItems);
+	/** Find related fields if field type is fieldType Set */
+	public <T> Set<T> findFieldSet(Object bean, Class<T> fieldType, Object... optionItems) {
+		return null;
+	}
+
+	/** Find related fields if field type is fieldType Map */
+	public <T> Map<Object, T> findFieldMap(Object bean, Class<T> fieldType, Object... optionItems) {
+		return null;
 	}
 
 	// ========== Dialect shortcut methods ===============
@@ -367,7 +391,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	// ================================================================
-	protected void entityNetAboutMethods__________________________() {// NOSONAR
+	protected void entityNetAboutMethodsToBeDelete__________________________() {// NOSONAR
 	}
 
 	/** Create a EntityNet by given list and netConfigs */

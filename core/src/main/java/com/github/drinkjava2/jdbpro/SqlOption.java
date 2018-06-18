@@ -16,41 +16,41 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * SqlOption is a property in SqlItem, this property tell system how to analyse
- * a SqlItem
+ * SqlOption system how to explain a SqlItem, SqlItem like "Message" in windows,
+ * SqlOption is the "Message" type.
  * 
  * @author Yong Zhu
  * @since 1.7.0.3
  */
 public enum SqlOption {
-	/** A SQL String piece */
+	// ----------Sql Items explained by DbPro ------------
+	/** Append a SQL String piece */
 	SQL,
 
-	/** SQL parameter or parameters, need Object types followed */
+	/** Append a parameter or parameter array */
 	PARAM,
 
-	/** Append a "?" at end of SQL and append a parameter or parameter array */
+	/** Append a "?" String and append a parameter or parameter array */
 	QUESTION_PARAM,
+
 	/** BIND Key-Values pairs "key1,value1, key2,value2..." for SqlTemplateEngine */
 	BIND, //
 
 	/**
 	 * Usage: NOT_NUL("user_name=?", name), when name is null, nothing will be
-	 * appended into SQL and parameters
+	 * appended into SQL and parameters, otherwise return a "user_name=?" String and
+	 * a SQL parameter
 	 */
 	NOT_NULL,
 
 	/** Append a " values(?,?,?....?)" String at end of SQL */
 	VALUES_QUESTIONS,
 
-	// ----------Special Items------------
-	/**
-	 * Switch to another DbPro or subClass(like SqlBoxContext) instance to run the
-	 * SQL
-	 */
+	// ----------Special Items ------------
+	/** Switch to another DbPro or subClass(like SqlBoxContext) */
 	SWITCHTO,
 
-	/** Object will created by IocTool */
+	/** Give one or more class as parameter, instance will created by IocTool */
 	IOC,
 
 	/** Disable handles according given handlers' class */
@@ -59,33 +59,8 @@ public enum SqlOption {
 	/** Disable handles according given handlers' class */
 	ENABLE_HANDLERS,
 
-	/** Tell system this is a "SHARD_TABLE" SqlItem */
-	SHARD_TABLE,
-
-	/** Tell system this is a "SHARD_DATABASE" SqlItem */
-	SHARD_DATABASE,
-
-	// =============Control option==================
 	/** Force use template style */
 	USE_TEMPLATE,
-
-	// ------Master_Slave Options-------
-	/**
-	 * Tell system to choose master or slave database automatically (write:master,
-	 * read:if in Transaction use master otherwise use on slave)
-	 */
-	USE_AUTO,
-	/** Tell system force use master database (write:master, read:master) */
-	USE_MASTER,
-
-	/** Tell system force use slave database (write:all slaves, read:one slave) */
-	USE_SLAVE, //
-
-	/**
-	 * Tell system force use master and slave database (write: master + all slaves,
-	 * read: master)
-	 */
-	USE_BOTH,
 
 	// ------Sql Operation type--------
 	/** It's a EXECUTE type SQL */
@@ -98,5 +73,42 @@ public enum SqlOption {
 	INSERT,
 
 	/** It's a QUERY type SQL */
-	QUERY
+	QUERY,
+
+	// ================================================================
+	// Below items designed for jSqlBox or other projects to explain
+	// ================================================================
+
+	/**
+	 * A CARRIER type SqlItem, used to carrier some parameters to SQL methods to
+	 * prepare PreparedSQL only
+	 */
+	CARRIER,
+
+	// ------Master_Slave Options-------
+	/**
+	 * Tell system to choose master or slave database automatically (write:master,
+	 * read:if in Transaction use master otherwise use on slave)
+	 */
+	USE_AUTO,
+
+	/** Tell system force use master database (write:master, read:master) */
+	USE_MASTER,
+
+	/** Tell system force use slave database (write:all slaves, read:one slave) */
+	USE_SLAVE, //
+
+	/**
+	 * Tell system force use master and slave database (write: master + all slaves,
+	 * read: master)
+	 */
+	USE_BOTH,
+
+	// ------- sharding items -----------
+	/** Tell system this is a "SHARD_TABLE" SqlItem */
+	SHARD_TABLE,
+
+	/** Tell system this is a "SHARD_DATABASE" SqlItem */
+	SHARD_DATABASE
+
 }

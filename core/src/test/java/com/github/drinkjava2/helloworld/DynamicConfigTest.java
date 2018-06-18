@@ -21,6 +21,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBox;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * ActiveRecordDemoTest of jSqlBox configurations
@@ -75,7 +76,6 @@ public class DynamicConfigTest extends TestBase {
 		// A new column dynamically created
 		t.addColumn("anotherColumn2").VARCHAR(10);
 		createAndRegTables(t);
-
 		UserDemo u = new UserDemo();
 
 		// A Fake PKey dynamically cretated
@@ -87,6 +87,34 @@ public class DynamicConfigTest extends TestBase {
 		u.update();
 
 		Assert.assertEquals(1L, ctx.nQueryForObject("select count(*) from table2"));
+	}
+
+	@Test
+	public void doQueryTest() {
+		createAndRegTables(UserDemo.class);
+		UserDemo u = new UserDemo().put("userName", "Tom").insert();
+
+		//TODO: different load configurations
+		u.columnModel("id").pkey();
+		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(),u);
+		Assert.assertEquals("Tom", u2.getUserName());
+
+		u.columnModel("userName").setTransientable(true);
+		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(),u);
+		Assert.assertEquals(null, u3.getUserName());
+
+		UserDemo u4 = ctx.loadById(UserDemo.class, u.getId(),u.tableModel());
+		Assert.assertEquals(null, u4.getUserName());
+
+		UserDemo u5 = ctx.loadById(UserDemo.class, u.getId(),u.box());
+		Assert.assertEquals(null, u5.getUserName());
+	}
+
+	@Test(expected = SqlBoxException.class)
+	public void doExceptionTest() {
+		createAndRegTables(UserDemo.class);
+		UserDemo u = new UserDemo().put("userName", "Tom").insert();
+		ctx.loadById(UserDemo.class, u.getId());
 	}
 
 }

@@ -93,6 +93,7 @@ public class TableModel {
 		tb.check = this.check;
 		tb.comment = this.comment;
 		tb.engineTail = this.engineTail;
+		tb.entityClass = this.entityClass;
 		if (!columns.isEmpty())
 			for (ColumnModel item : columns) {
 				ColumnModel newItem = item.newCopy();
@@ -253,17 +254,17 @@ public class TableModel {
 				return columnModel;
 		return null;
 	}
-	
+
 	/**
 	 * Return ColumnModel object by columnName, if not found, return null;
 	 */
-	public ColumnModel getColumnByColOrFieldName(String colOrFieldName) {
+	public ColumnModel  getColumnByColOrEntityFieldName(String colOrFieldName) {
 		for (ColumnModel columnModel : columns) {
 			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(colOrFieldName))
 				return columnModel;
-			if( columnModel.getEntityField()!=null && columnModel.getEntityField().equalsIgnoreCase( colOrFieldName ))
+			if (columnModel.getEntityField() != null && columnModel.getEntityField().equalsIgnoreCase(colOrFieldName))
 				return columnModel;
-			}
+		}
 		return null;
 	}
 
@@ -276,7 +277,7 @@ public class TableModel {
 				return columnModel;// return first found only
 		return null;
 	}
-	
+
 	/**
 	 * @return First found ShardDatabase Column , if not found , return null
 	 */

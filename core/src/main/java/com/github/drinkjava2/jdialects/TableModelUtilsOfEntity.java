@@ -167,7 +167,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 		if (StrUtils.isEmpty(tableName))
 			tableName = entityClass.getSimpleName();
 		TableModel model = new TableModel(tableName); // Build the tableModel
-
+		model.setEntityClass(entityClass );
 		if (!tableMap.isEmpty()) {
 			// Index
 			Annotation[] indexes = (Annotation[]) tableMap.get("indexes");

@@ -1,6 +1,7 @@
 package com.github.drinkjava2.functionstest.entitynet.entities;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -23,6 +24,8 @@ public class User extends ActiveRecord {
 	Address address;
 
 	List<Role> roleList;
+
+	Map<Integer, Role> roleMap;
 
 	Set<Privilege> privilegeSet;
 
@@ -88,6 +91,14 @@ public class User extends ActiveRecord {
 
 	public void setPrivilegeSet(Set<Privilege> privilegeSet) {
 		this.privilegeSet = privilegeSet;
+	}
+
+	public Map<Integer, Role> getRoleMap() {
+		return roleMap;
+	}
+
+	public void setRoleMap(Map<Integer, Role> roleMap) {
+		this.roleMap = roleMap;
 	}
 
 }

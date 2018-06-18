@@ -27,7 +27,6 @@ import java.util.Map;
 public class DialectFunctionTranslator {
 	public static final DialectFunctionTranslator instance = new DialectFunctionTranslator();
 	private Map<String, Integer> functionMap = new HashMap<String, Integer>();
-	private static boolean debugMode = false;// for debug only
 
 	/**
 	 * Register functions names need translated, values is percentage of dialects
@@ -294,9 +293,6 @@ public class DialectFunctionTranslator {
 		for (DialectSqlItem item : items) {
 			correctType(item);
 		}
-		if (debugMode)
-			for (DialectSqlItem item : items)
-				System.out.print(item.getDebugInfo(0));// NOSONAR
 		String result = join(d, true, null, items);
 		if (Dialect.getGlobalAllowShowSql())
 			Dialect.logger.info("Translated sql: " + result);

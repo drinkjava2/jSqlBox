@@ -1,6 +1,7 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
@@ -13,9 +14,9 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
-import com.github.drinkjava2.jsqlbox.entitynet.NewNet;
+import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
 
-public class NewNetTest extends TestBase {
+public class OrmQryTest extends TestBase {
 	{
 		regTables(User.class, Email.class, Address.class, Role.class, Privilege.class, UserRole.class,
 				RolePrivilege.class);
@@ -73,19 +74,16 @@ public class NewNetTest extends TestBase {
 	}
 
 	@Test
-	public void testAutoPath() {
+	public void testAutoGive() {
 		insertDemoData();
-		NewNet net = new NewNet(ctx)
-				.config(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class)
-				.give("r", "u", "roleList").giveBoth("p", "u")
-				.query("select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+		OrmQry net = new OrmQry(ctx)
+				.config(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class).give("r", "u")
+				.giveBoth("p", "u").query("select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 						" left join userroletb ur on u.id=ur.userid ", //
 						" left join roletb r on ur.rid=r.id ", //
 						" left join roleprivilegetb rp on rp.rid=r.id ", //
 						" left join privilegetb p on p.id=rp.pid ", //
 						" order by u.id, ur.id, r.id, rp.id, p.id");
-		System.out.println(net.getDebugInfo());
-
 		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
@@ -93,6 +91,12 @@ public class NewNetTest extends TestBase {
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles) {
+					System.out.println("  Roles:" + r.getId());
+				}
+
+			Map<Integer, Role> roleMap = u.getRoleMap();
+			if (roleMap != null)
+				for (Role r : roleMap.values()) {
 					System.out.println("  Roles:" + r.getId());
 				}
 
@@ -106,12 +110,37 @@ public class NewNetTest extends TestBase {
 		System.out.println("===========================");
 		Set<Privilege> privileges = net.pickEntitySet("p");
 		for (Privilege p : privileges) {
-			System.out.println("Privilege:" + p.getId());
-			User u = p.getUser();
-			if (u != null)
-				System.out.println("  User:" + p.getUser().getId());
+			System.out.println("Privilege:" + p.getId()); 
+			System.out.println("  User:" + p.getUser().getId());
 		}
-
 	}
 
+	@Test
+	public void testManualLoad() {
+		insertDemoData();
+		User uSeting=new User();
+		//uSeting.columnModel("userName").setTransientable(true); 
+		User u2=ctx.loadById(User.class, "u1", uSeting);
+		System.out.println(u2.getUserName());
+		
+		List<User> userList = ctx.loadAll(User.class); 
+
+		System.out.println(userList.size());
+		for (User u : userList) {
+			System.out.println("User:" + u.getId());
+
+			//ctx.fillField(u, Role.class);
+			List<Role> roles = u.getRoleList();
+			if (roles != null)
+				for (Role r : roles) {
+					System.out.println("  Roles:" + r.getId());
+				}
+
+			Set<Privilege> privileges = u.getPrivilegeSet();
+			if (privileges != null)
+				for (Privilege privilege : privileges) {
+					System.out.println("  Privilege:" + privilege.getId());
+				}
+		}
+	}
 }

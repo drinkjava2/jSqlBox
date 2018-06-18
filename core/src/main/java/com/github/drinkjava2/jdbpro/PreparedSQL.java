@@ -39,7 +39,7 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 public class PreparedSQL {
 
 	/** SQL Operation Type */
-	private SqlOption type;
+	private SqlOption operationType;
 
 	/** Choose use master or slave options */
 	private SqlOption masterSlaveOption;
@@ -68,38 +68,23 @@ public class PreparedSQL {
 	/** Optional,SqlHandler instance list */
 	private List<SqlHandler> sqlHandlers;
 
-	/** Optional,ResultSetHandler instance */
+	/** Optional,ResultSetHandler instance, only allow have one */
 	private ResultSetHandler<?> resultSetHandler;
 
-	/** If this is not null, this type handler will not execute */
+	/** Handers in this list will disabled */
 	private List<Class<?>> disabledHandlers;
+
+	private List<SqlItem> namedSqlItems;
 
 	public PreparedSQL() {// default constructor
 	}
 
 	public PreparedSQL(SqlOption type, Connection conn, ResultSetHandler<?> rsh, String sql, Object... params) {
-		this.type = type;
+		this.operationType = type;
 		this.connection = conn;
 		this.resultSetHandler = rsh;
 		this.sql = sql;
 		this.params = params;
-	}
-
-	/** Clone self to get a new PreparedSQL copy, this is a shallow clone */
-	public PreparedSQL newCopy() {
-		PreparedSQL ps = new PreparedSQL();
-		ps.setType(this.type);
-		ps.setConnection(this.connection);
-		ps.setSql(this.sql);
-		ps.setParams(this.params);
-		ps.setUseTemplate(this.useTemplate);
-		ps.setTemplateEngine(this.templateEngine);
-		ps.setTemplateParamMap(this.templateParamMap);
-		ps.setSqlHandlers(this.sqlHandlers);
-		ps.setResultSetHandler(this.resultSetHandler);
-		ps.setDisabledHandlers(this.disabledHandlers);
-		ps.setMasterSlaveOption(this.masterSlaveOption);
-		return ps;
 	}
 
 	/**
@@ -107,7 +92,7 @@ public class PreparedSQL {
 	 */
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\ntype=").append(type);
+		sb.append("\ntype=").append(operationType);
 		sb.append("\nsql=").append(sql);
 		sb.append("\nparams=").append(Arrays.deepToString(params));
 		sb.append("\nmasterSlaveSelect=").append(masterSlaveOption);
@@ -169,6 +154,14 @@ public class PreparedSQL {
 		sqlHandlers.add(sqlHandler);
 	}
 
+	public void addNamedSqlItem(SqlItem namedSqlItem) {
+		if (namedSqlItems == null)
+			namedSqlItems = new ArrayList<SqlItem>();
+		if(namedSqlItem==null || !SqlOption.CARRIER.equals(namedSqlItem.getType())  )
+			throw new DbProRuntimeException("namedSqlItem need set a SqlOption.NAMED type");
+		namedSqlItems.add(namedSqlItem);
+	}
+
 	public void disableHandlers(Object[] handlersClass) {
 		if (handlersClass == null || handlersClass.length == 0)
 			throw new DbProRuntimeException("disableHandlers method need at least 1 parameter");
@@ -180,7 +173,7 @@ public class PreparedSQL {
 
 	public boolean isDisabledHandler(Object handler) {
 		if (disabledHandlers == null || disabledHandlers.isEmpty())
-			return false; 
+			return false;
 		for (Class<?> disabled : disabledHandlers)
 			if (disabled.equals(handler.getClass()))
 				return true;
@@ -237,7 +230,7 @@ public class PreparedSQL {
 		return params;
 	}
 
-	public void addGlobalAndThreadedHandlers(DbPro dbPro) {
+	public void addGlobalAndThreadedHandlers(ImprovedQueryRunner dbPro) {
 		if (dbPro.getSqlHandlers() != null)
 			for (SqlHandler handler : dbPro.getSqlHandlers())
 				addSqlHandler(handler);
@@ -253,8 +246,8 @@ public class PreparedSQL {
 
 	/** If current type is null, set with new type value */
 	public void ifNullSetType(SqlOption type) {
-		if (this.type == null)
-			this.type = type;
+		if (this.operationType == null)
+			this.operationType = type;
 	}
 
 	/** If current type is null, set with new type value */
@@ -267,12 +260,12 @@ public class PreparedSQL {
 		// === below this line are normal getter && setter======
 	}
 
-	public SqlOption getType() {
-		return type;
+	public SqlOption getOperationType() {
+		return operationType;
 	}
 
-	public void setType(SqlOption type) {
-		this.type = type;
+	public void setOperationType(SqlOption operationType) {
+		this.operationType = operationType;
 	}
 
 	public Connection getConnection() {
@@ -355,6 +348,14 @@ public class PreparedSQL {
 
 	public void setDisabledHandlers(List<Class<?>> disabledHandlers) {
 		this.disabledHandlers = disabledHandlers;
+	}
+
+	public List<SqlItem> getNamedSqlItems() {
+		return namedSqlItems;
+	}
+
+	public void setNamedSqlItems(List<SqlItem> namedSqlItems) {
+		this.namedSqlItems = namedSqlItems;
 	}
 
 }

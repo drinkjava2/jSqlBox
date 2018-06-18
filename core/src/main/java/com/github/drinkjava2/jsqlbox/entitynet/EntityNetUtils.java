@@ -169,8 +169,8 @@ public class EntityNetUtils {// NOSONAR
 			String refTable = fkey.getRefTableAndColumns()[0];
 			String fkeyValues = "";
 			String fkeyColumns = "";
-			for (String colNames : fkey.getColumnNames()) {
-				String entityField = model.getColumn(colNames).getEntityField();
+			for (String colName : fkey.getColumnNames()) {
+				String entityField = model.getColumnByColOrEntityFieldName(colName).getEntityField();
 				Object fKeyValue = ClassCacheUtils.readValueFromBeanField(entity, entityField);
 				if (StrUtils.isEmpty(fKeyValue)) {
 					fkeyValues = null;
@@ -182,7 +182,7 @@ public class EntityNetUtils {// NOSONAR
 
 				if (fkeyColumns.length() > 0)
 					fkeyColumns += EntityNet.COMPOUND_COLUMNNAME_SEPARATOR;// NOSONAR
-				fkeyColumns += colNames;// NOSONAR
+				fkeyColumns += colName;// NOSONAR
 			}
 			if (!StrUtils.isEmpty(fkeyColumns) && !StrUtils.isEmpty(fkeyValues) && !StrUtils.isEmpty(refTable)) {
 				if (resultList == null)

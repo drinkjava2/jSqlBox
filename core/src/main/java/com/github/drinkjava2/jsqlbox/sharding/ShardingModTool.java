@@ -37,7 +37,7 @@ public class ShardingModTool implements ShardingTool {
 
 	@Override
 	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
+		TableModel t = SqlBoxContextUtils.objectConfigToModel(ctx, entityOrClass);
 		ColumnModel col = t.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for table '" + t.getTableName() + "'");
@@ -82,7 +82,7 @@ public class ShardingModTool implements ShardingTool {
 
 	@Override
 	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.getTableModelFromEntityOrClass(ctx, entityOrClass);
+		TableModel t = SqlBoxContextUtils.objectConfigToModel(ctx, entityOrClass);
 
 		ColumnModel col = t.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)

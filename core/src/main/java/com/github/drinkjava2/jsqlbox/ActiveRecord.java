@@ -81,8 +81,8 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public ColumnModel columnModel(String columnName) {
-		return box().getTableModel().getColumn(columnName);
+	public ColumnModel columnModel(String colOrFieldName) {
+		return box().getTableModel().getColumnByColOrEntityFieldName(colOrFieldName);
 	}
 
 	@Override
