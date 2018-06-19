@@ -38,7 +38,7 @@ public class ShardingRangeTool implements ShardingTool {
 
 	@Override
 	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.objectToModel( entityOrClass);
+		TableModel t = SqlBoxContextUtils.configToModel( entityOrClass);
 		ColumnModel col = t.getShardTableColumn();
 		if (col == null)
 			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
@@ -84,7 +84,7 @@ public class ShardingRangeTool implements ShardingTool {
 	@Override
 	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
 
-		TableModel t = SqlBoxContextUtils.objectToModel(entityOrClass);
+		TableModel t = SqlBoxContextUtils.configToModel(entityOrClass);
 		ColumnModel col = t.getShardDatabaseColumn();
 		if (col == null)
 			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");

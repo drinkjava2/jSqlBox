@@ -148,7 +148,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * IdGenerator (identity or sequence or UUID...)
 	 */
 	public static int insert(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel model = SqlBoxContextUtils.objectToModel(entityBean);
+		TableModel model = SqlBoxContextUtils.configToModel(entityBean, optionItems);
 		LinkStyleArrayList<Object> jSQL = new LinkStyleArrayList<Object>();
 
 		String identityFieldName = null;
@@ -236,7 +236,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Update entityBean according primary key */
 	public static int update(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel model = SqlBoxContextUtils.objectToModel(entityBean);
+		TableModel model = SqlBoxContextUtils.configToModel(entityBean, optionItems);
 
 		LinkStyleArrayList<Object> jSQL = new LinkStyleArrayList<Object>();
 		LinkStyleArrayList<Object> where = new LinkStyleArrayList<Object>();
@@ -288,7 +288,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Delete entityBean in database according primary key value
 	 */
 	public static void delete(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel model = SqlBoxContextUtils.objectToModel(entityBean);
+		TableModel model = SqlBoxContextUtils.configToModel(entityBean, optionItems);
 
 		LinkStyleArrayList<Object> jSQL = new LinkStyleArrayList<Object>();
 		LinkStyleArrayList<Object> where = new LinkStyleArrayList<Object>();
@@ -343,7 +343,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * map<String,Object>
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T putIdValue(SqlBoxContext ctx, T bean, Object entityId) {
+	public static <T> T putIdValue(SqlBoxContext ctx, T bean, Object entityId, TableModel model) {
 		if (entityId instanceof Map) { // MAP for compound key
 			Map<String, Object> idMap = (Map<String, Object>) entityId;
 			for (Entry<String, Object> item : idMap.entrySet())
@@ -356,13 +356,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				if (Entity.class.equals(annotation.annotationType()))
 					return (T) entityId;// Entity for compound key or Single key
 
-			SqlBox box = SqlBoxUtils.findAndBindSqlBox(ctx, bean);
-			TableModel tableModel = box.getTableModel();
-			for (ColumnModel col : tableModel.getColumns())
+			boolean foundSingleKey = false;
+			for (ColumnModel col : model.getColumns())
 				if (col.getPkey()) {
 					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
+					foundSingleKey = true;
 					break;// Single Key value
 				}
+			if (!foundSingleKey)
+				throw new SqlBoxException("Not found Key setting in '" + bean + "'");
 		}
 		return bean;
 	}
@@ -381,7 +383,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static <T> T mapToEntityBean(SqlBoxContext ctx, Object config, Map<String, Object> oneRow) {
 		if (oneRow == null || oneRow.isEmpty())
 			throw new SqlBoxException("Can not use null or empty row to convert to EntityBean");
-		TableModel model = SqlBoxContextUtils.objectToModel( config);
+		TableModel model = SqlBoxContextUtils.configToModel(config);
 		SqlBoxException.assureNotNull(model.getEntityClass(), "Can not find entityClass setting in model.");
 		@SuppressWarnings("unchecked")
 		T bean = (T) ClassCacheUtils.createNewEntity(model.getEntityClass());
@@ -403,32 +405,27 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	public static <T> List<T> loadAll(SqlBoxContext ctx, Object config, Object... optionItems) {
-		TableModel t = objectToModel(config);
+		TableModel t = configToModel(config, optionItems);
 		Object[] items = new Object[optionItems.length + 1];
 		items[0] = "select * from " + t.getTableName();
 		System.arraycopy(optionItems, 0, items, 1, optionItems.length);
 		return ctx.iQueryForEntityList(config, items);
 	}
 
-	public static <T> T loadById(SqlBoxContext ctx, Object config, Object idOrIdMap, Object... optionItems) {// NOSONAR
-		try {
-			TableModel model = SqlBoxContextUtils.objectToModel(config);
-			SqlBoxException.assureNotNull(model.getEntityClass(), "Can not find entityClass setting in model.");
-			@SuppressWarnings("unchecked")
-			T bean = (T) ClassCacheUtils.createNewEntity(model.getEntityClass());
-			ctx.getSqlBox(bean).setTableModel(model.newCopy());
-			bean = putIdValue(ctx, bean, idOrIdMap);
-			return load(ctx, bean, optionItems);
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
+	public static <T> T loadById(SqlBoxContext ctx, Object entityOrClass, Object idOrIdMap, Object... optionItems) {// NOSONAR
+		TableModel model = SqlBoxContextUtils.configToModel(entityOrClass, optionItems);
+		SqlBoxException.assureNotNull(model.getEntityClass(),
+				"Can not find TableModel setting in '" + entityOrClass + "'");
+		T bean = SqlBoxContextUtils.configToBean(entityOrClass);
+		bean = putIdValue(ctx, bean, idOrIdMap, model);
+		return load(ctx, bean, optionItems);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> T load(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		SqlBoxException.assureNotNull(entityBean, "entityBean can not be null");
 
-		TableModel model = SqlBoxContextUtils.objectToModel(entityBean);
+		TableModel model = SqlBoxContextUtils.configToModel(entityBean, optionItems);
 		LinkStyleArrayList<Object> jSQL = new LinkStyleArrayList<Object>();
 		LinkStyleArrayList<Object> where = new LinkStyleArrayList<Object>();
 		List<String> allFieldNames = new ArrayList<String>();
@@ -503,12 +500,57 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * 4. Object, will call TableModelUtils.entity2Model(entityOrClass.getClass()) to create a SqlBox instance
 	 * </pre>
 	 */
-	public static TableModel objectToModel(Object entityOrClass) {
+	@SuppressWarnings("unchecked")
+	public static <T> T configToBean(Object entityOrClass) {
 		if (entityOrClass == null)
-			throw new SqlBoxException("Can build TableModel configuration for null netConfig");
+			throw new SqlBoxException("Can build Bean for null entityOrClass");
+		Class<?> t = null;
+		if (entityOrClass instanceof TableModel)
+			t = ((TableModel) entityOrClass).getEntityClass();
+		else if (entityOrClass instanceof SqlBox)
+
+			t = ((SqlBox) entityOrClass).getTableModel().getEntityClass();
+		else if (entityOrClass instanceof Class)
+			t = (Class<?>) entityOrClass;
+		else // it's a entity bean
+			return (T) entityOrClass;
+		try {
+			return (T) t.newInstance();
+		} catch (Exception e) {
+			throw new SqlBoxException("Can not create new instance for '" + t + "'");
+		}
+	}
+
+	/**
+	 * Transfer Object to TableModel, object can be SqlBox instance, entityClass or
+	 * entity Bean
+	 * 
+	 * <pre>
+	 * 0. If TableModel in option items, use it first
+	 * 1. if entityOrClass is TableModel instance, will use it
+	 * 2. if entityOrClass is SqlBox instance, will use its tableModel
+	 * 3. if entityOrClass is Class, will call TableModelUtils.entity2Model to create tableModel
+	 * 4. if entityOrClass is Object, will call TableModelUtils.entity2Model(entityOrClass.getClass()) to create a SqlBox instance
+	 * </pre>
+	 */
+	public static TableModel configToModel(Object entityOrClass, Object... optionItems) {
+		for (Object item : optionItems) { // If Model in option items, use it first;
+			if (item instanceof TableModel)
+				return (TableModel) item;
+			if (item instanceof SqlItem) {
+				SqlItem sqlItem = (SqlItem) item;
+				if (SqlOption.MODEL.equals(sqlItem.getType())) {
+					if (sqlItem.getParameters() == null || sqlItem.getParameters().length == 0)
+						throw new SqlBoxException("MODEL type SqlItem can not have empty setting");
+					return (TableModel) sqlItem.getParameters()[0];
+				}
+			}
+		}
+		if (entityOrClass == null)
+			throw new SqlBoxException("Can build TableModel configuration for null entityOrClass");
 		if (entityOrClass instanceof TableModel)
 			return (TableModel) entityOrClass;
-		else if (entityOrClass instanceof SqlBox)
+		else if (entityOrClass instanceof SqlBox) // TODO:delete this line
 			return ((SqlBox) entityOrClass).getTableModel();
 		else if (entityOrClass instanceof Class)
 			return TableModelUtils.entity2Model((Class<?>) entityOrClass);
@@ -527,12 +569,13 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * 4. Object, will call TableModelUtils.entity2Model(entityOrClass.getClass()) to create a SqlBox instance
 	 * </pre>
 	 */
-	public static TableModel[] objectToModels(Object[] netConfigs) {
+	@Deprecated
+	public static TableModel[] configToModels(Object[] netConfigs) {
 		if (netConfigs == null || netConfigs.length == 0)
 			return new TableModel[0];
 		TableModel[] result = new TableModel[netConfigs.length];
 		for (int i = 0; i < netConfigs.length; i++)
-			result[i] = SqlBoxContextUtils.objectToModel(netConfigs[i]);
+			result[i] = SqlBoxContextUtils.configToModel(netConfigs[i]);
 		return result;
 	}
 

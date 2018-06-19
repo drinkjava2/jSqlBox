@@ -264,10 +264,4 @@ public class SqlHandlersTest extends TestBase {
 		Assert.assertEquals(49, result2.size());
 	}
 
-//	@Test
-//	public void testNamedItemSqlHandler() throws SQLException {
-//		List<Map<String, Object>> result2 = gpQuery(new MapListHandler(), "select u.* from DemoUser u where u.age>?",
-//				new SqlItem("some name", "This will be ignored"), 50);
-//		Assert.assertEquals(49, result2.size());
-//	}
 }

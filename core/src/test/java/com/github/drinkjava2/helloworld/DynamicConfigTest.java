@@ -94,8 +94,16 @@ public class DynamicConfigTest extends TestBase {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
 
-		//TODO: different load configurations
 		u.columnModel("id").pkey();
+		u.setUserName(null);
+		u.load();
+		Assert.assertEquals("Tom", u.getUserName());
+		
+		u.setUserName(null);
+		u.loadById(u.getId());
+		Assert.assertEquals("Tom", u.getUserName());
+
+		//TODO: different load configurations
 		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(),u.tableModel());
 		Assert.assertEquals("Tom", u2.getUserName());
 

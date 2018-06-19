@@ -171,12 +171,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				if (args.length == 0)
 					throw new SqlBoxException("Model item can not be empty");
 				if (args.length < 2 || !(args[1] instanceof String)) {
-					TableModel[] modelArray = SqlBoxContextUtils.objectToModels(args);
+					TableModel[] modelArray = SqlBoxContextUtils.configToModels(args);
 					for (TableModel t : modelArray)
 						ps.addModel(t);
 				} else {
 					for (int i = 0; i < args.length / 2; i++) {
-						TableModel t = SqlBoxContextUtils.objectToModel(args[i * 2]);
+						TableModel t = SqlBoxContextUtils.configToModel(args[i * 2]);
 						EntityNetException.assureNotNull(t.getEntityClass(),
 								"'entityClass' property not set for model " + t);
 						EntityNetException.assureNotEmpty((String) args[i * 2 + 1],
@@ -309,6 +309,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entity, optionItems);
 	}
 
+	/** Load an entity from database by key, key can be one object or a Map */
+	public <T> T loadById(Object config, Object entityId, Object... optionItems) {
+		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);
+	}
+	
 	/** Load an entity from database by key, key can be one object or a Map */
 	public <T> T loadById(Class<T> config, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);

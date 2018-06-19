@@ -124,12 +124,9 @@ public abstract class SqlBoxUtils {// NOSONAR
 	public static SqlBox findAndBindSqlBox(SqlBoxContext ctx, Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
 		SqlBox box = SqlBoxUtils.getBindedBox(entity);
-		if (box != null) {
-			box.setContext(ctx);
-			return box;
-		}
+		if (box != null)  
+			return box; 
 		box = SqlBoxUtils.createSqlBox(ctx, entity.getClass());
-		box.setContext(ctx);
 		SqlBoxUtils.bindBoxToBean(box, entity);
 		return box;
 	}

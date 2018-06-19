@@ -145,14 +145,13 @@ public class ActiveRecord implements ActiveRecordSupport {
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx.load(this, optionalSqlItems);
 	}
-
-	@SuppressWarnings("unchecked")
+ 
 	@Override
 	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.loadById((Class<T>) this.getClass(), idOrIdMap, optionalSqlItems);
+		return ctx.loadById(this, idOrIdMap, optionalSqlItems);
 	}
 
 	@SuppressWarnings("unchecked")

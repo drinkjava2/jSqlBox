@@ -45,12 +45,12 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
 	/** Create a model configurations, */
 	public static TableModel model(Object model) {
-		return SqlBoxContextUtils.objectToModel(model);
+		return SqlBoxContextUtils.configToModel(model);
 	}
 
 	/** Create a model configurations, */
 	public static TableModel model(Object model, String alias) {
-		TableModel t = SqlBoxContextUtils.objectToModel(model);
+		TableModel t = SqlBoxContextUtils.configToModel(model);
 		t.setAlias(alias);
 		return t;
 	}

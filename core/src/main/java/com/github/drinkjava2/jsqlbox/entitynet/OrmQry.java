@@ -72,7 +72,7 @@ public class OrmQry {
 	/** Config, parameters can be entity or entity class or TableModel */
 	public OrmQry config(Object... entityOrModel) {
 		for (Object object : entityOrModel) {
-			TableModel t = SqlBoxContextUtils.objectToModel(object);
+			TableModel t = SqlBoxContextUtils.configToModel(object);
 			EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 			String alias = t.getAlias();
 			if (StrUtils.isEmpty(alias)) {
@@ -103,7 +103,7 @@ public class OrmQry {
 
 	/** Config one entity */
 	private OrmQry configOneAlias(Object entityOrModel, String alias) {
-		TableModel t = SqlBoxContextUtils.objectToModel( entityOrModel);
+		TableModel t = SqlBoxContextUtils.configToModel( entityOrModel);
 		EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 		EntityNetException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
 		t.setAlias(alias);

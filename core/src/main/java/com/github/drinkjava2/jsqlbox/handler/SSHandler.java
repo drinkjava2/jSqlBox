@@ -142,7 +142,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	public String explainNetQuery(SqlBoxContext ctx, String sqlString) {// NOSONAR
 		SqlBoxException.assureNotEmpty(sqlString, "Sql can not be empty");
 		String sql = SqlBoxStrUtils.formatSQL(sqlString);
-		TableModel[] configModels = SqlBoxContextUtils.objectToModels(netConfigObjects);
+		TableModel[] configModels = SqlBoxContextUtils.configToModels(netConfigObjects);
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
 			pos = sql.indexOf(".##");
