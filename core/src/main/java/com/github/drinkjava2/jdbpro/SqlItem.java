@@ -33,7 +33,7 @@ public class SqlItem {
 	}
 
 	public SqlItem(String name, Object... parameters) {
-		this.type = SqlOption.CARRIER;
+		this.type = SqlOption.IGNORE;
 		this.name = name;
 		this.parameters = parameters;
 	}

@@ -32,6 +32,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNetException;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.MapListWrap;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
@@ -152,16 +153,41 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Override DbPro's dealItem to deal SqlBoxContext's SqlItem
 	 */
 	@Override
-	protected boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
-		if (super.dealItem(iXxxStyle, predSQL, sql, item))
+	protected boolean dealItem(boolean iXxxStyle, PreparedSQL ps, StringBuilder sql, Object item) {// NOSONAR
+		if (super.dealItem(iXxxStyle, ps, sql, item))
 			return true; // if super class DbPro can deal it, let it do
-		else if (item instanceof SqlItem) {
+		else if (item instanceof TableModel) {
+			ps.addModel(item);
+			return true; // ignore TablemModel
+		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
 			if (SqlOption.SHARD_TABLE.equals(sqlItemType))
 				handleShardTable(sql, sqItem);
 			else if (SqlOption.SHARD_DATABASE.equals(sqlItemType))
-				handleShardDatabase(predSQL, sqItem);
+				handleShardDatabase(ps, sqItem);
+			else if (SqlOption.MODEL.equals(sqlItemType)) {
+				Object[] args = sqItem.getParameters();
+				if (args.length == 0)
+					throw new SqlBoxException("Model item can not be empty");
+				if (args.length < 2 || !(args[1] instanceof String)) {
+					TableModel[] modelArray = SqlBoxContextUtils.objectToModels(args);
+					for (TableModel t : modelArray)
+						ps.addModel(t);
+				} else {
+					for (int i = 0; i < args.length / 2; i++) {
+						TableModel t = SqlBoxContextUtils.objectToModel(args[i * 2]);
+						EntityNetException.assureNotNull(t.getEntityClass(),
+								"'entityClass' property not set for model " + t);
+						EntityNetException.assureNotEmpty((String) args[i * 2 + 1],
+								"Alias can not be empty for class '" + t.getEntityClass() + "'");
+						t.setAlias((String) args[i * 2 + 1]);
+						ps.addModel(t);
+					}
+				}
+				return true;
+			}
+
 			else
 				return false;
 		} else
@@ -286,18 +312,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Load an entity from database by key, key can be one object or a Map */
 	public <T> T loadById(Class<T> config, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);
-	} 
+	}
 
 	/** Load an entity from database by query */
 	public <T> T loadByQuery(Class<T> config, Object... optionItems) {
 		return SqlBoxContextUtils.loadByQuery(this, config, optionItems);
 	}
- 
 
 	/** Load all entity from database */
 	public <T> List<T> loadAll(Class<T> config, Object... optionItems) {
 		return SqlBoxContextUtils.loadAll(this, config, optionItems);
-	} 
+	}
 
 	protected void loadFieldsMethods______________________________() {// NOSONAR
 	}

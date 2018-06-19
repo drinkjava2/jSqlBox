@@ -224,8 +224,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
-			if (SqlOption.CARRIER.equals(sqlItemType))
-				return true;
+			if (SqlOption.IGNORE.equals(sqlItemType))
+				return true;// Always return true for IGNORE type
 			else if (SqlOption.PARAM.equals(sqlItemType)) {
 				for (Object pm : sqItem.getParameters())
 					predSQL.addParam(pm);

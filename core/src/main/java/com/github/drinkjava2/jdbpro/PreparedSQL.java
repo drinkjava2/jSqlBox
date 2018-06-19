@@ -56,6 +56,8 @@ public class PreparedSQL {
 	/** Optional,The SQL parameters */
 	private Object[] params;
 
+ 
+
 	/** If set true, will use templateEngine to render SQL */
 	private Boolean useTemplate = null;
 
@@ -72,9 +74,13 @@ public class PreparedSQL {
 	private ResultSetHandler<?> resultSetHandler;
 
 	/** Handers in this list will disabled */
-	private List<Class<?>> disabledHandlers;
+	private List<Class<?>> disabledHandlers; 
+	
+	/** TableModels, this is designed for ORM program */
+	private Object[] models;
 
-	private List<SqlItem> namedSqlItems;
+	/** Give List, this is designed for ORM program */
+	private List<String[]> givesList = null;
 
 	public PreparedSQL() {// default constructor
 	}
@@ -119,6 +125,17 @@ public class PreparedSQL {
 		params[params.length - 1] = param;
 	}
 
+	public void addModel(Object tableModel) {
+		if (models == null)
+			models = new Object[1];
+		else {
+			Object[] newModels = new Object[models.length + 1];
+			System.arraycopy(models, 0, newModels, 0, models.length);
+			models = newModels;
+		}
+		models[models.length - 1] = tableModel;
+	}
+
 	/**
 	 * Add map content to current template map, if keys already exist will use new
 	 * value replace
@@ -153,14 +170,7 @@ public class PreparedSQL {
 		}
 		sqlHandlers.add(sqlHandler);
 	}
-
-	public void addNamedSqlItem(SqlItem namedSqlItem) {
-		if (namedSqlItems == null)
-			namedSqlItems = new ArrayList<SqlItem>();
-		if(namedSqlItem==null || !SqlOption.CARRIER.equals(namedSqlItem.getType())  )
-			throw new DbProRuntimeException("namedSqlItem need set a SqlOption.NAMED type");
-		namedSqlItems.add(namedSqlItem);
-	}
+ 
 
 	public void disableHandlers(Object[] handlersClass) {
 		if (handlersClass == null || handlersClass.length == 0)
@@ -348,14 +358,22 @@ public class PreparedSQL {
 
 	public void setDisabledHandlers(List<Class<?>> disabledHandlers) {
 		this.disabledHandlers = disabledHandlers;
+	} 
+	
+	public Object[] getModels() {
+		return models;
 	}
 
-	public List<SqlItem> getNamedSqlItems() {
-		return namedSqlItems;
+	public void setModels(Object[] models) {
+		this.models = models;
 	}
 
-	public void setNamedSqlItems(List<SqlItem> namedSqlItems) {
-		this.namedSqlItems = namedSqlItems;
+	public List<String[]> getGivesList() {
+		return givesList;
+	}
+
+	public void setGivesList(List<String[]> givesList) {
+		this.givesList = givesList;
 	}
 
 }

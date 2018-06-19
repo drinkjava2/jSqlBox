@@ -47,7 +47,7 @@ public enum SqlOption {
 	VALUES_QUESTIONS,
 
 	// ----------Special Items ------------
-	/** Switch to another DbPro or subClass(like SqlBoxContext) */
+	/** Switch to another DbPro or subClass (SqlBoxContext) to execute SQL */
 	SWITCHTO,
 
 	/** Give one or more class as parameter, instance will created by IocTool */
@@ -75,15 +75,15 @@ public enum SqlOption {
 	/** It's a QUERY type SQL */
 	QUERY,
 
+	/**
+	 * IGNORE type SqlItem always be ignored, but user can use this type to carrier
+	 * some parameters
+	 */
+	IGNORE,
+
 	// ================================================================
 	// Below items designed for jSqlBox or other projects to explain
 	// ================================================================
-
-	/**
-	 * A CARRIER type SqlItem, used to carrier some parameters to SQL methods to
-	 * prepare PreparedSQL only
-	 */
-	CARRIER,
 
 	// ------Master_Slave Options-------
 	/**
@@ -109,6 +109,17 @@ public enum SqlOption {
 	SHARD_TABLE,
 
 	/** Tell system this is a "SHARD_DATABASE" SqlItem */
-	SHARD_DATABASE
+	SHARD_DATABASE,
+
+	// -------Below designed for ORM program
+
+	/** The GIVE option, this is designed for ORM program */
+	GIVE,
+
+	/** The GIVE_BOTH option, this is designed for ORM program */
+	GIVE_BOTH,
+
+	/** The MODEL means TableModel type, this is designed for ORM program */
+	MODEL
 
 }

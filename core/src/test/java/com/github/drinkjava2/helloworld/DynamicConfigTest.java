@@ -96,7 +96,7 @@ public class DynamicConfigTest extends TestBase {
 
 		//TODO: different load configurations
 		u.columnModel("id").pkey();
-		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(),u);
+		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(),u.tableModel());
 		Assert.assertEquals("Tom", u2.getUserName());
 
 		u.columnModel("userName").setTransientable(true);

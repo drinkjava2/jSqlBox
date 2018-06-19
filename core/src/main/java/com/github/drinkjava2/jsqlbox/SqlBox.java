@@ -23,13 +23,13 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  */
 public class SqlBox {
 	/** A TableModel instance */
-	TableModel tableModel;
+	private TableModel tableModel;
 
 	/**
 	 * Optional, a SqlBoxContext instance, usually used for ActiveRecordSupport
 	 * entity
 	 */
-	SqlBoxContext context;
+	private SqlBoxContext context;
 
 	// Shortcut method
 	public String table() {

@@ -20,6 +20,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import com.github.drinkjava2.jdbpro.JDBPRO;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
 /**
@@ -42,24 +43,35 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return new PaginHandler(pageNumber, pageSize);
 	}
 
-	/** Create a model configurations,  */
-	public static SqlItem config(Object... models) {
-		return new SqlItem("config", models);
+	/** Create a model configurations, */
+	public static TableModel model(Object model) {
+		return SqlBoxContextUtils.objectToModel(model);
 	}
-	
-	/** Create model configurations with alias, usage model1, alias1, model2, alias2.... */
-	public static SqlItem configAlias(Object... modelsAndAlias) {
-		return new SqlItem("configAlias", modelsAndAlias);
+
+	/** Create a model configurations, */
+	public static TableModel model(Object model, String alias) {
+		TableModel t = SqlBoxContextUtils.objectToModel(model);
+		t.setAlias(alias);
+		return t;
 	}
-	
+
+	/** Create model configurations */
+	public static SqlItem models(Object... modelsAndAlias) {
+		return new SqlItem(SqlOption.MODEL, modelsAndAlias);
+	}
+
+	public static SqlItem give(String from, String to, String fieldName) {
+		return new SqlItem(SqlOption.GIVE, from, to, fieldName);
+	}
+
 	public static SqlItem give(String from, String to) {
-		return new SqlItem("give", from, to);
+		return new SqlItem(SqlOption.GIVE, from, to, null);
 	}
-	
+
 	public static SqlItem giveBoth(String from, String to) {
-		return new SqlItem("giveBoth", from, to);
+		return new SqlItem(SqlOption.GIVE_BOTH, from, to, null);
 	}
-	
+
 	public static SqlItem noPagin() {
 		return new SqlItem(SqlOption.DISABLE_HANDLERS, PaginHandler.class);
 	}

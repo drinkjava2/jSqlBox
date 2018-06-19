@@ -114,7 +114,7 @@ public class EntityNet {
 	private EntityNet loadAllOrSketch(boolean loadSketchOnly, Object... configObjects) {
 		if (configObjects == null || configObjects.length == 0)
 			throw new EntityNetException("LoadNet() does not support empty netConfigs parameter");
-		TableModel[] models = SqlBoxContextUtils.objectConfigsToModels(sqlBoxContext, configObjects);
+		TableModel[] models = SqlBoxContextUtils.objectToModels(configObjects);
 		EntityNet net = new EntityNet(sqlBoxContext);
 		String starOrSharp = loadSketchOnly ? ".##" : ".**";
 		for (TableModel t : models) {
@@ -143,7 +143,7 @@ public class EntityNet {
 		if (listMap == null)
 			throw new EntityNetException("Can not join null listMap");
 
-		TableModel[] configs = SqlBoxContextUtils.objectConfigsToModels(sqlBoxContext, configObjects);
+		TableModel[] configs = SqlBoxContextUtils.objectToModels(configObjects);
 
 		EntityNetUtils.checkModelHasEntityClassAndAlias(configs);
 		if (configs != null && configs.length > 0)// Join models

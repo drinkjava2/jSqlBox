@@ -14,6 +14,7 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
 
 public class OrmQryTest extends TestBase {
@@ -118,9 +119,9 @@ public class OrmQryTest extends TestBase {
 	@Test
 	public void testManualLoad() {
 		insertDemoData();
-		User uSeting=new User();
-		//uSeting.columnModel("userName").setTransientable(true); 
-		User u2=ctx.loadById(User.class, "u1", uSeting);
+		TableModel model=new User().tableModel();
+		model.column("userName").setTransientable(true); 
+		User u2=ctx.loadById(User.class, "u1", model);
 		System.out.println(u2.getUserName());
 		
 		List<User> userList = ctx.loadAll(User.class); 
