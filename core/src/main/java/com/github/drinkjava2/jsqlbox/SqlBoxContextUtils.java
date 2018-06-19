@@ -507,8 +507,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		Class<?> t = null;
 		if (entityOrClass instanceof TableModel)
 			t = ((TableModel) entityOrClass).getEntityClass();
+		else if (entityOrClass instanceof ActiveRecordSupport)
+			return (T) entityOrClass;
 		else if (entityOrClass instanceof SqlBox)
-
 			t = ((SqlBox) entityOrClass).getTableModel().getEntityClass();
 		else if (entityOrClass instanceof Class)
 			t = (Class<?>) entityOrClass;
@@ -537,6 +538,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (Object item : optionItems) { // If Model in option items, use it first;
 			if (item instanceof TableModel)
 				return (TableModel) item;
+			else if (item instanceof ActiveRecordSupport)
+				return ((ActiveRecordSupport) item).tableModel();
+			else if (item instanceof SqlBox)
+				return ((SqlBox) item).getTableModel();
 			if (item instanceof SqlItem) {
 				SqlItem sqlItem = (SqlItem) item;
 				if (SqlOption.MODEL.equals(sqlItem.getType())) {
@@ -550,7 +555,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			throw new SqlBoxException("Can build TableModel configuration for null entityOrClass");
 		if (entityOrClass instanceof TableModel)
 			return (TableModel) entityOrClass;
-		else if (entityOrClass instanceof SqlBox) // TODO:delete this line
+		else if (entityOrClass instanceof ActiveRecordSupport)
+			return ((ActiveRecordSupport) entityOrClass).tableModel();
+		else if (entityOrClass instanceof SqlBox)
 			return ((SqlBox) entityOrClass).getTableModel();
 		else if (entityOrClass instanceof Class)
 			return TableModelUtils.entity2Model((Class<?>) entityOrClass);
@@ -570,12 +577,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * </pre>
 	 */
 	@Deprecated
-	public static TableModel[] configToModels(Object[] netConfigs) {
-		if (netConfigs == null || netConfigs.length == 0)
+	public static TableModel[] configToModels(Object[] configs) {
+		if (configs == null || configs.length == 0)
 			return new TableModel[0];
-		TableModel[] result = new TableModel[netConfigs.length];
-		for (int i = 0; i < netConfigs.length; i++)
-			result[i] = SqlBoxContextUtils.configToModel(netConfigs[i]);
+		TableModel[] result = new TableModel[configs.length];
+		for (int i = 0; i < configs.length; i++)
+			result[i] = SqlBoxContextUtils.configToModel(configs[i]);
 		return result;
 	}
 

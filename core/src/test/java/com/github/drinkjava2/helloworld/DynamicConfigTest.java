@@ -98,23 +98,23 @@ public class DynamicConfigTest extends TestBase {
 		u.setUserName(null);
 		u.load();
 		Assert.assertEquals("Tom", u.getUserName());
-		
+
 		u.setUserName(null);
 		u.loadById(u.getId());
 		Assert.assertEquals("Tom", u.getUserName());
 
-		//TODO: different load configurations
-		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(),u.tableModel());
+		// TODO: different load configurations
+		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(), u.tableModel());
 		Assert.assertEquals("Tom", u2.getUserName());
 
 		u.columnModel("userName").setTransientable(true);
-		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(),u);
+		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(), u);
 		Assert.assertEquals(null, u3.getUserName());
 
-		UserDemo u4 = ctx.loadById(UserDemo.class, u.getId(),u.tableModel());
+		UserDemo u4 = ctx.loadById(UserDemo.class, u.getId(), u.tableModel());
 		Assert.assertEquals(null, u4.getUserName());
 
-		UserDemo u5 = ctx.loadById(UserDemo.class, u.getId(),u.box());
+		UserDemo u5 = ctx.loadById(UserDemo.class, u.getId(), u.box());
 		Assert.assertEquals(null, u5.getUserName());
 	}
 

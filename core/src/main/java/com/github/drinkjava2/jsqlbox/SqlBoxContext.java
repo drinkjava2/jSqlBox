@@ -158,7 +158,13 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			return true; // if super class DbPro can deal it, let it do
 		else if (item instanceof TableModel) {
 			ps.addModel(item);
-			return true; // ignore TablemModel
+			return true; 
+		} else if (item instanceof ActiveRecordSupport) {
+			ps.addModel(((ActiveRecordSupport)item).tableModel());
+			return true; 
+		} else if (item instanceof SqlBox) {
+			ps.addModel(((SqlBox)item).getTableModel() );
+			return true; 
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
@@ -313,7 +319,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> T loadById(Object config, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);
 	}
-	
+
 	/** Load an entity from database by key, key can be one object or a Map */
 	public <T> T loadById(Class<T> config, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);
