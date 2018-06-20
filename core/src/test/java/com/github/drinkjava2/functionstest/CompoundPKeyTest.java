@@ -15,6 +15,9 @@
  */
 package com.github.drinkjava2.functionstest;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.modelAlias;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +27,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jsqlbox.ActiveRecord; 
+import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
+import com.github.drinkjava2.jsqlbox.handler.OrmQryHandler;
 
 /**
  * This is function test for Entity with Compound Prime keys, a compound-pkey
@@ -98,34 +102,34 @@ public class CompoundPKeyTest extends TestBase {
 	public void init() {
 		super.init();
 		createAndRegTables(CmpEntity.class);
-		for (int i = 0; i < 100; i++)
+		for (int i = 1; i <= 10; i++)
 			new CmpEntity().put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", i, "address", "China")
 					.insert();
 	}
 
 	@Test
-	public void testEntityNet() {
-		EntityNet net = ctx.netLoadAll(CmpEntity.class);
-		long start = System.currentTimeMillis();
-		Path p = new Path("S+", CmpEntity.class).where("age>=?", 50);
-		List<CmpEntity> entities = net.runPath(p).pickEntityList(CmpEntity.class);
-		printTimeUsed(start, "Bean Validator instance ");
-		Assert.assertEquals(50, entities.size());
+	public void testOrmQry() {
+		OrmQry net = ctx.iQuery(new OrmQryHandler(), "select u.** from CmpEntity u", modelAlias(CmpEntity.class, "u"),
+				" where age>?", param(5));
+		List<CmpEntity> entities = net.pickEntityList("u");
+		Assert.assertEquals(5, entities.size());
 
+		 
 		// Map as entityId
-		Map<String, Object> idMap = new HashMap<String, Object>();
-		idMap.put("lastName", "Zhu");
-		idMap.put("firstName", "Sam");
-		idMap.put("middleName", "Y");
-		idMap.put("age", 5);
-		CmpEntity entity = net.pickOneEntity(CmpEntity.class, idMap);
-		Assert.assertEquals(new Integer(5), entity.getAge());
-
-		// Entity as entityId
-		CmpEntity entityBean = new CmpEntity();
-		entityBean.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 6);
-		CmpEntity entity2 = net.pickOneEntity(CmpEntity.class, entityBean);
-		Assert.assertEquals(new Integer(6), entity2.getAge());
+//		 Map<String, Object> idMap = new HashMap<String, Object>();
+//		 idMap.put("lastName", "Zhu");
+//		 idMap.put("firstName", "Sam");
+//		 idMap.put("middleName", "Y");
+//		 idMap.put("age", 5);
+//		 CmpEntity entity = net.pickEntityMap("u");
+//		 Assert.assertEquals(new Integer(5), entity.getAge());
+//		
+//		 // Entity as entityId
+//		 CmpEntity entityBean = new CmpEntity();
+//		 entityBean.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu",
+//		 "age", 6);
+//		 CmpEntity entity2 = net.pickOneEntity(CmpEntity.class, entityBean);
+//		 Assert.assertEquals(new Integer(6), entity2.getAge());
 	}
 
 	@Test

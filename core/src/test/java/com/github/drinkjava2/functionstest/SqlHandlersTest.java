@@ -46,9 +46,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
@@ -141,12 +139,6 @@ public class SqlHandlersTest extends TestBase {
 		Assert.assertTrue(result2.size() == 99);
 	}
 
-	@Test
-	public void testEntityNetHandler() {
-		EntityNet net = gpQuery(new EntityNetHandler(DemoUser.class), "select u.** from DemoUser u where u.age>?", 0);
-		List<DemoUser> result = net.pickEntityList(DemoUser.class);
-		Assert.assertTrue(result.size() == 99);
-	}
 
 	@Test
 	public void testEntityListHandler2() {

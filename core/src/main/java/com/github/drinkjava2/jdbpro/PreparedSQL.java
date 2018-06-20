@@ -75,7 +75,7 @@ public class PreparedSQL {
 	private List<Class<?>> disabledHandlers;
 
 	/** TableModels, this is designed for ORM program */
-	private List<Object> models;
+	private Object[] models;
 
 	/** Give List, this is designed for ORM program */
 	private List<String[]> givesList = null;
@@ -123,10 +123,15 @@ public class PreparedSQL {
 		params[params.length - 1] = param;
 	}
 
-	public void addModel(Object tableModel) {
+	public void addModel(Object model) {
 		if (models == null)
-			models = new ArrayList<Object>();
-		models.add(tableModel);
+			models = new Object[1];
+		else {
+			Object[] newModels = new Object[models.length + 1];
+			System.arraycopy(models, 0, newModels, 0, models.length);
+			models = newModels;
+		}
+		models[models.length - 1] = model;
 	}
 
 	public void addGives(String[] gives) {
@@ -360,11 +365,13 @@ public class PreparedSQL {
 		this.disabledHandlers = disabledHandlers;
 	}
 
-	public List<Object> getModels() {
+ 
+
+	public Object[] getModels() {
 		return models;
 	}
 
-	public void setModels(List<Object> models) {
+	public void setModels(Object[] models) {
 		this.models = models;
 	}
 

@@ -11,9 +11,12 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
+import java.util.List;
+import java.util.Map;
+
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
 
 /**
@@ -22,13 +25,17 @@ import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class OrmQryHandler extends DefaultOrderSqlHandler {
+public class OrmQryHandler extends SSMapListHandler {
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		OrmQry orm=new OrmQry();
-		
-		return null;
+		OrmQry qry = new OrmQry();
+		qry.config(ps.getModels());
+		qry.addGivesList(ps.getGivesList());  
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> result = (List<Map<String, Object>>) super.handle(runner, ps);
+		qry.translateToEntity((SqlBoxContext) runner, result);
+		return qry;
 	}
 
 }

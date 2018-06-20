@@ -94,6 +94,7 @@ public class TableModel {
 		tb.comment = this.comment;
 		tb.engineTail = this.engineTail;
 		tb.entityClass = this.entityClass;
+		tb.alias=this.alias;
 		if (!columns.isEmpty())
 			for (ColumnModel item : columns) {
 				ColumnModel newItem = item.newCopy();

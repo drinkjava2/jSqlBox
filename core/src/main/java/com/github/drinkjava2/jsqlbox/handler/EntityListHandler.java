@@ -47,16 +47,16 @@ public class EntityListHandler extends DefaultOrderSqlHandler {
 		Object cfg = null;
 		if (config != null) {
 			cfg = config;
-			if (ps.getModels() != null && ps.getModels().size() > 0)
+			if (ps.getModels() != null && ps.getModels().length > 0)
 				throw new SqlBoxException(
 						"EntityListHandler already have config parameter, no need extra TableModel sqlItem parameter");
 		} else {
-			List<Object> tableModels = ps.getModels();
-			if (tableModels == null || tableModels.isEmpty())
+			Object[] tableModels = ps.getModels();
+			if (tableModels == null || tableModels.length==0)
 				throw new SqlBoxException("TableModel setting needed for EntityListHandler");
-			if (tableModels.size() > 1)
+			if (tableModels.length > 1)
 				throw new SqlBoxException("TableModel setting should only have 1 for EntityListHandler");
-			cfg = (TableModel) tableModels.get(0);
+			cfg = (TableModel) tableModels[0];
 		}
 
 		ps.setResultSetHandler(SingleTonHandlers.mapListHandler);

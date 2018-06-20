@@ -68,11 +68,11 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	}
 
 	public static SqlItem give(String from, String to) {
-		return new SqlItem(SqlOption.GIVE, from, to, null);
+		return new SqlItem(SqlOption.GIVE, from, to);
 	}
 
 	public static SqlItem giveBoth(String from, String to) {
-		return new SqlItem(SqlOption.GIVE_BOTH, from, to, null);
+		return new SqlItem(SqlOption.GIVE_BOTH, from, to);
 	}
 
 	public static SqlItem noPagin() {

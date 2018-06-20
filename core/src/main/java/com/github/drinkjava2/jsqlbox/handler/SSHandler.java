@@ -38,7 +38,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
  */
 @SuppressWarnings("all")
 public class SSHandler extends DefaultOrderSqlHandler {
-	public List<Object> models;
+	public Object[] models;
 
 	public SSHandler() {
 
@@ -47,17 +47,17 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	public SSHandler(Object... configs) {
 		if (configs == null && configs.length == 0)
 			return;
-		this.models = new ArrayList<Object>();
-		for (Object obj : configs)
-			this.models.add(SqlBoxContextUtils.configToModel(obj));
+		models = new Object[configs.length];
+		for (int i = 0; i < configs.length; i++)
+			models[i] = SqlBoxContextUtils.configToModel(configs[i]);
 	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		List<Object> tableModels = models;
+		Object[] tableModels = models;
 		if (tableModels == null)
 			tableModels = ps.getModels();
-		if (tableModels == null || tableModels.isEmpty())
+		if (tableModels == null || tableModels.length == 0)
 			throw new SqlBoxException("TableModel items needed for SSHandler");
 		String sql = explainNetQuery(ps.getSql(), tableModels);
 		ps.setSql(sql);
@@ -73,7 +73,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	 * u.##  ==> u.id as u_id
 	 * </pre>
 	 */
-	private String explainNetQuery(String sqlString, List<Object> tableModels) {// NOSONAR
+	private String explainNetQuery(String sqlString, Object[] tableModels) {// NOSONAR
 		SqlBoxException.assureNotEmpty(sqlString, "Sql can not be empty");
 		String sql = SqlBoxStrUtils.formatSQL(sqlString);
 		int pos = sql.indexOf(".**");
@@ -136,8 +136,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	 * u.##  ==> u.id as u_id
 	 * </pre>
 	 */
-	private static String replaceStarStarToColumn(String sql, String alias, String tableName,
-			List<Object> tableModels) {
+	private static String replaceStarStarToColumn(String sql, String alias, String tableName, Object[] tableModels) {
 		String result = sql;
 		if (sql.contains(alias + ".**")) {
 			StringBuilder sb = new StringBuilder();

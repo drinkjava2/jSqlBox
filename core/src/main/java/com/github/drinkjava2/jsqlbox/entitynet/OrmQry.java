@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
@@ -31,7 +29,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
  * OrmQuery
@@ -158,14 +155,8 @@ public class OrmQry {
 		return this;
 	}
 
-	/** Execute a query and join result into current NewNet */
-	@SuppressWarnings("unchecked")
-	public OrmQry query(SqlBoxContext ctx, Object... sqlItems) {
-		PreparedSQL ps = ctx.iPrepare(sqlItems);
-		ps.addHandler(new SSMapListHandler(configs.values().toArray(new Object[configs.size()])));
-		ps.setOperationType(SqlOption.QUERY);
-		List<Map<String, Object>> result = (List<Map<String, Object>>) ctx.runPreparedSQL(ps);
-		for (Map<String, Object> map : result) {
+	public OrmQry translateToEntity(SqlBoxContext ctx, List<Map<String, Object>> listMap) {
+		for (Map<String, Object> map : listMap) {
 			rowData.add(map);
 			translateToEntities(ctx, map);
 			if (!givesList.isEmpty())
@@ -193,10 +184,10 @@ public class OrmQry {
 	private void translateToEntities(SqlBoxContext ctx, Map<String, Object> oneRow) {
 		for (Entry<String, TableModel> config : this.configs.entrySet()) {
 			TableModel model = config.getValue();
-			String alias = config.getKey();
+			String alias = model.getAlias();
 
 			// find and build entityID
-			Object entityId = buildEntityId(oneRow, model, alias);
+			Object entityId = buildEntityId(oneRow, model);
 			if (entityId == null)
 				continue;// not found entity ID columns
 			Object entity = getOneEntity(alias, entityId);
@@ -211,7 +202,7 @@ public class OrmQry {
 		}
 	}
 
-	private Object createEntity(SqlBoxContext ctx, Map<String, Object> oneRow, TableModel model, String alias) {
+	private static Object createEntity(SqlBoxContext ctx, Map<String, Object> oneRow, TableModel model, String alias) {
 		Object entity;
 		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
 		ctx.getSqlBox(entity).setTableModel(model.newCopy());
@@ -278,16 +269,15 @@ public class OrmQry {
 		}
 	}
 
-	private Object buildEntityId(Map<String, Object> oneRow, TableModel model, String alias) {
+	private static Object buildEntityId(Map<String, Object> oneRow, TableModel model) {
 		Object entityId = null;
+		int pkCount = 0;
 		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 			for (ColumnModel col : model.getColumns()) {
 				if (col.getTransientable() || !col.getPkey())
 					continue;
-				int pkCount = 0;
-
 				if (row.getKey().equalsIgnoreCase(
-						new StringBuilder(alias).append("_").append(col.getColumnName()).toString())) {
+						new StringBuilder(model.getAlias()).append("_").append(col.getColumnName()).toString())) {
 					pkCount++;
 					if (pkCount == 1)
 						entityId = row.getValue();
@@ -366,6 +356,20 @@ public class OrmQry {
 		}
 		return sb.toString();
 
+	}
+
+	public OrmQry addGivesList(List<String[]> givesList) {
+		if (givesList == null)
+			return this;
+		for (String[] strings : givesList) {
+			if (strings == null || strings.length < 2 || strings.length > 3)
+				throw new SqlBoxException("gives should have 2 or 3 parameters");
+			if (strings.length == 2)
+				give(strings[0], strings[1]);
+			else
+				give(strings[0], strings[1], strings[2]); 
+		}
+		return this;
 	}
 
 	public OrmQry setGivesList(List<String[]> givesList) {
