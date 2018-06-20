@@ -11,9 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
@@ -21,6 +18,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
@@ -37,29 +35,17 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class SSHandler extends DefaultOrderSqlHandler {
-	public List<Object> models;
+public class SSHandlerOld extends DefaultOrderSqlHandler {
+	protected Object[] netConfigObjects; // The input config objects
+	protected TableModel[] config; // the real config tableModels
 
-	public SSHandler() {
-
-	}
-
-	public SSHandler(Object... configs) {
-		if (configs == null && configs.length == 0)
-			return;
-		this.models = new ArrayList<Object>();
-		for (Object obj : configs)
-			this.models.add(SqlBoxContextUtils.configToModel(obj));
+	public SSHandlerOld(Object... netConfigObjects) {
+		this.netConfigObjects = netConfigObjects;
 	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		List<Object> tableModels = models;
-		if (tableModels == null)
-			tableModels = ps.getModels();
-		if (tableModels == null || tableModels.isEmpty())
-			throw new SqlBoxException("TableModel items needed for SSHandler");
-		String sql = explainNetQuery(ps.getSql(), tableModels);
+		String sql = explainNetQuery((SqlBoxContext) runner, ps.getSql());
 		ps.setSql(sql);
 		return runner.runPreparedSQL(ps);
 	}
@@ -73,9 +59,10 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	 * u.##  ==> u.id as u_id
 	 * </pre>
 	 */
-	private String explainNetQuery(String sqlString, List<Object> tableModels) {// NOSONAR
+	public String explainNetQuery(SqlBoxContext ctx, String sqlString) {// NOSONAR
 		SqlBoxException.assureNotEmpty(sqlString, "Sql can not be empty");
 		String sql = SqlBoxStrUtils.formatSQL(sqlString);
+		TableModel[] configModels = SqlBoxContextUtils.configToModels(netConfigObjects);
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
 			pos = sql.indexOf(".##");
@@ -119,14 +106,16 @@ public class SSHandler extends DefaultOrderSqlHandler {
 				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
 			String tbStr = tableNameSb.toString();
 
-			sql = replaceStarStarToColumn(sql, alias, tbStr, tableModels);
+			sql = replaceStarStarToColumn(sql, alias, tbStr, configModels);
 			pos = sql.indexOf(".**");
 			if (pos < 0)
 				pos = sql.indexOf(".##");
 		}
+		config = configModels;
 		return sql;
 	}
 
+	
 	/**
 	 * Replace .** to all fields, replace .## to all PKey and Fkey fields only, for
 	 * example:
@@ -136,27 +125,26 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	 * u.##  ==> u.id as u_id
 	 * </pre>
 	 */
-	private static String replaceStarStarToColumn(String sql, String alias, String tableName,
-			List<Object> tableModels) {
+	private static String replaceStarStarToColumn(String sql, String alias, String tableName, TableModel[] models) {
 		String result = sql;
 		if (sql.contains(alias + ".**")) {
 			StringBuilder sb = new StringBuilder();
-			for (Object obj : tableModels) {
-				TableModel tb = (TableModel) obj;
-				if (tableName.equalsIgnoreCase(tb.getTableName())) {
-					if (StrUtils.isEmpty(tb.getAlias()))
-						tb.setAlias(alias);
-					else {
-						if (!alias.equalsIgnoreCase(tb.getAlias()))
-							throw new SqlBoxException(
-									"Alias '" + alias + "' not same as tableModel's alias '" + tb.getAlias() + "'");
+			if (models != null && models.length > 0) {
+				for (TableModel tb : models) {
+					if (tableName.equalsIgnoreCase(tb.getTableName())) {
+						if (StrUtils.isEmpty(tb.getAlias()))
+							tb.setAlias(alias);
+						else {
+							if (!alias.equalsIgnoreCase(tb.getAlias()))
+								throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias '"+tb.getAlias() +"'");
+						}
+						for (ColumnModel col : tb.getColumns()) {
+							if (!col.getTransientable())
+								sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
+										.append("_").append(col.getColumnName()).append(", ");
+						}
+						break;
 					}
-					for (ColumnModel col : tb.getColumns()) {
-						if (!col.getTransientable())
-							sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
-					}
-					break;
 				}
 			}
 			if (sb.length() == 0)
@@ -168,34 +156,35 @@ public class SSHandler extends DefaultOrderSqlHandler {
 
 		if (sql.contains(alias + ".##")) {// Pkey and Fkey only
 			StringBuilder sb = new StringBuilder();
-			for (Object obj : tableModels) {
-				TableModel tb = (TableModel) obj;
-				if (tableName.equalsIgnoreCase(tb.getTableName())) {
-					if (StrUtils.isEmpty(tb.getAlias()))
-						tb.setAlias(alias);
-					else {
-						if (!alias.equalsIgnoreCase(tb.getAlias()))
-							throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias");
-					}
-					for (ColumnModel col : tb.getColumns()) {
-						boolean found = false;
-						if (!col.getTransientable()) {
-							if (col.getPkey())
-								found = true;
-							else {
-								for (FKeyModel tableModel : tb.getFkeyConstraints()) {
-									if (tableModel.getColumnNames().contains(col.getColumnName())) {
-										found = true;
-										break;
+			if (models != null && models.length > 0) {
+				for (TableModel tb : models) {
+					if (tableName.equalsIgnoreCase(tb.getTableName())) {
+						if (StrUtils.isEmpty(tb.getAlias()))
+							tb.setAlias(alias);
+						else {
+							if (!alias.equalsIgnoreCase(tb.getAlias()))
+								throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias");
+						}
+						for (ColumnModel col : tb.getColumns()) {
+							boolean found = false;
+							if (!col.getTransientable()) {
+								if (col.getPkey())
+									found = true;
+								else {
+									for (FKeyModel tableModel : tb.getFkeyConstraints()) {
+										if (tableModel.getColumnNames().contains(col.getColumnName())) {
+											found = true;
+											break;
+										}
 									}
 								}
 							}
+							if (found)
+								sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
+										.append("_").append(col.getColumnName()).append(", ");
 						}
-						if (found)
-							sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
+						break;
 					}
-					break;
 				}
 			}
 			if (sb.length() == 0)
@@ -207,4 +196,5 @@ public class SSHandler extends DefaultOrderSqlHandler {
 		return result;
 	}
 
+ 
 }

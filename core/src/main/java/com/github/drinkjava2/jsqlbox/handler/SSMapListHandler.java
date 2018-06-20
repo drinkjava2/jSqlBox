@@ -16,8 +16,8 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 
 /**
- * SSMapListHandler is a SqlHandler used to explain alias.** to real columns
- * in SQL, example:
+ * SSMapListHandler is a SqlHandler used to explain alias.** to real columns in
+ * SQL, example:
  * 
  * select u.** from users u ==> select u.name, u.address, u.age from users u
  * 
@@ -29,8 +29,12 @@ import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 @SuppressWarnings("all")
 public class SSMapListHandler extends SSHandler {
 
-	public SSMapListHandler(Object... netConfigObjects) {
-		super(netConfigObjects);
+	public SSMapListHandler() {
+
+	}
+
+	public SSMapListHandler(Object... configs) {
+		super(configs);
 	}
 
 	@Override

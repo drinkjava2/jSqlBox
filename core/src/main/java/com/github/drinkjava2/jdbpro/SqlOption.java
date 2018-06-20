@@ -76,7 +76,7 @@ public enum SqlOption {
 	QUERY,
 
 	/**
-	 * IGNORE type SqlItem always be ignored, but user can use this type to carrier
+	 * IGNORE type SqlItem always be ignored, but user can use this type to inject
 	 * some parameters
 	 */
 	IGNORE,
@@ -88,11 +88,11 @@ public enum SqlOption {
 	// ------Master_Slave Options-------
 	/**
 	 * Tell system to choose master or slave database automatically (write:master,
-	 * read:if in Transaction use master otherwise use on slave)
+	 * read:if in Transaction use master otherwise use one slave)
 	 */
 	USE_AUTO,
 
-	/** Tell system force use master database (write:master, read:master) */
+	/** Tell system force use master database (write and read:master ) */
 	USE_MASTER,
 
 	/** Tell system force use slave database (write:all slaves, read:one slave) */
@@ -105,21 +105,16 @@ public enum SqlOption {
 	USE_BOTH,
 
 	// ------- sharding items -----------
-	/** Tell system this is a "SHARD_TABLE" SqlItem */
+	/** Tell system this is a "SHARD_TABLE" item */
 	SHARD_TABLE,
 
-	/** Tell system this is a "SHARD_DATABASE" SqlItem */
+	/** Tell system this is a "SHARD_DATABASE" item */
 	SHARD_DATABASE,
 
-	// -------Below designed for ORM program
+	/** GIVE, GIVE_BOTH option are designed for ORM Query */
+	GIVE, GIVE_BOTH,
 
-	/** The GIVE option, this is designed for ORM program */
-	GIVE,
-
-	/** The GIVE_BOTH option, this is designed for ORM program */
-	GIVE_BOTH,
-
-	/** The MODEL means TableModel type, this is designed for ORM program */
-	MODEL
+	/** MODEL, MODEL_ALIAS, MODEL_AUTO_ALIAS CONFIGS are designed for ORM Query */
+	MODEL, MODEL_ALIAS, MODEL_AUTO_ALIAS
 
 }

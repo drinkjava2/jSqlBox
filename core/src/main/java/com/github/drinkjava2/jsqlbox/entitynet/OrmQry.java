@@ -30,6 +30,7 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 
 /**
@@ -41,9 +42,6 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 public class OrmQry {
 	/** Used to combine compound key column values into a single String */
 	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdVlSpr_";
-
-	/** NewNet depends on SqlBoxContext */
-	SqlBoxContext ctx;
 
 	/** Models, Map<alias, tableModels> */
 	private Map<String, TableModel> configs = new LinkedHashMap<String, TableModel>();
@@ -59,13 +57,6 @@ public class OrmQry {
 	/** The body of entity net, Map<alias, Map<entityId, entity>> */
 	private Map<String, LinkedHashMap<Object, Object>> body = new HashMap<String, LinkedHashMap<Object, Object>>();
 
-	protected void constructor__________________________() {// NOSONAR
-	}
-
-	public OrmQry(SqlBoxContext ctx) {
-		this.ctx = ctx;
-	}
-
 	protected void core__________________________() {// NOSONAR
 	}
 
@@ -73,7 +64,7 @@ public class OrmQry {
 	public OrmQry config(Object... entityOrModel) {
 		for (Object object : entityOrModel) {
 			TableModel t = SqlBoxContextUtils.configToModel(object);
-			EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
+			SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 			String alias = t.getAlias();
 			if (StrUtils.isEmpty(alias)) {
 				StringBuilder sb = new StringBuilder();
@@ -83,9 +74,9 @@ public class OrmQry {
 						sb.append(c);
 				alias = sb.toString().toLowerCase();
 			}
-			EntityNetException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
+			SqlBoxException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
 			if (configs.containsKey(alias)) {
-				throw new EntityNetException("Duplicated alias '" + alias + "' for class '" + t.getEntityClass()
+				throw new SqlBoxException("Duplicated alias '" + alias + "' for class '" + t.getEntityClass()
 						+ "' found, need use configOne method manually set alias.");
 			}
 			t.setAlias(alias);
@@ -103,12 +94,12 @@ public class OrmQry {
 
 	/** Config one entity */
 	private OrmQry configOneAlias(Object entityOrModel, String alias) {
-		TableModel t = SqlBoxContextUtils.configToModel( entityOrModel);
-		EntityNetException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
-		EntityNetException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
+		TableModel t = SqlBoxContextUtils.configToModel(entityOrModel);
+		SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
+		SqlBoxException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
 		t.setAlias(alias);
 		if (configs.containsKey(alias))
-			throw new EntityNetException("Duplicated alias '" + alias + "' found, need manually set alias.");
+			throw new SqlBoxException("Duplicated alias '" + alias + "' found, need manually set alias.");
 		configs.put(alias, t);
 		return this;
 	}
@@ -123,13 +114,13 @@ public class OrmQry {
 	/** Give a's value to b's aField */
 	public OrmQry give(String a, String b) {
 		TableModel aModel = configs.get(a);
-		EntityNetException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
-		EntityNetException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
+		SqlBoxException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
+		SqlBoxException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
 		String fieldName = StrUtils.toLowerCaseFirstOne(aModel.getEntityClass().getSimpleName());
 
 		TableModel bModel = configs.get(b);
-		EntityNetException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
-		EntityNetException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
+		SqlBoxException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
+		SqlBoxException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
 
 		boolean found = false;
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName);
@@ -155,28 +146,28 @@ public class OrmQry {
 			found = true;
 		}
 		if (!found)
-			throw new EntityNetException("Not found field '" + fieldName + "' or '" + fieldName
+			throw new SqlBoxException("Not found field '" + fieldName + "' or '" + fieldName
 					+ "List/Set/Map' in class /" + bModel.getEntityClass());
 		return this;
 	}
 
 	/** Give a's value to b's someField */
 	public OrmQry give(String a, String b, String someField) {
-		EntityNetException.assureNotEmpty(someField, "give field parameter can not be empty for '" + b + "'");
+		SqlBoxException.assureNotEmpty(someField, "give field parameter can not be empty for '" + b + "'");
 		givesList.add(new String[] { a, b, someField });
 		return this;
 	}
 
 	/** Execute a query and join result into current NewNet */
 	@SuppressWarnings("unchecked")
-	public OrmQry query(Object... sqlItems) {
+	public OrmQry query(SqlBoxContext ctx, Object... sqlItems) {
 		PreparedSQL ps = ctx.iPrepare(sqlItems);
 		ps.addHandler(new SSMapListHandler(configs.values().toArray(new Object[configs.size()])));
 		ps.setOperationType(SqlOption.QUERY);
 		List<Map<String, Object>> result = (List<Map<String, Object>>) ctx.runPreparedSQL(ps);
 		for (Map<String, Object> map : result) {
 			rowData.add(map);
-			translateToEntities(map);
+			translateToEntities(ctx, map);
 			if (!givesList.isEmpty())
 				doGive(map);
 		}
@@ -199,7 +190,7 @@ public class OrmQry {
 	}
 
 	/** Translate one row map list to entity objects, put into entity net body */
-	private void translateToEntities(Map<String, Object> oneRow) {
+	private void translateToEntities(SqlBoxContext ctx, Map<String, Object> oneRow) {
 		for (Entry<String, TableModel> config : this.configs.entrySet()) {
 			TableModel model = config.getValue();
 			String alias = config.getKey();
@@ -212,12 +203,30 @@ public class OrmQry {
 
 			// create new Entity
 			if (entity == null) {
-				entity = createEntity(oneRow, model, alias);
+				entity = createEntity(ctx, oneRow, model, alias);
 				this.putOneEntity(alias, entityId, entity);
 			}
 			oneRow.put(alias, entity);// In this row, add entities directly
 			oneRow.put("#" + alias, entityId); // In this row, add entityIds
 		}
+	}
+
+	private Object createEntity(SqlBoxContext ctx, Map<String, Object> oneRow, TableModel model, String alias) {
+		Object entity;
+		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
+		ctx.getSqlBox(entity).setTableModel(model.newCopy());
+		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
+			for (ColumnModel col : model.getColumns()) {
+				if (col.getTransientable())
+					continue;
+				if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
+					SqlBoxException.assureNotEmpty(col.getEntityField(),
+							"EntityField not set for column '" + col.getColumnName() + "'");
+					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
+				}
+			}
+		}
+		return entity;
 	}
 
 	/** Give values according gives setting for oneRow */
@@ -229,7 +238,7 @@ public class OrmQry {
 			Object from = oneRow.get(fromAlias);
 			Object to = oneRow.get(toAlias);
 			String tofield = gives[2];
-			EntityNetException.assureNotEmpty(tofield);
+			SqlBoxException.assureNotEmpty(tofield);
 			if (from != null && to != null) {
 				TableModel toModel = configs.get(toAlias);
 				ColumnModel col = toModel.getColumn(tofield);
@@ -259,7 +268,7 @@ public class OrmQry {
 						ClassCacheUtils.writeValueToBeanField(to, tofield, map);
 					}
 					Object entityId = oneRow.get("#" + fromAlias);
-					EntityNetException.assureNotNull(entityId, "Can not find entityId for '" + fromAlias + "'");
+					SqlBoxException.assureNotNull(entityId, "Can not find entityId for '" + fromAlias + "'");
 					if (!map.containsKey(entityId))
 						map.put(entityId, from);
 				} else {// No matter what type, give "from" value to "to"
@@ -267,24 +276,6 @@ public class OrmQry {
 				}
 			}
 		}
-	}
-
-	private Object createEntity(Map<String, Object> oneRow, TableModel model, String alias) {
-		Object entity;
-		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-		ctx.getSqlBox(entity).setTableModel(model.newCopy());
-		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
-			for (ColumnModel col : model.getColumns()) {
-				if (col.getTransientable())
-					continue;
-				if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
-					EntityNetException.assureNotEmpty(col.getEntityField(),
-							"EntityField not set for column '" + col.getColumnName() + "'");
-					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
-				}
-			}
-		}
-		return entity;
 	}
 
 	private Object buildEntityId(Map<String, Object> oneRow, TableModel model, String alias) {
@@ -327,15 +318,6 @@ public class OrmQry {
 	}
 
 	protected void getterSetter__________________________() {// NOSONAR
-	}
-
-	public SqlBoxContext getCtx() {
-		return ctx;
-	}
-
-	public OrmQry setCtx(SqlBoxContext ctx) {
-		this.ctx = ctx;
-		return this;
 	}
 
 	public Map<String, TableModel> getConfigs() {

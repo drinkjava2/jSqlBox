@@ -1,5 +1,9 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.modelAutoAlias;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +20,7 @@ import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
+import com.github.drinkjava2.jsqlbox.handler.OrmQryHandler;
 
 public class OrmQryTest extends TestBase {
 	{
@@ -75,16 +80,16 @@ public class OrmQryTest extends TestBase {
 	}
 
 	@Test
-	public void testAutoGive() {
+	public void testAutoAlias() {
 		insertDemoData();
-		OrmQry net = new OrmQry(ctx)
-				.config(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class).give("r", "u")
-				.giveBoth("p", "u").query("select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
-						" left join userroletb ur on u.id=ur.userid ", //
-						" left join roletb r on ur.rid=r.id ", //
-						" left join roleprivilegetb rp on rp.rid=r.id ", //
-						" left join privilegetb p on p.id=rp.pid ", //
-						" order by u.id, ur.id, r.id, rp.id, p.id");
+		OrmQry net = ctx.iQuery(new OrmQryHandler(),
+				modelAutoAlias(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class), give("r", "u"),
+				giveBoth("p", "u"), "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+				" left join userroletb ur on u.id=ur.userid ", //
+				" left join roletb r on ur.rid=r.id ", //
+				" left join roleprivilegetb rp on rp.rid=r.id ", //
+				" left join privilegetb p on p.id=rp.pid ", //
+				" order by u.id, ur.id, r.id, rp.id, p.id");
 		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
@@ -111,7 +116,7 @@ public class OrmQryTest extends TestBase {
 		System.out.println("===========================");
 		Set<Privilege> privileges = net.pickEntitySet("p");
 		for (Privilege p : privileges) {
-			System.out.println("Privilege:" + p.getId()); 
+			System.out.println("Privilege:" + p.getId());
 			System.out.println("  User:" + p.getUser().getId());
 		}
 	}
@@ -119,18 +124,18 @@ public class OrmQryTest extends TestBase {
 	@Test
 	public void testManualLoad() {
 		insertDemoData();
-		TableModel model=new User().tableModel();
-		model.column("userName").setTransientable(true); 
-		User u2=ctx.loadById(User.class, "u1", model);
+		TableModel model = new User().tableModel();
+		model.column("userName").setTransientable(true);
+		User u2 = ctx.loadById(User.class, "u1", model);
 		System.out.println(u2.getUserName());
-		
-		List<User> userList = ctx.loadAll(User.class); 
+
+		List<User> userList = ctx.loadAll(User.class);
 
 		System.out.println(userList.size());
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
 
-			//ctx.fillField(u, Role.class);
+			// ctx.fillField(u, Role.class);
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles) {

@@ -26,9 +26,7 @@ import org.junit.Test;
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.entitynet.Path;
+import com.github.drinkjava2.jsqlbox.ActiveRecord; 
 
 /**
  * This is function test for Entity with Compound Prime keys, a compound-pkey

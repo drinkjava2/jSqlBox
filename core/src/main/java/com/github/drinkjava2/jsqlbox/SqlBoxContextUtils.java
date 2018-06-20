@@ -41,7 +41,6 @@ import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNetException;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
@@ -393,7 +392,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			for (Entry<String, Object> row : oneRow.entrySet()) {
 				if (row.getKey().equalsIgnoreCase(col.getColumnName())) {
 					foundValue = true;
-					EntityNetException.assureNotEmpty(col.getEntityField(),
+					SqlBoxException.assureNotEmpty(col.getEntityField(),
 							"EntityField not found for column '" + col.getColumnName() + "'");
 					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), row.getValue());
 				}
@@ -538,19 +537,37 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (Object item : optionItems) { // If Model in option items, use it first;
 			if (item instanceof TableModel)
 				return (TableModel) item;
-			else if (item instanceof ActiveRecordSupport)
+			if (item instanceof ActiveRecordSupport)
 				return ((ActiveRecordSupport) item).tableModel();
-			else if (item instanceof SqlBox)
+			if (item instanceof SqlBox)
 				return ((SqlBox) item).getTableModel();
 			if (item instanceof SqlItem) {
 				SqlItem sqlItem = (SqlItem) item;
-				if (SqlOption.MODEL.equals(sqlItem.getType())) {
-					if (sqlItem.getParameters() == null || sqlItem.getParameters().length == 0)
-						throw new SqlBoxException("MODEL type SqlItem can not have empty setting");
-					return (TableModel) sqlItem.getParameters()[0];
+				SqlOption sqlItemType = sqlItem.getType();
+				if (SqlOption.MODEL.equals(sqlItemType) || SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType)) {
+					Object[] args = sqlItem.getParameters();
+					if (args.length != 1)
+						throw new SqlBoxException("Model item need one parameter here.");
+					TableModel t = SqlBoxContextUtils.configToModel(args[0]);// deal first
+					// if auto alias? for example: UserOrder.class -> UR
+					if (SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType) && StrUtils.isEmpty(t.getAlias()))
+						t.setAlias(createAutoAliasNameForEntityClass(t.getEntityClass()));
+					return t;// return first model
+				} else if (SqlOption.MODEL_ALIAS.equals(sqlItemType)) {
+					Object[] args = sqlItem.getParameters();
+					if (args.length != 2)
+						throw new SqlBoxException("MODEL_ALIAS item need 'model, alias' format 2 parameters");
+					TableModel t = SqlBoxContextUtils.configToModel(0);
+					SqlBoxException.assureNotNull(t.getEntityClass(),
+							"'entityClass' property not set for model " + t);
+					SqlBoxException.assureNotEmpty((String) args[1],
+							"Alias can not be empty for class '" + t.getEntityClass() + "'");
+					t.setAlias((String) args[1]);
+					return t;
 				}
 			}
 		}
+
 		if (entityOrClass == null)
 			throw new SqlBoxException("Can build TableModel configuration for null entityOrClass");
 		if (entityOrClass instanceof TableModel)
@@ -563,6 +580,17 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return TableModelUtils.entity2Model((Class<?>) entityOrClass);
 		else // it's a entity bean
 			return SqlBoxUtils.findAndBindSqlBox(null, entityOrClass).getTableModel();
+	}
+
+	/** Create a Auto Alias name for a Entity Class */
+	public static String createAutoAliasNameForEntityClass(Class<?> clazz) {
+		StringBuilder sb = new StringBuilder();
+		char[] chars = clazz.getSimpleName().toCharArray();
+		for (char c : chars)
+			if (c >= 'A' && c <= 'Z')
+				sb.append(c);
+		String alias = sb.toString().toLowerCase();
+		return alias;
 	}
 
 	/**

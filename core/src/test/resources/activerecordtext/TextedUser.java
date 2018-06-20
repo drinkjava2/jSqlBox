@@ -1,6 +1,7 @@
 package activerecordtext;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
 
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class TextedUser extends UserAR {
 	 */
 
 	public List<TextedUser> selectUsersByText2(String name, String address) {
-		return this.guess(name, address, new EntityListHandler(TextedUser.class));
+		return this.guess(name, address, new EntityListHandler(), model(TextedUser.class));
 	}
 	/*-
 	   select *
@@ -86,7 +87,8 @@ public class TextedUser extends UserAR {
 	 */
 
 	public List<TextedUser> selectUsersByText3(String name, String address) {
-		return this.ctx().iQuery(new EntityListHandler(TextedUser.class), this.guessSQL(), param(name), param(address));
+		return this.ctx().iQuery(new EntityListHandler(), model(TextedUser.class), this.guessSQL(), param(name),
+				param(address));
 	}
 	/*-
 	   select * 

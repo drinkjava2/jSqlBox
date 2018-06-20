@@ -56,8 +56,6 @@ public class PreparedSQL {
 	/** Optional,The SQL parameters */
 	private Object[] params;
 
- 
-
 	/** If set true, will use templateEngine to render SQL */
 	private Boolean useTemplate = null;
 
@@ -74,10 +72,10 @@ public class PreparedSQL {
 	private ResultSetHandler<?> resultSetHandler;
 
 	/** Handers in this list will disabled */
-	private List<Class<?>> disabledHandlers; 
-	
+	private List<Class<?>> disabledHandlers;
+
 	/** TableModels, this is designed for ORM program */
-	private Object[] models;
+	private List<Object> models;
 
 	/** Give List, this is designed for ORM program */
 	private List<String[]> givesList = null;
@@ -127,13 +125,16 @@ public class PreparedSQL {
 
 	public void addModel(Object tableModel) {
 		if (models == null)
-			models = new Object[1];
-		else {
-			Object[] newModels = new Object[models.length + 1];
-			System.arraycopy(models, 0, newModels, 0, models.length);
-			models = newModels;
-		}
-		models[models.length - 1] = tableModel;
+			models = new ArrayList<Object>();
+		models.add(tableModel);
+	}
+
+	public void addGives(String[] gives) {
+		if (givesList == null)
+			givesList = new ArrayList<String[]>();
+		if (gives == null || gives.length < 2)
+			throw new DbProRuntimeException("addGives at least need 2 alias parameters");
+		givesList.add(gives);
 	}
 
 	/**
@@ -170,7 +171,6 @@ public class PreparedSQL {
 		}
 		sqlHandlers.add(sqlHandler);
 	}
- 
 
 	public void disableHandlers(Object[] handlersClass) {
 		if (handlersClass == null || handlersClass.length == 0)
@@ -358,13 +358,13 @@ public class PreparedSQL {
 
 	public void setDisabledHandlers(List<Class<?>> disabledHandlers) {
 		this.disabledHandlers = disabledHandlers;
-	} 
-	
-	public Object[] getModels() {
+	}
+
+	public List<Object> getModels() {
 		return models;
 	}
 
-	public void setModels(Object[] models) {
+	public void setModels(List<Object> models) {
 		this.models = models;
 	}
 

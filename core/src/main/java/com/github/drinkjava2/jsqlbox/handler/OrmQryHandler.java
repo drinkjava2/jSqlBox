@@ -9,18 +9,26 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox.entitynet.tinyparser;
+package com.github.drinkjava2.jsqlbox.handler;
+
+import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
+import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
 
 /**
+ * OrmQuery
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  * @since 1.0.0
  */
-public class TinyParserException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
+public class OrmQryHandler extends DefaultOrderSqlHandler {
 
-	public TinyParserException(String msg) {
-		super(msg);
+	@Override
+	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
+		OrmQry orm=new OrmQry();
+		
+		return null;
 	}
 
 }

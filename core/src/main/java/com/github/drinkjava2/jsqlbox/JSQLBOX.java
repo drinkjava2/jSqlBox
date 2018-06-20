@@ -48,16 +48,19 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return SqlBoxContextUtils.configToModel(model);
 	}
 
-	/** Create a model configurations, */
-	public static TableModel model(Object model, String alias) {
-		TableModel t = SqlBoxContextUtils.configToModel(model);
-		t.setAlias(alias);
-		return t;
+	/** Create model configurations */
+	public static SqlItem model(Object... modelsAndAlias) {
+		return new SqlItem(SqlOption.MODEL, modelsAndAlias);
 	}
 
-	/** Create model configurations */
-	public static SqlItem models(Object... modelsAndAlias) {
-		return new SqlItem(SqlOption.MODEL, modelsAndAlias);
+	/** Create a model configurations with given alias name */
+	public static SqlItem modelAlias(Object... modelsAndAlias) {
+		return new SqlItem(SqlOption.MODEL_ALIAS, modelsAndAlias);
+	}
+
+	/** Create a model configurations with given alias name */
+	public static SqlItem modelAutoAlias(Object... modelsAndAlias) {
+		return new SqlItem(SqlOption.MODEL_AUTO_ALIAS, modelsAndAlias);
 	}
 
 	public static SqlItem give(String from, String to, String fieldName) {

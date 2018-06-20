@@ -50,7 +50,7 @@ public abstract class AbstractUser extends TextedUser {
 	         u.name=:name and address=:address
 	 */
 
-	public static class EntityListHandlerBox extends BeanBox {
+	public static class EntityListHandlerBox extends BeanBox {//TODO: here add TextedUser model
 		public EntityListHandler create() {
 			return new EntityListHandler(TextedUser.class);
 		}
