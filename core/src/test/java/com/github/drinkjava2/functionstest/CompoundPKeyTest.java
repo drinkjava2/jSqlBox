@@ -29,8 +29,8 @@ import org.junit.Test;
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
-import com.github.drinkjava2.jsqlbox.handler.OrmQryHandler;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
 /**
  * This is function test for Entity with Compound Prime keys, a compound-pkey
@@ -109,27 +109,25 @@ public class CompoundPKeyTest extends TestBase {
 
 	@Test
 	public void testOrmQry() {
-		OrmQry net = ctx.iQuery(new OrmQryHandler(), "select u.** from CmpEntity u", modelAlias(CmpEntity.class, "u"),
-				" where age>?", param(5));
+		EntityNet net = ctx.iQuery(new EntityNetHandler(), "select u.** from CmpEntity u",
+				modelAlias(CmpEntity.class, "u"), " where age>?", param(5));
 		List<CmpEntity> entities = net.pickEntityList("u");
 		Assert.assertEquals(5, entities.size());
 
-		 
 		// Map as entityId
-//		 Map<String, Object> idMap = new HashMap<String, Object>();
-//		 idMap.put("lastName", "Zhu");
-//		 idMap.put("firstName", "Sam");
-//		 idMap.put("middleName", "Y");
-//		 idMap.put("age", 5);
-//		 CmpEntity entity = net.pickEntityMap("u");
-//		 Assert.assertEquals(new Integer(5), entity.getAge());
-//		
-//		 // Entity as entityId
-//		 CmpEntity entityBean = new CmpEntity();
-//		 entityBean.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu",
-//		 "age", 6);
-//		 CmpEntity entity2 = net.pickOneEntity(CmpEntity.class, entityBean);
-//		 Assert.assertEquals(new Integer(6), entity2.getAge());
+		Map<String, Object> idMap = new HashMap<String, Object>();
+		idMap.put("lastName", "Zhu");
+		idMap.put("firstName", "Sam");
+		idMap.put("middleName", "Y");
+		idMap.put("age", 6);
+		CmpEntity entity = net.pickOneEntity("u", idMap);
+		Assert.assertEquals(new Integer(6), entity.getAge());
+
+		// Entity as entityId
+		CmpEntity entityBean = new CmpEntity();
+		entityBean.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 6);
+		CmpEntity entity2 = net.pickOneEntity("u", entityBean);
+		Assert.assertEquals(new Integer(6), entity2.getAge());
 	}
 
 	@Test

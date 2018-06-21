@@ -16,7 +16,6 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDB;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTB;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -34,13 +33,13 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
-import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
@@ -337,37 +336,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			throw new SqlBoxException("Multiple rows affected when delete entityBean");
 	}
 
-	/**
-	 * Put one id value into a entity bean, or put values according a
-	 * map<String,Object>
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T putIdValue(SqlBoxContext ctx, T bean, Object entityId, TableModel model) {
-		if (entityId instanceof Map) { // MAP for compound key
-			Map<String, Object> idMap = (Map<String, Object>) entityId;
-			for (Entry<String, Object> item : idMap.entrySet())
-				ClassCacheUtils.writeValueToBeanField(bean, item.getKey(), item.getValue());
-		} else {
-			if (entityId instanceof ActiveRecordSupport)
-				return (T) entityId;
-			Annotation[] anno = entityId.getClass().getAnnotations();
-			for (Annotation annotation : anno)
-				if (Entity.class.equals(annotation.annotationType()))
-					return (T) entityId;// Entity for compound key or Single key
-
-			boolean foundSingleKey = false;
-			for (ColumnModel col : model.getColumns())
-				if (col.getPkey()) {
-					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
-					foundSingleKey = true;
-					break;// Single Key value
-				}
-			if (!foundSingleKey)
-				throw new SqlBoxException("Not found Key setting in '" + bean + "'");
-		}
-		return bean;
-	}
-
 	public static <T> T loadByQuery(SqlBoxContext ctx, Object config, Object... sqlItems) {
 		List<Map<String, Object>> rows = ctx.iQueryForMapList(sqlItems);
 		if (rows == null || rows.isEmpty())
@@ -416,7 +384,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlBoxException.assureNotNull(model.getEntityClass(),
 				"Can not find TableModel setting in '" + entityOrClass + "'");
 		T bean = SqlBoxContextUtils.configToBean(entityOrClass);
-		bean = putIdValue(ctx, bean, idOrIdMap, model);
+		bean =  EntityIdUtils.setEntityIdValues(bean, idOrIdMap, model);
 		return load(ctx, bean, optionItems);
 	}
 
@@ -558,8 +526,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					if (args.length != 2)
 						throw new SqlBoxException("MODEL_ALIAS item need 'model, alias' format 2 parameters");
 					TableModel t = SqlBoxContextUtils.configToModel(0);
-					SqlBoxException.assureNotNull(t.getEntityClass(),
-							"'entityClass' property not set for model " + t);
+					SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 					SqlBoxException.assureNotEmpty((String) args[1],
 							"Alias can not be empty for class '" + t.getEntityClass() + "'");
 					t.setAlias((String) args[1]);

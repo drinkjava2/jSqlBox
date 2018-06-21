@@ -17,21 +17,21 @@ import java.util.Map;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
- * OrmQuery
+ * EntityNetHandler used to convert SQL query result to EntityNet
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class OrmQryHandler extends SSMapListHandler {
+public class EntityNetHandler extends SSMapListHandler {
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		OrmQry qry = new OrmQry();
+		EntityNet qry = new EntityNet();
 		qry.config(ps.getModels());
-		qry.addGivesList(ps.getGivesList());  
+		qry.addGivesList(ps.getGivesList());
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> result = (List<Map<String, Object>>) super.handle(runner, ps);
 		qry.translateToEntity((SqlBoxContext) runner, result);

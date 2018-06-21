@@ -6,6 +6,8 @@
 package com.github.drinkjava2.jdialects.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -94,7 +96,7 @@ public class TableModel {
 		tb.comment = this.comment;
 		tb.engineTail = this.engineTail;
 		tb.entityClass = this.entityClass;
-		tb.alias=this.alias;
+		tb.alias = this.alias;
 		if (!columns.isEmpty())
 			for (ColumnModel item : columns) {
 				ColumnModel newItem = item.newCopy();
@@ -259,7 +261,7 @@ public class TableModel {
 	/**
 	 * Return ColumnModel object by columnName, if not found, return null;
 	 */
-	public ColumnModel  getColumnByColOrEntityFieldName(String colOrFieldName) {
+	public ColumnModel getColumnByColOrEntityFieldName(String colOrFieldName) {
 		for (ColumnModel columnModel : columns) {
 			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(colOrFieldName))
 				return columnModel;
@@ -439,10 +441,43 @@ public class TableModel {
 		return null;
 	}
 
+	public int getPKeyCount() {
+		int pkeyCount = 0;
+		for (ColumnModel col : columns)
+			if (col.getPkey() && !col.getTransientable())
+				pkeyCount++;
+		return pkeyCount;
+	}
+
+	public ColumnModel getFirstPKeyColumn() {
+		for (ColumnModel col : columns)
+			if (col.getPkey() && !col.getTransientable())
+				return col;
+		return null;
+	}
+
+	/** Get pkey columns sorted by column name */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List<ColumnModel> getPKeyColsSortByColumnName() {
+		List<ColumnModel> pkeyCols = new ArrayList<ColumnModel>();
+		for (ColumnModel col : columns)
+			if (col.getPkey() && !col.getTransientable())
+				pkeyCols.add(col);
+		Collections.sort(pkeyCols, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((ColumnModel) o1).getColumnName().compareTo(((ColumnModel) o1).getColumnName());
+			}
+		});
+		return pkeyCols;
+	}
+
 	public String getDebugInfo() {
 		return DebugUtils.getTableModelDebugInfo(this);
 	}
 	// getter & setter=========================
+
+	protected void getAndSetters____________________________() {// NOSONAR
+	}
 
 	public String getTableName() {
 		return tableName;

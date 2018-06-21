@@ -31,14 +31,16 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * OrmQuery
+ * EntityNet is Entity net, after created by using EntityNetHandler, can use
+ * pickXxxx methods to pick entity list/set/map from it, and also can use NoSql
+ * type search.
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class OrmQry {
+public class EntityNet {
 	/** Used to combine compound key column values into a single String */
-	public static final String COMPOUND_VALUE_SEPARATOR = "_CpdVlSpr_";
+	public static final String COMPOUND_VALUE_SEPARATOR = "__";
 
 	/** Models, Map<alias, tableModels> */
 	private Map<String, TableModel> configs = new LinkedHashMap<String, TableModel>();
@@ -58,7 +60,7 @@ public class OrmQry {
 	}
 
 	/** Config, parameters can be entity or entity class or TableModel */
-	public OrmQry config(Object... entityOrModel) {
+	public EntityNet config(Object... entityOrModel) {
 		for (Object object : entityOrModel) {
 			TableModel t = SqlBoxContextUtils.configToModel(object);
 			SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
@@ -83,14 +85,14 @@ public class OrmQry {
 	}
 
 	/** Config entity1, alias1, entity2, alias2... */
-	public OrmQry configAlias(Object... args) {
+	public EntityNet configAlias(Object... args) {
 		for (int i = 0; i < args.length / 2; i++)
 			configOneAlias(args[i * 2], (String) args[i * 2 + 1]);
 		return this;
 	}
 
 	/** Config one entity */
-	private OrmQry configOneAlias(Object entityOrModel, String alias) {
+	private EntityNet configOneAlias(Object entityOrModel, String alias) {
 		TableModel t = SqlBoxContextUtils.configToModel(entityOrModel);
 		SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 		SqlBoxException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
@@ -102,14 +104,14 @@ public class OrmQry {
 	}
 
 	/** Give a's value to b's aField */
-	public OrmQry giveBoth(String a, String b) {
+	public EntityNet giveBoth(String a, String b) {
 		give(a, b);
 		give(b, a);
 		return this;
 	}
 
 	/** Give a's value to b's aField */
-	public OrmQry give(String a, String b) {
+	public EntityNet give(String a, String b) {
 		TableModel aModel = configs.get(a);
 		SqlBoxException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
 		SqlBoxException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
@@ -149,13 +151,13 @@ public class OrmQry {
 	}
 
 	/** Give a's value to b's someField */
-	public OrmQry give(String a, String b, String someField) {
+	public EntityNet give(String a, String b, String someField) {
 		SqlBoxException.assureNotEmpty(someField, "give field parameter can not be empty for '" + b + "'");
 		givesList.add(new String[] { a, b, someField });
 		return this;
 	}
 
-	public OrmQry translateToEntity(SqlBoxContext ctx, List<Map<String, Object>> listMap) {
+	public EntityNet translateToEntity(SqlBoxContext ctx, List<Map<String, Object>> listMap) {
 		for (Map<String, Object> map : listMap) {
 			rowData.add(map);
 			translateToEntities(ctx, map);
@@ -180,6 +182,21 @@ public class OrmQry {
 		return (Map<Object, T>) body.get(alias);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> T pickOneEntity(String alias, Object entityId) {
+		SqlBoxException.assureNotEmpty(alias);
+		if (!configs.containsKey(alias))
+			throw new SqlBoxException("There is no alias '" + alias + "' setting in current EntityNet.");
+		TableModel model = configs.get(alias);
+		Object realEntityId = EntityIdUtils.buildEntityIdFromUnknow(entityId, model);
+		if (realEntityId == null)
+			throw new SqlBoxException("Can not build entityId for '" + entityId + "'");
+		Map<Object, Object> map = body.get(alias);
+		if (map == null)
+			return null;
+		return (T) map.get(realEntityId);
+	}
+
 	/** Translate one row map list to entity objects, put into entity net body */
 	private void translateToEntities(SqlBoxContext ctx, Map<String, Object> oneRow) {
 		for (Entry<String, TableModel> config : this.configs.entrySet()) {
@@ -187,7 +204,7 @@ public class OrmQry {
 			String alias = model.getAlias();
 
 			// find and build entityID
-			Object entityId = buildEntityId(oneRow, model);
+			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(oneRow, model);
 			if (entityId == null)
 				continue;// not found entity ID columns
 			Object entity = getOneEntity(alias, entityId);
@@ -269,28 +286,6 @@ public class OrmQry {
 		}
 	}
 
-	private static Object buildEntityId(Map<String, Object> oneRow, TableModel model) {
-		Object entityId = null;
-		int pkCount = 0;
-		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
-			for (ColumnModel col : model.getColumns()) {
-				if (col.getTransientable() || !col.getPkey())
-					continue;
-				if (row.getKey().equalsIgnoreCase(
-						new StringBuilder(model.getAlias()).append("_").append(col.getColumnName()).toString())) {
-					pkCount++;
-					if (pkCount == 1)
-						entityId = row.getValue();
-					else {
-						entityId = new StringBuilder("").append(entityId).append(COMPOUND_VALUE_SEPARATOR)
-								.append(row.getValue()).toString();
-					}
-				}
-			}
-		}
-		return entityId;
-	}
-
 	public void putOneEntity(String alias, Object entityId, Object entity) {
 		LinkedHashMap<Object, Object> entityMap = body.get(alias);
 		if (entityMap == null) {
@@ -314,7 +309,7 @@ public class OrmQry {
 		return configs;
 	}
 
-	public OrmQry setConfigs(Map<String, TableModel> configs) {
+	public EntityNet setConfigs(Map<String, TableModel> configs) {
 		this.configs = configs;
 		return this;
 	}
@@ -323,7 +318,7 @@ public class OrmQry {
 		return rowData;
 	}
 
-	public OrmQry setRowData(List<Map<String, Object>> rowData) {
+	public EntityNet setRowData(List<Map<String, Object>> rowData) {
 		this.rowData = rowData;
 		return this;
 	}
@@ -358,7 +353,7 @@ public class OrmQry {
 
 	}
 
-	public OrmQry addGivesList(List<String[]> givesList) {
+	public EntityNet addGivesList(List<String[]> givesList) {
 		if (givesList == null)
 			return this;
 		for (String[] strings : givesList) {
@@ -367,12 +362,12 @@ public class OrmQry {
 			if (strings.length == 2)
 				give(strings[0], strings[1]);
 			else
-				give(strings[0], strings[1], strings[2]); 
+				give(strings[0], strings[1], strings[2]);
 		}
 		return this;
 	}
 
-	public OrmQry setGivesList(List<String[]> givesList) {
+	public EntityNet setGivesList(List<String[]> givesList) {
 		this.givesList = givesList;
 		return this;
 	}

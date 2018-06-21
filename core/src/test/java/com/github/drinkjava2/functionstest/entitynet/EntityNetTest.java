@@ -4,10 +4,13 @@ import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.modelAutoAlias;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
@@ -19,10 +22,10 @@ import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.entitynet.OrmQry;
-import com.github.drinkjava2.jsqlbox.handler.OrmQryHandler;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
-public class OrmQryTest extends TestBase {
+public class EntityNetTest extends TestBase {
 	{
 		regTables(User.class, Email.class, Address.class, Role.class, Privilege.class, UserRole.class,
 				RolePrivilege.class);
@@ -82,14 +85,16 @@ public class OrmQryTest extends TestBase {
 	@Test
 	public void testAutoAlias() {
 		insertDemoData();
-		OrmQry net = ctx.iQuery(new OrmQryHandler(),
-				modelAutoAlias(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class), give("r", "u"),
-				giveBoth("p", "u"), "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+		EntityNet net = ctx.iQuery(new EntityNetHandler(),
+				modelAutoAlias(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class),
+				give("r", "u"), give("u", "r"), giveBoth("p", "u"),
+				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ", //
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
 				" left join privilegetb p on p.id=rp.pid ", //
 				" order by u.id, ur.id, r.id, rp.id, p.id");
+		System.out.println("===========pick entity list================");
 		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
@@ -113,12 +118,37 @@ public class OrmQryTest extends TestBase {
 				}
 		}
 
-		System.out.println("===========================");
+		System.out.println("===========pick entity set================");
 		Set<Privilege> privileges = net.pickEntitySet("p");
 		for (Privilege p : privileges) {
 			System.out.println("Privilege:" + p.getId());
 			System.out.println("  User:" + p.getUser().getId());
 		}
+
+		System.out.println("===========pick entity Map================");
+		Map<Object, Object> roleMap = net.pickEntityMap("r");
+		for (Entry<Object, Object> entry : roleMap.entrySet()) {
+			System.out.println("RoleId:" + entry.getKey());
+			Role r = (Role) entry.getValue();
+			System.out.println("Role:" + r.getId());
+			System.out.println("  user=" + r.getUser().getId());
+		}
+
+		System.out.println("===========pick one entity by value================");
+		Role r3 = net.pickOneEntity("r", "r3");
+		Assert.assertEquals("r3", r3.getId());
+
+		System.out.println("===========pick one entity by bean ================");
+		Role temp = new Role();
+		temp.put("id", "r4");
+		Role r4 = net.pickOneEntity("r", temp);
+		Assert.assertEquals("r4", r4.getId());
+
+		System.out.println("===========pick one entity by map ================");
+		Map<String, Object> mp = new HashMap<String, Object>();
+		mp.put("id", "r2");
+		Role r2 = net.pickOneEntity("r", mp);
+		Assert.assertEquals("r2", r2.getId());
 	}
 
 	@Test
