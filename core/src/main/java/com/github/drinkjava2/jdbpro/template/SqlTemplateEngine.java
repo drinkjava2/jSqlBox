@@ -37,9 +37,10 @@ public interface SqlTemplateEngine {
 	 *            template String
 	 * @param paramMap
 	 *            A Map instance, key is String type, value is Object type
-	 * @param directReplaceMap
-	 *            Optional, A Map instance, key is String type, value is Object
-	 *            type, only use replace() or replace0() method to put real values;
+	 * @param unbindedParams
+	 *            Optional, some time un-binded parameter can make template SQL
+	 *            executed like normal SQL, i.e., use normal params to replace
+	 *            placeholder according apperance order
 	 * 
 	 *            <pre>
 	 *            For example: 

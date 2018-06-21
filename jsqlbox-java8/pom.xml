@@ -120,5 +120,84 @@
             </plugin>  
        </plugins>       
     </build> 
+    
+        <profiles>
+
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${version.source-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <attach>true</attach>
+                            <encoding>UTF-8</encoding>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${version.javadoc-plugin}</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <links>
+                                <link>http://docs.oracle.com/javase/${version.javadoc}/docs/api</link>
+                            </links>
+							<!-- close doc line check, for Java6,7 only, if run on Java8 will get a Javadoc-plugin error -->
+							<!--properties>
+								<javadoc.opts>-Xdoclint:none</javadoc.opts>
+							</properties-->
+							<additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${version.gpg-plugin}</version>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+			   <!-- Release, if is offical verison, will release to centre lib, if is "-SNAPSHOT" version, 
+			        will release to sanpshot site, but they use same command:
+					"mvn clean deploy -P release -Dgpg.passphrase=yourGPGpwd"
+			   -->	
+              <snapshotRepository>
+                 <id>oss</id>
+                 <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+              </snapshotRepository>
+              <repository>
+                 <id>oss</id>
+                 <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+              </repository>
+           </distributionManagement>
+        </profile>
+		
+    </profiles> 
 
 </project>

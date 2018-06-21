@@ -1,5 +1,7 @@
 package com.demo.model;
 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
+
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
@@ -10,7 +12,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.annotation.jpa.TableGenerator;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
-
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 @Entity
 @Table(name = "teams")
 public class Team extends ActiveRecord {
@@ -47,9 +49,9 @@ public class Team extends ActiveRecord {
 		this.rating = rating;
 	}
 
-	@Sql("select t.** from teams t")
+	@Sql("select * from teams")
 	public List<Team> finaAllTeams() {
-		return guess();
+		return guess(new EntityListHandler(), model(Team.class));
 	}
 
 }

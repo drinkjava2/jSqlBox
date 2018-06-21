@@ -1,5 +1,7 @@
 package model;
 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
+
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
@@ -7,6 +9,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
+import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 @Table(name = "teams")
 public class Team extends ActiveRecord {
@@ -49,10 +52,10 @@ public class Team extends ActiveRecord {
 	}
 
 	public List<Team> queryTeamsRatingEqualTo(Integer rating) {
-		return guess(rating);
+		return guess(bind("rating",rating), new EntityListHandler(), model(Team.class));
 	}
 	/*- 
-	 select t.**
+	 select t.*
 	    from teams t
 	    where t.rating=:rating
 	*/

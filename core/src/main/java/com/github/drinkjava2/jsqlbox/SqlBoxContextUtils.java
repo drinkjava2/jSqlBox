@@ -502,7 +502,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * </pre>
 	 */
 	public static TableModel configToModel(Object entityOrClass, Object... optionItems) {
-		for (Object item : optionItems) { // If Model in option items, use it first;
+		for (Object item : optionItems) { // If Model in option items, use it first
 			if (item instanceof TableModel)
 				return (TableModel) item;
 			if (item instanceof ActiveRecordSupport)
@@ -556,29 +556,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (char c : chars)
 			if (c >= 'A' && c <= 'Z')
 				sb.append(c);
-		String alias = sb.toString().toLowerCase();
-		return alias;
-	}
-
-	/**
-	 * Transfer Object[] to TableModel[], object can be SqlBox instance, entityClass
-	 * or entity Bean
-	 * 
-	 * <pre>
-	 * 1. TableModel instance, will use it
-	 * 2. SqlBox instance, will use its tableModel
-	 * 3. Class, will call TableModelUtils.entity2Model to create tableModel
-	 * 4. Object, will call TableModelUtils.entity2Model(entityOrClass.getClass()) to create a SqlBox instance
-	 * </pre>
-	 */
-	@Deprecated
-	public static TableModel[] configToModels(Object[] configs) {
-		if (configs == null || configs.length == 0)
-			return new TableModel[0];
-		TableModel[] result = new TableModel[configs.length];
-		for (int i = 0; i < configs.length; i++)
-			result[i] = SqlBoxContextUtils.configToModel(configs[i]);
-		return result;
-	}
-
+		return sb.toString().toLowerCase(); 
+	} 
+ 
 }

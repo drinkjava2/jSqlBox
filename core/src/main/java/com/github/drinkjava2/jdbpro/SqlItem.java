@@ -27,14 +27,13 @@ public class SqlItem {
 	private String name;
 	private Object[] parameters;
 
-	public SqlItem(SqlOption type, Object... parameters) {
-		this.type = type;
-		this.parameters = parameters;
+	public SqlItem(String sqlPiece) {
+		this.type = SqlOption.SQL;
+		this.parameters = new Object[] { sqlPiece };
 	}
 
-	public SqlItem(String name, Object... parameters) {
-		this.type = SqlOption.IGNORE;
-		this.name = name;
+	public SqlItem(SqlOption type, Object... parameters) {
+		this.type = type;
 		this.parameters = parameters;
 	}
 

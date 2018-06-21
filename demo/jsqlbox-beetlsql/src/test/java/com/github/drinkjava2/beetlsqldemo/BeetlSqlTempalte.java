@@ -28,7 +28,7 @@ public class BeetlSqlTempalte implements SqlTemplateEngine {
 	}
 
 	@Override
-	public PreparedSQL render(String sqlId, Map<String, Object> paramMap ) {
+	public PreparedSQL render(String sqlId, Map<String, Object> paramMap, Object[] unbindParams) {
 		return doRender(sm, sqlId, paramMap);
 	}
 
@@ -56,6 +56,5 @@ public class BeetlSqlTempalte implements SqlTemplateEngine {
 		sp.setParams(params);
 		return sp;
 	}
- 
 
 }

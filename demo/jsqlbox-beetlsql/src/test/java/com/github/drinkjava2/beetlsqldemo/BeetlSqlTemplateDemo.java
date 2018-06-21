@@ -1,6 +1,6 @@
 package com.github.drinkjava2.beetlsqldemo;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.put;
+import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 
 import java.util.List;
 import java.util.Map;
@@ -72,11 +72,11 @@ public class BeetlSqlTemplateDemo {
 		}
 
 		Assert.assertEquals(100, ctx.nQueryForLongValue("select count(*) from users"));
-		List<Map<String, Object>> result = ctx.tQueryForMapList("user.select", put("age", 50));
+		List<Map<String, Object>> result = ctx.tQueryForMapList("user.select", bind("age", 50));
 		Assert.assertEquals(50, result.size());
 
-		List<User> users = ctx.tQuery("user.selectUserEntity", put("u", new User().put("age", 50, "name", "Foo100")),
-				new EntityListHandler(User.class));
+		List<User> users = ctx.tQuery("user.selectUserEntity",
+				bind("u", new User().put("age", 50, "name", "Foo100")), new EntityListHandler(User.class));
 		Assert.assertEquals(1, users.size());
 		Assert.assertTrue(users.get(0).getAge().equals(100));
 

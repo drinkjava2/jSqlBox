@@ -48,7 +48,7 @@
     <!-- jSqlBox is a ORM tool based on Apache-DbUtils and jDialects-->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
-      <artifactId>jsqlbox</artifactId>
+      <artifactId>jsqlbox-java8</artifactId>
       <version>2.0.0</version>
     </dependency> 
 
@@ -68,7 +68,7 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jbeanbox</artifactId>
-      <version>2.4.6</version>
+      <version>2.4.7</version>
     </dependency> 
    
    <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->

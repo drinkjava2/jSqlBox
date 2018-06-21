@@ -1,7 +1,6 @@
 package com.github.drinkjava2.test;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giExecute;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*; 
 
 import java.util.List;
 

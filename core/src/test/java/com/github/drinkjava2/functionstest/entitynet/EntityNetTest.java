@@ -102,13 +102,13 @@ public class EntityNetTest extends TestBase {
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles) {
-					System.out.println("  Roles:" + r.getId());
+					System.out.println("  Roles List:" + r.getId());
 				}
 
 			Map<Integer, Role> roleMap = u.getRoleMap();
 			if (roleMap != null)
 				for (Role r : roleMap.values()) {
-					System.out.println("  Roles:" + r.getId());
+					System.out.println("  Roles Map:" + r.getId());
 				}
 
 			Set<Privilege> privileges = u.getPrivilegeSet();

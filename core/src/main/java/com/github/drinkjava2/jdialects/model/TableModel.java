@@ -57,16 +57,16 @@ public class TableModel {
 	private List<ColumnModel> columns = new ArrayList<ColumnModel>();
 
 	/** IdGenerators */
-	private List<IdGenerator> idGenerators = new ArrayList<IdGenerator>();
+	private List<IdGenerator> idGenerators;
 
 	/** Foreign Keys */
-	private List<FKeyModel> fkeyConstraints = new ArrayList<FKeyModel>();
+	private List<FKeyModel> fkeyConstraints;
 
 	/** Indexes */
-	private List<IndexModel> indexConsts = new ArrayList<IndexModel>();
+	private List<IndexModel> indexConsts;
 
 	/** Unique constraints */
-	private List<UniqueModel> uniqueConsts = new ArrayList<UniqueModel>();
+	private List<UniqueModel> uniqueConsts;
 
 	/**
 	 * Map to which entityClass, this field is designed to ORM tool to use
@@ -96,7 +96,6 @@ public class TableModel {
 		tb.comment = this.comment;
 		tb.engineTail = this.engineTail;
 		tb.entityClass = this.entityClass;
-		tb.alias = this.alias;
 		if (!columns.isEmpty())
 			for (ColumnModel item : columns) {
 				ColumnModel newItem = item.newCopy();
@@ -104,21 +103,21 @@ public class TableModel {
 				tb.columns.add(newItem);
 			}
 
-		if (!idGenerators.isEmpty())
+		if (idGenerators != null && !idGenerators.isEmpty())
 			for (IdGenerator item : idGenerators)
-				tb.idGenerators.add(item.newCopy());
+				tb.getIdGenerators().add(item.newCopy());
 
-		if (!fkeyConstraints.isEmpty())
+		if (fkeyConstraints != null && !fkeyConstraints.isEmpty())
 			for (FKeyModel item : fkeyConstraints)
-				tb.fkeyConstraints.add(item.newCopy());
+				tb.getFkeyConstraints().add(item.newCopy());
 
-		if (!indexConsts.isEmpty())
+		if (indexConsts != null && !indexConsts.isEmpty())
 			for (IndexModel item : indexConsts)
-				tb.indexConsts.add(item.newCopy());
+				tb.getIndexConsts().add(item.newCopy());
 
-		if (!uniqueConsts.isEmpty())
+		if (uniqueConsts != null && !uniqueConsts.isEmpty())
 			for (UniqueModel item : uniqueConsts)
-				tb.uniqueConsts.add(item.newCopy());
+				tb.getUniqueConsts().add(item.newCopy());
 		return tb;
 	}
 
@@ -141,7 +140,7 @@ public class TableModel {
 		DialectException.assureNotNull(generator);
 		DialectException.assureNotNull(generator.getGenerationType());
 		DialectException.assureNotEmpty(generator.getIdGenName(), "IdGenerator name can not be empty");
-		idGenerators.add(generator);
+		getIdGenerators().add(generator);
 	}
 
 	/**
@@ -213,7 +212,7 @@ public class TableModel {
 	 * Remove a FKey by given fkeyName
 	 */
 	public TableModel removeFKey(String fkeyName) {
-		List<FKeyModel> fkeys = this.getFkeyConstraints();
+		List<FKeyModel> fkeys = getFkeyConstraints();
 		Iterator<FKeyModel> fkeyIter = fkeys.iterator();
 		while (fkeyIter.hasNext())
 			if (fkeyIter.next().getFkeyName().equalsIgnoreCase(fkeyName))
@@ -297,7 +296,7 @@ public class TableModel {
 	public FKeyModel fkey() {
 		FKeyModel fkey = new FKeyModel();
 		fkey.setTableName(this.tableName);
-		this.fkeyConstraints.add(fkey);
+		getFkeyConstraints().add(fkey);
 		return fkey;
 	}
 
@@ -308,7 +307,7 @@ public class TableModel {
 		FKeyModel fkey = new FKeyModel();
 		fkey.setTableName(this.tableName);
 		fkey.setFkeyName(fkeyName);
-		this.fkeyConstraints.add(fkey);
+		getFkeyConstraints().add(fkey);
 		return fkey;
 	}
 
@@ -327,7 +326,7 @@ public class TableModel {
 	 */
 	public IndexModel index() {
 		IndexModel index = new IndexModel();
-		this.indexConsts.add(index);
+		getIndexConsts().add(index);
 		return index;
 	}
 
@@ -337,7 +336,7 @@ public class TableModel {
 	public IndexModel index(String indexName) {
 		IndexModel index = new IndexModel();
 		index.setName(indexName);
-		this.indexConsts.add(index);
+		getIndexConsts().add(index);
 		return index;
 	}
 
@@ -346,7 +345,7 @@ public class TableModel {
 	 */
 	public UniqueModel unique() {
 		UniqueModel unique = new UniqueModel();
-		this.uniqueConsts.add(unique);
+		getUniqueConsts().add(unique);
 		return unique;
 	}
 
@@ -356,7 +355,7 @@ public class TableModel {
 	public UniqueModel unique(String uniqueName) {
 		UniqueModel unique = new UniqueModel();
 		unique.setName(uniqueName);
-		this.uniqueConsts.add(unique);
+		getUniqueConsts().add(unique);
 		return unique;
 	}
 
@@ -375,7 +374,7 @@ public class TableModel {
 	 * and name
 	 */
 	public IdGenerator getIdGenerator(GenerationType generationType, String name) {
-		return getIdGenerator(generationType, name, this.getIdGenerators());
+		return getIdGenerator(generationType, name, getIdGenerators());
 	}
 
 	/**
@@ -390,7 +389,7 @@ public class TableModel {
 	 * Search and return the IdGenerator in this TableModel by its name
 	 */
 	public IdGenerator getIdGenerator(String name) {
-		return getIdGenerator(null, name, this.getIdGenerators());
+		return getIdGenerator(null, name, getIdGenerators());
 	}
 
 	/**
@@ -512,6 +511,8 @@ public class TableModel {
 	}
 
 	public List<FKeyModel> getFkeyConstraints() {
+		if (fkeyConstraints == null)
+			fkeyConstraints = new ArrayList<FKeyModel>();
 		return fkeyConstraints;
 	}
 
@@ -528,6 +529,8 @@ public class TableModel {
 	}
 
 	public List<IndexModel> getIndexConsts() {
+		if (indexConsts == null)
+			indexConsts = new ArrayList<IndexModel>();
 		return indexConsts;
 	}
 
@@ -536,6 +539,8 @@ public class TableModel {
 	}
 
 	public List<UniqueModel> getUniqueConsts() {
+		if (uniqueConsts == null)
+			uniqueConsts = new ArrayList<UniqueModel>();
 		return uniqueConsts;
 	}
 
@@ -544,6 +549,8 @@ public class TableModel {
 	}
 
 	public List<IdGenerator> getIdGenerators() {
+		if (idGenerators == null)
+			idGenerators = new ArrayList<IdGenerator>();
 		return idGenerators;
 	}
 

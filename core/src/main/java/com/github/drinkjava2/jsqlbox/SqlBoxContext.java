@@ -15,8 +15,6 @@ import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -325,14 +323,14 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entity, optionItems);
 	}
 
-	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T loadById(Object config, Object entityId, Object... optionItems) {
-		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);
+	/** Load an entity from database by entityId, entityId can be one object or a Map */
+	public <T> T loadById(Object entity, Object entityId, Object... optionItems) {
+		return SqlBoxContextUtils.loadById(this, entity, entityId, optionItems);
 	}
 
-	/** Load an entity from database by key, key can be one object or a Map */
-	public <T> T loadById(Class<T> config, Object entityId, Object... optionItems) {
-		return SqlBoxContextUtils.loadById(this, config, entityId, optionItems);
+	/** Load an entity from database by entityId, entityId can be one object or a Map */
+	public <T> T loadById(Class<T> entityClass, Object entityId, Object... optionItems) {
+		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionItems);
 	}
 
 	/** Load an entity from database by query */
@@ -343,34 +341,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Load all entity from database */
 	public <T> List<T> loadAll(Class<T> config, Object... optionItems) {
 		return SqlBoxContextUtils.loadAll(this, config, optionItems);
-	}
-
-	protected void loadFieldsMethods______________________________() {// NOSONAR
-	}
-
-	/** Find related field value by given fieldName */
-	public <T> T findField(Object bean, String fieldName, Object... optionItems) {
-		return null;
-	}
-
-	/** Find related field value by given fieldType */
-	public <T> T findField(Object bean, Class<?> fieldType, Object... optionItems) {
-		return null;
-	}
-
-	/** Find related fields if field type is fieldType List */
-	public <T> List<T> findFieldList(Object bean, Class<T> fieldType, Object... optionItems) {
-		return null;
-	}
-
-	/** Find related fields if field type is fieldType Set */
-	public <T> Set<T> findFieldSet(Object bean, Class<T> fieldType, Object... optionItems) {
-		return null;
-	}
-
-	/** Find related fields if field type is fieldType Map */
-	public <T> Map<Object, T> findFieldMap(Object bean, Class<T> fieldType, Object... optionItems) {
-		return null;
 	}
 
 	// ========== Dialect shortcut methods ===============

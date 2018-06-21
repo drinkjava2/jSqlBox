@@ -10,7 +10,7 @@ and name = #name#
 
 selectUserEntity
 ===
-select u.** from users u where 1=1
+select u.* from users u where 1=1
 @if(!isEmpty(u.age)){
 and u.age > #u.age#
 @}

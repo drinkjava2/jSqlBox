@@ -34,7 +34,7 @@ public class TeamService {
 	}
 
 	public List<Team> getTeamByName(String name) {
-		return JSQLBOX.gpQuery(new EntityListHandler(Team.class), "select t.** from teams t where t.name=?", name);
+		return JSQLBOX.gpQuery(new EntityListHandler(Team.class), "select t.* from teams t where t.name=?", name);
 	}
 
 }
