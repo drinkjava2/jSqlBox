@@ -35,20 +35,20 @@ public interface ActiveRecordSupport {// NOSONAR
 	 */
 	public SqlBox box();
 
-	/**
-	 * @return the binded SqlBox, if no, return null;
-	 */
-	public SqlBox bindedBox();
-
-	/**
-	 * Bind a SqlBox instance to entity, if already binded, repalce with new one
-	 */
-	public void bindBox(SqlBox box);
-
-	/**
-	 * Unbind SqlBox instance of entity
-	 */
-	public void unbindBox();
+//	/**
+//	 * @return the binded SqlBox, if no, return null;
+//	 */
+//	public SqlBox bindedBox();
+//
+//	/**
+//	 * Bind a SqlBox instance to entity, if already binded, repalce with new one
+//	 */
+//	public void bindBox(SqlBox box);
+//
+//	/**
+//	 * Unbind SqlBox instance of entity
+//	 */
+//	public void unbindBox();
 
 	/** @return TableModel instance binded in this entity */
 	public TableModel tableModel();
@@ -56,7 +56,7 @@ public interface ActiveRecordSupport {// NOSONAR
 	/** set Entity's box's tableModel's alias name */
 	public ActiveRecordSupport alias(String alias);
 
-	/** @return binded TableModel's columnModel by given columnName */
+	/** @return TableModel's columnModel by given columnName */
 	public ColumnModel columnModel(String columnName);
 
 	/** @return table name */

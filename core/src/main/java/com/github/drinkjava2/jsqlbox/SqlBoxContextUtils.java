@@ -146,7 +146,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * IdGenerator (identity or sequence or UUID...)
 	 */
 	public static int insert(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel model = SqlBoxContextUtils.configToModel(entityBean, optionItems);
+		TableModel model = SqlBoxContextUtils.findTableModel(entityBean, optionItems);
 		LinkStyleArrayList<Object> jSQL = new LinkStyleArrayList<Object>();
 
 		String identityFieldName = null;
@@ -384,7 +384,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlBoxException.assureNotNull(model.getEntityClass(),
 				"Can not find TableModel setting in '" + entityOrClass + "'");
 		T bean = SqlBoxContextUtils.configToBean(entityOrClass);
-		bean =  EntityIdUtils.setEntityIdValues(bean, idOrIdMap, model);
+		bean = EntityIdUtils.setEntityIdValues(bean, idOrIdMap, model);
 		return load(ctx, bean, optionItems);
 	}
 
@@ -472,21 +472,57 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		if (entityOrClass == null)
 			throw new SqlBoxException("Can build Bean for null entityOrClass");
 		Class<?> t = null;
-		if (entityOrClass instanceof TableModel)
-			t = ((TableModel) entityOrClass).getEntityClass();
-		else if (entityOrClass instanceof ActiveRecordSupport)
+		if (entityOrClass instanceof ActiveRecordSupport)
 			return (T) entityOrClass;
-		else if (entityOrClass instanceof SqlBox)
-			t = ((SqlBox) entityOrClass).getTableModel().getEntityClass();
 		else if (entityOrClass instanceof Class)
-			t = (Class<?>) entityOrClass;
+			try {
+				return ((Class<T>) entityOrClass).newInstance();
+			} catch (Exception e) {
+				throw new SqlBoxException("Can not create new instance for '" + t + "'");
+			}
 		else // it's a entity bean
 			return (T) entityOrClass;
-		try {
-			return (T) t.newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException("Can not create new instance for '" + t + "'");
+	}
+
+	/**
+	 *  
+	 */
+	public static TableModel findTableModel(Object entityOrClass, Object... optionItems) {
+		for (Object item : optionItems) { // If Model in option items, use it first
+			if (item instanceof TableModel)
+				return (TableModel) item;
+			if (item instanceof SqlItem) {
+				SqlItem sqlItem = (SqlItem) item;
+				SqlOption sqlItemType = sqlItem.getType();
+				if (SqlOption.MODEL.equals(sqlItemType) || SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType)) {
+					Object[] args = sqlItem.getParameters();
+					if (args.length != 1)
+						throw new SqlBoxException("Model item need one parameter here.");
+					TableModel t = SqlBoxContextUtils.findTableModel(args[0]);// deal first
+					// if auto alias? i.e., UserOrder.class -> UR
+					if (SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType) && StrUtils.isEmpty(t.getAlias()))
+						t.setAlias(createAutoAliasNameForEntityClass(t.getEntityClass()));
+					return t;// return first model
+				} else if (SqlOption.MODEL_ALIAS.equals(sqlItemType)) {
+					Object[] args = sqlItem.getParameters();
+					if (args.length != 2)
+						throw new SqlBoxException("MODEL_ALIAS item need 'model, alias' format 2 parameters");
+					TableModel t = SqlBoxContextUtils.findTableModel(0);
+					SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
+					SqlBoxException.assureNotEmpty((String) args[1],
+							"Alias can not be empty for class '" + t.getEntityClass() + "'");
+					t.setAlias((String) args[1]);
+					return t;
+				}
+			}
 		}
+
+		if (entityOrClass == null)
+			throw new SqlBoxException("Can build TableModel configuration for null entityOrClass");
+		else if (entityOrClass instanceof Class)
+			return TableModelUtils.entity2Model((Class<?>) entityOrClass);
+		else // it's a entity bean
+			return TableModelUtils.entity2Model(entityOrClass.getClass());
 	}
 
 	/**
@@ -501,6 +537,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * 4. if entityOrClass is Object, will call TableModelUtils.entity2Model(entityOrClass.getClass()) to create a SqlBox instance
 	 * </pre>
 	 */
+	@Deprecated
 	public static TableModel configToModel(Object entityOrClass, Object... optionItems) {
 		for (Object item : optionItems) { // If Model in option items, use it first
 			if (item instanceof TableModel)
@@ -556,7 +593,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (char c : chars)
 			if (c >= 'A' && c <= 'Z')
 				sb.append(c);
-		return sb.toString().toLowerCase(); 
-	} 
- 
+		return sb.toString().toLowerCase();
+	}
+
 }

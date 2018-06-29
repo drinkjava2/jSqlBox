@@ -260,7 +260,7 @@ public class TableModel {
 	/**
 	 * Return ColumnModel object by columnName, if not found, return null;
 	 */
-	public ColumnModel getColumnByColOrEntityFieldName(String colOrFieldName) {
+	public ColumnModel columnModel(String colOrFieldName) {
 		for (ColumnModel columnModel : columns) {
 			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(colOrFieldName))
 				return columnModel;

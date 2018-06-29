@@ -15,12 +15,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBox;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -61,32 +59,26 @@ public class DynamicConfigTest extends TestBase {
 		}
 	}
 
-	public static class UserDemoSqlBox extends SqlBox {
-		{
-			TableModel t = TableModelUtils.entity2Model(UserDemo.class);
-			t.addColumn("anotherColumn1").STRING(40);
-			this.setTableModel(t);
-		}
-	}
-
 	@Test
 	public void doTest() {
-		TableModel t = new UserDemoSqlBox().getTableModel();
+		ctx.setAllowShowSQL(true);
+		TableModel t = new UserDemo().tableModel();
 
 		// A new column dynamically created
 		t.addColumn("anotherColumn2").VARCHAR(10);
 		createAndRegTables(t);
-		UserDemo u = new UserDemo();
 
-		// A Fake PKey dynamically cretated
-		u.columnModel("id").pkey();
+		UserDemo u = new UserDemo();
 		u.setUserName("Sam");
-		ctx.insert(u);
+
+		// A Fake PKey dynamically created
+		t.column("id").pkey();
+		ctx.insert(u, t);
 
 		u.setUserName("Tom");
-		u.update();
+		u.update(t);
 
-		Assert.assertEquals(1L, ctx.nQueryForObject("select count(*) from table2"));
+		Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from table2", t));
 	}
 
 	@Test
@@ -94,28 +86,22 @@ public class DynamicConfigTest extends TestBase {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
 
-		u.columnModel("id").pkey();
+		TableModel t = u.tableModel();
+		t.columnModel("id").pkey();
 		u.setUserName(null);
-		u.load();
+		u.load(t);
 		Assert.assertEquals("Tom", u.getUserName());
 
 		u.setUserName(null);
-		u.loadById(u.getId());
+		u.loadById(u.getId(), t);
 		Assert.assertEquals("Tom", u.getUserName());
 
-		// TODO: different load configurations
-		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(), u.tableModel());
+		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals("Tom", u2.getUserName());
 
-		u.columnModel("userName").setTransientable(true);
-		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(), u);
-		Assert.assertEquals(null, u3.getUserName());
-
-		UserDemo u4 = ctx.loadById(UserDemo.class, u.getId(), u.tableModel());
-		Assert.assertEquals(null, u4.getUserName());
-
-		UserDemo u5 = ctx.loadById(UserDemo.class, u.getId(), u.box());
-		Assert.assertEquals(null, u5.getUserName());
+		t.columnModel("userName").setTransientable(true);
+		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(), t);
+		Assert.assertEquals(null, u3.getUserName()); 
 	}
 
 	@Test(expected = SqlBoxException.class)

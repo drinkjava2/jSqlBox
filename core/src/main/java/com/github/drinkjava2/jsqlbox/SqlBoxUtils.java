@@ -70,12 +70,8 @@ public abstract class SqlBoxUtils {// NOSONAR
 	public static SqlBox getBindedBox(Object entity) {
 		if (entity == null)
 			throw new SqlBoxException("Can not find SqlBox for null entity");
-		else {
-			if (entity instanceof ActiveRecordSupport)
-				return ((ActiveRecordSupport) entity).bindedBox();
-			else
-				return findBoxOfPOJO(entity);
-		}
+		else  
+				return findBoxOfPOJO(entity); 
 	}
 
 	/**
@@ -96,11 +92,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 	public static void unbindBox(Object entity) {
 		if (entity == null)
 			throw new SqlBoxException("Unbind box error, entity can not be null");
-		if (entity instanceof ActiveRecordSupport) {
-			ActiveRecordSupport ac = (ActiveRecordSupport) entity;
-			ac.unbindBox();
-		} else
-			unbindBoxOfPOJO(entity);
+  	unbindBoxOfPOJO(entity);
 	}
 
 	/**
@@ -111,9 +103,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 			throw new SqlBoxException("Bind box error, entity can not be null");
 		if (box == null)
 			throw new SqlBoxException("Bind box error, box can not be null");
-		else if (entity instanceof ActiveRecordSupport)
-			((ActiveRecordSupport) entity).bindBox(box);
-		else
+		 else
 			bindBoxToPOJO(entity, box);
 	}
 

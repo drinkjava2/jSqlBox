@@ -141,8 +141,10 @@ public abstract class EntityIdUtils {// NOSONAR
 				ClassCacheUtils.writeValueToBeanField(bean, item.getKey(), item.getValue());
 		} else {
 			if (TypeUtils.canMapToSqlType(entityId.getClass())) {
+				if (model.getPKeyCount() == 0)
+					throw new SqlBoxException("No PKey column found for '"+bean.getClass()+"'");
 				if (model.getPKeyCount() != 1)
-					throw new SqlBoxException("More than 1 PKey column but only give 1 primary type parameter");
+					throw new SqlBoxException("Not give enough PKey column value '"+bean.getClass()+"'");
 				ColumnModel col = model.getFirstPKeyColumn();
 				ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
 				return bean;

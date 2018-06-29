@@ -17,6 +17,7 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -58,31 +59,31 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return box;
 	}
 
-	@Override
-	public SqlBox bindedBox() {
-		return box;
-	}
-
-	@Override
-	public void bindBox(SqlBox box) {
-		if (box == null)
-			throw new SqlBoxException("Can not bind null SqlBox to entity");
-		this.box = box;
-	}
-
-	@Override
-	public void unbindBox() {
-		box = null;
-	}
+//	@Override
+//	public SqlBox bindedBox() {
+//		return box;
+//	}
+//
+//	@Override
+//	public void bindBox(SqlBox box) {
+//		if (box == null)
+//			throw new SqlBoxException("Can not bind null SqlBox to entity");
+//		this.box = box;
+//	}
+//
+//	@Override
+//	public void unbindBox() {
+//		box = null;
+//	}
 
 	@Override
 	public TableModel tableModel() {
-		return box().getTableModel();
+		return TableModelUtils.entity2Model(this.getClass());
 	}
 
 	@Override
 	public ColumnModel columnModel(String colOrFieldName) {
-		return box().getTableModel().getColumnByColOrEntityFieldName(colOrFieldName);
+		return box().getTableModel().columnModel(colOrFieldName);
 	}
 
 	@Override
