@@ -34,22 +34,7 @@ public interface ActiveRecordSupport {// NOSONAR
 	 *         entity and return it
 	 */
 	public SqlBox box();
-
-//	/**
-//	 * @return the binded SqlBox, if no, return null;
-//	 */
-//	public SqlBox bindedBox();
-//
-//	/**
-//	 * Bind a SqlBox instance to entity, if already binded, repalce with new one
-//	 */
-//	public void bindBox(SqlBox box);
-//
-//	/**
-//	 * Unbind SqlBox instance of entity
-//	 */
-//	public void unbindBox();
-
+  
 	/** @return TableModel instance binded in this entity */
 	public TableModel tableModel();
 
@@ -136,6 +121,12 @@ public interface ActiveRecordSupport {// NOSONAR
 	 * Usage: put("key1",value1,"key2",value2...);
 	 */
 	public SqlItem bind(Object... parameters);
+
+	/** Return current entity's shardTable according its sharding key values */
+	public String shardTB(Object... optionItems)  ; 
+	
+	/** Return current entity's shardDatabase according its sharding key values */
+	public SqlBoxContext shardDB(Object... optionItems)  ; 
 
 
 }

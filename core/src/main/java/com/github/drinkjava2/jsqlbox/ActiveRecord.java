@@ -59,22 +59,22 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return box;
 	}
 
-//	@Override
-//	public SqlBox bindedBox() {
-//		return box;
-//	}
-//
-//	@Override
-//	public void bindBox(SqlBox box) {
-//		if (box == null)
-//			throw new SqlBoxException("Can not bind null SqlBox to entity");
-//		this.box = box;
-//	}
-//
-//	@Override
-//	public void unbindBox() {
-//		box = null;
-//	}
+	// @Override
+	// public SqlBox bindedBox() {
+	// return box;
+	// }
+	//
+	// @Override
+	// public void bindBox(SqlBox box) {
+	// if (box == null)
+	// throw new SqlBoxException("Can not bind null SqlBox to entity");
+	// this.box = box;
+	// }
+	//
+	// @Override
+	// public void unbindBox() {
+	// box = null;
+	// }
 
 	@Override
 	public TableModel tableModel() {
@@ -146,7 +146,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx.load(this, optionalSqlItems);
 	}
- 
+
 	@Override
 	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
@@ -224,6 +224,34 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public SqlItem bind(Object... parameters) {
 		return new SqlItem(SqlOption.BIND, parameters);
+	}
+
+	@Override
+	public String shardTB(Object... optionItems) {
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(this.getClass(), optionItems);
+		TableModel model = optionModel;
+		if (model == null)
+			model = SqlBoxContextUtils.findEntityOrClassTableModel(this.getClass());
+		SqlBoxException.assureNotNull(model.getEntityClass());
+		ColumnModel col = model.getShardTableColumn();
+		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
+			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		return SqlBoxContextUtils.getShardedTB(ctx(), model.getEntityClass(), shardKey1);
+	}
+
+	@Override
+	public SqlBoxContext shardDB(Object... optionItems) {
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(this.getClass(), optionItems);
+		TableModel model = optionModel;
+		if (model == null)
+			model = SqlBoxContextUtils.findEntityOrClassTableModel(this.getClass());
+		SqlBoxException.assureNotNull(model.getEntityClass());
+		ColumnModel col = model.getShardDatabaseColumn();
+		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
+			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 
 }

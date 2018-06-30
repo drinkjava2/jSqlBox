@@ -162,8 +162,8 @@ public abstract class EntityIdUtils {// NOSONAR
 			if (!isEntity)
 				throw new SqlBoxException(
 						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
-			List<ColumnModel> Cols = model.getPKeyColsSortByColumnName();
-			for (ColumnModel col : Cols) {
+			List<ColumnModel> cols = model.getPKeyColsSortByColumnName();
+			for (ColumnModel col : cols) {
 				Object value = ClassCacheUtils.readValueFromBeanField(entityId, col.getEntityField());
 				ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), value);
 			}

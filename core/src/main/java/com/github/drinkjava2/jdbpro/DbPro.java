@@ -285,7 +285,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		else if (item instanceof ResultSetHandler)
 			predSQL.setResultSetHandler((ResultSetHandler) item);
 		else if (item instanceof Class) {
-			throw new DbProRuntimeException("Found a sqlItem is class type :'" + item + "', currently is not allowed.");
+			// Class type will treated as TableModel in jSQLBOX, but not at jDbPro
+			return false;
 		} else if (item instanceof SpecialSqlItem) {
 			if (specialSqlItemPreparers == null || specialSqlItemPreparers.length == 0)
 				throw new DbProRuntimeException(

@@ -174,7 +174,8 @@ public abstract class ClassCacheUtils {// NOSONAR
 	public static Object readValueFromBeanField(Object entityBean, String fieldName) {
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
 		if (readMethod == null)
-			throw new DialectException("Can not find Java bean read method for column '" + fieldName + "'");
+			throw new DialectException("Can not find Java bean read method for column '" + fieldName + "' in '"
+					+ entityBean.getClass() + "'");
 		try {
 			return readMethod.invoke(entityBean);
 		} catch (Exception e) {

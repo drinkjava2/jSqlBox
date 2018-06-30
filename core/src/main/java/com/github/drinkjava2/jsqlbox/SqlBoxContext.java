@@ -30,6 +30,7 @@ import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
@@ -164,7 +165,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
 			if (SqlOption.SHARD_TABLE.equals(sqlItemType))
-				handleShardTable(sql, sqItem);
+				handleShardTable(ps, sql, sqItem);
 			else if (SqlOption.SHARD_DATABASE.equals(sqlItemType))
 				handleShardDatabase(ps, sqItem);
 			else if (SqlOption.GIVE.equals(sqlItemType)) {
@@ -182,7 +183,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				if (args.length == 0)
 					throw new SqlBoxException("Model item can not be empty");
 				for (Object object : args) {
-					TableModel t = SqlBoxContextUtils.configToModel(object);
+					TableModel t = SqlBoxContextUtils.findTableModel(object);
 					// if auto alias? for example: UserOrder.class -> UR
 					if (SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType) && StrUtils.isEmpty(t.getAlias()))
 						t.setAlias(SqlBoxContextUtils.createAutoAliasNameForEntityClass(t.getEntityClass()));
@@ -194,9 +195,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 					throw new SqlBoxException(
 							"MODEL_ALIAS item need model1, alias1, model2, alias2... format parameters");
 				for (int i = 0; i < args.length / 2; i++) {
-					TableModel t = SqlBoxContextUtils.configToModel(args[i * 2]);
-					SqlBoxException.assureNotNull(t.getEntityClass(),
-							"'entityClass' property not set for model " + t);
+					TableModel t = SqlBoxContextUtils.findTableModel(args[i * 2]);
+					SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 					SqlBoxException.assureNotEmpty((String) args[i * 2 + 1],
 							"Alias can not be empty for class '" + t.getEntityClass() + "'");
 					t.setAlias((String) args[i * 2 + 1]);
@@ -204,6 +204,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				}
 			} else
 				return false;
+		} else if (item instanceof Class) {
+			ps.addModel(TableModelUtils.entity2Model((Class<?>) item));
 		} else
 			return false;
 		return true;
@@ -256,17 +258,20 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
-	protected String handleShardTable(StringBuilder sql, SqlItem item) {
+	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
 		Object[] params = item.getParameters();
 		String table = null;
+		if (predSQL.getModels() == null || predSQL.getModels().length == 0)
+			throw new SqlBoxException("ShardTable not found model setting");
+		TableModel model = (TableModel) predSQL.getModels()[0];
 		if (params.length == 1)
-			table = SqlBoxContextUtils.getShardedTB(this, params[0]);
+			table = SqlBoxContextUtils.getShardedTB(this, model, params[0]);
 		else if (params.length == 2)
-			table = SqlBoxContextUtils.getShardedTB(this, params[0], params[1]);
+			table = SqlBoxContextUtils.getShardedTB(this, model, params[0], params[1]);
 		else
-			table = SqlBoxContextUtils.getShardedTB(this, params[0], params[1], params[2]);
+			throw new SqlBoxException("ShardTable need 1 or 2 parameters");
 		if (table == null)
-			throw new SqlBoxException("No ShardingTool can handle target '" + params[0] + "'");
+			throw new SqlBoxException("No ShardTable Tool found.");
 		else
 			sql.append(table);
 		return table;
@@ -275,14 +280,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected DbPro handleShardDatabase(PreparedSQL predSQL, SqlItem item) {
 		Object[] params = item.getParameters();
 		SqlBoxContext ctx = null;
+		if (predSQL.getModels() == null || predSQL.getModels().length == 0)
+			throw new SqlBoxException("ShardTable not found model setting");
+		TableModel model = (TableModel) predSQL.getModels()[0];
 		if (params.length == 1)
-			ctx = SqlBoxContextUtils.getShardedDB(this, params[0]);
+			ctx = SqlBoxContextUtils.getShardedDB(this, model, params[0]);
 		else if (params.length == 2)
-			ctx = SqlBoxContextUtils.getShardedDB(this, params[0], params[1]);
+			ctx = SqlBoxContextUtils.getShardedDB(this, model, params[0], params[1]);
 		else
-			ctx = SqlBoxContextUtils.getShardedDB(this, params[0], params[1], params[2]);
+			throw new SqlBoxException("ShardDatabase need 1 or 2 parameters");
 		if (ctx == null)
-			throw new SqlBoxException("No ShardingTool can handle target '" + params[0] + "'");
+			throw new SqlBoxException("No ShardDatabase Tool found.");
 		else
 			predSQL.setSwitchTo(ctx);
 		return ctx;
@@ -323,12 +331,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.load(this, entity, optionItems);
 	}
 
-	/** Load an entity from database by entityId, entityId can be one object or a Map */
+	/**
+	 * Load an entity from database by entityId, entityId can be one object or a Map
+	 */
 	public <T> T loadById(Object entity, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.loadById(this, entity, entityId, optionItems);
 	}
 
-	/** Load an entity from database by entityId, entityId can be one object or a Map */
+	/**
+	 * Load an entity from database by entityId, entityId can be one object or a Map
+	 */
 	public <T> T loadById(Class<T> entityClass, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionItems);
 	}
@@ -405,7 +417,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		if (dialect == null)
 			throw new DbProRuntimeException("Try use a dialect method but dialect is null");
 	}
- 
+
 	protected void getteSetters__________________________() {// NOSONAR
 	}
 

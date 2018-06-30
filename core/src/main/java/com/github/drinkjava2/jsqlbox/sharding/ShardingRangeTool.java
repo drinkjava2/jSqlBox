@@ -19,11 +19,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -37,22 +35,21 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingRangeTool implements ShardingTool {
 
 	@Override
-	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.configToModel( entityOrClass);
-		ColumnModel col = t.getShardTableColumn();
+	public String[] handleShardTable(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
+		ColumnModel col = model.getShardTableColumn();
 		if (col == null)
-			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
+			throw new SqlBoxException("Not found ShardTable setting for table '" + model.getTableName() + "'");
 		if (!"RANGE".equalsIgnoreCase(col.getShardTable()[0]))
 			return null;// NOSONAR
 		String tableSize = col.getShardTable()[1];
 
 		Object shardKey1 = null;
 		Object shardkey2 = null;
-		if (shardkey == null || shardkey.length == 0) {
-			if (entityOrClass instanceof Class)
-				throw new SqlBoxException("entityOrClass need ShardTable key value");
-			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
-		} else if (shardkey.length == 1) {
+		Class<?> entityOrClass = model.getEntityClass();
+		SqlBoxException.assureNotNull(entityOrClass);
+		if (shardkey == null || shardkey.length == 0)
+			throw new SqlBoxException("ShardTable key parameter needed");
+		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
 			shardKey1 = shardkey[0];
@@ -61,44 +58,41 @@ public class ShardingRangeTool implements ShardingTool {
 		if (shardKey1 == null)
 			throw new SqlBoxException("ShardTable key value can not be null");
 
- 
 		if (shardkey2 != null) {
-			return calculateTableNames(t.getTableName(), shardKey1, shardkey2, tableSize);
+			return calculateTableNames(model.getTableName(), shardKey1, shardkey2, tableSize);
 		} else {
 			Set<String> set = new HashSet<String>();
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateTableName(t.getTableName(), key, tableSize));
+					set.add(calculateTableName(model.getTableName(), key, tableSize));
 				return set.toArray(new String[set.size()]);
 			} else if (shardKey1.getClass().isArray()) {
 				for (Object key : (Object[]) shardKey1)
-					set.add(calculateTableName(t.getTableName(), key, tableSize));
+					set.add(calculateTableName(model.getTableName(), key, tableSize));
 				return set.toArray(new String[set.size()]);
 			} else {
-				set.add(calculateTableName(t.getTableName(), shardKey1, tableSize));
+				set.add(calculateTableName(model.getTableName(), shardKey1, tableSize));
 				return set.toArray(new String[set.size()]);
 			}
 		}
 	}
 
 	@Override
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
-
-		TableModel t = SqlBoxContextUtils.configToModel(entityOrClass);
-		ColumnModel col = t.getShardDatabaseColumn();
+	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
+		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null)
-			throw new SqlBoxException("Not found sharding setting for entity '" + entityOrClass + "'");
+			throw new SqlBoxException("Not found ShardDatabase setting for table '" + model.getTableName() + "'");
 		if (!"RANGE".equalsIgnoreCase(col.getShardDatabase()[0]))
 			return null;// NOSONAR
 		String tableSize = col.getShardDatabase()[1];
-		
+
 		Object shardKey1 = null;
 		Object shardkey2 = null;
-		if (shardkey == null || shardkey.length == 0) {
-			if (entityOrClass instanceof Class)
-				throw new SqlBoxException("entityOrClass need ShardDatabase key value");
-			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
-		} else if (shardkey.length == 1) {
+		Class<?> entityOrClass = model.getEntityClass();
+		SqlBoxException.assureNotNull(entityOrClass);
+		if (shardkey == null || shardkey.length == 0)
+			throw new SqlBoxException("ShardDatabase key parameter needed");
+		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
 			shardKey1 = shardkey[0];
@@ -107,7 +101,6 @@ public class ShardingRangeTool implements ShardingTool {
 		if (shardKey1 == null)
 			throw new SqlBoxException("ShardDatabase key value can not be null");
 
- 
 		if (shardkey2 != null) {
 			return calculateDatabases(ctx, shardKey1, shardkey2, tableSize);
 		} else {

@@ -61,7 +61,6 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		ctx.setAllowShowSQL(true);
 		TableModel t = new UserDemo().tableModel();
 
 		// A new column dynamically created
@@ -87,7 +86,7 @@ public class DynamicConfigTest extends TestBase {
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
 
 		TableModel t = u.tableModel();
-		t.columnModel("id").pkey();
+		t.columnModel("id").pkey();// Fake Pkey
 		u.setUserName(null);
 		u.load(t);
 		Assert.assertEquals("Tom", u.getUserName());
@@ -99,9 +98,9 @@ public class DynamicConfigTest extends TestBase {
 		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals("Tom", u2.getUserName());
 
-		t.columnModel("userName").setTransientable(true);
+		t.columnModel("userName").setTransientable(true);// ignore userName
 		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(), t);
-		Assert.assertEquals(null, u3.getUserName()); 
+		Assert.assertEquals(null, u3.getUserName());
 	}
 
 	@Test(expected = SqlBoxException.class)

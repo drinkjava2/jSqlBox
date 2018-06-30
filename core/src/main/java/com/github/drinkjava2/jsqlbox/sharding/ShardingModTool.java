@@ -19,11 +19,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -36,11 +34,10 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingModTool implements ShardingTool {
 
 	@Override
-	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.configToModel(entityOrClass);
-		ColumnModel col = t.getShardTableColumn();
+	public String[] handleShardTable(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
+		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
-			throw new SqlBoxException("Not found ShardTable setting for table '" + t.getTableName() + "'");
+			throw new SqlBoxException("Not found ShardTable setting for table '" + model.getTableName() + "'");
 
 		// return null if is not "MOD" shardTable strategy
 		if (!"MOD".equalsIgnoreCase(col.getShardTable()[0]))
@@ -49,11 +46,12 @@ public class ShardingModTool implements ShardingTool {
 
 		Object shardKey1 = null;
 		Object shardkey2 = null;
-		if (shardkey == null || shardkey.length == 0) {
-			if (entityOrClass instanceof Class)
-				throw new SqlBoxException("entityOrClass need ShardTable key value");
-			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
-		} else if (shardkey.length == 1) {
+		Class<?> entityOrClass = model.getEntityClass();
+		SqlBoxException.assureNotNull(entityOrClass);
+
+		if (shardkey == null || shardkey.length == 0)
+			throw new SqlBoxException("ShardTable key parameter needed");
+		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
 			shardKey1 = shardkey[0];
@@ -64,29 +62,28 @@ public class ShardingModTool implements ShardingTool {
 
 		Set<String> set = new HashSet<String>();
 
-		if (shardkey2 != null)
+		if (shardkey2 != null) {
 			throw new SqlBoxException("ShardingModTool does not support shardBetween type method");
-		else {
+		} else {
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateTableName(t.getTableName(), key, modNumber));
+					set.add(calculateTableName(model.getTableName(), key, modNumber));
 				return set.toArray(new String[set.size()]);
 			} else if (shardKey1.getClass().isArray()) {
 				for (Object key : (Object[]) shardKey1)
-					set.add(calculateTableName(t.getTableName(), key, modNumber));
+					set.add(calculateTableName(model.getTableName(), key, modNumber));
 				return set.toArray(new String[set.size()]);
 			} else
-				return new String[] { calculateTableName(t.getTableName(), shardKey1, modNumber) };
+				return new String[] { calculateTableName(model.getTableName(), shardKey1, modNumber) };
 		}
 	}
 
 	@Override
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardkey) {// NOSONAR
-		TableModel t = SqlBoxContextUtils.configToModel( entityOrClass);
+	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
 
-		ColumnModel col = t.getShardDatabaseColumn();
+		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
-			throw new SqlBoxException("Not found ShardDatabase setting for table '" + t.getTableName() + "'");
+			throw new SqlBoxException("Not found ShardDatabase setting for table '" + model.getTableName() + "'");
 
 		// return null if is not "MOD" shardTable strategy
 		if (!"MOD".equalsIgnoreCase(col.getShardDatabase()[0]))
@@ -95,11 +92,11 @@ public class ShardingModTool implements ShardingTool {
 
 		Object shardKey1 = null;
 		Object shardkey2 = null;
-		if (shardkey == null || shardkey.length == 0) {
-			if (entityOrClass instanceof Class)
-				throw new SqlBoxException("entityOrClass need ShardDatabase key value");
-			shardKey1 = ClassCacheUtils.readValueFromBeanField(entityOrClass, col.getColumnName());
-		} else if (shardkey.length == 1) {
+		Class<?> entityOrClass = model.getEntityClass();
+		SqlBoxException.assureNotNull(entityOrClass); 
+		if (shardkey == null || shardkey.length == 0)
+			throw new SqlBoxException("ShardDatabase key parameter needed");
+		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
 			shardKey1 = shardkey[0];

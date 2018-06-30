@@ -117,13 +117,12 @@ public class ShardingRangeToolTest {
 
 	@Test
 	public void testInsertSQLs() {
-		System.out.println(masters[2].getShardedDB(TheUser.class, dbID).getName());
-		masters[2].iExecute("insert into ", shardTB(TheUser.class, tbID), shardDB(TheUser.class, dbID),
+		masters[2].iExecute(TheUser.class, "insert into ", shardTB(tbID), shardDB(dbID),
 				" (id, name, databaseId) values(?,?,?)", param(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
-		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from ", shardTB(TheUser.class, tbID),
-				shardDB(TheUser.class, dbID), USE_SLAVE, new PrintSqlHandler()));
-		Assert.assertEquals(1, masters[2].iQueryForLongValue("select count(*) from ", shardTB(TheUser.class, tbID),
-				shardDB(TheUser.class, dbID)));
+		Assert.assertEquals(1, masters[0].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(tbID),
+				shardDB(dbID), USE_SLAVE, new PrintSqlHandler()));
+		Assert.assertEquals(1,
+				masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(tbID), shardDB(dbID)));
 	}
 
 	@Test
@@ -131,8 +130,8 @@ public class ShardingRangeToolTest {
 		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
 		TheUser u1 = new TheUser();
 		u1.put("id", tbID, "databaseId", dbID, "name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
-		Assert.assertEquals("Master2", u1.ctx().getShardedDB(u1).getName());
-		Assert.assertEquals("TheUser_3", u1.ctx().getShardedTB(u1));
+		Assert.assertEquals("Master2", u1.shardDB().getName());
+		Assert.assertEquals("TheUser_3", u1.shardTB());
 
 		u1.setName("Sam");
 		u1.update(USE_BOTH, new PrintSqlHandler());
@@ -143,10 +142,10 @@ public class ShardingRangeToolTest {
 		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use slave
 		Assert.assertEquals("Sam", u2.getName());
 
-		u2.delete(new PrintSqlHandler());// only deleted master except use
-											// "USE_BOTH" option
-		Assert.assertEquals(0, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2), USE_MASTER));
-		Assert.assertEquals(1, giQueryForLongValue("select count(*) from ", shardTB(u2), shardDB(u2)));
+		// only deleted master, if want delete slaves at same time, use "USE_BOTH"
+		u2.delete(new PrintSqlHandler());
+		Assert.assertEquals(0, giQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
+		Assert.assertEquals(1, giQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));
 	}
 
 }

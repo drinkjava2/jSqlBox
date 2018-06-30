@@ -15,6 +15,7 @@
  */
 package com.github.drinkjava2.jsqlbox.sharding;
 
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
@@ -38,7 +39,7 @@ public interface ShardingTool {// NOSONAR
 	 * @return A String[] stored table names or null if the sharding strategy is not
 	 *         fit for current implementation
 	 */
-	public String[] handleShardTable(SqlBoxContext ctx, Object entityOrClass, Object... shardKey);
+	public String[] handleShardTable(SqlBoxContext ctx, TableModel tableModel, Object... shardKey);
 
 	/**
 	 * Dealing a ShardTable SqlItem, return real master SqlBoxContexts array
@@ -52,6 +53,6 @@ public interface ShardingTool {// NOSONAR
 	 * @return A SqlBoxContext[] stored master SqlBoxContexts or null if the
 	 *         sharding strategy is not fit for current implementation
 	 */
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, Object entityOrClass, Object... shardKey);
+	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, TableModel tableModel, Object... shardKey);
 
 }

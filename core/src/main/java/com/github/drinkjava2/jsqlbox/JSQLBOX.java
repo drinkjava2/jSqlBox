@@ -45,7 +45,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
 	/** Create a model configurations, */
 	public static TableModel model(Object model) {
-		return SqlBoxContextUtils.configToModel(model);
+		return SqlBoxContextUtils.findTableModel(model);
 	}
 
 	/** Create model configurations */
@@ -79,22 +79,24 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return new SqlItem(SqlOption.DISABLE_HANDLERS, PaginHandler.class);
 	}
 
-	public static SqlItem shardTB(Object entityOrClass, Object... shardvalues) {
+	public static SqlItem shardTB(Object... shardvalues) {
 		if (shardvalues.length == 0)
-			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass);
+			throw new SqlBoxException("shardTB() method need at least 1 parameter");
 		else if (shardvalues.length == 1)
-			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[0]);
-		else
-			return new SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardvalues[1]);
+			return new SqlItem(SqlOption.SHARD_TABLE, shardvalues[0]);
+		else if (shardvalues.length == 2)
+			return new SqlItem(SqlOption.SHARD_TABLE, shardvalues[0], shardvalues[1]);
+		throw new SqlBoxException("shardTB() method allow at most 2 parameter");
 	}
 
-	public static SqlItem shardDB(Object entityOrClass, Object... shardvalues) {
+	public static SqlItem shardDB(Object... shardvalues) {
 		if (shardvalues.length == 0)
-			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass);
+			throw new SqlBoxException("shardDB() method need at least 1 parameter");
 		else if (shardvalues.length == 1)
-			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[0]);
-		else
-			return new SqlItem(SqlOption.SHARD_DATABASE, entityOrClass, shardvalues[1]);
+			return new SqlItem(SqlOption.SHARD_DATABASE, shardvalues[0]);
+		else if (shardvalues.length == 2)
+			return new SqlItem(SqlOption.SHARD_DATABASE, shardvalues[0], shardvalues[1]);
+		throw new SqlBoxException("shardTB() method allow at most 2 parameter");
 	}
 
 	//@formatter:off

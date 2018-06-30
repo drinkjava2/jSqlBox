@@ -62,7 +62,7 @@ public class EntityNet {
 	/** Config, parameters can be entity or entity class or TableModel */
 	public EntityNet config(Object... entityOrModel) {
 		for (Object object : entityOrModel) {
-			TableModel t = SqlBoxContextUtils.configToModel(object);
+			TableModel t = SqlBoxContextUtils.findTableModel(object);
 			SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 			String alias = t.getAlias();
 			if (StrUtils.isEmpty(alias)) {
@@ -93,7 +93,7 @@ public class EntityNet {
 
 	/** Config one entity */
 	private EntityNet configOneAlias(Object entityOrModel, String alias) {
-		TableModel t = SqlBoxContextUtils.configToModel(entityOrModel);
+		TableModel t = SqlBoxContextUtils.findTableModel(entityOrModel);
 		SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
 		SqlBoxException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
 		t.setAlias(alias);
