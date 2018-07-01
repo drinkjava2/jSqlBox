@@ -36,8 +36,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  *    or 
  *    
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
- *    entity.box().setContext(ctx);
- *    entity.insert();
+ *    entity.insert(ctx);
  *    
  *    
  * Data Mapper style (for POJO entity):   
@@ -59,23 +58,6 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return box;
 	}
 
-	// @Override
-	// public SqlBox bindedBox() {
-	// return box;
-	// }
-	//
-	// @Override
-	// public void bindBox(SqlBox box) {
-	// if (box == null)
-	// throw new SqlBoxException("Can not bind null SqlBox to entity");
-	// this.box = box;
-	// }
-	//
-	// @Override
-	// public void unbindBox() {
-	// box = null;
-	// }
-
 	@Override
 	public TableModel tableModel() {
 		return TableModelUtils.entity2Model(this.getClass());
@@ -83,18 +65,12 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public ColumnModel columnModel(String colOrFieldName) {
-		return box().getTableModel().columnModel(colOrFieldName);
+		return tableModel().getColumn(colOrFieldName);
 	}
 
 	@Override
 	public String table() {
-		return box().getTableModel().getTableName();
-	}
-
-	@Override
-	public ActiveRecordSupport alias(String alias) {
-		box().getTableModel().setAlias(alias);
-		return this;
+		return tableModel().getTableName();
 	}
 
 	@Override
@@ -228,11 +204,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public String shardTB(Object... optionItems) {
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(this.getClass(), optionItems);
-		TableModel model = optionModel;
-		if (model == null)
-			model = SqlBoxContextUtils.findEntityOrClassTableModel(this.getClass());
-		SqlBoxException.assureNotNull(model.getEntityClass());
+		TableModel model = SqlBoxContextUtils.findTableModel(this.getClass(), optionItems);
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
@@ -242,11 +214,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 
 	@Override
 	public SqlBoxContext shardDB(Object... optionItems) {
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(this.getClass(), optionItems);
-		TableModel model = optionModel;
-		if (model == null)
-			model = SqlBoxContextUtils.findEntityOrClassTableModel(this.getClass());
-		SqlBoxException.assureNotNull(model.getEntityClass());
+		TableModel model = SqlBoxContextUtils.findTableModel(this.getClass(), optionItems);
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");

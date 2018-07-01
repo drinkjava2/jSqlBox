@@ -62,6 +62,7 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("tableName=" + model.getTableName()).append("\r\n");
 		sb.append("getEntityClass=" + model.getEntityClass()).append("\r\n");
 		sb.append("getAlias=" + model.getAlias()).append("\r\n");
+		sb.append("readOnly=" + model.getReadOnly()).append("\r\n");
 		sb.append(getFkeyDebugInfo(model));
 		List<ColumnModel> columns = model.getColumns();
 		sb.append("Columns:\r\n");

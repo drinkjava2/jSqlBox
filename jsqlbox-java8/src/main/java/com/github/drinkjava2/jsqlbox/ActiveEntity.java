@@ -6,13 +6,14 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * ActiveEntity is a interface has default methods only supported for
- * Java8+, so in Java8 and above, a POJO can implements ActiveEntity
- * interface to obtain CRUD methods instead of extends ActiveRecord class
+ * ActiveEntity is a interface has default methods only supported for Java8+, so
+ * in Java8 and above, a POJO can implements ActiveEntity interface to obtain
+ * CRUD methods instead of extends ActiveRecord class
  */
 
 public interface ActiveEntity extends ActiveRecordSupport {
@@ -28,39 +29,18 @@ public interface ActiveEntity extends ActiveRecordSupport {
 	}
 
 	@Override
-	public default SqlBox bindedBox() {
-		return SqlBoxUtils.findBoxOfPOJO(this);
-	}
-
-	@Override
-	public default void bindBox(SqlBox box) {
-		SqlBoxUtils.bindBoxToPOJO(this, box);
-	}
-
-	@Override
-	public default void unbindBox() {
-		SqlBoxUtils.unbindBoxOfPOJO(this);
-	}
-
-	@Override
 	public default TableModel tableModel() {
-		return box().getTableModel();
+		return TableModelUtils.entity2Model(this.getClass());
 	}
 
 	@Override
-	public default ColumnModel columnModel(String columnName) {
-		return box().getTableModel().getColumn(columnName);
+	public default ColumnModel columnModel(String colOrFieldName) {
+		return tableModel().getColumn(colOrFieldName);
 	}
 
 	@Override
 	public default String table() {
-		return box().getTableModel().getTableName();
-	}
-
-	@Override
-	public default ActiveRecordSupport alias(String alias) {
-		box().getTableModel().setAlias(alias);
-		return this;
+		return tableModel().getTableName();
 	}
 
 	@Override
@@ -113,13 +93,12 @@ public interface ActiveEntity extends ActiveRecordSupport {
 		return ctx.load(this, optionalSqlItems);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public default <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
 		SqlBoxContext ctx = ctx();
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.loadById((Class<T>) this.getClass(), idOrIdMap, optionalSqlItems);
+		return ctx.loadById(this, idOrIdMap, optionalSqlItems);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -191,5 +170,25 @@ public interface ActiveEntity extends ActiveRecordSupport {
 	@Override
 	public default SqlItem bind(Object... parameters) {
 		return new SqlItem(SqlOption.BIND, parameters);
+	}
+
+	@Override
+	public default String shardTB(Object... optionItems) {
+		TableModel model = SqlBoxContextUtils.findTableModel(this.getClass(), optionItems);
+		ColumnModel col = model.getShardTableColumn();
+		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
+			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		return SqlBoxContextUtils.getShardedTB(ctx(), model.getEntityClass(), shardKey1);
+	}
+
+	@Override
+	public default SqlBoxContext shardDB(Object... optionItems) {
+		TableModel model = SqlBoxContextUtils.findTableModel(this.getClass(), optionItems);
+		ColumnModel col = model.getShardDatabaseColumn();
+		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
+			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 }

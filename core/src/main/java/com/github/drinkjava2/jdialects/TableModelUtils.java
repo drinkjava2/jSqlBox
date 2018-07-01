@@ -43,7 +43,7 @@ public abstract class TableModelUtils {
 	 * @return TableModel
 	 */
 	public static TableModel entity2Model(Class<?> entityClass) {
-		return TableModelUtilsOfEntity.oneEntity2Model(entityClass).newCopy();
+		return TableModelUtilsOfEntity.oneEntity2Model(entityClass);
 	}
 
 	/**

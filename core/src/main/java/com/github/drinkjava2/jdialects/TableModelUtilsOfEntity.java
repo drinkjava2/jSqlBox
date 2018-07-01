@@ -144,6 +144,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			}
 		if (model == null)
 			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
+		//model.setReadOnly(true);
 		tableModelCache.put(entityClass, model);
 		return model.newCopy();
 	}
@@ -167,7 +168,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 		if (StrUtils.isEmpty(tableName))
 			tableName = entityClass.getSimpleName();
 		TableModel model = new TableModel(tableName); // Build the tableModel
-		model.setEntityClass(entityClass );
+		model.setEntityClass(entityClass);
 		if (!tableMap.isEmpty()) {
 			// Index
 			Annotation[] indexes = (Annotation[]) tableMap.get("indexes");
@@ -245,9 +246,9 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 
 			Field field = ReflectionUtils.findField(entityClass, entityfieldName);
 			if (field == null)
-				continue; 
+				continue;
 
-			if (!getFirstEntityAnno(field, "Transient").isEmpty()  || !TypeUtils.canMapToSqlType(propertyClass)) {
+			if (!getFirstEntityAnno(field, "Transient").isEmpty() || !TypeUtils.canMapToSqlType(propertyClass)) {
 				ColumnModel col = new ColumnModel(entityfieldName);
 				col.setColumnType(TypeUtils.toType(propertyClass));
 				col.setLengths(new Integer[] { 255, 0, 0 });
@@ -308,15 +309,15 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.pkey();
 
 				// Is a ShardTable column?
-				Map<String, Object> shardTableMap = getFirstEntityAnno(field, "ShardTable"); 
-				if (!shardTableMap.isEmpty())  
-					col.shardTable((String[]) shardTableMap.get("value"));  
-				
-			    // Is ShardDatabase?
-				Map<String, Object> shardDatabaseMap = getFirstEntityAnno(field, "ShardDatabase"); 
-				if (!shardDatabaseMap.isEmpty())  
+				Map<String, Object> shardTableMap = getFirstEntityAnno(field, "ShardTable");
+				if (!shardTableMap.isEmpty())
+					col.shardTable((String[]) shardTableMap.get("value"));
+
+				// Is ShardDatabase?
+				Map<String, Object> shardDatabaseMap = getFirstEntityAnno(field, "ShardDatabase");
+				if (!shardDatabaseMap.isEmpty())
 					col.shardDatabase((String[]) shardDatabaseMap.get("value"));
-				
+
 				col.setEntityField(entityfieldName);
 				col.setTableModel(model);
 				// col will also set TableModel field point to its owner

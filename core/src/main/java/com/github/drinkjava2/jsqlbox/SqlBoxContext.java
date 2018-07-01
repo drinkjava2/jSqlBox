@@ -156,11 +156,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		if (super.dealItem(iXxxStyle, ps, sql, item))
 			return true; // if super class DbPro can deal it, let it do
 		else if (item instanceof TableModel)
-			ps.addModel(item);
-		else if (item instanceof ActiveRecordSupport)
-			ps.addModel(((ActiveRecordSupport) item).tableModel());
-		else if (item instanceof SqlBox)
-			ps.addModel(((SqlBox) item).getTableModel());
+			ps.addModel(item); 
 		else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
@@ -182,7 +178,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				Object[] args = sqItem.getParameters();
 				if (args.length == 0)
 					throw new SqlBoxException("Model item can not be empty");
-				for (Object object : args) {
+				for (Object object : args) { 
 					TableModel t = SqlBoxContextUtils.findTableModel(object);
 					// if auto alias? for example: UserOrder.class -> UR
 					if (SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType) && StrUtils.isEmpty(t.getAlias()))

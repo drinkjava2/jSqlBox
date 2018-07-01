@@ -1,7 +1,7 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.modelAutoAlias;
 
 import java.util.HashMap;
@@ -80,6 +80,27 @@ public class EntityNetTest extends TestBase {
 		new RolePrivilege().putValues("r2", "p3").insert();
 		new RolePrivilege().putValues("r3", "p3").insert();
 		new RolePrivilege().putValues("r4", "p1").insert();
+	}
+
+	@Test
+	public void testModelAlias() {
+		insertDemoData();
+		EntityNet net = ctx.iQuery(new EntityNetHandler(),
+				modelAlias(new User(), "u", Role.class, "r", Privilege.class, "p", UserRole.class, "ur",
+						RolePrivilege.class, "rp"),
+				giveBoth("r", "u"), giveBoth("p", "u"), "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+				" left join userroletb ur on u.id=ur.userid ", //
+				" left join roletb r on ur.rid=r.id ", //
+				" left join roleprivilegetb rp on rp.rid=r.id ", //
+				" left join privilegetb p on p.id=rp.pid ", //
+				" order by u.id, ur.id, r.id, rp.id, p.id");
+		System.out.println("===========pick entity list================");
+		List<Role> roleList = net.pickEntityList("r");
+		for (Role r : roleList) {
+			System.out.println("Role:" + r.getId());
+			Assert.assertNotNull(r.getUser());
+			System.out.println("  User:" + r.getUser().getId());
+		}
 	}
 
 	@Test

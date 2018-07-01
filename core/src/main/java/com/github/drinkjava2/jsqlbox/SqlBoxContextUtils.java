@@ -163,7 +163,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return TableModelUtils.entity2Model(entityOrClass.getClass());
 	}
 
-	public static TableModel findOptionTableModel(Object entityOrClass, Object... optionItems) {
+	public static TableModel findOptionTableModel(Object... optionItems) {//NOSONAR
 		for (Object item : optionItems) { // If Model in option items, use it first
 			if (item instanceof TableModel)
 				return (TableModel) item;
@@ -274,7 +274,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlBoxException.assureNotNull(model.getEntityClass(), "Can not find entityClass setting in model.");
 		@SuppressWarnings("unchecked")
 		T bean = (T) ClassCacheUtils.createNewEntity(model.getEntityClass());
-		ctx.getSqlBox(bean).setTableModel(model.newCopy());
+		ctx.getSqlBox(bean).setTableModel(model);
 		for (ColumnModel col : model.getColumns()) {
 			boolean foundValue = false;
 			for (Entry<String, Object> row : oneRow.entrySet()) {
@@ -325,7 +325,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * IdGenerator (identity or sequence or UUID...)
 	 */
 	public static int insert(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(entityBean, optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -421,7 +421,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Update entityBean according primary key */
 	public static int update(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(entityBean, optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -481,7 +481,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Delete entityBean in database according primary key value
 	 */
 	public static void delete(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(entityBean, optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -540,7 +540,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	@SuppressWarnings("unchecked")
 	public static <T> T load(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(entityBean, optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -612,7 +612,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	public static <T> T loadById(SqlBoxContext ctx, Object entityOrClass, Object idOrIdMap, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(entityOrClass, optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClass);

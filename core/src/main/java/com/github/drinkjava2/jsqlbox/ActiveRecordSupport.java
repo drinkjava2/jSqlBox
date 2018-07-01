@@ -36,10 +36,7 @@ public interface ActiveRecordSupport {// NOSONAR
 	public SqlBox box();
   
 	/** @return TableModel instance binded in this entity */
-	public TableModel tableModel();
-
-	/** set Entity's box's tableModel's alias name */
-	public ActiveRecordSupport alias(String alias);
+	public TableModel tableModel(); 
 
 	/** @return TableModel's columnModel by given columnName */
 	public ColumnModel columnModel(String columnName);

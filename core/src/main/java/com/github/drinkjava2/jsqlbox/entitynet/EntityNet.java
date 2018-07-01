@@ -169,12 +169,18 @@ public class EntityNet {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> List<T> pickEntityList(String alias) {
-		return (List<T>) new ArrayList(body.get(alias).values());
+		Map<Object, Object> map = body.get(alias);
+		if (map == null)
+			return new ArrayList();
+		return (List<T>) new ArrayList(map.values());
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> Set<T> pickEntitySet(String alias) {
-		return (Set<T>) new LinkedHashSet(body.get(alias).values());
+		Map<Object, Object> map = body.get(alias);
+		if (map == null)
+			return new HashSet();
+		return (Set<T>) new LinkedHashSet(map.values());
 	}
 
 	@SuppressWarnings({ "unchecked" })
@@ -222,7 +228,7 @@ public class EntityNet {
 	private static Object createEntity(SqlBoxContext ctx, Map<String, Object> oneRow, TableModel model, String alias) {
 		Object entity;
 		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-		ctx.getSqlBox(entity).setTableModel(model.newCopy());
+		ctx.getSqlBox(entity).setTableModel(model);
 		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 			for (ColumnModel col : model.getColumns()) {
 				if (col.getTransientable())

@@ -29,8 +29,8 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 
 /**
  * PreparedSQL is a POJO used for store SQL, parameter, ResultSetHandlers,
- * SqlHandlers, Connection and templateEngine..., this is a temporary object
- * prepared for lower layer JDBC tool to access database
+ * SqlHandlers, Connection and templateEngine..., this is a temporary object,
+ * not thread-safe
  * 
  * @author Yong Zhu
  * @since 1.7.0
@@ -76,6 +76,9 @@ public class PreparedSQL {
 
 	/** TableModels, this is designed for ORM program */
 	private Object[] models;
+
+	/** Alias of TableModels */
+	private String[] aliases;
 
 	/** Give List, this is designed for ORM program */
 	private List<String[]> givesList = null;
@@ -124,14 +127,34 @@ public class PreparedSQL {
 	}
 
 	public void addModel(Object model) {
-		if (models == null)
+		if (models == null) {
 			models = new Object[1];
-		else {
+			aliases = new String[1];
+		} else {
 			Object[] newModels = new Object[models.length + 1];
+			String[] newAliases = new String[models.length + 1];
 			System.arraycopy(models, 0, newModels, 0, models.length);
+			System.arraycopy(aliases, 0, newAliases, 0, models.length);
 			models = newModels;
+			aliases = newAliases;
 		}
 		models[models.length - 1] = model;
+	}
+
+	public void addModel(Object model, String alias) {
+		if (models == null) {
+			models = new Object[1];
+			aliases = new String[1];
+		} else {
+			Object[] newModels = new Object[models.length + 1];
+			String[] newAliases = new String[models.length + 1];
+			System.arraycopy(models, 0, newModels, 0, models.length);
+			System.arraycopy(aliases, 0, newAliases, 0, models.length);
+			models = newModels;
+			aliases = newAliases;
+		}
+		models[models.length - 1] = model;
+		aliases[aliases.length - 1] = alias;
 	}
 
 	public void addGives(String[] gives) {
@@ -365,7 +388,13 @@ public class PreparedSQL {
 		this.disabledHandlers = disabledHandlers;
 	}
 
- 
+	public String[] getAliases() {
+		return aliases;
+	}
+
+	public void setAliases(String[] aliases) {
+		this.aliases = aliases;
+	}
 
 	public Object[] getModels() {
 		return models;

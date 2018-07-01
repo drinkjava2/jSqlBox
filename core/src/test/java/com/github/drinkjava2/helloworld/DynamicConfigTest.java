@@ -61,7 +61,7 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		TableModel t = new UserDemo().tableModel();
+		TableModel t = new UserDemo().tableModel().newCopy();
 
 		// A new column dynamically created
 		t.addColumn("anotherColumn2").VARCHAR(10);
@@ -85,8 +85,8 @@ public class DynamicConfigTest extends TestBase {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
 
-		TableModel t = u.tableModel();
-		t.columnModel("id").pkey();// Fake Pkey
+		TableModel t = u.tableModel().newCopy();
+		t.getColumn("id").pkey();// Fake Pkey
 		u.setUserName(null);
 		u.load(t);
 		Assert.assertEquals("Tom", u.getUserName());
@@ -98,7 +98,7 @@ public class DynamicConfigTest extends TestBase {
 		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals("Tom", u2.getUserName());
 
-		t.columnModel("userName").setTransientable(true);// ignore userName
+		t.getColumn("userName").setTransientable(true);// ignore userName
 		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals(null, u3.getUserName());
 	}

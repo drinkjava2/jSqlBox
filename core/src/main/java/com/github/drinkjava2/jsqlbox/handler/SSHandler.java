@@ -11,9 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
@@ -29,7 +26,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
  * SSHandler is used to explain alias.** to real columns in SQL, transient
  * columns not included, the example:
  * 
- * select u.** from users u ==> select u.name, u.address, u.age from users u
+ * select u.** from users u ==> select u.name as u_name, u.address as u_address from users u
  * 
  * SS means star-star
  * 

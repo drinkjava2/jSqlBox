@@ -376,6 +376,11 @@ public class ColumnModel {
 	public String getDebugInfo() {
 		return DebugUtils.getColumnModelDebugInfo(this);
 	}
+
+	public void checkReadOnly() {
+		if (tableModel != null && tableModel.getReadOnly())
+			throw new DialectException("TableModel '" + tableModel.getTableName() + "' is readOnly, can not be modified.");
+	}
 	
 	//@formatter:off shut off eclipse's formatter
 	public ColumnModel LONG() {this.columnType=Type.BIGINT;return this;} 
@@ -581,5 +586,7 @@ public class ColumnModel {
 	public void setShardDatabase(String[] shardDatabase) {
 		this.shardDatabase = shardDatabase;
 	}
+
+ 
 
 }

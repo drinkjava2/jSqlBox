@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.drinkjava2.jdialects.DialectException;
+
 /**
  * The platform-independent Foreign Key Constraint model
  * 
@@ -31,6 +33,7 @@ public class FKeyModel {
 	private String tableName;
 	private List<String> columnNames = new ArrayList<String>();
 	private String fkeyTail;
+	private TableModel tableModel; // belong to which tableModel
 
 	/*
 	 * if ddl set to false, will not create DDL when call TableModelUtils's
@@ -55,7 +58,7 @@ public class FKeyModel {
 		result.tableName = tableName;
 		result.fkeyTail = fkeyTail;
 		result.refTableAndColumns = refTableAndColumns;
-		result.ddl=ddl;
+		result.ddl = ddl;
 		for (String colName : columnNames) {
 			result.columnNames.add(colName);
 		}
@@ -63,29 +66,40 @@ public class FKeyModel {
 	}
 
 	public FKeyModel columns(String... columnNames) {
+		checkReadOnly();
 		this.columnNames = Arrays.asList(columnNames);
 		return this;
 	}
 
 	public FKeyModel fkeyName(String fkeyName) {
+		checkReadOnly();
 		this.fkeyName = fkeyName;
 		return this;
 	}
 
 	public FKeyModel ddl(Boolean ddl) {
+		checkReadOnly();
 		this.ddl = ddl;
 		return this;
 	}
 
 	public FKeyModel refs(String... refTableAndColumns) {
+		checkReadOnly();
 		this.refTableAndColumns = refTableAndColumns;
 		return this;
 	}
 
 	/** Add a tail String at the end of Foreign key DDL */
 	public FKeyModel fkeyTail(String fkeyTail) {
+		checkReadOnly();
 		this.fkeyTail = fkeyTail;
 		return this;
+	}
+
+	public void checkReadOnly() {
+		if (tableModel != null && tableModel.getReadOnly())
+			throw new DialectException(
+					"TableModel '" + tableModel.getTableName() + "' is readOnly, can not be modified.");
 	}
 
 	// getter & setter=====
@@ -94,6 +108,7 @@ public class FKeyModel {
 	}
 
 	public void setTableName(String tableName) {
+		checkReadOnly();
 		this.tableName = tableName;
 	}
 
@@ -102,6 +117,7 @@ public class FKeyModel {
 	}
 
 	public void setColumnNames(List<String> columnNames) {
+		checkReadOnly();
 		this.columnNames = columnNames;
 	}
 
@@ -110,6 +126,7 @@ public class FKeyModel {
 	}
 
 	public void setRefTableAndColumns(String[] refTableAndColumns) {
+		checkReadOnly();
 		this.refTableAndColumns = refTableAndColumns;
 	}
 
@@ -118,6 +135,7 @@ public class FKeyModel {
 	}
 
 	public void setFkeyName(String fkeyName) {
+		checkReadOnly();
 		this.fkeyName = fkeyName;
 	}
 
@@ -126,6 +144,7 @@ public class FKeyModel {
 	}
 
 	public void setFkeyTail(String tail) {
+		checkReadOnly();
 		this.fkeyTail = tail;
 	}
 
@@ -134,7 +153,17 @@ public class FKeyModel {
 	}
 
 	public void setDdl(Boolean ddl) {
+		checkReadOnly();
 		this.ddl = ddl;
+	}
+
+	public TableModel getTableModel() {
+		return tableModel;
+	}
+
+	public void setTableModel(TableModel tableModel) {
+		checkReadOnly();
+		this.tableModel = tableModel;
 	}
 
 }
