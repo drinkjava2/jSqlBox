@@ -17,7 +17,6 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
-import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -57,22 +56,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx(), this.getClass());
 		return box;
 	}
-
-	@Override
-	public TableModel tableModel() {
-		return TableModelUtils.entity2Model(this.getClass());
-	}
-
-	@Override
-	public ColumnModel columnModel(String colOrFieldName) {
-		return tableModel().getColumn(colOrFieldName);
-	}
-
-	@Override
-	public String table() {
-		return tableModel().getTableName();
-	}
-
+ 
 	@Override
 	public SqlBoxContext ctx() {
 		SqlBox theBox = box();

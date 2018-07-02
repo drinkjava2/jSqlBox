@@ -30,7 +30,7 @@ public class EntityNetHandler extends SSMapListHandler {
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		EntityNet qry = new EntityNet();
-		qry.config(ps.getModels());
+		qry.config(ps);
 		qry.addGivesList(ps.getGivesList());
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> result = (List<Map<String, Object>>) super.handle(runner, ps);

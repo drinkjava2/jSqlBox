@@ -25,61 +25,61 @@ package com.github.drinkjava2.jdbpro;
 public enum SqlOption {
 	// ----------Sql Items explained by DbPro ------------
 	/** Append a SQL String piece */
-	SQL,
+	SQL,//Method
 
 	/** Append a parameter or parameter array */
-	PARAM,
+	PARAM,//Method
 
 	/** Append a "?" String and append a parameter or parameter array */
-	QUESTION_PARAM,
+	QUESTION_PARAM,//Method
 
 	/** BIND Key-Values pairs "key1,value1, key2,value2..." for SqlTemplateEngine */
-	BIND, //
+	BIND, //Method
 
 	/**
 	 * Usage: NOT_NUL("user_name=?", name), when name is null, nothing will be
 	 * appended into SQL and parameters, otherwise return a "user_name=?" String and
 	 * a SQL parameter
 	 */
-	NOT_NULL,
+	NOT_NULL,//Method
 
 	/** Append a " values(?,?,?....?)" String at end of SQL */
-	VALUES_QUESTIONS,
+	VALUES_QUESTIONS,//Method
 
 	// ----------Special Items ------------
 	/** Switch to another DbPro or subClass (SqlBoxContext) to execute SQL */
-	SWITCHTO,
+	SWITCHTO,//Method
 
 	/** Give one or more class as parameter, instance will created by IocTool */
-	IOC,
+	IOC,//Method
 
 	/** Disable handles according given handlers' class */
-	DISABLE_HANDLERS, //
+	DISABLE_HANDLERS, //Method
 
 	/** Disable handles according given handlers' class */
-	ENABLE_HANDLERS,
+	ENABLE_HANDLERS,//Method
 
 	/** Force use template style */
-	USE_TEMPLATE,
+	USE_TEMPLATE,//Control Switch
 
 	// ------Sql Operation type--------
 	/** It's a EXECUTE type SQL */
-	EXECUTE,
+	EXECUTE,//Control Switch
 
 	/** It's a UPDATE type SQL */
-	UPDATE,
+	UPDATE,//Control Switch
 
 	/** It's a INSERT type SQL */
-	INSERT,
+	INSERT,//Control Switch
 
 	/** It's a QUERY type SQL */
-	QUERY,
+	QUERY,//Control Switch
 
 	/**
 	 * IGNORE type SqlItem always be ignored, but user can use this type to inject
 	 * some parameters
 	 */
-	IGNORE,
+	IGNORE,//Method
 
 	// ================================================================
 	// Below items designed for jSqlBox or other projects to explain
@@ -90,31 +90,37 @@ public enum SqlOption {
 	 * Tell system to choose master or slave database automatically (write:master,
 	 * read:if in Transaction use master otherwise use one slave)
 	 */
-	USE_AUTO,
+	USE_AUTO, //Control Switch
 
 	/** Tell system force use master database (write and read:master ) */
-	USE_MASTER,
+	USE_MASTER, //Control Switch
 
 	/** Tell system force use slave database (write:all slaves, read:one slave) */
-	USE_SLAVE, //
+	USE_SLAVE, //Control Switch
 
 	/**
 	 * Tell system force use master and slave database (write: master + all slaves,
 	 * read: master)
 	 */
-	USE_BOTH,
+	USE_BOTH,//Control Switch
+	
+	
+	// ------TableModel about options--- 
+	/** Mark alias names for TableModels*/
+	ALIAS,  //Method
 
 	// ------- sharding items -----------
 	/** Tell system this is a "SHARD_TABLE" item */
-	SHARD_TABLE,
+	SHARD_TABLE,//Method
 
 	/** Tell system this is a "SHARD_DATABASE" item */
-	SHARD_DATABASE,
+	SHARD_DATABASE,//Method
 
 	/** GIVE, GIVE_BOTH option are designed for ORM Query */
-	GIVE, GIVE_BOTH,
+	GIVE, //Method
+	
+	GIVE_BOTH //Method
 
-	/** MODEL, MODEL_ALIAS, MODEL_AUTO_ALIAS CONFIGS are designed for ORM Query */
-	MODEL, MODEL_ALIAS, MODEL_AUTO_ALIAS
+ 
 
 }

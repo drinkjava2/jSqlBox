@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
+import com.github.drinkjava2.jsqlbox.annotation.Model;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
@@ -40,8 +41,9 @@ public abstract class AbstractUser extends TextedUser {
 	         and  address=:address
 	 */
 
+	@Model(TextedUser.class)
 	@Ioc(EntityListHandlerBox.class)
-	public abstract List<TextedUser> selectAbstractUserListUnBind(String name, String address);
+	public abstract List<TextedUser> selectAbstractUserList1(String name, String address);
 	/*-
 	   select u.*
 	   from 
@@ -50,14 +52,9 @@ public abstract class AbstractUser extends TextedUser {
 	         u.name=:name and address=:address
 	 */
 
-	public static class EntityListHandlerBox extends BeanBox {//TODO: here add TextedUser model
-		public EntityListHandler create() {
-			return new EntityListHandler(TextedUser.class);
-		}
-	}
-
+	@Model(TextedUser.class)
 	@Ioc(EntityListHandlerBox.class)
-	public abstract List<TextedUser> selectAbstractUserListBind(String name, TextedUser u);
+	public abstract List<TextedUser> selectAbstractUserList2(String name, TextedUser u);
 	/*-
 	   select u.* 
 	   from 
@@ -65,5 +62,11 @@ public abstract class AbstractUser extends TextedUser {
 	      where 
 	         u.name=:name and address=#{u.address}
 	 */
+
+	public static class EntityListHandlerBox extends BeanBox {// TODO: here add TextedUser model
+		public EntityListHandler create() {
+			return new EntityListHandler();
+		}
+	}
 
 }

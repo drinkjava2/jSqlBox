@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -61,7 +62,7 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		TableModel t = new UserDemo().tableModel().newCopy();
+		TableModel t = TableModelUtils.entity2EditableModel(UserDemo.class);
 
 		// A new column dynamically created
 		t.addColumn("anotherColumn2").VARCHAR(10);
@@ -85,7 +86,7 @@ public class DynamicConfigTest extends TestBase {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
 
-		TableModel t = u.tableModel().newCopy();
+		TableModel t = TableModelUtils.entity2EditableModel(UserDemo.class);
 		t.getColumn("id").pkey();// Fake Pkey
 		u.setUserName(null);
 		u.load(t);

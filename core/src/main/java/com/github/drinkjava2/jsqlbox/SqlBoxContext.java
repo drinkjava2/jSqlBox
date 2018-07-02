@@ -11,8 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -29,7 +27,6 @@ import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -63,6 +60,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected SqlMapperGuesser sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
 	protected ShardingTool[] shardingTools = SqlBoxContextConfig.globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
+	protected Object[] ssModels = null;
 
 	public SqlBoxContext() {
 		super();
@@ -110,11 +108,13 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			this.sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
 			this.shardingTools = SqlBoxContextConfig.globalNextShardingTools;
 			this.snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
+			this.ssModels = SqlBoxContextConfig.globalNextSsModels;
 		} else {
 			this.dialect = config.getDialect();
 			this.sqlMapperGuesser = config.getSqlMapperGuesser();
 			this.shardingTools = config.getShardingTools();
 			this.snowflakeCreator = config.getSnowflakeCreator();
+			this.ssModels = config.getSsModels();
 		}
 	}
 
@@ -155,9 +155,15 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected boolean dealItem(boolean iXxxStyle, PreparedSQL ps, StringBuilder sql, Object item) {// NOSONAR
 		if (super.dealItem(iXxxStyle, ps, sql, item))
 			return true; // if super class DbPro can deal it, let it do
-		else if (item instanceof TableModel)
-			ps.addModel(item); 
-		else if (item instanceof SqlItem) {
+		else if (item instanceof TableModel) {
+			TableModel t = (TableModel) item;
+			SqlBoxException.assureNotNull(t.getEntityClass());
+			ps.addModel(item);
+			ps.setLastAliases(SqlBoxContextUtils.createAutoAliasNameForEntityClass(t.getEntityClass()));
+		} else if (item instanceof Class) {
+			ps.addModel(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
+			ps.setLastAliases(SqlBoxContextUtils.createAutoAliasNameForEntityClass((Class<?>) item));
+		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
 			if (SqlOption.SHARD_TABLE.equals(sqlItemType))
@@ -174,34 +180,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				Object[] a = ((SqlItem) item).getParameters();
 				ps.addGives(new String[] { (String) a[0], (String) a[1] });
 				ps.addGives(new String[] { (String) a[1], (String) a[0] });
-			} else if (SqlOption.MODEL.equals(sqlItemType) || SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType)) {
-				Object[] args = sqItem.getParameters();
-				if (args.length == 0)
-					throw new SqlBoxException("Model item can not be empty");
-				for (Object object : args) { 
-					TableModel t = SqlBoxContextUtils.findTableModel(object);
-					// if auto alias? for example: UserOrder.class -> UR
-					if (SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType) && StrUtils.isEmpty(t.getAlias()))
-						t.setAlias(SqlBoxContextUtils.createAutoAliasNameForEntityClass(t.getEntityClass()));
-					ps.addModel(t);
-				}
-			} else if (SqlOption.MODEL_ALIAS.equals(sqlItemType)) {
-				Object[] args = sqItem.getParameters();
-				if (args.length < 2)
-					throw new SqlBoxException(
-							"MODEL_ALIAS item need model1, alias1, model2, alias2... format parameters");
-				for (int i = 0; i < args.length / 2; i++) {
-					TableModel t = SqlBoxContextUtils.findTableModel(args[i * 2]);
-					SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
-					SqlBoxException.assureNotEmpty((String) args[i * 2 + 1],
-							"Alias can not be empty for class '" + t.getEntityClass() + "'");
-					t.setAlias((String) args[i * 2 + 1]);
-					ps.addModel(t);
-				}
+			} else if (SqlOption.ALIAS.equals(sqlItemType)) {
+				if (sqItem.getParameters().length == 0)
+					throw new SqlBoxException("alias method need parameter");
+				ps.setLastAliases((String[]) sqItem.getParameters());// NOSONAR
 			} else
 				return false;
-		} else if (item instanceof Class) {
-			ps.addModel(TableModelUtils.entity2Model((Class<?>) item));
 		} else
 			return false;
 		return true;
@@ -292,16 +276,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
-	public <T> List<T> iQueryForEntityList(Object config, Object... optionItems) {
-		return this.iQuery(new EntityListHandler(), model(config), optionItems);
+	public <T> List<T> iQueryForEntityList(Object... optionItems) {
+		return this.iQuery(new EntityListHandler(), optionItems);
 	}
 
-	public <T> List<T> pQueryForEntityList(Object config, Object... optionItems) {
-		return this.pQuery(new EntityListHandler(), model(config), optionItems);
+	public <T> List<T> pQueryForEntityList(Object... optionItems) {
+		return this.pQuery(new EntityListHandler(), optionItems);
 	}
 
-	public <T> List<T> tQueryForEntityList(Object config, Object... optionItems) {
-		return this.tQuery(new EntityListHandler(), model(config), optionItems);
+	public <T> List<T> tQueryForEntityList(Object... optionItems) {
+		return this.tQuery(new EntityListHandler(), optionItems);
 	}
 
 	protected void crudMethods______________________________() {// NOSONAR
@@ -461,6 +445,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {
 		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
+	}
+
+	public Object[] getSsModels() {
+		return ssModels;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	@Deprecated
+	public void setSsModels(Object[] ssModels) {// NOSONAR
+		this.ssModels = ssModels;
 	}
 
 }

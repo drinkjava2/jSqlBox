@@ -98,38 +98,33 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 		return result;
 	}
 
-	/**
-	 * Convert entity or JPA annotated entity classes to "TableModel" Object,
-	 * 
-	 * <pre>
-	 * This method support below JPA Annotations:  
-	 * Entity, Table, Column, GeneratedValue, GenerationType, Id, Index, Transient, UniqueConstraint
-	 * 
-	 * And below annotations are added by jDialects:
-	 * FKey, FKey1, FKey2, FKey3, Ref
-	 * </pre>
-	 * 
-	 * @param entityClasses
-	 * @return TableModel
-	 */
-	public static TableModel[] entity2Model(Class<?>... entityClasses) {
+	/** Convert entity classes to a read-only TableModel instances */
+	public static TableModel[] entity2ReadOnlyModel(Class<?>... entityClasses) {
 		List<TableModel> l = new ArrayList<TableModel>();
 		for (Class<?> clazz : entityClasses) {
-			l.add(oneEntity2Model(clazz));
+			l.add(oneEntity2ReadOnlyModel(clazz));
+		}
+		return l.toArray(new TableModel[l.size()]);
+	}
+
+	/** Convert entity classes to a editable TableModel instances */
+	public static TableModel[] entity2EditableModel(Class<?>... entityClasses) {
+		List<TableModel> l = new ArrayList<TableModel>();
+		for (Class<?> clazz : entityClasses) {
+			l.add(oneEntity2EditableModel(clazz));
 		}
 		return l.toArray(new TableModel[l.size()]);
 	}
 
 	/**
-	 * Convert a Java entity class or JPA annotated entity classes to "TableModel"
-	 * Object, if this class has a "config(TableModel tableModel)" method, will also
-	 * call it
+	 * Convert entity class to a read-only TableModel instance , if this class has a
+	 * "config(TableModel tableModel)" method, will also call it
 	 */
-	public static TableModel oneEntity2Model(Class<?> entityClass) {
+	public static TableModel oneEntity2ReadOnlyModel(Class<?> entityClass) {
 		DialectException.assureNotNull(entityClass, "Entity class can not be null");
 		TableModel model = tableModelCache.get(entityClass);
 		if (model != null)
-			return model.newCopy();
+			return model;
 		model = entity2ModelIgnoreConfigMethod(entityClass);
 		Method method = null;
 		try {
@@ -144,9 +139,37 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			}
 		if (model == null)
 			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
-		//model.setReadOnly(true);
+		model.setReadOnly(true);
 		tableModelCache.put(entityClass, model);
-		return model.newCopy();
+		return model;
+	}
+
+	/**
+	 * Convert entity class to a Editable TableModel instance , if this class has a
+	 * "config(TableModel tableModel)" method, will also call it
+	 */
+	public static TableModel oneEntity2EditableModel(Class<?> entityClass) {
+		DialectException.assureNotNull(entityClass, "Entity class can not be null");
+		TableModel model = tableModelCache.get(entityClass);
+		if (model != null)
+			return model.buildEditableCopy();
+		model = entity2ModelIgnoreConfigMethod(entityClass);
+		Method method = null;
+		try {
+			method = entityClass.getMethod("config", TableModel.class);
+		} catch (Exception e) {// NOSONAR
+		}
+		if (method != null)
+			try {
+				method.invoke(null, model);
+			} catch (Exception e) {
+				throw new DialectException(e);
+			}
+		if (model == null)
+			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
+		model.setReadOnly(true);
+		tableModelCache.put(entityClass, model);
+		return model.buildEditableCopy();
 	}
 
 	/**

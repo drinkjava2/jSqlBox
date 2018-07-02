@@ -88,7 +88,7 @@ public class ShardingModToolTest {
 				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}
 
-		TableModel model = TableModelUtils.entity2Model(TheUser.class);
+		TableModel model = TableModelUtils.entity2EditableModel(TheUser.class);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
 				model.setTableName("TheUser" + "_" + j);
@@ -100,7 +100,7 @@ public class ShardingModToolTest {
 
 	@After
 	public void cleanup() {
-		TableModel model = TableModelUtils.entity2Model(TheUser.class);
+		TableModel model = TableModelUtils.entity2EditableModel(TheUser.class);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			for (int j = 0; j < TABLE_QTY; j++) {
 				model.setTableName("TheUser" + "_" + j);
@@ -122,7 +122,7 @@ public class ShardingModToolTest {
 		Assert.assertEquals(1, masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(10),
 				shardDB(3), USE_SLAVE, new PrintSqlHandler()));
 		Assert.assertEquals(1,
-				masters[2].iQueryForLongValue(model(TheUser.class), "select count(*) from ", shardTB(10), shardDB(3)));
+				masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(10), shardDB(3)));
 	}
 
 	@Test

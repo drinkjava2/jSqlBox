@@ -20,7 +20,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import com.github.drinkjava2.jdbpro.JDBPRO;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
 /**
@@ -31,6 +30,16 @@ import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
  * @since 1.0.8
  */
 public abstract class JSQLBOX extends JDBPRO {// NOSONAR
+	public static final SqlOption USE_TEMPLATE = SqlOption.USE_TEMPLATE;
+	public static final SqlOption EXECUTE = SqlOption.EXECUTE;
+	public static final SqlOption UPDATE = SqlOption.UPDATE;
+	public static final SqlOption INSERT = SqlOption.INSERT;
+	public static final SqlOption QUERY = SqlOption.QUERY;
+	public static final SqlOption USE_AUTO = SqlOption.USE_AUTO;
+	public static final SqlOption USE_MASTER = SqlOption.USE_MASTER;
+	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
+	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH; 
+
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
 		if (SqlBoxContext.getGlobalSqlBoxContext() == null)
@@ -43,24 +52,9 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return new PaginHandler(pageNumber, pageSize);
 	}
 
-	/** Create a model configurations, */
-	public static TableModel model(Object model) {
-		return SqlBoxContextUtils.findTableModel(model);
-	}
-
-	/** Create model configurations */
-	public static SqlItem model(Object... modelsAndAlias) {
-		return new SqlItem(SqlOption.MODEL, modelsAndAlias);
-	}
-
 	/** Create a model configurations with given alias name */
-	public static SqlItem modelAlias(Object... modelsAndAlias) {
-		return new SqlItem(SqlOption.MODEL_ALIAS, modelsAndAlias);
-	}
-
-	/** Create a model configurations with given alias name */
-	public static SqlItem modelAutoAlias(Object... modelsAndAlias) {
-		return new SqlItem(SqlOption.MODEL_AUTO_ALIAS, modelsAndAlias);
+	public static SqlItem alias(String... alias) {
+		return new SqlItem(SqlOption.ALIAS, (Object[])alias);
 	}
 
 	public static SqlItem give(String from, String to, String fieldName) {

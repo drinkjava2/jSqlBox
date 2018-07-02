@@ -10,59 +10,38 @@ import java.sql.Connection;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * This utility tool should have below methods:
- * 
- * entity2Model() method: Convert 1 entity class or annotated entity class to
- * TableModel Objects
- * 
- * entity2Models() method: Convert entity classes or annotated entity classes to
- * TableModel Objects
- * 
- * db2Models() method: Convert JDBC database to TableModels
- * 
- * Models2Excel() method: Convert TableModel Objects to Excel CSV format text
- *
- * excel2Models() method: Convert Excel CSV format text to TableModel Objects
- * 
- * Models2EntitySrc method: Convert TableModel Object to Annotated entity class
- * Java Source code
- * 
- * Model2ModelSrc method: Convert TableModel Objects to Java configuration, for
- * example: TableModel t= new TableModel("tb"), t.column("col").LONG()...
+ * This utility tool to translate Entity class / Database metaData / Excel(will
+ * add in future) file to TableModel
  * 
  * @author Yong Zhu
  * @since 1.0.5
  */
-public abstract class TableModelUtils {
-	/**
-	 * Convert entity class or JPA annotated entity class to "TableModel" Object, if
-	 * class have a "config(TableModel tableModel)" method, will also call it. This
-	 * method support annotations on entity class, detail see README.md.
-	 * 
-	 * @param entityClass
-	 * @return TableModel
-	 */
-	public static TableModel entity2Model(Class<?> entityClass) {
-		return TableModelUtilsOfEntity.oneEntity2Model(entityClass);
+public abstract class TableModelUtils {// NOSONAR
+	/** Convert entity class to a read-only TableModel instance */
+	public static TableModel entity2ReadOnlyModel(Class<?> entityClass) {
+		return TableModelUtilsOfEntity.oneEntity2ReadOnlyModel(entityClass);
+	}
+
+	/** Convert entity class to a editable TableModel instance */
+	public static TableModel entity2EditableModel(Class<?> entityClass) {
+		return TableModelUtilsOfEntity.oneEntity2ReadOnlyModel(entityClass).buildEditableCopy();
+	}
+
+	/** Convert entity classes to read-only TableModel instances */
+	public static TableModel[] entity2ReadOnlyModels(Class<?>... entityClasses) {
+		return TableModelUtilsOfEntity.entity2ReadOnlyModel(entityClasses);
+	}
+
+	/** Convert entity classes to editable TableModel instances */
+	public static TableModel[] entity2EditableModels(Class<?>... entityClasses) {
+		return TableModelUtilsOfEntity.entity2ReadOnlyModel(entityClasses);
 	}
 
 	/**
-	 * Convert entity or JPA annotated entity classes to "TableModel" Object, if
-	 * these classes have a "config(TableModel tableModel)" method, will also call
-	 * it. This method support Annotations on entity class, detail see README.md.
-	 * 
-	 * @param entityClasses
-	 * @return TableModel
-	 */
-	public static TableModel[] entity2Models(Class<?>... entityClasses) {
-		return TableModelUtilsOfEntity.entity2Model(entityClasses);
-	}
-
-	/**
-	 * Convert JDBC connected database structure to TableModels, note: <br/>
+	 * Convert database metaData to TableModels, note: <br/>
 	 * 1)This method does not close connection, do not forgot close it later <br/>
 	 * 2)This method does not support sequence, foreign keys, primary keys..., only
-	 * read the database structure, but in future version may support
+	 * read the basic database columns structure, but in future version may support
 	 */
 	public static TableModel[] db2Models(Connection con, Dialect dialect) {
 		return TableModelUtilsOfDb.db2Model(con, dialect);

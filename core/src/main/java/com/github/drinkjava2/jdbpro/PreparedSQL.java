@@ -28,9 +28,9 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 
 /**
- * PreparedSQL is a POJO used for store SQL, parameter, ResultSetHandlers,
- * SqlHandlers, Connection and templateEngine..., this is a temporary object,
- * not thread-safe
+ * PreparedSQL is a temporary object used for store SQL, parameter,
+ * ResultSetHandlers, SqlHandlers, Connection and templateEngine..., it's not
+ * thread-safe
  * 
  * @author Yong Zhu
  * @since 1.7.0
@@ -77,7 +77,7 @@ public class PreparedSQL {
 	/** TableModels, this is designed for ORM program */
 	private Object[] models;
 
-	/** Alias of TableModels */
+	/** Alias of TableModels, this is designed for ORM Program */
 	private String[] aliases;
 
 	/** Give List, this is designed for ORM program */
@@ -132,30 +132,20 @@ public class PreparedSQL {
 			aliases = new String[1];
 		} else {
 			Object[] newModels = new Object[models.length + 1];
-			String[] newAliases = new String[models.length + 1];
 			System.arraycopy(models, 0, newModels, 0, models.length);
-			System.arraycopy(aliases, 0, newAliases, 0, models.length);
 			models = newModels;
+			String[] newAliases = new String[aliases.length + 1];
+			System.arraycopy(aliases, 0, newAliases, 0, aliases.length);
 			aliases = newAliases;
 		}
 		models[models.length - 1] = model;
 	}
 
-	public void addModel(Object model, String alias) {
-		if (models == null) {
-			models = new Object[1];
-			aliases = new String[1];
-		} else {
-			Object[] newModels = new Object[models.length + 1];
-			String[] newAliases = new String[models.length + 1];
-			System.arraycopy(models, 0, newModels, 0, models.length);
-			System.arraycopy(aliases, 0, newAliases, 0, models.length);
-			models = newModels;
-			aliases = newAliases;
-		}
-		models[models.length - 1] = model;
-		aliases[aliases.length - 1] = alias;
-	}
+	public void setLastAliases(String... alias) {
+		for (int i = 0; i < alias.length; i++) {
+			aliases[models.length - alias.length+i ]=alias[i];
+		} 
+	} 
 
 	public void addGives(String[] gives) {
 		if (givesList == null)

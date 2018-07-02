@@ -16,7 +16,7 @@
 package com.github.drinkjava2.functionstest;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.modelAlias;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
 
 import java.util.HashMap;
 import java.util.List;
@@ -109,8 +109,8 @@ public class CompoundPKeyTest extends TestBase {
 
 	@Test
 	public void testOrmQry() {
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), "select u.** from CmpEntity u",
-				modelAlias(CmpEntity.class, "u"), " where age>?", param(5));
+		EntityNet net = ctx.iQuery(new EntityNetHandler(), "select u.** from CmpEntity u", CmpEntity.class, alias("u"),
+				" where age>?", param(5));
 		List<CmpEntity> entities = net.pickEntityList("u");
 		Assert.assertEquals(5, entities.size());
 

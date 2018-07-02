@@ -22,12 +22,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -60,48 +60,13 @@ public class EntityNet {
 	}
 
 	/** Config, parameters can be entity or entity class or TableModel */
-	public EntityNet config(Object... entityOrModel) {
-		for (Object object : entityOrModel) {
-			TableModel t = SqlBoxContextUtils.findTableModel(object);
-			SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
-			String alias = t.getAlias();
-			if (StrUtils.isEmpty(alias)) {
-				StringBuilder sb = new StringBuilder();
-				char[] chars = t.getEntityClass().getSimpleName().toCharArray();
-				for (char c : chars)
-					if (c >= 'A' && c <= 'Z')
-						sb.append(c);
-				alias = sb.toString().toLowerCase();
-			}
-			SqlBoxException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
-			if (configs.containsKey(alias)) {
-				throw new SqlBoxException("Duplicated alias '" + alias + "' for class '" + t.getEntityClass()
-						+ "' found, need use configOne method manually set alias.");
-			}
-			t.setAlias(alias);
-			configs.put(alias, t);
-		}
+	public EntityNet config(PreparedSQL ps) {
+		for (int i = 0; i < ps.getModels().length; i++)  
+			configs.put(ps.getAliases()[i] ,(TableModel)ps.getModels()[i]); 
 		return this;
 	}
 
-	/** Config entity1, alias1, entity2, alias2... */
-	public EntityNet configAlias(Object... args) {
-		for (int i = 0; i < args.length / 2; i++)
-			configOneAlias(args[i * 2], (String) args[i * 2 + 1]);
-		return this;
-	}
-
-	/** Config one entity */
-	private EntityNet configOneAlias(Object entityOrModel, String alias) {
-		TableModel t = SqlBoxContextUtils.findTableModel(entityOrModel);
-		SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
-		SqlBoxException.assureNotEmpty(alias, "Alias can not be empty for class '" + t.getEntityClass() + "'");
-		t.setAlias(alias);
-		if (configs.containsKey(alias))
-			throw new SqlBoxException("Duplicated alias '" + alias + "' found, need manually set alias.");
-		configs.put(alias, t);
-		return this;
-	}
+	 
 
 	/** Give a's value to b's aField */
 	public EntityNet giveBoth(String a, String b) {
@@ -207,10 +172,10 @@ public class EntityNet {
 	private void translateToEntities(SqlBoxContext ctx, Map<String, Object> oneRow) {
 		for (Entry<String, TableModel> config : this.configs.entrySet()) {
 			TableModel model = config.getValue();
-			String alias = model.getAlias();
+			String alias = config.getKey();
 
 			// find and build entityID
-			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(oneRow, model);
+			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(oneRow, model, alias);
 			if (entityId == null)
 				continue;// not found entity ID columns
 			Object entity = getOneEntity(alias, entityId);

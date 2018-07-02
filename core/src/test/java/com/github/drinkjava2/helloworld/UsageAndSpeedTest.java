@@ -538,10 +538,10 @@ public class UsageAndSpeedTest {
 			mapper.updateUserPreparedSQL("Tom", "China");
 			List<Map<String, Object>> users = mapper.selectUserListMap("Tom", "China");
 			Assert.assertEquals(1, users.size());
-			List<TextedUser> users2 = mapper.selectAbstractUserListUnBind("Tom", "China");
+			List<TextedUser> users2 = mapper.selectAbstractUserList1("Tom", "China");
 			Assert.assertEquals(1, users2.size());
 			mapper.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, mapper.ctx().pQueryForLongValue("select count(*) from	 users"));
+			Assert.assertEquals(0, mapper.ctx().pQueryForLongValue("select count(*) from users"));
 		}
 	}
 
@@ -711,11 +711,11 @@ public class UsageAndSpeedTest {
 		AbstractUser mapper = SqlBoxContext.createMapper(AbstractUser.class);
 		mapper.insertOneUser("Sam", "Canada");
 		mapper.updateUserPreparedSQL("Tom", "China");
-		List<TextedUser> users2 = mapper.selectAbstractUserListUnBind("Tom", "China");
+		List<TextedUser> users2 = mapper.selectAbstractUserList1("Tom", "China");
 		Assert.assertEquals(1, users2.size());
 
 		TextedUser u = users2.get(0);
-		List<TextedUser> users3 = mapper.selectAbstractUserListBind("Tom", u);
+		List<TextedUser> users3 = mapper.selectAbstractUserList2("Tom", u);
 		Assert.assertEquals(1, users3.size());
 	}
 }

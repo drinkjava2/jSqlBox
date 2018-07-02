@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.drinkjava2.jdbpro.LinkStyleArrayList;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
@@ -158,102 +159,30 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		else if (entityOrClass instanceof TableModel)
 			return (TableModel) entityOrClass;
 		else if (entityOrClass instanceof Class)
-			return TableModelUtils.entity2Model((Class<?>) entityOrClass);
+			return TableModelUtils.entity2ReadOnlyModel((Class<?>) entityOrClass);
 		else // it's a entity bean
-			return TableModelUtils.entity2Model(entityOrClass.getClass());
+			return TableModelUtils.entity2ReadOnlyModel(entityOrClass.getClass());
 	}
 
-	public static TableModel findOptionTableModel(Object... optionItems) {//NOSONAR
+	public static TableModel findOptionTableModel(Object... optionItems) {// NOSONAR
 		for (Object item : optionItems) { // If Model in option items, use it first
 			if (item instanceof TableModel)
 				return (TableModel) item;
-			if (item instanceof SqlItem) {
-				SqlItem sqlItem = (SqlItem) item;
-				SqlOption sqlItemType = sqlItem.getType();
-				if (SqlOption.MODEL.equals(sqlItemType) || SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType)) {
-					Object[] args = sqlItem.getParameters();
-					if (args.length != 1)
-						throw new SqlBoxException("Model item need one parameter here.");
-					TableModel t = SqlBoxContextUtils.findTableModel(args[0]);// deal first
-					// if auto alias? i.e., UserOrder.class -> UR
-					if (SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType) && StrUtils.isEmpty(t.getAlias()))
-						t.setAlias(createAutoAliasNameForEntityClass(t.getEntityClass()));
-					return t;// return first model
-				} else if (SqlOption.MODEL_ALIAS.equals(sqlItemType)) {
-					Object[] args = sqlItem.getParameters();
-					if (args.length != 2)
-						throw new SqlBoxException("MODEL_ALIAS item need 'model, alias' format 2 parameters");
-					TableModel t = SqlBoxContextUtils.findTableModel(0);
-					SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
-					SqlBoxException.assureNotEmpty((String) args[1],
-							"Alias can not be empty for class '" + t.getEntityClass() + "'");
-					t.setAlias((String) args[1]);
-					return t;
-				}
-			}
+			else if (item instanceof Class)
+				return TableModelUtils.entity2ReadOnlyModel((Class<?>) item);
 		}
 		return null;
 	}
 
-	/**
-	 * Transfer Object to TableModel, object can be SqlBox instance, entityClass or
-	 * entity Bean
-	 * 
-	 * <pre>
-	 * 0. If TableModel in option items, use it first
-	 * 1. if entityOrClass is TableModel instance, will use it
-	 * 2. if entityOrClass is SqlBox instance, will use its tableModel
-	 * 3. if entityOrClass is Class, will call TableModelUtils.entity2Model to create tableModel
-	 * 4. if entityOrClass is Object, will call TableModelUtils.entity2Model(entityOrClass.getClass()) to create a SqlBox instance
-	 * </pre>
-	 */
-	@Deprecated
-	public static TableModel configToModel(Object entityOrClass, Object... optionItems) {
-		for (Object item : optionItems) { // If Model in option items, use it first
-			if (item instanceof TableModel)
-				return (TableModel) item;
-			if (item instanceof ActiveRecordSupport)
-				return ((ActiveRecordSupport) item).tableModel();
-			if (item instanceof SqlBox)
-				return ((SqlBox) item).getTableModel();
-			if (item instanceof SqlItem) {
-				SqlItem sqlItem = (SqlItem) item;
-				SqlOption sqlItemType = sqlItem.getType();
-				if (SqlOption.MODEL.equals(sqlItemType) || SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType)) {
-					Object[] args = sqlItem.getParameters();
-					if (args.length != 1)
-						throw new SqlBoxException("Model item need one parameter here.");
-					TableModel t = SqlBoxContextUtils.configToModel(args[0]);// deal first
-					// if auto alias? for example: UserOrder.class -> UR
-					if (SqlOption.MODEL_AUTO_ALIAS.equals(sqlItemType) && StrUtils.isEmpty(t.getAlias()))
-						t.setAlias(createAutoAliasNameForEntityClass(t.getEntityClass()));
-					return t;// return first model
-				} else if (SqlOption.MODEL_ALIAS.equals(sqlItemType)) {
-					Object[] args = sqlItem.getParameters();
-					if (args.length != 2)
-						throw new SqlBoxException("MODEL_ALIAS item need 'model, alias' format 2 parameters");
-					TableModel t = SqlBoxContextUtils.configToModel(0);
-					SqlBoxException.assureNotNull(t.getEntityClass(), "'entityClass' property not set for model " + t);
-					SqlBoxException.assureNotEmpty((String) args[1],
-							"Alias can not be empty for class '" + t.getEntityClass() + "'");
-					t.setAlias((String) args[1]);
-					return t;
-				}
-			}
-		}
-
-		if (entityOrClass == null)
-			throw new SqlBoxException("Can build TableModel configuration for null entityOrClass");
-		if (entityOrClass instanceof TableModel)
-			return (TableModel) entityOrClass;
-		else if (entityOrClass instanceof ActiveRecordSupport)
-			return ((ActiveRecordSupport) entityOrClass).tableModel();
-		else if (entityOrClass instanceof SqlBox)
-			return ((SqlBox) entityOrClass).getTableModel();
-		else if (entityOrClass instanceof Class)
-			return TableModelUtils.entity2Model((Class<?>) entityOrClass);
-		else // it's a entity bean
-			return SqlBoxUtils.findAndBindSqlBox(null, entityOrClass).getTableModel();
+	/** Create a Auto Alias name for PreparedSQL */
+	public static void createAutoAliasForPreparedSql(PreparedSQL ps) {
+		TableModel[] models = (TableModel[]) ps.getModels();
+		if (ps.getModels() == null)
+			return;
+		String[] aliases = new String[models.length];
+		for (int i = 0; i < models.length; i++)
+			aliases[i] = createAutoAliasNameForEntityClass(models[i].getEntityClass());
+		ps.setAliases(aliases);
 	}
 
 	/** Create a Auto Alias name for a Entity Class */

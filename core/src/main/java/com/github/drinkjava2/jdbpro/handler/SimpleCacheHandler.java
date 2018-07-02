@@ -68,8 +68,13 @@ public class SimpleCacheHandler extends DefaultOrderSqlHandler {
 	}
 
 	private String createKey(PreparedSQL ps) {
-		return new StringBuilder(Long.toString(System.currentTimeMillis() / 1000 / aliveSeconds)).append("SQL:")
-				.append(ps.getSql()).append("  Params:").append(ps.getParams()).toString();
+		StringBuilder sb = new StringBuilder(Long.toString(System.currentTimeMillis() / 1000 / aliveSeconds))
+				.append("SQL:").append(ps.getSql()).append("  Params:");
+		Object[] params = ps.getParams();
+		if (params != null)
+			for (Object para : params)
+				sb.append(para);
+		return sb.toString();
 	}
 
 	@Override

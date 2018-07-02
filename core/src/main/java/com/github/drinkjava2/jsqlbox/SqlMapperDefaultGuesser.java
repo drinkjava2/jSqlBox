@@ -12,14 +12,13 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jsqlbox.annotation.Ioc;
-import com.github.drinkjava2.jsqlbox.annotation.New;
 
 /**
  * Guess and execute the SQL for a annotated ActiveRecord entity's method
@@ -96,30 +95,20 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 		Method callerMethod = ClassCacheUtils.checkMethodExist(callerClass, callerMethodName);
 		if (callerMethod == null)
 			throw new SqlBoxException("Can not find method '" + callerMethodName + "' in '" + callerClassName + "'");
-		PreparedSQL ps= buildPreparedSQL(ctx, callerClassName, callerMethod, params);
-		return ps;
+		return buildPreparedSQL(ctx, callerClassName, callerMethod, params);
 	}
 
 	private PreparedSQL buildPreparedSQL(SqlBoxContext ctx, String callerClassName, Method callerMethod,
 			Object... params) {
+		List<Object> realParamList = new ArrayList<Object>();
 		String sql = SqlMapperUtils.getSqlOfMethod(callerClassName, callerMethod);
-		Class<?>[] newClasses = SqlMapperUtils.getNewOrIocAnnotation(New.class, callerMethod);
-		Class<?>[] iocClasses = SqlMapperUtils.getNewOrIocAnnotation(Ioc.class, callerMethod);
-		Object[] realParams = new Object[1 + newClasses.length + iocClasses.length + params.length];
-		realParams[0] = sql;
-		int i = 1;
-		for (Class<?> newClaz : newClasses)
-			try {
-				realParams[i++] = newClaz.newInstance();
-			} catch (Exception e) {
-				throw new SqlBoxException(e);
-			}
-		for (Class<?> iocClaz : iocClasses)
-			realParams[i++] = new SqlItem(SqlOption.IOC, iocClaz);
+		SqlBoxException.assureNotEmpty(sql, "Can not find sql text for method '" + callerMethod.getName() + "'");
+		realParamList.add(sql);
+		SqlMapperUtils.dealNewIocModelAliasAnnotation(realParamList, callerMethod);
 		for (Object para : params)
-			realParams[i++] = para;
+			realParamList.add(para);
 
-		PreparedSQL ps = ctx.pPrepare(realParams);
+		PreparedSQL ps = ctx.pPrepare(realParamList.toArray(new Object[realParamList.size()]));
 		if (ps.getOperationType() == null)
 			if (StrUtils.startsWithIgnoreCase(ps.getSql(), "select"))
 				ps.setOperationType(SqlOption.QUERY);
@@ -131,7 +120,8 @@ public class SqlMapperDefaultGuesser implements SqlMapperGuesser {
 				ps.setOperationType(SqlOption.UPDATE);
 			else
 				throw new SqlBoxException(
-						"Can not guess SqlType, only can guess SQL started with select/delete/update/insert, need manually set SqlType");
+						"Can not guess SqlType, only can guess SQL started with select/delete/update/insert, need manually set SqlOption type");
+		// Guess method always use template style
 		ps.ifNullSetUseTemplate(sql.indexOf(':') > -1 || sql.indexOf('{') > -1 || sql.indexOf('[') > -1);
 		return ps;
 	}

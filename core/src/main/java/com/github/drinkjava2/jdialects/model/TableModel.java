@@ -73,11 +73,6 @@ public class TableModel {
 	 */
 	private Class<?> entityClass;
 
-	/**
-	 * The alias name for this table, this field is designed to ORM tool use
-	 */
-	private String alias;
-
 	private Boolean readOnly = false;
 
 	public TableModel() {
@@ -89,9 +84,9 @@ public class TableModel {
 	}
 
 	/**
-	 * @return a copy of this TableModel
+	 * @return an editable copy of current TableModel
 	 */
-	public TableModel newCopy() {// NOSONAR
+	public TableModel buildEditableCopy() {// NOSONAR
 		TableModel tb = new TableModel();
 		tb.tableName = this.tableName;
 		tb.check = this.check;
@@ -595,15 +590,6 @@ public class TableModel {
 	public void setEntityClass(Class<?> entityClass) {
 		checkReadOnly();
 		this.entityClass = entityClass;
-	}
-
-	public String getAlias() {
-		return alias;
-	}
-
-	public void setAlias(String alias) {
-		checkReadOnly();
-		this.alias = alias;
 	}
 
 	public Boolean getReadOnly() {

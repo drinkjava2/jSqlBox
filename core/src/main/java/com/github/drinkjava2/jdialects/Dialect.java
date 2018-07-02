@@ -427,21 +427,21 @@ public enum Dialect implements CommonDialect {
 	 * Transfer entity classes to create DDL
 	 */
 	public String[] toCreateDDL(Class<?>... entityClasses) {
-		return DDLCreateUtils.toCreateDDL(this, TableModelUtils.entity2Models(entityClasses));
+		return DDLCreateUtils.toCreateDDL(this, TableModelUtils.entity2ReadOnlyModels(entityClasses));
 	}
 
 	/**
 	 * Transfer entity classes to create DDL
 	 */
 	public String[] toDropDDL(Class<?>... entityClasses) {
-		return DDLDropUtils.toDropDDL(this, TableModelUtils.entity2Models(entityClasses));
+		return DDLDropUtils.toDropDDL(this, TableModelUtils.entity2ReadOnlyModels(entityClasses));
 	}
 
 	/**
 	 * Transfer entity classes to drop and create DDL String array
 	 */
 	public String[] toDropAndCreateDDL(Class<?>... entityClasses) {
-		return toDropAndCreateDDL(TableModelUtils.entity2Models(entityClasses));
+		return toDropAndCreateDDL(TableModelUtils.entity2ReadOnlyModels(entityClasses));
 	}
 
 	/**

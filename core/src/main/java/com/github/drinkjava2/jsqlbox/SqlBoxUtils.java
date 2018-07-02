@@ -141,14 +141,14 @@ public abstract class SqlBoxUtils {// NOSONAR
 
 		if (boxClass == null) {
 			box = new SqlBox();
-			TableModel t=TableModelUtils.entity2Model(entityOrBoxClass);//is a class 
+			TableModel t=TableModelUtils.entity2ReadOnlyModel(entityOrBoxClass);//is a class 
 			box.setTableModel( t); 
 		} else {
 			try {
 				box = (SqlBox) boxClass.newInstance();
 				TableModel model = box.getTableModel();
 				if (model == null) {
-					model = TableModelUtils.entity2Model(entityOrBoxClass); 
+					model = TableModelUtils.entity2ReadOnlyModel(entityOrBoxClass); 
 					box.setTableModel(model);
 				}
 				Method configMethod = null;

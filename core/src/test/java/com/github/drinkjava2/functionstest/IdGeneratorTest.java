@@ -66,7 +66,7 @@ public class IdGeneratorTest extends TestBase {
 
 	@Test
 	public void testPKey() {// nextID
-		TableModel t = TableModelUtils.entity2Model(PkeyEntity.class);
+		TableModel t = TableModelUtils.entity2ReadOnlyModel(PkeyEntity.class);
 		Assert.assertTrue(t.column("id1").getPkey());
 		Assert.assertTrue(t.column("id2").getPkey());
 	}

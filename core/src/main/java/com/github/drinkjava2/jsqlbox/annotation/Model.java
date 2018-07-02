@@ -22,13 +22,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a Class array which will built by IOC Tools
+ * Specifies TableModel classes 
  */
 @Target({ METHOD })
-@Retention(RUNTIME)
-public @interface Ioc {
+@Retention(RUNTIME) 
+public @interface Model {
 	/**
-	 * The Object classes (can more than 1 )
+	 * The TableModel classes (can more than 1 )
 	 */
 	Class<?>[] value();
 }

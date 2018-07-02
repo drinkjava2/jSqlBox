@@ -85,7 +85,7 @@ public class TestBase {
 	 * Register tables, create and drop will done by TestBase
 	 */
 	public void regTables(Class<?>... classes) {
-		this.tablesForTest = TableModelUtils.entity2Models(classes);
+		this.tablesForTest = TableModelUtils.entity2ReadOnlyModels(classes);
 	}
 
 	public void createAndRegTables(TableModel... tableModels) {
@@ -94,7 +94,7 @@ public class TestBase {
 	}
 
 	public void createAndRegTables(Class<?>... classes) {
-		this.tablesForTest = TableModelUtils.entity2Models(classes);
+		this.tablesForTest = TableModelUtils.entity2ReadOnlyModels(classes);
 		createTables(tablesForTest);
 	}
 

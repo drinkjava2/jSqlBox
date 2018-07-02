@@ -19,9 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.github.drinkjava2.jdbpro.SqlItem;
+import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jsqlbox.annotation.Alias;
 import com.github.drinkjava2.jsqlbox.annotation.Ioc;
+import com.github.drinkjava2.jsqlbox.annotation.Model;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
@@ -33,13 +37,13 @@ import com.github.drinkjava2.jsqlbox.compiler.DynamicCompileEngine;
  * @since 1.0.8
  */
 public abstract class SqlMapperUtils {// NOSONAR
-	public static final String CHILD_SUFFIX="_Child";
+	public static final String CHILD_SUFFIX = "_Child";
 
 	private static final Map<String, String[]> methodParamNamesCache = new ConcurrentHashMap<String, String[]>();
 
 	/**
-	 * This is the method body to build an instance based on abstract class
-	 * which extended from ActiveRecord or implemented ActiveRecordSupport
+	 * This is the method body to build an instance based on abstract class which
+	 * extended from ActiveRecord or implemented ActiveRecordSupport
 	 * 
 	 * @param activeClass
 	 * @return Object instance
@@ -82,7 +86,7 @@ public abstract class SqlMapperUtils {// NOSONAR
 				if (i != 0)
 					sb.append(",");
 				String trimedStr = params[i].trim();
-				String pm=StrUtils.substringAfterLast(trimedStr, " ");
+				String pm = StrUtils.substringAfterLast(trimedStr, " ");
 				sb.append("bind(\"").append(pm).append("\", ").append(pm).append(")");
 			}
 			sb.append(");}");
@@ -97,7 +101,6 @@ public abstract class SqlMapperUtils {// NOSONAR
 		TextUtils.javaFileCache.put(fullClassName, childClassSrc);
 		return childClass;
 	}
- 
 
 	public static Map<String, Object> buildParamMap(String callerClassName, String callerMethodName, Object... params) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -110,7 +113,10 @@ public abstract class SqlMapperUtils {// NOSONAR
 		return map;
 	}
 
-	/** Get method name String[], this method only works for Text support case, i.e., put java in resouce folder */
+	/**
+	 * Get method name String[], this method only works for Text support case, i.e.,
+	 * put java in resouce folder
+	 */
 	public static String[] getMethodParamNames(String classFullName, String callerMethodName) {
 		String key = classFullName + "@#!$^" + callerMethodName;
 		if (methodParamNamesCache.containsKey(key))
@@ -133,43 +139,53 @@ public abstract class SqlMapperUtils {// NOSONAR
 	/** Get the sql from @Sql annotation or text */
 	public static String getSqlOfMethod(String callerClassName, Method callerMethod) {// NOSONAR
 		Annotation[] annos = callerMethod.getAnnotations();
-		String sql = null;
 		for (Annotation anno : annos)
 			if (Sql.class.equals(anno.annotationType())) {
-				sql = ((Sql) anno).value()[0];
-				break;
+				StringBuilder sb = new StringBuilder();
+				for (String s : ((Sql) anno).value())
+					sb.append(s);
+				return sb.toString();
 			}
-		if (sql == null) {
-			String src = null;
-			try {
-				src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
-				sql = StrUtils.substringAfter(src, callerMethod.getName() + "(");
-				sql = StrUtils.substringBetween(sql, "/*-", "*/");
-			} catch (Exception e) {// NOSONAR
-			}
+		String sql = null;
+		String src = null;
+		try {
+			src = TextUtils.getJavaSourceCodeUTF8(callerClassName);
+			sql = StrUtils.substringAfter(src, callerMethod.getName() + "(");
+			sql = StrUtils.substringBetween(sql, "/*-", "*/");
+		} catch (Exception e) {// NOSONAR
 		}
 		if (sql != null)
 			sql = sql.trim();
 		return sql;
 	}
 
-	/** Get the @New and @Ioc annotation values */
-	public static Class<?>[] getNewOrIocAnnotation(Class<?> annotation, Method callerMethod) {// NOSONAR
-		List<Object> result = new ArrayList<Object>();
+	/** Deal @New @Ioc @Model @Alias Annotations */
+	public static void dealNewIocModelAliasAnnotation(List<Object> realParamList, Method callerMethod) {// NOSONAR
 		Annotation[] annos = callerMethod.getAnnotations();
-		for (Annotation anno : annos)
-			if (annotation.equals(anno.annotationType())) {
-				if (New.class.equals(annotation)) {
-					Class<?>[] array = ((New) anno).value();
-					for (Class<?> claz : array)
-						result.add(claz);
-				} else {
-					Class<?>[] array = ((Ioc) anno).value();
-					for (Class<?> claz : array)
-						result.add(claz);
-				}
+		for (Annotation anno : annos) {
+			Class<?> annoType = anno.annotationType();
+			if (New.class.equals(annoType)) {// New
+				Class<?>[] array = ((New) anno).value();
+				for (Class<?> claz : array)
+					try {
+						realParamList.add(claz.newInstance());
+					} catch (Exception e) {
+						throw new SqlBoxException(e);
+					}
+			} else if (Ioc.class.equals(annoType)) {// Ioc
+				Class<?>[] array = ((Ioc) anno).value();
+				for (Class<?> claz : array)
+					realParamList.add(new SqlItem(SqlOption.IOC, claz));
+			} else if (Model.class.equals(annoType)) {// Model
+				Class<?>[] array = ((Model) anno).value();
+				for (Class<?> claz : array)
+					realParamList.add(claz);
+			} else if (Alias.class.equals(annoType)) {// Model
+				String[] aliases = ((Alias) anno).value();
+				for (String s : aliases)
+					realParamList.add(new SqlItem(SqlOption.ALIAS, s));
 			}
-		return result.toArray(new Class<?>[result.size()]);
+		}
 	}
 
 }

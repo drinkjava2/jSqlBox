@@ -31,14 +31,14 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  */
 public abstract class EntityIdUtils {// NOSONAR
 
-	public static Object buildEntityIdFromOneRow(Map<String, Object> oneRow, TableModel model) {
+	public static Object buildEntityIdFromOneRow(Map<String, Object> oneRow, TableModel model, String alias) {
 		int pkeyCount = model.getPKeyCount();
 		if (pkeyCount == 0)
-			throw new SqlBoxException("No Pkey setting for '" + model.getTableName() + "'");
+			throw new SqlBoxException(" No Pkey setting for '" + model.getTableName() + "'");
 		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
 		// DbUtils don't care UP/LOW case
 		Object firstPKeyValue = oneRow
-				.get(new StringBuilder(model.getAlias()).append("_").append(firstPkeyCol.getColumnName()).toString());
+				.get(new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString());
 		if (firstPKeyValue == null)
 			return null;// Single or Compound Pkey not found in oneRow
 		if (pkeyCount == 1)
@@ -49,7 +49,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			if (sb.length() > 0)
 				sb.append(EntityNet.COMPOUND_VALUE_SEPARATOR);
 			Object value = oneRow
-					.get(new StringBuilder(model.getAlias()).append("_").append(col.getColumnName()).toString());
+					.get(new StringBuilder(alias).append("_").append(col.getColumnName()).toString());
 			if (value == null)
 				return null;
 			sb.append(value);
@@ -133,7 +133,7 @@ public abstract class EntityIdUtils {// NOSONAR
 	 * map<String,Object>
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T setEntityIdValues(T bean, Object entityId, TableModel model) {
+	public  static <T> T setEntityIdValues(T bean, Object entityId, TableModel model) {
 		SqlBoxException.assureNotNull(entityId, "entityId can not be null.");
 		if (entityId instanceof Map) { // MAP for compound key
 			Map<String, Object> idMap = (Map<String, Object>) entityId;

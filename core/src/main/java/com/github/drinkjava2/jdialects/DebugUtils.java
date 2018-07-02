@@ -60,8 +60,7 @@ public abstract class DebugUtils {//// NOSONAR
 	public static String getTableModelDebugInfo(TableModel model) {
 		StringBuilder sb = new StringBuilder("\r\n=======================================================\r\n");
 		sb.append("tableName=" + model.getTableName()).append("\r\n");
-		sb.append("getEntityClass=" + model.getEntityClass()).append("\r\n");
-		sb.append("getAlias=" + model.getAlias()).append("\r\n");
+		sb.append("getEntityClass=" + model.getEntityClass()).append("\r\n"); 
 		sb.append("readOnly=" + model.getReadOnly()).append("\r\n");
 		sb.append(getFkeyDebugInfo(model));
 		List<ColumnModel> columns = model.getColumns();

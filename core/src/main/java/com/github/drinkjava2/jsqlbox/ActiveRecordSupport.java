@@ -13,8 +13,6 @@ package com.github.drinkjava2.jsqlbox;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
-import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * If a entity class implements ActiveRecordSupport interface, it will have CRUD
@@ -34,16 +32,7 @@ public interface ActiveRecordSupport {// NOSONAR
 	 *         entity and return it
 	 */
 	public SqlBox box();
-  
-	/** @return TableModel instance binded in this entity */
-	public TableModel tableModel(); 
-
-	/** @return TableModel's columnModel by given columnName */
-	public ColumnModel columnModel(String columnName);
-
-	/** @return table name */
-	public String table();
-
+   
 	/** @return current SqlBoxContext instance */
 	public SqlBoxContext ctx();
 

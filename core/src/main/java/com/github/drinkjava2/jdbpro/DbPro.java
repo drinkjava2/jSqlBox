@@ -220,7 +220,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			} else if (SqlOption.INSERT.equals(item)) {
 				predSQL.setOperationType(SqlOption.INSERT);
 			} else
-				throw new DbProRuntimeException("Un-explained SqlOption:" + item);
+				return false;
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
@@ -372,7 +372,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public int iUpdate(Object... inlineSQL) {
 		PreparedSQL ps = iPrepare(inlineSQL);
-		ps.ifNullSetType(SqlOption.UPDATE);
+		ps.ifNullSetType(SqlOption.UPDATE); 
 		return (Integer) runPreparedSQL(ps);
 	}
 

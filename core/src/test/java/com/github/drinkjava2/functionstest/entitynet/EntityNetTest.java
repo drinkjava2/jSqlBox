@@ -1,8 +1,8 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.modelAutoAlias;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +21,7 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
@@ -83,12 +84,11 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
-	public void testModelAlias() {
+	public void testModelAutoAlias() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(),
-				modelAlias(new User(), "u", Role.class, "r", Privilege.class, "p", UserRole.class, "ur",
-						RolePrivilege.class, "rp"),
-				giveBoth("r", "u"), giveBoth("p", "u"), "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, Role.class, Privilege.class, UserRole.class,
+				RolePrivilege.class, giveBoth("r", "u"), giveBoth("p", "u"),
+				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ", //
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
@@ -104,11 +104,10 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
-	public void testAutoAlias() {
+	public void testManualAlias() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(),
-				modelAutoAlias(new User(), Role.class, Privilege.class, UserRole.class, RolePrivilege.class),
-				give("r", "u"), give("u", "r"), giveBoth("p", "u"),
+		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, Role.class, alias("u", "r"), Privilege.class,
+				UserRole.class, RolePrivilege.class, give("r", "u"), give("u", "r"), giveBoth("p", "u"),
 				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ", //
@@ -175,7 +174,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testManualLoad() {
 		insertDemoData();
-		TableModel model = new User().tableModel();
+		TableModel model = TableModelUtils.entity2EditableModel(User.class);
 		model.column("userName").setTransientable(true);
 		User u2 = ctx.loadById(User.class, "u1", model);
 		System.out.println(u2.getUserName());
