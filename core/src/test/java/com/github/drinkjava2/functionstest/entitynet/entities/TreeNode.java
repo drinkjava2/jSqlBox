@@ -1,5 +1,7 @@
 package com.github.drinkjava2.functionstest.entitynet.entities;
 
+import java.util.List;
+
 import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
@@ -12,7 +14,11 @@ public class TreeNode extends ActiveRecord {
 
 	@SingleFKey(ddl = false, refs = { "treenodetb", "id" })
 	String pid;
+	
+	TreeNode parent;
 
+	List<TreeNode> childs;
+	
 	String comments;
 	Integer line;
 	Integer lvl;
@@ -63,6 +69,22 @@ public class TreeNode extends ActiveRecord {
 
 	public void setLvl(Integer lvl) {
 		this.lvl = lvl;
+	}
+
+	public TreeNode getParent() {
+		return parent;
+	}
+
+	public void setParent(TreeNode parent) {
+		this.parent = parent;
+	}
+
+	public List<TreeNode> getChilds() {
+		return childs;
+	}
+
+	public void setChilds(List<TreeNode> childs) {
+		this.childs = childs;
 	}
 
 }

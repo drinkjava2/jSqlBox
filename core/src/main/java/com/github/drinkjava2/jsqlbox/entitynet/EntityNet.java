@@ -54,6 +54,7 @@ public class EntityNet {
 
 	/** The body of entity net, Map<alias, Map<entityId, entity>> */
 	private Map<String, LinkedHashMap<Object, Object>> body = new HashMap<String, LinkedHashMap<Object, Object>>();
+	//TODO: change to Map<Class, LinkedHashMap<Object, Object>>
 
 	protected void core__________________________() {// NOSONAR
 	}
