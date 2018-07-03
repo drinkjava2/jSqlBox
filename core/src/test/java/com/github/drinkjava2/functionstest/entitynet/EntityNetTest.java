@@ -83,59 +83,37 @@ public class EntityNetTest extends TestBase {
 		new RolePrivilege().putValues("r4", "p1").insert();
 	}
 
-	@Test
-	public void testModelAutoAlias() {
-		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, Role.class, Privilege.class, UserRole.class,
-				RolePrivilege.class, giveBoth("r", "u"), giveBoth("p", "u"),
-				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
-				" left join userroletb ur on u.id=ur.userid ", //
-				" left join roletb r on ur.rid=r.id ", //
-				" left join roleprivilegetb rp on rp.rid=r.id ", //
-				" left join privilegetb p on p.id=rp.pid ", //
-				" order by u.id, ur.id, r.id, rp.id, p.id");
-		System.out.println("===========pick entity list================");
-		List<Role> roleList = net.pickEntityList("r");
-		for (Role r : roleList) {
-			System.out.println("Role:" + r.getId());
-			Assert.assertNotNull(r.getUser());
-			System.out.println("  User:" + r.getUser().getId());
-		}
-	}
+	private static final Object[] targets = new Object[] { new EntityNetHandler(), Address.class, Email.class,
+			User.class, Role.class, Privilege.class, UserRole.class, RolePrivilege.class };
 
 	@Test
-	public void testManualAlias() {
+	public void testAutoAlias() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, Role.class, alias("u", "r"), Privilege.class,
-				UserRole.class, RolePrivilege.class, give("r", "u"), give("u", "r"), giveBoth("p", "u"),
+		EntityNet net = ctx.iQuery(targets, giveBoth("r", "u"), giveBoth("p", "u"),
 				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ", //
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
 				" left join privilegetb p on p.id=rp.pid ", //
 				" order by u.id, ur.id, r.id, rp.id, p.id");
-		System.out.println("===========pick entity list================");
-		List<User> userList = net.pickEntityList("u");
+		List<User> userList = net.pickEntityList("t");
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
 
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
-				for (Role r : roles) {
-					System.out.println("  Roles List:" + r.getId());
-				}
+				for (Role r : roles)
+					System.out.println("  Roles:" + r.getId());
 
 			Map<Integer, Role> roleMap = u.getRoleMap();
 			if (roleMap != null)
-				for (Role r : roleMap.values()) {
-					System.out.println("  Roles Map:" + r.getId());
-				}
+				for (Role r : roleMap.values())
+					System.out.println("  Roles:" + r.getId());
 
 			Set<Privilege> privileges = u.getPrivilegeSet();
 			if (privileges != null)
-				for (Privilege privilege : privileges) {
+				for (Privilege privilege : privileges)
 					System.out.println("  Privilege:" + privilege.getId());
-				}
 		}
 
 		System.out.println("===========pick entity set================");
@@ -172,9 +150,65 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
+	public void testJoinQuary() {
+		insertDemoData();
+		EntityNet net = ctx.iQuery(targets, giveBoth("r", "u"), giveBoth("p", "u"),
+				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+				" left join userroletb ur on u.id=ur.userid ", //
+				" left join roletb r on ur.rid=r.id ", //
+				" left join roleprivilegetb rp on rp.rid=r.id ", //
+				" left join privilegetb p on p.id=rp.pid ", //
+				" order by u.id, ur.id, r.id, rp.id, p.id");
+
+		 ctx.iQuery(net, targets, give("e", "u"),
+				"select u.##, e.** from emailtb e, usertb u where e.userid=u.id");
+
+		 ctx.iQuery(net, targets, giveBoth("a", "u"),
+				"select u.id as u_id, a.** from addresstb a, usertb u where a.userid=u.id");
+ 
+		Address a = net.pickOneEntity("a", "a2");
+		System.out.println("Address:" + a.getAddressName());
+		System.out.println("  User:" + a.getUser().getUserName());
+		List<Email> emails = a.getUser().getEmailList();
+		if (emails != null)
+			for (Email e : emails)
+				System.out.println("    Email:" + e.getEmailName());
+		Set<Privilege> privileges = a.getUser().getPrivilegeSet();
+		if (privileges != null)
+			for (Privilege privilege : privileges)
+				System.out.println("    Privilege:" + privilege.getPrivilegeName());
+	}
+
+	@Test
+	public void testManualAlias() {
+		insertDemoData();
+		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, Role.class, alias("t", "r"), Privilege.class,
+				UserRole.class, RolePrivilege.class, give("r", "t"), give("t", "r"), giveBoth("p", "t"),
+				"select t.**, ur.**, r.**, p.**, rp.** from usertb t ", //
+				" left join userroletb ur on t.id=ur.userid ", //
+				" left join roletb r on ur.rid=r.id ", //
+				" left join roleprivilegetb rp on rp.rid=r.id ", //
+				" left join privilegetb p on p.id=rp.pid ", //
+				" order by t.id, ur.id, r.id, rp.id, p.id");
+		List<User> userList = net.pickEntityList("t");
+		for (User u : userList) {
+			System.out.println("User:" + u.getId());
+			List<Role> roles = u.getRoleList();
+			if (roles != null)
+				for (Role r : roles)
+					System.out.println("  Roles:" + r.getId());
+
+			Set<Privilege> privileges = u.getPrivilegeSet();
+			if (privileges != null)
+				for (Privilege privilege : privileges)
+					System.out.println("  Privilege:" + privilege.getId());
+		}
+	}
+
+	@Test
 	public void testManualLoad() {
 		insertDemoData();
-		TableModel model = TableModelUtils.entity2EditableModel(User.class);
+		TableModel model = TableModelUtils.entity2Model(User.class);
 		model.column("userName").setTransientable(true);
 		User u2 = ctx.loadById(User.class, "u1", model);
 		System.out.println(u2.getUserName());

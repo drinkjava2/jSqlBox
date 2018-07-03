@@ -76,21 +76,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	private static ColumnModel findMatchColumnForJavaField(String entityField, TableModel tableModel) {
 		SqlBoxException.assureNotNull(tableModel, "Can not find column for '" + entityField + "' in null table ");
-		List<ColumnModel> columns = tableModel.getColumns();
-		ColumnModel result = null;
-		String underLineFieldName = SqlBoxStrUtils.camelToLowerCaseUnderline(entityField);
-		for (ColumnModel col : columns) {
-			if (entityField.equalsIgnoreCase(col.getEntityField())
-					|| underLineFieldName.equalsIgnoreCase(col.getColumnName())) {
-				if (result != null)
-					throw new SqlBoxException("Field '" + entityField + "' found duplicated columns definition");
-				result = col;
-			}
-		}
-		if (result == null)
-			throw new SqlBoxException(
-					"Can not find column for '" + entityField + "' in table '" + tableModel.getTableName() + "'");
-		return result;
+		ColumnModel col = tableModel.getColumnByFieldName(entityField);
+		SqlBoxException.assureNotNull(col,
+				"Can not find column for '" + entityField + "' in table '" + tableModel.getTableName() + "'");
+		return col;
 	}
 
 	/**
@@ -203,7 +192,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlBoxException.assureNotNull(model.getEntityClass(), "Can not find entityClass setting in model.");
 		@SuppressWarnings("unchecked")
 		T bean = (T) ClassCacheUtils.createNewEntity(model.getEntityClass());
-		ctx.getSqlBox(bean).setTableModel(model);
 		for (ColumnModel col : model.getColumns()) {
 			boolean foundValue = false;
 			for (Entry<String, Object> row : oneRow.entrySet()) {

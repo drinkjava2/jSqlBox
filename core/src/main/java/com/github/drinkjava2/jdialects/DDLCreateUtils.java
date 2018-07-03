@@ -471,7 +471,7 @@ public class DDLCreateUtils {// NOSONAR
 			boolean nullable = false;
 			String[] columns = unique.getColumnList();
 			for (String colNames : columns) {
-				ColumnModel vc = t.getColumn(colNames.toLowerCase());
+				ColumnModel vc = t.getColumnByColName(colNames);
 				if (vc != null && vc.getNullable())
 					nullable = true;
 			}

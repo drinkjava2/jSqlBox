@@ -6,7 +6,6 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
-import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -22,25 +21,10 @@ public interface ActiveEntity extends ActiveRecordSupport {
 	public default SqlBox box() {
 		SqlBox box = SqlBoxUtils.findBoxOfPOJO(this);
 		if (box == null) {
-			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx(), this.getClass());
+			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx());
 			SqlBoxUtils.bindBoxToPOJO(this, box);
 		}
 		return box;
-	}
-
-	@Override
-	public default TableModel tableModel() {
-		return TableModelUtils.entity2Model(this.getClass());
-	}
-
-	@Override
-	public default ColumnModel columnModel(String colOrFieldName) {
-		return tableModel().getColumn(colOrFieldName);
-	}
-
-	@Override
-	public default String table() {
-		return tableModel().getTableName();
 	}
 
 	@Override

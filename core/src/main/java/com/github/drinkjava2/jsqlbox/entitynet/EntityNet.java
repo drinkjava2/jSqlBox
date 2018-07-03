@@ -27,7 +27,6 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -43,7 +42,7 @@ public class EntityNet {
 	public static final String COMPOUND_VALUE_SEPARATOR = "__";
 
 	/** Models, Map<alias, tableModels> */
-	private Map<String, TableModel> configs = new LinkedHashMap<String, TableModel>();
+	private Map<String, TableModel> models = new LinkedHashMap<String, TableModel>();
 
 	private List<String[]> givesList = new ArrayList<String[]>();
 
@@ -60,13 +59,13 @@ public class EntityNet {
 	}
 
 	/** Config, parameters can be entity or entity class or TableModel */
-	public EntityNet config(PreparedSQL ps) {
-		for (int i = 0; i < ps.getModels().length; i++)  
-			configs.put(ps.getAliases()[i] ,(TableModel)ps.getModels()[i]); 
+	public EntityNet configFromPreparedSQL(PreparedSQL ps) {
+		SqlBoxException.assureNotNull(ps.getModels(), "No tableModel setting found.");
+		for (int i = 0; i < ps.getModels().length; i++)
+			models.put(ps.getAliases()[i], (TableModel) ps.getModels()[i]);
+		addGivesList(ps.getGivesList());
 		return this;
 	}
-
-	 
 
 	/** Give a's value to b's aField */
 	public EntityNet giveBoth(String a, String b) {
@@ -77,12 +76,12 @@ public class EntityNet {
 
 	/** Give a's value to b's aField */
 	public EntityNet give(String a, String b) {
-		TableModel aModel = configs.get(a);
+		TableModel aModel = models.get(a);
 		SqlBoxException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
 		SqlBoxException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
 		String fieldName = StrUtils.toLowerCaseFirstOne(aModel.getEntityClass().getSimpleName());
 
-		TableModel bModel = configs.get(b);
+		TableModel bModel = models.get(b);
 		SqlBoxException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
 		SqlBoxException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
 
@@ -122,10 +121,10 @@ public class EntityNet {
 		return this;
 	}
 
-	public EntityNet translateToEntity(SqlBoxContext ctx, List<Map<String, Object>> listMap) {
+	public EntityNet joinMapList(List<Map<String, Object>> listMap) {
 		for (Map<String, Object> map : listMap) {
 			rowData.add(map);
-			translateToEntities(ctx, map);
+			translateToEntities(map);
 			if (!givesList.isEmpty())
 				doGive(map);
 		}
@@ -156,9 +155,9 @@ public class EntityNet {
 	@SuppressWarnings("unchecked")
 	public <T> T pickOneEntity(String alias, Object entityId) {
 		SqlBoxException.assureNotEmpty(alias);
-		if (!configs.containsKey(alias))
+		if (!models.containsKey(alias))
 			throw new SqlBoxException("There is no alias '" + alias + "' setting in current EntityNet.");
-		TableModel model = configs.get(alias);
+		TableModel model = models.get(alias);
 		Object realEntityId = EntityIdUtils.buildEntityIdFromUnknow(entityId, model);
 		if (realEntityId == null)
 			throw new SqlBoxException("Can not build entityId for '" + entityId + "'");
@@ -169,8 +168,8 @@ public class EntityNet {
 	}
 
 	/** Translate one row map list to entity objects, put into entity net body */
-	private void translateToEntities(SqlBoxContext ctx, Map<String, Object> oneRow) {
-		for (Entry<String, TableModel> config : this.configs.entrySet()) {
+	private void translateToEntities(Map<String, Object> oneRow) {
+		for (Entry<String, TableModel> config : this.models.entrySet()) {
 			TableModel model = config.getValue();
 			String alias = config.getKey();
 
@@ -182,7 +181,7 @@ public class EntityNet {
 
 			// create new Entity
 			if (entity == null) {
-				entity = createEntity(ctx, oneRow, model, alias);
+				entity = createEntity(oneRow, model, alias);
 				this.putOneEntity(alias, entityId, entity);
 			}
 			oneRow.put(alias, entity);// In this row, add entities directly
@@ -190,10 +189,9 @@ public class EntityNet {
 		}
 	}
 
-	private static Object createEntity(SqlBoxContext ctx, Map<String, Object> oneRow, TableModel model, String alias) {
+	private static Object createEntity(Map<String, Object> oneRow, TableModel model, String alias) {
 		Object entity;
 		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-		ctx.getSqlBox(entity).setTableModel(model);
 		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 			for (ColumnModel col : model.getColumns()) {
 				if (col.getTransientable())
@@ -219,8 +217,8 @@ public class EntityNet {
 			String tofield = gives[2];
 			SqlBoxException.assureNotEmpty(tofield);
 			if (from != null && to != null) {
-				TableModel toModel = configs.get(toAlias);
-				ColumnModel col = toModel.getColumn(tofield);
+				TableModel toModel = models.get(toAlias);
+				ColumnModel col = toModel.getColumnByFieldName(tofield);
 				Method readMethod = ClassCacheUtils.getClassFieldReadMethod(toModel.getEntityClass(),
 						col.getEntityField());
 				Class<?> fieldType = readMethod.getReturnType();
@@ -277,11 +275,11 @@ public class EntityNet {
 	}
 
 	public Map<String, TableModel> getConfigs() {
-		return configs;
+		return models;
 	}
 
 	public EntityNet setConfigs(Map<String, TableModel> configs) {
-		this.configs = configs;
+		this.models = configs;
 		return this;
 	}
 
@@ -308,7 +306,7 @@ public class EntityNet {
 			sb.append("\r\n");
 		}
 		sb.append("\r\n=========configs=========\r\n");
-		for (TableModel tb : configs.values()) {
+		for (TableModel tb : models.values()) {
 			sb.append(tb.getDebugInfo());
 		}
 		sb.append("\r\n=========rowData=========\r\n");

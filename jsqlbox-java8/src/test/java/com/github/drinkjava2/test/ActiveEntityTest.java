@@ -44,7 +44,7 @@ public class ActiveEntityTest implements ActiveEntity {
 
 	@Sql("select * from ActiveEntityTest where age>=?")
 	public List<ActiveEntityTest> selectUsers(Integer age) {
-		return guess(age, new EntityListHandler(ActiveEntityTest.class));
+		return guess(age, new EntityListHandler(), ActiveEntityTest.class);
 	};
 
 	@Before

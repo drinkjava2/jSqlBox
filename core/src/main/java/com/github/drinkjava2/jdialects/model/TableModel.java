@@ -86,7 +86,7 @@ public class TableModel {
 	/**
 	 * @return an editable copy of current TableModel
 	 */
-	public TableModel buildEditableCopy() {// NOSONAR
+	public TableModel newCopy() {// NOSONAR
 		TableModel tb = new TableModel();
 		tb.tableName = this.tableName;
 		tb.check = this.check;
@@ -256,7 +256,8 @@ public class TableModel {
 	}
 
 	/**
-	 * Return ColumnModel object by columnName, if not found, return null;
+	 * Get ColumnModel by column Name or field name ignore case, if not found,
+	 * return null
 	 */
 	public ColumnModel getColumn(String colOrFieldName) {
 		for (ColumnModel columnModel : columns) {
@@ -265,6 +266,27 @@ public class TableModel {
 			if (columnModel.getEntityField() != null && columnModel.getEntityField().equalsIgnoreCase(colOrFieldName))
 				return columnModel;
 		}
+		return null;
+	}
+
+	/**
+	 * Get ColumnModel by columnName ignore case, if not found, return null
+	 */
+	public ColumnModel getColumnByColName(String colName) {
+		for (ColumnModel columnModel : columns) {
+			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(colName))
+				return columnModel;
+		}
+		return null;
+	}
+
+	/**
+	 * Get ColumnModel by entity field name ignore case, if not found, return null
+	 */
+	public ColumnModel getColumnByFieldName(String fieldName) {
+		for (ColumnModel columnModel : columns)
+			if (columnModel.getEntityField() != null && columnModel.getEntityField().equalsIgnoreCase(fieldName))
+				return columnModel;
 		return null;
 	}
 

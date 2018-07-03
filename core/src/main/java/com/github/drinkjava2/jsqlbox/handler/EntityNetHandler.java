@@ -16,7 +16,6 @@ import java.util.Map;
 
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
@@ -29,13 +28,12 @@ public class EntityNetHandler extends SSMapListHandler {
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-		EntityNet qry = new EntityNet();
-		qry.config(ps);
-		qry.addGivesList(ps.getGivesList());
+		EntityNet net = ps.getEntityNet() == null ? new EntityNet() : (EntityNet) ps.getEntityNet();
+		net.configFromPreparedSQL(ps);
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> result = (List<Map<String, Object>>) super.handle(runner, ps);
-		qry.translateToEntity((SqlBoxContext) runner, result);
-		return qry;
+		net.joinMapList(result);
+		return net;
 	}
 
 }

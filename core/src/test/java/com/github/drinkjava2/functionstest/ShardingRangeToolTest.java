@@ -85,7 +85,7 @@ public class ShardingRangeToolTest {
 				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}
 
-		TableModel model = TableModelUtils.entity2EditableModel(TheUser.class);
+		TableModel model = TableModelUtils.entity2Model(TheUser.class);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
 				model.setTableName("TheUser" + "_" + j);
@@ -97,7 +97,7 @@ public class ShardingRangeToolTest {
 
 	@After
 	public void cleanup() {
-		TableModel model = TableModelUtils.entity2EditableModel(TheUser.class);
+		TableModel model = TableModelUtils.entity2Model(TheUser.class);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			for (int j = 0; j < TABLE_QTY; j++) {
 				model.setTableName("TheUser" + "_" + j);

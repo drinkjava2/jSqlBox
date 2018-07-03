@@ -147,7 +147,7 @@ public class IdGeneratorTest extends TestBase {
 		table.column("id").STRING(30).pkey().autoId();
 		createAndRegTables(table);
 
-		IdGenerator gen = table.getColumn("id").getIdGenerator();
+		IdGenerator gen = table.getColumnByColName("id").getIdGenerator();
 		for (int i = 0; i < 5; i++) {
 			Assert.assertNotNull(gen.getNextID(ctx, dialect, null));
 			System.out.println(gen.getNextID(ctx, dialect, null));
@@ -256,7 +256,7 @@ public class IdGeneratorTest extends TestBase {
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
 		System.out.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
 
-		idGen = table.getColumn("id").getIdGenerator();
+		idGen = table.getColumnByColName("id").getIdGenerator();
 		System.out.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
 	}
 

@@ -19,7 +19,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  * @since 1.7.0
  */
 public class AliasProxyUtil {
-	public static ThreadLocal<AliasItemInfo> thdMethodName = new ThreadLocal<AliasItemInfo>();//NOSONAR
+	public static ThreadLocal<AliasItemInfo> thdMethodName = new ThreadLocal<AliasItemInfo>();// NOSONAR
 
 	static class AliasItemInfo {
 		public String tableName = null;// NOSONAR
@@ -39,9 +39,11 @@ public class AliasProxyUtil {
 	 */
 	static class ProxyBean implements MethodInterceptor {
 		private TableModel tableModel;
+		private String alias;
 
-		public ProxyBean(TableModel tableModel) {
+		public ProxyBean(TableModel tableModel, String alias) {
 			this.tableModel = tableModel;
+			this.alias = alias;
 		}
 
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy cgLibMethodProxy)
@@ -53,7 +55,7 @@ public class AliasProxyUtil {
 				for (ColumnModel col : tableModel.getColumns())
 					if (col.getEntityField().equalsIgnoreCase(fieldName))
 						columnName = col.getColumnName();
-				thdMethodName.set(new AliasItemInfo(tableModel.getTableName(), tableModel.getAlias(), columnName));
+				thdMethodName.set(new AliasItemInfo(tableModel.getTableName(), alias, columnName));
 			}
 			return null;
 		}
@@ -81,11 +83,10 @@ public class AliasProxyUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T createAliasProxy(Class<T> c, String alias) {
-		TableModel t = TableModelUtils.entity2Model(c);
-		t.setAlias(alias);
+		TableModel t = TableModelUtils.entity2EditableModel(c);
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(c);
-		enhancer.setCallback(new ProxyBean(t));
+		enhancer.setCallback(new ProxyBean(t, alias));
 		return (T) enhancer.create();
 	}
 
@@ -94,7 +95,7 @@ public class AliasProxyUtil {
 		return new SqlItem("");
 	}
 
-	public static SqlItem alias(Object o) {//NOSONAR
+	public static SqlItem alias(Object o) {// NOSONAR
 		try {
 			AliasItemInfo a = thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
@@ -109,7 +110,7 @@ public class AliasProxyUtil {
 		}
 	}
 
-	public static SqlItem c_alias(Object o) {//NOSONAR
+	public static SqlItem c_alias(Object o) {// NOSONAR
 		try {
 			AliasItemInfo a = thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
@@ -124,7 +125,7 @@ public class AliasProxyUtil {
 		}
 	}
 
-	public static SqlItem col(Object o) {//NOSONAR
+	public static SqlItem col(Object o) {// NOSONAR
 		try {
 			AliasItemInfo a = thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
@@ -151,7 +152,7 @@ public class AliasProxyUtil {
 		}
 	}
 
-	public static SqlItem TABLE(Object o) {//NOSONAR
+	public static SqlItem TABLE(Object o) {// NOSONAR
 		return table(o);
 	}
 

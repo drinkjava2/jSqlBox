@@ -224,8 +224,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
-			if (SqlOption.IGNORE.equals(sqlItemType))
-				return true;// Always return true for IGNORE type
+			if (SqlOption.OTHER.equals(sqlItemType))
+				predSQL.addOther(sqItem.getParameters());
 			else if (SqlOption.PARAM.equals(sqlItemType)) {
 				for (Object pm : sqItem.getParameters())
 					predSQL.addParam(pm);
@@ -372,7 +372,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	public int iUpdate(Object... inlineSQL) {
 		PreparedSQL ps = iPrepare(inlineSQL);
-		ps.ifNullSetType(SqlOption.UPDATE); 
+		ps.ifNullSetType(SqlOption.UPDATE);
 		return (Integer) runPreparedSQL(ps);
 	}
 

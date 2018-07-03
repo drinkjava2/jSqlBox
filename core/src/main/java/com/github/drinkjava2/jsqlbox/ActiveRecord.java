@@ -35,12 +35,22 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  *    or 
  *    
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
+ *    entity.useContext(ctx);
+ *    entity.insert();
+ *    
+ *    or 
+ *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
  *    entity.insert(ctx);
  *    
  *    
  * Data Mapper style (for POJO entity):   
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
  *    ctx.insert(entity);
+ *    
+ *    or 
+ *    
+ *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
+ *    someOtherCtx.insert(entity, ctx);
  * 
  * </pre>
  * 
@@ -53,16 +63,17 @@ public class ActiveRecord implements ActiveRecordSupport {
 	@Override
 	public SqlBox box() {
 		if (box == null)
-			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx(), this.getClass());
+			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx());
 		return box;
 	}
- 
+
 	@Override
 	public SqlBoxContext ctx() {
-		SqlBox theBox = box();
-		if (theBox.getContext() == null)
-			theBox.setContext(SqlBoxContext.getGlobalSqlBoxContext());
-		return theBox.getContext();
+		if (box == null)
+			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx());
+		if (box.getContext() == null)
+			box.setContext(SqlBoxContext.getGlobalSqlBoxContext());
+		return box.getContext();
 	}
 
 	@Override

@@ -37,7 +37,6 @@ public class SqlBoxContextConfig extends DbProConfig {
 	private SqlMapperGuesser sqlMapperGuesser = globalNextSqlMapperGuesser;
 	private SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 	private ShardingTool[] shardingTools = globalNextShardingTools;
-	protected Object[] ssModels = globalNextSsModels;
 
 	public SqlBoxContextConfig() {
 		super();
@@ -45,7 +44,7 @@ public class SqlBoxContextConfig extends DbProConfig {
 
 	protected void getterAndSetters______________________() {// NOSONAR
 	}
-	
+
 	public Dialect getDialect() {
 		return dialect;
 	}
@@ -77,14 +76,6 @@ public class SqlBoxContextConfig extends DbProConfig {
 
 	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {
 		this.snowflakeCreator = snowflakeCreator;
-	}
-
-	public Object[] getSsModels() {
-		return ssModels;
-	}
-
-	public void setSsModels(Object[] ssModels) {
-		this.ssModels = ssModels;
 	}
 
 	protected void staticGlobalNextMethods______________________() {// NOSONAR

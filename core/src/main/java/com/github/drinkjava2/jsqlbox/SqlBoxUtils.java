@@ -11,12 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Method;
 import java.util.WeakHashMap;
-
-import com.github.drinkjava2.jdialects.ClassCacheUtils;
-import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * SqlBoxUtils is utility class to bind SqlBox instance to a entity bean, there
@@ -70,8 +65,8 @@ public abstract class SqlBoxUtils {// NOSONAR
 	public static SqlBox getBindedBox(Object entity) {
 		if (entity == null)
 			throw new SqlBoxException("Can not find SqlBox for null entity");
-		else  
-				return findBoxOfPOJO(entity); 
+		else
+			return findBoxOfPOJO(entity);
 	}
 
 	/**
@@ -92,7 +87,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 	public static void unbindBox(Object entity) {
 		if (entity == null)
 			throw new SqlBoxException("Unbind box error, entity can not be null");
-  	unbindBoxOfPOJO(entity);
+		unbindBoxOfPOJO(entity);
 	}
 
 	/**
@@ -103,7 +98,7 @@ public abstract class SqlBoxUtils {// NOSONAR
 			throw new SqlBoxException("Bind box error, entity can not be null");
 		if (box == null)
 			throw new SqlBoxException("Bind box error, box can not be null");
-		 else
+		else
 			bindBoxToPOJO(entity, box);
 	}
 
@@ -114,9 +109,9 @@ public abstract class SqlBoxUtils {// NOSONAR
 	public static SqlBox findAndBindSqlBox(SqlBoxContext ctx, Object entity) {
 		SqlBoxException.assureNotNull(entity, "Can not find box instance for null entity");
 		SqlBox box = SqlBoxUtils.getBindedBox(entity);
-		if (box != null)  
-			return box; 
-		box = SqlBoxUtils.createSqlBox(ctx, entity.getClass());
+		if (box != null)
+			return box;
+		box = SqlBoxUtils.createSqlBox(ctx);
 		SqlBoxUtils.bindBoxToBean(box, entity);
 		return box;
 	}
@@ -124,46 +119,9 @@ public abstract class SqlBoxUtils {// NOSONAR
 	/**
 	 * Create a SqlBox by given entity or entityClass
 	 */
-	public static SqlBox createSqlBox(SqlBoxContext ctx, Class<?> entityOrBoxClass) {// NOSONAR
-		Class<?> boxClass = null;
-		if (entityOrBoxClass == null)
-			throw new SqlBoxException("Bean Or SqlBox class can not be null");
-		if (SqlBox.class.isAssignableFrom(entityOrBoxClass))
-			boxClass = entityOrBoxClass;
-		if (boxClass == null)
-			boxClass = ClassCacheUtils.checkClassExist(entityOrBoxClass.getName() + SqlBoxContext.SQLBOX_SUFFIX);
-		if (boxClass == null)
-			boxClass = ClassCacheUtils.checkClassExist(
-					entityOrBoxClass.getName() + "$" + entityOrBoxClass.getSimpleName() + SqlBoxContext.SQLBOX_SUFFIX);
-		if (boxClass != null && !SqlBox.class.isAssignableFrom((Class<?>) boxClass))
-			boxClass = null;
-		SqlBox box = null;
-
-		if (boxClass == null) {
-			box = new SqlBox();
-			TableModel t=TableModelUtils.entity2ReadOnlyModel(entityOrBoxClass);//is a class 
-			box.setTableModel( t); 
-		} else {
-			try {
-				box = (SqlBox) boxClass.newInstance();
-				TableModel model = box.getTableModel();
-				if (model == null) {
-					model = TableModelUtils.entity2ReadOnlyModel(entityOrBoxClass); 
-					box.setTableModel(model);
-				}
-				Method configMethod = null;
-				try {// NOSONAR
-					configMethod = boxClass.getMethod("config", TableModel.class);
-				} catch (Exception e) {// NOSONAR
-				}
-				if (configMethod != null)
-					configMethod.invoke(box, model);
-			} catch (Exception e) {
-				throw new SqlBoxException("Can not create SqlBox instance: " + entityOrBoxClass, e);
-			}
-		}
-		if (box.getContext() == null)
-			box.setContext(ctx);
+	public static SqlBox createSqlBox(SqlBoxContext ctx) {// NOSONAR
+		SqlBox box = new SqlBox();
+		box.setContext(ctx);
 		return box;
 	}
 

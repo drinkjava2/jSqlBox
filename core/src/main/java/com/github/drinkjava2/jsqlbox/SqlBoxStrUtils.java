@@ -17,25 +17,7 @@ package com.github.drinkjava2.jsqlbox;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public abstract class SqlBoxStrUtils {
-
-	/**
-	 * Camel string change to lower case underline string, "AbcDef" to "abc_def"
-	 */
-	public static String camelToLowerCaseUnderline(String name) {
-		StringBuilder sb = new StringBuilder();
-		if (name != null && name.length() > 0) {
-			sb.append(name.substring(0, 1).toLowerCase());
-			for (int i = 1; i < name.length(); i++) {
-				String s = name.substring(i, i + 1);
-				char c = s.substring(0, 1).toCharArray()[0];
-				if (c >= 'A' && c <= 'Z')
-					sb.append("_");
-				sb.append(s.toLowerCase());
-			}
-		}
-		return sb.toString();
-	}
+public abstract class SqlBoxStrUtils { // NOSONAR
 
 	/**
 	 * Build "?,?,?....?" String according given howmanyQuestions

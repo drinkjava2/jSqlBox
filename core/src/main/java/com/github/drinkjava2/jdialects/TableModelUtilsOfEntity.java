@@ -98,78 +98,50 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 		return result;
 	}
 
-	/** Convert entity classes to a read-only TableModel instances */
-	public static TableModel[] entity2ReadOnlyModel(Class<?>... entityClasses) {
-		List<TableModel> l = new ArrayList<TableModel>();
-		for (Class<?> clazz : entityClasses) {
-			l.add(oneEntity2ReadOnlyModel(clazz));
-		}
-		return l.toArray(new TableModel[l.size()]);
-	}
-
-	/** Convert entity classes to a editable TableModel instances */
-	public static TableModel[] entity2EditableModel(Class<?>... entityClasses) {
-		List<TableModel> l = new ArrayList<TableModel>();
-		for (Class<?> clazz : entityClasses) {
-			l.add(oneEntity2EditableModel(clazz));
-		}
-		return l.toArray(new TableModel[l.size()]);
-	}
-
 	/**
-	 * Convert entity class to a read-only TableModel instance , if this class has a
-	 * "config(TableModel tableModel)" method, will also call it
+	 * Convert entity class to a read-only TableModel instance  
 	 */
-	public static TableModel oneEntity2ReadOnlyModel(Class<?> entityClass) {
+	public static TableModel entity2ReadOnlyModel(Class<?> entityClass) {
 		DialectException.assureNotNull(entityClass, "Entity class can not be null");
 		TableModel model = tableModelCache.get(entityClass);
 		if (model != null)
 			return model;
-		model = entity2ModelIgnoreConfigMethod(entityClass);
-		Method method = null;
-		try {
-			method = entityClass.getMethod("config", TableModel.class);
-		} catch (Exception e) {// NOSONAR
-		}
-		if (method != null)
-			try {
-				method.invoke(null, model);
-			} catch (Exception e) {
-				throw new DialectException(e);
-			}
-		if (model == null)
-			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
+		model = entity2ModelWithConfig(entityClass);
 		model.setReadOnly(true);
 		tableModelCache.put(entityClass, model);
 		return model;
 	}
 
+	/** Convert entity classes to a read-only TableModel instances */
+	public static TableModel[] entity2ReadOnlyModel(Class<?>... entityClasses) {
+		List<TableModel> l = new ArrayList<TableModel>();
+		for (Class<?> clazz : entityClasses) {
+			l.add(entity2ReadOnlyModel(clazz));
+		}
+		return l.toArray(new TableModel[l.size()]);
+	}
+
 	/**
-	 * Convert entity class to a Editable TableModel instance , if this class has a
-	 * "config(TableModel tableModel)" method, will also call it
+	 * Convert entity class to a Editable TableModel instance  
 	 */
-	public static TableModel oneEntity2EditableModel(Class<?> entityClass) {
+	public static TableModel entity2EditableModel(Class<?> entityClass) {
 		DialectException.assureNotNull(entityClass, "Entity class can not be null");
 		TableModel model = tableModelCache.get(entityClass);
 		if (model != null)
-			return model.buildEditableCopy();
-		model = entity2ModelIgnoreConfigMethod(entityClass);
-		Method method = null;
-		try {
-			method = entityClass.getMethod("config", TableModel.class);
-		} catch (Exception e) {// NOSONAR
-		}
-		if (method != null)
-			try {
-				method.invoke(null, model);
-			} catch (Exception e) {
-				throw new DialectException(e);
-			}
-		if (model == null)
-			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
+			return model.newCopy();
+		model = entity2ModelWithConfig(entityClass);
 		model.setReadOnly(true);
 		tableModelCache.put(entityClass, model);
-		return model.buildEditableCopy();
+		return model.newCopy();
+	}
+
+	/** Convert entity classes to a editable TableModel instances */
+	public static TableModel[] entity2EditableModels(Class<?>... entityClasses) {
+		List<TableModel> l = new ArrayList<TableModel>();
+		for (Class<?> clazz : entityClasses) {
+			l.add(entity2EditableModel(clazz));
+		}
+		return l.toArray(new TableModel[l.size()]);
 	}
 
 	/**
@@ -416,6 +388,29 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			}
 
 		} // End of columns loop
+		return model;
+	}
+
+	/**
+	 * Convert entity class to a Editable TableModel instance , if this class has a
+	 * "config(TableModel tableModel)" method, will also call it
+	 */
+	private static TableModel entity2ModelWithConfig(Class<?> entityClass) {
+		TableModel model;
+		model = entity2ModelIgnoreConfigMethod(entityClass);
+		Method method = null;
+		try {
+			method = entityClass.getMethod("config", TableModel.class);
+		} catch (Exception e) {// NOSONAR
+		}
+		if (method != null)
+			try {
+				method.invoke(null, model);
+			} catch (Exception e) {
+				throw new DialectException(e);
+			}
+		if (model == null)
+			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
 		return model;
 	}
 

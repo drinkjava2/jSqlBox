@@ -17,23 +17,23 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.5
  */
 public abstract class TableModelUtils {// NOSONAR
-	/** Convert entity class to a read-only TableModel instance */
-	public static TableModel entity2ReadOnlyModel(Class<?> entityClass) {
-		return TableModelUtilsOfEntity.oneEntity2ReadOnlyModel(entityClass);
+	/** Convert entity class to a editable TableModel instance */
+	public static TableModel entity2Model(Class<?> entityClass) {
+		return TableModelUtilsOfEntity.entity2EditableModel(entityClass);
 	}
 
-	/** Convert entity class to a editable TableModel instance */
-	public static TableModel entity2EditableModel(Class<?> entityClass) {
-		return TableModelUtilsOfEntity.oneEntity2ReadOnlyModel(entityClass).buildEditableCopy();
+	/** Convert entity classes to editable TableModel instances */
+	public static TableModel[] entity2Models(Class<?>... entityClasses) {
+		return TableModelUtilsOfEntity.entity2EditableModels(entityClasses);
+	}
+
+	/** Convert entity class to a read-only TableModel instance */
+	public static TableModel entity2ReadOnlyModel(Class<?> entityClass) {
+		return TableModelUtilsOfEntity.entity2ReadOnlyModel(entityClass);
 	}
 
 	/** Convert entity classes to read-only TableModel instances */
 	public static TableModel[] entity2ReadOnlyModels(Class<?>... entityClasses) {
-		return TableModelUtilsOfEntity.entity2ReadOnlyModel(entityClasses);
-	}
-
-	/** Convert entity classes to editable TableModel instances */
-	public static TableModel[] entity2EditableModels(Class<?>... entityClasses) {
 		return TableModelUtilsOfEntity.entity2ReadOnlyModel(entityClasses);
 	}
 

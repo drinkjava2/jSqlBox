@@ -67,7 +67,7 @@ public abstract class TableModelUtilsOfDb {
 				while (rs.next()) {// NOSONAR
 					String colName = rs.getString("COLUMN_NAME");
 					oneTable.column(colName);
-					ColumnModel col = oneTable.getColumn(colName);
+					ColumnModel col = oneTable.getColumnByColName(colName);
 					int javaSqlType = rs.getInt("DATA_TYPE");
 					// col.setPropertyTypeName(rs.getString("TYPE_NAME"));
 

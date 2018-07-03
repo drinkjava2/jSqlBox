@@ -30,6 +30,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingRangeTool;
@@ -48,9 +49,6 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 public class SqlBoxContext extends DbPro {// NOSONAR
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
-	/** SQLBOX_SUFFIX use to identify the SqlBox configuration class */
-	public static final String SQLBOX_SUFFIX = "SqlBox";// NOSONAR
-
 	protected static SqlBoxContext globalSqlBoxContext = null;
 
 	/** Dialect of current SqlBoxContext, optional */
@@ -60,7 +58,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected SqlMapperGuesser sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
 	protected ShardingTool[] shardingTools = SqlBoxContextConfig.globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
-	protected Object[] ssModels = null;
 
 	public SqlBoxContext() {
 		super();
@@ -108,20 +105,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			this.sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
 			this.shardingTools = SqlBoxContextConfig.globalNextShardingTools;
 			this.snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
-			this.ssModels = SqlBoxContextConfig.globalNextSsModels;
 		} else {
 			this.dialect = config.getDialect();
 			this.sqlMapperGuesser = config.getSqlMapperGuesser();
 			this.shardingTools = config.getShardingTools();
 			this.snowflakeCreator = config.getSnowflakeCreator();
-			this.ssModels = config.getSsModels();
 		}
 	}
 
 	protected void coreMethods______________________________() {// NOSONAR
 	}
 
-	/** Reset all global SqlBox variants to its old default values */
+	/** Reset all global SqlBox variants to default values */
 	public static void resetGlobalVariants() {
 		SqlBoxContextConfig.setGlobalNextAllowShowSql(false);
 		SqlBoxContextConfig.setGlobalNextMasterSlaveOption(SqlOption.USE_AUTO);
@@ -136,6 +131,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContextConfig
 				.setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
 		SqlBoxContextConfig.setGlobalNextIocTool(null);
+		SqlBoxContextConfig.setGlobalNextSsModels(null);
 		globalSqlBoxContext = null;
 	}
 
@@ -186,6 +182,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				ps.setLastAliases((String[]) sqItem.getParameters());// NOSONAR
 			} else
 				return false;
+		} else if (item instanceof EntityNet) {
+			ps.setEntityNet((EntityNet) item);
 		} else
 			return false;
 		return true;
@@ -445,16 +443,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {
 		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
-	}
-
-	public Object[] getSsModels() {
-		return ssModels;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	@Deprecated
-	public void setSsModels(Object[] ssModels) {// NOSONAR
-		this.ssModels = ssModels;
 	}
 
 }

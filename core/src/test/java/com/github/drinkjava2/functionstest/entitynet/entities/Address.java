@@ -4,15 +4,17 @@ import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
- 
+
 @Table(name = "addresstb")
 public class Address extends ActiveRecord {
 	@Id
 	String id;
 	String addressName;
 
-	@SingleFKey(refs = {"usertb","id"})
+	@SingleFKey(refs = { "usertb", "id" })
 	String userId;
+
+	User user;
 
 	public String getId() {
 		return id;
@@ -38,4 +40,11 @@ public class Address extends ActiveRecord {
 		this.userId = userId;
 	}
 
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 }

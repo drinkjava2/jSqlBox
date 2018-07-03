@@ -62,7 +62,7 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		TableModel t = TableModelUtils.entity2EditableModel(UserDemo.class);
+		TableModel t = TableModelUtils.entity2Model(UserDemo.class);
 
 		// A new column dynamically created
 		t.addColumn("anotherColumn2").VARCHAR(10);
@@ -86,8 +86,8 @@ public class DynamicConfigTest extends TestBase {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
 
-		TableModel t = TableModelUtils.entity2EditableModel(UserDemo.class);
-		t.getColumn("id").pkey();// Fake Pkey
+		TableModel t = TableModelUtils.entity2Model(UserDemo.class);
+		t.getColumnByFieldName("id").pkey();// Fake Pkey
 		u.setUserName(null);
 		u.load(t);
 		Assert.assertEquals("Tom", u.getUserName());
@@ -99,7 +99,7 @@ public class DynamicConfigTest extends TestBase {
 		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals("Tom", u2.getUserName());
 
-		t.getColumn("userName").setTransientable(true);// ignore userName
+		t.getColumnByFieldName("userName").setTransientable(true);// ignore userName
 		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals(null, u3.getUserName());
 	}

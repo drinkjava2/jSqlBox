@@ -25,61 +25,58 @@ package com.github.drinkjava2.jdbpro;
 public enum SqlOption {
 	// ----------Sql Items explained by DbPro ------------
 	/** Append a SQL String piece */
-	SQL,//Method
+	SQL, // Method
 
 	/** Append a parameter or parameter array */
-	PARAM,//Method
+	PARAM, // Method
 
 	/** Append a "?" String and append a parameter or parameter array */
-	QUESTION_PARAM,//Method
+	QUESTION_PARAM, // Method
 
 	/** BIND Key-Values pairs "key1,value1, key2,value2..." for SqlTemplateEngine */
-	BIND, //Method
+	BIND, // Method
 
 	/**
 	 * Usage: NOT_NUL("user_name=?", name), when name is null, nothing will be
 	 * appended into SQL and parameters, otherwise return a "user_name=?" String and
 	 * a SQL parameter
 	 */
-	NOT_NULL,//Method
+	NOT_NULL, // Method
 
 	/** Append a " values(?,?,?....?)" String at end of SQL */
-	VALUES_QUESTIONS,//Method
+	VALUES_QUESTIONS, // Method
 
 	// ----------Special Items ------------
 	/** Switch to another DbPro or subClass (SqlBoxContext) to execute SQL */
-	SWITCHTO,//Method
+	SWITCHTO, // Method
 
 	/** Give one or more class as parameter, instance will created by IocTool */
-	IOC,//Method
+	IOC, // Method
 
 	/** Disable handles according given handlers' class */
-	DISABLE_HANDLERS, //Method
+	DISABLE_HANDLERS, // Method
 
 	/** Disable handles according given handlers' class */
-	ENABLE_HANDLERS,//Method
+	ENABLE_HANDLERS, // Method
 
 	/** Force use template style */
-	USE_TEMPLATE,//Control Switch
+	USE_TEMPLATE, // Control Switch
 
 	// ------Sql Operation type--------
 	/** It's a EXECUTE type SQL */
-	EXECUTE,//Control Switch
+	EXECUTE, // Control Switch
 
 	/** It's a UPDATE type SQL */
-	UPDATE,//Control Switch
+	UPDATE, // Control Switch
 
 	/** It's a INSERT type SQL */
-	INSERT,//Control Switch
+	INSERT, // Control Switch
 
 	/** It's a QUERY type SQL */
-	QUERY,//Control Switch
+	QUERY, // Control Switch
 
-	/**
-	 * IGNORE type SqlItem always be ignored, but user can use this type to inject
-	 * some parameters
-	 */
-	IGNORE,//Method
+	/** OTHER type SqlItem used to store some other items for user */
+	OTHER,
 
 	// ================================================================
 	// Below items designed for jSqlBox or other projects to explain
@@ -90,37 +87,34 @@ public enum SqlOption {
 	 * Tell system to choose master or slave database automatically (write:master,
 	 * read:if in Transaction use master otherwise use one slave)
 	 */
-	USE_AUTO, //Control Switch
+	USE_AUTO, // Control Switch
 
 	/** Tell system force use master database (write and read:master ) */
-	USE_MASTER, //Control Switch
+	USE_MASTER, // Control Switch
 
 	/** Tell system force use slave database (write:all slaves, read:one slave) */
-	USE_SLAVE, //Control Switch
+	USE_SLAVE, // Control Switch
 
 	/**
 	 * Tell system force use master and slave database (write: master + all slaves,
 	 * read: master)
 	 */
-	USE_BOTH,//Control Switch
-	
-	
-	// ------TableModel about options--- 
-	/** Mark alias names for TableModels*/
-	ALIAS,  //Method
+	USE_BOTH, // Control Switch
+
+	// ------TableModel about options---
+	/** Mark alias names for TableModels */
+	ALIAS, // Method
 
 	// ------- sharding items -----------
 	/** Tell system this is a "SHARD_TABLE" item */
-	SHARD_TABLE,//Method
+	SHARD_TABLE, // Method
 
 	/** Tell system this is a "SHARD_DATABASE" item */
-	SHARD_DATABASE,//Method
+	SHARD_DATABASE, // Method
 
 	/** GIVE, GIVE_BOTH option are designed for ORM Query */
-	GIVE, //Method
-	
-	GIVE_BOTH //Method
+	GIVE, // Method
 
- 
+	GIVE_BOTH // Method
 
 }

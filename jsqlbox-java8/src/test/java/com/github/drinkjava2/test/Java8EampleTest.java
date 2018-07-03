@@ -47,12 +47,12 @@ public class Java8EampleTest {
 		for (String ddl : gctx().toDropDDL(User.class))
 			gctx().iExecute(ddl);
 	}
- 
+
 	@Test
 	public void lambdaTest() {
 		Assert.assertEquals(100, giQueryForLongValue("select count(*) from usertb"));
 
-		List<User> totalUsers = giQuery(new EntityListHandler(User.class), "select * from usertb");
+		List<User> totalUsers = giQuery(new EntityListHandler(), User.class, "select * from usertb");
 		Assert.assertEquals(100, totalUsers.size());
 
 		User u = createAliasProxy(User.class);
@@ -68,7 +68,7 @@ public class Java8EampleTest {
 		Assert.assertEquals(10, list1.size());
 
 		u = createAliasProxy(User.class, "u");
-		List<User> list2 = giQuery(new EntityListHandler(User.class) //
+		List<User> list2 = giQuery(new EntityListHandler(), User.class //
 				, "select * from ", table(u), " where "//
 				, (COL) u::getName, ">=?", param("Foo90") //
 				, " and ", (COL) u::getAge, ">?", param(1) //

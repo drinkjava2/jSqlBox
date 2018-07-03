@@ -74,14 +74,20 @@ public class PreparedSQL {
 	/** Handers in this list will disabled */
 	private List<Class<?>> disabledHandlers;
 
+	/** Store "SqlOption.Other" type items */
+	private List<Object> others = null;
+
 	/** TableModels, this is designed for ORM program */
 	private Object[] models;
 
 	/** Alias of TableModels, this is designed for ORM Program */
 	private String[] aliases;
 
-	/** Give List, this is designed for ORM program */
+	/** Give List, this is designed for ORM program's EntityNet */
 	private List<String[]> givesList = null;
+
+	/** EntityNet, this is designed for ORM program's EntityNet */
+	private Object entityNet = null;
 
 	public PreparedSQL() {// default constructor
 	}
@@ -143,9 +149,9 @@ public class PreparedSQL {
 
 	public void setLastAliases(String... alias) {
 		for (int i = 0; i < alias.length; i++) {
-			aliases[models.length - alias.length+i ]=alias[i];
-		} 
-	} 
+			aliases[models.length - alias.length + i] = alias[i];
+		}
+	}
 
 	public void addGives(String[] gives) {
 		if (givesList == null)
@@ -284,6 +290,12 @@ public class PreparedSQL {
 			this.useTemplate = useTemplate;
 	}
 
+	public void addOther(Object obj) {
+		if (others == null)
+			others = new ArrayList<Object>();
+		others.add(obj);
+	}
+
 	protected void GetterSetters_________________________() {// NOSONAR
 		// === below this line are normal getter && setter======
 	}
@@ -400,6 +412,22 @@ public class PreparedSQL {
 
 	public void setGivesList(List<String[]> givesList) {
 		this.givesList = givesList;
+	}
+
+	public Object getEntityNet() {
+		return entityNet;
+	}
+
+	public void setEntityNet(Object entityNet) {
+		this.entityNet = entityNet;
+	}
+
+	public List<Object> getOthers() {
+		return others;
+	}
+
+	public void setOthers(List<Object> others) {
+		this.others = others;
 	}
 
 }
