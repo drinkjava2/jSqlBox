@@ -53,7 +53,7 @@ public class EntityNet {
 	private List<Map<String, Object>> rowData = new ArrayList<Map<String, Object>>();
 
 	/** The body of entity net, Map<alias, Map<entityId, entity>> */
-	private Map<String, LinkedHashMap<Object, Object>> body = new HashMap<String, LinkedHashMap<Object, Object>>();
+	private Map<Class<?>, LinkedHashMap<Object, Object>> body = new HashMap<Class<?>, LinkedHashMap<Object,Object>>();
 	//TODO: change to Map<Class, LinkedHashMap<Object, Object>>
 
 	protected void core__________________________() {// NOSONAR
@@ -168,7 +168,7 @@ public class EntityNet {
 		return (T) map.get(realEntityId);
 	}
 
-	/** Translate one row map list to entity objects, put into entity net body */
+	/** Translate one row of map list to entity objects, put into entity net body */
 	private void translateToEntities(Map<String, Object> oneRow) {
 		for (Entry<String, TableModel> config : this.models.entrySet()) {
 			TableModel model = config.getValue();
@@ -178,12 +178,14 @@ public class EntityNet {
 			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(oneRow, model, alias);
 			if (entityId == null)
 				continue;// not found entity ID columns
-			Object entity = getOneEntity(alias, entityId);
+			
+			SqlBoxException.assureNotNull( model.getEntityClass());
+			Object entity = getOneEntity( model.getEntityClass(), entityId);
 
 			// create new Entity
 			if (entity == null) {
 				entity = createEntity(oneRow, model, alias);
-				this.putOneEntity(alias, entityId, entity);
+				this.putOneEntity(model.getEntityClass(), entityId, entity); 
 			}
 			oneRow.put(alias, entity);// In this row, add entities directly
 			oneRow.put("#" + alias, entityId); // In this row, add entityIds
@@ -256,17 +258,17 @@ public class EntityNet {
 		}
 	}
 
-	public void putOneEntity(String alias, Object entityId, Object entity) {
-		LinkedHashMap<Object, Object> entityMap = body.get(alias);
+	public void putOneEntity(Class<?> claz, Object entityId, Object entity) {
+		LinkedHashMap<Object, Object> entityMap = body.get(claz);
 		if (entityMap == null) {
 			entityMap = new LinkedHashMap<Object, Object>();
-			body.put(alias, entityMap);
+			body.put(claz, entityMap);
 		}
 		entityMap.put(entityId, entity);
 	}
 
-	public Object getOneEntity(String alias, Object entityId) {
-		Map<Object, Object> entityMap = body.get(alias);
+	public Object getOneEntity(Class<?> claz, Object entityId) {
+		Map<Object, Object> entityMap = body.get(claz);
 		if (entityMap == null)
 			return null;
 		return entityMap.get(entityId);
@@ -342,12 +344,13 @@ public class EntityNet {
 		return this;
 	}
 
-	public Map<String, LinkedHashMap<Object, Object>> getBody() {
+	public Map<Class<?>, LinkedHashMap<Object, Object>> getBody() {
 		return body;
 	}
 
-	public void setBody(Map<String, LinkedHashMap<Object, Object>> body) {
+	public void setBody(Map<Class<?>, LinkedHashMap<Object, Object>> body) {
 		this.body = body;
-	}
+	} 
+ 
 
 }
