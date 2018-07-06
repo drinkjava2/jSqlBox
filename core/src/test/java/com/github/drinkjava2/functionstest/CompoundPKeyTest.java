@@ -111,7 +111,7 @@ public class CompoundPKeyTest extends TestBase {
 	public void testOrmQry() {
 		EntityNet net = ctx.iQuery(new EntityNetHandler(), "select u.** from CmpEntity u", CmpEntity.class, alias("u"),
 				" where age>?", param(5));
-		List<CmpEntity> entities = net.pickEntityList("u");
+		List<CmpEntity> entities = net.pickEntityList(CmpEntity.class);
 		Assert.assertEquals(5, entities.size());
 
 		// Map as entityId
@@ -120,13 +120,13 @@ public class CompoundPKeyTest extends TestBase {
 		idMap.put("firstName", "Sam");
 		idMap.put("middleName", "Y");
 		idMap.put("age", 6);
-		CmpEntity entity = net.pickOneEntity("u", idMap);
+		CmpEntity entity = net.pickOneEntity(CmpEntity.class, idMap);
 		Assert.assertEquals(new Integer(6), entity.getAge());
 
 		// Entity as entityId
 		CmpEntity entityBean = new CmpEntity();
 		entityBean.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 6);
-		CmpEntity entity2 = net.pickOneEntity("u", entityBean);
+		CmpEntity entity2 = net.pickOneEntity(CmpEntity.class, entityBean);
 		Assert.assertEquals(new Integer(6), entity2.getAge());
 	}
 

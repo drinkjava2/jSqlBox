@@ -3,8 +3,6 @@ package com.github.drinkjava2.functionstest.entitynet;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
 
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +15,7 @@ public class EntityNetTreeTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
-		//ctx.setAllowShowSQL(true);
+		// ctx.setAllowShowSQL(true);
 		createAndRegTables(TreeNode.class);
 		TreeNode t = new TreeNode();
 		t.putFields("id", "comments", "pid", "line", "lvl");
@@ -37,18 +35,35 @@ public class EntityNetTreeTest extends TestBase {
 		System.out.println();
 	}
 
+	private static final Object[] targets = new Object[] { new EntityNetHandler(), TreeNode.class, TreeNode.class,
+			alias("a", "b"), give("b", "a", "parent"), give("a", "b", "childs") };
+
 	@Test
 	public void testSearchTreeChild() {
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), TreeNode.class, TreeNode.class, alias("a", "_a"),
-				give("_a", "a", "parent"), give("a", "_a", "childs"),
-				"select a.**, a.pid as b_id from treenodetb a,  treenodetb b");
-		List<TreeNode> nodes = net.pickEntityList("a");
-		for (TreeNode node : nodes) {
-			System.out.print(node.getId()+"["+node+"]   P:");
-			if(node.getParent()!=null)
-				System.out.print(node.getParent().getId()+"["+node.getParent()+"]");
-			System.out.println(); 
-		} 
+		EntityNet net = ctx.iQuery(targets, "select a.**, a.pid as b_id from treenodetb a");
+		TreeNode node = net.pickOneEntity(TreeNode.class, "A");
+		printTree(node, 0);
+	}
+
+	@Test
+	public void subTreeSearch() {// see https://my.oschina.net/drinkjava2/blog/1818631
+		TreeNode d = new TreeNode().loadById("D");
+		EntityNet net = ctx.pQuery(targets,
+				"select a.**, a.pid as b_id from treenodetb a where a.line>=? and a.line< (select min(line) from treenodetb where line>? and lvl<=?) ",
+				d.getLine(), d.getLine(), d.getLvl());
+		TreeNode node = net.pickOneEntity(TreeNode.class, "D");
+		printTree(node, 0);
+	}
+
+	private static void printTree(TreeNode node, int space) {
+		space++;
+		for (int i = 1; i < space; i++)
+			System.out.print("  ");
+		System.out.println(node.getId() + (node.getParent() != null ? "  Parent:" + node.getParent().getId() : " "));
+		if (node.getChilds() != null)
+			for (TreeNode c : node.getChilds())
+				printTree(c, space);
+		space--;
 	}
 
 }

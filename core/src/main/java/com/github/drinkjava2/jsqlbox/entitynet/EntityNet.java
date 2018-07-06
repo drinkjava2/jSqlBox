@@ -53,8 +53,7 @@ public class EntityNet {
 	private List<Map<String, Object>> rowData = new ArrayList<Map<String, Object>>();
 
 	/** The body of entity net, Map<alias, Map<entityId, entity>> */
-	private Map<Class<?>, LinkedHashMap<Object, Object>> body = new HashMap<Class<?>, LinkedHashMap<Object,Object>>();
-	//TODO: change to Map<Class, LinkedHashMap<Object, Object>>
+	private Map<Class<?>, LinkedHashMap<Object, Object>> body = new HashMap<Class<?>, LinkedHashMap<Object, Object>>();
 
 	protected void core__________________________() {// NOSONAR
 	}
@@ -122,6 +121,7 @@ public class EntityNet {
 		return this;
 	}
 
+	/** Join a Map List into current EntityNet */
 	public EntityNet joinMapList(List<Map<String, Object>> listMap) {
 		for (Map<String, Object> map : listMap) {
 			rowData.add(map);
@@ -132,37 +132,40 @@ public class EntityNet {
 		return this;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> List<T> pickEntityList(String alias) {
-		Map<Object, Object> map = body.get(alias);
+	@SuppressWarnings("unchecked")
+	public <T> List<T> pickEntityList(Class<T> claz) {
+		Map<Object, Object> map = body.get(claz);
 		if (map == null)
-			return new ArrayList();
-		return (List<T>) new ArrayList(map.values());
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> Set<T> pickEntitySet(String alias) {
-		Map<Object, Object> map = body.get(alias);
-		if (map == null)
-			return new HashSet();
-		return (Set<T>) new LinkedHashSet(map.values());
-	}
-
-	@SuppressWarnings({ "unchecked" })
-	public <T> Map<Object, T> pickEntityMap(String alias) {
-		return (Map<Object, T>) body.get(alias);
+			return new ArrayList<T>();
+		return (List<T>) new ArrayList<Object>(map.values());
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T pickOneEntity(String alias, Object entityId) {
-		SqlBoxException.assureNotEmpty(alias);
-		if (!models.containsKey(alias))
-			throw new SqlBoxException("There is no alias '" + alias + "' setting in current EntityNet.");
-		TableModel model = models.get(alias);
+	public <T> Set<T> pickEntitySet(Class<T> claz) {
+		Map<Object, Object> map = body.get(claz);
+		if (map == null)
+			return new LinkedHashSet<T>();
+		return (Set<T>) new LinkedHashSet<Object>(map.values());
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	public <T> Map<Object, T> pickEntityMap(Class<T> claz) {
+		return (Map<Object, T>) body.get(claz);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T pickOneEntity(Class<T> claz, Object entityId) {
+		TableModel model = null;
+		for (Entry<String, TableModel> entry : models.entrySet()) {
+			if (claz.equals(entry.getValue().getEntityClass())) {
+				model = entry.getValue();
+				break;
+			}
+		}
 		Object realEntityId = EntityIdUtils.buildEntityIdFromUnknow(entityId, model);
 		if (realEntityId == null)
 			throw new SqlBoxException("Can not build entityId for '" + entityId + "'");
-		Map<Object, Object> map = body.get(alias);
+		Map<Object, Object> map = body.get(claz);
 		if (map == null)
 			return null;
 		return (T) map.get(realEntityId);
@@ -178,14 +181,16 @@ public class EntityNet {
 			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(oneRow, model, alias);
 			if (entityId == null)
 				continue;// not found entity ID columns
-			
-			SqlBoxException.assureNotNull( model.getEntityClass());
-			Object entity = getOneEntity( model.getEntityClass(), entityId);
+
+			SqlBoxException.assureNotNull(model.getEntityClass());
+			Object entity = getOneEntity(model.getEntityClass(), entityId);
 
 			// create new Entity
 			if (entity == null) {
 				entity = createEntity(oneRow, model, alias);
-				this.putOneEntity(model.getEntityClass(), entityId, entity); 
+				this.putOneEntity(model.getEntityClass(), entityId, entity);
+			} else {
+				updateEntity(entity, oneRow, model, alias);
 			}
 			oneRow.put(alias, entity);// In this row, add entities directly
 			oneRow.put("#" + alias, entityId); // In this row, add entityIds
@@ -195,6 +200,10 @@ public class EntityNet {
 	private static Object createEntity(Map<String, Object> oneRow, TableModel model, String alias) {
 		Object entity;
 		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
+		return updateEntity(entity, oneRow, model, alias);
+	}
+
+	private static Object updateEntity(Object entity, Map<String, Object> oneRow, TableModel model, String alias) {
 		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
 			for (ColumnModel col : model.getColumns()) {
 				if (col.getTransientable())
@@ -350,7 +359,6 @@ public class EntityNet {
 
 	public void setBody(Map<Class<?>, LinkedHashMap<Object, Object>> body) {
 		this.body = body;
-	} 
- 
+	}
 
 }

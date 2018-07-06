@@ -83,7 +83,7 @@ public class AliasProxyUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T createAliasProxy(Class<T> c, String alias) {
-		TableModel t = TableModelUtils.entity2EditableModel(c);
+		TableModel t = TableModelUtils.entity2ReadOnlyModel(c);
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(c);
 		enhancer.setCallback(new ProxyBean(t, alias));
