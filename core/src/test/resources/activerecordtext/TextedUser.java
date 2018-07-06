@@ -9,8 +9,10 @@ import java.util.Map;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.github.drinkjava2.helloworld.UsageAndSpeedTest.UserAR;
+import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jsqlbox.TextUtils;
+import com.github.drinkjava2.jsqlbox.annotation.Ioc;
 import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
@@ -97,6 +99,24 @@ public class TextedUser extends UserAR {
 	      where 
 	         u.name=? and address=?
 	 */
+	
+	@Ioc(EntityListHandlerBox2.class)
+	public List<TextedUser> selectUsersByText4(String name, String address) {
+		return this.guess(name, address);
+	}
+	/*-
+	   select * 
+	   from 
+	   users u
+	      where 
+	         u.name=? and address=?
+	 */
+	
+	public static class EntityListHandlerBox2 extends BeanBox {
+		public Object[] create() {
+			return new Object[] { new EntityListHandler(), TextedUser.class };
+		}
+	}
 
 	public static void main(String[] args) {
 		String javaSourceCode = TextUtils.getJavaSourceCodeUTF8(TextedUser.class);

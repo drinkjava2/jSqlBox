@@ -936,5 +936,44 @@ public class StrUtils {
         else
             return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
     }
+    
+	/**
+	 * Check if a String only have a-z,A-Z,0-9,"_" characters
+	 */
+	public static boolean isNormalLetters(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_';
+	}
+
+	/**
+	 * Return true if is an invisible Char like space, tab, return... char
+	 */
+	public static boolean isInvisibleChar(char c) {
+		return c <= ' ';
+	}
+
+	/**
+	 * Format all " ", \t, \r... , to " ",
+	 */
+	public static String formatSQL(String sql) {
+		if (sql == null || sql.length() == 0)
+			return sql;
+		StringBuilder sb = new StringBuilder();
+		char[] chars = sql.toCharArray();
+		boolean addedSpace = false;
+		for (char c : chars) {
+			if (isInvisibleChar(c)) {
+				if (!addedSpace) {
+					sb.append(" ");
+					addedSpace = true;
+				}
+			} else {
+				sb.append(c);
+				addedSpace = false;
+			}
+		}
+		sb.append(" ");
+		return sb.toString();
+	}
+
 
 }

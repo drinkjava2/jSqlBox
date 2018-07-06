@@ -133,6 +133,26 @@ public class EntityNet {
 	}
 
 	@SuppressWarnings("unchecked")
+	public <T> List<T> pickEntityList(String alias) {
+		return (List<T>) pickEntityList(models.get(alias).getEntityClass());
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Set<T> pickEntitySet(String alias) {
+		return (Set<T>) pickEntitySet(models.get(alias).getEntityClass());
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Map<Object, T> pickEntityMap(String alias) {
+		return (Map<Object, T>) pickEntityMap(models.get(alias).getEntityClass());
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T pickOneEntity(String alias, Object entityId) {
+		return (T) pickOneEntity(models.get(alias).getEntityClass(), entityId);
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> List<T> pickEntityList(Class<T> claz) {
 		Map<Object, Object> map = body.get(claz);
 		if (map == null)

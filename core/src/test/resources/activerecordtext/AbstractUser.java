@@ -42,7 +42,7 @@ public abstract class AbstractUser extends TextedUser {
 	 */
 
 	@Model(TextedUser.class)
-	@Ioc(EntityListHandlerBox.class)
+	@Ioc(EntityListHandlerBox1.class)
 	public abstract List<TextedUser> selectAbstractUserList1(String name, String address);
 	/*-
 	   select u.*
@@ -52,8 +52,13 @@ public abstract class AbstractUser extends TextedUser {
 	         u.name=:name and address=:address
 	 */
 
-	@Model(TextedUser.class)
-	@Ioc(EntityListHandlerBox.class)
+	public static class EntityListHandlerBox1 extends BeanBox {
+		public EntityListHandler create() {
+			return new EntityListHandler();
+		}
+	}
+
+	@Ioc(EntityListHandlerBox2.class)
 	public abstract List<TextedUser> selectAbstractUserList2(String name, TextedUser u);
 	/*-
 	   select u.* 
@@ -63,9 +68,9 @@ public abstract class AbstractUser extends TextedUser {
 	         u.name=:name and address=#{u.address}
 	 */
 
-	public static class EntityListHandlerBox extends BeanBox {// TODO: here add TextedUser model
-		public EntityListHandler create() {
-			return new EntityListHandler();
+	public static class EntityListHandlerBox2 extends BeanBox {
+		public Object[] create() {
+			return new Object[] { new EntityListHandler(), TextedUser.class };
 		}
 	}
 

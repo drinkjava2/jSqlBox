@@ -19,7 +19,6 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jsqlbox.SqlBoxStrUtils;
 
 /**
  * SSHandler is used to explain alias.** to real columns in SQL, transient
@@ -59,7 +58,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	 * </pre>
 	 */
 	private String explainNetQuery(PreparedSQL ps) {// NOSONAR
-		String sql = SqlBoxStrUtils.formatSQL(ps.getSql());
+		String sql = StrUtils.formatSQL(ps.getSql());
 		SqlBoxException.assureNotEmpty(ps.getSql(), "Sql can not be empty");
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
@@ -67,7 +66,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 		while (pos >= 0) {
 			StringBuilder aliasSB = new StringBuilder();
 			for (int i = pos - 1; i >= 0; i--) {
-				if (SqlBoxStrUtils.isNormalLetters(sql.charAt(i)))
+				if (StrUtils.isNormalLetters(sql.charAt(i)))
 					aliasSB.insert(0, sql.charAt(i));
 				else
 					break;
@@ -95,7 +94,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 			StringBuilder tableNameSb = new StringBuilder();
 			for (int i = posAlias - 1; i >= 0; i--) {
 				char c = sql.charAt(i);
-				if (SqlBoxStrUtils.isNormalLetters(c))
+				if (StrUtils.isNormalLetters(c))
 					tableNameSb.insert(0, c);
 				else if (tableNameSb.length() > 0)
 					break;
@@ -149,7 +148,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 		if (sql.contains(alias + ".##")) {// Pkey and Fkey only
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < ps.getModels().length; i++) {
-				TableModel tb = (TableModel) ps.getModels()[i]; // TODO
+				TableModel tb = (TableModel) ps.getModels()[i];
 				if (tableName.equalsIgnoreCase(tb.getTableName())) {
 					if (!alias.equalsIgnoreCase(ps.getAliases()[i]))
 						throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias");

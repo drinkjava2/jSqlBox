@@ -13,9 +13,8 @@ import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
 public class EntityNetTreeTest extends TestBase {
 	@Before
-	public void init() {
+	public void init() {// See "orm.png" in root folder
 		super.init();
-		// ctx.setAllowShowSQL(true);
 		createAndRegTables(TreeNode.class);
 		TreeNode t = new TreeNode();
 		t.putFields("id", "comments", "pid", "line", "lvl");
@@ -41,17 +40,21 @@ public class EntityNetTreeTest extends TestBase {
 	@Test
 	public void testSearchTreeChild() {
 		EntityNet net = ctx.iQuery(targets, "select a.**, a.pid as b_id from treenodetb a");
-		TreeNode node = net.pickOneEntity(TreeNode.class, "A");
+		TreeNode node = net.pickOneEntity("a", "A");
 		printTree(node, 0);
 	}
 
 	@Test
 	public void subTreeSearch() {// see https://my.oschina.net/drinkjava2/blog/1818631
 		TreeNode d = new TreeNode().loadById("D");
+		loadSubTree(d);
+	}
+
+	public void loadSubTree(TreeNode d) {// see https://my.oschina.net/drinkjava2/blog/1818631
 		EntityNet net = ctx.pQuery(targets,
 				"select a.**, a.pid as b_id from treenodetb a where a.line>=? and a.line< (select min(line) from treenodetb where line>? and lvl<=?) ",
 				d.getLine(), d.getLine(), d.getLvl());
-		TreeNode node = net.pickOneEntity(TreeNode.class, "D");
+		TreeNode node = net.pickOneEntity("a", d.getId());
 		printTree(node, 0);
 	}
 

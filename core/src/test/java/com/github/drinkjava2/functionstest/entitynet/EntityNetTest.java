@@ -96,7 +96,7 @@ public class EntityNetTest extends TestBase {
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
 				" left join privilegetb p on p.id=rp.pid ", //
 				" order by u.id, ur.id, r.id, rp.id, p.id");
-		List<User> userList = net.pickEntityList(User.class);
+		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
 

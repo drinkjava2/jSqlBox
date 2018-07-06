@@ -497,9 +497,15 @@ public class UsageAndSpeedTest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void sqlMapperUseText2() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		ctx.setIocTool(new IocTool() {
+			public <T> T getBean(Class<?> configClass) {
+				return BeanBox.getBean(configClass);
+			}
+		});
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
 		TextedUser user = new TextedUser();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
@@ -516,6 +522,9 @@ public class UsageAndSpeedTest {
 
 			List<TextedUser> u4 = user.selectUsersByText3("Tom", "China");
 			Assert.assertEquals(1, u4.size());
+			
+			List<TextedUser> u5 = user.selectUsersByText4("Tom", "China");
+			Assert.assertEquals(1, u5.size());
 
 			user.deleteUsers("Tom", "China");
 			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
@@ -545,8 +554,8 @@ public class UsageAndSpeedTest {
 		}
 	}
 
-	protected void BelowNotForSpeedTest_______________________() {
-		// below methods are test usages only, not join to speed test
+	protected void BelowNotForSpeedTest_JustDoSomeUnitTest__________________() {
+		// below methods are for unit test only, not for speed test
 	}
 
 	@Test

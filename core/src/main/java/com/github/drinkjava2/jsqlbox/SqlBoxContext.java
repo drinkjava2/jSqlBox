@@ -191,14 +191,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	// =========getter & setter =======
 
 	/**
-	 * Get the SqlBox instance binded to this entityBean, if no, create a new one
-	 * and bind on entityBean
-	 */
-	public SqlBox getSqlBox(Object entityBean) {
-		return SqlBoxUtils.findAndBindSqlBox(this, entityBean);
-	}
-
-	/**
 	 * Create a subClass instance of a abstract ActiveRecordSupport class based on
 	 * default global SqlBoxContext
 	 */
@@ -217,9 +209,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * given SqlBoxContext
 	 */
 	public static <T> T createMapper(SqlBoxContext ctx, Class<?> abstractClass) {
-		T entity = createMapper(abstractClass);
-		SqlBoxUtils.findAndBindSqlBox(ctx, entity);
-		return entity;
+		return createMapper(abstractClass);
 	}
 
 	public String getShardedTB(Object entityOrClass, Object... shardvalues) {

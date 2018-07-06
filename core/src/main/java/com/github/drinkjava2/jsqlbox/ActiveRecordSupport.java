@@ -16,9 +16,8 @@ import com.github.drinkjava2.jdbpro.SqlItem;
 
 /**
  * If a entity class implements ActiveRecordSupport interface, it will have CRUD
- * Method. This interface is designed for Java8 because Java8 support default
- * method can be used for box() method to bind a SqlBox instance to bean. This
- * interface is not useful for Java7 and below.
+ * Method. This interface is designed for jSqlBox Java8 version because Java8
+ * support default method interface is not useful for Java7 and below.
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -27,12 +26,6 @@ public interface ActiveRecordSupport {// NOSONAR
 
 	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 
-	/**
-	 * @return the binded SqlBox instance, if no, create a new one and bind to
-	 *         entity and return it
-	 */
-	public SqlBox box();
-   
 	/** @return current SqlBoxContext instance */
 	public SqlBoxContext ctx();
 
@@ -46,18 +39,17 @@ public interface ActiveRecordSupport {// NOSONAR
 	public void delete(Object... optionalSqlItems);
 
 	/**
-	 * Load entity from database by primary key, shardTable and shardDatabase fields if have
+	 * Load entity from database by primary key, shardTable and shardDatabase fields
+	 * if have
 	 */
 	public <T> T load(Object... optionalSqlItems);
 
-	
-	/**  Load entity by given id (P-Key) or id Map  */
+	/** Load entity by given id (P-Key) or id Map */
 	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems);
-	
-	/**  Load entity by given query  */
+
+	/** Load entity by given query */
 	public <T> T loadByQuery(Object... sqlItems);
-	
-	
+
 	/**
 	 * Link style set values for entity field, format like:
 	 * user.put("id","id1").put("name","Sam").put("address","Beijing","phone","12345",
@@ -98,8 +90,7 @@ public interface ActiveRecordSupport {// NOSONAR
 	 * @return
 	 */
 	public ActiveRecordSupport useContext(SqlBoxContext ctx);
-	
-	
+
 	/**
 	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
 	 * instance,
@@ -109,10 +100,9 @@ public interface ActiveRecordSupport {// NOSONAR
 	public SqlItem bind(Object... parameters);
 
 	/** Return current entity's shardTable according its sharding key values */
-	public String shardTB(Object... optionItems)  ; 
-	
-	/** Return current entity's shardDatabase according its sharding key values */
-	public SqlBoxContext shardDB(Object... optionItems)  ; 
+	public String shardTB(Object... optionItems);
 
+	/** Return current entity's shardDatabase according its sharding key values */
+	public SqlBoxContext shardDB(Object... optionItems);
 
 }
