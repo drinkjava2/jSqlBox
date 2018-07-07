@@ -83,14 +83,7 @@ public interface ActiveRecordSupport {// NOSONAR
 
 	/** In SqlMapper style, return current method's prepared SQL */
 	public PreparedSQL guessPreparedSQL(Object... params);
-
-	/**
-	 * Switch to use another SqlBoxContext
-	 * 
-	 * @return
-	 */
-	public ActiveRecordSupport useContext(SqlBoxContext ctx);
-
+  
 	/**
 	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
 	 * instance,

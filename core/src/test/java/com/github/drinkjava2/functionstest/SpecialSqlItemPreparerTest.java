@@ -70,7 +70,7 @@ public class SpecialSqlItemPreparerTest extends TestBase {
 
 		SpecialSqlItemPreparer sp1 = new SpecialSqlItemPreparer() {
 			@Override
-			public boolean doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item) {
+			public boolean doPrepare(PreparedSQL ps, SpecialSqlItem item) {
 				if (item instanceof MySqlItem1) {
 					System.out.println("This is MySqlItem1 preparer");
 					return true;
@@ -81,7 +81,7 @@ public class SpecialSqlItemPreparerTest extends TestBase {
 
 		SpecialSqlItemPreparer sp2 = new SpecialSqlItemPreparer() {
 			@Override
-			public boolean doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item) {
+			public boolean doPrepare(PreparedSQL ps, SpecialSqlItem item) {
 				if (item instanceof MySqlItem2) {
 					System.out.println("This is MySqlItem2 preparer");
 					return true;

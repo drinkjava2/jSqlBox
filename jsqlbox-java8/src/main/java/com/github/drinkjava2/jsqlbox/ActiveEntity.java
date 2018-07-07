@@ -18,80 +18,43 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public interface ActiveEntity extends ActiveRecordSupport {
 
 	@Override
-	public default SqlBox box() {
-		SqlBox box = SqlBoxUtils.findBoxOfPOJO(this);
-		if (box == null) {
-			box = SqlBoxUtils.createSqlBox(SqlBoxContext.gctx());
-			SqlBoxUtils.bindBoxToPOJO(this, box);
-		}
-		return box;
-	}
-
-	@Override
 	public default SqlBoxContext ctx() {
-		SqlBox theBox = box();
-		if (theBox.getContext() == null)
-			theBox.setContext(SqlBoxContext.getGlobalSqlBoxContext());
-		return theBox.getContext();
-	}
-
-	@Override
-	public default ActiveRecordSupport useContext(SqlBoxContext ctx) {
-		box().setContext(ctx);
-		return this;
+		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public default <T> T insert(Object... optionalSqlItems) {
-		SqlBoxContext ctx = ctx();
-		if (ctx == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.insert(this, optionalSqlItems);
+		ctx().insert(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public default <T> T update(Object... optionalSqlItems) {
-		SqlBoxContext ctx = ctx();
-		if (ctx == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.update(this, optionalSqlItems);
+		ctx().update(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@Override
 	public default void delete(Object... optionalSqlItems) {
-		SqlBoxContext ctx = ctx();
-		if (ctx == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		ctx.delete(this, optionalSqlItems);
+		ctx().delete(this, optionalSqlItems);
 	}
 
 	@Override
 	public default <T> T load(Object... optionalSqlItems) {
-		SqlBoxContext ctx = ctx();
-		if (ctx == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.load(this, optionalSqlItems);
+		return ctx().load(this, optionalSqlItems);
 	}
 
 	@Override
 	public default <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
-		SqlBoxContext ctx = ctx();
-		if (ctx == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.loadById(this, idOrIdMap, optionalSqlItems);
+		return ctx().loadById(this, idOrIdMap, optionalSqlItems);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public default <T> T loadByQuery(Object... sqlItems) {
-		SqlBoxContext ctx = ctx();
-		if (ctx == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
-		return ctx.loadByQuery((Class<T>) this.getClass(), sqlItems);
+		return ctx().loadByQuery((Class<T>) this.getClass(), sqlItems);
 	}
 
 	@Override

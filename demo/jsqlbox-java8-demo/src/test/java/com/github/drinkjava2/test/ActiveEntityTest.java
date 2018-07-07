@@ -1,6 +1,6 @@
 package com.github.drinkjava2.test;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*; 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 /**
- * ActiveEntity is a interface has default methods only supported for
- * Java8+, so in Java8 and above, a POJO can implements ActiveEntity
- * interface to obtain CRUD methods instead of extends ActiveRecord class
+ * ActiveEntity is a interface has default methods only supported for Java8+, so
+ * in Java8 and above, a POJO can implements ActiveEntity interface to obtain
+ * CRUD methods instead of extends ActiveRecord class
  */
 public class ActiveEntityTest implements ActiveEntity {
 	@Id
@@ -43,7 +43,7 @@ public class ActiveEntityTest implements ActiveEntity {
 
 	@Sql("select * from ActiveEntityTest where age>=?")
 	public List<ActiveEntityTest> selectUsers(Integer age) {
-		return guess(age, new EntityListHandler(ActiveEntityTest.class));
+		return guess(age, new EntityListHandler(), ActiveEntityTest.class);
 	};
 
 	@Before

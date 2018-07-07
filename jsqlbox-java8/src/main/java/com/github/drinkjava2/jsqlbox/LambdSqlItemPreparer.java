@@ -11,7 +11,7 @@ public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 		public Object get();
 	}
 
-	public static interface C_ALIAS extends SpecialSqlItem {////NOSONAR  , a.clo as a_col
+	public static interface C_ALIAS extends SpecialSqlItem {//// NOSONAR , a.clo as a_col
 		public Object get();
 	}
 
@@ -20,37 +20,37 @@ public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 	}
 
 	@Override
-	public boolean doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item) {//NOSONAR
+	public boolean doPrepare(PreparedSQL ps, SpecialSqlItem item) {// NOSONAR
 		AliasProxyUtil.thdMethodName.remove();
 		if (item instanceof ALIAS) {
 			((ALIAS) item).get();
 			AliasItemInfo a = AliasProxyUtil.thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
-				throw new SqlBoxException("Column name not found.");//NOSONAR
+				throw new SqlBoxException("Column name not found.");// NOSONAR
 			if (StrUtils.isEmpty(a.alias))
-				sql.append(a.colName);
+				ps.addSql(a.colName);
 			else
-				sql.append(new StringBuilder(a.alias).append(".").append(a.colName).append(" as ").append(a.alias)
-						.append("_").append(a.colName).toString());
+				ps.addSql(a.alias).append(".").append(a.colName).append(" as ").append(a.alias).append("_")
+						.append(a.colName);
 		} else if (item instanceof C_ALIAS) {
 			((C_ALIAS) item).get();
 			AliasItemInfo a = AliasProxyUtil.thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
 			if (StrUtils.isEmpty(a.alias))
-				sql.append(", " + a.colName);
+				ps.addSql(", " + a.colName);
 			else
-				sql.append(new StringBuilder(", ").append(a.alias).append(".").append(a.colName).append(" as ")
-						.append(a.alias).append("_").append(a.colName).toString());
+				ps.addSql(", ").append(a.alias).append(".").append(a.colName).append(" as ").append(a.alias).append("_")
+						.append(a.colName);
 		} else if (item instanceof COL) {
 			((COL) item).get();
 			AliasItemInfo a = AliasProxyUtil.thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
 			if (StrUtils.isEmpty(a.alias))
-				sql.append(a.colName);
+				ps.addSql(a.colName);
 			else
-				sql.append(new StringBuilder(a.alias).append(".").append(a.colName).toString());
+				ps.addSql(a.alias).append(".").append(a.colName);
 		} else
 			return false;// Not my job, return false to tell jSqlBox use other SpecialSqlItemPreparer
 		return true;

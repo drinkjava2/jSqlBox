@@ -68,8 +68,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx;
 	}
-
-	@Override
+ 
 	public ActiveRecordSupport useContext(SqlBoxContext ctx) {
 		this.ctx=ctx;
 		return this;

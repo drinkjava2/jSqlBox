@@ -11,7 +11,7 @@
  */
 package jsqlboxtx;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
 
 import java.util.Properties;
 
@@ -68,6 +68,7 @@ public class XATransactionTest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Before
 	public void init() {
 		BeanBox.regAopAroundAnnotation(TX.class, SpringTxIBox.class);

@@ -148,8 +148,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Override DbPro's dealItem to deal SqlBoxContext's SqlItem
 	 */
 	@Override
-	protected boolean dealItem(boolean iXxxStyle, PreparedSQL ps, StringBuilder sql, Object item) {// NOSONAR
-		if (super.dealItem(iXxxStyle, ps, sql, item))
+	protected boolean dealOneSqlItem(boolean iXxxStyle, PreparedSQL ps, Object item) {// NOSONAR
+		if (super.dealOneSqlItem(iXxxStyle, ps, item))
 			return true; // if super class DbPro can deal it, let it do
 		else if (item instanceof TableModel) {
 			TableModel t = (TableModel) item;
@@ -163,7 +163,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
 			if (SqlOption.SHARD_TABLE.equals(sqlItemType))
-				handleShardTable(ps, sql, sqItem);
+				handleShardTable(ps, sqItem);
 			else if (SqlOption.SHARD_DATABASE.equals(sqlItemType))
 				handleShardDatabase(ps, sqItem);
 			else if (SqlOption.GIVE.equals(sqlItemType)) {
@@ -226,7 +226,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return ctx;
 	}
 
-	protected String handleShardTable(PreparedSQL predSQL, StringBuilder sql, SqlItem item) {
+	protected String handleShardTable(PreparedSQL predSQL, SqlItem item) {
 		Object[] params = item.getParameters();
 		String table = null;
 		if (predSQL.getModels() == null || predSQL.getModels().length == 0)
@@ -241,7 +241,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		if (table == null)
 			throw new SqlBoxException("No ShardTable Tool found.");
 		else
-			sql.append(table);
+			predSQL.addSql(table);
 		return table;
 	}
 

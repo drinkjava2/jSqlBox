@@ -139,60 +139,58 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * @return a PreparedSQL instance
 	 */
 	private PreparedSQL doPrepare(boolean iXxxStyle, Object... items) {// NOSONAR
-		PreparedSQL ps = realDoPrepare(null, null, iXxxStyle, items);
+		PreparedSQL ps = dealSqlItems(null, iXxxStyle, items);
 		ps.addGlobalAndThreadedHandlers(this);
 		return ps;
 	}
 
-	protected PreparedSQL realDoPrepare(PreparedSQL lastPreSql, StringBuilder lastSqlBuilder, boolean iXxxStyle, // NOSONAR
-			Object... items) {
+	/**
+	 * Deal with multiple SqlItems
+	 */
+	protected PreparedSQL dealSqlItems(PreparedSQL lastPreSql, boolean iXxxStyle, Object... items) {// NOSONAR
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
 		PreparedSQL predSQL = lastPreSql;
 		if (predSQL == null)
 			predSQL = new PreparedSQL();
-		StringBuilder sql = lastSqlBuilder;
-		if (sql == null)
-			sql = new StringBuilder();
 		for (Object item : items) {
 			if (item == null) {
 				if (iXxxStyle)
 					throw new DbProRuntimeException("In iXxxx style,  null value can not append as SQL piece");
 				else
 					predSQL.addParam(null);
-			} else if (!dealItem(iXxxStyle, predSQL, sql, item)) {
+			} else if (!dealOneSqlItem(iXxxStyle, predSQL, item)) {
 				if (item instanceof SqlItem)
 					throw new DbProRuntimeException(
 							"One SqlItem did not find explainer, type=" + ((SqlItem) item).getType());
 				if (item.getClass().isArray()) {
-					realDoPrepare(predSQL, sql, iXxxStyle, (Object[]) item);
+					dealSqlItems(predSQL, iXxxStyle, (Object[]) item);
 				} else if (iXxxStyle)
-					sql.append(item); // iXxxx style, unknown is SQL piece
+					predSQL.addSql(item); // iXxxx style, unknown is SQL piece
 				else
 					predSQL.addParam(item); // pXxxx style, unknown is parameter
 			}
 		}
-		predSQL.setSql(sql.toString());
+		predSQL.setSql(predSQL.getStringBuilder().toString());
 		return predSQL;
 	}
 
 	/**
-	 * Here deal a non-null items, if can analyse it, return true, otherwise return
-	 * false, subclass (like SqlBoxContext) can override this method to deal more
-	 * trick.
+	 * Here deal one SqlItem, if can deal it, return true, otherwise return false,
+	 * subclass (like SqlBoxContext) can override this method
 	 */
-	protected boolean dealItem(boolean iXxxStyle, PreparedSQL predSQL, StringBuilder sql, Object item) {// NOSONAR
+	protected boolean dealOneSqlItem(boolean iXxxStyle, PreparedSQL predSQL, Object item) {// NOSONAR
 		if (item instanceof String) {
 			if (iXxxStyle)
-				sql.append(item);
-			else if (sql.length() > 0)
+				predSQL.addSql(item);
+			else if (predSQL.getStringBuilder().length() > 0)
 				predSQL.addParam(item);
 			else
-				sql.append(item);
+				predSQL.addSql(item);
 		} else if (item instanceof PreparedSQL) {
 			PreparedSQL psItem = (PreparedSQL) item;
 			if (psItem.getSql() != null)
-				sql.append(psItem.getSql());
+				predSQL.addSql(psItem.getSql());
 			if (psItem.getParams() != null)
 				for (Object obj : psItem.getParams())
 					predSQL.addParam(obj);
@@ -233,14 +231,14 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				predSQL.addTemplateParam(sqItem);
 			} else if (SqlOption.SQL.equals(sqlItemType)) {
 				for (Object pm : sqItem.getParameters())
-					sql.append(pm);
+					predSQL.addSql(pm);
 			} else if (SqlOption.QUESTION_PARAM.equals(sqlItemType)) {
 				int i = 0;
 				for (Object pm : sqItem.getParameters()) {
 					predSQL.addParam(pm);
 					if (i > 0)
-						sql.append(",");
-					sql.append("?");
+						predSQL.addSql(",");
+					predSQL.addSql("?");
 					i++;
 				}
 			} else if (SqlOption.NOT_NULL.equals(sqlItemType)) {
@@ -249,17 +247,17 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					throw new DbProRuntimeException("NOT_NULL type SqlItem need at least 2 args");
 				if (args[args.length - 1] != null) {
 					for (int i = 0; i < args.length - 1; i++)
-						dealItem(true, predSQL, sql, args[i]);// in NOT_NULL type, force use i style
+						dealOneSqlItem(true, predSQL, args[i]);// in NOT_NULL type, force use i style
 					predSQL.addParam(args[args.length - 1]);
 				}
 			} else if (SqlOption.VALUES_QUESTIONS.equals(sqlItemType)) {
-				sql.append(" values(");
+				predSQL.addSql(" values(");
 				for (int i = 0; i < predSQL.getParamSize(); i++) {
 					if (i > 0)
-						sql.append(",");
-					sql.append("?");
+						predSQL.addSql(",");
+					predSQL.addSql("?");
 				}
-				sql.append(")");
+				predSQL.addSql(")");
 			} else if (SqlOption.ENABLE_HANDLERS.equals(sqlItemType)) {
 				predSQL.enableAllHandlers();
 			} else if (SqlOption.DISABLE_HANDLERS.equals(sqlItemType)) {
@@ -272,7 +270,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 							"A IocTool setting required to deal an @Ioc or ioc() method, please read user manual.");
 				for (Object claz : sqItem.getParameters()) {
 					Object obj = this.getIocTool().getBean((Class) claz);
-					dealItem(iXxxStyle, predSQL, sql, obj);
+					dealSqlItems(predSQL, iXxxStyle, obj);
 				}
 			} else
 				return false;
@@ -292,7 +290,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				throw new DbProRuntimeException(
 						"SpecialSqlItem found but no specialSqlItemPreparers be set, please read user manual how to set SpecialSqlItemPreparers");
 			for (SpecialSqlItemPreparer spPreparer : specialSqlItemPreparers) {
-				if (spPreparer.doPrepare(predSQL, sql, (SpecialSqlItem) item))// find the first preparer
+				if (spPreparer.doPrepare(predSQL, (SpecialSqlItem) item))// find the first preparer
 					return true;
 			}
 			return false;

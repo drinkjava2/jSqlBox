@@ -53,7 +53,7 @@ public class Java8EampleTest {
 	@Test
 	public void pageQuery() {
 		User u = createAliasProxy(User.class);
-		List<User> users= new User().pageQuery(pagin(2, 10), notNull(" and ", (COL) u::getAge, ">?", "10"));
+		List<User> users = new User().pageQuery(pagin(2, 10), notNull(" and ", (COL) u::getAge, ">?", "10"));
 		Assert.assertEquals(10, users.size());
 	}
 
@@ -61,7 +61,7 @@ public class Java8EampleTest {
 	public void lambdaTest() {
 		Assert.assertEquals(100, giQueryForLongValue("select count(*) from usertb"));
 
-		List<User> totalUsers = giQuery(new EntityListHandler(User.class), "select * from usertb");
+		List<User> totalUsers = giQuery(new EntityListHandler(), User.class, "select * from usertb");
 		Assert.assertEquals(100, totalUsers.size());
 
 		User u = createAliasProxy(User.class);
@@ -77,7 +77,7 @@ public class Java8EampleTest {
 		Assert.assertEquals(10, list1.size());
 
 		u = createAliasProxy(User.class, "u");
-		List<User> list2 = giQuery(new EntityListHandler(User.class) //
+		List<User> list2 = giQuery(new EntityListHandler(),User.class //
 				, "select * from ", table(u), " where "//
 				, (COL) u::getName, ">=?", param("Foo90") //
 				, " and ", (COL) u::getAge, ">?", param(1) //

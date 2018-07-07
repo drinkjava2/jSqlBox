@@ -59,6 +59,6 @@ public class User extends ActiveRecord {
 
 	public List<User> pageQuery(PaginHandler pagin, Object... conditions) {
 		giQueryForLongValue("select count(1) from usertb where 1=1 ", conditions);
-		return giQuery(new EntityListHandler(User.class), "select * from usertb where 1=1", conditions, pagin);
+		return giQuery(new EntityListHandler(), User.class, "select * from usertb where 1=1", conditions, pagin);
 	}
 }

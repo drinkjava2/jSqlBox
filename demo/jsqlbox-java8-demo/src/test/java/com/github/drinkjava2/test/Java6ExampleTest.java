@@ -51,7 +51,7 @@ public class Java6ExampleTest {
 	@Test
 	public void normalTest() {
 		// ctx.setAllowShowSQL(true);
-		List<User> totalUsers = giQuery(new EntityListHandler(User.class), "select * from usertb");
+		List<User> totalUsers = giQuery(new EntityListHandler(), User.class, "select * from usertb");
 		Assert.assertEquals(100, totalUsers.size());
 
 		User u = createAliasProxy(User.class);
@@ -67,7 +67,7 @@ public class Java6ExampleTest {
 		Assert.assertEquals(10, list.size());
 
 		u = createAliasProxy(User.class, "u");
-		List<User> list2 = giQuery(new EntityListHandler(User.class), clean(), //
+		List<User> list2 = giQuery(new EntityListHandler(), User.class, clean(), //
 				"select * from ", table(u), " where "//
 				, col(u.getName()), ">=?", param("Foo90") //
 				, " and ", col(u.getAge()), ">?", param(1) //

@@ -75,8 +75,8 @@ public class BeetlSqlTemplateDemo {
 		List<Map<String, Object>> result = ctx.tQueryForMapList("user.select", bind("age", 50));
 		Assert.assertEquals(50, result.size());
 
-		List<User> users = ctx.tQuery("user.selectUserEntity",
-				bind("u", new User().put("age", 50, "name", "Foo100")), new EntityListHandler(User.class));
+		List<User> users = ctx.tQuery("user.selectUserEntity", bind("u", new User().put("age", 50, "name", "Foo100")),
+				new EntityListHandler(), User.class);
 		Assert.assertEquals(1, users.size());
 		Assert.assertTrue(users.get(0).getAge().equals(100));
 

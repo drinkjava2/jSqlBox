@@ -38,6 +38,8 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 @SuppressWarnings("rawtypes")
 public class PreparedSQL {
 
+	private StringBuilder stringBuilder = new StringBuilder();
+
 	/** SQL Operation Type */
 	private SqlOption operationType;
 
@@ -119,6 +121,11 @@ public class PreparedSQL {
 		sb.append("\nmasterSlaveOption=").append(masterSlaveOption);
 		sb.append("\n");
 		return sb.toString();
+	}
+
+	public StringBuilder addSql(Object sqlPiece) {
+		stringBuilder.append(sqlPiece);
+		return stringBuilder;
 	}
 
 	public void addParam(Object param) {
@@ -428,6 +435,14 @@ public class PreparedSQL {
 
 	public void setOthers(List<Object> others) {
 		this.others = others;
+	}
+
+	public StringBuilder getStringBuilder() {
+		return stringBuilder;
+	}
+
+	public void setStringBuilder(StringBuilder stringBuilder) {
+		this.stringBuilder = stringBuilder;
 	}
 
 }

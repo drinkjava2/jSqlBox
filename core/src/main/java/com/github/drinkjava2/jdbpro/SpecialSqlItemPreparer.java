@@ -36,5 +36,5 @@ public interface SpecialSqlItemPreparer {
 	 *         let system know to find other SpecialSqlItemPreparers to handle this
 	 *         item
 	 */
-	public boolean doPrepare(PreparedSQL ps, StringBuilder sql, SpecialSqlItem item);
+	public boolean doPrepare(PreparedSQL ps,   SpecialSqlItem item);
 }

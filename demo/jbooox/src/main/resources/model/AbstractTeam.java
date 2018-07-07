@@ -18,8 +18,8 @@ public abstract class AbstractTeam extends Team {
 	*/ 
 	
 	public static class EntityListHandlerBox extends BeanBox {
-		public EntityListHandler create() {
-			return new EntityListHandler(Team.class);
+		public Object[] create() {
+			return new Object[] {new EntityListHandler( ), Team.class};
 		}
 	}
 }

@@ -45,6 +45,7 @@ public class NonXATransactionTest {
 	final static int MASTER_DATABASE_QTY = 2; // total 2 databases
 	final static SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
 
+	@SuppressWarnings("deprecation")
 	@Before
 	public void init() {
 		SqlBoxContextConfig.setGlobalNextConnectionManager(TinyTxConnectionManager.instance());

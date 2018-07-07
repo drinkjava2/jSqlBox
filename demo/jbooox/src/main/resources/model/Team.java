@@ -1,7 +1,5 @@
 package model;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
-
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
@@ -52,7 +50,7 @@ public class Team extends ActiveRecord {
 	}
 
 	public List<Team> queryTeamsRatingEqualTo(Integer rating) {
-		return guess(bind("rating",rating), new EntityListHandler(), model(Team.class));
+		return guess(bind("rating", rating), new EntityListHandler(), Team.class);
 	}
 	/*- 
 	 select t.*
