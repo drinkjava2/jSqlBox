@@ -47,8 +47,7 @@ public interface ActiveRecordSupport {// NOSONAR
 	/** Load entity by given id (P-Key) or id Map */
 	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems);
 
-	/** Load entity by given query */
-	public <T> T loadByQuery(Object... sqlItems);
+	public int countAll(Object... optionalSqlItems);
 
 	/**
 	 * Link style set values for entity field, format like:
@@ -83,7 +82,7 @@ public interface ActiveRecordSupport {// NOSONAR
 
 	/** In SqlMapper style, return current method's prepared SQL */
 	public PreparedSQL guessPreparedSQL(Object... params);
-  
+
 	/**
 	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
 	 * instance,

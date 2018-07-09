@@ -280,25 +280,30 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Insert an entity to database */
-	public void insert(Object entity, Object... optionItems) {
-		SqlBoxContextUtils.insert(this, entity, optionItems);
+	public int insertEntity(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.insertEntity(this, entity, optionItems);
 	}
 
 	/** Update an entity in database */
-	public int update(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.update(this, entity, optionItems);
+	public int updateEntity(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.updateEntity(this, entity, optionItems);
 	}
 
 	/** Delete an entity in database */
-	public void delete(Object entity, Object... optionItems) {
-		SqlBoxContextUtils.delete(this, entity, optionItems);
+	public void deleteEntity(Object entity, Object... optionItems) {
+		SqlBoxContextUtils.deleteEntity(this, entity, optionItems);
 	}
 
 	/** Load an entity from database */
-	public <T> T load(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.load(this, entity, optionItems);
+	public <T> T loadEntity(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.loadEntity(this, entity, optionItems);
 	}
 
+	
+	public int countAllEntity(Class<?> entityClass,Object... optionItems) {
+		return SqlBoxContextUtils.countAllEntity(this, entityClass, optionItems);
+	}
+	
 	/**
 	 * Load an entity from database by entityId, entityId can be one object or a Map
 	 */

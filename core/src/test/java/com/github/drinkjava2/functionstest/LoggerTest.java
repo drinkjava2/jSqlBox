@@ -66,7 +66,7 @@ public class LoggerTest {
 			ctx.quiteExecute(ddl);
 		LoggerTest t = new LoggerTest();
 		t.setName("Tom");
-		ctx.insert(t);
+		ctx.insertEntity(t);
 		SqlBoxContextConfig.getGlobalNextLogger().info("Logger test message3 output ok");
 		SqlBoxContextConfig.getGlobalNextLogger().info("Logger test message4 output ok");
 		SqlBoxContextConfig.setGlobalNextAllowShowSql(false);

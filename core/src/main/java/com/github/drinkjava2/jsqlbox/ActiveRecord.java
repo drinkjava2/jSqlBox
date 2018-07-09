@@ -58,55 +58,57 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 public class ActiveRecord implements ActiveRecordSupport {
-	SqlBoxContext ctx; 
+	SqlBoxContext ctx;
 
 	@Override
 	public SqlBoxContext ctx() {
-		if(ctx==null)
-			ctx=SqlBoxContext.globalSqlBoxContext;
+		if (ctx == null)
+			ctx = SqlBoxContext.globalSqlBoxContext;
 		if (ctx == null)
 			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx;
 	}
- 
+
 	public ActiveRecordSupport useContext(SqlBoxContext ctx) {
-		this.ctx=ctx;
+		this.ctx = ctx;
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T insert(Object... optionalSqlItems) {
-		ctx().insert(this, optionalSqlItems);
+		int affectedRow = ctx().insertEntity(this, optionalSqlItems);
+		if (affectedRow != 1)
+			throw new SqlBoxException("No record inserted into database.");
 		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T update(Object... optionalSqlItems) { 
-		ctx().update(this, optionalSqlItems);
+	public <T> T update(Object... optionalSqlItems) {
+		ctx().updateEntity(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@Override
 	public void delete(Object... optionalSqlItems) {
-		ctx().delete(this, optionalSqlItems);
+		ctx().deleteEntity(this, optionalSqlItems);
 	}
 
 	@Override
-	public <T> T load(Object... optionalSqlItems) { 
-		return ctx().load(this, optionalSqlItems);
+	public <T> T load(Object... optionalSqlItems) {
+		return ctx().loadEntity(this, optionalSqlItems);
 	}
 
 	@Override
-	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) { 
+	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
 		return ctx().loadById(this, idOrIdMap, optionalSqlItems);
 	}
+	
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T loadByQuery(Object... sqlItems) { 
-		return ctx().loadByQuery((Class<T>) this.getClass(), sqlItems);
+	public int countAll(Object... optionalSqlItems) {
+		return ctx().countAllEntity(this.getClass(), optionalSqlItems);
 	}
 
 	@Override

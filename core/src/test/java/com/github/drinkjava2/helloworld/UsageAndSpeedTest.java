@@ -427,11 +427,11 @@ public class UsageAndSpeedTest {
 			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
 			user.setAddress("Canada");
-			ctx.insert(user);
+			ctx.insertEntity(user);
 			user.setAddress("China");
-			ctx.update(user);
+			ctx.updateEntity(user);
 			UserPOJO sam2 = ctx.loadById(UserPOJO.class, "Sam");
-			ctx.delete(sam2);
+			ctx.deleteEntity(sam2);
 		}
 	}
 
@@ -627,8 +627,8 @@ public class UsageAndSpeedTest {
 		user.setName("Sam");
 		user.setAddress("Canada");
 		user.insert();
-		UserAR user2 = new UserAR().useContext(ctx).loadByQuery("select * from ", UserAR.TABLE);
-		Assert.assertEquals("Sam", user2.getName());
+		UserAR user2 = new UserAR().useContext(ctx).loadById(user.getName());
+		Assert.assertEquals("Canada", user2.getAddress());
 	}
 
 	@Test
@@ -639,22 +639,22 @@ public class UsageAndSpeedTest {
 		for (int i = 1; i <= 10; i++) {
 			user.setName("Tom" + i);
 			user.setAddress("China" + i);
-			ctx.insert(user);
+			ctx.insertEntity(user);
 		}
 		user = new UserAR();
 		user.setName("Tom8");
-		ctx.load(user);
+		ctx.loadEntity(user);
 		Assert.assertEquals("China8", user.getAddress());
 
 		user = ctx.loadById(UserAR.class, "Tom7");
 		Assert.assertEquals("China7", user.getAddress());
 
 		user.setAddress("Canada");
-		ctx.update(user);
+		ctx.updateEntity(user);
 		Assert.assertEquals("Canada", ctx.loadById(UserAR.class, "Tom7").getAddress());
 
-		ctx.delete(user);
-		ctx.delete(user, " or name=?", param("Tom2"));
+		ctx.deleteEntity(user);
+		ctx.deleteEntity(user, " or name=?", param("Tom2"));
 
 		Assert.assertEquals(7, ctx.loadAll(UserAR.class, " where name>?", param("Tom1")).size());
 	}

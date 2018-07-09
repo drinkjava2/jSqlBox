@@ -96,10 +96,10 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	//@formatter:off
 		protected void gXxxxCrudMethods_____________________() {}// NOSONAR 
 		
-		public static void gInsert(Object entity, Object... optionalSqlItems) { gctx().insert(entity, optionalSqlItems); }  
-		public static int gUpdate(Object entity, Object... optionalSqlItems) { return gctx().update(entity, optionalSqlItems); } 
-		public static  void gDelete(Object entity, Object... optionalSqlItems) { gctx().delete(entity, optionalSqlItems); } 
-		public static <T> T gLoad(Object entity, Object... optionalSqlItems) { return gctx().load(entity, optionalSqlItems); } 
+		public static void gInsert(Object entity, Object... optionalSqlItems) { gctx().insertEntity(entity, optionalSqlItems); }  
+		public static int gUpdate(Object entity, Object... optionalSqlItems) { return gctx().updateEntity(entity, optionalSqlItems); } 
+		public static  void gDelete(Object entity, Object... optionalSqlItems) { gctx().deleteEntity(entity, optionalSqlItems); } 
+		public static <T> T gLoad(Object entity, Object... optionalSqlItems) { return gctx().loadEntity(entity, optionalSqlItems); } 
 		public static <T> List<T> gLoadAll(Class<T> entityClass, Object... optionalSqlItems) { return gctx().loadAll(entityClass, optionalSqlItems); } 
 		public static <T> T gLoadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {return gctx().loadById(entityClass, entityId, optionalSqlItems);}
 		public static <T> T gLoadByQuery(Class<T> entityClass, Object... sqlItems) { return gctx().loadByQuery(entityClass, sqlItems); }
