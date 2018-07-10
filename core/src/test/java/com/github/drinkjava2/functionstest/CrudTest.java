@@ -92,18 +92,26 @@ public class CrudTest {
 		CrudUser u1 = new CrudUser();
 		u1.setName("Tom");
 		u1.setAddress("China");
+		int result = 0;
+
+		Assert.assertEquals(1, ctx.tryInsertEntity(u1));
+		Assert.assertEquals(1, u1.tryInsert());
 		ctx.insertEntity(u1);
+		u1.insert();
+		
 
 		u1.setAddress("Canada");
-		ctx.updateEntity(u1);
+		result = ctx.tryUpdate(u1);
+		Assert.assertEquals(1, result);
 
 		CrudUser u2 = new CrudUser();
 		u2.setName("Tom");
-		ctx.loadEntity(u2);
+		ctx.load(u2);
 		Assert.assertEquals("Canada", u2.getAddress());
 
-		ctx.deleteEntity(u2);
-		Assert.assertEquals(0, ctx.countAllEntity(CrudUser.class));
+		result = ctx.tryDelete(u2);
+		Assert.assertEquals(1, result);
+		Assert.assertEquals(0, ctx.countAll(CrudUser.class));
 	}
 
 	@Test

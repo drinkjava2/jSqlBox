@@ -73,7 +73,7 @@ public class DynamicConfigTest extends TestBase {
 
 		// A Fake PKey dynamically created
 		t.column("id").pkey();
-		ctx.insertEntity(u, t);
+		ctx.tryInsertEntity(u, t);
 
 		u.setUserName("Tom");
 		u.update(t);

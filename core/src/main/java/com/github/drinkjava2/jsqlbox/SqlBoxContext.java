@@ -46,6 +46,7 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
  * @author Yong Zhu
  * @since 1.0.0
  */
+@SuppressWarnings("unchecked")
 public class SqlBoxContext extends DbPro {// NOSONAR
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
@@ -113,7 +114,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		}
 	}
 
-	protected void coreMethods______________________________() {// NOSONAR
+	protected void miscMethods______________________________() {// NOSONAR
 	}
 
 	/** Reset all global SqlBox variants to default values */
@@ -276,34 +277,45 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return this.tQuery(new EntityListHandler(), optionItems);
 	}
 
+	private static void checkIfResultIs1(int result, String curdType) {
+		if (result == 0)
+			throw new SqlBoxException("No record found in database when do " + curdType + " operation.");
+		if (result == 0)
+			throw new SqlBoxException("No record found in database when do " + curdType + " operation.");
+	}
+
 	protected void crudMethods______________________________() {// NOSONAR
 	}
 
-	/** Insert an entity to database */
-	public int insertEntity(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.insertEntity(this, entity, optionItems);
+	public <T> T insertEntity(Object entity, Object... optionItems) {
+		int result = tryInsertEntity(entity, optionItems);
+		checkIfResultIs1(result, "insert");
+		return (T) entity;
+	} 
+
+	public int tryInsertEntity(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.tryInsert(this, entity, optionItems);
 	}
 
 	/** Update an entity in database */
-	public int updateEntity(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.updateEntity(this, entity, optionItems);
+	public int tryUpdate(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.tryUpdate(this, entity, optionItems);
 	}
 
 	/** Delete an entity in database */
-	public void deleteEntity(Object entity, Object... optionItems) {
-		SqlBoxContextUtils.deleteEntity(this, entity, optionItems);
+	public int tryDelete(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.tryDelete(this, entity, optionItems);
 	}
 
 	/** Load an entity from database */
-	public <T> T loadEntity(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.loadEntity(this, entity, optionItems);
+	public <T> T load(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.load(this, entity, optionItems);
 	}
 
-	
-	public int countAllEntity(Class<?> entityClass,Object... optionItems) {
-		return SqlBoxContextUtils.countAllEntity(this, entityClass, optionItems);
+	public int countAll(Class<?> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.countAll(this, entityClass, optionItems);
 	}
-	
+
 	/**
 	 * Load an entity from database by entityId, entityId can be one object or a Map
 	 */
@@ -318,9 +330,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionItems);
 	}
 
-	/** Load an entity from database by query */
-	public <T> T loadByQuery(Class<T> config, Object... optionItems) {
-		return SqlBoxContextUtils.loadByQuery(this, config, optionItems);
+	/** Load all entity from database */
+	public <T> List<T> findBySQL(Class<T> config, Object... optionItems) {
+		return null;
 	}
 
 	/** Load all entity from database */

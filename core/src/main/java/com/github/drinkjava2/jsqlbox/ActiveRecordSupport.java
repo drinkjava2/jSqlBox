@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.util.List;
+
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 
@@ -29,25 +31,56 @@ public interface ActiveRecordSupport {// NOSONAR
 	/** @return current SqlBoxContext instance */
 	public SqlBoxContext ctx();
 
-	/** Insert entity to database */
-	public <T> T insert(Object... optionalSqlItems);
+	/** Insert entity to database, if not 1 row updated, throw SqlBoxException */
+	public <T> T insert(Object... options);
 
-	/** Update entity in database */
-	public <T> T update(Object... optionalSqlItems);
+	/** Insert entity to database, return how many rows affected */
+	public int tryInsert(Object... options);
 
-	/** Delete entity in database */
-	public void delete(Object... optionalSqlItems);
+	/** Update entity in database, if not 1 row updated, throw SqlBoxException */
+	public <T> T update(Object... options);
 
-	/**
-	 * Load entity from database by primary key, shardTable and shardDatabase fields
-	 * if have
-	 */
-	public <T> T load(Object... optionalSqlItems);
+	/** Update entity in database, return how many rows affected */
+	public int tryUpdate(Object... options);
 
-	/** Load entity by given id (P-Key) or id Map */
-	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems);
+	/** Delete entity in database, if not 1 row deleted, throw SqlBoxException */
+	public void delete(Object... options);
 
-	public int countAll(Object... optionalSqlItems);
+	/** Delete entity in database, return how many rows affected */
+	public int tryDelete(Object... options);
+
+	/** Delete entity by given id, if not 1 row deleted, throw SqlBoxException */
+	public void deleteById(Object id, Object... options);
+
+	/** Delete entity by given id, return how many rows deleted */
+	public int tryDeleteById(Object id, Object... options);
+
+	/** Load entity according its id, if not found, throw SqlBoxException */
+	public <T> T load(Object... options);
+
+	/** Load entity according its id, if not found, return null */
+	public <T> T tryLoad(Object... options);
+
+	/** Load entity by given id, if not found, throw SqlBoxException */
+	public <T> T loadById(Object id, Object... options);
+
+	/** Load entity by given id, if not found, return null */
+	public <T> T tryLoadById(Object id, Object... options);
+
+	/** Load entity according its id, if not found, throw SqlBoxException */
+	public <T> List<T> findAll(Object id, Object... options);
+
+	/** Load entity according its id, if not found, return null */
+	public <T> List<T> findAllByIds(Iterable<?> ids, Object... options);
+
+	/** Return how many records for current entity class */
+	public int countAll(Object... options);
+
+	/** Check if entity exist by its id */
+	public boolean exist(Object... options);
+
+	/** Check if entity exist by given id */
+	public boolean existById(Object id, Object... options);
 
 	/**
 	 * Link style set values for entity field, format like:

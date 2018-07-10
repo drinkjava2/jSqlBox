@@ -427,11 +427,11 @@ public class UsageAndSpeedTest {
 			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
 			user.setAddress("Canada");
-			ctx.insertEntity(user);
+			ctx.tryInsertEntity(user);
 			user.setAddress("China");
-			ctx.updateEntity(user);
+			ctx.tryUpdate(user);
 			UserPOJO sam2 = ctx.loadById(UserPOJO.class, "Sam");
-			ctx.deleteEntity(sam2);
+			ctx.tryDelete(sam2);
 		}
 	}
 
@@ -639,22 +639,22 @@ public class UsageAndSpeedTest {
 		for (int i = 1; i <= 10; i++) {
 			user.setName("Tom" + i);
 			user.setAddress("China" + i);
-			ctx.insertEntity(user);
+			ctx.tryInsertEntity(user);
 		}
 		user = new UserAR();
 		user.setName("Tom8");
-		ctx.loadEntity(user);
+		ctx.load(user);
 		Assert.assertEquals("China8", user.getAddress());
 
 		user = ctx.loadById(UserAR.class, "Tom7");
 		Assert.assertEquals("China7", user.getAddress());
 
 		user.setAddress("Canada");
-		ctx.updateEntity(user);
+		ctx.tryUpdate(user);
 		Assert.assertEquals("Canada", ctx.loadById(UserAR.class, "Tom7").getAddress());
 
-		ctx.deleteEntity(user);
-		ctx.deleteEntity(user, " or name=?", param("Tom2"));
+		ctx.tryDelete(user);
+		ctx.tryDelete(user, " or name=?", param("Tom2"));
 
 		Assert.assertEquals(7, ctx.loadAll(UserAR.class, " where name>?", param("Tom1")).size());
 	}

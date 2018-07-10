@@ -12,6 +12,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
@@ -74,41 +75,108 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
+	protected void crudMethods__________________() {// NOSONAR
+	}
+
 	@Override
 	public <T> T insert(Object... optionalSqlItems) {
-		int affectedRow = ctx().insertEntity(this, optionalSqlItems);
-		if (affectedRow != 1)
-			throw new SqlBoxException("No record inserted into database.");
-		return (T) this;
+		return ctx().insertEntity(this, optionalSqlItems);
+	}
+
+	@Override
+	public int tryInsert(Object... options) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T update(Object... optionalSqlItems) {
-		ctx().updateEntity(this, optionalSqlItems);
+		ctx().tryUpdate(this, optionalSqlItems);
 		return (T) this;
 	}
 
 	@Override
+	public int tryUpdate(Object... options) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
 	public void delete(Object... optionalSqlItems) {
-		ctx().deleteEntity(this, optionalSqlItems);
+		ctx().tryDelete(this, optionalSqlItems);
+	}
+
+	@Override
+	public int tryDelete(Object... options) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void deleteById(Object id, Object... options) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int tryDeleteById(Object id, Object... options) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	@Override
 	public <T> T load(Object... optionalSqlItems) {
-		return ctx().loadEntity(this, optionalSqlItems);
+		return ctx().load(this, optionalSqlItems);
+	}
+
+	@Override
+	public <T> T tryLoad(Object... options) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
 		return ctx().loadById(this, idOrIdMap, optionalSqlItems);
 	}
-	
+
+	@Override
+	public <T> T tryLoadById(Object id, Object... options) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> List<T> findAll(Object id, Object... options) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> List<T> findAllByIds(Iterable<?> ids, Object... options) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public int countAll(Object... optionalSqlItems) {
-		return ctx().countAllEntity(this.getClass(), optionalSqlItems);
+		return ctx().countAll(this.getClass(), optionalSqlItems);
+	}
+
+	@Override
+	public boolean exist(Object... options) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean existById(Object id, Object... options) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	protected void miscMethods__________________() {// NOSONAR
 	}
 
 	@Override
