@@ -21,7 +21,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class ActiveRecordDemoTest {
 
 	@Table(name = "users")
-	public static class UserEntity extends ActiveRecord {
+	public static class UserEntity extends ActiveRecord<UserEntity> {
 		@UUID25
 		@Id
 		private String id;

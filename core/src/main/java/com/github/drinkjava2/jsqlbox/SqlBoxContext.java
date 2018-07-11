@@ -195,7 +195,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Create a subClass instance of a abstract ActiveRecordSupport class based on
 	 * default global SqlBoxContext
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> T createMapper(Class<?> abstractClass) {
 		Class<?> childClass = SqlMapperUtils.createChildClass(abstractClass);
 		try {
@@ -277,66 +276,79 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return this.tQuery(new EntityListHandler(), optionItems);
 	}
 
-	private static void checkIfResultIs1(int result, String curdType) {
-		if (result == 0)
+	private static void checkOnlyOneRowAffected(int result, String curdType) {
+		if (result <= 0)
 			throw new SqlBoxException("No record found in database when do " + curdType + " operation.");
-		if (result == 0)
-			throw new SqlBoxException("No record found in database when do " + curdType + " operation.");
+		if (result > 1)
+			throw new SqlBoxException("Affect more than 1 row record in database when do " + curdType + " operation.");
 	}
 
 	protected void crudMethods______________________________() {// NOSONAR
 	}
 
-	public <T> T insertEntity(Object entity, Object... optionItems) {
-		int result = tryInsertEntity(entity, optionItems);
-		checkIfResultIs1(result, "insert");
-		return (T) entity;
-	} 
+	public <T> T entityInsert(T entity, Object... optionItems) {
+		int result = SqlBoxContextUtils.entityTryInsert(this, entity, optionItems);
+		checkOnlyOneRowAffected(result, "insert");
+		return entity;
+	}
 
-	public int tryInsertEntity(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.tryInsert(this, entity, optionItems);
+	public int entityTryInsert(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.entityTryInsert(this, entity, optionItems);
 	}
 
 	/** Update an entity in database */
-	public int tryUpdate(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.tryUpdate(this, entity, optionItems);
+	public <T> T entityUpdate(Object entity, Object... optionItems) {
+		int result = SqlBoxContextUtils.entityTryUpdate(this, entity, optionItems);
+		checkOnlyOneRowAffected(result, "update");
+		return (T) entity;
+	}
+
+	/** Update an entity in database */
+	public int entityTryUpdate(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.entityTryUpdate(this, entity, optionItems);
 	}
 
 	/** Delete an entity in database */
-	public int tryDelete(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.tryDelete(this, entity, optionItems);
+	public void entityDelete(Object entity, Object... optionItems) {
+		int result = SqlBoxContextUtils.entityTryDelete(this, entity, optionItems);
+		checkOnlyOneRowAffected(result, "delete");
+	}
+
+	/** Delete an entity in database */
+	public int entityTryDelete(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.entityTryDelete(this, entity, optionItems);
 	}
 
 	/** Load an entity from database */
-	public <T> T load(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.load(this, entity, optionItems);
+	public <T> T entityLoad(T entity, Object... optionItems) {
+		int result = SqlBoxContextUtils.entityTryLoad(this, entity, optionItems);
+		checkOnlyOneRowAffected(result, "insert");
+		return entity;
 	}
 
-	public int countAll(Class<?> entityClass, Object... optionItems) {
-		return SqlBoxContextUtils.countAll(this, entityClass, optionItems);
+	/** Load an entity from database */
+	public int entityTryLoad(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.entityTryLoad(this, entity, optionItems);
+	}
+
+	public int entityCountAll(Class<?> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.entityCountAll(this, entityClass, optionItems);
 	}
 
 	/**
 	 * Load an entity from database by entityId, entityId can be one object or a Map
 	 */
-	public <T> T loadById(Object entity, Object entityId, Object... optionItems) {
-		return SqlBoxContextUtils.loadById(this, entity, entityId, optionItems);
-	}
-
-	/**
-	 * Load an entity from database by entityId, entityId can be one object or a Map
-	 */
-	public <T> T loadById(Class<T> entityClass, Object entityId, Object... optionItems) {
-		return SqlBoxContextUtils.loadById(this, entityClass, entityId, optionItems);
+	public <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
+		return SqlBoxContextUtils.entityLoadById(this, entityClass, entityId, optionItems);
 	}
 
 	/** Load all entity from database */
-	public <T> List<T> findBySQL(Class<T> config, Object... optionItems) {
+	public <T> List<T> entityFindBySQL(Class<T> config, Object... optionItems) {
 		return null;
 	}
 
 	/** Load all entity from database */
-	public <T> List<T> loadAll(Class<T> config, Object... optionItems) {
+	public <T> List<T> entityLoadAll(Class<T> config, Object... optionItems) {
 		return SqlBoxContextUtils.loadAll(this, config, optionItems);
 	}
 

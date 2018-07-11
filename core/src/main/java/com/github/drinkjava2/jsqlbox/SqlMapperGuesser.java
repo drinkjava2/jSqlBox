@@ -31,9 +31,9 @@ public interface SqlMapperGuesser {// NOSONAR
 	 *            The ActiveRecord entity
 	 * @param params
 	 *            The SQL params
-	 * @return T The Result object, a generic type
+	 * @return U The Result object, a generic type
 	 */
-	public <T> T guess(SqlBoxContext ctx, Object entity, Object... params);
+	public <U> U guess(SqlBoxContext ctx, Object entity, Object... params);
 
 	/**
 	 * Return the guessed SQL of a method which has @Sql annotation or Text in

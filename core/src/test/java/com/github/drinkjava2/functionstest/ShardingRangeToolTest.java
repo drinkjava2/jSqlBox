@@ -50,7 +50,7 @@ public class ShardingRangeToolTest {
 
 	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
 
-	public static class TheUser extends ActiveRecord {
+	public static class TheUser extends ActiveRecord<TheUser> {
 		// 0~99 store in TheUser_0, 100~199 store in TheUser_1...
 		@ShardTable({ "RANGE", "100" })
 		@Id

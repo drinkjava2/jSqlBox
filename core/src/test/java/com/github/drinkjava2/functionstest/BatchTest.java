@@ -55,7 +55,7 @@ public class BatchTest {
 	}
 
 	@Table(name = "batch_test_tb")
-	public static class User extends ActiveRecord {
+	public static class User extends ActiveRecord<User> {
 		String name;
 		String address;
 

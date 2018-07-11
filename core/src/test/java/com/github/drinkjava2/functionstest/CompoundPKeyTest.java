@@ -41,7 +41,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 @SuppressWarnings("all")
 public class CompoundPKeyTest extends TestBase {
 
-	public static class CmpEntity extends ActiveRecord {
+	public static class CmpEntity extends ActiveRecord<CmpEntity> {
 		@Id
 		String firstName;
 

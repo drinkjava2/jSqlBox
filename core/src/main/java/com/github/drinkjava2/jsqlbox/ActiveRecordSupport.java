@@ -24,79 +24,79 @@ import com.github.drinkjava2.jdbpro.SqlItem;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public interface ActiveRecordSupport {// NOSONAR
+public interface ActiveRecordSupport<T> {// NOSONAR
 
 	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 
 	/** @return current SqlBoxContext instance */
-	public SqlBoxContext ctx();
+	public SqlBoxContext ctx(Object... optionItems);
 
 	/** Insert entity to database, if not 1 row updated, throw SqlBoxException */
-	public <T> T insert(Object... options);
+	public T insert(Object... optionItems);
 
 	/** Insert entity to database, return how many rows affected */
-	public int tryInsert(Object... options);
+	public int tryInsert(Object... optionItems);
 
 	/** Update entity in database, if not 1 row updated, throw SqlBoxException */
-	public <T> T update(Object... options);
+	public T update(Object... optionItems);
 
 	/** Update entity in database, return how many rows affected */
-	public int tryUpdate(Object... options);
+	public int tryUpdate(Object... optionItems);
 
 	/** Delete entity in database, if not 1 row deleted, throw SqlBoxException */
-	public void delete(Object... options);
+	public void delete(Object... optionItems);
 
 	/** Delete entity in database, return how many rows affected */
-	public int tryDelete(Object... options);
+	public int tryDelete(Object... optionItems);
 
 	/** Delete entity by given id, if not 1 row deleted, throw SqlBoxException */
-	public void deleteById(Object id, Object... options);
+	public void deleteById(Object id, Object... optionItems);
 
 	/** Delete entity by given id, return how many rows deleted */
-	public int tryDeleteById(Object id, Object... options);
+	public int tryDeleteById(Object id, Object... optionItems);
 
 	/** Load entity according its id, if not found, throw SqlBoxException */
-	public <T> T load(Object... options);
+	public T load(Object... optionItems);
 
-	/** Load entity according its id, if not found, return null */
-	public <T> T tryLoad(Object... options);
+	/** Load entity according its id, return how many rows found */
+	public int tryLoad(Object... optionItems);
 
 	/** Load entity by given id, if not found, throw SqlBoxException */
-	public <T> T loadById(Object id, Object... options);
+	public T loadById(Object id, Object... optionItems);
 
 	/** Load entity by given id, if not found, return null */
-	public <T> T tryLoadById(Object id, Object... options);
+	public T tryLoadById(Object id, Object... optionItems);
 
 	/** Load entity according its id, if not found, throw SqlBoxException */
-	public <T> List<T> findAll(Object id, Object... options);
+	public List<T> findAll(Object id, Object... optionItems);
 
 	/** Load entity according its id, if not found, return null */
-	public <T> List<T> findAllByIds(Iterable<?> ids, Object... options);
+	public List<T> findAllByIds(Iterable<?> ids, Object... optionItems);
 
 	/** Return how many records for current entity class */
-	public int countAll(Object... options);
+	public int countAll(Object... optionItems);
 
 	/** Check if entity exist by its id */
-	public boolean exist(Object... options);
+	public boolean exist(Object... optionItems);
 
 	/** Check if entity exist by given id */
-	public boolean existById(Object id, Object... options);
+	public boolean existById(Object id, Object... optionItems);
 
 	/**
 	 * Link style set values for entity field, format like:
 	 * user.put("id","id1").put("name","Sam").put("address","Beijing","phone","12345",
 	 * "email","abc@123.com")
 	 */
-	public ActiveRecordSupport put(Object... fieldAndValues);
+	public T put(Object... fieldAndValues);
 
 	/** Cache a field array in ThreadLocal for putValues method use */
-	public ActiveRecordSupport putFields(String... fieldNames);
+	public T putFields(String... fieldNames);
 
 	/**
 	 * Put values for entity fields, field names should be cached by call putFields
 	 * method first
 	 */
-	public ActiveRecordSupport putValues(Object... values);
+	public T putValues(Object... values);
 
 	/**
 	 * In SqlMapper style, based on current method @Sql annotated String or Text(see
@@ -104,7 +104,7 @@ public interface ActiveRecordSupport {// NOSONAR
 	 * manual) and parameters, guess a best fit query/update/delete/execute method
 	 * and run it
 	 */
-	public <T> T guess(Object... params);
+	public <U> U guess(Object... params);
 
 	/**
 	 * In SqlMapper style, return current method's SQL String based on current

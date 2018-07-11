@@ -25,7 +25,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 1.0.0
  */
 
-public class HelloWorld extends ActiveRecord{
+public class HelloWorld extends ActiveRecord<HelloWorld>{
 	private String name;
 
 	public String getName() {

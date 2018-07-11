@@ -36,7 +36,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 @SuppressWarnings("all")
 public class SpecialSqlItemPreparerTest extends TestBase {
 
-	public static class SpecialDemoUser extends ActiveRecord {
+	public static class SpecialDemoUser extends ActiveRecord<SpecialDemoUser> {
 		@Id
 		String id;
 

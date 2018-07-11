@@ -8,7 +8,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "treenodetb")
-public class TreeNode extends ActiveRecord {
+public class TreeNode extends ActiveRecord<TreeNode> {
 	@Id
 	String id;
 

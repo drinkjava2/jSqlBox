@@ -52,7 +52,7 @@ public class ShardingModToolTest {
 
 	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
 
-	public static class TheUser extends ActiveRecord {
+	public static class TheUser extends ActiveRecord<TheUser> {
 		@ShardTable({ "MOD", "8" })
 		@Snowflake
 		@Id

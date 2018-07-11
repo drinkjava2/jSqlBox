@@ -156,7 +156,7 @@ public class UsageAndSpeedTest {
 	}
 
 	@Table(name = UserAR.TABLE)
-	public static class UserAR extends ActiveRecord {
+	public static class UserAR extends ActiveRecord<UserAR> {
 		public static final String TABLE = "users";
 		public static final String NAME = "name";
 		public static final String ADDRESS = "address";
@@ -427,11 +427,11 @@ public class UsageAndSpeedTest {
 			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
 			user.setAddress("Canada");
-			ctx.tryInsertEntity(user);
+			ctx.entityTryInsert(user);
 			user.setAddress("China");
-			ctx.tryUpdate(user);
-			UserPOJO sam2 = ctx.loadById(UserPOJO.class, "Sam");
-			ctx.tryDelete(sam2);
+			ctx.entityTryUpdate(user);
+			UserPOJO sam2 = ctx.entityLoadById(UserPOJO.class, "Sam");
+			ctx.entityTryDelete(sam2);
 		}
 	}
 
@@ -447,7 +447,7 @@ public class UsageAndSpeedTest {
 			user.setAddress("China");
 			user.update();
 			UserAR user2 = new UserAR().useContext(ctx).loadById("Sam");
-			user2.delete();
+			user2.delete(ctx);
 		}
 	}
 
@@ -462,7 +462,7 @@ public class UsageAndSpeedTest {
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			UserAR user2 = ctx.loadById(UserAR.class, "Sam");
+			UserAR user2 = ctx.entityLoadById(UserAR.class, "Sam");
 			user2.delete();
 		}
 	}
@@ -616,7 +616,7 @@ public class UsageAndSpeedTest {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("name", "Sam");
 		UserAR user2 = new UserAR().useContext(ctx).loadById(map);
-		user2.delete();
+		user2.delete(ctx);
 	}
 
 	@Test
@@ -639,24 +639,24 @@ public class UsageAndSpeedTest {
 		for (int i = 1; i <= 10; i++) {
 			user.setName("Tom" + i);
 			user.setAddress("China" + i);
-			ctx.tryInsertEntity(user);
+			ctx.entityTryInsert(user);
 		}
 		user = new UserAR();
 		user.setName("Tom8");
-		ctx.load(user);
+		ctx.entityLoad(user);
 		Assert.assertEquals("China8", user.getAddress());
 
-		user = ctx.loadById(UserAR.class, "Tom7");
+		user = ctx.entityLoadById(UserAR.class, "Tom7");
 		Assert.assertEquals("China7", user.getAddress());
 
 		user.setAddress("Canada");
-		ctx.tryUpdate(user);
-		Assert.assertEquals("Canada", ctx.loadById(UserAR.class, "Tom7").getAddress());
+		ctx.entityTryUpdate(user);
+		Assert.assertEquals("Canada", ctx.entityLoadById(UserAR.class, "Tom7").getAddress());
 
-		ctx.tryDelete(user);
-		ctx.tryDelete(user, " or name=?", param("Tom2"));
+		ctx.entityTryDelete(user);
+		ctx.entityTryDelete(user, " or name=?", param("Tom2"));
 
-		Assert.assertEquals(7, ctx.loadAll(UserAR.class, " where name>?", param("Tom1")).size());
+		Assert.assertEquals(7, ctx.entityLoadAll(UserAR.class, " where name>?", param("Tom1")).size());
 	}
 
 	@Test

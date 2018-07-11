@@ -60,7 +60,7 @@ import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
 public class SqlHandlersTest extends TestBase {
 
 	@Table(name = "DemoUser")
-	public static class DemoUser extends ActiveRecord {
+	public static class DemoUser extends ActiveRecord<DemoUser> {
 		@Id
 		String id;
 		String userName;

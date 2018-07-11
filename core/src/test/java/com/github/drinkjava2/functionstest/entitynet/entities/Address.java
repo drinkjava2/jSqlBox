@@ -6,7 +6,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "addresstb")
-public class Address extends ActiveRecord {
+public class Address extends ActiveRecord<Address> {
 	@Id
 	String id;
 	String addressName;

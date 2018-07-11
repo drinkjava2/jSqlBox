@@ -36,7 +36,7 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
  */
 public class BatchInsertTest extends TestBase {
 
-	public static class DummyUser extends ActiveRecord {
+	public static class DummyUser extends ActiveRecord<DummyUser> {
 		private String name;
 		private Integer age;
 

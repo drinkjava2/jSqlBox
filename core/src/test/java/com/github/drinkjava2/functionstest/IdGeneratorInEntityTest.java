@@ -45,7 +45,7 @@ public class IdGeneratorInEntityTest extends TestBase {
 	
 	@Entity
 	@Table(name = "teams")
-	public static class TeamDemo extends ActiveRecord {
+	public static class TeamDemo extends ActiveRecord<TeamDemo> {
 		@Id
 		@TableGenerator(name = "ID_GENERATOR", table = "pk_table", pkColumnName = "pk_col", pkColumnValue = "pk_val", valueColumnName = "val_col", initialValue = 1, allocationSize = 1)
 		@GeneratedValue(strategy = GenerationType.TABLE, generator = "ID_GENERATOR")

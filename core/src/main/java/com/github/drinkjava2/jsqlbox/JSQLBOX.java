@@ -95,13 +95,6 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
 	//@formatter:off
 		protected void gXxxxCrudMethods_____________________() {}// NOSONAR 
-		
-		public static void gInsert(Object entity, Object... optionalSqlItems) { gctx().tryInsertEntity(entity, optionalSqlItems); }  
-		public static int gUpdate(Object entity, Object... optionalSqlItems) { return gctx().tryUpdate(entity, optionalSqlItems); } 
-		public static  void gDelete(Object entity, Object... optionalSqlItems) { gctx().tryDelete(entity, optionalSqlItems); } 
-		public static <T> T gLoad(Object entity, Object... optionalSqlItems) { return gctx().load(entity, optionalSqlItems); } 
-		public static <T> List<T> gLoadAll(Class<T> entityClass, Object... optionalSqlItems) { return gctx().loadAll(entityClass, optionalSqlItems); } 
-		public static <T> T gLoadById(Class<T> entityClass, Object entityId, Object... optionalSqlItems) {return gctx().loadById(entityClass, entityId, optionalSqlItems);}
 
 		protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
 		public static <T> T giQuery(Object... inlineSQL) {return  gctx().iQuery(inlineSQL);}

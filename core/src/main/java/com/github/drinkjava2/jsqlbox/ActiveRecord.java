@@ -58,11 +58,15 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class ActiveRecord implements ActiveRecordSupport {
+@SuppressWarnings("unchecked")
+public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	SqlBoxContext ctx;
 
 	@Override
-	public SqlBoxContext ctx() {
+	public SqlBoxContext ctx(Object... optionItems) {
+		for (Object item : optionItems)  
+			if (item != null && item instanceof SqlBoxContext)
+				return (SqlBoxContext) item; 
 		if (ctx == null)
 			ctx = SqlBoxContext.globalSqlBoxContext;
 		if (ctx == null)
@@ -70,108 +74,101 @@ public class ActiveRecord implements ActiveRecordSupport {
 		return ctx;
 	}
 
-	public ActiveRecordSupport useContext(SqlBoxContext ctx) {
+	public T useContext(SqlBoxContext ctx) {
 		this.ctx = ctx;
-		return this;
+		return (T) this;
 	}
 
 	protected void crudMethods__________________() {// NOSONAR
 	}
 
 	@Override
-	public <T> T insert(Object... optionalSqlItems) {
-		return ctx().insertEntity(this, optionalSqlItems);
+	public T insert(Object... optionItems) {
+		return (T) ctx(optionItems).entityInsert(this, optionItems);
 	}
 
 	@Override
-	public int tryInsert(Object... options) {
+	public int tryInsert(Object... optionItems) {
+		return ctx(optionItems).entityTryInsert(this, optionItems);
+	}
+
+	@Override
+	public T update(Object... optionItems) {
+		return ctx(optionItems).entityUpdate(this, optionItems);
+	}
+
+	@Override
+	public int tryUpdate(Object... optionItems) {
+		return ctx(optionItems).entityTryUpdate(this, optionItems);
+	}
+
+	@Override
+	public void delete(Object... optionItems) {
+		ctx(optionItems).entityTryDelete(this, optionItems);
+	}
+
+	@Override
+	public int tryDelete(Object... optionItems) {
+		return ctx(optionItems).entityTryDelete(this, optionItems);
+	}
+
+	@Override
+	public void deleteById(Object id, Object... optionItems) {
 		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T update(Object... optionalSqlItems) {
-		ctx().tryUpdate(this, optionalSqlItems);
-		return (T) this;
 	}
 
 	@Override
-	public int tryUpdate(Object... options) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void delete(Object... optionalSqlItems) {
-		ctx().tryDelete(this, optionalSqlItems);
-	}
-
-	@Override
-	public int tryDelete(Object... options) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void deleteById(Object id, Object... options) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public int tryDeleteById(Object id, Object... options) {
+	public int tryDeleteById(Object id, Object... optionItems) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public <T> T load(Object... optionalSqlItems) {
-		return ctx().load(this, optionalSqlItems);
+	public T load(Object... optionItems) {
+		return (T) ctx(optionItems).entityLoad(this, optionItems);
 	}
 
 	@Override
-	public <T> T tryLoad(Object... options) {
+	public int tryLoad(Object... optionItems) {
+		return ctx(optionItems).entityTryLoad(this, optionItems);
+	}
+
+	@Override
+	public T loadById(Object idOrIdMap, Object... optionItems) {
+		return (T) ctx(optionItems).entityLoadById(this.getClass(), idOrIdMap, optionItems);
+	}
+
+	@Override
+	public T tryLoadById(Object id, Object... optionItems) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <T> T loadById(Object idOrIdMap, Object... optionalSqlItems) {
-		return ctx().loadById(this, idOrIdMap, optionalSqlItems);
-	}
-
-	@Override
-	public <T> T tryLoadById(Object id, Object... options) {
+	public List<T> findAll(Object id, Object... optionItems) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <T> List<T> findAll(Object id, Object... options) {
+	public List<T> findAllByIds(Iterable<?> ids, Object... optionItems) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <T> List<T> findAllByIds(Iterable<?> ids, Object... options) {
-		// TODO Auto-generated method stub
-		return null;
+	public int countAll(Object... optionItems) {
+		return ctx(optionItems).entityCountAll(this.getClass(), optionItems);
 	}
 
 	@Override
-	public int countAll(Object... optionalSqlItems) {
-		return ctx().countAll(this.getClass(), optionalSqlItems);
-	}
-
-	@Override
-	public boolean exist(Object... options) {
+	public boolean exist(Object... optionItems) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean existById(Object id, Object... options) {
+	public boolean existById(Object id, Object... optionItems) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -180,7 +177,7 @@ public class ActiveRecord implements ActiveRecordSupport {
 	}
 
 	@Override
-	public ActiveRecordSupport put(Object... fieldAndValues) {
+	public T put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {
 			String field = (String) fieldAndValues[i * 2];
 			Object value = fieldAndValues[i * 2 + 1];
@@ -191,17 +188,17 @@ public class ActiveRecord implements ActiveRecordSupport {
 				throw new SqlBoxException(e);
 			}
 		}
-		return this;
+		return (T) this;
 	}
 
 	@Override
-	public ActiveRecordSupport putFields(String... fieldNames) {
+	public T putFields(String... fieldNames) {
 		lastTimePutFieldsCache.set(fieldNames);
-		return this;
+		return (T) this;
 	}
 
 	@Override
-	public ActiveRecordSupport putValues(Object... values) {
+	public T putValues(Object... values) {
 		String[] fields = lastTimePutFieldsCache.get();
 		if (values.length == 0 || fields == null || fields.length == 0)
 			throw new SqlBoxException("putValues fields or values can not be empty");
@@ -218,11 +215,11 @@ public class ActiveRecord implements ActiveRecordSupport {
 				throw new SqlBoxException(e);
 			}
 		}
-		return this;
+		return (T) this;
 	}
 
 	@Override
-	public <T> T guess(Object... params) {// NOSONAR
+	public <U> U guess(Object... params) {// NOSONAR
 		return ctx().getSqlMapperGuesser().guess(ctx(), this, params);
 	}
 

@@ -23,12 +23,11 @@ public class CrudTest {
 
 	protected HikariDataSource dataSource;
 
-	public static class CrudUser extends ActiveRecord {
+	public static class CrudUser extends ActiveRecord<CrudUser> {
 		@Id
 		@Column(name = "name")
 		String name;
 		String address;
-		Integer age;
 
 		public CrudUser() {
 		}
@@ -52,14 +51,6 @@ public class CrudTest {
 
 		public void setAddress(String address) {
 			this.address = address;
-		}
-
-		public Integer getAge() {
-			return age;
-		}
-
-		public void setAge(Integer age) {
-			this.age = age;
 		}
 
 	}
@@ -86,47 +77,59 @@ public class CrudTest {
 		dataSource.close();
 	}
 
+	/**
+	 * Test below CRUD methods:
+	 * 
+	 * insert,update,tryUpdate,delete,tryDelete,deleteById,tryDeleteById,load,
+	 * tryLoad,loadById,tryLoadById,findAll,findAllByIds,countAll,exist,existById,
+	 * findRelated
+	 */
 	@Test
 	public void crudTest() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		CrudUser u1 = new CrudUser();
-		u1.setName("Tom");
-		u1.setAddress("China");
-		int result = 0;
-
-		Assert.assertEquals(1, ctx.tryInsertEntity(u1));
-		Assert.assertEquals(1, u1.tryInsert());
-		ctx.insertEntity(u1);
-		u1.insert();
-		
-
-		u1.setAddress("Canada");
-		result = ctx.tryUpdate(u1);
-		Assert.assertEquals(1, result);
-
-		CrudUser u2 = new CrudUser();
-		u2.setName("Tom");
-		ctx.load(u2);
-		Assert.assertEquals("Canada", u2.getAddress());
-
-		result = ctx.tryDelete(u2);
-		Assert.assertEquals(1, result);
-		Assert.assertEquals(0, ctx.countAll(CrudUser.class));
-	}
-
-	@Test
-	public void activeRecordCrudTest() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
-		CrudUser u1 = new CrudUser().put("name", "Tom", "address", "China").insert();
+		// ======insert
+		CrudUser u1 = new CrudUser("Name1", "Address1");
+		CrudUser u2 = new CrudUser("Name2", "Address2");
+		CrudUser u3 = new CrudUser("Name3", "Address3");
+		CrudUser u4 = new CrudUser("Name4", "Address4");
+		ctx.entityInsert(u1);
+		u2.insert();
+		Assert.assertEquals(1, ctx.entityTryInsert(u3));
+		Assert.assertEquals(1, u4.tryInsert());
 
-		u1.put("address", "Canada").update();
+		// ======update
+		u1.setAddress("NewAddress1");
+		u2.setAddress("NewAddress2");
+		u3.setAddress("NewAddress3");
+		u4.setAddress("NewAddress4");
+		ctx.entityUpdate(u1);
+		u2.update();
+		Assert.assertEquals(1, ctx.entityTryUpdate(u3));
+		Assert.assertEquals(1, u4.tryUpdate());
 
-		CrudUser u2 = new CrudUser().put("name", "Tom").load();
-		Assert.assertEquals("Canada", u2.getAddress());
+		// =======load
+		u1.setAddress(null);
+		u2.setAddress(null);
+		u3.setAddress(null);
+		u4.setAddress(null);
+		Assert.assertEquals("NewAddress1", ctx.entityLoad(u1).getAddress());
+		Assert.assertEquals("NewAddress2", u2.load().getAddress());
+		Assert.assertEquals(1, ctx.entityTryLoad(u3));
+		Assert.assertEquals("NewAddress3", u3.getAddress());
+		Assert.assertEquals(1, u4.tryLoad());
+		Assert.assertEquals("NewAddress4", u4.getAddress());
 
+		// =======countAll
+		Assert.assertEquals(4, ctx.entityCountAll(CrudUser.class));
+		Assert.assertEquals(4, new CrudUser().countAll());
+
+		// =======delete
+		ctx.entityDelete(u1);
 		u2.delete();
+		ctx.entityTryDelete(u3);
+		u4.tryDelete();
 		Assert.assertEquals(0, u1.countAll());
 	}
 

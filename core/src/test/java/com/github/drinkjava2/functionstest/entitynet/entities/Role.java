@@ -5,7 +5,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "roletb")
-public class Role extends ActiveRecord {
+public class Role extends ActiveRecord<Role> {
 	@Id
 	String id;
 

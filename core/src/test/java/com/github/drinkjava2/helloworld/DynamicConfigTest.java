@@ -31,7 +31,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 public class DynamicConfigTest extends TestBase {
 
-	public static class UserDemo extends ActiveRecord {
+	public static class UserDemo extends ActiveRecord<UserDemo> {
 		@UUID32
 		private String id;
 
@@ -73,7 +73,7 @@ public class DynamicConfigTest extends TestBase {
 
 		// A Fake PKey dynamically created
 		t.column("id").pkey();
-		ctx.tryInsertEntity(u, t);
+		ctx.entityTryInsert(u, t);
 
 		u.setUserName("Tom");
 		u.update(t);
@@ -93,14 +93,14 @@ public class DynamicConfigTest extends TestBase {
 		Assert.assertEquals("Tom", u.getUserName());
 
 		u.setUserName(null);
-		u.loadById(u.getId(), t);
-		Assert.assertEquals("Tom", u.getUserName());
+		UserDemo newU=u.loadById(u.getId(), t);
+		Assert.assertEquals("Tom", newU.getUserName());
 
-		UserDemo u2 = ctx.loadById(UserDemo.class, u.getId(), t);
+		UserDemo u2 = ctx.entityLoadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals("Tom", u2.getUserName());
 
 		t.getColumnByFieldName("userName").setTransientable(true);// ignore userName
-		UserDemo u3 = ctx.loadById(UserDemo.class, u.getId(), t);
+		UserDemo u3 = ctx.entityLoadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals(null, u3.getUserName());
 	}
 
@@ -108,7 +108,7 @@ public class DynamicConfigTest extends TestBase {
 	public void doExceptionTest() {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
-		ctx.loadById(UserDemo.class, u.getId());
+		ctx.entityLoadById(UserDemo.class, u.getId());
 	}
 
 }
