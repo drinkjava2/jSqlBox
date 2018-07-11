@@ -24,12 +24,21 @@ import com.github.drinkjava2.jsqlbox.ActiveRecordSupport;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * EntityNet Utils
+ * <pre>
+ * Entity Id Utils, an Entity ID can be:
+ * 
+ * 1. MAP (For compound id)
+ * 2. Basic Java Objects (For single id)
+ * 3. Instance of Entity Class, which implements ActiveRecordSupport interface or have @Entity annotation (for compound or single id)
+ * 
+ * </pre>
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
 public abstract class EntityIdUtils {// NOSONAR
+	/** Used to combine compound key column values into a single String */
+	public static final String COMPOUND_ID_SEPARATOR = "__";
 
 	public static Object buildEntityIdFromOneRow(Map<String, Object> oneRow, TableModel model, String alias) {
 		int pkeyCount = model.getPKeyCount();
@@ -47,9 +56,8 @@ public abstract class EntityIdUtils {// NOSONAR
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
-				sb.append(EntityNet.COMPOUND_VALUE_SEPARATOR);
-			Object value = oneRow
-					.get(new StringBuilder(alias).append("_").append(col.getColumnName()).toString());
+				sb.append(COMPOUND_ID_SEPARATOR);
+			Object value = oneRow.get(new StringBuilder(alias).append("_").append(col.getColumnName()).toString());
 			if (value == null)
 				return null;
 			sb.append(value);
@@ -72,7 +80,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
-				sb.append(EntityNet.COMPOUND_VALUE_SEPARATOR);
+				sb.append(COMPOUND_ID_SEPARATOR);
 			Object value = ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField());
 			if (value == null)
 				return null;
@@ -96,7 +104,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
-				sb.append(EntityNet.COMPOUND_VALUE_SEPARATOR);
+				sb.append(COMPOUND_ID_SEPARATOR);
 			Object value = map.get(col.getEntityField());
 			if (value == null)
 				return null;
@@ -133,18 +141,18 @@ public abstract class EntityIdUtils {// NOSONAR
 	 * map<String,Object>
 	 */
 	@SuppressWarnings("unchecked")
-	public  static <T> T setEntityIdValues(T bean, Object entityId, TableModel model) {
+	public static <T> T setEntityIdValues(T bean, Object entityId, TableModel model) {
 		SqlBoxException.assureNotNull(entityId, "entityId can not be null.");
-		if (entityId instanceof Map) { // MAP for compound key
+		if (entityId instanceof Map) {
 			Map<String, Object> idMap = (Map<String, Object>) entityId;
 			for (Entry<String, Object> item : idMap.entrySet())
 				ClassCacheUtils.writeValueToBeanField(bean, item.getKey(), item.getValue());
 		} else {
 			if (TypeUtils.canMapToSqlType(entityId.getClass())) {
 				if (model.getPKeyCount() == 0)
-					throw new SqlBoxException("No PKey column found for '"+bean.getClass()+"'");
+					throw new SqlBoxException("No PKey column found for '" + bean.getClass() + "'");
 				if (model.getPKeyCount() != 1)
-					throw new SqlBoxException("Not give enough PKey column value '"+bean.getClass()+"'");
+					throw new SqlBoxException("Not give enough PKey column value '" + bean.getClass() + "'");
 				ColumnModel col = model.getFirstPKeyColumn();
 				ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
 				return bean;
@@ -153,12 +161,14 @@ public abstract class EntityIdUtils {// NOSONAR
 			boolean isEntity = false;
 			if (entityId instanceof ActiveRecordSupport)
 				isEntity = true;
-			Annotation[] anno = entityId.getClass().getAnnotations();
-			for (Annotation annotation : anno)
-				if (annotation.annotationType().getName().endsWith(".Entity")) {
-					isEntity = true;
-					break;
-				}
+			else {
+				Annotation[] anno = entityId.getClass().getAnnotations();
+				for (Annotation annotation : anno)
+					if (annotation.annotationType().getName().endsWith(".Entity")) {
+						isEntity = true;
+						break;
+					}
+			}
 			if (!isEntity)
 				throw new SqlBoxException(
 						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
@@ -171,4 +181,39 @@ public abstract class EntityIdUtils {// NOSONAR
 		return bean;
 	}
 
+	/**
+	 * Read field value from entityId:
+	 * 
+	 * 1) if entityId is map, get the value by use fieldName as key <br/>
+	 * 2) if entityId is basic java Object, direct return it 3) if is Entity? read
+	 * field value from it.
+	 * 
+	 */
+	public static Object readFeidlValueFromEntityId(Object entityId, TableModel model, String fieldName) {
+		SqlBoxException.assureNotNull(entityId, "entityId can not be null.");
+		if (entityId instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> idMap = (Map<String, Object>) entityId;
+			return idMap.get(fieldName);
+		} else {
+			if (TypeUtils.canMapToSqlType(entityId.getClass()))
+				return entityId;
+
+			boolean isEntity = false;
+			if (entityId instanceof ActiveRecordSupport)
+				isEntity = true;
+			else {
+				Annotation[] anno = entityId.getClass().getAnnotations();
+				for (Annotation annotation : anno)
+					if (annotation.annotationType().getName().endsWith(".Entity")) {
+						isEntity = true;
+						break;
+					}
+			}
+			if (!isEntity)
+				throw new SqlBoxException(
+						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
+			return ClassCacheUtils.readValueFromBeanField(entityId, fieldName);
+		}
+	}
 }

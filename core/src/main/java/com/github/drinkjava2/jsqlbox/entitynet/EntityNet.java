@@ -38,8 +38,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  * @since 1.0.0
  */
 public class EntityNet {
-	/** Used to combine compound key column values into a single String */
-	public static final String COMPOUND_VALUE_SEPARATOR = "__";
+ 
 
 	/** Models, Map<alias, tableModels> */
 	private Map<String, TableModel> models = new LinkedHashMap<String, TableModel>();

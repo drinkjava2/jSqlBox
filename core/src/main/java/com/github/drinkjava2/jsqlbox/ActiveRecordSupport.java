@@ -31,11 +31,8 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	/** @return current SqlBoxContext instance */
 	public SqlBoxContext ctx(Object... optionItems);
 
-	/** Insert entity to database, if not 1 row updated, throw SqlBoxException */
+	/** Insert entity to database */
 	public T insert(Object... optionItems);
-
-	/** Insert entity to database, return how many rows affected */
-	public int tryInsert(Object... optionItems);
 
 	/** Update entity in database, if not 1 row updated, throw SqlBoxException */
 	public T update(Object... optionItems);
@@ -68,10 +65,10 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	public T tryLoadById(Object id, Object... optionItems);
 
 	/** Load entity according its id, if not found, throw SqlBoxException */
-	public List<T> findAll(Object id, Object... optionItems);
+	public List<T> loadAll( Object... optionItems);
 
 	/** Load entity according its id, if not found, return null */
-	public List<T> findAllByIds(Iterable<?> ids, Object... optionItems);
+	public List<T> loadAllByIds(Iterable<?> ids, Object... optionItems);
 
 	/** Return how many records for current entity class */
 	public int countAll(Object... optionItems);

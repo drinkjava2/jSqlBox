@@ -454,6 +454,69 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return rowAffected;
 	}
 
+	/**
+	 * Try delete entity by Id, return row affected
+	 */
+	public static int entityTryDeleteById(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
+		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel model = optionModel;
+		if (model == null)
+			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
+		SqlBoxException.assureNotNull(model.getEntityClass());
+
+		LinkStyleArrayList<Object> jSQL = new LinkStyleArrayList<Object>();
+		LinkStyleArrayList<Object> where = new LinkStyleArrayList<Object>();
+		SqlItem shardTableItem = null;
+		SqlItem shardDbItem = null;
+
+		Map<String, Method> readMethods = ClassCacheUtils.getClassReadMethods(entityClass);
+		for (String fieldName : readMethods.keySet()) {
+			ColumnModel col = findMatchColumnForJavaField(fieldName, model);
+			if (col.getTransientable())
+				continue;
+			if (col.getPkey()) {
+				Object value = EntityIdUtils.readFeidlValueFromEntityId(id, model, fieldName);
+				if (!where.isEmpty())
+					where.append(" and ");
+				where.append(param(value));
+				where.append(col.getColumnName()).append("=? ");
+				if (col.getShardTable() != null) // Sharding Table?
+					shardTableItem = shardTB(EntityIdUtils.readFeidlValueFromEntityId(id, model, fieldName));
+
+				if (col.getShardDatabase() != null) // Sharding DB?
+					shardDbItem = shardDB(EntityIdUtils.readFeidlValueFromEntityId(id, model, fieldName));
+			} else {
+				if (col.getShardTable() != null || col.getShardDatabase() != null)
+					throw new SqlBoxException(
+							"Fail to delete entity according id because sharding column is not included in prime Key columns");
+			}
+		}
+		if (where.isEmpty())
+			throw new SqlBoxException("No primary key found for entityBean");
+
+		jSQL.append("delete from ");
+		if (shardTableItem != null)
+			jSQL.append(shardTableItem);
+		else
+			jSQL.append(model.getTableName());
+		if (shardDbItem != null)
+			jSQL.append(shardDbItem);
+		jSQL.append(" where ").addAll(where);
+
+		if (optionItems != null)
+			for (Object item : optionItems)
+				jSQL.append(item);
+
+		if (optionModel == null)
+			jSQL.frontAdd(model);
+
+		jSQL.append(SingleTonHandlers.arrayHandler);
+		int rowAffected = ctx.iUpdate(jSQL.toObjectArray());
+		if (ctx.isBatchEnabled())
+			return 1; // in batch mode, direct return 1
+		return rowAffected;
+	}
+
 	public static int entityTryLoad(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
@@ -545,18 +608,29 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return ((Number) ctx.iQueryForObject(jSQL.toObjectArray())).intValue();// NOSONAR
 	}
 
-	public static <T> T entityLoadById(SqlBoxContext ctx, Object entityOrClass, Object idOrIdMap,
+	public static <T> T entityTryLoadById(SqlBoxContext ctx, Class<T> entityClass, Object idOrIdMap,
 			Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
-			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClass);
+			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
 		SqlBoxException.assureNotNull(model.getEntityClass());
 
-		T bean = SqlBoxContextUtils.entityOrClassToBean(entityOrClass);
+		T bean = SqlBoxContextUtils.entityOrClassToBean(entityClass);
 		bean = EntityIdUtils.setEntityIdValues(bean, idOrIdMap, model);
-		entityTryLoad(ctx, bean, optionItems);
-		return bean;
+		int result = entityTryLoad(ctx, bean, optionItems);
+		if (result != 1)
+			return null;
+		else
+			return bean;
+	}
+
+	public static <T> List<T> loadAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {
+		TableModel t = findTableModel(entityClass, optionItems);
+		Object[] items = new Object[optionItems.length + 1];
+		items[0] = "select * from " + t.getTableName();
+		System.arraycopy(optionItems, 0, items, 1, optionItems.length);
+		return ctx.iQueryForEntityList(entityClass, items);
 	}
 
 	public static <T> T loadByQuery(SqlBoxContext ctx, Object config, Object... sqlItems) {
@@ -567,14 +641,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			throw new SqlBoxException("More than 1 record found in database.");
 		Map<String, Object> oneRow = rows.get(0);
 		return mapToEntityBean(ctx, config, oneRow);
-	}
-
-	public static <T> List<T> loadAll(SqlBoxContext ctx, Object config, Object... optionItems) {
-		TableModel t = findTableModel(config, optionItems);
-		Object[] items = new Object[optionItems.length + 1];
-		items[0] = "select * from " + t.getTableName();
-		System.arraycopy(optionItems, 0, items, 1, optionItems.length);
-		return ctx.iQueryForEntityList(config, items);
 	}
 
 }

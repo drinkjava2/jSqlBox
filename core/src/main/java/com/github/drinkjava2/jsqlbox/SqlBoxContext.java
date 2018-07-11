@@ -278,9 +278,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	private static void checkOnlyOneRowAffected(int result, String curdType) {
 		if (result <= 0)
-			throw new SqlBoxException("No record found in database when do " + curdType + " operation.");
+			throw new SqlBoxException("No record found in database when do '" + curdType + "' operation.");
 		if (result > 1)
-			throw new SqlBoxException("Affect more than 1 row record in database when do " + curdType + " operation.");
+			throw new SqlBoxException(
+					"Affect more than 1 row record in database when do '" + curdType + "' operation.");
 	}
 
 	protected void crudMethods______________________________() {// NOSONAR
@@ -290,10 +291,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		int result = SqlBoxContextUtils.entityTryInsert(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "insert");
 		return entity;
-	}
-
-	public int entityTryInsert(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.entityTryInsert(this, entity, optionItems);
 	}
 
 	/** Update an entity in database */
@@ -319,6 +316,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityTryDelete(this, entity, optionItems);
 	}
 
+	/** Delete an entity in database */
+	public void entityDeleteById(Class<?> entityClass, Object id, Object... optionItems) {
+		int result = SqlBoxContextUtils.entityTryDeleteById(this, entityClass, id, optionItems);
+		checkOnlyOneRowAffected(result, "deleteById");
+	}
+
+	/** Delete an entity in database */
+	public int entityTryDeleteById(Class<?> entityClass, Object id, Object... optionItems) {
+		return SqlBoxContextUtils.entityTryDeleteById(this, entityClass, id, optionItems);
+	}
+
 	/** Load an entity from database */
 	public <T> T entityLoad(T entity, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityTryLoad(this, entity, optionItems);
@@ -339,17 +347,23 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Load an entity from database by entityId, entityId can be one object or a Map
 	 */
 	public <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
-		return SqlBoxContextUtils.entityLoadById(this, entityClass, entityId, optionItems);
+		T entity = SqlBoxContextUtils.entityTryLoadById(this, entityClass, entityId, optionItems);
+		if (entity == null)
+			throw new SqlBoxException("No record found in database when do 'LoadById' operation.");
+		return entity;
 	}
 
-	/** Load all entity from database */
-	public <T> List<T> entityFindBySQL(Class<T> config, Object... optionItems) {
-		return null;
+	/**
+	 * Load an entity from database by entityId, entityId can be one object or a Map
+	 */
+	public <T> T entityTryLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
+		return SqlBoxContextUtils.entityTryLoadById(this, entityClass, entityId, optionItems);
 	}
 
+	 
 	/** Load all entity from database */
-	public <T> List<T> entityLoadAll(Class<T> config, Object... optionItems) {
-		return SqlBoxContextUtils.loadAll(this, config, optionItems);
+	public <T> List<T> entityLoadAll(Class<T> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.loadAll(this, entityClass, optionItems);
 	}
 
 	// ========== Dialect shortcut methods ===============

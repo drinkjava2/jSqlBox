@@ -427,7 +427,7 @@ public class UsageAndSpeedTest {
 			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
 			user.setAddress("Canada");
-			ctx.entityTryInsert(user);
+			ctx.entityInsert(user);
 			user.setAddress("China");
 			ctx.entityTryUpdate(user);
 			UserPOJO sam2 = ctx.entityLoadById(UserPOJO.class, "Sam");
@@ -639,7 +639,7 @@ public class UsageAndSpeedTest {
 		for (int i = 1; i <= 10; i++) {
 			user.setName("Tom" + i);
 			user.setAddress("China" + i);
-			ctx.entityTryInsert(user);
+			ctx.entityInsert(user);
 		}
 		user = new UserAR();
 		user.setName("Tom8");

@@ -64,9 +64,9 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	@Override
 	public SqlBoxContext ctx(Object... optionItems) {
-		for (Object item : optionItems)  
+		for (Object item : optionItems)
 			if (item != null && item instanceof SqlBoxContext)
-				return (SqlBoxContext) item; 
+				return (SqlBoxContext) item;
 		if (ctx == null)
 			ctx = SqlBoxContext.globalSqlBoxContext;
 		if (ctx == null)
@@ -85,11 +85,6 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	@Override
 	public T insert(Object... optionItems) {
 		return (T) ctx(optionItems).entityInsert(this, optionItems);
-	}
-
-	@Override
-	public int tryInsert(Object... optionItems) {
-		return ctx(optionItems).entityTryInsert(this, optionItems);
 	}
 
 	@Override
@@ -114,13 +109,12 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	@Override
 	public void deleteById(Object id, Object... optionItems) {
-		// TODO Auto-generated method stub
+		ctx(optionItems).entityDeleteById(this.getClass(), id, optionItems);
 	}
 
 	@Override
 	public int tryDeleteById(Object id, Object... optionItems) {
-		// TODO Auto-generated method stub
-		return 0;
+		return ctx(optionItems).entityTryDeleteById(this.getClass(), id, optionItems);
 	}
 
 	@Override
@@ -134,24 +128,22 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public T loadById(Object idOrIdMap, Object... optionItems) {
-		return (T) ctx(optionItems).entityLoadById(this.getClass(), idOrIdMap, optionItems);
+	public T loadById(Object id, Object... optionItems) {
+		return (T) ctx(optionItems).entityLoadById(this.getClass(), id, optionItems);
 	}
 
 	@Override
 	public T tryLoadById(Object id, Object... optionItems) {
-		// TODO Auto-generated method stub
+		return (T) ctx(optionItems).entityTryLoadById(this.getClass(), id, optionItems);
+	}
+
+	@Override
+	public List<T> loadAll(Object... optionItems) {
 		return null;
 	}
 
 	@Override
-	public List<T> findAll(Object id, Object... optionItems) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<T> findAllByIds(Iterable<?> ids, Object... optionItems) {
+	public List<T> loadAllByIds(Iterable<?> ids, Object... optionItems) {
 		// TODO Auto-generated method stub
 		return null;
 	}
