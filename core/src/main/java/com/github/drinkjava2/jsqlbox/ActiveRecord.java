@@ -118,6 +118,16 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
+	public boolean exist(Object... optionItems) {
+		return ctx(optionItems).entityExist(this, optionItems);
+	}
+
+	@Override
+	public boolean existById(Object id, Object... optionItems) {
+		return ctx(optionItems).entityExistById(this.getClass(), id, optionItems);
+	}
+
+	@Override
 	public T load(Object... optionItems) {
 		return (T) ctx(optionItems).entityLoad(this, optionItems);
 	}
@@ -150,18 +160,6 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	@Override
 	public int countAll(Object... optionItems) {
 		return ctx(optionItems).entityCountAll(this.getClass(), optionItems);
-	}
-
-	@Override
-	public boolean exist(Object... optionItems) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean existById(Object id, Object... optionItems) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	protected void miscMethods__________________() {// NOSONAR

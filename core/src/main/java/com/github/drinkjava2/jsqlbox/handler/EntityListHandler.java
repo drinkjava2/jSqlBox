@@ -41,13 +41,13 @@ public class EntityListHandler extends DefaultOrderSqlHandler {
 			throw new SqlBoxException("TableModel setting needed for EntityListHandler");
 		if (tableModels.length > 1)
 			throw new SqlBoxException("TableModel setting should only have 1 for EntityListHandler");
-		Object cfg = (TableModel) tableModels[0];
+		TableModel model = (TableModel) tableModels[0];
 
 		ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
 		List<Map<String, Object>> maps = (List<Map<String, Object>>) runner.runPreparedSQL(ps);
 		List<Object> entityList = new ArrayList<Object>();
 		for (Map<String, Object> row : maps) {
-			Object entity = SqlBoxContextUtils.mapToEntityBean((SqlBoxContext) runner, cfg, row);
+			Object entity = SqlBoxContextUtils.mapToEntityBean((SqlBoxContext) runner, model, row);
 			entityList.add(entity);
 		}
 		return entityList;

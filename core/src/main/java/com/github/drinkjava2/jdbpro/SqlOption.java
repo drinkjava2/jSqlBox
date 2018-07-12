@@ -115,6 +115,10 @@ public enum SqlOption {
 	/** GIVE, GIVE_BOTH option are designed for ORM Query */
 	GIVE, // Method
 
-	GIVE_BOTH // Method
+	GIVE_BOTH, // Method
+
+	// ------- Entity CURD items -----------
+	/** This option is designed for ORM, mark a "IGNORE_NULL" item" */
+	IGNORE_NULL // Control Switch
 
 }

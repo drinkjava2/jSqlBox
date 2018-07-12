@@ -210,7 +210,7 @@ public class EntityNetTest extends TestBase {
 		TableModel model = TableModelUtils.entity2Model(User.class);
 		model.column("userName").setTransientable(true);
 		User u2 = ctx.entityLoadById(User.class, "u1", model);
-		System.out.println(u2.getUserName());
+		Assert.assertEquals(null, u2.getUserName());
 
 		List<User> userList = ctx.entityLoadAll(User.class);
 

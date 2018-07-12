@@ -153,7 +153,7 @@ public abstract class EntityIdUtils {// NOSONAR
 				if (model.getPKeyCount() == 0)
 					throw new SqlBoxException("No PKey column found for '" + bean.getClass() + "'");
 				if (model.getPKeyCount() != 1)
-					throw new SqlBoxException("Not give enough PKey column value '" + bean.getClass() + "'");
+					throw new SqlBoxException("Not give enough PKey column value for '" + bean.getClass() + "'");
 				ColumnModel col = model.getFirstPKeyColumn();
 				ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
 				return bean;

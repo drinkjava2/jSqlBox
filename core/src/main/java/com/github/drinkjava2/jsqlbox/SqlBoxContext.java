@@ -152,7 +152,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected boolean dealOneSqlItem(boolean iXxxStyle, PreparedSQL ps, Object item) {// NOSONAR
 		if (super.dealOneSqlItem(iXxxStyle, ps, item))
 			return true; // if super class DbPro can deal it, let it do
-		else if (item instanceof TableModel) {
+		if (item instanceof SqlOption) {
+			if (SqlOption.IGNORE_NULL.equals(item)) {
+				return true;// 联知
+			} else
+				return false;
+		} else if (item instanceof TableModel) {
 			TableModel t = (TableModel) item;
 			SqlBoxException.assureNotNull(t.getEntityClass());
 			ps.addModel(item);
@@ -317,9 +322,19 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Delete an entity in database */
+	public boolean entityExist(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.entityExist(this, entity, optionItems);
+	}
+
+	/** Delete an entity in database */
 	public void entityDeleteById(Class<?> entityClass, Object id, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityTryDeleteById(this, entityClass, id, optionItems);
 		checkOnlyOneRowAffected(result, "deleteById");
+	}
+
+	/** Delete an entity in database */
+	public boolean entityExistById(Class<?> entityClass, Object id, Object... optionItems) {
+		return SqlBoxContextUtils.entityExistById(this, entityClass, id, optionItems);
 	}
 
 	/** Delete an entity in database */
@@ -368,6 +383,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Load all entity from database */
 	public <T> List<T> entityLoadAll(Class<T> entityClass, Object... optionItems) {
 		return SqlBoxContextUtils.entityLoadAll(this, entityClass, optionItems);
+	}
+	
+	/** Load all entity from database */
+	public <T> List<T> entityLoadByQuery(Class<T> entityClass, Object... optionItems) {
+		return (List<T>) SqlBoxContextUtils.entityLoadByQuery(this, entityClass, optionItems);
 	}
 
 	// ========== Dialect shortcut methods ===============

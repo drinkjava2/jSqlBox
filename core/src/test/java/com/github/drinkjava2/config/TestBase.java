@@ -44,7 +44,7 @@ public class TestBase {
 		Dialect.setGlobalAllowReservedWords(true);
 
 		//SqlBoxContext.setGlobalNextAllowShowSql(true);
-		ctx = new SqlBoxContext(dataSource);
+		ctx = new SqlBoxContext(dataSource); 
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 		if (tablesForTest != null)
 			createAndRegTables(tablesForTest);

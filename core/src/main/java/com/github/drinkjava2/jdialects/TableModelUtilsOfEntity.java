@@ -235,7 +235,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 		for (PropertyDescriptor pd : pds) {
 			String entityfieldName = pd.getName();
 			if ("class".equals(entityfieldName) || "simpleName".equals(entityfieldName)
-					|| "canonicalName".equals(entityfieldName) || "box".equals(entityfieldName))
+					|| "canonicalName".equals(entityfieldName) )
 				continue;
 			Class<?> propertyClass = pd.getPropertyType();
 

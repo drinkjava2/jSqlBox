@@ -38,7 +38,8 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static final SqlOption USE_AUTO = SqlOption.USE_AUTO;
 	public static final SqlOption USE_MASTER = SqlOption.USE_MASTER;
 	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
-	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH; 
+	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
+	public static final SqlOption IGNORE_NULL = SqlOption.IGNORE_NULL;
 
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
@@ -54,7 +55,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
 	/** Create a model configurations with given alias name */
 	public static SqlItem alias(String... alias) {
-		return new SqlItem(SqlOption.ALIAS, (Object[])alias);
+		return new SqlItem(SqlOption.ALIAS, (Object[]) alias);
 	}
 
 	public static SqlItem give(String from, String to, String fieldName) {
@@ -94,58 +95,77 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	}
 
 	//@formatter:off
-		protected void gXxxxCrudMethods_____________________() {}// NOSONAR 
+	protected void g_Entity_Methods_____________________() {}// NOSONAR 
 
-		protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
-		public static <T> T giQuery(Object... inlineSQL) {return  gctx().iQuery(inlineSQL);}
-		public static <T> T giQueryForObject(Object... inlineSQL) {return gctx().iQueryForObject(inlineSQL);}
-		public static long giQueryForLongValue(Object... inlineSQL) {return gctx().iQueryForLongValue(inlineSQL);}
-		public static String giQueryForString(Object... inlineSQL) {return gctx().iQueryForString(inlineSQL);}
-		public static List<Map<String, Object>> giQueryForMapList(Object... items) {return gctx().iQueryForMapList(items);}
-		public static int giUpdate(Object... inlineSQL) {return gctx().iUpdate(inlineSQL);}
-		public static <T> T giInsert(Object... inlineSQL) {return gctx().iInsert(inlineSQL);}
-		public static <T> T giExecute(Object... inlineSQL) {return gctx().iExecute(inlineSQL); }
-		public static <T> List<T> giQueryForEntityList(Class<T> entityClass, Object... inlineSQL) {return gctx().iQueryForEntityList(entityClass, inlineSQL); }
-		 
-		public static <T> T gpQuery(Object... inlineSQL) {return gctx().pQuery(inlineSQL);}
-		public static <T> T gpQueryForObject(Object... inlineSQL) {return gctx().pQueryForObject(inlineSQL);}
-		public static long gpQueryForLongValue(Object... inlineSQL) {return gctx().pQueryForLongValue(inlineSQL);}
-		public static String gpQueryForString(Object... inlineSQL) {return gctx().pQueryForString(inlineSQL);}
-		public static List<Map<String, Object>> gpQueryForMapList(Object... items) {return gctx().pQueryForMapList(items);}
-		public static int gpUpdate(Object... inlineSQL) {return gctx().pUpdate(inlineSQL);}
-		public static <T> T gpInsert(Object... inlineSQL) {return gctx().pInsert(inlineSQL);}
-		public static <T> T gpExecute(Object... inlineSQL) {return gctx().pExecute(inlineSQL); } 
-		public static <T> List<T> gpQueryForEntityList(Class<T> entityClass, Object... inlineSQL) {return gctx().pQueryForEntityList(entityClass, inlineSQL); }
-		
+	public static <T> T geInsert(T entity, Object... optionItems) {return  gctx().entityInsert(entity, optionItems);}		 
+	public <T> T geUpdate(Object entity, Object... optionItems)  {return  gctx().entityUpdate(entity, optionItems);}
+	public int geTryUpdate(Object entity, Object... optionItems)  {return  gctx().entityTryUpdate(entity, optionItems);}
+	public void geDelete(Object entity, Object... optionItems)  { gctx().entityDelete(entity, optionItems);}
+	public int geTryDelete(Object entity, Object... optionItems) {return  gctx().entityTryDelete(entity, optionItems);} 
+	public boolean geExist(Object entity, Object... optionItems) {return  gctx().entityExist(entity, optionItems);}
+	public void geDeleteById(Class<?> entityClass, Object id, Object... optionItems) { gctx().entityDeleteById(entityClass, id, optionItems);}	
+	public boolean geExistById(Class<?> entityClass, Object id, Object... optionItems) {return  gctx().entityExistById(entityClass, id, optionItems);}
+	public int geTryDeleteById(Class<?> entityClass, Object id, Object... optionItems)  {return  gctx().entityTryDeleteById(entityClass, id, optionItems);}
+	public <T> T geLoad(T entity, Object... optionItems)  {return  gctx().entityLoad(entity, optionItems);}
+	public int geTryLoad(Object entity, Object... optionItems)  {return  gctx().entityTryLoad(entity, optionItems);}
+	public int geCountAll(Class<?> entityClass, Object... optionItems) {return  gctx().entityCountAll(entityClass, optionItems);}
+	public <T> T geLoadById(Class<T> entityClass, Object id, Object... optionItems) {return  gctx().entityLoadById(entityClass,id, optionItems);}
+	public <T> List<T> geLoadByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {return  gctx().entityLoadByIds(entityClass,ids, optionItems);}
+	public <T> T geTryLoadById(Class<T> entityClass, Object id, Object... optionItems)  {return  gctx().entityTryLoadById(entityClass, id,optionItems);}
+	public <T> List<T> geLoadAll(Class<T> entityClass, Object... optionItems) {return  gctx().entityLoadAll(entityClass, optionItems);} 
+	
+	
+	protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
+	
+	public static <T> T giQuery(Object... inlineSQL) {return  gctx().iQuery(inlineSQL);}
+	public static <T> T giQueryForObject(Object... inlineSQL) {return gctx().iQueryForObject(inlineSQL);}
+	public static long giQueryForLongValue(Object... inlineSQL) {return gctx().iQueryForLongValue(inlineSQL);}
+	public static String giQueryForString(Object... inlineSQL) {return gctx().iQueryForString(inlineSQL);}
+	public static List<Map<String, Object>> giQueryForMapList(Object... items) {return gctx().iQueryForMapList(items);}
+	public static int giUpdate(Object... inlineSQL) {return gctx().iUpdate(inlineSQL);}
+	public static <T> T giInsert(Object... inlineSQL) {return gctx().iInsert(inlineSQL);}
+	public static <T> T giExecute(Object... inlineSQL) {return gctx().iExecute(inlineSQL); }
+	public static <T> List<T> giQueryForEntityList(Class<T> entityClass, Object... inlineSQL) {return gctx().iQueryForEntityList(entityClass, inlineSQL); }
+	 
+	public static <T> T gpQuery(Object... inlineSQL) {return gctx().pQuery(inlineSQL);}
+	public static <T> T gpQueryForObject(Object... inlineSQL) {return gctx().pQueryForObject(inlineSQL);}
+	public static long gpQueryForLongValue(Object... inlineSQL) {return gctx().pQueryForLongValue(inlineSQL);}
+	public static String gpQueryForString(Object... inlineSQL) {return gctx().pQueryForString(inlineSQL);}
+	public static List<Map<String, Object>> gpQueryForMapList(Object... items) {return gctx().pQueryForMapList(items);}
+	public static int gpUpdate(Object... inlineSQL) {return gctx().pUpdate(inlineSQL);}
+	public static <T> T gpInsert(Object... inlineSQL) {return gctx().pInsert(inlineSQL);}
+	public static <T> T gpExecute(Object... inlineSQL) {return gctx().pExecute(inlineSQL); } 
+	public static <T> List<T> gpQueryForEntityList(Class<T> entityClass, Object... inlineSQL) {return gctx().pQueryForEntityList(entityClass, inlineSQL); }
+	
 
-		public static <T> T gtQuery(Object... items) {return gctx().tQuery(items);}
-		public static <T> T gtQueryForObject(Object... items) {return gctx().tQueryForObject(items);}
-		public static long gtQueryForLongValue(Object... items) {return gctx().tQueryForLongValue(items);}
-		public static String gtQueryForString(Object... items) {return gctx().tQueryForString(items);}
-		public static List<Map<String, Object>> gtQueryForMapList(Object... items) {return gctx().tQueryForMapList(items);}
-		public static int gtUpdate(Object... items) {return gctx().tUpdate(items);}
-		public static <T> T gtInsert(Object... items) {return gctx().tInsert(items);}
-		public static <T> T gtExecute(Object... items) {return gctx().tExecute(items);}
-		public static <T> List<T> gtQueryForEntityList(Class<T> entityClass, Object... inlineSQL) {return gctx().tQueryForEntityList(entityClass, inlineSQL); }
+	public static <T> T gtQuery(Object... items) {return gctx().tQuery(items);}
+	public static <T> T gtQueryForObject(Object... items) {return gctx().tQueryForObject(items);}
+	public static long gtQueryForLongValue(Object... items) {return gctx().tQueryForLongValue(items);}
+	public static String gtQueryForString(Object... items) {return gctx().tQueryForString(items);}
+	public static List<Map<String, Object>> gtQueryForMapList(Object... items) {return gctx().tQueryForMapList(items);}
+	public static int gtUpdate(Object... items) {return gctx().tUpdate(items);}
+	public static <T> T gtInsert(Object... items) {return gctx().tInsert(items);}
+	public static <T> T gtExecute(Object... items) {return gctx().tExecute(items);}
+	public static <T> List<T> gtQueryForEntityList(Class<T> entityClass, Object... inlineSQL) {return gctx().tQueryForEntityList(entityClass, inlineSQL); }
 
-		
-		public static <T> T gnQuery(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nQuery(conn, rsh, sql, params);}
-		public static <T> T gnQueryForObject(Connection conn, String sql, Object... params) {return gctx().nQueryForObject(conn, sql, params);}
-		public static String gnQueryForString(Connection conn, String sql, Object... params) {return gctx().nQueryForString(conn, sql, params);}
-		public static long gnQueryForLongValue(Connection conn, String sql, Object... params) {return gctx().nQueryForLongValue(conn, sql, params);}
-		public static List<Map<String, Object>> gnQueryForMapList(Connection conn, String sql, Object... params) {return gctx().nQueryForMapList(conn, sql, params);}
-		public static int gnUpdate(Connection conn, String sql, Object... params) {return gctx().nUpdate(conn, sql, params);}
-		public static <T> T gnInsert(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nInsert(conn, rsh, sql, params);}
-		public static int gnExecute(Connection conn, String sql, Object... params) {return gctx().nExecute(conn, sql, params);}
-		public static <T> List<T> gnExecute(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nExecute(conn, rsh, sql, params);}
-		public static <T> T gnQuery(ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nQuery(rsh, sql, params);}
-		public static <T> T gnQueryForObject(String sql, Object... params) {return gctx().nQueryForObject(sql, params);}
-		public static String gnQueryForString(String sql, Object... params) {return gctx().nQueryForString(sql, params);}
-		public static long gnQueryForLongValue(String sql, Object... params) {return gctx().nQueryForLongValue(sql, params);}
-		public static List<Map<String, Object>> gnQueryForMapList(String sql, Object... params) {return gctx().nQueryForMapList(sql, params);}
-		public static int gnUpdate(String sql, Object... params) {return gctx().nUpdate(sql, params);}
-		public static <T> T gnInsert(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... params) {return gctx().nInsert(rsh, sql, params);}
-		public static int gnExecute(String sql, Object... params) {return gctx().nExecute(sql, params);}
-		public static <T> List<T> gnExecute(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... params) {return gctx().nExecute(rsh, sql, params);}
+	
+	public static <T> T gnQuery(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nQuery(conn, rsh, sql, params);}
+	public static <T> T gnQueryForObject(Connection conn, String sql, Object... params) {return gctx().nQueryForObject(conn, sql, params);}
+	public static String gnQueryForString(Connection conn, String sql, Object... params) {return gctx().nQueryForString(conn, sql, params);}
+	public static long gnQueryForLongValue(Connection conn, String sql, Object... params) {return gctx().nQueryForLongValue(conn, sql, params);}
+	public static List<Map<String, Object>> gnQueryForMapList(Connection conn, String sql, Object... params) {return gctx().nQueryForMapList(conn, sql, params);}
+	public static int gnUpdate(Connection conn, String sql, Object... params) {return gctx().nUpdate(conn, sql, params);}
+	public static <T> T gnInsert(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nInsert(conn, rsh, sql, params);}
+	public static int gnExecute(Connection conn, String sql, Object... params) {return gctx().nExecute(conn, sql, params);}
+	public static <T> List<T> gnExecute(Connection conn, ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nExecute(conn, rsh, sql, params);}
+	public static <T> T gnQuery(ResultSetHandler<T> rsh, String sql, Object... params) {return gctx().nQuery(rsh, sql, params);}
+	public static <T> T gnQueryForObject(String sql, Object... params) {return gctx().nQueryForObject(sql, params);}
+	public static String gnQueryForString(String sql, Object... params) {return gctx().nQueryForString(sql, params);}
+	public static long gnQueryForLongValue(String sql, Object... params) {return gctx().nQueryForLongValue(sql, params);}
+	public static List<Map<String, Object>> gnQueryForMapList(String sql, Object... params) {return gctx().nQueryForMapList(sql, params);}
+	public static int gnUpdate(String sql, Object... params) {return gctx().nUpdate(sql, params);}
+	public static <T> T gnInsert(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... params) {return gctx().nInsert(rsh, sql, params);}
+	public static int gnExecute(String sql, Object... params) {return gctx().nExecute(sql, params);}
+	public static <T> List<T> gnExecute(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... params) {return gctx().nExecute(rsh, sql, params);}
 	 
 }
