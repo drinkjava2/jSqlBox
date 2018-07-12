@@ -133,19 +133,18 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
+	public List<T> loadByIds(Iterable<?> ids, Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityLoadByIds(this.getClass(), ids, optionItems);
+	}
+
+	@Override
 	public T tryLoadById(Object id, Object... optionItems) {
 		return (T) ctx(optionItems).entityTryLoadById(this.getClass(), id, optionItems);
 	}
 
 	@Override
 	public List<T> loadAll(Object... optionItems) {
-		return null;
-	}
-
-	@Override
-	public List<T> loadAllByIds(Iterable<?> ids, Object... optionItems) {
-		// TODO Auto-generated method stub
-		return null;
+		return (List<T>) ctx(optionItems).entityLoadAll(this.getClass(), optionItems);
 	}
 
 	@Override

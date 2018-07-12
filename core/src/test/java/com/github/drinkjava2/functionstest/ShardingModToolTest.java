@@ -62,6 +62,7 @@ public class ShardingModToolTest {
 
 		@Snowflake
 		@ShardDatabase({ "MOD", "7" })
+		@Id
 		private Long databaseId;
 
 		//@formatter:off

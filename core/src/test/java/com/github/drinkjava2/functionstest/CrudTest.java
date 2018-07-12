@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdbpro.LinkStyleArrayList;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -112,10 +113,6 @@ public class CrudTest {
 		Assert.assertEquals(1, ctx.entityTryUpdate(u3));
 		Assert.assertEquals(1, u4.tryUpdate());
 
-		// =======countAll
-		Assert.assertEquals(4, ctx.entityCountAll(CrudUser.class));
-		Assert.assertEquals(4, new CrudUser().countAll());
-
 		// =======load
 		Assert.assertEquals("NewAddress1", ctx.entityLoad(u1).getAddress());
 		Assert.assertEquals("NewAddress2", u2.load().getAddress());
@@ -147,9 +144,41 @@ public class CrudTest {
 		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CrudUser.class, u3).getAddress());
 		Assert.assertEquals("NewAddress4", u1.tryLoadById(u4).getAddress());
 
+		// =======loadByIds (id is basic value list)
+		LinkStyleArrayList<String> ids = new LinkStyleArrayList<String>().append("Name1").append("Name2")
+				.append("Name3");
+		Assert.assertEquals(3, ctx.entityLoadByIds(CrudUser.class, ids).size());
+		Assert.assertEquals(3, new CrudUser().loadByIds(ids).size());
+
+		// =======loadByIds (id is mp)
+		LinkStyleArrayList<Object> idMapList = new LinkStyleArrayList<Object>();
+		Map<String, Object> mpId1 = new HashMap<String, Object>();
+		mpId1.put("name", "Name1");
+		Map<String, Object> mpId2 = new HashMap<String, Object>();
+		mpId2.put("name", "Name2");
+		Map<String, Object> mpId3 = new HashMap<String, Object>();
+		mpId3.put("name", "Name3");
+		idMapList.append(mpId1).append(mpId2).append(mpId3);
+		Assert.assertEquals(3, ctx.entityLoadByIds(CrudUser.class, idMapList).size());
+		Assert.assertEquals(3, new CrudUser().loadByIds(idMapList).size());
+
+		// =======loadByIds (id is bean)
+		LinkStyleArrayList<Object> idBeanList = new LinkStyleArrayList<Object>();
+		idBeanList.append(u1).append(u2).append(u3);
+		Assert.assertEquals(3, ctx.entityLoadByIds(CrudUser.class, idBeanList).size());
+		Assert.assertEquals(3, new CrudUser().loadByIds(idBeanList).size());
+
 		// =======loadAll
 		Assert.assertEquals(4, ctx.entityLoadAll(CrudUser.class).size());
-		Assert.assertEquals(4, new CrudUser().loadAll().size()); //TODO: work on here
+		Assert.assertEquals(4, new CrudUser().loadAll().size());
+
+		// =======loadAllById
+		Assert.assertEquals(4, ctx.entityLoadAll(CrudUser.class).size());
+		Assert.assertEquals(4, new CrudUser().loadAll().size());
+
+		// =======countAll
+		Assert.assertEquals(4, ctx.entityCountAll(CrudUser.class));
+		Assert.assertEquals(4, new CrudUser().countAll());
 
 		// =======delete
 		ctx.entityDelete(u1);

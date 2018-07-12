@@ -68,7 +68,7 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	public List<T> loadAll( Object... optionItems);
 
 	/** Load entity according its id, if not found, return null */
-	public List<T> loadAllByIds(Iterable<?> ids, Object... optionItems);
+	public List<T> loadByIds(Iterable<?> ids, Object... optionItems);
 
 	/** Return how many records for current entity class */
 	public int countAll(Object... optionItems);

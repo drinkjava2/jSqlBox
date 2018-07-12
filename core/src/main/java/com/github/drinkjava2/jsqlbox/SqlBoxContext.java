@@ -353,6 +353,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return entity;
 	}
 
+	/** Load all entity from database */
+	public <T> List<T> entityLoadByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {
+		return SqlBoxContextUtils.entityLoadByIds(this, entityClass, ids, optionItems);
+	}
+
 	/**
 	 * Load an entity from database by entityId, entityId can be one object or a Map
 	 */
@@ -360,10 +365,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityTryLoadById(this, entityClass, entityId, optionItems);
 	}
 
-	 
 	/** Load all entity from database */
 	public <T> List<T> entityLoadAll(Class<T> entityClass, Object... optionItems) {
-		return SqlBoxContextUtils.loadAll(this, entityClass, optionItems);
+		return SqlBoxContextUtils.entityLoadAll(this, entityClass, optionItems);
 	}
 
 	// ========== Dialect shortcut methods ===============

@@ -60,6 +60,7 @@ public class ShardingRangeToolTest {
 
 		// 0~9 store in database0, 10~19 store in database1...
 		@ShardDatabase({ "RANGE", "10" })
+		@Id
 		private Long databaseId;
 
 		//@formatter:off

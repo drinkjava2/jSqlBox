@@ -12,6 +12,7 @@
 package com.github.drinkjava2.jsqlbox.entitynet;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -189,12 +190,12 @@ public abstract class EntityIdUtils {// NOSONAR
 	 * field value from it.
 	 * 
 	 */
-	public static Object readFeidlValueFromEntityId(Object entityId, TableModel model, String fieldName) {
+	public static Object readFeidlValueFromEntityId(Object entityId, TableModel model, String entityFieldName) {
 		SqlBoxException.assureNotNull(entityId, "entityId can not be null.");
 		if (entityId instanceof Map) {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> idMap = (Map<String, Object>) entityId;
-			return idMap.get(fieldName);
+			return idMap.get(entityFieldName);
 		} else {
 			if (TypeUtils.canMapToSqlType(entityId.getClass()))
 				return entityId;
@@ -213,7 +214,21 @@ public abstract class EntityIdUtils {// NOSONAR
 			if (!isEntity)
 				throw new SqlBoxException(
 						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
-			return ClassCacheUtils.readValueFromBeanField(entityId, fieldName);
+			return ClassCacheUtils.readValueFromBeanField(entityId, entityFieldName);
 		}
 	}
+
+	/**
+	 * Get the real id list only for one java field, because Iterable ids may be
+	 * compound id
+	 */
+	public static List<Object> getOnlyOneFieldFromIds(Iterable<?> ids, TableModel model, String entityFieldName) {
+		List<Object> result = new ArrayList<Object>();
+		for (Object entityId : ids) {
+			Object realEntityId = EntityIdUtils.readFeidlValueFromEntityId(entityId, model, entityFieldName);
+			result.add(realEntityId);
+		}
+		return result;
+	}
+
 }
