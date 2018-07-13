@@ -143,7 +143,7 @@ public class XATransactionTest {
 	}
 
 	//@formatter:off 
-	public static class Bank extends ActiveRecord {
+	public static class Bank extends ActiveRecord<Bank> {
 		@ShardDatabase({ "MOD", "3" })
 		@Id
 		private Long bankId;

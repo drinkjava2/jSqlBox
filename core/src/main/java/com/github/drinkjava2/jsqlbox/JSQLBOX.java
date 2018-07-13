@@ -98,22 +98,22 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	protected void g_Entity_Methods_____________________() {}// NOSONAR 
 
 	public static <T> T geInsert(T entity, Object... optionItems) {return  gctx().entityInsert(entity, optionItems);}		 
-	public <T> T geUpdate(Object entity, Object... optionItems)  {return  gctx().entityUpdate(entity, optionItems);}
-	public int geTryUpdate(Object entity, Object... optionItems)  {return  gctx().entityTryUpdate(entity, optionItems);}
-	public void geDelete(Object entity, Object... optionItems)  { gctx().entityDelete(entity, optionItems);}
-	public int geTryDelete(Object entity, Object... optionItems) {return  gctx().entityTryDelete(entity, optionItems);} 
-	public boolean geExist(Object entity, Object... optionItems) {return  gctx().entityExist(entity, optionItems);}
-	public void geDeleteById(Class<?> entityClass, Object id, Object... optionItems) { gctx().entityDeleteById(entityClass, id, optionItems);}	
-	public boolean geExistById(Class<?> entityClass, Object id, Object... optionItems) {return  gctx().entityExistById(entityClass, id, optionItems);}
-	public int geTryDeleteById(Class<?> entityClass, Object id, Object... optionItems)  {return  gctx().entityTryDeleteById(entityClass, id, optionItems);}
-	public <T> T geLoad(T entity, Object... optionItems)  {return  gctx().entityLoad(entity, optionItems);}
-	public int geTryLoad(Object entity, Object... optionItems)  {return  gctx().entityTryLoad(entity, optionItems);}
-	public int geCountAll(Class<?> entityClass, Object... optionItems) {return  gctx().entityCountAll(entityClass, optionItems);}
-	public <T> T geLoadById(Class<T> entityClass, Object id, Object... optionItems) {return  gctx().entityLoadById(entityClass,id, optionItems);}
-	public <T> List<T> geLoadByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {return  gctx().entityLoadByIds(entityClass,ids, optionItems);}
-	public <T> T geTryLoadById(Class<T> entityClass, Object id, Object... optionItems)  {return  gctx().entityTryLoadById(entityClass, id,optionItems);}
-	public <T> List<T> geLoadAll(Class<T> entityClass, Object... optionItems) {return  gctx().entityLoadAll(entityClass, optionItems);} 
-	
+	public static <T> T geUpdate(Object entity, Object... optionItems)  {return  gctx().entityUpdate(entity, optionItems);}
+	public static int geTryUpdate(Object entity, Object... optionItems)  {return  gctx().entityTryUpdate(entity, optionItems);}
+	public static void geDelete(Object entity, Object... optionItems)  { gctx().entityDelete(entity, optionItems);}
+	public static int geTryDelete(Object entity, Object... optionItems) {return  gctx().entityTryDelete(entity, optionItems);} 
+	public static boolean geExist(Object entity, Object... optionItems) {return  gctx().entityExist(entity, optionItems);}
+	public static void geDeleteById(Class<?> entityClass, Object id, Object... optionItems) { gctx().entityDeleteById(entityClass, id, optionItems);}	
+	public static boolean geExistById(Class<?> entityClass, Object id, Object... optionItems) {return  gctx().entityExistById(entityClass, id, optionItems);}
+	public static int geTryDeleteById(Class<?> entityClass, Object id, Object... optionItems)  {return  gctx().entityTryDeleteById(entityClass, id, optionItems);}
+	public static <T> T geLoad(T entity, Object... optionItems)  {return  gctx().entityLoad(entity, optionItems);}
+	public static int geTryLoad(Object entity, Object... optionItems)  {return  gctx().entityTryLoad(entity, optionItems);}
+	public static int geCountAll(Class<?> entityClass, Object... optionItems) {return  gctx().entityCountAll(entityClass, optionItems);}
+	public static <T> T geLoadById(Class<T> entityClass, Object id, Object... optionItems) {return  gctx().entityLoadById(entityClass,id, optionItems);}
+	public static <T> List<T> geLoadByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {return  gctx().entityLoadByIds(entityClass,ids, optionItems);}
+	public static <T> T geTryLoadById(Class<T> entityClass, Object id, Object... optionItems)  {return  gctx().entityTryLoadById(entityClass, id,optionItems);}
+	public static <T> List<T> geLoadAll(Class<T> entityClass, Object... optionItems) {return  gctx().entityLoadAll(entityClass, optionItems);} 
+	public static <T> List<T> geLoadBySql(Class<T> entityClass, Object... optionItems) {return  gctx().entityLoadBySQL(entityClass, optionItems);} 
 	
 	protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
 	

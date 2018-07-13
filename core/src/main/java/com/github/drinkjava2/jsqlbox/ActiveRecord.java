@@ -143,11 +143,6 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public List<T> loadByIds(Iterable<?> ids, Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityLoadByIds(this.getClass(), ids, optionItems);
-	}
-
-	@Override
 	public T tryLoadById(Object id, Object... optionItems) {
 		return (T) ctx(optionItems).entityTryLoadById(this.getClass(), id, optionItems);
 	}
@@ -155,6 +150,16 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	@Override
 	public List<T> loadAll(Object... optionItems) {
 		return (List<T>) ctx(optionItems).entityLoadAll(this.getClass(), optionItems);
+	}
+
+	@Override
+	public List<T> loadByIds(Iterable<?> ids, Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityLoadByIds(this.getClass(), ids, optionItems);
+	}
+
+	@Override
+	public List<T> loadBySQL(Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityLoadBySQL(this.getClass(), optionItems);
 	}
 
 	@Override

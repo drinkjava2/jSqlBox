@@ -67,6 +67,8 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	/** Load entity according its id, if not found, throw SqlBoxException */
 	public List<T> loadAll( Object... optionItems);
 
+	public List<T> loadBySQL(Object... optionItems);
+	
 	/** Load entity according its id, if not found, return null */
 	public List<T> loadByIds(Iterable<?> ids, Object... optionItems);
 

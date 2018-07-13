@@ -131,6 +131,10 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CpdUser.class, u3).getAddress());
 		Assert.assertEquals("NewAddress4", u1.tryLoadById(u4).getAddress());
 
+		// =======loadAll
+		Assert.assertEquals(4, ctx.entityLoadAll(CpdUser.class).size());
+		Assert.assertEquals(4, new CpdUser().loadAll().size());
+
 		// =======loadByIds (id is mp)
 		LinkStyleArrayList<Object> idMapList = new LinkStyleArrayList<Object>();
 		Map<String, Object> mpId1 = new HashMap<String, Object>();
@@ -152,13 +156,13 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(3, ctx.entityLoadByIds(CpdUser.class, idBeanList).size());
 		Assert.assertEquals(3, new CpdUser().loadByIds(idBeanList).size());
 
-		// =======loadAll
-		Assert.assertEquals(4, ctx.entityLoadAll(CpdUser.class).size());
-		Assert.assertEquals(4, new CpdUser().loadAll().size());
+		// ========loadBySql
+		Assert.assertEquals(4, ctx.entityLoadBySQL(CpdUser.class, "select * from CpdUser").size());
+		Assert.assertEquals(4, u1.loadBySQL("select * from CpdUser").size());
 
-		// =======loadAllById
-		Assert.assertEquals(4, ctx.entityLoadAll(CpdUser.class).size());
-		Assert.assertEquals(4, new CpdUser().loadAll().size());
+		// ========loadBySql
+		Assert.assertEquals(4, ctx.entityLoadBySQL(CpdUser.class, "select * from CpdUser").size());
+		Assert.assertEquals(4, u1.loadBySQL("select * from CpdUser").size());
 
 		// =======countAll
 		Assert.assertEquals(4, ctx.entityCountAll(CpdUser.class));

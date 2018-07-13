@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
 @Table(name = "usertb")
-public class User extends ActiveRecord {
+public class User extends ActiveRecord<User> {
 
 	@UUID25
 	@Id

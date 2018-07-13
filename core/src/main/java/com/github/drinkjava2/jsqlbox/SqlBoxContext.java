@@ -384,10 +384,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> List<T> entityLoadAll(Class<T> entityClass, Object... optionItems) {
 		return SqlBoxContextUtils.entityLoadAll(this, entityClass, optionItems);
 	}
-	
+
 	/** Load all entity from database */
-	public <T> List<T> entityLoadByQuery(Class<T> entityClass, Object... optionItems) {
-		return (List<T>) SqlBoxContextUtils.entityLoadByQuery(this, entityClass, optionItems);
+	public <T> List<T> entityLoadBySQL(Class<T> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.entityLoadBySQL(this, entityClass, optionItems);
 	}
 
 	// ========== Dialect shortcut methods ===============

@@ -14,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 @Entity
 @Table(name = "teams")
-public class Team extends ActiveRecord {
+public class Team extends ActiveRecord<Team> {
 	@Id
 	@TableGenerator(name = "ID_GENERATOR", table = "pk_table", pkColumnName = "pk_col", pkColumnValue = "pk_val", valueColumnName = "val_col", initialValue = 1, allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "ID_GENERATOR")

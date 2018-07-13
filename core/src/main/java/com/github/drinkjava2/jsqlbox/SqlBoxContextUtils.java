@@ -923,8 +923,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> List<T> entityLoadByQuery(SqlBoxContext ctx, Class<T> entityClass, Object... sqlItems) {
-		//TODO this entityLoadByQuery method need add unit test
+	public static <T> List<T> entityLoadBySQL(SqlBoxContext ctx, Class<T> entityClass, Object... sqlItems) {
 		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(sqlItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -934,8 +933,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		List<Map<String, Object>> rows = ctx.iQueryForMapList(sqlItems);
 		if (rows == null || rows.isEmpty())
 			throw new SqlBoxException("No no record found in database.");
-		if (rows.size() > 1)
-			throw new SqlBoxException("More than 1 record found in database.");
 		List<T> results = new ArrayList<T>();
 		for (Map<String, Object> oneRow : rows)
 			results.add((T) mapToEntityBean(ctx, model, oneRow));

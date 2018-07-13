@@ -25,7 +25,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 1.0.0
  */
 
-public class HelloWorld implements ActiveEntity{
+public class HelloWorld implements ActiveEntity<HelloWorld> {
 	private String name;
 
 	public String getName() {
@@ -44,8 +44,8 @@ public class HelloWorld implements ActiveEntity{
 		String[] ddls = ctx.toCreateDDL(HelloWorld.class);
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
-		
-        new HelloWorld().put("name","Hello jSqlBox").insert(); 
+
+		new HelloWorld().put("name", "Hello jSqlBox").insert();
 		System.out.println(ctx.pQueryForString("select name from HelloWorld"));
 	}
 }

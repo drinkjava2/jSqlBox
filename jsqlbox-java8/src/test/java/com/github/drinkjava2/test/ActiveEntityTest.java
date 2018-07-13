@@ -21,7 +21,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
  * Java8+, so in Java8 and above, a POJO can implements ActiveRecordJava8
  * interface to obtain CRUD methods instead of extends ActiveRecord class
  */
-public class ActiveEntityTest implements ActiveEntity {
+public class ActiveEntityTest implements ActiveEntity<ActiveEntityTest> {
 	@Id
 	private String name;
 	private Integer age;
