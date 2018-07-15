@@ -9,8 +9,8 @@ public class SqlBoxContextInitializer {
 
 	@SuppressWarnings("deprecation")
 	public static void initialize(SqlBoxContext ctx) {
-		ctx.setIocTool(JBeanBoxIocTool.instance);//NOSONAR
-		ctx.setSpecialSqlItemPreparers(new SpecialSqlItemPreparer[] { new LambdSqlItemPreparer() });//NOSONAR
+		//ctx.setIocTool(JBeanBoxIocTool.instance);//NOSONAR
+		//ctx.setSpecialSqlItemPreparers(new SpecialSqlItemPreparer[] { new LambdSqlItemPreparer() });//NOSONAR
 	}
 
 }

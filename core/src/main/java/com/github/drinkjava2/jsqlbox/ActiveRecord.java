@@ -148,18 +148,23 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public List<T> loadAll(Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityLoadAll(this.getClass(), optionItems);
+	public List<T> findAll(Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityFindAll(this.getClass(), optionItems);
 	}
 
 	@Override
-	public List<T> loadByIds(Iterable<?> ids, Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityLoadByIds(this.getClass(), ids, optionItems);
+	public List<T> findByIds(Iterable<?> ids, Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityFindByIds(this.getClass(), ids, optionItems);
 	}
 
 	@Override
-	public List<T> loadBySQL(Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityLoadBySQL(this.getClass(), optionItems);
+	public List<T> findBySQL(Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityFindBySQL(this.getClass(), optionItems);
+	}
+
+	@Override
+	public List<T> findBySample(Object sampleBean, Object... optionItems) {
+		return ctx(optionItems).entityFindBySample(sampleBean, optionItems);
 	}
 
 	@Override

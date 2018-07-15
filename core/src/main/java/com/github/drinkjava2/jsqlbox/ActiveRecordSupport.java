@@ -64,13 +64,17 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	/** Load entity by given id, if not found, return null */
 	public T tryLoadById(Object id, Object... optionItems);
 
-	/** Load entity according its id, if not found, throw SqlBoxException */
-	public List<T> loadAll( Object... optionItems);
+	/** Find entity according its id, if not found, return empty list */
+	public List<T> findAll(Object... optionItems);
 
-	public List<T> loadBySQL(Object... optionItems);
-	
-	/** Load entity according its id, if not found, return null */
-	public List<T> loadByIds(Iterable<?> ids, Object... optionItems);
+	/** Find entity according SQL, if not found, return empty list */
+	public List<T> findBySQL(Object... optionItems);
+
+	/** Find entity according its id, if not found, return empty list */
+	public List<T> findByIds(Iterable<?> ids, Object... optionItems);
+
+	/** Find entity according a sample bean, if not found, return empty list */
+	public List<T> findBySample(Object sampleBean, Object... optionItems);
 
 	/** Return how many records for current entity class */
 	public int countAll(Object... optionItems);

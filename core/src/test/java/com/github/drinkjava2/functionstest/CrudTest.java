@@ -12,6 +12,7 @@ import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdbpro.LinkStyleArrayList;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.sqlitem.Sample;
 
 /**
  * Usage of different SQL style and speed test
@@ -126,12 +127,8 @@ public class CrudTest extends TestBase {
 		// =======loadByIds (id is basic value list)
 		LinkStyleArrayList<String> ids = new LinkStyleArrayList<String>().append("Name1").append("Name2")
 				.append("Name3");
-		Assert.assertEquals(3, ctx.entityLoadByIds(CrudUser.class, ids).size());
-		Assert.assertEquals(3, new CrudUser().loadByIds(ids).size());
-
-		// =======loadAll
-		Assert.assertEquals(4, ctx.entityLoadAll(CrudUser.class).size());
-		Assert.assertEquals(4, new CrudUser().loadAll().size());
+		Assert.assertEquals(3, ctx.entityFindByIds(CrudUser.class, ids).size());
+		Assert.assertEquals(3, new CrudUser().findByIds(ids).size());
 
 		// =======loadByIds (id is mp)
 		LinkStyleArrayList<Object> idMapList = new LinkStyleArrayList<Object>();
@@ -142,18 +139,37 @@ public class CrudTest extends TestBase {
 		Map<String, Object> mpId3 = new HashMap<String, Object>();
 		mpId3.put("name", "Name3");
 		idMapList.append(mpId1).append(mpId2).append(mpId3);
-		Assert.assertEquals(3, ctx.entityLoadByIds(CrudUser.class, idMapList).size());
-		Assert.assertEquals(3, new CrudUser().loadByIds(idMapList).size());
+		Assert.assertEquals(3, ctx.entityFindByIds(CrudUser.class, idMapList).size());
+		Assert.assertEquals(3, new CrudUser().findByIds(idMapList).size());
 
-		// =======loadByIds (id is bean)
+		// =======findAll
+		Assert.assertEquals(4, ctx.entityFindAll(CrudUser.class).size());
+		Assert.assertEquals(4, new CrudUser().findAll().size());
+
+		// =======findByIds (id is bean)
 		LinkStyleArrayList<Object> idBeanList = new LinkStyleArrayList<Object>();
 		idBeanList.append(u1).append(u2).append(u3);
-		Assert.assertEquals(3, ctx.entityLoadByIds(CrudUser.class, idBeanList).size());
-		Assert.assertEquals(3, new CrudUser().loadByIds(idBeanList).size());
+		Assert.assertEquals(3, ctx.entityFindByIds(CrudUser.class, idBeanList).size());
+		Assert.assertEquals(3, new CrudUser().findByIds(idBeanList).size());
 
-		// ========loadBySql
-		Assert.assertEquals(4, ctx.entityLoadBySQL(CrudUser.class, "select * from CrudUser").size());
-		Assert.assertEquals(4, u1.loadBySQL("select * from CrudUser").size());
+		// ========fidnBySql
+		Assert.assertEquals(4, ctx.entityFindBySQL(CrudUser.class, "select * from CrudUser").size());
+		Assert.assertEquals(4, u1.findBySQL("select * from CrudUser").size());
+
+		// ========findBySample
+		ctx.setAllowShowSQL(true);
+		Assert.assertEquals(1, ctx.entityFindBySample(u1).size());
+		Assert.assertEquals(1,
+				ctx.entityFindAll(CrudUser.class, new Sample(u1).sql(" where  ").notNullFields()).size());
+		CrudUser sample = new CrudUser("Nam", "addr");
+		Assert.assertEquals(4, ctx.entityFindAll(CrudUser.class, new Sample(sample).sql(" where (").nullFields()
+				.sql(") or name like ?").param(":name%").sql(" order by name")).size());
+
+		Assert.assertEquals(1, u1.findBySample(u2).size());
+		Assert.assertEquals(1, u1.findAll(new Sample(u2).sql(" where  ").notNullFields()).size());
+		Assert.assertEquals(4, u1.findAll(CrudUser.class, new Sample(sample).sql(" where (").nullFields()
+				.sql(") or name like ?").param(":name%").sql(" order by name")).size());
+		ctx.setAllowShowSQL(false);
 
 		// =======countAll
 		Assert.assertEquals(4, ctx.entityCountAll(CrudUser.class));

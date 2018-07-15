@@ -110,10 +110,10 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static int geTryLoad(Object entity, Object... optionItems)  {return  gctx().entityTryLoad(entity, optionItems);}
 	public static int geCountAll(Class<?> entityClass, Object... optionItems) {return  gctx().entityCountAll(entityClass, optionItems);}
 	public static <T> T geLoadById(Class<T> entityClass, Object id, Object... optionItems) {return  gctx().entityLoadById(entityClass,id, optionItems);}
-	public static <T> List<T> geLoadByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {return  gctx().entityLoadByIds(entityClass,ids, optionItems);}
+	public static <T> List<T> geLoadByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {return  gctx().entityFindByIds(entityClass,ids, optionItems);}
 	public static <T> T geTryLoadById(Class<T> entityClass, Object id, Object... optionItems)  {return  gctx().entityTryLoadById(entityClass, id,optionItems);}
-	public static <T> List<T> geLoadAll(Class<T> entityClass, Object... optionItems) {return  gctx().entityLoadAll(entityClass, optionItems);} 
-	public static <T> List<T> geLoadBySql(Class<T> entityClass, Object... optionItems) {return  gctx().entityLoadBySQL(entityClass, optionItems);} 
+	public static <T> List<T> geLoadAll(Class<T> entityClass, Object... optionItems) {return  gctx().entityFindAll(entityClass, optionItems);} 
+	public static <T> List<T> geLoadBySql(Class<T> entityClass, Object... optionItems) {return  gctx().entityFindBySQL(entityClass, optionItems);} 
 	
 	protected void gxXxxxStylePublicStaticMethods_____________________() {}// NOSONAR 
 	

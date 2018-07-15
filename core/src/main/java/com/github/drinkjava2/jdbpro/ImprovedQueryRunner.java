@@ -58,7 +58,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected DbProLogger logger = DbProConfig.globalNextLogger;
 	protected Integer batchSize = DbProConfig.globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = DbProConfig.globalNextSqlHandlers;
-	protected SpecialSqlItemPreparer[] specialSqlItemPreparers = DbProConfig.globalNextSpecialSqlItemPreparers;
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
 	protected String name;
@@ -786,31 +785,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Deprecated
 	public void setSqlHandlers(SqlHandler[] sqlHandlers) {// NOSONAR
 		this.sqlHandlers = sqlHandlers;
-	}
-
-	public SpecialSqlItemPreparer[] getSpecialSqlItemPreparers() {
-		return specialSqlItemPreparers;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	@Deprecated
-	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {// NOSONAR
-		this.specialSqlItemPreparers = specialSqlItemPreparers;
-	}
-
-	/**
-	 * This method is not thread safe, suggest only use at program starting
-	 */
-	@Deprecated
-	public void addSpecialSqlItemPreparer(SpecialSqlItemPreparer specialSqlItemPreparer) {// NOSONAR
-		if (this.specialSqlItemPreparers == null || this.specialSqlItemPreparers.length == 0) {
-			this.specialSqlItemPreparers = new SpecialSqlItemPreparer[] { specialSqlItemPreparer };
-		} else {
-			SpecialSqlItemPreparer[] newArray = new SpecialSqlItemPreparer[specialSqlItemPreparers.length + 1];
-			System.arraycopy(specialSqlItemPreparers, 0, newArray, 0, specialSqlItemPreparers.length);
-			newArray[ specialSqlItemPreparers.length] =  specialSqlItemPreparer;
-			this.specialSqlItemPreparers = newArray;
-		}
 	}
 
 	public DbPro[] getSlaves() {

@@ -64,7 +64,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.slaves = config.getSlaves();
 		this.masters = config.getMasters();
 		this.masterSlaveOption = config.getMasterSlaveSelect();
-		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
 
 	public DbPro(DataSource ds, DbProConfig config) {
@@ -79,7 +78,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		this.slaves = config.getSlaves();
 		this.masters = config.getMasters();
 		this.masterSlaveOption = config.getMasterSlaveSelect();
-		this.specialSqlItemPreparers = config.getSpecialSqlItemPreparers();
 	}
 
 	/**
@@ -164,7 +162,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					throw new DbProRuntimeException(
 							"One SqlItem did not find explainer, type=" + ((SqlItem) item).getType());
 				if (item.getClass().isArray()) {
-					dealSqlItems(predSQL, iXxxStyle, (Object[]) item);
+					Object[] array = (Object[]) item;
+					if (array.length != 0)
+						dealSqlItems(predSQL, iXxxStyle, (Object[]) item);
 				} else if (iXxxStyle)
 					predSQL.addSql(item); // iXxxx style, unknown is SQL piece
 				else
@@ -282,18 +282,11 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			predSQL.addHandler((SqlHandler) item);
 		else if (item instanceof ResultSetHandler)
 			predSQL.setResultSetHandler((ResultSetHandler) item);
-		else if (item instanceof Class) {
+		else if (item instanceof Class)
 			// Class type will treated as TableModel in jSQLBOX, but not at jDbPro
 			return false;
-		} else if (item instanceof SpecialSqlItem) {
-			if (specialSqlItemPreparers == null || specialSqlItemPreparers.length == 0)
-				throw new DbProRuntimeException(
-						"SpecialSqlItem found but no specialSqlItemPreparers be set, please read user manual how to set SpecialSqlItemPreparers");
-			for (SpecialSqlItemPreparer spPreparer : specialSqlItemPreparers) {
-				if (spPreparer.doPrepare(predSQL, (SpecialSqlItem) item))// find the first preparer
-					return true;
-			}
-			return false;
+		else if (item instanceof CustomizedSqlItem) {
+			((CustomizedSqlItem) item).doPrepare(predSQL);
 		} else
 			return false;
 		return true;

@@ -20,7 +20,6 @@ import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
@@ -47,7 +46,7 @@ public class EntityListHandler extends DefaultOrderSqlHandler {
 		List<Map<String, Object>> maps = (List<Map<String, Object>>) runner.runPreparedSQL(ps);
 		List<Object> entityList = new ArrayList<Object>();
 		for (Map<String, Object> row : maps) {
-			Object entity = SqlBoxContextUtils.mapToEntityBean((SqlBoxContext) runner, model, row);
+			Object entity = SqlBoxContextUtils.mapToEntityBean( model, row);
 			entityList.add(entity);
 		}
 		return entityList;

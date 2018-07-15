@@ -1,26 +1,25 @@
 package com.github.drinkjava2.jsqlbox;
 
+import com.github.drinkjava2.jdbpro.CustomizedSqlItem;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SpecialSqlItem;
-import com.github.drinkjava2.jdbpro.SpecialSqlItemPreparer;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.AliasProxyUtil.AliasItemInfo;
 
-public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
-	public static interface ALIAS extends SpecialSqlItem {// a.col as a_col
+public interface LambdSqlItem extends CustomizedSqlItem {
+	public static interface ALIAS extends LambdSqlItem {// a.col as a_col
 		public Object get();
 	}
 
-	public static interface C_ALIAS extends SpecialSqlItem {//// NOSONAR , a.clo as a_col
+	public static interface C_ALIAS extends LambdSqlItem {//// NOSONAR , a.clo as a_col
 		public Object get();
 	}
 
-	public static interface COL extends SpecialSqlItem {// a.col
+	public static interface COL extends LambdSqlItem {// a.col
 		public Object get();
 	}
 
 	@Override
-	public boolean doPrepare(PreparedSQL ps, SpecialSqlItem item) {// NOSONAR
+	public default void doPrepare(PreparedSQL ps, CustomizedSqlItem item) {// NOSONAR
 		AliasProxyUtil.thdMethodName.remove();
 		if (item instanceof ALIAS) {
 			((ALIAS) item).get();
@@ -52,7 +51,6 @@ public class LambdSqlItemPreparer implements SpecialSqlItemPreparer {
 			else
 				ps.addSql(a.alias).append(".").append(a.colName);
 		} else
-			return false;// Not my job, return false to tell jSqlBox use other SpecialSqlItemPreparer
-		return true;
+			throw new SqlBoxException("Unsupported CustomizedSqlItem found.");
 	}
 }

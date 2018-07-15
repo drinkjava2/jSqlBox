@@ -656,7 +656,7 @@ public class UsageAndSpeedTest {
 		ctx.entityTryDelete(user);
 		ctx.entityTryDelete(user, " or name=?", param("Tom2"));
 
-		Assert.assertEquals(7, ctx.entityLoadAll(UserAR.class, " where name>?", param("Tom1")).size());
+		Assert.assertEquals(7, ctx.entityFindAll(UserAR.class, " where name>?", param("Tom1")).size());
 	}
 
 	@Test

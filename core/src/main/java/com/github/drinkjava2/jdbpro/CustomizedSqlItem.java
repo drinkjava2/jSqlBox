@@ -21,5 +21,12 @@ package com.github.drinkjava2.jdbpro;
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public interface SpecialSqlItem {
+public interface CustomizedSqlItem {
+	/**
+	 * Prepare special SQL items
+	 * 
+	 * @param ps
+	 *            PreparedSQL instance
+	 */
+	public void doPrepare(PreparedSQL ps);
 }

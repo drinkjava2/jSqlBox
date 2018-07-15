@@ -11,7 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -25,7 +24,6 @@ import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
-import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
@@ -64,20 +62,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		super();
 		this.dialect = SqlBoxContextConfig.globalNextDialect;
 		copyConfigs(null);
-		findAndExecuteInitializer();
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
 		copyConfigs(null);
-		findAndExecuteInitializer();
 	}
 
 	public SqlBoxContext(SqlBoxContextConfig config) {
 		super(config);
 		copyConfigs(config);
-		findAndExecuteInitializer();
 	}
 
 	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
@@ -85,20 +80,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		copyConfigs(config);
 		if (dialect == null)
 			dialect = Dialect.guessDialect(ds);
-		findAndExecuteInitializer();
-	}
-
-	private void findAndExecuteInitializer() {
-		Class<?> callerClass = ClassCacheUtils
-				.checkClassExist("com.github.drinkjava2.jsqlbox.SqlBoxContextInitializer");
-		if (callerClass == null)
-			return;// not found
-		try {
-			Method initMethod = callerClass.getMethod("initialize", SqlBoxContext.class);
-			initMethod.invoke(null, this);
-		} catch (Exception e) {
-			throw new SqlBoxException("SqlBoxContextInitializer found but failed call it's initialize method.");
-		}
 	}
 
 	private void copyConfigs(SqlBoxContextConfig config) {
@@ -127,7 +108,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContextConfig.setGlobalNextBatchSize(300);
 		SqlBoxContextConfig.setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
 		SqlBoxContextConfig.setGlobalNextDialect(null);
-		SqlBoxContextConfig.setGlobalNextSpecialSqlItemPreparers(null);
 		SqlBoxContextConfig.setGlobalNextSqlMapperGuesser(SqlMapperDefaultGuesser.instance);
 		SqlBoxContextConfig
 				.setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
@@ -153,10 +133,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		if (super.dealOneSqlItem(iXxxStyle, ps, item))
 			return true; // if super class DbPro can deal it, let it do
 		if (item instanceof SqlOption) {
-			if (SqlOption.IGNORE_NULL.equals(item)) {
-				return true;// 联知
-			} else
-				return false;
+			return SqlOption.IGNORE_NULL.equals(item);
 		} else if (item instanceof TableModel) {
 			TableModel t = (TableModel) item;
 			SqlBoxException.assureNotNull(t.getEntityClass());
@@ -207,14 +184,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		} catch (Exception e) {
 			throw new SqlBoxException(e);
 		}
-	}
-
-	/**
-	 * Create a subClass instance of a abstract ActiveRecordSupport class based on
-	 * given SqlBoxContext
-	 */
-	public static <T> T createMapper(SqlBoxContext ctx, Class<?> abstractClass) {
-		return createMapper(abstractClass);
 	}
 
 	public String getShardedTB(Object entityOrClass, Object... shardvalues) {
@@ -369,8 +338,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Load all entity from database */
-	public <T> List<T> entityLoadByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {
-		return SqlBoxContextUtils.entityLoadByIds(this, entityClass, ids, optionItems);
+	public <T> List<T> entityFindByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {
+		return SqlBoxContextUtils.entityFindByIds(this, entityClass, ids, optionItems);
 	}
 
 	/**
@@ -381,13 +350,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Load all entity from database */
-	public <T> List<T> entityLoadAll(Class<T> entityClass, Object... optionItems) {
-		return SqlBoxContextUtils.entityLoadAll(this, entityClass, optionItems);
+	public <T> List<T> entityFindAll(Class<T> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.entityFindAll(this, entityClass, optionItems);
 	}
 
 	/** Load all entity from database */
-	public <T> List<T> entityLoadBySQL(Class<T> entityClass, Object... optionItems) {
-		return SqlBoxContextUtils.entityLoadBySQL(this, entityClass, optionItems);
+	public <T> List<T> entityFindBySQL(Class<T> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.entityFindBySQL(this, entityClass, optionItems);
+	}
+
+	/** Load all entity from database */
+	public <T> List<T> entityFindBySample(Object sampleBean, Object... optionItems) {
+		return SqlBoxContextUtils.entityFindBySample(this, sampleBean, optionItems);
 	}
 
 	// ========== Dialect shortcut methods ===============

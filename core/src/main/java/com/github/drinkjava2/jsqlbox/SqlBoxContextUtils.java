@@ -42,6 +42,7 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
+import com.github.drinkjava2.jsqlbox.sqlitem.Sample;
 
 /**
  * SqlBoxContextUtils is utility class store static methods about SqlBoxContext
@@ -74,7 +75,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		throw new SqlBoxException(sqlException);
 	}
 
-	private static ColumnModel findMatchColumnForJavaField(String entityField, TableModel tableModel) {
+	public static ColumnModel findMatchColumnForJavaField(String entityField, TableModel tableModel) {
 		SqlBoxException.assureNotNull(tableModel, "Can not find column for '" + entityField + "' in null table ");
 		ColumnModel col = tableModel.getColumnByFieldName(entityField);
 		SqlBoxException.assureNotNull(col,
@@ -185,7 +186,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/** Convert one row data into EntityBean */
-	public static <T> T mapToEntityBean(SqlBoxContext ctx, TableModel model, Map<String, Object> oneRow) {
+	public static <T> T mapToEntityBean( TableModel model, Map<String, Object> oneRow) {
 		if (oneRow == null || oneRow.isEmpty())
 			throw new SqlBoxException("Can not use null or empty row to convert to EntityBean");
 		SqlBoxException.assureNotNull(model.getEntityClass(), "Can not find entityClass setting in model.");
@@ -232,7 +233,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return (T) entityOrClass;
 	}
 
-	private static void notAllowSharding(ColumnModel col) {
+	public static void notAllowSharding(ColumnModel col) {
 		if (col.getShardTable() != null || col.getShardDatabase() != null)
 			throw new SqlBoxException(
 					"Fail to execute entity CRUD operation because found sharding column is not included in prime Key columns");
@@ -787,7 +788,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return bean;
 	}
 
-	public static <T> List<T> entityLoadAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
+	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -839,7 +840,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return result;
 	}
 
-	public static <T> List<T> entityLoadByIds(SqlBoxContext ctx, Class<T> entityClass, Iterable<?> ids, // NOSONAR
+	public static <T> List<T> entityFindByIds(SqlBoxContext ctx, Class<T> entityClass, Iterable<?> ids, // NOSONAR
 			Object... optionItems) {
 		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
 		TableModel model = optionModel;
@@ -923,7 +924,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> List<T> entityLoadBySQL(SqlBoxContext ctx, Class<T> entityClass, Object... sqlItems) {
+	public static <T> List<T> entityFindBySQL(SqlBoxContext ctx, Class<T> entityClass, Object... sqlItems) {
 		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(sqlItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -935,8 +936,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			throw new SqlBoxException("No no record found in database.");
 		List<T> results = new ArrayList<T>();
 		for (Map<String, Object> oneRow : rows)
-			results.add((T) mapToEntityBean(ctx, model, oneRow));
+			results.add((T) mapToEntityBean(model, oneRow));
 		return results;
 	}
-
+ 
+	@SuppressWarnings("unchecked")
+	public static <T> List<T> entityFindBySample(SqlBoxContext ctx, Object sampleBean, Object... sqlItems) { 
+		return (List<T>) entityFindAll(ctx, sampleBean.getClass(),new Sample(sampleBean).sql(" where ").notNullFields(), sqlItems);
+	}
 }

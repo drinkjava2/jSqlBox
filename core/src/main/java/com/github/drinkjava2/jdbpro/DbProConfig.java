@@ -32,8 +32,7 @@ public class DbProConfig {
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
 	protected static IocTool globalNextIocTool = null;
-	protected static SqlHandler[] globalNextSqlHandlers = null;
-	protected static SpecialSqlItemPreparer[] globalNextSpecialSqlItemPreparers = null;
+	protected static SqlHandler[] globalNextSqlHandlers = null; 
 	
 	
 	private SqlTemplateEngine templateEngine = globalNextTemplateEngine;
@@ -43,8 +42,7 @@ public class DbProConfig {
 	private IocTool iocTool =globalNextIocTool ;
 	private SqlOption masterSlaveOption = globalNextMasterSlaveOption ;
 	private Integer batchSize = globalNextBatchSize ;
-	private SqlHandler[] sqlHandlers = globalNextSqlHandlers ;
-	private SpecialSqlItemPreparer[] specialSqlItemPreparers = globalNextSpecialSqlItemPreparers ;
+	private SqlHandler[] sqlHandlers = globalNextSqlHandlers ; 
 	private DbPro[] slaves;
 	private DbPro[] masters;
 
@@ -127,15 +125,7 @@ public class DbProConfig {
 	public void setMasterSlaveSelect(SqlOption masterSlaveSelect) {
 		this.masterSlaveOption = masterSlaveSelect;
 	}
-
-	public SpecialSqlItemPreparer[] getSpecialSqlItemPreparers() {
-		return specialSqlItemPreparers;
-	}
-
-	public void setSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
-		this.specialSqlItemPreparers = specialSqlItemPreparers;
-	}
-
+	
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR
 	}
 
@@ -194,15 +184,7 @@ public class DbProConfig {
 	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
 		globalNextSqlHandlers = sqlHandlers;
 	}
-
-	public static SpecialSqlItemPreparer[] getGlobalNextSpecialSqlItemPreparers() {
-		return globalNextSpecialSqlItemPreparers;
-	}
-
-	public static void setGlobalNextSpecialSqlItemPreparers(SpecialSqlItemPreparer[] specialSqlItemPreparers) {
-		globalNextSpecialSqlItemPreparers = specialSqlItemPreparers;
-	}
-
+  
 	public static IocTool getGlobalNextIocTool() {
 		return globalNextIocTool;
 	}

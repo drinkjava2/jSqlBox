@@ -131,10 +131,6 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CpdUser.class, u3).getAddress());
 		Assert.assertEquals("NewAddress4", u1.tryLoadById(u4).getAddress());
 
-		// =======loadAll
-		Assert.assertEquals(4, ctx.entityLoadAll(CpdUser.class).size());
-		Assert.assertEquals(4, new CpdUser().loadAll().size());
-
 		// =======loadByIds (id is mp)
 		LinkStyleArrayList<Object> idMapList = new LinkStyleArrayList<Object>();
 		Map<String, Object> mpId1 = new HashMap<String, Object>();
@@ -147,22 +143,22 @@ public class CrudCompoundIdTest extends TestBase {
 		mpId1.put("sex", true);
 		mpId3.put("name", "Name3");
 		idMapList.append(mpId1).append(mpId2).append(mpId3);
-		Assert.assertEquals(3, ctx.entityLoadByIds(CpdUser.class, idMapList).size());
-		Assert.assertEquals(3, new CpdUser().loadByIds(idMapList).size());
+		Assert.assertEquals(3, ctx.entityFindByIds(CpdUser.class, idMapList).size());
+		Assert.assertEquals(3, new CpdUser().findByIds(idMapList).size());
 
-		// =======loadByIds (id is bean)
+		// =======findAll
+		Assert.assertEquals(4, ctx.entityFindAll(CpdUser.class).size());
+		Assert.assertEquals(4, new CpdUser().findAll().size());
+
+		// =======findByIds (id is bean)
 		LinkStyleArrayList<Object> idBeanList = new LinkStyleArrayList<Object>();
 		idBeanList.append(u1).append(u2).append(u3);
-		Assert.assertEquals(3, ctx.entityLoadByIds(CpdUser.class, idBeanList).size());
-		Assert.assertEquals(3, new CpdUser().loadByIds(idBeanList).size());
+		Assert.assertEquals(3, ctx.entityFindByIds(CpdUser.class, idBeanList).size());
+		Assert.assertEquals(3, new CpdUser().findByIds(idBeanList).size());
 
-		// ========loadBySql
-		Assert.assertEquals(4, ctx.entityLoadBySQL(CpdUser.class, "select * from CpdUser").size());
-		Assert.assertEquals(4, u1.loadBySQL("select * from CpdUser").size());
-
-		// ========loadBySql
-		Assert.assertEquals(4, ctx.entityLoadBySQL(CpdUser.class, "select * from CpdUser").size());
-		Assert.assertEquals(4, u1.loadBySQL("select * from CpdUser").size());
+		// ========findBySql
+		Assert.assertEquals(4, ctx.entityFindBySQL(CpdUser.class, "select * from CpdUser").size());
+		Assert.assertEquals(4, u1.findBySQL("select * from CpdUser").size());
 
 		// =======countAll
 		Assert.assertEquals(4, ctx.entityCountAll(CpdUser.class));
