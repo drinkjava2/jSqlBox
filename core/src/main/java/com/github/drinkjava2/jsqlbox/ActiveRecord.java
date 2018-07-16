@@ -13,6 +13,8 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
@@ -165,6 +167,22 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	@Override
 	public List<T> findBySample(Object sampleBean, Object... optionItems) {
 		return ctx(optionItems).entityFindBySample(sampleBean, optionItems);
+	}
+
+	public <E> E findOneRelated(Object... sqlItems) {
+		return ctx(sqlItems).entityFindOneRelated(ctx, this, sqlItems);
+	}
+
+	public <E> List<E> findRelatedList(Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedList(ctx, this, sqlItems);
+	}
+
+	public <E> Set<E> findRelatedSet(Object entity, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedSet(ctx, entity, sqlItems);
+	}
+
+	public <E> Map<Object, E> findRelatedMap(Object entity, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedMap(ctx, entity, sqlItems);
 	}
 
 	@Override

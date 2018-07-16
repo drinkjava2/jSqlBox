@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox.sqlitem;
+package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class Sample implements CustomizedSqlItem {
 	Object entityBean;
 	TableModel model = null;
-	List<Object> sqlPieces = new ArrayList<Object>();
+	List<Object> sqlItems = new ArrayList<Object>();
 
 	public Sample(Object entityBean) {
 		this.entityBean = entityBean;
@@ -45,30 +45,42 @@ public class Sample implements CustomizedSqlItem {
 		this.model = model;
 	}
 
+	/**
+	 * For all not null fields, create field1=? and field2=?... sql pieces
+	 */
 	public Sample notNullFields() {
-		sqlPieces.add("#NOTNULL_Fields");
+		sqlItems.add("#NOTNULL_Fields");
 		return this;
 	}
 
+	/**
+	 * For all fields has null values, create field1 is null and field2 is null...
+	 * sql pieces
+	 */
 	public Sample nullFields() {
-		sqlPieces.add("#NULL_Fields");
+		sqlItems.add("#NULL_Fields");
 		return this;
 	}
 
+	/**
+	 * For all fields, create field1=? and field2=? and field3 is null... sql pieces
+	 */
 	public Sample allFields() {
-		sqlPieces.add("#ALL_Fields");
+		sqlItems.add("#ALL_Fields");
 		return this;
 	}
 
+	/** Add a sql piece */
 	public Sample sql(String... sqlPiece) {
 		for (String sql : sqlPiece)
-			sqlPieces.add(sql);
+			sqlItems.add(sql);
 		return this;
 	}
 
+	/** Add a Sql param */
 	public Sample param(Object... params) {
 		for (Object param : params)
-			sqlPieces.add(new Object[] { param });
+			sqlItems.add(new Object[] { param });
 		return this;
 	}
 
@@ -102,8 +114,8 @@ public class Sample implements CustomizedSqlItem {
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
 		SqlBoxException.assureNotNull(model.getEntityClass());
-		if (!sqlPieces.isEmpty())
-			for (Object piece : sqlPieces) { // NOSONAR
+		if (!sqlItems.isEmpty())
+			for (Object piece : sqlItems) { // NOSONAR
 				if ("#NOTNULL_Fields".equals(piece)) {
 					dealAllFields(ps, model, false);
 					continue;

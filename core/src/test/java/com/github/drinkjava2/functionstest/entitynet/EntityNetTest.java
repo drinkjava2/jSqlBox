@@ -212,14 +212,13 @@ public class EntityNetTest extends TestBase {
 		User u2 = ctx.entityLoadById(User.class, "u1", model);
 		Assert.assertEquals(null, u2.getUserName());
 
-		List<User> userList = ctx.entityFindAll(User.class);
-
-		System.out.println(userList.size());
-		for (User u : userList) {
+		List<User> users = ctx.entityFindAll(User.class);
+		for (User u : users) {
 			System.out.println("User:" + u.getId());
 
-			// ctx.fillField(u, Role.class);
 			List<Role> roles = u.getRoleList();
+			if (roles == null)
+				roles = u.findRelatedList(Role.class);
 			if (roles != null)
 				for (Role r : roles) {
 					System.out.println("  Roles:" + r.getId());

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.github.drinkjava2.jdbpro.LinkStyleArrayList;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
@@ -42,7 +43,6 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
-import com.github.drinkjava2.jsqlbox.sqlitem.Sample;
 
 /**
  * SqlBoxContextUtils is utility class store static methods about SqlBoxContext
@@ -186,7 +186,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/** Convert one row data into EntityBean */
-	public static <T> T mapToEntityBean( TableModel model, Map<String, Object> oneRow) {
+	public static <T> T mapToEntityBean(TableModel model, Map<String, Object> oneRow) {
 		if (oneRow == null || oneRow.isEmpty())
 			throw new SqlBoxException("Can not use null or empty row to convert to EntityBean");
 		SqlBoxException.assureNotNull(model.getEntityClass(), "Can not find entityClass setting in model.");
@@ -939,9 +939,27 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			results.add((T) mapToEntityBean(model, oneRow));
 		return results;
 	}
- 
+
 	@SuppressWarnings("unchecked")
-	public static <T> List<T> entityFindBySample(SqlBoxContext ctx, Object sampleBean, Object... sqlItems) { 
-		return (List<T>) entityFindAll(ctx, sampleBean.getClass(),new Sample(sampleBean).sql(" where ").notNullFields(), sqlItems);
+	public static <T> List<T> entityFindBySample(SqlBoxContext ctx, Object sampleBean, Object... sqlItems) {
+		return (List<T>) entityFindAll(ctx, sampleBean.getClass(),
+				new Sample(sampleBean).sql(" where ").notNullFields(), sqlItems);
 	}
+
+	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entities, Object... sqlItems) {
+		return null;
+	}
+
+	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entities, Object... sqlItems) {
+		return null;
+	}
+
+	public static <E> Set<E> entityFindRelatedSet(SqlBoxContext ctx, Object entities, Object... sqlItems) {
+		return null;
+	}
+
+	public static <E> Map<Object, E> entityFindRelatedMap(SqlBoxContext ctx, Object entities, Object... sqlItems) {
+		return null;
+	}
+
 }

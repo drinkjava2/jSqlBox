@@ -42,15 +42,24 @@ public class EntityNetTreeTest extends TestBase {
 		EntityNet net = ctx.iQuery(targets, "select a.**, a.pid as b_id from treenodetb a");
 		TreeNode node = net.pickOneEntity("a", "A");
 		printTree(node, 0);
+
+		System.out.println("====================");
+		node = net.pickOneEntity("a", "D");
+		printTree(node, 0);
 	}
 
 	@Test
-	public void subTreeSearch() {// see https://my.oschina.net/drinkjava2/blog/1818631
+	public void subTreeSearch() {// see https://my.oschina.net/drinkjava2/blog/181863
+		System.out.println("====================");
 		TreeNode d = new TreeNode().loadById("D");
 		loadSubTree(d);
 	}
 
-	public void loadSubTree(TreeNode d) {// see https://my.oschina.net/drinkjava2/blog/1818631
+	/**
+	 * Use one SQL to load a whole child tree,see
+	 * https://my.oschina.net/drinkjava2/blog/1818631
+	 */
+	public void loadSubTree(TreeNode d) {
 		EntityNet net = ctx.pQuery(targets,
 				"select a.**, a.pid as b_id from treenodetb a where a.line>=? and a.line< (select min(line) from treenodetb where line>? and lvl<=?) ",
 				d.getLine(), d.getLine(), d.getLvl());
