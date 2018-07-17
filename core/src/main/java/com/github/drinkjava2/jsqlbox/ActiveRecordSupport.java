@@ -88,9 +88,9 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 
 	public <E> List<E> findRelatedList(Object... sqlItems);
 
-	public <E> Set<E> findRelatedSet(Object entity, Object... sqlItems);
+	public <E> Set<E> findRelatedSet(Object... sqlItems);
 
-	public <E> Map<Object, E> findRelatedMap(Object entity, Object... sqlItems);
+	public <E> Map<Object, E> findRelatedMap(Object... sqlItems);
 
 	/** Return how many records for current entity class */
 	public int countAll(Object... optionItems);

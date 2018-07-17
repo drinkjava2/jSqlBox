@@ -157,7 +157,6 @@ public class CrudTest extends TestBase {
 		Assert.assertEquals(4, u1.findBySQL("select * from CrudUser").size());
 
 		// ========findBySample
-		ctx.setAllowShowSQL(true);
 		Assert.assertEquals(1, ctx.entityFindBySample(u1).size());
 		Assert.assertEquals(1,
 				ctx.entityFindAll(CrudUser.class, new Sample(u2).sql(" where  ").notNullFields()).size());
