@@ -84,12 +84,16 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	/** Find entity according a sample bean, if not found, return empty list */
 	public List<T> findBySample(Object sampleBean, Object... optionItems);
 
+	/** Find one related entity */
 	public <E> E findOneRelated(Object... sqlItems);
 
+	/** Find related entity List */
 	public <E> List<E> findRelatedList(Object... sqlItems);
 
+	/** Find related entity Set */
 	public <E> Set<E> findRelatedSet(Object... sqlItems);
 
+	/** Find related entity Map */
 	public <E> Map<Object, E> findRelatedMap(Object... sqlItems);
 
 	/** Return how many records for current entity class */

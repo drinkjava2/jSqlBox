@@ -49,6 +49,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
+	/** Build a PaginHandler handler */
 	public static PaginHandler pagin(int pageNumber, int pageSize) {
 		return new PaginHandler(pageNumber, pageSize);
 	}
@@ -58,22 +59,35 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return new SqlItem(SqlOption.ALIAS, (Object[]) alias);
 	}
 
+	/**
+	 * Based on current tableModels, build a SQL String like select a.**, b.**, c.**
+	 * ... from xxx a left join xxx b on a.bid=b.id left join on ...
+	 */
+	public static String leftJoinSQL() {
+		return null;// TODO here
+	}
+
+	/** For EntityNet Query use, see user manual */
 	public static SqlItem give(String from, String to, String fieldName) {
 		return new SqlItem(SqlOption.GIVE, from, to, fieldName);
 	}
 
+	/** For EntityNet Query use, see user manual */
 	public static SqlItem give(String from, String to) {
 		return new SqlItem(SqlOption.GIVE, from, to);
 	}
 
+	/** For EntityNet Query use, see user manual */
 	public static SqlItem giveBoth(String from, String to) {
 		return new SqlItem(SqlOption.GIVE_BOTH, from, to);
 	}
 
+	/** Disable PaginHandler */
 	public static SqlItem noPagin() {
 		return new SqlItem(SqlOption.DISABLE_HANDLERS, PaginHandler.class);
 	}
 
+	/** Build a SHARD_TABLE type sqlItem */
 	public static SqlItem shardTB(Object... shardvalues) {
 		if (shardvalues.length == 0)
 			throw new SqlBoxException("shardTB() method need at least 1 parameter");
@@ -84,6 +98,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		throw new SqlBoxException("shardTB() method allow at most 2 parameter");
 	}
 
+	/** Build a SHARD_DATABASE type sqlItem */
 	public static SqlItem shardDB(Object... shardvalues) {
 		if (shardvalues.length == 0)
 			throw new SqlBoxException("shardDB() method need at least 1 parameter");

@@ -76,8 +76,8 @@ public class PreparedSQL {
 	/** Handers in this list will disabled */
 	private List<Class<?>> disabledHandlers;
 
-	/** Store "SqlOption.Other" type items */
-	private List<Object> others = null;
+	/** Store "SqlOption.Other" type SqlItem */
+	private List<SqlItem> others = null;
 
 	/** TableModels, this is designed for ORM program */
 	private Object[] models;
@@ -297,9 +297,9 @@ public class PreparedSQL {
 			this.useTemplate = useTemplate;
 	}
 
-	public void addOther(Object obj) {
+	public void addOther(SqlItem obj) {
 		if (others == null)
-			others = new ArrayList<Object>();
+			others = new ArrayList<SqlItem>();
 		others.add(obj);
 	}
 
@@ -429,11 +429,11 @@ public class PreparedSQL {
 		this.entityNet = entityNet;
 	}
 
-	public List<Object> getOthers() {
+	public List<SqlItem> getOthers() {
 		return others;
 	}
 
-	public void setOthers(List<Object> others) {
+	public void setOthers(List<SqlItem> others) {
 		this.others = others;
 	}
 

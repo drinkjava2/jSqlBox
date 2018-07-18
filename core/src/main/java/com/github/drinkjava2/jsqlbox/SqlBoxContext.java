@@ -369,24 +369,24 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected void ormQueryMethods__________________________() {// NOSONAR
 	}
 
-	/** Find related entity for given entity */
-	public <E> E entityFindOneRelated(Object entity, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindOneRelated(this, entity, sqlItems);
+	/** Find one related entity by given entity */
+	public <E> E entityFindOneRelated(Object entity,  Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindOneRelated(this, entity,  sqlItems);
 	}
 
 	/** Find related entity list for given entities ( entity or Iterable) */
-	public <E> List<E> entityFindRelatedList(Object entities, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedList(this, entities, sqlItems);
+	public <E> List<E> entityFindRelatedList(Object entities,   Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedList(this, entities,  sqlItems);
 	}
 
 	/** Find related entity set for given entities ( entity or Iterable) */
-	public <E> Set<E> entityFindRelatedSet(Object entities, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedSet(this, entities, sqlItems);
+	public <E> Set<E> entityFindRelatedSet(Object entities,   Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedSet(this, entities,  sqlItems);
 	}
 
 	/** Find related entity map for given entities ( entity or Iterable) */
-	public <E> Map<Object, E> entityFindRelatedMap(Object entities, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedMap(this, entities, sqlItems);
+	public <E> Map<Object, E> entityFindRelatedMap(Object entities,  Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedMap(this, entities,   sqlItems);
 	}
 
 	protected void dialectShortcutMethods__________________________() {// NOSONAR

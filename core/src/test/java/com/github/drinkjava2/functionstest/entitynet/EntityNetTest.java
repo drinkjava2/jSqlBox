@@ -1,6 +1,6 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
 
@@ -179,7 +179,7 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
-	public void testManualAlias() {
+	public void testGiveAlias() {
 		insertDemoData();
 		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, Role.class, alias("t", "r"), Privilege.class,
 				UserRole.class, RolePrivilege.class, give("r", "t"), give("t", "r"), giveBoth("p", "t"),
@@ -205,26 +205,36 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
-	public void testManualLoad() {
+	public void testDynamicConfig() {
 		insertDemoData();
 		TableModel model = TableModelUtils.entity2Model(User.class);
 		model.column("userName").setTransientable(true);
 		User u2 = ctx.entityLoadById(User.class, "u1", model);
 		Assert.assertEquals(null, u2.getUserName());
+	}
 
+	@Test
+	public void testManualLoad() {
+		insertDemoData();
 		List<User> users = ctx.entityFindAll(User.class);
+
 		for (User u : users) {
 			System.out.println("User:" + u.getId());
 
 			List<Role> roles = u.getRoleList();
 			if (roles == null)
-				roles = u.findRelatedList(Role.class);
+				roles = u.findRelatedList(User.class, UserRole.class, Role.class);
+			Assert.assertNotEquals(0, roles.size());
 			if (roles != null)
 				for (Role r : roles) {
 					System.out.println("  Roles:" + r.getId());
 				}
 
 			Set<Privilege> privileges = u.getPrivilegeSet();
+			Object path = new Object[] {  UserRole.class, Role.class, RolePrivilege.class, Privilege.class };
+			if (privileges == null)
+				privileges = u.findRelatedSet(path);
+			Assert.assertNotEquals(0, roles.size());
 			if (privileges != null)
 				for (Privilege privilege : privileges) {
 					System.out.println("  Privilege:" + privilege.getId());

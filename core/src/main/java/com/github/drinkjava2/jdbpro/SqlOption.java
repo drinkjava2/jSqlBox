@@ -75,7 +75,7 @@ public enum SqlOption {
 	/** It's a QUERY type SQL */
 	QUERY, // Control Switch
 
-	/** OTHER type SqlItem used to store some other items for user */
+	/** OTHER type SqlItem used to store some other items */
 	OTHER,
 
 	// ================================================================
@@ -112,7 +112,7 @@ public enum SqlOption {
 	/** Tell system this is a "SHARD_DATABASE" item */
 	SHARD_DATABASE, // Method
 
-	/** GIVE, GIVE_BOTH option are designed for ORM Query */
+	/** GIVE, GIVE_BOTH option are designed for ORM query */
 	GIVE, // Method
 
 	GIVE_BOTH, // Method
@@ -120,5 +120,4 @@ public enum SqlOption {
 	// ------- Entity CURD items -----------
 	/** This option is designed for ORM, mark a "IGNORE_NULL" item" */
 	IGNORE_NULL // Control Switch
-
 }

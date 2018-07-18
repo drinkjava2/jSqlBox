@@ -39,7 +39,7 @@ import com.zaxxer.hikari.HikariDataSource;
 /*- 
 SqlOptions: 
 USE_MASTER (write: Master              read：  Master)
-USE_AUTO   (write: Master              read: Random 1 Slave if not in TX / Master if in TX))
+USE_AUTO   (write: Master              read: If not in TX random choose 1 Slave, otherwise use Master))
 USE_BOTH   (write: Master+All Slaves!  read: Master)
 USE_SLAVE  (write: All Slaves!         read: Random 1 Slave ) 
 */
@@ -123,8 +123,8 @@ public class MasterSlaveTest {
 		System.out.println("============Test testMasterSlaveUpdate==================");
 		// AutoChoose, not in Transaction, should use Master
 		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
-		//TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
-		TheUser u1 =new TheUser().useContext(master).put("id", 3L).load(USE_MASTER);
+		// TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
+		TheUser u1 = new TheUser().useContext(master).put("id", 3L).load(USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
 		TheUser u2 = master.entityLoadById(TheUser.class, 3L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row3", u2.getName());

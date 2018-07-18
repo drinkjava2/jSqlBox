@@ -170,23 +170,23 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public <E> E findOneRelated(Object... sqlItems) {
-		return ctx(sqlItems).entityFindOneRelated(ctx, this, sqlItems);
+	public <E> E findOneRelated(Object... optionItems) {
+		return ctx(optionItems).entityFindOneRelated(this, optionItems);
 	}
 
 	@Override
-	public <E> List<E> findRelatedList(Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedList(ctx, this, sqlItems);
+	public <E> List<E> findRelatedList(Object... optionItems) {
+		return ctx(optionItems).entityFindRelatedList(this, optionItems);
 	}
 
 	@Override
-	public <E> Set<E> findRelatedSet(Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedSet(ctx, this, sqlItems);
+	public <E> Set<E> findRelatedSet(Object... optionItems) {
+		return ctx(optionItems).entityFindRelatedSet(this, optionItems);
 	}
 
 	@Override
-	public <E> Map<Object, E> findRelatedMap(Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedMap(ctx, this, sqlItems);
+	public <E> Map<Object, E> findRelatedMap(Object... optionItems) {
+		return ctx(optionItems).entityFindRelatedMap(this, optionItems);
 	}
 
 	@Override
@@ -279,5 +279,4 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 
- 
 }

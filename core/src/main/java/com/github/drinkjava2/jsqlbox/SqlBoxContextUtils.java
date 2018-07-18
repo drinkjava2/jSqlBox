@@ -946,23 +946,22 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				new Sample(sampleBean).sql(" where ").notNullFields(), sqlItems);
 	}
 
-	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Class<E> targetClass, Object entities,
-			Object... sqlItems) {
+	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		List<E> list = entityFindRelatedList(ctx, entity, sqlItems);
+		if (list.size() != 1)
+			throw new SqlBoxException("Except 1 entity but found " + list.size() + " records");
+		return list.get(0);
+	}
+
+	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entities, Object... sqlItems) {
 		return null;
 	}
 
-	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Class<E> targetClass, Object entities,
-			Object... sqlItems) {
+	public static <E> Set<E> entityFindRelatedSet(SqlBoxContext ctx, Object entities, Object... sqlItems) {
 		return null;
 	}
 
-	public static <E> Set<E> entityFindRelatedSet(SqlBoxContext ctx, Class<E> targetClass, Object entities,
-			Object... sqlItems) {
-		return null;
-	}
-
-	public static <E> Map<Object, E> entityFindRelatedMap(SqlBoxContext ctx, Class<E> targetClass, Object entities,
-			Object... sqlItems) {
+	public static <E> Map<Object, E> entityFindRelatedMap(SqlBoxContext ctx, Object entities, Object... sqlItems) {
 		return null;
 	}
 

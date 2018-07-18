@@ -22,8 +22,8 @@ public class EntityNetTreeTest extends TestBase {
 		t.putValues("B", "is a worm?", "A", 2, 2).insert();
 		t.putValues("E", "no", "B", 3, 3).insert();
 		t.putValues("F", "is a bug", "B", 4, 3).insert();
-		t.putValues("C", "oh, a bug", "A", 5, 2).insert();
-		t.putValues("G", "need solve it", "C", 6, 3).insert();
+		t.putValues("t", "oh, a bug", "A", 5, 2).insert();
+		t.putValues("G", "need solve it", "t", 6, 3).insert();
 		t.putValues("D", "careful it bites", "A", 7, 2).insert();
 		t.putValues("H", "it does not bite", "D", 8, 3).insert();
 		t.putValues("J", "found the reason", "H", 9, 4).insert();
@@ -35,35 +35,35 @@ public class EntityNetTreeTest extends TestBase {
 	}
 
 	private static final Object[] targets = new Object[] { new EntityNetHandler(), TreeNode.class, TreeNode.class,
-			alias("a", "b"), give("b", "a", "parent"), give("a", "b", "childs") };
+			alias("t", "p"), give("p", "t", "parent"), give("t", "p", "childs") };
 
 	@Test
 	public void testSearchTreeChild() {
-		EntityNet net = ctx.iQuery(targets, "select a.**, a.pid as b_id from treenodetb a");
-		TreeNode node = net.pickOneEntity("a", "A");
+		EntityNet net = ctx.iQuery(targets, "select t.**, t.pid as p_id from treenodetb t");
+		TreeNode node = net.pickOneEntity("t", "A");
 		printTree(node, 0);
 
 		System.out.println("====================");
-		node = net.pickOneEntity("a", "D");
+		node = net.pickOneEntity("t", "D");
 		printTree(node, 0);
 	}
 
 	@Test
 	public void subTreeSearch() {// see https://my.oschina.net/drinkjava2/blog/181863
-		System.out.println("====================");
+		System.out.println("==========Sub trea load==========");
 		TreeNode d = new TreeNode().loadById("D");
-		loadSubTree(d);
+		loadSubTreeByGivenNode(d);
 	}
 
 	/**
-	 * Use one SQL to load a whole child tree,see
+	 * Use one SQL to load a whole sub-tree,see
 	 * https://my.oschina.net/drinkjava2/blog/1818631
 	 */
-	public void loadSubTree(TreeNode d) {
+	public void loadSubTreeByGivenNode(TreeNode d) {
 		EntityNet net = ctx.pQuery(targets,
-				"select a.**, a.pid as b_id from treenodetb a where a.line>=? and a.line< (select min(line) from treenodetb where line>? and lvl<=?) ",
+				"select t.**, t.pid as p_id from treenodetb t where t.line>=? and t.line< (select min(line) from treenodetb where line>? and lvl<=?) ",
 				d.getLine(), d.getLine(), d.getLvl());
-		TreeNode node = net.pickOneEntity("a", d.getId());
+		TreeNode node = net.pickOneEntity("t", d.getId());
 		printTree(node, 0);
 	}
 
