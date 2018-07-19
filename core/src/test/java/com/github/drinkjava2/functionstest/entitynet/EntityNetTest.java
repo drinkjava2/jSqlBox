@@ -21,6 +21,7 @@ import com.github.drinkjava2.functionstest.entitynet.entities.Role;
 import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
+import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
@@ -83,14 +84,13 @@ public class EntityNetTest extends TestBase {
 		new RolePrivilege().putValues("r4", "p1").insert();
 	}
 
-	private static final Object[] targets = new Object[] { new EntityNetHandler(), Address.class, Email.class,
-			User.class, Role.class, Privilege.class, UserRole.class, RolePrivilege.class };
+	private static final Object[] targets = new Object[] { new EntityNetHandler(), User.class, UserRole.class,
+			Role.class, RolePrivilege.class, Privilege.class, giveBoth("r", "u"), giveBoth("p", "u") };
 
 	@Test
 	public void testAutoAlias() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(targets, giveBoth("r", "u"), giveBoth("p", "u"),
-				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+		EntityNet net = ctx.iQuery(targets, "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ", //
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
@@ -150,19 +150,28 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
+	public void testLeftJoinSQL() {
+		insertDemoData();
+		EntityNet net = ctx.iQuery(targets, LEFT_JOIN_SQL);
+		List<User> userList = net.pickEntityList("u");
+		for (User u : userList) {
+			System.out.println("User:" + u.getId());
+			Set<Privilege> privileges = u.getPrivilegeSet();
+			if (privileges != null)
+				for (Privilege privilege : privileges)
+					System.out.println("  Privilege:" + privilege.getId());
+		}
+	}
+
+	@Test
 	public void testJoinQuary() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(targets, giveBoth("r", "u"), giveBoth("p", "u"),
-				"select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
-				" left join userroletb ur on u.id=ur.userid ", //
-				" left join roletb r on ur.rid=r.id ", //
-				" left join roleprivilegetb rp on rp.rid=r.id ", //
-				" left join privilegetb p on p.id=rp.pid ", //
-				" order by u.id, ur.id, r.id, rp.id, p.id");
+		EntityNet net = ctx.iQuery(targets, LEFT_JOIN_SQL);
 
-		ctx.iQuery(net, targets, give("e", "u"), "select u.##, e.** from emailtb e, usertb u where e.userid=u.id");
+		ctx.iQuery(net, new EntityNetHandler(), Email.class, give("e", "u"),
+				"select u.##, e.** from emailtb e, usertb u where e.userid=u.id");
 
-		ctx.iQuery(net, targets, giveBoth("a", "u"),
+		ctx.iQuery(net, new EntityNetHandler(), Address.class, giveBoth("a", "u"),
 				"select u.id as u_id, a.** from addresstb a, usertb u where a.userid=u.id");
 
 		Address a = net.pickOneEntity(Address.class, "a2");
@@ -179,16 +188,12 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
-	public void testGiveAlias() {
+	public void testGiveAlias() {// Assign alias name "t" to User, "tr" to UserRole
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, Role.class, alias("t", "r"), Privilege.class,
-				UserRole.class, RolePrivilege.class, give("r", "t"), give("t", "r"), giveBoth("p", "t"),
-				"select t.**, ur.**, r.**, p.**, rp.** from usertb t ", //
-				" left join userroletb ur on t.id=ur.userid ", //
-				" left join roletb r on ur.rid=r.id ", //
-				" left join roleprivilegetb rp on rp.rid=r.id ", //
-				" left join privilegetb p on p.id=rp.pid ", //
-				" order by t.id, ur.id, r.id, rp.id, p.id");
+		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, UserRole.class, Role.class,
+				alias("t", "tr", "r"), RolePrivilege.class, Privilege.class, give("r", "t"), give("t", "r"),
+				giveBoth("p", "t"), LEFT_JOIN_SQL, //
+				" order by t.id, tr.id, r.id, rp.id, p.id",new PrintSqlHandler());
 		List<User> userList = net.pickEntityList(User.class);
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
@@ -231,7 +236,7 @@ public class EntityNetTest extends TestBase {
 				}
 
 			Set<Privilege> privileges = u.getPrivilegeSet();
-			Object path = new Object[] {  UserRole.class, Role.class, RolePrivilege.class, Privilege.class };
+			Object path = new Object[] { UserRole.class, Role.class, RolePrivilege.class, Privilege.class };
 			if (privileges == null)
 				privileges = u.findRelatedSet(path);
 			Assert.assertNotEquals(0, roles.size());

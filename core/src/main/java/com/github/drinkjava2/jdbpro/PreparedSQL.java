@@ -38,7 +38,7 @@ import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 @SuppressWarnings("rawtypes")
 public class PreparedSQL {
 
-	private StringBuilder stringBuilder = new StringBuilder();
+	private StringBuilder sqlBuilder = new StringBuilder();
 
 	/** SQL Operation Type */
 	private SqlOption operationType;
@@ -78,6 +78,12 @@ public class PreparedSQL {
 
 	/** Store "SqlOption.Other" type SqlItem */
 	private List<SqlItem> others = null;
+
+	/**
+	 * Designed for ORM program, if set true will ignore fields with null value in
+	 * insert & update methods
+	 */
+	private Boolean ignoreNull = null;
 
 	/** TableModels, this is designed for ORM program */
 	private Object[] models;
@@ -124,8 +130,8 @@ public class PreparedSQL {
 	}
 
 	public StringBuilder addSql(Object sqlPiece) {
-		stringBuilder.append(sqlPiece);
-		return stringBuilder;
+		sqlBuilder.append(sqlPiece);
+		return sqlBuilder;
 	}
 
 	public void addParam(Object param) {
@@ -437,12 +443,20 @@ public class PreparedSQL {
 		this.others = others;
 	}
 
-	public StringBuilder getStringBuilder() {
-		return stringBuilder;
+	public StringBuilder getSqlBuilder() {
+		return sqlBuilder;
 	}
 
-	public void setStringBuilder(StringBuilder stringBuilder) {
-		this.stringBuilder = stringBuilder;
+	public void setSqlBuilder(StringBuilder sqlBuilder) {
+		this.sqlBuilder = sqlBuilder;
+	}
+
+	public Boolean getIgnoreNull() {
+		return ignoreNull;
+	}
+
+	public void setIgnoreNull(Boolean ignoreNull) {
+		this.ignoreNull = ignoreNull;
 	}
 
 }

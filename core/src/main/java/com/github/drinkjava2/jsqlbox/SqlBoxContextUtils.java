@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.LEFT_JOIN_SQL;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDB;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTB;
 
@@ -40,8 +41,11 @@ import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
+import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 
 /**
@@ -239,8 +243,78 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					"Fail to execute entity CRUD operation because found sharding column is not included in prime Key columns");
 	}
 
-	protected void crudMethods___________________________________() {// NOSONAR
+	/**
+	 * Based on PreparedSQL's models and alias, automatically build and append a SQL
+	 * like below:
+	 * 
+	 * <pre>
+	 * select a.**, b.**, c.**... from xxx a  
+	 * left join xxx b on a.bid=b.id  
+	 * left join xxx c on b.cid=c.id ...
+	 * </pre>
+	 */
+	public static void appendLeftJoinSQL(PreparedSQL ps) {
+		Object[] m = ps.getModels();
+		String[] a = ps.getAliases();
+		SqlBoxException.assureTrue(m != null && m.length > 0);
+		SqlBoxException.assureTrue(a != null && a.length > 0);
+		SqlBoxException.assureTrue(m.length == m.length);// NOSONAR
 
+		StringBuilder sb = new StringBuilder(" select ");
+		for (int i = 0; i < m.length; i++) {
+			if (i > 0)
+				sb.append(", ");
+			sb.append(a[i]).append(".**");
+		}
+		sb.append(" from ");
+		sb.append(((TableModel) m[0]).getTableName()).append(" ").append(a[0]).append(" ");
+		for (int i = 1; i < m.length; i++) {
+			sb.append(" left join ");
+			sb.append(((TableModel) m[i]).getTableName()).append(" ").append(a[i]);
+			sb.append(" on ");
+			appendKeyEquelsSqlPiece(sb, a[i - 1], ((TableModel) m[i - 1]), a[i], ((TableModel) m[i]));
+
+		}
+		ps.addSql(sb.toString());
+	}
+
+	private static void appendKeyEquelsSqlPiece(StringBuilder sb, String a1, TableModel m1, String a2, TableModel m2) {
+		List<FKeyModel> fkeys = m1.getFkeyConstraints();
+		for (FKeyModel fkey : fkeys) {
+			String refTable = fkey.getRefTableAndColumns()[0];
+			if (refTable.equalsIgnoreCase(m2.getTableName())) {// m2 is parent
+				realDoAppendKeyEquelsSqlPiece(sb, a1, m1, a2, m2, fkey);
+				return;
+			}
+		}
+		fkeys = m2.getFkeyConstraints();
+		for (FKeyModel fkey : fkeys) {
+			String refTable = fkey.getRefTableAndColumns()[0];
+			if (refTable.equalsIgnoreCase(m1.getTableName())) {// m1 is parent
+				realDoAppendKeyEquelsSqlPiece(sb, a2, m2, a1, m1, fkey);
+				return;
+			}
+		}
+		throw new SqlBoxException("Not found relationship(foreign key) setting between '" + m1.getEntityClass()
+				+ "' and '" + m2.getEntityClass() + "'");
+	}
+
+	/** Build a.bid1=b.id1 and a.bid2=b.id2 SQL piece */
+	private static void realDoAppendKeyEquelsSqlPiece(StringBuilder sb, String a, TableModel ma, String b,
+			TableModel mb, FKeyModel fkey) {
+		int i = 0;
+		for (String col : fkey.getColumnNames()) {
+			if (i > 0)
+				sb.append("and ");
+			sb.append(a).append(".").append(col).append("=").append(b).append(".")
+					.append(fkey.getRefTableAndColumns()[i + 1]).append(" ");
+			i++;
+		}
+
+	}
+
+	@SuppressWarnings("unused")
+	private static void crudMethods___________________________________() {
 	}
 
 	/**
@@ -949,11 +1023,16 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		List<E> list = entityFindRelatedList(ctx, entity, sqlItems);
 		if (list.size() != 1)
-			throw new SqlBoxException("Except 1 entity but found " + list.size() + " records");
+			throw new SqlBoxException("Expect 1 entity but found " + list.size() + " records");
 		return list.get(0);
 	}
 
 	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entities, Object... sqlItems) {
+		PreparedSQL ps=ctx.iPrepare(new EntityNetHandler(), sqlItems);
+		SqlBoxException.assureNotNull(ps.getModels());//TODO here
+		TableModel model=(TableModel) ps.getModels()[ps.getModels().length-1];
+		 
+		EntityNet net = ctx.iQuery( sqlItems, LEFT_JOIN_SQL);
 		return null;
 	}
 

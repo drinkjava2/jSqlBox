@@ -40,6 +40,8 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
 	public static final SqlOption IGNORE_NULL = SqlOption.IGNORE_NULL;
+	public static final SqlOption LEFT_JOIN_SQL = SqlOption.LEFT_JOIN_SQL;
+	
 
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
@@ -58,14 +60,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static SqlItem alias(String... alias) {
 		return new SqlItem(SqlOption.ALIAS, (Object[]) alias);
 	}
-
-	/**
-	 * Based on current tableModels, build a SQL String like select a.**, b.**, c.**
-	 * ... from xxx a left join xxx b on a.bid=b.id left join on ...
-	 */
-	public static String leftJoinSQL() {
-		return null;// TODO here
-	}
+ 
 
 	/** For EntityNet Query use, see user manual */
 	public static SqlItem give(String from, String to, String fieldName) {

@@ -171,7 +171,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					predSQL.addParam(item); // pXxxx style, unknown is parameter
 			}
 		}
-		predSQL.setSql(predSQL.getStringBuilder().toString());
+		predSQL.setSql(predSQL.getSqlBuilder().toString());
 		return predSQL;
 	}
 
@@ -183,7 +183,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		if (item instanceof String) {
 			if (iXxxStyle)
 				predSQL.addSql(item);
-			else if (predSQL.getStringBuilder().length() > 0)
+			else if (predSQL.getSqlBuilder().length() > 0)
 				predSQL.addParam(item);
 			else
 				predSQL.addSql(item);

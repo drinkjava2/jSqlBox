@@ -13,6 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -135,7 +136,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		if (super.dealOneSqlItem(iXxxStyle, ps, item))
 			return true; // if super class DbPro can deal it, let it do
 		if (item instanceof SqlOption) {
-			return SqlOption.IGNORE_NULL.equals(item);
+			if (SqlOption.IGNORE_NULL.equals(item))
+				ps.setIgnoreNull(true);
+			else if (SqlOption.LEFT_JOIN_SQL.equals(item))
+				SqlBoxContextUtils.appendLeftJoinSQL(ps);
+			else
+				return false;
 		} else if (item instanceof TableModel) {
 			TableModel t = (TableModel) item;
 			SqlBoxException.assureNotNull(t.getEntityClass());
@@ -168,7 +174,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			} else
 				return false;
 		} else if (item instanceof EntityNet) {
-			ps.setEntityNet((EntityNet) item);
+			EntityNet net = (EntityNet) item;
+			ps.setEntityNet(net);
+			for (Entry<String, TableModel> entry : net.getConfigs().entrySet()) {
+				ps.addModel(entry.getValue());
+				ps.setLastAliases(entry.getKey());
+			}
 		} else
 			return false;
 		return true;
@@ -370,23 +381,23 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Find one related entity by given entity */
-	public <E> E entityFindOneRelated(Object entity,  Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindOneRelated(this, entity,  sqlItems);
+	public <E> E entityFindOneRelated(Object entity, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindOneRelated(this, entity, sqlItems);
 	}
 
 	/** Find related entity list for given entities ( entity or Iterable) */
-	public <E> List<E> entityFindRelatedList(Object entities,   Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedList(this, entities,  sqlItems);
+	public <E> List<E> entityFindRelatedList(Object entities, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedList(this, entities, sqlItems);
 	}
 
 	/** Find related entity set for given entities ( entity or Iterable) */
-	public <E> Set<E> entityFindRelatedSet(Object entities,   Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedSet(this, entities,  sqlItems);
+	public <E> Set<E> entityFindRelatedSet(Object entities, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedSet(this, entities, sqlItems);
 	}
 
 	/** Find related entity map for given entities ( entity or Iterable) */
-	public <E> Map<Object, E> entityFindRelatedMap(Object entities,  Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedMap(this, entities,   sqlItems);
+	public <E> Map<Object, E> entityFindRelatedMap(Object entities, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedMap(this, entities, sqlItems);
 	}
 
 	protected void dialectShortcutMethods__________________________() {// NOSONAR
