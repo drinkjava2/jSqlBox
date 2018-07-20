@@ -234,18 +234,17 @@ public class EntityNetTest extends TestBase {
 					System.out.println("  Roles:" + r.getId());
 				}
 
-			Set<Privilege> privileges = u.findRelatedSet(UserRole.class, Role.class, RolePrivilege.class,
-					Privilege.class);
+			Object path = new Object[] { UserRole.class, Role.class, RolePrivilege.class, Privilege.class };
+			Set<Privilege> privileges = u.findRelatedSet(path);
 			if (privileges != null)
 				for (Privilege privilege : privileges) {
 					System.out.println("  Privilege:" + privilege.getId());
 				}
-			
-			Map<Object, Privilege> privilegeMap = u.findRelatedMap(UserRole.class, Role.class, RolePrivilege.class,
-					Privilege.class);
+
+			Map<Object, Privilege> privilegeMap = u.findRelatedMap(path);
 			if (privilegeMap != null)
-				for (Entry<Object, Privilege> entry : privilegeMap.entrySet() ) {
-					System.out.println("  Privilege " + entry.getKey()+"="+entry.getValue().getId());
+				for (Entry<Object, Privilege> entry : privilegeMap.entrySet()) {
+					System.out.println("  Privilege " + entry.getKey() + "=" + entry.getValue().getId());
 				}
 		}
 	}

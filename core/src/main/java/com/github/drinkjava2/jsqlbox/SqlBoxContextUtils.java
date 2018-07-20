@@ -170,13 +170,21 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	public static List<TableModel> findAllModels(Object... optionItems) {// NOSONAR
 		List<TableModel> result = new ArrayList<TableModel>();
+		doFindAllModels(result, optionItems);
+		return result;
+	}
+
+	private static void doFindAllModels(List<TableModel> result, Object... optionItems) {
 		for (Object item : optionItems) { // If Model in option items, use it first
 			if (item instanceof TableModel)
 				result.add((TableModel) item);
 			else if (item instanceof Class)
 				result.add(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
+			else if (item.getClass().isArray()) {
+				Object[] array = (Object[]) item;
+				doFindAllModels(result, array);
+			}
 		}
-		return result;
 	}
 
 	/** Create a Auto Alias name for PreparedSQL */

@@ -19,10 +19,10 @@ public interface LambdSqlItem extends CustomizedSqlItem {
 	}
 
 	@Override
-	public default void doPrepare(PreparedSQL ps, CustomizedSqlItem item) {// NOSONAR
+	public default void doPrepare(PreparedSQL ps) {
 		AliasProxyUtil.thdMethodName.remove();
-		if (item instanceof ALIAS) {
-			((ALIAS) item).get();
+		if (this instanceof ALIAS) {
+			((ALIAS) this).get();
 			AliasItemInfo a = AliasProxyUtil.thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");// NOSONAR
@@ -31,8 +31,8 @@ public interface LambdSqlItem extends CustomizedSqlItem {
 			else
 				ps.addSql(a.alias).append(".").append(a.colName).append(" as ").append(a.alias).append("_")
 						.append(a.colName);
-		} else if (item instanceof C_ALIAS) {
-			((C_ALIAS) item).get();
+		} else if (this instanceof C_ALIAS) {
+			((C_ALIAS) this).get();
 			AliasItemInfo a = AliasProxyUtil.thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
@@ -41,8 +41,8 @@ public interface LambdSqlItem extends CustomizedSqlItem {
 			else
 				ps.addSql(", ").append(a.alias).append(".").append(a.colName).append(" as ").append(a.alias).append("_")
 						.append(a.colName);
-		} else if (item instanceof COL) {
-			((COL) item).get();
+		} else if (this instanceof COL) {
+			((COL) this).get();
 			AliasItemInfo a = AliasProxyUtil.thdMethodName.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");

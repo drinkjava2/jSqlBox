@@ -178,15 +178,16 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	@Override
 	public <E> List<E> findRelatedList(Object... optionItems) {
-		Object[] items = addThisClassIfNotHave(this, optionItems);
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
 		return ctx(optionItems).entityFindRelatedList(this, items);
 	}
 
-	private static Object[] addThisClassIfNotHave(Object entity, Object... optionItems) {
+	private static Object[] insertThisClassIfNotHave(Object entity, Object... optionItems) {
 		Object[] items = optionItems;
 		List<TableModel> models = SqlBoxContextUtils.findAllModels(optionItems);
-		TableModel model = models.get(0);
-		SqlBoxException.assureNotNull(model);
+		if(models==null || models.size()==0)
+			throw new SqlBoxException("No TableMode found for entity.");
+		TableModel model = models.get(0); 
 		if (!entity.getClass().equals(model.getEntityClass())) {// NOSONAR
 			model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
 			items = ArrayUtils.insertArray(model, items);
@@ -196,13 +197,13 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	@Override
 	public <E> Set<E> findRelatedSet(Object... optionItems) {
-		Object[] items = addThisClassIfNotHave(this, optionItems);
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
 		return ctx(optionItems).entityFindRelatedSet(this, items);
 	}
 
 	@Override
 	public <E> Map<Object, E> findRelatedMap(Object... optionItems) {
-		Object[] items = addThisClassIfNotHave(this, optionItems);
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
 		return ctx(optionItems).entityFindRelatedMap(this, items);
 	}
 

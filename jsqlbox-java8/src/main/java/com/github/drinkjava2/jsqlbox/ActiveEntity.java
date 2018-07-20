@@ -2,11 +2,15 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdialects.ArrayUtils;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -26,7 +30,6 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
-	 
 	@Override
 	public default T insert(Object... optionItems) {
 		return (T) ctx(optionItems).entityInsert(this, optionItems);
@@ -93,18 +96,59 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public default List<T> loadAll(Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityLoadAll(this.getClass(), optionItems);
+	public default List<T> findAll(Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityFindAll(this.getClass(), optionItems);
 	}
 
 	@Override
-	public default List<T> loadByIds(Iterable<?> ids, Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityLoadByIds(this.getClass(), ids, optionItems);
+	public default List<T> findByIds(Iterable<?> ids, Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityFindByIds(this.getClass(), ids, optionItems);
 	}
 
 	@Override
-	public default List<T> loadBySQL(Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityLoadBySQL(this.getClass(), optionItems);
+	public default List<T> findBySQL(Object... optionItems) {
+		return (List<T>) ctx(optionItems).entityFindBySQL(this.getClass(), optionItems);
+	}
+
+	@Override
+	public default List<T> findBySample(Object sampleBean, Object... optionItems) {
+		return ctx(optionItems).entityFindBySample(sampleBean, optionItems);
+	}
+
+	@Override
+	public default <E> E findOneRelated(Object... optionItems) {
+		return ctx(optionItems).entityFindOneRelated(this, optionItems);
+	}
+
+	@Override
+	public default <E> List<E> findRelatedList(Object... optionItems) {
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindRelatedList(this, items);
+	}
+
+	static Object[] insertThisClassIfNotHave(Object entity, Object... optionItems) {
+		Object[] items = optionItems;
+		List<TableModel> models = SqlBoxContextUtils.findAllModels(optionItems);
+		if (models == null || models.size() == 0)
+			throw new SqlBoxException("No TableMode found for entity.");
+		TableModel model = models.get(0);
+		if (!entity.getClass().equals(model.getEntityClass())) {// NOSONAR
+			model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
+			items = ArrayUtils.insertArray(model, items);
+		}
+		return items;
+	}
+
+	@Override
+	public default <E> Set<E> findRelatedSet(Object... optionItems) {
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindRelatedSet(this, items);
+	}
+
+	@Override
+	public default <E> Map<Object, E> findRelatedMap(Object... optionItems) {
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindRelatedMap(this, items);
 	}
 
 	@Override
@@ -112,7 +156,6 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 		return ctx(optionItems).entityCountAll(this.getClass(), optionItems);
 	}
 
- 
 	@Override
 	public default T put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {
@@ -194,4 +237,5 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
+
 }
