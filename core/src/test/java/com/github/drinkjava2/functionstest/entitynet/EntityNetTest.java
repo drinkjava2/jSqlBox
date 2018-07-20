@@ -167,12 +167,8 @@ public class EntityNetTest extends TestBase {
 	public void testJoinQuary() {
 		insertDemoData();
 		EntityNet net = ctx.iQuery(targets, LEFT_JOIN_SQL);
-
-		ctx.iQuery(net, new EntityNetHandler(), Email.class, give("e", "u"),
-				"select u.##, e.** from emailtb e, usertb u where e.userid=u.id");
-
-		ctx.iQuery(net, new EntityNetHandler(), Address.class, giveBoth("a", "u"),
-				"select u.id as u_id, a.** from addresstb a, usertb u where a.userid=u.id");
+		ctx.iQuery(net, new EntityNetHandler(), User.class, Email.class, give("e", "u"), LEFT_JOIN_SQL);
+		ctx.iQuery(net, new EntityNetHandler(), User.class, Address.class, giveBoth("a", "u"), LEFT_JOIN_SQL);
 
 		Address a = net.pickOneEntity(Address.class, "a2");
 		System.out.println("Address:" + a.getAddressName());
@@ -188,12 +184,12 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
-	public void testGiveAlias() {// Assign alias name "t" to User, "tr" to UserRole
+	public void testGiveAlias() {// Assign alias name "t" to User, "tr" to UserRole, "r" to Role
 		insertDemoData();
 		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, UserRole.class, Role.class,
-				alias("t", "tr", "r"), RolePrivilege.class, Privilege.class, give("r", "t"), give("t", "r"),
-				giveBoth("p", "t"), LEFT_JOIN_SQL, //
-				" order by t.id, tr.id, r.id, rp.id, p.id",new PrintSqlHandler());
+				alias("t", "tr", "r"), RolePrivilege.class, Privilege.class, giveBoth("r", "t"), giveBoth("p", "t"),
+				LEFT_JOIN_SQL, //
+				" order by t.id, tr.id, r.id, rp.id, p.id", new PrintSqlHandler());
 		List<User> userList = net.pickEntityList(User.class);
 		for (User u : userList) {
 			System.out.println("User:" + u.getId());
@@ -226,23 +222,30 @@ public class EntityNetTest extends TestBase {
 		for (User u : users) {
 			System.out.println("User:" + u.getId());
 
-			List<Role> roles = u.getRoleList();
-			if (roles == null)
-				roles = u.findRelatedList(User.class, UserRole.class, Role.class);
-			Assert.assertNotEquals(0, roles.size());
+			List<UserRole> userRoles = u.findRelatedList(UserRole.class);
+			if (userRoles != null)
+				for (UserRole ur : userRoles) {
+					System.out.println("  UserRole:" + ur.getUserId() + "," + ur.getRid());
+				}
+
+			List<Role> roles = u.findRelatedList(UserRole.class, Role.class);
 			if (roles != null)
 				for (Role r : roles) {
 					System.out.println("  Roles:" + r.getId());
 				}
 
-			Set<Privilege> privileges = u.getPrivilegeSet();
-			Object path = new Object[] { UserRole.class, Role.class, RolePrivilege.class, Privilege.class };
-			if (privileges == null)
-				privileges = u.findRelatedSet(path);
-			Assert.assertNotEquals(0, roles.size());
+			Set<Privilege> privileges = u.findRelatedSet(UserRole.class, Role.class, RolePrivilege.class,
+					Privilege.class);
 			if (privileges != null)
 				for (Privilege privilege : privileges) {
 					System.out.println("  Privilege:" + privilege.getId());
+				}
+			
+			Map<Object, Privilege> privilegeMap = u.findRelatedMap(UserRole.class, Role.class, RolePrivilege.class,
+					Privilege.class);
+			if (privilegeMap != null)
+				for (Entry<Object, Privilege> entry : privilegeMap.entrySet() ) {
+					System.out.println("  Privilege " + entry.getKey()+"="+entry.getValue().getId());
 				}
 		}
 	}

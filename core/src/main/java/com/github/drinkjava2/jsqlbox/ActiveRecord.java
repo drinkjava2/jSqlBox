@@ -19,7 +19,9 @@ import java.util.Set;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdialects.ArrayUtils;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -176,17 +178,32 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	@Override
 	public <E> List<E> findRelatedList(Object... optionItems) {
-		return ctx(optionItems).entityFindRelatedList(this, optionItems);
+		Object[] items = addThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindRelatedList(this, items);
+	}
+
+	private static Object[] addThisClassIfNotHave(Object entity, Object... optionItems) {
+		Object[] items = optionItems;
+		List<TableModel> models = SqlBoxContextUtils.findAllModels(optionItems);
+		TableModel model = models.get(0);
+		SqlBoxException.assureNotNull(model);
+		if (!entity.getClass().equals(model.getEntityClass())) {// NOSONAR
+			model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
+			items = ArrayUtils.insertArray(model, items);
+		}
+		return items;
 	}
 
 	@Override
 	public <E> Set<E> findRelatedSet(Object... optionItems) {
-		return ctx(optionItems).entityFindRelatedSet(this, optionItems);
+		Object[] items = addThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindRelatedSet(this, items);
 	}
 
 	@Override
 	public <E> Map<Object, E> findRelatedMap(Object... optionItems) {
-		return ctx(optionItems).entityFindRelatedMap(this, optionItems);
+		Object[] items = addThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindRelatedMap(this, items);
 	}
 
 	@Override

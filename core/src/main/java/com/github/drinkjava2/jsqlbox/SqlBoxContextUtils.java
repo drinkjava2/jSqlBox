@@ -141,7 +141,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	public static TableModel findTableModel(Object entityOrClass, Object... optionItems) {
-		TableModel model = findOptionTableModel(optionItems);
+		TableModel model = findFirstModel(optionItems);
 		if (model != null)
 			return model;
 		return findEntityOrClassTableModel(entityOrClass);
@@ -158,7 +158,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return TableModelUtils.entity2ReadOnlyModel(entityOrClass.getClass());
 	}
 
-	public static TableModel findOptionTableModel(Object... optionItems) {// NOSONAR
+	public static TableModel findFirstModel(Object... optionItems) {// NOSONAR
 		for (Object item : optionItems) { // If Model in option items, use it first
 			if (item instanceof TableModel)
 				return (TableModel) item;
@@ -166,6 +166,17 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				return TableModelUtils.entity2ReadOnlyModel((Class<?>) item);
 		}
 		return null;
+	}
+
+	public static List<TableModel> findAllModels(Object... optionItems) {// NOSONAR
+		List<TableModel> result = new ArrayList<TableModel>();
+		for (Object item : optionItems) { // If Model in option items, use it first
+			if (item instanceof TableModel)
+				result.add((TableModel) item);
+			else if (item instanceof Class)
+				result.add(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
+		}
+		return result;
 	}
 
 	/** Create a Auto Alias name for PreparedSQL */
@@ -278,6 +289,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		ps.addSql(sb.toString());
 	}
 
+	/**
+	 * Find relationship of 2 classes, build "a.bid1=b.id1 and a.bid2=b.id2..." SQL
+	 * piece
+	 */
 	private static void appendKeyEquelsSqlPiece(StringBuilder sb, String a1, TableModel m1, String a2, TableModel m2) {
 		List<FKeyModel> fkeys = m1.getFkeyConstraints();
 		for (FKeyModel fkey : fkeys) {
@@ -313,6 +328,39 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	}
 
+	/**
+	 * According given PreparedSQL and entities, append "a.bid1=? and a.bid2=?..."
+	 * SQL piece
+	 */
+	private static void appendEntityKeyParameters(PreparedSQL ps, Object entity) {
+		TableModel model = null;
+		String alias = null;
+		for (int i = 0; i < ps.getModels().length; i++) {
+			TableModel psmodel = (TableModel) ps.getModels()[i];
+			if (entity.getClass().equals(psmodel.getEntityClass())) {
+				model = psmodel;
+				alias = ps.getAliases()[i];
+			}
+		}
+		SqlBoxException.assureNotNull(model);// found the model of entity
+		SqlBoxException.assureNotEmpty(alias); // found the alias
+		doAppendEntityKeyParameters(ps, entity, alias, model);
+	}
+
+	private static void doAppendEntityKeyParameters(PreparedSQL ps, Object entity, String alias, TableModel model) {
+		int i = 0;
+		for (ColumnModel col : model.getColumns()) {
+			if (col.getPkey() && !col.getTransientable()) {
+				if (i > 0)
+					ps.addSql(" and ");
+				ps.addSql(alias).append(".").append(col.getColumnName()).append("=? ");
+				Object value = ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField());
+				ps.addParam(value);
+				i++;
+			}
+		}
+	}
+
 	@SuppressWarnings("unused")
 	private static void crudMethods___________________________________() {
 	}
@@ -322,7 +370,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * IdGenerator (identity or sequence or UUID...)
 	 */
 	public static int entityTryInsert(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -433,7 +481,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Update entityBean according primary key */
 	public static int entityTryUpdate(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -507,7 +555,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Delete entityBean in database according primary key value
 	 */
 	public static int entityTryDelete(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -568,7 +616,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Check if entityBean exist in database by its id
 	 */
 	public static boolean entityExist(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -630,7 +678,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Try delete entity by Id, return row affected
 	 */
 	public static int entityTryDeleteById(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
@@ -690,7 +738,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Try delete entity by Id, return row affected
 	 */
 	public static boolean entityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
@@ -750,7 +798,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	public static int entityTryLoad(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -822,7 +870,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Count quantity of all entity, this method does not support sharding */
 	public static int entityCountAll(SqlBoxContext ctx, Class<?> entityClass, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
@@ -847,7 +895,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	public static <T> T entityTryLoadById(SqlBoxContext ctx, Class<T> entityClass, Object idOrIdMap,
 			Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
@@ -863,7 +911,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
@@ -916,7 +964,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	public static <T> List<T> entityFindByIds(SqlBoxContext ctx, Class<T> entityClass, Iterable<?> ids, // NOSONAR
 			Object... optionItems) {
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(optionItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
@@ -999,7 +1047,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> entityFindBySQL(SqlBoxContext ctx, Class<T> entityClass, Object... sqlItems) {
-		TableModel optionModel = SqlBoxContextUtils.findOptionTableModel(sqlItems);
+		TableModel optionModel = SqlBoxContextUtils.findFirstModel(sqlItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityClass);
@@ -1020,6 +1068,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				new Sample(sampleBean).sql(" where ").notNullFields(), sqlItems);
 	}
 
+	@SuppressWarnings("unused")
+	private static void ormQueryMethods___________________________________() {
+	}
+
 	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		List<E> list = entityFindRelatedList(ctx, entity, sqlItems);
 		if (list.size() != 1)
@@ -1027,21 +1079,39 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return list.get(0);
 	}
 
-	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entities, Object... sqlItems) {
-		PreparedSQL ps=ctx.iPrepare(new EntityNetHandler(), sqlItems);
-		SqlBoxException.assureNotNull(ps.getModels());//TODO here
-		TableModel model=(TableModel) ps.getModels()[ps.getModels().length-1];
-		 
-		EntityNet net = ctx.iQuery( sqlItems, LEFT_JOIN_SQL);
-		return null;
+	@SuppressWarnings("unchecked")
+	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		SqlBoxException.assureNotNull(entity);
+		List<TableModel> models = findAllModels(sqlItems);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, LEFT_JOIN_SQL);
+		ps.addSql(" where ");
+		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
+		ps.setSql(ps.getSqlBuilder().toString());
+		EntityNet net = (EntityNet) ctx.runPreparedSQL(ps);
+		return (List<E>) net.pickEntityList(models.get(models.size() - 1).getEntityClass());
 	}
 
-	public static <E> Set<E> entityFindRelatedSet(SqlBoxContext ctx, Object entities, Object... sqlItems) {
-		return null;
+	@SuppressWarnings("unchecked")
+	public static <E> Set<E> entityFindRelatedSet(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		SqlBoxException.assureNotNull(entity);
+		List<TableModel> models = findAllModels(sqlItems);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, LEFT_JOIN_SQL);
+		ps.addSql(" where ");
+		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
+		ps.setSql(ps.getSqlBuilder().toString());
+		EntityNet net = (EntityNet) ctx.runPreparedSQL(ps);
+		return (Set<E>) net.pickEntitySet(models.get(models.size() - 1).getEntityClass());
 	}
 
-	public static <E> Map<Object, E> entityFindRelatedMap(SqlBoxContext ctx, Object entities, Object... sqlItems) {
-		return null;
+	@SuppressWarnings("unchecked")
+	public static <E> Map<Object, E> entityFindRelatedMap(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		SqlBoxException.assureNotNull(entity);
+		List<TableModel> models = findAllModels(sqlItems);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, LEFT_JOIN_SQL);
+		ps.addSql(" where ");
+		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
+		ps.setSql(ps.getSqlBuilder().toString());
+		EntityNet net = (EntityNet) ctx.runPreparedSQL(ps);
+		return (Map<Object, E>) net.pickEntityMap(models.get(models.size() - 1).getEntityClass());
 	}
-
 }

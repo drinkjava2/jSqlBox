@@ -13,7 +13,6 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -174,12 +173,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			} else
 				return false;
 		} else if (item instanceof EntityNet) {
-			EntityNet net = (EntityNet) item;
-			ps.setEntityNet(net);
-			for (Entry<String, TableModel> entry : net.getConfigs().entrySet()) {
-				ps.addModel(entry.getValue());
-				ps.setLastAliases(entry.getKey());
-			}
+			ps.setEntityNet((EntityNet) item);
 		} else
 			return false;
 		return true;
@@ -386,18 +380,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Find related entity list for given entities ( entity or Iterable) */
-	public <E> List<E> entityFindRelatedList(Object entities, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedList(this, entities, sqlItems);
+	public <E> List<E> entityFindRelatedList(Object entity, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedList(this, entity, sqlItems);
 	}
 
 	/** Find related entity set for given entities ( entity or Iterable) */
-	public <E> Set<E> entityFindRelatedSet(Object entities, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedSet(this, entities, sqlItems);
+	public <E> Set<E> entityFindRelatedSet(Object entity, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedSet(this, entity, sqlItems);
 	}
 
 	/** Find related entity map for given entities ( entity or Iterable) */
-	public <E> Map<Object, E> entityFindRelatedMap(Object entities, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedMap(this, entities, sqlItems);
+	public <E> Map<Object, E> entityFindRelatedMap(Object entity, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedMap(this, entity, sqlItems);
 	}
 
 	protected void dialectShortcutMethods__________________________() {// NOSONAR
