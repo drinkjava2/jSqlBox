@@ -298,7 +298,7 @@ public class UsageAndSpeedTest {
 				conn = ctx.prepareConnection();
 				ctx.execute(conn, "insert into users (name,address) values(?,?)", "Sam", "Canada");
 				ctx.execute(conn, "update users set name=?, address=?", "Tom", "China");
-				Assert.assertEquals(1L, ctx.queryForObject(conn,
+				Assert.assertEquals(1L, ctx.queryForLongValue(conn,
 						"select count(*) from users where name=? and address=?", "Tom", "China"));
 				ctx.execute(conn, "delete from users where name=? or address=?", "Tom", "China");
 			} catch (SQLException e) {
@@ -321,7 +321,7 @@ public class UsageAndSpeedTest {
 				ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 				ctx.execute("update users set name=?, address=?", "Tom", "China");
 				Assert.assertEquals(1L,
-						ctx.queryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
+						ctx.queryForLongValue("select count(*) from users where name=? and address=?", "Tom", "China"));
 				ctx.execute("delete from users where name=? or address=?", "Tom", "China");
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -367,7 +367,7 @@ public class UsageAndSpeedTest {
 			ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 			ctx.nExecute("update users set name=?, address=?", "Tom", "China");
 			Assert.assertEquals(1L,
-					ctx.nQueryForObject("select count(*) from users where name=? and address=?", "Tom", "China"));
+					ctx.nQueryForLongValue("select count(*) from users where name=? and address=?", "Tom", "China"));
 			ctx.nExecute("delete from users where name=? or address=?", "Tom", "China");
 		}
 	}
@@ -382,7 +382,7 @@ public class UsageAndSpeedTest {
 					" address ", param("Canada"), //
 					") ", valuesQuestions());
 			ctx.iExecute("update users set name=?,address=?", param("Tom", "China"));
-			Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from users where name=? and address=?",
+			Assert.assertEquals(1L, ctx.iQueryForLongValue("select count(*) from users where name=? and address=?",
 					param("Tom", "China")));
 			ctx.iExecute("delete from users where name=", question("Tom"), " or address=", question("China"));
 		}
@@ -394,7 +394,7 @@ public class UsageAndSpeedTest {
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.pExecute("insert into users (name,address,age) ", "Sam", "Canada", 10, valuesQuestions());
 			ctx.pExecute("update users set name=?", "Tom", sql(", address=?"), "China", sql(", age=?"), null);
-			Assert.assertEquals(1L, ctx.pQueryForObject(
+			Assert.assertEquals(1L, ctx.pQueryForLongValue(
 					"select count(*) from users where name=? and address=? and age is ?", "Tom", "China", null));
 			ctx.pExecute("delete from users where name=? or address=?", "Tom", "China");
 		}
@@ -411,7 +411,7 @@ public class UsageAndSpeedTest {
 			ctx2.tExecute("insert into users (name, address) values(#{user.name},:user.address)", paramMap);
 			ctx2.tExecute("update users set name=#{user.name}, address=:user.address", bind("user", tom));
 			Assert.assertEquals(1L,
-					ctx2.tQueryForObject("select count(*) from users where name=#{name} and address=:addr",
+					ctx2.tQueryForLongValue("select count(*) from users where name=#{name} and address=:addr",
 							bind("name", "Tom", "addr", "China")));
 			ctx2.tExecute("delete from users where "//
 					, " name=:name ", bind("name", "Tom")//
@@ -568,7 +568,7 @@ public class UsageAndSpeedTest {
 		ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", bind("user", user));
 		ctx.tExecute("update users set name=[user.name], address=[user.address]", bind("user", tom));
 		Assert.assertEquals(1L,
-				ctx.tQueryForObject("select count(*) from users where ${col}= [name] and address=[addr]",
+				ctx.tQueryForLongValue("select count(*) from users where ${col}= [name] and address=[addr]",
 						bind("name", "Tom"), bind("addr", "China"), bind("$col", "name")));
 		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
 				bind("$nm", "name"));
@@ -583,7 +583,7 @@ public class UsageAndSpeedTest {
 		ctx.tExecute("insert into users (name, address) values(#{user.name}, #{user.address})", bind("user", user));
 		ctx.tExecute(engine, "update users set name=[user.name], address=[user.address]", bind("user", tom));
 		Assert.assertEquals(1L,
-				ctx.tQueryForObject(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
+				ctx.tQueryForLongValue(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
 						bind("name", "Tom"), bind("addr", "China"), bind("$col", "name")));
 		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
 				bind("$nm", "name"), engine);

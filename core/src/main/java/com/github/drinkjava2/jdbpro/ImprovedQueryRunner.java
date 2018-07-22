@@ -306,6 +306,21 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
+	 * Query for a long value
+	 * 
+	 * @param sql
+	 *            The SQL
+	 * @param params
+	 *            The parameters
+	 * @return A long value
+	 * @throws SQLException
+	 */
+	public long queryForLongValue(Connection conn, String sql, Object... params) throws SQLException {
+ 	return ((Number) queryForObject(conn, sql, params)).longValue();
+	}
+	
+	
+	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
 	 * if no result found, SQLException may be threw if some SQL operation Exception
@@ -320,6 +335,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	public <T> T queryForObject(String sql, Object... params) throws SQLException {
 		return query(sql, new ScalarHandler<T>(1), params);
+	}
+
+	/**
+	 * Query for a long value
+	 * 
+	 * @param sql
+	 *            The SQL
+	 * @param params
+	 *            The parameters
+	 * @return A long value
+	 * @throws SQLException
+	 */
+	public long queryForLongValue(String sql, Object... params) throws SQLException {
+		return ((Number) queryForObject(sql, params)).longValue();
 	}
 
 	/**

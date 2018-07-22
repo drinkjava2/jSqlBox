@@ -19,9 +19,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.LambdSqlItemPreparer.ALIAS;
-import com.github.drinkjava2.jsqlbox.LambdSqlItemPreparer.COL;
-import com.github.drinkjava2.jsqlbox.LambdSqlItemPreparer.C_ALIAS;
+import com.github.drinkjava2.jsqlbox.LambdSqlItem.ALIAS;
+import com.github.drinkjava2.jsqlbox.LambdSqlItem.COL;
+import com.github.drinkjava2.jsqlbox.LambdSqlItem.C_ALIAS;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 

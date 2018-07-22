@@ -350,6 +350,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				alias = ps.getAliases()[i];
 			}
 		}
+		if(model==null) {
+			model=TableModelUtils.entity2ReadOnlyModel(entity.getClass());
+			alias=SqlBoxContextUtils.createAutoAliasNameForEntityClass(entity.getClass());
+		} 
 		SqlBoxException.assureNotNull(model);// found the model of entity
 		SqlBoxException.assureNotEmpty(alias); // found the alias
 		doAppendEntityKeyParameters(ps, entity, alias, model);

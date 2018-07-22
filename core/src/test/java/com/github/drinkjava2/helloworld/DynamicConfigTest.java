@@ -78,7 +78,7 @@ public class DynamicConfigTest extends TestBase {
 		u.setUserName("Tom");
 		u.update(t);
 
-		Assert.assertEquals(1L, ctx.iQueryForObject("select count(*) from table2", t));
+		Assert.assertEquals(1L, ctx.iQueryForLongValue("select count(*) from table2", t));
 	}
 
 	@Test

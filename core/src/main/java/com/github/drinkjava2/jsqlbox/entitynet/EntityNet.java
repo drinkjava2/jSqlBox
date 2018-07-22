@@ -38,7 +38,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  * @since 1.0.0
  */
 public class EntityNet {
- 
 
 	/** Models, Map<alias, tableModels> */
 	private Map<String, TableModel> models = new LinkedHashMap<String, TableModel>();
