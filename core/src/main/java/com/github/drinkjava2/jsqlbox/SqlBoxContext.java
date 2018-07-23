@@ -145,10 +145,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			TableModel t = (TableModel) item;
 			SqlBoxException.assureNotNull(t.getEntityClass());
 			ps.addModel(item);
-			ps.setLastAliases(SqlBoxContextUtils.createAutoAliasNameForEntityClass(t.getEntityClass()));
+			SqlBoxContextUtils.createLastAutoAliasName(ps);
 		} else if (item instanceof Class) {
 			ps.addModel(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
-			ps.setLastAliases(SqlBoxContextUtils.createAutoAliasNameForEntityClass((Class<?>) item));
+			SqlBoxContextUtils.createLastAutoAliasName(ps);
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
@@ -372,6 +372,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	protected void ormQueryMethods__________________________() {// NOSONAR
+	}
+
+	/** Build a entityNet */
+	public EntityNet autoEntityNet(Class<?>... entityClass) {
+		return SqlBoxContextUtils.autoEntityNet(this, entityClass);
 	}
 
 	/** Find one related entity by given entity */

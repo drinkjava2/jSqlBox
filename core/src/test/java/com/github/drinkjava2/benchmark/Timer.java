@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * A small tool to find out each method execute time, see:
+ * A small tool to debug method execute time, see:
  * https://my.oschina.net/drinkjava2/blog/1622179
  * 
  * @author Yong Zhu

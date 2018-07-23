@@ -83,32 +83,21 @@ public class EntityNet {
 		SqlBoxException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
 		SqlBoxException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
 
-		boolean found = false;
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName);
-		if (readMethod != null) {
+		if (readMethod != null)
 			give(a, b, StrUtils.toLowerCaseFirstOne(fieldName));
-			found = true;
-		}
 
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "List");
-		if (readMethod != null) {
+		if (readMethod != null)
 			give(a, b, fieldName + "List");
-			found = true;
-		}
 
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Set");
-		if (readMethod != null) {
+		if (readMethod != null)
 			give(a, b, fieldName + "Set");
-			found = true;
-		}
+		
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Map");
-		if (readMethod != null) {
+		if (readMethod != null)
 			give(a, b, fieldName + "Map");
-			found = true;
-		}
-		if (!found)
-			throw new SqlBoxException("Not found field '" + fieldName + "' or '" + fieldName
-					+ "List/Set/Map' in class /" + bModel.getEntityClass());
 		return this;
 	}
 

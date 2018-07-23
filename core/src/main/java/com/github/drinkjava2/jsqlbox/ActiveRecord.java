@@ -173,7 +173,8 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	@Override
 	public <E> E findOneRelated(Object... optionItems) {
-		return ctx(optionItems).entityFindOneRelated(this, optionItems);
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindOneRelated(this, items);
 	}
 
 	@Override

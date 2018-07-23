@@ -187,25 +187,36 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 	}
 
-	/** Create a Auto Alias name for PreparedSQL */
-	public static void createAutoAliasForPreparedSql(PreparedSQL ps) {
-		TableModel[] models = (TableModel[]) ps.getModels();
-		if (ps.getModels() == null)
-			return;
-		String[] aliases = new String[models.length];
-		for (int i = 0; i < models.length; i++)
-			aliases[i] = createAutoAliasNameForEntityClass(models[i].getEntityClass());
-		ps.setAliases(aliases);
-	}
-
-	/** Create a Auto Alias name for a Entity Class */
-	public static String createAutoAliasNameForEntityClass(Class<?> clazz) {
+	/**
+	 * Create auto Alias name based on capital letters of class name in models of
+	 * PreparedSQL, if alias already exists, put a number at end, for example: <br/>
+	 * User ->u <br/>
+	 * User, UserRole, UserOther, Order, Order_a -> u, u1, u2, o, o1
+	 */
+	public static void createLastAutoAliasName(PreparedSQL ps) {
+		if (ps.getModels() == null || ps.getModels().length == 0)
+			throw new SqlBoxException("No tableModel found");
+		TableModel model = (TableModel) ps.getModels()[ps.getModels().length - 1];
+		String[] aliases = ps.getAliases();
 		StringBuilder sb = new StringBuilder();
-		char[] chars = clazz.getSimpleName().toCharArray();
+		char[] chars = model.getEntityClass().getSimpleName().toCharArray();
 		for (char c : chars)
 			if (c >= 'A' && c <= 'Z')
 				sb.append(c);
-		return sb.toString().toLowerCase();
+		String alias = sb.toString().toLowerCase();
+		int count = 1;
+		String newAlias = alias;
+		boolean found = false;
+		do {
+			for (int i = 0; i < aliases.length - 2; i++) {
+				if (newAlias.equals(aliases[i])) {
+					newAlias = alias + count++;
+					found = true;
+					break;
+				}
+			}
+		} while (found);
+		ps.setLastAliases(newAlias);
 	}
 
 	/** Convert one row data into EntityBean */
@@ -350,10 +361,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				alias = ps.getAliases()[i];
 			}
 		}
-		if(model==null) {
-			model=TableModelUtils.entity2ReadOnlyModel(entity.getClass());
-			alias=SqlBoxContextUtils.createAutoAliasNameForEntityClass(entity.getClass());
-		} 
 		SqlBoxException.assureNotNull(model);// found the model of entity
 		SqlBoxException.assureNotEmpty(alias); // found the alias
 		doAppendEntityKeyParameters(ps, entity, alias, model);
@@ -1082,6 +1089,18 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	@SuppressWarnings("unused")
 	private static void ormQueryMethods___________________________________() {
+	}
+
+	public static EntityNet autoEntityNet(SqlBoxContext ctx, Class<?>... entityClasses) {
+		List<TableModel> models = findAllModels((Object[]) entityClasses);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(),
+				models.toArray(new TableModel[models.size()]), LEFT_JOIN_SQL);
+		String firstAlias = ps.getAliases()[0];
+		String lastAlias = ps.getAliases()[ps.getAliases().length - 1];
+		SqlBoxException.assureTrue(!firstAlias.equals(lastAlias));
+		ps.addGives(new String[] { firstAlias, lastAlias });
+		ps.addGives(new String[] { lastAlias, firstAlias });
+		return (EntityNet) ctx.runPreparedSQL(ps);
 	}
 
 	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
