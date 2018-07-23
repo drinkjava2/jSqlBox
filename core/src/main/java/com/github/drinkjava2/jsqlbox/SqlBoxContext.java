@@ -32,6 +32,7 @@ import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
+import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingRangeTool;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
@@ -137,7 +138,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		if (item instanceof SqlOption) {
 			if (SqlOption.IGNORE_NULL.equals(item))
 				ps.setIgnoreNull(true);
-			else if (SqlOption.LEFT_JOIN_SQL.equals(item))
+			else if (SqlOption.AUTO_SQL.equals(item))
 				SqlBoxContextUtils.appendLeftJoinSQL(ps);
 			else
 				return false;
@@ -174,6 +175,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				return false;
 		} else if (item instanceof EntityNet) {
 			ps.setEntityNet((EntityNet) item);
+			ps.addHandler(new EntityNetHandler());
 		} else
 			return false;
 		return true;

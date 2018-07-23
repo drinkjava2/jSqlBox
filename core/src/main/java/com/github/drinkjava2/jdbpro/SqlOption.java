@@ -126,5 +126,5 @@ public enum SqlOption {
 
 	// ------- Entity CURD items -----------
 	/** This option is designed for ORM, will be parsed as a left join SQL */
-	LEFT_JOIN_SQL
+	AUTO_SQL
 }

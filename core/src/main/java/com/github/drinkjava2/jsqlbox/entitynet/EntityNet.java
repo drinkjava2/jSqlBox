@@ -224,7 +224,7 @@ public class EntityNet {
 		}
 		return entity;
 	}
-
+	 
 	/** Give values according gives setting for oneRow */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void doGive(Map<String, Object> oneRow) {// NOSONAR
@@ -341,6 +341,9 @@ public class EntityNet {
 
 	}
 
+	/**
+	 * Add a bunch of gives, give can be 2 or 3 items String[]
+	 */
 	public EntityNet addGivesList(List<String[]> givesList) {
 		if (givesList == null)
 			return this;

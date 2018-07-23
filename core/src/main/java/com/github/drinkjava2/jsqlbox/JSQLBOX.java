@@ -40,7 +40,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
 	public static final SqlOption IGNORE_NULL = SqlOption.IGNORE_NULL;
-	public static final SqlOption LEFT_JOIN_SQL = SqlOption.LEFT_JOIN_SQL;
+	public static final SqlOption AUTO_SQL = SqlOption.AUTO_SQL;
 	
 
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */

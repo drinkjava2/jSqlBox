@@ -13,7 +13,7 @@ package com.github.drinkjava2.jsqlbox;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.LEFT_JOIN_SQL;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.AUTO_SQL;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDB;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTB;
 
@@ -1094,7 +1094,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static EntityNet autoEntityNet(SqlBoxContext ctx, Class<?>... entityClasses) {
 		List<TableModel> models = findAllModels((Object[]) entityClasses);
 		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(),
-				models.toArray(new TableModel[models.size()]), LEFT_JOIN_SQL);
+				models.toArray(new TableModel[models.size()]), AUTO_SQL);
 		SqlBoxException.assureTrue(ps.getAliases() != null && ps.getAliases().length > 1);
 		String firstAlias = ps.getAliases()[0];
 		for (int i = 1; i < entityClasses.length; i++)
@@ -1113,7 +1113,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		SqlBoxException.assureNotNull(entity);
 		List<TableModel> models = findAllModels(sqlItems);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, LEFT_JOIN_SQL);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, AUTO_SQL);
 		ps.addSql(" where ");
 		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
 		ps.setSql(ps.getSqlBuilder().toString());
@@ -1125,7 +1125,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static <E> Set<E> entityFindRelatedSet(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		SqlBoxException.assureNotNull(entity);
 		List<TableModel> models = findAllModels(sqlItems);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, LEFT_JOIN_SQL);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, AUTO_SQL);
 		ps.addSql(" where ");
 		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
 		ps.setSql(ps.getSqlBuilder().toString());
@@ -1137,7 +1137,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static <E> Map<Object, E> entityFindRelatedMap(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		SqlBoxException.assureNotNull(entity);
 		List<TableModel> models = findAllModels(sqlItems);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, LEFT_JOIN_SQL);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, AUTO_SQL);
 		ps.addSql(" where ");
 		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
 		ps.setSql(ps.getSqlBuilder().toString());

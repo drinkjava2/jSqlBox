@@ -76,7 +76,8 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testExampleQuery() {
-		List<DemoUser> result = gctx().entityFindBySample(new DemoUser().put("id", 1), " or code=?", param("efg"));
+		List<DemoUser> result = gctx().entityFindBySample(new DemoUser().put("id", 1, "code", "abc"), " or code=?",
+				param("efg"));
 		if (result.get(0) == null)
 			throw new RuntimeException("Example query error");
 	}

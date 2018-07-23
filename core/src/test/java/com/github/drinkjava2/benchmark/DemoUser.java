@@ -1,8 +1,6 @@
 package com.github.drinkjava2.benchmark;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForEntityList;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.noPagin;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
