@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
+import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
@@ -63,7 +64,6 @@ public class DynamicConfigTest extends TestBase {
 	@Test
 	public void doTest() {
 		TableModel t = TableModelUtils.entity2Model(UserDemo.class);
-
 		// A new column dynamically created
 		t.addColumn("anotherColumn2").VARCHAR(10);
 		createAndRegTables(t);
@@ -82,6 +82,23 @@ public class DynamicConfigTest extends TestBase {
 	}
 
 	@Test
+	public void testDynamicConfig() {
+		TableModel model = TableModelUtils.entity2Model(User.class);
+		model.column("id").pkey(); 
+		createAndRegTables(model);
+		UserDemo u1 = new UserDemo();
+		u1.setId("u1");
+		u1.setUserName("Tom");
+		u1.insert(model);
+		UserDemo u2 = ctx.entityLoadById(UserDemo.class, "u1", model);
+		Assert.assertEquals("Tom", u2.getUserName());
+		
+		model.column("userName").setTransientable(true);
+		UserDemo u3 = ctx.entityLoadById(UserDemo.class, "u1", model);
+		Assert.assertEquals(null, u3.getUserName());
+	}
+
+	@Test
 	public void doQueryTest() {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().put("userName", "Tom").insert();
@@ -93,7 +110,7 @@ public class DynamicConfigTest extends TestBase {
 		Assert.assertEquals("Tom", u.getUserName());
 
 		u.setUserName(null);
-		UserDemo newU=u.loadById(u.getId(), t);
+		UserDemo newU = u.loadById(u.getId(), t);
 		Assert.assertEquals("Tom", newU.getUserName());
 
 		UserDemo u2 = ctx.entityLoadById(UserDemo.class, u.getId(), t);

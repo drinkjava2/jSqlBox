@@ -1,6 +1,7 @@
 package com.github.drinkjava2.functionstest.entitynet;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.LEFT_JOIN_SQL;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
 
@@ -22,8 +23,6 @@ import com.github.drinkjava2.functionstest.entitynet.entities.RolePrivilege;
 import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.functionstest.entitynet.entities.UserRole;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
-import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
@@ -206,15 +205,6 @@ public class EntityNetTest extends TestBase {
 	}
 
 	@Test
-	public void testDynamicConfig() {
-		insertDemoData();
-		TableModel model = TableModelUtils.entity2Model(User.class);
-		model.column("userName").setTransientable(true);
-		User u2 = ctx.entityLoadById(User.class, "u1", model);
-		Assert.assertEquals(null, u2.getUserName());
-	}
-
-	@Test
 	public void testManualLoad() {
 		insertDemoData();
 		List<User> users = ctx.entityFindAll(User.class);
@@ -246,6 +236,28 @@ public class EntityNetTest extends TestBase {
 				for (Entry<Object, Privilege> entry : privilegeMap.entrySet()) {
 					System.out.println("  Privilege " + entry.getKey() + "=" + entry.getValue().getId());
 				}
+		}
+	}
+
+	@Test
+	public void testAutoEntityNet() {
+		insertDemoData();
+		List<User> users = ctx
+				.autoEntityNet(User.class, UserRole.class, Role.class, RolePrivilege.class, Privilege.class)
+				.pickEntityList(User.class);
+
+		for (User u : users) {
+			System.out.println("User:" + u.getId());
+
+			List<Role> roles = u.getRoleList();
+			if (roles != null)
+				for (Role r : roles)
+					System.out.println("  Roles:" + r.getId());
+
+			Set<Privilege> privileges = u.getPrivilegeSet();
+			if (privileges != null)
+				for (Privilege privilege : privileges)
+					System.out.println("  Privilege:" + privilege.getId());
 		}
 	}
 }

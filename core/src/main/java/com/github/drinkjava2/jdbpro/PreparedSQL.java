@@ -173,6 +173,13 @@ public class PreparedSQL {
 			throw new DbProRuntimeException("addGives at least need 2 alias parameters");
 		givesList.add(gives);
 	}
+	
+	public void giveBoth(String  alias1, String alias2) {  
+		if (givesList == null)
+			givesList = new ArrayList<String[]>();
+		givesList.add(new String[] { alias1, alias2 });
+		givesList.add(new String[] { alias2, alias1 });
+	}
 
 	/**
 	 * Add map content to current template map, if keys already exist will use new

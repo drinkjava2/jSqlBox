@@ -374,11 +374,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected void ormQueryMethods__________________________() {// NOSONAR
 	}
 
-	/** Build a entityNet */
+	/** Build a entityNet, only give both between start class and end classes */
 	public EntityNet autoEntityNet(Class<?>... entityClass) {
 		return SqlBoxContextUtils.autoEntityNet(this, entityClass);
-	}
-
+	} 
 	/** Find one related entity by given entity */
 	public <E> E entityFindOneRelated(Object entity, Object... sqlItems) {
 		return SqlBoxContextUtils.entityFindOneRelated(this, entity, sqlItems);

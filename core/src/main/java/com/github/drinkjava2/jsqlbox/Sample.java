@@ -22,11 +22,22 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * This SqlBoxException used to wrap exception to a Runtime type Exception
+ * This Sample is a CustomizedSqlItem, used to build a " where field1=? and
+ * field2=? ..." SQL piece, usages see below (detail demo see CrudTest.java):
+ * 
+ * <pre>
+ * Assert.assertEquals(1, ctx.entityFindBySample(u1).size());
+ * Assert.assertEquals(1, ctx.entityFindAll(CrudUser.class, new Sample(u2).sql(" where  ").notNullFields()).size());
+ * CrudUser sample = new CrudUser("Nam", "addr");
+ * Assert.assertEquals(4, ctx.entityFindAll(CrudUser.class,
+ * 		new Sample(sample).sql(" where (").allFields().sql(") or name like ?").param(":name%").sql(" order by name"))
+ * 		.size());
+ * Assert.assertEquals(4, ctx.entityFindBySQL(CrudUser.class, new Sample(sample).sql("select * from CrudUser where (")
+ * 		.nullFields().sql(") or name like ?").param(":name%").sql(" order by name")).size());
+ * 
+ * </pre>
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -131,7 +142,8 @@ public class Sample implements CustomizedSqlItem {
 				} else {
 					Object param = ((Object[]) piece)[0];
 					Object realParam = param;
-					if (param instanceof String) { // change ":fieldName" to param("fieldValue")
+					// Below code will change ":fieldName%" to param("fieldValue%")
+					if (param instanceof String) {
 						String s = (String) param;
 						int colon = s.indexOf(':');
 						if (colon >= 0) {

@@ -1095,15 +1095,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		List<TableModel> models = findAllModels((Object[]) entityClasses);
 		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(),
 				models.toArray(new TableModel[models.size()]), LEFT_JOIN_SQL);
+		SqlBoxException.assureTrue(ps.getAliases() != null && ps.getAliases().length > 1);
 		String firstAlias = ps.getAliases()[0];
-		String lastAlias = ps.getAliases()[ps.getAliases().length - 1];
-		SqlBoxException.assureTrue(!firstAlias.equals(lastAlias));
-		ps.addGives(new String[] { firstAlias, lastAlias });
-		ps.addGives(new String[] { lastAlias, firstAlias });
+		for (int i = 1; i < entityClasses.length; i++)
+			ps.giveBoth(firstAlias, ps.getAliases()[i]);
 		return (EntityNet) ctx.runPreparedSQL(ps);
 	}
 
-	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+ 	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		List<E> list = entityFindRelatedList(ctx, entity, sqlItems);
 		if (list.size() != 1)
 			throw new SqlBoxException("Expect 1 entity but found " + list.size() + " records");
