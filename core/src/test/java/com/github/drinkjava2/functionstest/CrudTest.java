@@ -12,7 +12,7 @@ import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdbpro.LinkStyleArrayList;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.Sample;
+import com.github.drinkjava2.jsqlbox.sqlitem.SampleItem;
 
 /**
  * Usage of different SQL style and speed test
@@ -159,21 +159,21 @@ public class CrudTest extends TestBase {
 		// ========findBySample
 		Assert.assertEquals(1, ctx.entityFindBySample(u1).size());
 		Assert.assertEquals(1,
-				ctx.entityFindAll(CrudUser.class, new Sample(u2).sql(" where  ").notNullFields()).size());
+				ctx.entityFindAll(CrudUser.class, new SampleItem(u2).sql(" where  ").notNullFields()).size());
 		CrudUser sample = new CrudUser("Nam", "addr");
-		Assert.assertEquals(4, ctx.entityFindAll(CrudUser.class, new Sample(sample).sql(" where (").allFields()
+		Assert.assertEquals(4, ctx.entityFindAll(CrudUser.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param(":name%").sql(" order by name")).size());
 		Assert.assertEquals(4,
-				ctx.entityFindBySQL(CrudUser.class, new Sample(sample).sql("select * from CrudUser where (")
+				ctx.entityFindBySQL(CrudUser.class, new SampleItem(sample).sql("select * from CrudUser where (")
 						.nullFields().sql(") or name like ?").param(":name%").sql(" order by name")).size());
 
 		Assert.assertEquals(1, u1.findBySample(u2).size());
-		Assert.assertEquals(1, u1.findAll(new Sample(u3).sql(" where  ").notNullFields()).size());
-		Assert.assertEquals(4, u1.findAll(CrudUser.class, new Sample(sample).sql(" where (").allFields()
+		Assert.assertEquals(1, u1.findAll(new SampleItem(u3).sql(" where  ").notNullFields()).size());
+		Assert.assertEquals(4, u1.findAll(CrudUser.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param("%:name%").sql(" order by name")).size());
 		Assert.assertEquals(4,
 				u1.findBySQL("select * from CrudUser where (",
-						new Sample(sample).notNullFields().sql(") or name like ?").param(":name%"), " order by name")
+						new SampleItem(sample).notNullFields().sql(") or name like ?").param(":name%"), " order by name")
 						.size());
 
 		// =======countAll

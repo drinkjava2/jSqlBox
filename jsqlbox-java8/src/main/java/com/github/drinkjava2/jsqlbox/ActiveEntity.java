@@ -128,10 +128,10 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 
 	static Object[] insertThisClassIfNotHave(Object entity, Object... optionItems) {
 		Object[] items = optionItems;
-		List<TableModel> models = SqlBoxContextUtils.findAllModels(optionItems);
-		if (models == null || models.size() == 0)
+		TableModel[] models = SqlBoxContextUtils.findAllModels(optionItems);
+		if (models == null || models.length == 0)
 			throw new SqlBoxException("No TableMode found for entity.");
-		TableModel model = models.get(0);
+		TableModel model = models[0];
 		if (!entity.getClass().equals(model.getEntityClass())) {// NOSONAR
 			model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
 			items = ArrayUtils.insertArray(model, items);

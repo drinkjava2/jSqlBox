@@ -145,7 +145,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	/**
 	 * Deal with multiple SqlItems
 	 */
-	protected PreparedSQL dealSqlItems(PreparedSQL lastPreSql, boolean iXxxStyle, Object... items) {// NOSONAR
+	public PreparedSQL dealSqlItems(PreparedSQL lastPreSql, boolean iXxxStyle, Object... items) {// NOSONAR
 		if (items == null || items.length == 0)
 			throw new DbProRuntimeException("prepareSQL items can not be empty");
 		PreparedSQL predSQL = lastPreSql;

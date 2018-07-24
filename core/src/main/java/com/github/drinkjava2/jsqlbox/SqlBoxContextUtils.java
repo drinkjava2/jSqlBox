@@ -47,6 +47,8 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
+import com.github.drinkjava2.jsqlbox.sqlitem.EntityKeyItem;
+import com.github.drinkjava2.jsqlbox.sqlitem.SampleItem;
 
 /**
  * SqlBoxContextUtils is utility class store static methods about SqlBoxContext
@@ -168,22 +170,72 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return null;
 	}
 
-	public static List<TableModel> findAllModels(Object... optionItems) {// NOSONAR
+	/**
+	 * Extract models from sqlItems
+	 */
+	public static TableModel[] findAllModels(Object... sqlItems) {// NOSONAR
 		List<TableModel> result = new ArrayList<TableModel>();
-		doFindAllModels(result, optionItems);
-		return result;
+		doFindAllModels(result, sqlItems);
+		return result.toArray(new TableModel[result.size()]);
 	}
 
-	private static void doFindAllModels(List<TableModel> result, Object... optionItems) {
-		for (Object item : optionItems) { // If Model in option items, use it first
+	private static void doFindAllModels(List<TableModel> result, Object... sqlItems) {
+		for (Object item : sqlItems) { // If Model in option items, use it first
 			if (item instanceof TableModel)
 				result.add((TableModel) item);
 			else if (item instanceof Class)
 				result.add(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
-			else if (item.getClass().isArray()) {
-				Object[] array = (Object[]) item;
-				doFindAllModels(result, array);
+			else if (item.getClass().isArray())
+				doFindAllModels(result, (Object[]) item);
+		}
+	}
+
+	/**
+	 * Find model and alias items from sqlItems
+	 */
+	public static Object[] findModelAlias(Object... sqlItems) {// NOSONAR
+		List<Object> result = new ArrayList<Object>();
+		dofindModelAlias(result, sqlItems);
+		return result.toArray(new Object[result.size()]);
+	}
+
+	private static void dofindModelAlias(List<Object> result, Object... sqlItems) {
+		for (Object item : sqlItems) { // If Model in option items, use it first
+			if (item instanceof TableModel) {
+				result.add((TableModel) item);
+			} else if (item instanceof Class) {
+				result.add(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
+			} else if (item.getClass().isArray()) {
+				dofindModelAlias(result, (Object[]) item);
+			} else if (item instanceof SqlItem) {
+				SqlItem sqItem = (SqlItem) item;
+				SqlOption sqlItemType = sqItem.getType();
+				if (SqlOption.ALIAS.equals(sqlItemType)) {
+					result.add(item);
+				}
 			}
+		}
+	}
+
+	/**
+	 * Find not model/alias items from sqlItems
+	 */
+	public static Object[] findNotModelAlias(Object... sqlItems) {// NOSONAR
+		List<Object> result = new ArrayList<Object>();
+		dofindNotModelAlias(result, sqlItems);
+		return result.toArray(new Object[result.size()]);
+	}
+
+	private static void dofindNotModelAlias(List<Object> result, Object... sqlItems) {
+		for (Object item : sqlItems) { // If Model in option items, use it first
+			if (item instanceof TableModel || item instanceof Class) {// NOSONAR
+			} else if (item.getClass().isArray()) {
+				dofindNotModelAlias(result, (Object[]) item);
+			} else if (item instanceof SqlItem) {
+				if (!SqlOption.ALIAS.equals(((SqlItem) item).getType()))
+					result.add(item);
+			} else
+				result.add(item);
 		}
 	}
 
@@ -343,41 +395,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			sb.append(a).append(".").append(col).append("=").append(b).append(".")
 					.append(fkey.getRefTableAndColumns()[i + 1]).append(" ");
 			i++;
-		}
-
-	}
-
-	/**
-	 * According given PreparedSQL and entities, append "a.bid1=? and a.bid2=?..."
-	 * SQL piece
-	 */
-	private static void appendEntityKeyParameters(PreparedSQL ps, Object entity) {
-		TableModel model = null;
-		String alias = null;
-		for (int i = 0; i < ps.getModels().length; i++) {
-			TableModel psmodel = (TableModel) ps.getModels()[i];
-			if (entity.getClass().equals(psmodel.getEntityClass())) {
-				model = psmodel;
-				alias = ps.getAliases()[i];
-			}
-		}
-		SqlBoxException.assureNotNull(model);// found the model of entity
-		SqlBoxException.assureNotEmpty(alias); // found the alias
-		doAppendEntityKeyParameters(ps, entity, alias, model);
-	}
-
-	private static void doAppendEntityKeyParameters(PreparedSQL ps, Object entity, String alias, TableModel model) {
-		int i = 0;
-		for (ColumnModel col : model.getColumns()) {
-			if (col.getPkey() && !col.getTransientable()) {
-				if (i > 0)
-					ps.addSql(" and ");
-				ps.addSql(alias).append(".").append(col.getColumnName()).append("=? ");
-				Object value = ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField());
-				ps.addParam(value);
-				i++;
-			}
-		}
+		} 
 	}
 
 	@SuppressWarnings("unused")
@@ -1084,7 +1102,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> entityFindBySample(SqlBoxContext ctx, Object sampleBean, Object... sqlItems) {
 		return (List<T>) entityFindAll(ctx, sampleBean.getClass(),
-				new Sample(sampleBean).sql(" where ").notNullFields(), sqlItems);
+				new SampleItem(sampleBean).sql(" where ").notNullFields(), sqlItems);
 	}
 
 	@SuppressWarnings("unused")
@@ -1092,9 +1110,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	public static EntityNet autoEntityNet(SqlBoxContext ctx, Class<?>... entityClasses) {
-		List<TableModel> models = findAllModels((Object[]) entityClasses);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(),
-				models.toArray(new TableModel[models.size()]), AUTO_SQL);
+		TableModel[] models = findAllModels((Object[]) entityClasses);
+		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), models, AUTO_SQL);
 		SqlBoxException.assureTrue(ps.getAliases() != null && ps.getAliases().length > 1);
 		String firstAlias = ps.getAliases()[0];
 		for (int i = 1; i < entityClasses.length; i++)
@@ -1102,7 +1119,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return (EntityNet) ctx.runPreparedSQL(ps);
 	}
 
- 	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		List<E> list = entityFindRelatedList(ctx, entity, sqlItems);
 		if (list.size() != 1)
 			throw new SqlBoxException("Expect 1 entity but found " + list.size() + " records");
@@ -1111,37 +1128,48 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	@SuppressWarnings("unchecked")
 	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		if (sqlItems.length == 0)
+			throw new SqlBoxException("Target entity class is required"); 
+		for (Object item : sqlItems) 
+			if (item instanceof EntityNet)
+				return ((EntityNet) item).findRelatedList(ctx, entity, sqlItems); 
+		 
 		SqlBoxException.assureNotNull(entity);
-		List<TableModel> models = findAllModels(sqlItems);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, AUTO_SQL);
-		ps.addSql(" where ");
-		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
-		ps.setSql(ps.getSqlBuilder().toString());
-		EntityNet net = (EntityNet) ctx.runPreparedSQL(ps);
-		return (List<E>) net.pickEntityList(models.get(models.size() - 1).getEntityClass());
+		TableModel[] models = findAllModels(sqlItems);
+		Object[] modelsAlias = findModelAlias(sqlItems);
+		Object[] notModelAlias = findNotModelAlias(sqlItems);
+		EntityNet net = ctx.iQuery(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
+				new EntityKeyItem(entity), notModelAlias);
+		return (List<E>) net.pickEntityList(models[models.length - 1].getEntityClass());
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <E> Set<E> entityFindRelatedSet(SqlBoxContext ctx, Object entity, Object... sqlItems) {
-		SqlBoxException.assureNotNull(entity);
-		List<TableModel> models = findAllModels(sqlItems);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, AUTO_SQL);
-		ps.addSql(" where ");
-		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
-		ps.setSql(ps.getSqlBuilder().toString());
-		EntityNet net = (EntityNet) ctx.runPreparedSQL(ps);
-		return (Set<E>) net.pickEntitySet(models.get(models.size() - 1).getEntityClass());
+		if (sqlItems.length == 0)
+			throw new SqlBoxException("Target entity class is required");
+		for (Object item : sqlItems)  
+			if (item instanceof EntityNet)
+				return ((EntityNet) item).findRelatedSet(ctx, entity, sqlItems); 
+		TableModel[] models = findAllModels(sqlItems);
+		Object[] modelsAlias = findModelAlias(sqlItems);
+		Object[] notModelAlias = findNotModelAlias(sqlItems);
+		EntityNet net = ctx.iQuery(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
+				new EntityKeyItem(entity), notModelAlias);
+		return (Set<E>) net.pickEntitySet(models[models.length - 1].getEntityClass());
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <E> Map<Object, E> entityFindRelatedMap(SqlBoxContext ctx, Object entity, Object... sqlItems) {
-		SqlBoxException.assureNotNull(entity);
-		List<TableModel> models = findAllModels(sqlItems);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), sqlItems, AUTO_SQL);
-		ps.addSql(" where ");
-		appendEntityKeyParameters(ps, entity);// add where a.id1=? and a.id2=? ...
-		ps.setSql(ps.getSqlBuilder().toString());
-		EntityNet net = (EntityNet) ctx.runPreparedSQL(ps);
-		return (Map<Object, E>) net.pickEntityMap(models.get(models.size() - 1).getEntityClass());
+		if (sqlItems.length == 0)
+			throw new SqlBoxException("Target entity class is required");
+		for (Object item : sqlItems)  
+			if (item instanceof EntityNet)
+				return ((EntityNet) item).findRelatedMap(ctx, entity, sqlItems); 
+		TableModel[] models = findAllModels(sqlItems);
+		Object[] modelsAlias = findModelAlias(sqlItems);
+		Object[] notModelAlias = findNotModelAlias(sqlItems);
+		EntityNet net = ctx.iQuery(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
+				new EntityKeyItem(entity), notModelAlias);
+		return (Map<Object, E>) net.pickEntityMap(models[models.length - 1].getEntityClass());
 	}
 }

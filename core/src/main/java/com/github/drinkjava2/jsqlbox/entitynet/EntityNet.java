@@ -26,13 +26,17 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * EntityNet is Entity net, after created by using EntityNetHandler, can use
- * pickXxxx methods to pick entity list/set/map from it, and also can use NoSql
- * type search.
+ * pickXxxx methods to pick entity list/set/map from it, and also can use
+ * findRelatedXxx methods to search items inside of it, no need send SQL to DB
+ * again
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -94,7 +98,7 @@ public class EntityNet {
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Set");
 		if (readMethod != null)
 			give(a, b, fieldName + "Set");
-		
+
 		readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName + "Map");
 		if (readMethod != null)
 			give(a, b, fieldName + "Map");
@@ -224,7 +228,7 @@ public class EntityNet {
 		}
 		return entity;
 	}
-	 
+
 	/** Give values according gives setting for oneRow */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void doGive(Map<String, Object> oneRow) {// NOSONAR
@@ -290,31 +294,6 @@ public class EntityNet {
 		return entityMap.get(entityId);
 	}
 
-	protected void getterSetter__________________________() {// NOSONAR
-	}
-
-	public Map<String, TableModel> getConfigs() {
-		return models;
-	}
-
-	public EntityNet setConfigs(Map<String, TableModel> configs) {
-		this.models = configs;
-		return this;
-	}
-
-	public List<Map<String, Object>> getRowData() {
-		return rowData;
-	}
-
-	public EntityNet setRowData(List<Map<String, Object>> rowData) {
-		this.rowData = rowData;
-		return this;
-	}
-
-	public List<String[]> getGivesList() {
-		return givesList;
-	}
-
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\r\n=========givesList=========\r\n");
@@ -338,7 +317,115 @@ public class EntityNet {
 			sb.append(row.toString()).append("\r\n");
 		}
 		return sb.toString();
+	}
 
+	/** Search related entity list inside of current EntityNet */
+	public <E> List<E> findRelatedList(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		Set<E> resultSet = findRelatedSet(ctx, entity, sqlItems);
+		return new ArrayList<E>(resultSet);
+	}
+
+	/** Search related entity set inside of current EntityNet */
+	@SuppressWarnings("unchecked")
+	public <E> Set<E> findRelatedSet(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		TableModel[] tbModels = SqlBoxContextUtils.findAllModels(sqlItems);
+		// first model is entity self, last is target model
+		SqlBoxException.assureTrue(tbModels.length > 1);
+		SqlBoxException.assureTrue(entity.getClass().equals(tbModels[0].getEntityClass()));
+		return (Set<E>) doFindRelatedSet(0, entity, tbModels);
+	}
+
+	/** Inside of current EntityNet, search related entity Map */
+	public <E> Map<Object, E> findRelatedMap(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+		TableModel[] tbModels = SqlBoxContextUtils.findAllModels(sqlItems);
+		Set<E> resultSet = findRelatedSet(ctx, entity, sqlItems);
+		Map<Object, E> resultMap = new HashMap<Object, E>();
+		for (E ent : resultSet) {
+			Object entityId = EntityIdUtils.buildEntityIdFromEntity(ent, tbModels[tbModels.length - 1]);
+			resultMap.put(entityId, ent);
+		}
+		return resultMap;
+	}
+
+	private static boolean hasRelationShip(Object e1, Object e2, TableModel m1, TableModel m2) {
+		List<FKeyModel> fkeys = m1.getFkeyConstraints();
+		for (FKeyModel fkey : fkeys) {
+			String refTable = fkey.getRefTableAndColumns()[0];
+			if (refTable.equalsIgnoreCase(m2.getTableName())) {// m2 is parent
+				return realDoRelationCheck(e1, e2, m1, m2, fkey);
+			}
+		}
+		fkeys = m2.getFkeyConstraints();
+		for (FKeyModel fkey : fkeys) {
+			String refTable = fkey.getRefTableAndColumns()[0];
+			if (refTable.equalsIgnoreCase(m1.getTableName())) {// m1 is parent
+				return realDoRelationCheck(e2, e1, m2, m1, fkey);
+			}
+		}
+		throw new SqlBoxException("Not found relationship(foreign key) setting between '" + m1.getEntityClass()
+				+ "' and '" + m2.getEntityClass() + "'");
+	}
+
+	/**
+	 * Check if 2 entities have relationShip, e1's fkey value should equal e2's ID
+	 */
+	private static boolean realDoRelationCheck(Object e1, Object e2, TableModel m1, TableModel m2, FKeyModel fkey) {
+		int i = 0;
+		for (String col : fkey.getColumnNames()) {
+			String refCol = fkey.getRefTableAndColumns()[i + 1];
+			ColumnModel c1 = m1.getColumnByColName(col);
+			ColumnModel c2 = m2.getColumnByColName(refCol);
+			Object value1 = ClassCacheUtils.readValueFromBeanField(e1, c1.getEntityField());
+			Object value2 = ClassCacheUtils.readValueFromBeanField(e2, c2.getEntityField());
+			if (value1 == null || value2 == null || !value1.equals(value2))
+				return false;
+			i++;
+		}
+		return true;
+	}
+
+	public Set<Object> doFindRelatedSet(int index, Object entity, TableModel[] tbModels) {
+		Set<Object> result = new HashSet<Object>();
+		TableModel m1 = tbModels[index]; // User or UserRole or RolePrivilege...
+		TableModel m2 = tbModels[index + 1]; // Privilege
+		if ((index + 2) >= tbModels.length) {
+			for (Entry<Object, Object> e : body.get(m2.getEntityClass()).entrySet()) {
+				if (hasRelationShip(entity, e.getValue(), m1, m2))
+					result.add(e.getValue());
+			}
+		} else {
+			Set<Object> middleEntitis = doFindRelatedSet(0, entity, new TableModel[] { m1, m2 });
+			for (Object mid : middleEntitis) {
+				Set<Object> targets = doFindRelatedSet(index + 1, mid, tbModels);// NOSONAR
+				result.addAll(targets);
+			}
+		}
+		return result;
+	}
+
+	protected void getterSetter__________________________() {// NOSONAR
+	}
+
+	public Map<String, TableModel> getConfigs() {
+		return models;
+	}
+
+	public EntityNet setConfigs(Map<String, TableModel> configs) {
+		this.models = configs;
+		return this;
+	}
+
+	public List<Map<String, Object>> getRowData() {
+		return rowData;
+	}
+
+	public EntityNet setRowData(List<Map<String, Object>> rowData) {
+		this.rowData = rowData;
+		return this;
+	}
+
+	public List<String[]> getGivesList() {
+		return givesList;
 	}
 
 	/**

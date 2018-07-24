@@ -24,7 +24,6 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
  * Entity class extended from ActiveRecord or implements ActiveRecordSupport
@@ -174,19 +173,15 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	private static Object[] insertThisClassIfNotHave(Object entity, Object... optionItems) {
 		Object[] items = optionItems;
-		List<TableModel> models = SqlBoxContextUtils.findAllModels(optionItems);
-		if (models == null || models.size() == 0)
+		TableModel[] models = SqlBoxContextUtils.findAllModels(optionItems);
+		if (models.length == 0)
 			throw new SqlBoxException("No TableMode found for entity.");
-		TableModel model = models.get(0);
+		TableModel model = models[0];
 		if (!entity.getClass().equals(model.getEntityClass())) {// NOSONAR
 			model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
 			items = ArrayUtils.insertArray(model, items);
 		}
 		return items;
-	}
-
-	public <E> E findOneRelated(EntityNet net, Class<E> entityClass) {
-		return null;// TODO: work at here
 	}
 
 	@Override

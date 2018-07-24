@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jsqlbox.sqlitem;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -22,6 +22,8 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * This Sample is a CustomizedSqlItem, used to build a " where field1=? and
@@ -29,12 +31,12 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * 
  * <pre>
  * Assert.assertEquals(1, ctx.entityFindBySample(u1).size());
- * Assert.assertEquals(1, ctx.entityFindAll(CrudUser.class, new Sample(u2).sql(" where  ").notNullFields()).size());
+ * Assert.assertEquals(1, ctx.entityFindAll(CrudUser.class, new SampleItem(u2).sql(" where  ").notNullFields()).size());
  * CrudUser sample = new CrudUser("Nam", "addr");
  * Assert.assertEquals(4, ctx.entityFindAll(CrudUser.class,
- * 		new Sample(sample).sql(" where (").allFields().sql(") or name like ?").param(":name%").sql(" order by name"))
+ * 		new SampleItem(sample).sql(" where (").allFields().sql(") or name like ?").param(":name%").sql(" order by name"))
  * 		.size());
- * Assert.assertEquals(4, ctx.entityFindBySQL(CrudUser.class, new Sample(sample).sql("select * from CrudUser where (")
+ * Assert.assertEquals(4, ctx.entityFindBySQL(CrudUser.class, new SampleItem(sample).sql("select * from CrudUser where (")
  * 		.nullFields().sql(") or name like ?").param(":name%").sql(" order by name")).size());
  * 
  * </pre>
@@ -42,16 +44,16 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class Sample implements CustomizedSqlItem {
+public class SampleItem implements CustomizedSqlItem {
 	Object entityBean;
 	TableModel model = null;
 	List<Object> sqlItems = new ArrayList<Object>();
 
-	public Sample(Object entityBean) {
+	public SampleItem(Object entityBean) {
 		this.entityBean = entityBean;
 	}
 
-	public Sample(Object entityBean, TableModel model) {
+	public SampleItem(Object entityBean, TableModel model) {
 		this.entityBean = entityBean;
 		this.model = model;
 	}
@@ -59,7 +61,7 @@ public class Sample implements CustomizedSqlItem {
 	/**
 	 * For all not null fields, create field1=? and field2=?... sql pieces
 	 */
-	public Sample notNullFields() {
+	public SampleItem notNullFields() {
 		sqlItems.add("#NOTNULL_Fields");
 		return this;
 	}
@@ -68,7 +70,7 @@ public class Sample implements CustomizedSqlItem {
 	 * For all fields has null values, create field1 is null and field2 is null...
 	 * sql pieces
 	 */
-	public Sample nullFields() {
+	public SampleItem nullFields() {
 		sqlItems.add("#NULL_Fields");
 		return this;
 	}
@@ -76,20 +78,20 @@ public class Sample implements CustomizedSqlItem {
 	/**
 	 * For all fields, create field1=? and field2=? and field3 is null... sql pieces
 	 */
-	public Sample allFields() {
+	public SampleItem allFields() {
 		sqlItems.add("#ALL_Fields");
 		return this;
 	}
 
 	/** Add a sql piece */
-	public Sample sql(String... sqlPiece) {
+	public SampleItem sql(String... sqlPiece) {
 		for (String sql : sqlPiece)
 			sqlItems.add(sql);
 		return this;
 	}
 
 	/** Add a Sql param */
-	public Sample param(Object... params) {
+	public SampleItem param(Object... params) {
 		for (Object param : params)
 			sqlItems.add(new Object[] { param });
 		return this;
