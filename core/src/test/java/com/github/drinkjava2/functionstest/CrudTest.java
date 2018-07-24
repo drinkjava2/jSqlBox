@@ -90,13 +90,13 @@ public class CrudTest extends TestBase {
 		u4.setAddress("NewAddress4");
 		ctx.entityUpdate(u1);
 		u2.update();
-		Assert.assertEquals(1, ctx.entityTryUpdate(u3));
+		Assert.assertEquals(1, ctx.entityUpdateTry(u3));
 		Assert.assertEquals(1, u4.tryUpdate());
 
 		// =======load
 		Assert.assertEquals("NewAddress1", ctx.entityLoad(u1).getAddress());
 		Assert.assertEquals("NewAddress2", u2.load().getAddress());
-		Assert.assertEquals(1, ctx.entityTryLoad(u3));
+		Assert.assertEquals(1, ctx.entityLoadTry(u3));
 		Assert.assertEquals("NewAddress3", u3.getAddress());
 		Assert.assertEquals(1, u4.tryLoad());
 		Assert.assertEquals("NewAddress4", u4.getAddress());
@@ -104,7 +104,7 @@ public class CrudTest extends TestBase {
 		// =======load by id (id is basic value)
 		Assert.assertEquals("NewAddress1", ctx.entityLoadById(CrudUser.class, "Name1").getAddress());
 		Assert.assertEquals("NewAddress2", u2.loadById("Name2").getAddress());
-		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CrudUser.class, "Name3").getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CrudUser.class, "Name3").getAddress());
 		Assert.assertEquals("NewAddress4", u4.tryLoadById("Name4").getAddress());
 
 		// =======load by id (id is map)
@@ -114,14 +114,14 @@ public class CrudTest extends TestBase {
 		mp.put("name", "Name2");
 		Assert.assertEquals("NewAddress2", u2.loadById(mp).getAddress());
 		mp.put("name", "Name3");
-		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CrudUser.class, mp).getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CrudUser.class, mp).getAddress());
 		mp.put("name", "Name4");
 		Assert.assertEquals("NewAddress4", u4.tryLoadById(mp).getAddress());
 
 		// =======load by id (id is Entity bean)
 		Assert.assertEquals("NewAddress1", ctx.entityLoadById(CrudUser.class, u1).getAddress());
 		Assert.assertEquals("NewAddress2", u1.loadById(u2).getAddress());
-		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CrudUser.class, u3).getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CrudUser.class, u3).getAddress());
 		Assert.assertEquals("NewAddress4", u1.tryLoadById(u4).getAddress());
 
 		// =======loadByIds (id is basic value list)
@@ -203,8 +203,8 @@ public class CrudTest extends TestBase {
 		// =======delete
 		ctx.entityDelete(u1);
 		u2.delete();
-		Assert.assertEquals(1, ctx.entityTryDelete(u3));
-		Assert.assertEquals(0, ctx.entityTryDelete(u3));
+		Assert.assertEquals(1, ctx.entityDeleteTry(u3));
+		Assert.assertEquals(0, ctx.entityDeleteTry(u3));
 		Assert.assertEquals(1, u4.tryDelete());
 		Assert.assertEquals(0, u4.tryDelete());
 		Assert.assertEquals(0, u1.countAll());
@@ -216,8 +216,8 @@ public class CrudTest extends TestBase {
 		new CrudUser("Name4", "Address4").insert();
 		ctx.entityDeleteById(CrudUser.class, "Name1");
 		u1.deleteById("Name2");
-		Assert.assertEquals(1, ctx.entityTryDeleteById(CrudUser.class, "Name3"));
-		Assert.assertEquals(0, ctx.entityTryDeleteById(CrudUser.class, "Name3"));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CrudUser.class, "Name3"));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CrudUser.class, "Name3"));
 		Assert.assertEquals(1, u1.tryDeleteById("Name4"));
 		Assert.assertEquals(0, u1.tryDeleteById("Name4"));
 		Assert.assertEquals(0, u1.countAll());
@@ -233,8 +233,8 @@ public class CrudTest extends TestBase {
 		m.put("name", "Name2");
 		u1.deleteById(m);
 		m.put("name", "Name3");
-		Assert.assertEquals(1, ctx.entityTryDeleteById(CrudUser.class, m));
-		Assert.assertEquals(0, ctx.entityTryDeleteById(CrudUser.class, m));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CrudUser.class, m));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CrudUser.class, m));
 		m.put("name", "Name4");
 		Assert.assertEquals(1, u1.tryDeleteById(m));
 		Assert.assertEquals(0, u1.tryDeleteById(m));
@@ -247,8 +247,8 @@ public class CrudTest extends TestBase {
 		u4 = new CrudUser("Name4", "Address4").insert();
 		ctx.entityDeleteById(CrudUser.class, u1);
 		u1.deleteById(u2);
-		Assert.assertEquals(1, ctx.entityTryDeleteById(CrudUser.class, u3));
-		Assert.assertEquals(0, ctx.entityTryDeleteById(CrudUser.class, u3));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CrudUser.class, u3));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CrudUser.class, u3));
 		Assert.assertEquals(1, u1.tryDeleteById(u4));
 		Assert.assertEquals(0, u1.tryDeleteById(u4));
 		Assert.assertEquals(0, u1.countAll());

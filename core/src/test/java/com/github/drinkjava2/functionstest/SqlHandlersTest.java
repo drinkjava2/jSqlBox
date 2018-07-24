@@ -218,6 +218,8 @@ public class SqlHandlersTest extends TestBase {
 		SqlBoxContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));
 		List<DemoUser> users3 = gpQuery(new EntityListHandler(), DemoUser.class,
 				"select u.* from DemoUser u where u.age>?", 0);
+		
+		
 		Assert.assertTrue(users3.size() == 5);
 		SqlBoxContext.setThreadLocalSqlHandlers(null);
 	}

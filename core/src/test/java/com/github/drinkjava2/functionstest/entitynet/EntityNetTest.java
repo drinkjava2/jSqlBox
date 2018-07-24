@@ -289,7 +289,7 @@ public class EntityNetTest extends TestBase {
 	public void testAutoEntityNet() {
 		insertDemoData();
 		List<User> users = ctx
-				.autoEntityNet(User.class, UserRole.class, Role.class, RolePrivilege.class, Privilege.class)
+				.entityAutoNet(User.class, UserRole.class, Role.class, RolePrivilege.class, Privilege.class)
 				.pickEntityList(User.class);
 
 		for (User u : users) {

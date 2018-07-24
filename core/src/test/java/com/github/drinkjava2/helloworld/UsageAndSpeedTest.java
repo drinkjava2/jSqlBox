@@ -429,9 +429,9 @@ public class UsageAndSpeedTest {
 			user.setAddress("Canada");
 			ctx.entityInsert(user);
 			user.setAddress("China");
-			ctx.entityTryUpdate(user);
+			ctx.entityUpdateTry(user);
 			UserPOJO sam2 = ctx.entityLoadById(UserPOJO.class, "Sam");
-			ctx.entityTryDelete(sam2);
+			ctx.entityDeleteTry(sam2);
 		}
 	}
 
@@ -650,11 +650,11 @@ public class UsageAndSpeedTest {
 		Assert.assertEquals("China7", user.getAddress());
 
 		user.setAddress("Canada");
-		ctx.entityTryUpdate(user);
+		ctx.entityUpdateTry(user);
 		Assert.assertEquals("Canada", ctx.entityLoadById(UserAR.class, "Tom7").getAddress());
 
-		ctx.entityTryDelete(user);
-		ctx.entityTryDelete(user, " or name=?", param("Tom2"));
+		ctx.entityDeleteTry(user);
+		ctx.entityDeleteTry(user, " or name=?", param("Tom2"));
 
 		Assert.assertEquals(7, ctx.entityFindAll(UserAR.class, " where name>?", param("Tom1")).size());
 	}

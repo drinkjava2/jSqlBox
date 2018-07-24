@@ -102,13 +102,13 @@ public class CrudCompoundIdTest extends TestBase {
 		u4.setAddress("NewAddress4");
 		ctx.entityUpdate(u1);
 		u2.update();
-		Assert.assertEquals(1, ctx.entityTryUpdate(u3));
+		Assert.assertEquals(1, ctx.entityUpdateTry(u3));
 		Assert.assertEquals(1, u4.tryUpdate());
 
 		// =======load
 		Assert.assertEquals("NewAddress1", ctx.entityLoad(u1).getAddress());
 		Assert.assertEquals("NewAddress2", u2.load().getAddress());
-		Assert.assertEquals(1, ctx.entityTryLoad(u3));
+		Assert.assertEquals(1, ctx.entityLoadTry(u3));
 		Assert.assertEquals("NewAddress3", u3.getAddress());
 		Assert.assertEquals(1, u4.tryLoad());
 		Assert.assertEquals("NewAddress4", u4.getAddress());
@@ -121,14 +121,14 @@ public class CrudCompoundIdTest extends TestBase {
 		mp.put("name", "Name2");
 		Assert.assertEquals("NewAddress2", u2.loadById(mp).getAddress());
 		mp.put("name", "Name3");
-		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CpdUser.class, mp).getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CpdUser.class, mp).getAddress());
 		mp.put("name", "Name4");
 		Assert.assertEquals("NewAddress4", u4.tryLoadById(mp).getAddress());
 
 		// =======load by id (id is Entity bean)
 		Assert.assertEquals("NewAddress1", ctx.entityLoadById(CpdUser.class, u1).getAddress());
 		Assert.assertEquals("NewAddress2", u1.loadById(u2).getAddress());
-		Assert.assertEquals("NewAddress3", ctx.entityTryLoadById(CpdUser.class, u3).getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CpdUser.class, u3).getAddress());
 		Assert.assertEquals("NewAddress4", u1.tryLoadById(u4).getAddress());
 
 		// =======loadByIds (id is mp)
@@ -157,7 +157,7 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(3, new CpdUser().findByIds(idBeanList).size());
 
 		// ========findBySql
-		Assert.assertEquals(4, ctx.entityFindBySQL(CpdUser.class, "select * from CpdUser").size());
+		Assert.assertEquals(4, ctx.iQueryForEntityList(CpdUser.class, "select * from CpdUser").size());
 		Assert.assertEquals(4, u1.findBySQL("select * from CpdUser").size());
 
 		// =======countAll
@@ -185,8 +185,8 @@ public class CrudCompoundIdTest extends TestBase {
 		// =======delete
 		ctx.entityDelete(u1);
 		u2.delete();
-		Assert.assertEquals(1, ctx.entityTryDelete(u3));
-		Assert.assertEquals(0, ctx.entityTryDelete(u3));
+		Assert.assertEquals(1, ctx.entityDeleteTry(u3));
+		Assert.assertEquals(0, ctx.entityDeleteTry(u3));
 		Assert.assertEquals(1, u4.tryDelete());
 		Assert.assertEquals(0, u4.tryDelete());
 		Assert.assertEquals(0, u1.countAll());
@@ -203,8 +203,8 @@ public class CrudCompoundIdTest extends TestBase {
 		m.put("name", "Name2");
 		u1.deleteById(m);
 		m.put("name", "Name3");
-		Assert.assertEquals(1, ctx.entityTryDeleteById(CpdUser.class, m));
-		Assert.assertEquals(0, ctx.entityTryDeleteById(CpdUser.class, m));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CpdUser.class, m));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CpdUser.class, m));
 		m.put("name", "Name4");
 		Assert.assertEquals(1, u1.tryDeleteById(m));
 		Assert.assertEquals(0, u1.tryDeleteById(m));
@@ -217,8 +217,8 @@ public class CrudCompoundIdTest extends TestBase {
 		u4 = new CpdUser("Name4", true, "Address4").insert();
 		ctx.entityDeleteById(CpdUser.class, u1);
 		u1.deleteById(u2);
-		Assert.assertEquals(1, ctx.entityTryDeleteById(CpdUser.class, u3));
-		Assert.assertEquals(0, ctx.entityTryDeleteById(CpdUser.class, u3));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CpdUser.class, u3));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CpdUser.class, u3));
 		Assert.assertEquals(1, u1.tryDeleteById(u4));
 		Assert.assertEquals(0, u1.tryDeleteById(u4));
 		Assert.assertEquals(0, u1.countAll());

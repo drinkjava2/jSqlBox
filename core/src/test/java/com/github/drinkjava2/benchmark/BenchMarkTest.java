@@ -89,7 +89,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testOrmQUery() {
-		List<DemoOrder> list = gctx().autoEntityNet(DemoOrder.class, DemoCustomer.class)
+		List<DemoOrder> list = gctx().entityAutoNet(DemoOrder.class, DemoCustomer.class)
 				.pickEntityList(DemoOrder.class);
 		for (DemoOrder order : list) {
 			DemoCustomer customer = order.getDemoCustomer();
