@@ -171,7 +171,7 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 		return ctx(optionItems).entityFindBySample(sampleBean, optionItems);
 	}
 
-	private static Object[] insertThisClassIfNotHave(Object entity, Object... optionItems) {
+	static Object[] insertThisClassIfNotHave(Object entity, Object... optionItems) {
 		Object[] items = optionItems;
 		TableModel[] models = SqlBoxContextUtils.findAllModels(optionItems);
 		if (models.length == 0)

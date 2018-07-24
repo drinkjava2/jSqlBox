@@ -115,21 +115,10 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 		return ctx(optionItems).entityFindBySample(sampleBean, optionItems);
 	}
 
-	@Override
-	public default <E> E findOneRelated(Object... optionItems) {
-		return ctx(optionItems).entityFindOneRelated(this, optionItems);
-	}
-
-	@Override
-	public default <E> List<E> findRelatedList(Object... optionItems) {
-		Object[] items = insertThisClassIfNotHave(this, optionItems);
-		return ctx(optionItems).entityFindRelatedList(this, items);
-	}
-
 	static Object[] insertThisClassIfNotHave(Object entity, Object... optionItems) {
 		Object[] items = optionItems;
 		TableModel[] models = SqlBoxContextUtils.findAllModels(optionItems);
-		if (models == null || models.length == 0)
+		if (models.length == 0)
 			throw new SqlBoxException("No TableMode found for entity.");
 		TableModel model = models[0];
 		if (!entity.getClass().equals(model.getEntityClass())) {// NOSONAR
@@ -137,6 +126,18 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 			items = ArrayUtils.insertArray(model, items);
 		}
 		return items;
+	}
+
+	@Override
+	public default <E> E findOneRelated(Object... optionItems) {
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindOneRelated(this, items);
+	}
+
+	@Override
+	public default <E> List<E> findRelatedList(Object... optionItems) {
+		Object[] items = insertThisClassIfNotHave(this, optionItems);
+		return ctx(optionItems).entityFindRelatedList(this, items);
 	}
 
 	@Override
