@@ -3,8 +3,7 @@ package com.github.drinkjava2.functionstest.entitynet;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.AUTO_SQL;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 
 import java.util.HashMap;
 import java.util.List;

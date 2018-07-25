@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * @author Yong Zhu
  * @since 1.7.0.3
  */
-public abstract class JDBPRO extends DbPro {
+public abstract class JDBPRO {
 	public static final SqlOption USE_MASTER = SqlOption.USE_MASTER;
 	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;

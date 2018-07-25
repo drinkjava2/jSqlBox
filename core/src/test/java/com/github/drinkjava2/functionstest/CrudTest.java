@@ -91,21 +91,21 @@ public class CrudTest extends TestBase {
 		ctx.entityUpdate(u1);
 		u2.update();
 		Assert.assertEquals(1, ctx.entityUpdateTry(u3));
-		Assert.assertEquals(1, u4.tryUpdate());
+		Assert.assertEquals(1, u4.updateTry());
 
 		// =======load
 		Assert.assertEquals("NewAddress1", ctx.entityLoad(u1).getAddress());
 		Assert.assertEquals("NewAddress2", u2.load().getAddress());
 		Assert.assertEquals(1, ctx.entityLoadTry(u3));
 		Assert.assertEquals("NewAddress3", u3.getAddress());
-		Assert.assertEquals(1, u4.tryLoad());
+		Assert.assertEquals(1, u4.loadTry());
 		Assert.assertEquals("NewAddress4", u4.getAddress());
 
 		// =======load by id (id is basic value)
 		Assert.assertEquals("NewAddress1", ctx.entityLoadById(CrudUser.class, "Name1").getAddress());
 		Assert.assertEquals("NewAddress2", u2.loadById("Name2").getAddress());
 		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CrudUser.class, "Name3").getAddress());
-		Assert.assertEquals("NewAddress4", u4.tryLoadById("Name4").getAddress());
+		Assert.assertEquals("NewAddress4", u4.loadByIdTry("Name4").getAddress());
 
 		// =======load by id (id is map)
 		Map<String, Object> mp = new HashMap<String, Object>();
@@ -116,13 +116,13 @@ public class CrudTest extends TestBase {
 		mp.put("name", "Name3");
 		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CrudUser.class, mp).getAddress());
 		mp.put("name", "Name4");
-		Assert.assertEquals("NewAddress4", u4.tryLoadById(mp).getAddress());
+		Assert.assertEquals("NewAddress4", u4.loadByIdTry(mp).getAddress());
 
 		// =======load by id (id is Entity bean)
 		Assert.assertEquals("NewAddress1", ctx.entityLoadById(CrudUser.class, u1).getAddress());
 		Assert.assertEquals("NewAddress2", u1.loadById(u2).getAddress());
 		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CrudUser.class, u3).getAddress());
-		Assert.assertEquals("NewAddress4", u1.tryLoadById(u4).getAddress());
+		Assert.assertEquals("NewAddress4", u1.loadByIdTry(u4).getAddress());
 
 		// =======loadByIds (id is basic value list)
 		LinkStyleArrayList<String> ids = new LinkStyleArrayList<String>().append("Name1").append("Name2")
@@ -205,8 +205,8 @@ public class CrudTest extends TestBase {
 		u2.delete();
 		Assert.assertEquals(1, ctx.entityDeleteTry(u3));
 		Assert.assertEquals(0, ctx.entityDeleteTry(u3));
-		Assert.assertEquals(1, u4.tryDelete());
-		Assert.assertEquals(0, u4.tryDelete());
+		Assert.assertEquals(1, u4.deleteTry());
+		Assert.assertEquals(0, u4.deleteTry());
 		Assert.assertEquals(0, u1.countAll());
 
 		// =======delete by id (id is basic value)
@@ -218,8 +218,8 @@ public class CrudTest extends TestBase {
 		u1.deleteById("Name2");
 		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CrudUser.class, "Name3"));
 		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CrudUser.class, "Name3"));
-		Assert.assertEquals(1, u1.tryDeleteById("Name4"));
-		Assert.assertEquals(0, u1.tryDeleteById("Name4"));
+		Assert.assertEquals(1, u1.deleteByIdTry("Name4"));
+		Assert.assertEquals(0, u1.deleteByIdTry("Name4"));
 		Assert.assertEquals(0, u1.countAll());
 
 		// =======delete by id (id is Map)
@@ -236,8 +236,8 @@ public class CrudTest extends TestBase {
 		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CrudUser.class, m));
 		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CrudUser.class, m));
 		m.put("name", "Name4");
-		Assert.assertEquals(1, u1.tryDeleteById(m));
-		Assert.assertEquals(0, u1.tryDeleteById(m));
+		Assert.assertEquals(1, u1.deleteByIdTry(m));
+		Assert.assertEquals(0, u1.deleteByIdTry(m));
 		Assert.assertEquals(0, u1.countAll());
 
 		// =======delete by id (id is Entity bean)
@@ -249,8 +249,8 @@ public class CrudTest extends TestBase {
 		u1.deleteById(u2);
 		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CrudUser.class, u3));
 		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CrudUser.class, u3));
-		Assert.assertEquals(1, u1.tryDeleteById(u4));
-		Assert.assertEquals(0, u1.tryDeleteById(u4));
+		Assert.assertEquals(1, u1.deleteByIdTry(u4));
+		Assert.assertEquals(0, u1.deleteByIdTry(u4));
 		Assert.assertEquals(0, u1.countAll());
 	}
 

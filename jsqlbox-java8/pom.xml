@@ -7,8 +7,14 @@
  <version>2.0.1</version>
  
  <name>jsqlbox-java8</name>
- <description>This is the java8 version of jSqlBox</description> 
-   
+ <description>This is the java8 version of jSqlBox</description>
+ <url>https://github.com/drinkjava2/jsqlbox/jsqlbox-java8</url>
+  
+ <issueManagement>
+    <system>Github Issue</system>
+    <url>https://github.com/drinkjava2/jsqlbox/jsqlbox-java8/issues</url>
+ </issueManagement>
+
  <licenses>
    <license>
      <name>The Apache Software License, Version 2.0</name>
@@ -22,7 +28,13 @@
      <email>yong9981@gmail.com</email>
      <url>https://github.com/drinkjava2/</url>
    </developer>
- </developers> 
+ </developers>
+
+ <scm>
+   <connection>scm:git@github.com:drinkjava2/jsqlbox.git</connection>
+   <developerConnection>scm:git@github.com:drinkjava2/jsqlbox.git</developerConnection>
+   <url>git@github.com:drinkjava2/jsqlbox.git</url>
+ </scm>
 
  <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 

@@ -124,12 +124,13 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContext.globalSqlBoxContext;
 	}
 
+	/** Get the global static SqlBoxContext instance */
 	public static SqlBoxContext getGlobalSqlBoxContext() {
 		return SqlBoxContext.globalSqlBoxContext;
 	}
 
 	/**
-	 * Override DbPro's dealItem to deal SqlBoxContext's SqlItem
+	 * Override DbPro's dealItem method to deal SqlBoxContext's SqlItem
 	 */
 	@Override
 	protected boolean dealOneSqlItem(boolean iXxxStyle, PreparedSQL ps, Object item) {// NOSONAR
@@ -180,7 +181,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			return false;
 		return true;
 	}
-	// =========getter & setter =======
 
 	/**
 	 * Create a subClass instance of a abstract ActiveRecordSupport class based on
@@ -195,6 +195,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		}
 	}
 
+	/** Get the sharded table name by given shard values */
 	public String getShardedTB(Object entityOrClass, Object... shardvalues) {
 		String table = SqlBoxContextUtils.getShardedTB(this, entityOrClass, shardvalues);
 		if (table == null)
@@ -202,6 +203,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return table;
 	}
 
+	/** Get the sharded DB(=SqlBoxContext) instance by given shard values */
 	public SqlBoxContext getShardedDB(Object entityOrClass, Object... shardvalues) {
 		SqlBoxContext ctx = SqlBoxContextUtils.getShardedDB(this, entityOrClass, shardvalues);
 		if (ctx == null)
@@ -255,14 +257,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 					"Affect more than 1 row record in database when do '" + curdType + "' operation.");
 	}
 
+	/** Use i style to query for an entity list */
 	public <T> List<T> iQueryForEntityList(Object... optionItems) {
 		return this.iQuery(new EntityListHandler(), optionItems);
 	}
 
+	/** Use p style to query for an entity list */
 	public <T> List<T> pQueryForEntityList(Object... optionItems) {
 		return this.pQuery(new EntityListHandler(), optionItems);
 	}
 
+	/** Use t style to query for an entity list */
 	public <T> List<T> tQueryForEntityList(Object... optionItems) {
 		return this.tQuery(new EntityListHandler(), optionItems);
 	}
@@ -270,61 +275,75 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected void entityCrudMethods______________________________() {// NOSONAR
 	}
 
+	/** Insert entity to database, if not 1 row updated, throw SqlBoxException */
 	public <T> T entityInsert(T entity, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityInsertTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "insert");
 		return entity;
 	}
 
-	/** Update an entity in database */
+	/** Update entity in database, if not 1 row updated, throw SqlBoxException */
 	public <T> T entityUpdate(Object entity, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityUpdateTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "update");
 		return (T) entity;
 	}
 
-	/** Update an entity in database */
+	/** Update entity in database, return how many rows affected */
 	public int entityUpdateTry(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityUpdateTry(this, entity, optionItems);
 	}
 
-	/** Delete an entity in database */
+	/** Delete entity in database, if not 1 row deleted, throw SqlBoxException */
 	public void entityDelete(Object entity, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityDeleteTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "delete");
 	}
 
-	/** Delete an entity in database */
+	/** Delete entity in database, return how many rows affected */
 	public int entityDeleteTry(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityDeleteTry(this, entity, optionItems);
 	}
 
-	/** Delete an entity in database */
+	/** Delete entity by given id, if not 1 row deleted, throw SqlBoxException */
 	public void entityDeleteById(Class<?> entityClass, Object id, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityDeleteByIdTry(this, entityClass, id, optionItems);
 		checkOnlyOneRowAffected(result, "deleteById");
 	}
 
-	/** Delete an entity in database */
+	/** Delete entity by given id, return how many rows deleted */
 	public int entityDeleteByIdTry(Class<?> entityClass, Object id, Object... optionItems) {
 		return SqlBoxContextUtils.entityDeleteByIdTry(this, entityClass, id, optionItems);
 	}
 
-	/** Load an entity from database */
+	/** Check if entity exist by its id */
+	public boolean entityExist(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.entityExist(this, entity, optionItems);
+	}
+
+	/** Check if entity exist by given id */
+	public boolean entityExistById(Class<?> entityClass, Object id, Object... optionItems) {
+		return SqlBoxContextUtils.entityExistById(this, entityClass, id, optionItems);
+	}
+
+	/** Return how many records for current entity class */
+	public int entityCountAll(Class<?> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.entityCountAll(this, entityClass, optionItems);
+	}
+
+	/** Load entity according its id, if not 1 row round, throw SqlBoxException */
 	public <T> T entityLoad(T entity, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityLoadTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "insert");
 		return entity;
 	}
 
-	/** Load an entity from database */
+	/** Load entity according its id, return how many rows found */
 	public int entityLoadTry(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityLoadTry(this, entity, optionItems);
 	}
 
-	/**
-	 * Load an entity from database by entityId, entityId can be one object or a Map
-	 */
+	/** Load entity by given id, if not 1 row found, throw SqlBoxException */
 	public <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
 		T entity = SqlBoxContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
 		if (entity == null)
@@ -332,43 +351,30 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return entity;
 	}
 
-	/**
-	 * Load an entity from database by entityId, entityId can be one object or a Map
-	 */
+	/** Load entity by given id, if not found, return null */
 	public <T> T entityLoadByIdTry(Class<T> entityClass, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
 	}
 
-	/** Delete an entity in database */
-	public boolean entityExist(Object entity, Object... optionItems) {
-		return SqlBoxContextUtils.entityExist(this, entity, optionItems);
-	}
-
-	/** Delete an entity in database */
-	public boolean entityExistById(Class<?> entityClass, Object id, Object... optionItems) {
-		return SqlBoxContextUtils.entityExistById(this, entityClass, id, optionItems);
-	}
-
-	public int entityCountAll(Class<?> entityClass, Object... optionItems) {
-		return SqlBoxContextUtils.entityCountAll(this, entityClass, optionItems);
-	}
-
-	/** Load all entity from database */
-	public <T> List<T> entityFindByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {
-		return SqlBoxContextUtils.entityFindByIds(this, entityClass, ids, optionItems);
-	}
-
-	/** Load all entity from database */
+	/** Find all entity of given entity class, if not found, return empty list */
 	public <T> List<T> entityFindAll(Class<T> entityClass, Object... optionItems) {
 		return SqlBoxContextUtils.entityFindAll(this, entityClass, optionItems);
 	}
 
-	/** Load all entity from database */
+	/** Find all entity according its id, if not found, return empty list */
+	public <T> List<T> entityFindByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {
+		return SqlBoxContextUtils.entityFindByIds(this, entityClass, ids, optionItems);
+	}
+
+	/** Find entity according SQL, if not found, return empty list */
 	public <T> List<T> entityFindBySQL(Object... optionItems) {
 		return this.iQueryForEntityList(optionItems);
 	}
 
-	/** Load all entity from database */
+	/**
+	 * Find entity according a sample bean, ignore null fields, if not found, return
+	 * empty list
+	 */
 	public <T> List<T> entityFindBySample(Object sampleBean, Object... optionItems) {
 		return SqlBoxContextUtils.entityFindBySample(this, sampleBean, optionItems);
 	}
@@ -383,17 +389,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityFindOneRelated(this, entity, sqlItems);
 	}
 
-	/** Find related entity list for given entities ( entity or Iterable) */
-	public <E> List<E> entityFindRelatedList(Object entity, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindRelatedList(this, entity, sqlItems);
+	/** Find related entity list by given entity or Iterable */
+	public <E> List<E> entityFindRelatedList(Object entityOrIterable, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedList(this, entityOrIterable, sqlItems);
 	}
 
-	/** Find related entity set for given entities ( entity or Iterable) */
+	/** Find related entity set by given entity or Iterable */
 	public <E> Set<E> entityFindRelatedSet(Object entity, Object... sqlItems) {
 		return SqlBoxContextUtils.entityFindRelatedSet(this, entity, sqlItems);
 	}
 
-	/** Find related entity map for given entities ( entity or Iterable) */
+	/** Find related entity map(key is entityID) by given entity or Iterable */
 	public <E> Map<Object, E> entityFindRelatedMap(Object entity, Object... sqlItems) {
 		return SqlBoxContextUtils.entityFindRelatedMap(this, entity, sqlItems);
 	}

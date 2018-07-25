@@ -33,26 +33,26 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	/** @return current SqlBoxContext instance */
 	public SqlBoxContext ctx(Object... optionItems);
 
-	/** Insert entity to database */
+	/** Insert entity to database, if not 1 row updated, throw SqlBoxException */
 	public T insert(Object... optionItems);
 
 	/** Update entity in database, if not 1 row updated, throw SqlBoxException */
 	public T update(Object... optionItems);
 
 	/** Update entity in database, return how many rows affected */
-	public int tryUpdate(Object... optionItems);
+	public int updateTry(Object... optionItems);
 
 	/** Delete entity in database, if not 1 row deleted, throw SqlBoxException */
 	public void delete(Object... optionItems);
 
 	/** Delete entity in database, return how many rows affected */
-	public int tryDelete(Object... optionItems);
+	public int deleteTry(Object... optionItems);
 
 	/** Delete entity by given id, if not 1 row deleted, throw SqlBoxException */
 	public void deleteById(Object id, Object... optionItems);
 
 	/** Delete entity by given id, return how many rows deleted */
-	public int tryDeleteById(Object id, Object... optionItems);
+	public int deleteByIdTry(Object id, Object... optionItems);
 
 	/** Check if entity exist by its id */
 	public boolean exist(Object... optionItems);
@@ -60,28 +60,34 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	/** Check if entity exist by given id */
 	public boolean existById(Object id, Object... optionItems);
 
-	/** Load entity according its id, if not found, throw SqlBoxException */
+	/** Return how many records for current entity class */
+	public int countAll(Object... optionItems);
+
+	/** Load entity according its id, if not 1 row round, throw SqlBoxException */
 	public T load(Object... optionItems);
 
 	/** Load entity according its id, return how many rows found */
-	public int tryLoad(Object... optionItems);
+	public int loadTry(Object... optionItems);
 
-	/** Load entity by given id, if not found, throw SqlBoxException */
+	/** Load entity by given id, if not 1 row found, throw SqlBoxException */
 	public T loadById(Object id, Object... optionItems);
 
 	/** Load entity by given id, if not found, return null */
-	public T tryLoadById(Object id, Object... optionItems);
+	public T loadByIdTry(Object id, Object... optionItems);
 
-	/** Find entity according its id, if not found, return empty list */
+	/** Find all entity of same entity class, if not found, return empty list */
 	public List<T> findAll(Object... optionItems);
+
+	/** Find all entity according its id, if not found, return empty list */
+	public List<T> findByIds(Iterable<?> ids, Object... optionItems);
 
 	/** Find entity according SQL, if not found, return empty list */
 	public List<T> findBySQL(Object... optionItems);
 
-	/** Find entity according its id, if not found, return empty list */
-	public List<T> findByIds(Iterable<?> ids, Object... optionItems);
-
-	/** Find entity according a sample bean, if not found, return empty list */
+	/**
+	 * Find entity according a sample bean, ignore null fields, if not found, return
+	 * empty list
+	 */
 	public List<T> findBySample(Object sampleBean, Object... optionItems);
 
 	/** Find one related entity */
@@ -95,9 +101,6 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 
 	/** Find related entity Map */
 	public <E> Map<Object, E> findRelatedMap(Object... sqlItems);
-
-	/** Return how many records for current entity class */
-	public int countAll(Object... optionItems);
 
 	/**
 	 * Link style set values for entity field, format like:

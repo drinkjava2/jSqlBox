@@ -15,9 +15,9 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDB;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTB;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -145,8 +145,8 @@ public class ShardingModToolTest {
 		Assert.assertEquals("Sam", u2.getName());
 
 		u2.delete(new PrintSqlHandler());// only deleted master
-		Assert.assertEquals(0, giQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
-		Assert.assertEquals(1, giQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist
+		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
+		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist
 	}
 
 }

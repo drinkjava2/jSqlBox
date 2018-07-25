@@ -97,17 +97,17 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public int tryUpdate(Object... optionItems) {
+	public int updateTry(Object... optionItems) {
 		return ctx(optionItems).entityUpdateTry(this, optionItems);
 	}
 
 	@Override
 	public void delete(Object... optionItems) {
-		ctx(optionItems).entityDeleteTry(this, optionItems);
+		ctx(optionItems).entityDelete(this, optionItems);
 	}
 
 	@Override
-	public int tryDelete(Object... optionItems) {
+	public int deleteTry(Object... optionItems) {
 		return ctx(optionItems).entityDeleteTry(this, optionItems);
 	}
 
@@ -117,7 +117,7 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public int tryDeleteById(Object id, Object... optionItems) {
+	public int deleteByIdTry(Object id, Object... optionItems) {
 		return ctx(optionItems).entityDeleteByIdTry(this.getClass(), id, optionItems);
 	}
 
@@ -137,7 +137,7 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public int tryLoad(Object... optionItems) {
+	public int loadTry(Object... optionItems) {
 		return ctx(optionItems).entityLoadTry(this, optionItems);
 	}
 
@@ -147,7 +147,7 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public T tryLoadById(Object id, Object... optionItems) {
+	public T loadByIdTry(Object id, Object... optionItems) {
 		return (T) ctx(optionItems).entityLoadByIdTry(this.getClass(), id, optionItems);
 	}
 

@@ -103,14 +103,14 @@ public class CrudCompoundIdTest extends TestBase {
 		ctx.entityUpdate(u1);
 		u2.update();
 		Assert.assertEquals(1, ctx.entityUpdateTry(u3));
-		Assert.assertEquals(1, u4.tryUpdate());
+		Assert.assertEquals(1, u4.updateTry());
 
 		// =======load
 		Assert.assertEquals("NewAddress1", ctx.entityLoad(u1).getAddress());
 		Assert.assertEquals("NewAddress2", u2.load().getAddress());
 		Assert.assertEquals(1, ctx.entityLoadTry(u3));
 		Assert.assertEquals("NewAddress3", u3.getAddress());
-		Assert.assertEquals(1, u4.tryLoad());
+		Assert.assertEquals(1, u4.loadTry());
 		Assert.assertEquals("NewAddress4", u4.getAddress());
 
 		// =======load by id (id is map)
@@ -123,13 +123,13 @@ public class CrudCompoundIdTest extends TestBase {
 		mp.put("name", "Name3");
 		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CpdUser.class, mp).getAddress());
 		mp.put("name", "Name4");
-		Assert.assertEquals("NewAddress4", u4.tryLoadById(mp).getAddress());
+		Assert.assertEquals("NewAddress4", u4.loadByIdTry(mp).getAddress());
 
 		// =======load by id (id is Entity bean)
 		Assert.assertEquals("NewAddress1", ctx.entityLoadById(CpdUser.class, u1).getAddress());
 		Assert.assertEquals("NewAddress2", u1.loadById(u2).getAddress());
 		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(CpdUser.class, u3).getAddress());
-		Assert.assertEquals("NewAddress4", u1.tryLoadById(u4).getAddress());
+		Assert.assertEquals("NewAddress4", u1.loadByIdTry(u4).getAddress());
 
 		// =======loadByIds (id is mp)
 		LinkStyleArrayList<Object> idMapList = new LinkStyleArrayList<Object>();
@@ -187,8 +187,8 @@ public class CrudCompoundIdTest extends TestBase {
 		u2.delete();
 		Assert.assertEquals(1, ctx.entityDeleteTry(u3));
 		Assert.assertEquals(0, ctx.entityDeleteTry(u3));
-		Assert.assertEquals(1, u4.tryDelete());
-		Assert.assertEquals(0, u4.tryDelete());
+		Assert.assertEquals(1, u4.deleteTry());
+		Assert.assertEquals(0, u4.deleteTry());
 		Assert.assertEquals(0, u1.countAll());
 
 		// =======delete by id (id is Map)
@@ -206,8 +206,8 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CpdUser.class, m));
 		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CpdUser.class, m));
 		m.put("name", "Name4");
-		Assert.assertEquals(1, u1.tryDeleteById(m));
-		Assert.assertEquals(0, u1.tryDeleteById(m));
+		Assert.assertEquals(1, u1.deleteByIdTry(m));
+		Assert.assertEquals(0, u1.deleteByIdTry(m));
 		Assert.assertEquals(0, u1.countAll());
 
 		// =======delete by id (id is Entity bean)
@@ -219,8 +219,8 @@ public class CrudCompoundIdTest extends TestBase {
 		u1.deleteById(u2);
 		Assert.assertEquals(1, ctx.entityDeleteByIdTry(CpdUser.class, u3));
 		Assert.assertEquals(0, ctx.entityDeleteByIdTry(CpdUser.class, u3));
-		Assert.assertEquals(1, u1.tryDeleteById(u4));
-		Assert.assertEquals(0, u1.tryDeleteById(u4));
+		Assert.assertEquals(1, u1.deleteByIdTry(u4));
+		Assert.assertEquals(0, u1.deleteByIdTry(u4));
 		Assert.assertEquals(0, u1.countAll());
 	}
 

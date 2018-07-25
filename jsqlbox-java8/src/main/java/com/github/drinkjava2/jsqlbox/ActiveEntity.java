@@ -41,18 +41,18 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public default int tryUpdate(Object... optionItems) {
-		return ctx(optionItems).entityTryUpdate(this, optionItems);
+	public default int updateTry(Object... optionItems) {
+		return ctx(optionItems).entityUpdateTry(this, optionItems);
 	}
 
 	@Override
 	public default void delete(Object... optionItems) {
-		ctx(optionItems).entityTryDelete(this, optionItems);
+		ctx(optionItems).entityDelete(this, optionItems);
 	}
 
 	@Override
-	public default int tryDelete(Object... optionItems) {
-		return ctx(optionItems).entityTryDelete(this, optionItems);
+	public default int deleteTry(Object... optionItems) {
+		return ctx(optionItems).entityDeleteTry(this, optionItems);
 	}
 
 	@Override
@@ -61,8 +61,8 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public default int tryDeleteById(Object id, Object... optionItems) {
-		return ctx(optionItems).entityTryDeleteById(this.getClass(), id, optionItems);
+	public default int deleteByIdTry(Object id, Object... optionItems) {
+		return ctx(optionItems).entityDeleteByIdTry(this.getClass(), id, optionItems);
 	}
 
 	@Override
@@ -81,8 +81,8 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public default int tryLoad(Object... optionItems) {
-		return ctx(optionItems).entityTryLoad(this, optionItems);
+	public default int loadTry(Object... optionItems) {
+		return ctx(optionItems).entityLoadTry(this, optionItems);
 	}
 
 	@Override
@@ -91,8 +91,8 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 	}
 
 	@Override
-	public default T tryLoadById(Object id, Object... optionItems) {
-		return (T) ctx(optionItems).entityTryLoadById(this.getClass(), id, optionItems);
+	public default T loadByIdTry(Object id, Object... optionItems) {
+		return (T) ctx(optionItems).entityLoadByIdTry(this.getClass(), id, optionItems);
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 
 	@Override
 	public default List<T> findBySQL(Object... optionItems) {
-		return (List<T>) ctx(optionItems).entityFindBySQL(this.getClass(), optionItems);
+		return (List<T>) ctx(optionItems).iQueryForEntityList(this.getClass(), optionItems);
 	}
 
 	@Override
@@ -238,5 +238,4 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
-
 }
