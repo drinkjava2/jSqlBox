@@ -129,7 +129,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static <T> List<T> entityFindBySQL(Object... optionItems) {return  gctx().entityFindBySQL(optionItems);}
 	public static <T> List<T> entityFindBySample(Object sampleBean, Object... optionItems) {return  gctx().entityFindBySample(sampleBean, optionItems);}
 	public static EntityNet entityAutoNet(Class<?>... entityClass) {return  gctx().entityAutoNet(entityClass);}
-	public static <E> E entityFindOneRelated(Object entity, Object... sqlItems) {return  gctx().entityFindOneRelated(entity, sqlItems);}
+	public static <E> E entityFindRelatedOne(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedOne(entity, sqlItems);}
 	public static <E> List<E> entityFindRelatedList(Object entityOrIterable, Object... sqlItems) {return  gctx().entityFindRelatedList(entityOrIterable, sqlItems);}
 	public static <E> Set<E> entityFindRelatedSet(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedSet(entity, sqlItems);}
 	public static <E> Map<Object, E> entityFindRelatedMap(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedMap(entity, sqlItems);}

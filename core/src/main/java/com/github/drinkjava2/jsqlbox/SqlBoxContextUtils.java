@@ -1102,7 +1102,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return (EntityNet) ctx.runPreparedSQL(ps);
 	}
 
-	public static <E> E entityFindOneRelated(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+	public static <E> E entityFindRelatedOne(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		List<E> list = entityFindRelatedList(ctx, entity, sqlItems);
 		if (list.size() != 1)
 			throw new SqlBoxException("Expect 1 entity but found " + list.size() + " records");

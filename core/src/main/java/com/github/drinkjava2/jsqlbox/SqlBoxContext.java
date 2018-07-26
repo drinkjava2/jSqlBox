@@ -385,8 +385,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Find one related entity by given entity */
-	public <E> E entityFindOneRelated(Object entity, Object... sqlItems) {
-		return SqlBoxContextUtils.entityFindOneRelated(this, entity, sqlItems);
+	public <E> E entityFindRelatedOne(Object entity, Object... sqlItems) {
+		return SqlBoxContextUtils.entityFindRelatedOne(this, entity, sqlItems);
 	}
 
 	/** Find related entity list by given entity or Iterable */
