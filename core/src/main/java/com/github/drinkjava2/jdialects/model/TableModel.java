@@ -232,9 +232,12 @@ public class TableModel {
 	 * with columnName
 	 */
 	public ColumnModel column(String columnName) {// NOSONAR
-		for (ColumnModel columnModel : columns)
+		for (ColumnModel columnModel : columns) {
 			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(columnName))
 				return columnModel;
+			if (columnModel.getEntityField() != null && columnModel.getEntityField().equalsIgnoreCase(columnName))
+				return columnModel;
+		}
 		return addColumn(columnName);
 	}
 

@@ -15,9 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.functionstest.entitynet.entities.User;
 import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -33,7 +31,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class DynamicConfigTest extends TestBase {
 
 	public static class UserDemo extends ActiveRecord<UserDemo> {
-		@UUID32
 		private String id;
 
 		@Column(name = "user_name2", length = 32)
@@ -63,36 +60,39 @@ public class DynamicConfigTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		TableModel t = TableModelUtils.entity2Model(UserDemo.class);
+		TableModel model = TableModelUtils.entity2Model(UserDemo.class);
 		// A new column dynamically created
-		t.addColumn("anotherColumn2").VARCHAR(10);
-		createAndRegTables(t);
+		model.addColumn("anotherColumn2").VARCHAR(10);
+		createAndRegTables(model);
 
 		UserDemo u = new UserDemo();
+		u.setId("u1");
 		u.setUserName("Sam");
 
 		// A Fake PKey dynamically created
-		t.column("id").pkey();
-		ctx.entityInsert(u, t);
+		model.column("id").pkey();
+		ctx.entityInsert(u, model);
 
 		u.setUserName("Tom");
-		u.update(t);
+		u.update(model);
 
-		Assert.assertEquals(1L, ctx.iQueryForLongValue("select count(*) from table2", t));
+		Assert.assertEquals(1L, ctx.iQueryForLongValue("select count(*) from table2", model));
 	}
 
 	@Test
 	public void testDynamicConfig() {
-		TableModel model = TableModelUtils.entity2Model(User.class);
-		model.column("id").pkey(); 
+		TableModel model = TableModelUtils.entity2Model(UserDemo.class);
+		model.column("id").pkey();
 		createAndRegTables(model);
+
 		UserDemo u1 = new UserDemo();
 		u1.setId("u1");
 		u1.setUserName("Tom");
 		u1.insert(model);
+
 		UserDemo u2 = ctx.entityLoadById(UserDemo.class, "u1", model);
 		Assert.assertEquals("Tom", u2.getUserName());
-		
+
 		model.column("userName").setTransientable(true);
 		UserDemo u3 = ctx.entityLoadById(UserDemo.class, "u1", model);
 		Assert.assertEquals(null, u3.getUserName());
@@ -101,10 +101,11 @@ public class DynamicConfigTest extends TestBase {
 	@Test
 	public void doQueryTest() {
 		createAndRegTables(UserDemo.class);
-		UserDemo u = new UserDemo().put("userName", "Tom").insert();
+		UserDemo u = new UserDemo().put("id", "u1", "userName", "Tom").insert();
 
 		TableModel t = TableModelUtils.entity2Model(UserDemo.class);
 		t.getColumnByFieldName("id").pkey();// Fake Pkey
+		u.setId("u1");
 		u.setUserName(null);
 		u.load(t);
 		Assert.assertEquals("Tom", u.getUserName());

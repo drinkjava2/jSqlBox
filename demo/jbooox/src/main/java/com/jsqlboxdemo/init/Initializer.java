@@ -14,6 +14,7 @@ import org.junit.Assert;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.TX;
+import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
@@ -70,6 +71,12 @@ public class Initializer implements ServletContextListener {
 		// Initialize Global SqlBoxContext
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
 		config.setConnectionManager(TinyTxConnectionManager.instance());
+		config.setIocTool(new IocTool() {
+			@Override
+			public <T> T getBean(Class<?> configClass) {
+				return BeanBox.getBean(configClass);
+			}
+		});
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class), config);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 

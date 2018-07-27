@@ -84,7 +84,7 @@ public class BeetlSqlTemplateDemo {
 	}
 
 	@Table(name = "users")
-	public static class User extends ActiveRecord {
+	public static class User extends ActiveRecord<User> {
 
 		@UUID25
 		@Id

@@ -18,7 +18,7 @@ import model.Team;
 public class TeamService {
 
 	public List<Team> listAll() {
-		return SqlBoxContext.gctx().loadAll(Team.class);
+		return SqlBoxContext.gctx().entityFindAll(Team.class);
 	}
 
 	@Transaction

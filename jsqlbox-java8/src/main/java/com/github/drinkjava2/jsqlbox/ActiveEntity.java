@@ -131,7 +131,7 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 	@Override
 	public default <E> E findOneRelated(Object... optionItems) {
 		Object[] items = insertThisClassIfNotHave(this, optionItems);
-		return ctx(optionItems).entityFindOneRelated(this, items);
+		return ctx(optionItems).entityFindRelatedOne(this, items);
 	}
 
 	@Override

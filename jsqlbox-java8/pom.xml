@@ -31,16 +31,16 @@
  </developers>
 
  <scm>
-   <connection>scm:git@github.com:drinkjava2/jsqlbox.git</connection>
-   <developerConnection>scm:git@github.com:drinkjava2/jsqlbox.git</developerConnection>
-   <url>git@github.com:drinkjava2/jsqlbox.git</url>
+   <connection>scm:git@github.com:drinkjava2/jsqlbox-java8.git</connection>
+   <developerConnection>scm:git@github.com:drinkjava2/jsqlbox-java8.git</developerConnection>
+   <url>git@github.com:drinkjava2/jsqlbox-java8.git</url>
  </scm>
 
  <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
-        <!-- Demo run on JDK1.8 -->
+        <!-- Release on Java8 -->
         <version.java>1.8</version.java>
         <version.javadoc>6</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>

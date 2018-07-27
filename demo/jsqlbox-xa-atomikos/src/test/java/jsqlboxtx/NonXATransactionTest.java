@@ -11,7 +11,7 @@
  */
 package jsqlboxtx;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
 
 import java.sql.Connection;
 
@@ -89,8 +89,8 @@ public class NonXATransactionTest {
 		} catch (Exception e) {
 			System.out.println("Div 0 RuntimeException happened, but 1 database did not rollback ");
 		}
-		Assert.assertEquals(1L, giQueryForLongValue("select count(*) from bank", masters[0]));
-		Assert.assertEquals(0L, giQueryForLongValue("select count(*) from bank", masters[1]));
+		Assert.assertEquals(1L, iQueryForLongValue("select count(*) from bank", masters[0]));
+		Assert.assertEquals(0L, iQueryForLongValue("select count(*) from bank", masters[1]));
 
 	}
 

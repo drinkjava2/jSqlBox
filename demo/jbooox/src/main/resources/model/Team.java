@@ -10,7 +10,7 @@ import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 @Table(name = "teams")
-public class Team extends ActiveRecord {
+public class Team extends ActiveRecord<Team> {
 
 	@Id
 	@UUID25
