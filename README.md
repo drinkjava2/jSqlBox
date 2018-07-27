@@ -24,7 +24,7 @@ jSqlBox是一个小而全的跨数据库、提供多种SQL写法、ActiveRecord�
 jSqlBox有Java6和Java8两个版本。
 
 # 架构 | Architecture  
-![image](https://gitee.com/drinkjava2/jSqlBox/raw/master/arch.png)  
+![image](arch.png)  
 
 # 优点 | Advantages
 
