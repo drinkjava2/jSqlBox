@@ -1,7 +1,12 @@
 package com.github.drinkjava2.benchmark;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.AUTO_SQL;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
 
 import java.util.List;
 
@@ -10,6 +15,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler; 
 
 public class BenchMarkTest extends TestBase implements TestServiceInterface {
 	{
@@ -35,26 +41,40 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Test
 	public void doTest() {
-		Timer.lastMark = "Done testOrmQUery3";
+		Timer.lastMark = "testNetRelated";
+		testAdd();
+		Timer.set("add");
 		for (int j = 0; j < 1000; j++) { // change repeat times to test
-			testAdd();
-			Timer.set("Done Add");
+
 			testPageQuery();
-			Timer.set("Done PageQry");
+			Timer.set("pageQry");
 			testUnique();
-			Timer.set("Done Unique");
+			Timer.set("unique");
 			testUpdateById();
-			Timer.set("Done UpdateById");
+			Timer.set("updateById");
 			testExampleQuery();
-			Timer.set("Done ExampleQuery");
+			Timer.set("exampleQuery");
 			testOrmQUery();
-			Timer.set("Done testOrmQUery");
-			testOrmQUery2();
-			Timer.set("Done testOrmQUery2");
-			testOrmQUery3();
-			Timer.set("Done testOrmQUery3");
+			Timer.set("testOrmQUery");
+			testOrmQUerySQ(); 
+			Timer.set("testOrmQUerySQ");
+			testSqlRelated();
+			Timer.set("testSqlRelated");
+			testNetRelated();
+			Timer.set("testNetRelated");
 		}
 		Timer.print();
+	}
+
+	public void testTitledArrayResultHander() {
+		EntityNet net = gctx().iQuery(new EntityNet(), DemoOrder.class, AUTO_SQL);
+		gctx().iQuery(net, DemoCustomer.class, AUTO_SQL);
+		List<DemoOrder> list = net.pickEntityList(DemoOrder.class);
+		for (DemoOrder order : list) {
+			DemoCustomer customer = order.findOneRelated(net, DemoCustomer.class);
+			if (customer == null)
+				throw new RuntimeException("orm error");
+		}
 	}
 
 	@Override
@@ -64,9 +84,11 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testUnique() {
-		new DemoUser().put("id", 1).load();// included unique check
-		// or use gctx().entityExistById(DemoUser.class, 1);
-		// or use new DemoUser().existById(1);
+		DemoUser d=	new DemoUser().put("id", 1).load();// included unique check
+		 if (d.getCode()==null)
+			 throw new RuntimeException("testUnique error");
+		// or gctx().entityExistById(DemoUser.class, 1);
+		// or new DemoUser().existById(1);
 	}
 
 	@Override
@@ -97,8 +119,19 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 				throw new RuntimeException("Orm query error");
 		}
 	}
-
-	public void testOrmQUery2() {
+ 
+	public void testOrmQUerySQ() {
+		EntityNet net = gctx().iQuery(new EntityNetHandler(), DemoOrder.class, DemoCustomer.class, alias("o","c"), give("c","o"),
+				"select o.id as o_id, o.name as o_name, o.cust_id as o_cust_id, c.id as c_id, c.code as c_code, c.name as c_name from sys_order o left join sys_customer c on o.cust_id=c.id");
+		List<DemoOrder> list = net.pickEntityList(DemoOrder.class); 
+		for (DemoOrder order : list) {
+			DemoCustomer customer = order.getDemoCustomer();
+			if (customer == null)
+				throw new RuntimeException("Orm query error");
+		} 
+	}
+	
+	public void testSqlRelated() {
 		List<DemoOrder> list = gctx().entityFindAll(DemoOrder.class);
 		for (DemoOrder order : list) {
 			DemoCustomer customer = order.findOneRelated(DemoCustomer.class);
@@ -107,12 +140,12 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 		}
 	}
 
-	public void testOrmQUery3() {
+	public void testNetRelated() {
 		EntityNet net = gctx().iQuery(new EntityNet(), DemoOrder.class, AUTO_SQL);
-		gctx().iQuery(net, DemoCustomer.class, AUTO_SQL); 
+		gctx().iQuery(net, DemoCustomer.class, AUTO_SQL);
 		List<DemoOrder> list = net.pickEntityList(DemoOrder.class);
 		for (DemoOrder order : list) {
-			DemoCustomer customer = order.findOneRelated(net,DemoCustomer.class);
+			DemoCustomer customer = order.findOneRelated(net, DemoCustomer.class);
 			if (customer == null)
 				throw new RuntimeException("orm error");
 		}
