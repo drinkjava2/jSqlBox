@@ -15,13 +15,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
 /**
  * TitledArrayResultHandler transfer ResultSet to a List of Object[], first row
- * is titles, other rows are data but first column is null;
+ * is titles, other rows are data
  * 
  * <pre>
  * A result set:
@@ -32,8 +33,8 @@ import org.apache.commons.dbutils.ResultSetHandler;
  * be transfered to: 
  * 
  * First list item: object[]{"name", "age"}
- * 2nd list item:   object[]{null,"name", "age"}
- * 3rd list item:   object[]{null,"name", "age"}
+ * 2nd list item:   object[]{"tom",  5}
+ * 3rd list item:   object[]{"sam",  6}
  * 
  * 
  * </pre>
@@ -42,7 +43,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
  * @since 1.7.0.2
  */
 @SuppressWarnings("all")
-public class TitledArrayResultHandler implements ResultSetHandler<List<Object[]>> {
+public class TitleArrayListHandler implements ResultSetHandler<List<Object[]>> {
 
 	@Override
 	public List<Object[]> handle(ResultSet rs) throws SQLException {
@@ -65,7 +66,7 @@ public class TitledArrayResultHandler implements ResultSetHandler<List<Object[]>
 	}
 
 	public Object[] toArray(ResultSet rs, int cols) throws SQLException {
-		Object[] result = new Object[cols + 1];
+		Object[] result = new Object[cols];
 		for (int i = 0; i < cols; i++)
 			result[i] = rs.getObject(i + 1);
 		return result;

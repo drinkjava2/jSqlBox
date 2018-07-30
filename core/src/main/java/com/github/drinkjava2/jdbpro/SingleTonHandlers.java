@@ -23,6 +23,8 @@ import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import com.github.drinkjava2.jdbpro.handler.TitleArrayListHandler;
+
 /**
  * Here store some singleTon thread safe ResultSetHandlers
  * 
@@ -32,9 +34,10 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 public abstract class SingleTonHandlers {// NOSONAR
 	public static final KeyedHandler<?> keyedHandler = new KeyedHandler<Object>();
 	public static final MapHandler mapHandler = new MapHandler();
-	public static final MapListHandler mapListHandler = new MapListHandler();
+	public static final MapListHandler mapListHandler = new MapListHandler(); 
 	public static final ScalarHandler<?> scalarHandler = new ScalarHandler<Object>();
 	public static final ArrayHandler arrayHandler = new ArrayHandler();
-	public static final ArrayListHandler arrayListHandler = new ArrayListHandler();
+	public static final ArrayListHandler arrayListHandler = new ArrayListHandler(); 
+	public static final TitleArrayListHandler titleArrayListHandler = new TitleArrayListHandler();
 	public static final ColumnListHandler<?> columnListHandler = new ColumnListHandler<Object>(); 
 }

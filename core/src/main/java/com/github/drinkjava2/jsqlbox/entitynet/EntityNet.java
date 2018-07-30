@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.drinkjava2.jdbpro.CaseInsensitiveMap;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -52,7 +53,8 @@ public class EntityNet {
 	 * The row Data loaded from database, List<Map<colName, colValue>> or <"u",
 	 * entity> or <"#u",entityId>
 	 */
-	private List<Map<String, Object>> rowData = new ArrayList<Map<String, Object>>();
+	// private List<Map<String, Object>> rowData = new ArrayList<Map<String,
+	// Object>>();
 
 	/** The body of entity net, Map<alias, Map<entityId, entity>> */
 	private Map<Class<?>, LinkedHashMap<Object, Object>> body = new HashMap<Class<?>, LinkedHashMap<Object, Object>>();
@@ -113,13 +115,16 @@ public class EntityNet {
 	}
 
 	/** Join a Map List into current EntityNet */
-	public EntityNet joinMapList(List<Map<String, Object>> listMap) {
-		for (Map<String, Object> map : listMap) {
-			rowData.add(map);
-			translateToEntities(map);
-			if (!givesList.isEmpty())
-				doGive(map);
-		}
+	public EntityNet joinTitleArrayList(List<Object[]> titleArrayList) {
+		Object[] titles = titleArrayList.get(0);
+		Map<String, Integer> titlesMap = new CaseInsensitiveMap();
+		for (int i = 0; i < titles.length; i++)
+			titlesMap.put((String) titles[i], i);
+
+		int i = 0;
+		for (Object[] oneRow : titleArrayList)
+			if (i++ != 0)
+				translateAndGive(titlesMap, oneRow);
 		return this;
 	}
 
@@ -183,13 +188,14 @@ public class EntityNet {
 	}
 
 	/** Translate one row of map list to entity objects, put into entity net body */
-	private void translateToEntities(Map<String, Object> oneRow) {
+	private void translateAndGive(Map<String, Integer> titles, Object[] oneRow) {
+		Map<String, Object> oneRowEntities = new HashMap<String, Object>();
 		for (Entry<String, TableModel> config : this.models.entrySet()) {
 			TableModel model = config.getValue();
 			String alias = config.getKey();
 
 			// find and build entityID
-			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(oneRow, model, alias);
+			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(titles, oneRow, model, alias);
 			if (entityId == null)
 				continue;// not found entity ID columns
 
@@ -198,31 +204,33 @@ public class EntityNet {
 
 			// create new Entity
 			if (entity == null) {
-				entity = createEntity(oneRow, model, alias);
+				entity = createEntity(titles, oneRow, model, alias);
 				this.putOneEntity(model.getEntityClass(), entityId, entity);
 			} else {
-				updateEntity(entity, oneRow, model, alias);
+				updateEntity(titles, entity, oneRow, model, alias);
 			}
-			oneRow.put(alias, entity);// In this row, add entities directly
-			oneRow.put("#" + alias, entityId); // In this row, add entityIds
+			oneRowEntities.put(alias, entity);
+			oneRowEntities.put("#" + alias, entity);
 		}
+		doGive(oneRowEntities);
 	}
 
-	private static Object createEntity(Map<String, Object> oneRow, TableModel model, String alias) {
+	private static Object createEntity(Map<String, Integer> titles, Object[] oneRow, TableModel model, String alias) {
 		Object entity;
 		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-		return updateEntity(entity, oneRow, model, alias);
+		return updateEntity(titles, entity, oneRow, model, alias);
 	}
 
-	private static Object updateEntity(Object entity, Map<String, Object> oneRow, TableModel model, String alias) {
-		for (Entry<String, Object> row : oneRow.entrySet()) { // u_userName
+	private static Object updateEntity(Map<String, Integer> titles, Object entity, Object[] oneRow, TableModel model,
+			String alias) {
+		for (Entry<String, Integer> entry : titles.entrySet()) { // u_userName->5
 			for (ColumnModel col : model.getColumns()) {
 				if (col.getTransientable())
 					continue;
-				if (row.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
+				if (entry.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
 					SqlBoxException.assureNotEmpty(col.getEntityField(),
 							"EntityField not set for column '" + col.getColumnName() + "'");
-					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), row.getValue());
+					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), oneRow[entry.getValue()]);
 				}
 			}
 		}
@@ -306,10 +314,6 @@ public class EntityNet {
 		sb.append("\r\n=========configs=========\r\n");
 		for (TableModel tb : models.values()) {
 			sb.append(tb.getDebugInfo());
-		}
-		sb.append("\r\n=========rowData=========\r\n");
-		for (Map<String, Object> row : rowData) {
-			sb.append(row.toString()).append("\r\n");
 		}
 
 		sb.append("\r\n=========body=========\r\n");
@@ -412,15 +416,6 @@ public class EntityNet {
 
 	public EntityNet setConfigs(Map<String, TableModel> configs) {
 		this.models = configs;
-		return this;
-	}
-
-	public List<Map<String, Object>> getRowData() {
-		return rowData;
-	}
-
-	public EntityNet setRowData(List<Map<String, Object>> rowData) {
-		this.rowData = rowData;
 		return this;
 	}
 

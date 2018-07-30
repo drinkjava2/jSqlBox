@@ -15,24 +15,25 @@ import java.util.List;
 
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 
 /**
- * EntityNetHandler used to convert SQL query result to EntityNet
+ * SSMapListHandler is a SqlHandler used to explain alias.** to real columns in
+ * SQL and return a Map List, SS means star-star, example:
+ * 
+ * select u.** from users u ==> select u.name as u_name, u.address as u_address
+ * from users u
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class EntityNetHandler extends SSTitleArrayListHandler {
+@SuppressWarnings("all")
+public class SSTitleArrayListHandler extends SSHandler {
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {   
-		EntityNet net = ps.getEntityNet() == null ? new EntityNet() : (EntityNet) ps.getEntityNet();
-		net.configFromPreparedSQL(ps);  
-		List<Object[]> titleArrayList = (List<Object[]>) super.handle(runner, ps);   
-		net.joinTitleArrayList(titleArrayList); 
-		return net;
+	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
+		ps.setResultSetHandler(SingleTonHandlers.titleArrayListHandler);
+		return super.handle(runner, ps);
 	}
 
 }

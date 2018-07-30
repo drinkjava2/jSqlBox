@@ -41,29 +41,29 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Test
 	public void doTest() {
-		Timer.lastMark = "testNetRelated";
+		Debuger.lastMark = "testNetRelated";
 		testAdd();
-		Timer.set("add");
+		Debuger.set("add");
 		for (int j = 0; j < 1000; j++) { // change repeat times to test
 
 			testPageQuery();
-			Timer.set("pageQry");
+			Debuger.set("pageQry");
 			testUnique();
-			Timer.set("unique");
+			Debuger.set("unique");
 			testUpdateById();
-			Timer.set("updateById");
+			Debuger.set("updateById");
 			testExampleQuery();
-			Timer.set("exampleQuery");
+			Debuger.set("exampleQuery");
 			testOrmQUery();
-			Timer.set("testOrmQUery");
+			Debuger.set("testOrmQUery");
 			testOrmQUerySQ(); 
-			Timer.set("testOrmQUerySQ");
-			testSqlRelated();
-			Timer.set("testSqlRelated");
+			Debuger.set("testOrmQUerySQ");
+			//testSqlRelated();
+			Debuger.set("testSqlRelated");
 			testNetRelated();
-			Timer.set("testNetRelated");
+			Debuger.set("testNetRelated");
 		}
-		Timer.print();
+		Debuger.print();
 	}
 
 	public void testTitledArrayResultHander() {

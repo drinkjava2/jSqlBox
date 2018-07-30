@@ -11,7 +11,7 @@ import java.util.Map.Entry;
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class Timer {// NOSONAR
+public class Debuger {// NOSONAR
 	public static long multiple = 1;
 	public static String lastMark = "start";
 	private static long lastTime = System.nanoTime();

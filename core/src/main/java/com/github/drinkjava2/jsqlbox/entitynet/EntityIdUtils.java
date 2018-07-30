@@ -41,6 +41,42 @@ public abstract class EntityIdUtils {// NOSONAR
 	/** Used to combine compound key column values into a single String */
 	public static final String COMPOUND_ID_SEPARATOR = "__";
 
+	/**
+	 * Build entityId from titles, oneRow, model, alias
+	 */
+	public static Object buildEntityIdFromOneRow(Map<String, Integer> titles, Object[] oneRow, TableModel model,
+			String alias) {// NOSONAR
+		int pkeyCount = model.getPKeyCount();
+		if (pkeyCount == 0)
+			throw new SqlBoxException(" No Pkey setting for '" + model.getTableName() + "'");
+		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
+		// DbUtils don't care UP/LOW case
+		Integer index = titles
+				.get(new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString());
+		if (index == null)
+			return null;// Single or Compound Pkey not found in oneRow
+		Object firstPKeyValue = oneRow[index];
+		if (firstPKeyValue == null)
+			return null;//
+		if (pkeyCount == 1)
+			return firstPKeyValue;
+		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
+		StringBuilder sb = new StringBuilder();
+		for (ColumnModel col : l) {
+			if (sb.length() > 0)
+				sb.append(COMPOUND_ID_SEPARATOR);
+			  index = titles
+					.get(new StringBuilder(alias).append("_").append(col.getColumnName()).toString());
+			if (index == null)
+				return null;// Single or Compound Pkey not found in oneRow
+			Object value = oneRow[index];
+			if (value == null)
+				return null;// 
+			sb.append(value);
+		}
+		return sb.toString();
+	}
+
 	public static Object buildEntityIdFromOneRow(Map<String, Object> oneRow, TableModel model, String alias) {
 		int pkeyCount = model.getPKeyCount();
 		if (pkeyCount == 0)
