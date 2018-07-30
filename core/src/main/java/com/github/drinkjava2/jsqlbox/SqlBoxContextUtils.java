@@ -338,9 +338,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static void appendLeftJoinSQL(PreparedSQL ps) {
 		Object[] m = ps.getModels();
 		String[] a = ps.getAliases();
-		SqlBoxException.assureTrue(m != null && m.length > 0);
-		SqlBoxException.assureTrue(a != null && a.length > 0);
-		SqlBoxException.assureTrue(m.length == m.length);// NOSONAR
+		SqlBoxException.assureTrue(m != null && m != null & m.length == a.length);
 
 		StringBuilder sb = new StringBuilder(" select ");
 		boolean ifFirst = true;
@@ -353,8 +351,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				if (ifFirst)
 					ifFirst = false;
 				else
-					sb.append(", "); 
-				sb.append((String)a[i]).append(".").append(col.getColumnName()).append(" as ").append(a[i]).append("_")
+					sb.append(", ");
+				sb.append(a[i]).append(".").append(col.getColumnName()).append(" as ").append(a[i]).append("_")
 						.append(col.getColumnName());
 			}
 		}
@@ -364,10 +362,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			sb.append(" left join ");
 			sb.append(((TableModel) m[i]).getTableName()).append(" ").append(a[i]);
 			sb.append(" on ");
-			appendKeyEquelsSqlPiece(sb, a[i - 1], ((TableModel) m[i - 1]), a[i], ((TableModel) m[i])); 
+			appendKeyEquelsSqlPiece(sb, a[i - 1], ((TableModel) m[i - 1]), a[i], ((TableModel) m[i]));
 		}
 		ps.addSql(sb.toString());
-	} 
+	}
 
 	/**
 	 * Find relationship of 2 classes, build "a.bid1=b.id1 and a.bid2=b.id2..." SQL

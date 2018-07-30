@@ -113,27 +113,16 @@ public class EntityNet {
 		return this;
 	}
 
-	/** Join a Map List into current EntityNet */
+	/**
+	 * Join a titleArrayList into current EntityNet, titleArrayList is a
+	 * List<Object[]> structure, first row is titles, not data
+	 */
 	public EntityNet joinTitleArrayList(List<Object[]> titleArrayList) {
-		String[] titles = (String[]) titleArrayList.get(0);  
+		String[] titles = (String[]) titleArrayList.get(0);
 		int i = 0;
 		for (Object[] oneRow : titleArrayList)
 			if (i++ != 0)
 				translateAndGive(titles, oneRow);
-		return this;
-	}
-	
-	/** Join a Map List into current EntityNet */
-	public EntityNet joinTitleArrayListOld(List<Object[]> titleArrayList) {
-		Object[] titles = titleArrayList.get(0);
-		Map<String, Integer> titlesMap = new HashMap<String, Integer>();
-		for (int i = 0; i < titles.length; i++)
-			titlesMap.put(((String) titles[i]).toLowerCase(), i);
-
-		int i = 0;
-		for (Object[] oneRow : titleArrayList)
-			if (i++ != 0)
-				translateAndGiveOld(titlesMap, oneRow);
 		return this;
 	}
 
@@ -203,51 +192,21 @@ public class EntityNet {
 			TableModel model = config.getValue();
 			String alias = config.getKey();
 
-			// find and build entityID
+			// find and build entityID 
 			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(titles, oneRow, model, alias);
 			if (entityId == null)
-				continue;// not found entity ID columns
-
+				continue;// not found entity ID columns 
 			SqlBoxException.assureNotNull(model.getEntityClass());
-			Object entity = getOneEntity(model.getEntityClass(), entityId);
-
+			Object entity = getOneEntity(model.getEntityClass(), entityId); 
 			// create new Entity
 			if (entity == null) {
 				entity = createEntity(titles, oneRow, model, alias);
 				this.putOneEntity(model.getEntityClass(), entityId, entity);
 			} else {
-				//updateEntity(titles, entity, oneRow, model, alias);
-			}
+			 updateEntity(titles, entity, oneRow, model, alias);
+			} 
 			oneRowEntities.put(alias, entity);
 			oneRowEntities.put("#" + alias, entity);
-		}
-		doGive(oneRowEntities);
-	}
-	
-	/** Translate one row of map list to entity objects, put into entity net body */
-	private void translateAndGiveOld(Map<String, Integer> titles, Object[] oneRow) {
-		Map<String, Object> oneRowEntities = new HashMap<String, Object>();
-		for (Entry<String, TableModel> config : this.models.entrySet()) {
-			TableModel model = config.getValue();
-			String alias = config.getKey();
-
-			// find and build entityID
-			Object entityId = EntityIdUtils.buildEntityIdFromOneRowOld(titles, oneRow, model, alias);
-			if (entityId == null)
-				continue;// not found entity ID columns
-
-			SqlBoxException.assureNotNull(model.getEntityClass());
-			Object entity = getOneEntity(model.getEntityClass(), entityId);
-
-			// create new Entity
-			if (entity == null) {
-				entity = createEntityOld(titles, oneRow, model, alias);
-				this.putOneEntity(model.getEntityClass(), entityId, entity);
-			} else {
-				//updateEntity(titles, entity, oneRow, model, alias);
-			}
-			oneRowEntities.put(alias, entity);
-			//oneRowEntities.put("#" + alias, entity);
 		}
 		doGive(oneRowEntities);
 	}
@@ -260,38 +219,14 @@ public class EntityNet {
 
 	private static Object updateEntity(String[] titles, Object entity, Object[] oneRow, TableModel model,
 			String alias) {
-		for (int i = 0; i < titles.length; i++) { 
+		for (int i = 0; i < titles.length; i++) {
 			for (ColumnModel col : model.getColumns()) {
 				if (col.getTransientable())
 					continue;
-				if (
-						titles[i].equalsIgnoreCase( alias + "_" + col.getColumnName() ) ) {
+				if (oneRow[i]!=null && titles[i].equalsIgnoreCase(alias + "_" + col.getColumnName())) {
 					SqlBoxException.assureNotEmpty(col.getEntityField(),
 							"EntityField not set for column '" + col.getColumnName() + "'");
 					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), oneRow[i]);
-				}
-			}
-		}
-		return entity;
-	}
-	
-	
-	private static Object createEntityOld(Map<String, Integer> titles, Object[] oneRow, TableModel model, String alias) {
-		Object entity;
-		entity = ClassCacheUtils.createNewEntity(model.getEntityClass());
-		return updateEntityOld(titles, entity, oneRow, model, alias);
-	}
-
-	private static Object updateEntityOld(Map<String, Integer> titles, Object entity, Object[] oneRow, TableModel model,
-			String alias) {
-		for (Entry<String, Integer> entry : titles.entrySet()) { // u_userName->5
-			for (ColumnModel col : model.getColumns()) {
-				if (col.getTransientable())
-					continue;
-				if (entry.getKey().equalsIgnoreCase(alias + "_" + col.getColumnName())) {
-					SqlBoxException.assureNotEmpty(col.getEntityField(),
-							"EntityField not set for column '" + col.getColumnName() + "'");
-					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), oneRow[entry.getValue()]);
 				}
 			}
 		}

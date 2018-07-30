@@ -41,10 +41,10 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Test
 	public void doTest() {
-		Debuger.lastMark = "testNetRelated";
-		testAdd();
-		Debuger.set("add");
+		Debuger.lastMark = "testNetRelated";	 
 		for (int j = 0; j < 1000; j++) { // change repeat times to test 
+			testAdd();
+			Debuger.set("add");
 			testPageQuery();
 			Debuger.set("pageQry");
 			testUnique();
@@ -57,7 +57,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 			Debuger.set("testOrmQUery");
 			testOrmQUerySQ(); 
 			Debuger.set("testOrmQUerySQ");
-			//testSqlRelated();
+			testSqlRelated();
 			Debuger.set("testSqlRelated");
 			testNetRelated();
 			Debuger.set("testNetRelated");
@@ -87,7 +87,6 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 		 if (d.getCode()==null)
 			 throw new RuntimeException("testUnique error");
 		// or gctx().entityExistById(DemoUser.class, 1);
-		// or new DemoUser().existById(1);
 	}
 
 	@Override

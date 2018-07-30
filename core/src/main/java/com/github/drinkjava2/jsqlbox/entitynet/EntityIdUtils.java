@@ -59,10 +59,7 @@ public abstract class EntityIdUtils {// NOSONAR
 				firstPKeyValue=oneRow[i];
 		} 
 		if (firstPKeyValue == null)
-			return null;//
-		
-		
-		
+			return null;// 
 		
 		if (pkeyCount == 1)
 			return firstPKeyValue;
@@ -78,39 +75,6 @@ public abstract class EntityIdUtils {// NOSONAR
 				if(titles[i].equalsIgnoreCase(keColName))
 					value=oneRow[i];
 			} 
-			if (value == null)
-				return null;// 
-			sb.append(value);
-		}
-		return sb.toString();
-	}
- 
-	public static Object buildEntityIdFromOneRowOld(Map<String, Integer> titles, Object[] oneRow, TableModel model,
-			String alias) {// NOSONAR
-		int pkeyCount = model.getPKeyCount();
-		if (pkeyCount == 0)
-			throw new SqlBoxException(" No Pkey setting for '" + model.getTableName() + "'");
-		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
-		// DbUtils don't care UP/LOW case
-		Integer index = titles
-				.get(new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName().toLowerCase()).toString());
-		if (index == null)
-			return null;// Single or Compound Pkey not found in oneRow
-		Object firstPKeyValue = oneRow[index];
-		if (firstPKeyValue == null)
-			return null;//
-		if (pkeyCount == 1)
-			return firstPKeyValue;
-		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
-		StringBuilder sb = new StringBuilder();
-		for (ColumnModel col : l) {
-			if (sb.length() > 0)
-				sb.append(COMPOUND_ID_SEPARATOR);
-			  index = titles
-					.get(new StringBuilder(alias).append("_").append(col.getColumnName().toLowerCase()).toString());
-			if (index == null)
-				return null;// Single or Compound Pkey not found in oneRow
-			Object value = oneRow[index];
 			if (value == null)
 				return null;// 
 			sb.append(value);

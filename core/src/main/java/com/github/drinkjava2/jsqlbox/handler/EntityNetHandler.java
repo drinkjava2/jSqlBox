@@ -27,14 +27,11 @@ public class EntityNetHandler extends SSTitleArrayListHandler {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {   
+	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		EntityNet net = ps.getEntityNet() == null ? new EntityNet() : (EntityNet) ps.getEntityNet();
-		net.configFromPreparedSQL(ps);  
-		//Debuger.set(1);
+		net.configFromPreparedSQL(ps);
 		List<Object[]> titleArrayList = (List<Object[]>) super.handle(runner, ps);
-		//Debuger.set(2);
 		net.joinTitleArrayList(titleArrayList);
-		//Debuger.set(3);
 		return net;
 	}
 
