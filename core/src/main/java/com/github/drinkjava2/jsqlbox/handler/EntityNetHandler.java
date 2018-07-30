@@ -30,8 +30,11 @@ public class EntityNetHandler extends SSTitleArrayListHandler {
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {   
 		EntityNet net = ps.getEntityNet() == null ? new EntityNet() : (EntityNet) ps.getEntityNet();
 		net.configFromPreparedSQL(ps);  
-		List<Object[]> titleArrayList = (List<Object[]>) super.handle(runner, ps);   
-		net.joinTitleArrayList(titleArrayList); 
+		//Debuger.set(1);
+		List<Object[]> titleArrayList = (List<Object[]>) super.handle(runner, ps);
+		//Debuger.set(2);
+		net.joinTitleArrayList(titleArrayList);
+		//Debuger.set(3);
 		return net;
 	}
 

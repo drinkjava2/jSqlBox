@@ -44,8 +44,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 		Debuger.lastMark = "testNetRelated";
 		testAdd();
 		Debuger.set("add");
-		for (int j = 0; j < 1000; j++) { // change repeat times to test
-
+		for (int j = 0; j < 1000; j++) { // change repeat times to test 
 			testPageQuery();
 			Debuger.set("pageQry");
 			testUnique();
@@ -123,7 +122,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 	public void testOrmQUerySQ() {
 		EntityNet net = gctx().iQuery(new EntityNetHandler(), DemoOrder.class, DemoCustomer.class, alias("o","c"), give("c","o"),
 				"select o.id as o_id, o.name as o_name, o.cust_id as o_cust_id, c.id as c_id, c.code as c_code, c.name as c_name from sys_order o left join sys_customer c on o.cust_id=c.id");
-		List<DemoOrder> list = net.pickEntityList(DemoOrder.class); 
+		List<DemoOrder> list = net.pickEntityList(DemoOrder.class);
 		for (DemoOrder order : list) {
 			DemoCustomer customer = order.getDemoCustomer();
 			if (customer == null)

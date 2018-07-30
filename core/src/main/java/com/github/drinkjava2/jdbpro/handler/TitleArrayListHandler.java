@@ -50,7 +50,7 @@ public class TitleArrayListHandler implements ResultSetHandler<List<Object[]>> {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int cols = rsmd.getColumnCount();
 
-		Object[] titles = new Object[cols];
+		String[] titles = new String[cols];
 		for (int i = 1; i <= cols; i++) {
 			String columnName = rsmd.getColumnLabel(i);
 			if (null == columnName || 0 == columnName.length())

@@ -44,7 +44,48 @@ public abstract class EntityIdUtils {// NOSONAR
 	/**
 	 * Build entityId from titles, oneRow, model, alias
 	 */
-	public static Object buildEntityIdFromOneRow(Map<String, Integer> titles, Object[] oneRow, TableModel model,
+	public static Object buildEntityIdFromOneRow(String[] titles, Object[] oneRow, TableModel model,
+			String alias) {// NOSONAR
+		int pkeyCount = model.getPKeyCount();
+		if (pkeyCount == 0)
+			throw new SqlBoxException(" No Pkey setting for '" + model.getTableName() + "'");
+		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
+		// DbUtils don't care UP/LOW case
+		
+		Object firstPKeyValue =null; 
+	       String keColName=new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString();
+	       for (int i = 0; i < titles.length; i++) {
+			if(titles[i].equalsIgnoreCase(keColName))
+				firstPKeyValue=oneRow[i];
+		} 
+		if (firstPKeyValue == null)
+			return null;//
+		
+		
+		
+		
+		if (pkeyCount == 1)
+			return firstPKeyValue;
+		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
+		StringBuilder sb = new StringBuilder();
+		for (ColumnModel col : l) {
+			if (sb.length() > 0)
+				sb.append(COMPOUND_ID_SEPARATOR);
+			
+			Object value =null; 
+		         keColName=new StringBuilder(alias).append("_").append(col.getColumnName()).toString();
+		       for (int i = 0; i < titles.length; i++) {
+				if(titles[i].equalsIgnoreCase(keColName))
+					value=oneRow[i];
+			} 
+			if (value == null)
+				return null;// 
+			sb.append(value);
+		}
+		return sb.toString();
+	}
+ 
+	public static Object buildEntityIdFromOneRowOld(Map<String, Integer> titles, Object[] oneRow, TableModel model,
 			String alias) {// NOSONAR
 		int pkeyCount = model.getPKeyCount();
 		if (pkeyCount == 0)
@@ -52,7 +93,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
 		// DbUtils don't care UP/LOW case
 		Integer index = titles
-				.get(new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString());
+				.get(new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName().toLowerCase()).toString());
 		if (index == null)
 			return null;// Single or Compound Pkey not found in oneRow
 		Object firstPKeyValue = oneRow[index];
@@ -66,37 +107,12 @@ public abstract class EntityIdUtils {// NOSONAR
 			if (sb.length() > 0)
 				sb.append(COMPOUND_ID_SEPARATOR);
 			  index = titles
-					.get(new StringBuilder(alias).append("_").append(col.getColumnName()).toString());
+					.get(new StringBuilder(alias).append("_").append(col.getColumnName().toLowerCase()).toString());
 			if (index == null)
 				return null;// Single or Compound Pkey not found in oneRow
 			Object value = oneRow[index];
 			if (value == null)
 				return null;// 
-			sb.append(value);
-		}
-		return sb.toString();
-	}
-
-	public static Object buildEntityIdFromOneRow(Map<String, Object> oneRow, TableModel model, String alias) {
-		int pkeyCount = model.getPKeyCount();
-		if (pkeyCount == 0)
-			throw new SqlBoxException(" No Pkey setting for '" + model.getTableName() + "'");
-		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
-		// DbUtils don't care UP/LOW case
-		Object firstPKeyValue = oneRow
-				.get(new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString());
-		if (firstPKeyValue == null)
-			return null;// Single or Compound Pkey not found in oneRow
-		if (pkeyCount == 1)
-			return firstPKeyValue;
-		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
-		StringBuilder sb = new StringBuilder();
-		for (ColumnModel col : l) {
-			if (sb.length() > 0)
-				sb.append(COMPOUND_ID_SEPARATOR);
-			Object value = oneRow.get(new StringBuilder(alias).append("_").append(col.getColumnName()).toString());
-			if (value == null)
-				return null;
 			sb.append(value);
 		}
 		return sb.toString();
