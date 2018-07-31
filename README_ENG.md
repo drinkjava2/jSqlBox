@@ -55,7 +55,7 @@ jSqlBox is a Java persistence tool
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>
-   <version>2.0.1</version> <!--Or latest version-->
+   <version>2.0.2</version> <!--Or latest version-->
 </dependency> 
 ```
 
