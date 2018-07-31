@@ -305,4 +305,33 @@ public class EntityNetTest extends TestBase {
 					System.out.println("  Privilege:" + privilege.getId());
 		}
 	}
+
+	/**
+	 * Test u.##, it means only load P-Key and F-Key columns, other fields will not
+	 * load (is null), 一旦加载了某个属性，就不会再变回null了。
+	 */
+	@Test
+	public void testSharpSharp() {
+		insertDemoData();
+		EntityNet net = ctx.iQuery(new EntityNet(), User.class, Address.class, giveBoth("u", "a"),
+				"select u.##, a.** from usertb u left join addresstb a on u.id=a.userId");
+		List<User> userList = net.pickEntityList("u");
+		Assert.assertTrue(null == userList.get(0).getUserName());// userName is null!
+
+		ctx.iQuery(net, User.class, Email.class, giveBoth("u", "e"), AUTO_SQL);
+		userList = net.pickEntityList("u");// userName is not null!
+
+		ctx.iQuery(net, User.class, UserRole.class, giveBoth("u", "ur"),
+				"select u.##, ur.** from usertb u left join userroletb ur on u.id=ur.userId");
+		userList = net.pickEntityList("u");// userName is still not null!
+		Assert.assertTrue(null != userList.get(0).getUserName());
+
+		for (User u : userList) {
+			System.out.println("User:" + u.getUserName());
+			System.out.println("  Addr:" + u.getAddress().getAddressName());
+			if (u.getEmailList() != null)
+				for (Email e : u.getEmailList())
+					System.out.println("  Email:" + e.getId());
+		}
+	}
 }
