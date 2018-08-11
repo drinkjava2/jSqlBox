@@ -9,8 +9,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.annotation.jpa.TableGenerator;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.annotation.Sql;
-import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 @Entity
 @Table(name = "teams")
@@ -48,9 +46,8 @@ public class Team extends ActiveRecord<Team> {
 		this.rating = rating;
 	}
 
-	@Sql("select * from teams")
 	public List<Team> finaAllTeams() {
-		return guess(new EntityListHandler(), Team.class);
+		return new Team().findAll(" order by id");
 	}
 
 }

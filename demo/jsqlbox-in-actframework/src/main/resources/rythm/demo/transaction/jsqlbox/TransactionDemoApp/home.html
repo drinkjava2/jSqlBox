@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+@import demo.transaction.jsqlbox.*
+@args Account accA, Account accB
+<html>
+<head>
+  <style>
+    section {margin-bottom: 30px}
+    section header {font-weight: bolder; padding-bottom: 10px;}
+    .amount {
+      width: 200px;
+      text-align: right;
+      border: 1px solid #aaa;
+      background-color: #eee;
+      padding: 3px 8px;
+    }
+    .msg {
+      width: 80%;
+      padding: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #aaa;
+      background-color: #dfb;
+    }
+    .msg.error {
+      background-color: #ffbeb8;
+    }
+  </style>
+  <script src="/asset/js/jquery-1.11.3.min.js"></script>
+  <script src="/asset/js/jquery-ajax-ext.js"></script>
+</head>
+<body>
+<h1>Transaction Demo</h1>
+@if(_flash.error()) {
+<div class="msg error">@_flash.error()</div>
+} else if (_flash.success()) {
+<div class="msg success">@_flash.success()</div>
+}
+<section>
+  <header>Account A</header>
+  <div class="amount">@accA.getAmount()</div>
+</section>
+<section>
+  <header>Account B</header>
+  <div class="amount">@accB.getAmount()</div>
+</section>
+<section>
+  <header>Transfer</header>
+  <form action="/transfer" method="post">
+    @_csrfField
+    <input name="amount" value="100" class="amount">
+    <button name="btnA2B" value="true">From account A to account B</button>
+    <button name="btnB2A" value="true">From account B to account A</button>
+  </form>
+</section>

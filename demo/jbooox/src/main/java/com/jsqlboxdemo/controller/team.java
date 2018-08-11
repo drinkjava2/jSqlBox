@@ -44,7 +44,7 @@ public class team {
 
 	public static class team_edit extends BaseBox {
 		public void execute() {
-			this.setRequestAttribute("team", new Team().load(getPathParams()[0]));
+			this.setRequestAttribute("team", new Team().loadById(getPathParams()[0]));
 			redirect("team_edit.jsp");
 		}
 	}

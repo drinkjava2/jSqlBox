@@ -6,6 +6,8 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.annotation.Model;
+import com.github.drinkjava2.jsqlbox.annotation.New;
 import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
@@ -44,7 +46,9 @@ public class Team extends ActiveRecord<Team> {
 		this.rating = rating;
 	}
 
-	@Sql("select t.** from teams t where t.rating<>:rating")
+	@Model(Team.class)
+	@New(EntityListHandler.class)
+	@Sql("select * from teams where rating<>:rating")
 	public List<Team> queryTeamsRatingNotEqual(Integer rating) {
 		return guess(rating);
 	}

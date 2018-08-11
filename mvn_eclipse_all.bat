@@ -16,7 +16,15 @@ cd jsqlbox-beetlsql
 call mvn eclipse:eclipse
 cd..
 
+cd jsqlbox-in-actframework
+call mvn eclipse:eclipse
+cd..
+
 cd jsqlbox-in-spring
+call mvn eclipse:eclipse
+cd..
+
+cd jsqlbox-in-springboot
 call mvn eclipse:eclipse
 cd..
 
@@ -26,6 +34,7 @@ cd..
 
 cd jsqlbox-xa-atomikos
 call mvn eclipse:eclipse
-cd..
- 
+cd.. 
+
+
 cd..

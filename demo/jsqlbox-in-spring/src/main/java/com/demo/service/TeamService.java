@@ -21,8 +21,8 @@ public class TeamService {
 		team.update();
 	}
 
-	public Team getTeam(int id) {
-		return new Team().load(id);
+	public Team getTeam(Integer id) {
+		return new Team().loadById(id);
 	}
 
 	public void deleteTeam(int id) {
