@@ -22,31 +22,21 @@ import com.jfinal.template.Engine;
  * API引导式配置
  */
 public class DemoConfig extends JFinalConfig {
-
-	/**
-	 * 运行此 main 方法可以启动项目，此main方法可以放置在任意的Class类定义中，不一定要放于此
-	 * 
-	 * 使用本方法启动过第一次以后，会在开发工具的 debug、run config 中自动生成 一条启动配置，可对该自动生成的配置再添加额外的配置项，例如 VM
-	 * argument 可配置为： -XX:PermSize=64M -XX:MaxPermSize=256M
-	 */
-	public static void main(String[] args) { 
-		
-		JFinal.start("webapp", 80, "/");
-		// 备注：如果出错，把上面的写成JFinal.start("src/main/webapp", 8080, "/", 5);试试
+	private static final String path = "webapp"; // 命令行下运行模式
+	//private static final String path = "target/jsqlbox-in-jfinal-1.0"; // Eclipse下运行模式
+ 
+	public static void main(String[] args) {
+		JFinal.start(path, 80, "/");
 	}
 
-	/**
-	 * 配置常量
-	 */
+	/**  配置常量   */
 	public void configConstant(Constants me) {
 		// 加载少量必要配置，随后可用PropKit.get(...)获取值
 		PropKit.use("a_little_config.txt");
 		me.setDevMode(PropKit.getBoolean("devMode", false));
 	}
 
-	/**
-	 * 配置路由
-	 */
+	/** 配置路由  */
 	public void configRoute(Routes me) {
 		me.add("/", IndexController.class, "/index"); // 第三个参数为该Controller的视图存放路径
 		me.add("/blog", BlogController.class); // 第三个参数省略时默认与第一个参数值相同，在此即为 "/blog"
@@ -61,11 +51,9 @@ public class DemoConfig extends JFinalConfig {
 		return new DruidPlugin(PropKit.get("jdbcUrl"), PropKit.get("user"), PropKit.get("password").trim());
 	}
 
-	/**
-	 * 配置插件
-	 */
+	/** 配置插件 */
 	public void configPlugin(Plugins me) {
-		// 配置C3p0数据库连接池插件
+		// 配置数据库连接池插件
 		DruidPlugin druidPlugin = createDruidPlugin();
 		me.add(druidPlugin);
 
@@ -76,16 +64,12 @@ public class DemoConfig extends JFinalConfig {
 		me.add(arp);
 	}
 
-	/**
-	 * 配置全局拦截器
-	 */
+	/** 配置全局拦截器  */
 	public void configInterceptor(Interceptors me) {
 
 	}
 
-	/**
-	 * 配置处理器
-	 */
+	/** 配置处理器  */
 	public void configHandler(Handlers me) {
 
 	}
