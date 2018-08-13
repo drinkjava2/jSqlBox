@@ -1,6 +1,5 @@
 package com.demo.blog;
 
-import com.demo.common.model.Blog;
 import com.jfinal.core.Controller;
 import com.jfinal.validate.Validator;
 
@@ -18,7 +17,7 @@ public class BlogValidator extends Validator {
 	}
 	
 	protected void handleError(Controller controller) {
-		controller.keepModel(Blog.class);
+		//controller.keepModel(Blog.class); //当切换到jSqlBox后，keepModel方法失效
 		
 		String actionKey = getActionKey();
 		if (actionKey.equals("/blog/save"))

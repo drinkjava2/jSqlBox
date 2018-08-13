@@ -20,6 +20,10 @@ cd jsqlbox-in-actframework
 call mvn eclipse:eclipse
 cd..
 
+cd jsqlbox-in-jfinal
+call mvn eclipse:eclipse
+cd.. 
+
 cd jsqlbox-in-spring
 call mvn eclipse:eclipse
 cd..

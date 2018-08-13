@@ -1,41 +1,43 @@
 package com.demo.blog;
 
-import com.demo.common.model.Blog;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
+
+import java.util.List;
+
+import com.demo.common.Blog;
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Enhancer;
 import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.tx.Tx;
 
 /**
- * 本 demo 仅表达最为粗浅的 jfinal 用法，更为有价值的实用的企业级用法
- * 详见 JFinal 俱乐部: http://jfinal.com/club
+ * 本 demo 仅表达最为粗浅的 jfinal 用法，更为有价值的实用的企业级用法 详见 JFinal 俱乐部:
+ * http://jfinal.com/club
  * 
- * BlogService
- * 所有 sql 与业务逻辑写在 Service 中，不要放在 Model 中，更不
- * 要放在 Controller 中，养成好习惯，有利于大型项目的开发与维护
+ * BlogService 所有 sql 与业务逻辑写在 Service 中，不要放在 Model 中，更不 要放在 Controller
+ * 中，养成好习惯，有利于大型项目的开发与维护
  */
 public class BlogService {
-	
+
 	/**
-	 * 线程安全的 Service 可以开放一个 static me 变量，方便随处使用
-	 * 如果要使用业务层 AOP，可以使用如下代码代替 new 创建：
+	 * 线程安全的 Service 可以new一个 static me 变量，方便随处使用, 如果要使用业务层 AOP支持声明式事务，可以使用如下代码创建：
 	 * Enhancer.enhance(BlogService.class);
 	 */
-	public static final BlogService me = new BlogService();
-	
-	/**
-	 * 所有的 dao 对象也放在 Service 中，并且声明为 private，避免 sql 满天飞
-	 * sql 只放在业务层，或者放在外部 sql 模板，用模板引擎管理：
-	 * 			http://www.jfinal.com/doc/5-13
-	 */
-	private Blog dao = new Blog().dao();
-	
+	public static final BlogService me = Enhancer.enhance(BlogService.class);
+
 	public Page<Blog> paginate(int pageNumber, int pageSize) {
-		return dao.paginate(pageNumber, pageSize, "select *", "from blog order by id asc");
+		List<Blog> blogs = new Blog().findAll(pagin(pageNumber, pageSize), " order by id asc");
+		int totalRows = new Blog().countAll();
+		return new Page<Blog>(blogs, pageNumber, pageSize, (totalRows-1)/pageSize+1, totalRows);
 	}
-	
+
 	public Blog findById(int id) {
-		return dao.findById(id);
+		return 	new Blog().loadById(id);
 	}
-	
+
+	@Before(Tx.class)
 	public void deleteById(int id) {
-		dao.deleteById(id);
+		new Blog().deleteById(id); 
+		//int i=1/0;  //如果加上这句，事务将回滚
 	}
 }

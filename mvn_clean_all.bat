@@ -27,6 +27,12 @@ call del .act.*
 call del act.*
 cd..
 
+cd jsqlbox-in-jfinal
+call mvn clean
+call mvn eclipse:clean
+cd.. 
+
+
 cd jsqlbox-in-spring
 call mvn clean
 call mvn eclipse:clean

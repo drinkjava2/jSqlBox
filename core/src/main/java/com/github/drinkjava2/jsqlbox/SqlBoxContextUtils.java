@@ -999,7 +999,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					writeMethod.invoke(bean, values[i]);
 				}
 			} catch (Exception e) {
-				throw new SqlBoxException(e);
+				throw new SqlBoxException(
+						"Write bean error, it may be caused by bean field type different with Db column type.", e);
 			}
 			result.add(bean);
 		}

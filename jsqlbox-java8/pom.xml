@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox-java8</artifactId>
  <packaging>jar</packaging>
- <version>2.0.2</version>
+ <version>2.0.3</version>
  
  <name>jsqlbox-java8</name>
  <description>This is the java8 version of jSqlBox</description>
@@ -61,7 +61,7 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>2.0.2</version>
+      <version>2.0.3</version>
     </dependency> 
  
     <!-- jBeanBox is a IOC/AOP tool, here used to config datasource and create proxy by use its ASM libs-->
