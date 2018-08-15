@@ -1,3 +1,5 @@
+rd session_data
+
 cd  core
 call mvn clean
 call mvn eclipse:clean
@@ -30,6 +32,7 @@ cd..
 cd jsqlbox-in-jfinal
 call mvn clean
 call mvn eclipse:clean
+call del *.log
 cd.. 
 
 

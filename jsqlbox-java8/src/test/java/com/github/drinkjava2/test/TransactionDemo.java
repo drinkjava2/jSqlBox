@@ -16,11 +16,10 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jbeanbox.TX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jtransactions.TX;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
-import com.github.drinkjava2.test.User;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -60,7 +59,7 @@ public class TransactionDemo {
 	public void save() {
 		new User().put("name", "Tom").insert();
 		System.out.println(SqlBoxContext.gctx().iQueryForString("select name from usertb"));
-		//System.out.println(1 / 0); //force roll back
+		System.out.println(1 / 0); //force roll back
 	}
 
 	@SuppressWarnings("deprecation")

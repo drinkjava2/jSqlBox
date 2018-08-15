@@ -40,8 +40,10 @@
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<!-- Release on Java6 -->
+		<maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
         <version.java>1.6</version.java>
         <version.javadoc>7</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
@@ -72,11 +74,11 @@
     <!-- Note: Oracle11g JDBC driver need installed manually by yourself                                     -->  	
     <!-- ==================================================================================================  --> 
     
-    <!-- jBeanBox is a small IOC/AOP tool, in this project used to do some unit test configuration  -->
+    <!-- jBeanBox is a small IOC/AOP tool -->
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jbeanbox</artifactId>
-        <version>2.4.7</version>
+        <version>2.4.7</version><!--Or newest jBeanBox-->
         <scope>test</scope>
     </dependency> 
      
