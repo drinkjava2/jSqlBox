@@ -93,8 +93,7 @@ public class TransactionDemoApp {
 	private static final Injector INJECTOR = Guice.createInjector(new Module() {
 		@Override
 		public void configure(Binder binder) {
-			binder.bindInterceptor(subclassesOf(Account.class), annotatedWith(MyTX.class), new TinyTx(JdbcConnectionPool
-					.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "")));
+			binder.bindInterceptor(subclassesOf(Account.class), annotatedWith(MyTX.class), new TinyTx(dataSource));
 		}
 	});
 

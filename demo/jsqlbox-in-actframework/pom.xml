@@ -28,8 +28,10 @@
   <url>https://gitee.com/drinkjava2/jSqlBox</url>
 
   <properties> 
+	<maven.compiler.source>1.8</maven.compiler.source>  
     <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.build.source>1.8</maven.build.source>	
+	<maven.build.target>1.8</maven.build.target>
     <app.entry>demo.transaction.jsqlbox.TransactionDemoApp</app.entry>
   </properties>
 

@@ -16,8 +16,8 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.TX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.TX;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;

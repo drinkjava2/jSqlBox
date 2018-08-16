@@ -65,5 +65,4 @@ public class Account implements ActiveEntity<Account> {
 		from.credit(amount);
 		from.update();
 	}
-
 }
