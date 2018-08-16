@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox-in-jfinal</artifactId>
  <packaging>war</packaging>
- <version>2.0.3</version>
+ <version>1.0</version>
  
  <name>jsqlbox-in-jfinal</name>
  <description>This is a demo project to show use jSqlBox in jFinal</description> 

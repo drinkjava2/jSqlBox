@@ -3,7 +3,9 @@ package demo.transaction.jsqlbox;
 import org.osgl.util.E;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jsqlbox.ActiveEntity; 
+import com.github.drinkjava2.jsqlbox.ActiveEntity;
+
+import demo.transaction.jsqlbox.TransactionDemoApp.MyTX;
 
 /**
  * The account with a certain amount of money
@@ -53,8 +55,8 @@ public class Account implements ActiveEntity<Account> {
 		}
 		this.amount -= amount;
 	}
- 
-	@TX
+
+	@MyTX
 	public void transfer(Integer amount, String fromId, String toId) {
 		Account to = new Account(toId).load();
 		to.deposit(amount);

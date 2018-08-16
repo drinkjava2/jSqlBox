@@ -1,6 +1,7 @@
 package com.example.jsqlboxinspringboot.controller;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.entityCountAll;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.nQueryForLongValue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +19,7 @@ public class Controller {
 	@RequestMapping("/insert")
 	public String hello() {
 		services.insertOne();
-		return "Have " + gctx().iQueryForLongValue("select count(*) from Customer") + " records in database.";
+		return "Have " + nQueryForLongValue("select count(1) from Customer") + " records in database.";
 	}
 
 	@RequestMapping("/tx")
@@ -28,6 +29,6 @@ public class Controller {
 		} catch (Exception e) {
 			System.out.println("Div 0 Exception found.");
 		}
-		return "Still have " + new Customer().countAll() + " records in database.";
+		return "Still have " + entityCountAll(Customer.class) + " records in database, because transaction rolled back.";
 	}
 }

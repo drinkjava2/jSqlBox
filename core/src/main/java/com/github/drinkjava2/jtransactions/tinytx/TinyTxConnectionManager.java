@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
+import com.github.drinkjava2.jtransactions.TransactionsException;
 
 /**
  * DataSourceManager determine how to get or release connection from DataSource,
@@ -34,7 +35,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 public class TinyTxConnectionManager implements ConnectionManager {
 
-	private static class InnerTinyTxConnectionManager {//NOSONAR
+	private static class InnerTinyTxConnectionManager {// NOSONAR
 		private static final TinyTxConnectionManager INSTANCE = new TinyTxConnectionManager();
 	}
 
@@ -54,28 +55,28 @@ public class TinyTxConnectionManager implements ConnectionManager {
 
 	@Override
 	public boolean isInTransaction(DataSource ds) {
-		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null in isInTransaction method");
+		TransactionsException.assureNotNull(ds, "DataSource can not be null in isInTransaction method");
 		return null != threadLocalConnections.get().get(ds);
 	}
 
 	public void startTransaction(DataSource ds, Connection conn) {
-		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null in startTransaction method");
+		TransactionsException.assureNotNull(ds, "DataSource can not be null in startTransaction method");
 		threadLocalConnections.get().put(ds, conn);
 	}
 
 	public void endTransaction(DataSource ds) {
-		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null in endTransaction method");
+		TransactionsException.assureNotNull(ds, "DataSource can not be null in endTransaction method");
 		threadLocalConnections.get().remove(ds);
 	}
 
 	@Override
 	public Connection getConnection(DataSource ds) throws SQLException {
-		TinyTxRuntimeException.assertNotNull(ds, "DataSource can not be null");
+		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		// Try get a connection already in current transaction
 		Connection conn = threadLocalConnections.get().get(ds);
 		if (conn == null)
 			conn = ds.getConnection(); // Have to get a new connection
-		TinyTxRuntimeException.assertNotNull(conn, "Fail to get a connection from DataSource");
+		TransactionsException.assureNotNull(conn, "Fail to get a connection from DataSource");
 		return conn;
 	}
 

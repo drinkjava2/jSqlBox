@@ -1,6 +1,6 @@
 package com.demo.blog;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 
 import java.util.List;
 
@@ -28,16 +28,20 @@ public class BlogService {
 	public Page<Blog> paginate(int pageNumber, int pageSize) {
 		List<Blog> blogs = new Blog().findAll(pagin(pageNumber, pageSize), " order by id asc");
 		int totalRows = new Blog().countAll();
-		return new Page<Blog>(blogs, pageNumber, pageSize, (totalRows-1)/pageSize+1, totalRows);
+		return new Page<Blog>(blogs, pageNumber, pageSize, (totalRows - 1) / pageSize + 1, totalRows);
 	}
 
 	public Blog findById(int id) {
-		return 	new Blog().loadById(id);
+		return new Blog().loadById(id);
 	}
 
 	@Before(Tx.class)
 	public void deleteById(int id) {
-		new Blog().deleteById(id); 
-		//int i=1/0;  //如果加上这句，事务将回滚
+		new Blog().deleteById(id);
+		if (id == 1) {
+			System.out.println("Now have " + new Blog().countAll() + " records, but will rollback to "
+					+ (new Blog().countAll() - 1) + " because I want demostrate transaction roll back");
+			System.out.println(1 / 0); // DIV 0!
+		}
 	}
 }

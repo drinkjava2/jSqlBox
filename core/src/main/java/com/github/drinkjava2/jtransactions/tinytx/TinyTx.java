@@ -8,6 +8,8 @@ import javax.sql.DataSource;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import com.github.drinkjava2.jtransactions.TransactionsException;
+
 /**
  * A transaction MethodInterceptor
  * 
@@ -15,7 +17,6 @@ import org.aopalliance.intercept.MethodInvocation;
  * @since 1.0.0
  */
 public class TinyTx implements MethodInterceptor {
-	private static final TinyTxLogger logger = TinyTxLogger.getLog(TinyTx.class);
 	private static final TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
@@ -34,20 +35,20 @@ public class TinyTx implements MethodInterceptor {
 	}
 
 	@Override
-	public Object invoke(MethodInvocation caller) {//NOSONAR
+	public Object invoke(MethodInvocation caller) {// NOSONAR
 		if (cm.isInTransaction(ds)) {
 			try {
 				return caller.proceed();
 			} catch (Throwable t) {
-				throw new TinyTxRuntimeException(t);
+				throw new TransactionsException(t);
 			}
 		} else {
 			Connection conn;
 			try {
 				conn = cm.getConnection(ds);
-				TinyTxRuntimeException.assertNotNull(conn, "Connection can not get from DataSource in invoke method");
+				TransactionsException.assureNotNull(conn, "Connection can not get from DataSource in invoke method");
 			} catch (Exception e) {
-				throw new TinyTxRuntimeException(e);
+				throw new TransactionsException(e);
 			}
 			Object invokeResult = null;
 			try {
@@ -61,9 +62,9 @@ public class TinyTx implements MethodInterceptor {
 					try {
 						conn.rollback();
 					} catch (Exception e1) {
-						logger.warn(e1.getMessage());
+						throw new TransactionsException("TinyTx fail to rollback a transaction.", t);
 					}
-				throw new TinyTxRuntimeException("TinyTx found a runtime Exception, transaction rollbacked.", t);
+				throw new TransactionsException("TinyTx found a runtime Exception, transaction rollbacked.", t);
 			} finally {
 				cm.endTransaction(ds);
 				SQLException closeExp = null;
@@ -73,7 +74,7 @@ public class TinyTx implements MethodInterceptor {
 					closeExp = e;
 				}
 				if (closeExp != null)
-					throw new TinyTxRuntimeException("Exception happen when release connection.", closeExp);//NOSONAR
+					throw new TransactionsException("Exception happen when release connection.", closeExp);// NOSONAR
 			}
 			return invokeResult;
 		}
