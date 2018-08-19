@@ -32,6 +32,10 @@ cd jsqlbox-in-springboot
 call mvn eclipse:eclipse
 cd..
 
+cd jsqlbox-in-springboot-mybatis
+call mvn eclipse:eclipse
+cd..
+
 cd jsqlbox-java8-demo
 call mvn eclipse:eclipse
 cd..

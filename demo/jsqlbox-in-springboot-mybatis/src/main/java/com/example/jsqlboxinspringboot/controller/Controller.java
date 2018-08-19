@@ -22,7 +22,7 @@ public class Controller {
 	}
 
 	@RequestMapping("/insert")
-	public String hello() {
+	public String insert() {
 		services.insertOne();
 		return toHtml("Now have " + new Customer().countAll() + " records in database.");
 	}
@@ -38,8 +38,26 @@ public class Controller {
 				+ " records in database, because transaction rolled back.");
 	}
 
+	@RequestMapping("/mix_insert")
+	public String mybatis_insert() { 
+		services.mixInsert();
+		return toHtml("Now have " + new Customer().countAll() + " records in database.");
+	}
+
+	@RequestMapping("/mix_tx")
+	public String mybatis_errorInsert() {
+		try {
+			services.mixErrorInsert();
+		} catch (Exception e) {
+			System.out.println("Div 0 Exception found.");
+		}
+		return toHtml(
+				"Still have " + new Customer().countAll()
+				+ " records in database, because transaction rolled back.");
+	}
+
 	private static String toHtml(String s) {
-		return htmlTemplate.replaceFirst("HTMLBODY", s);
+		return htmlTemplate.replaceFirst("THE_RESULT", s);
 	}
 
 	//@formatter:off
@@ -49,9 +67,17 @@ public class Controller {
 			"<title>Hello jSqlBox</title>\n" + 
 			"</head>\n" + 
 			"<body>\n" + 
-			"HTMLBODY\n" + 
 			"<br/>\n" + 
-			"<a href=\"insert\">Insert</a>  | <a href=\"tx\">Insert but roll back</a>\n" + 
+			"THE_RESULT\n" + 
+			"<br/>\n" + 
+			"<br/>\n" + 
+			"jSqlBox:<br/>\n" + 
+			 "<a href=\"insert\">Insert by jSqlBox</a>  | <a href=\"tx\">Insert by jSqlBox but roll back</a>\n" + 
+			"<br/>\n" + 
+			"<br/>\n" + 
+			"MyBatis:<br/>\n" + 
+			"<a href=\"mix_insert\">Mix jSqlBox and Mybatis do insert</a>  | <a href=\"mix_tx\">Mix use jSqlBox and Mybatis do insert but roll back</a>\n" +
+			"<br/>\n" + 
 			"</body>\n" + 
 			"</html>"  ;
 }
