@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox-java8-demo</artifactId>
  <packaging>jar</packaging>
- <version>2.0.3</version>
+ <version>1.0</version>
  
  <name>jsqlbox-java8-demo</name>
  <description>This is the demo of jsqlbox-java8 </description> 

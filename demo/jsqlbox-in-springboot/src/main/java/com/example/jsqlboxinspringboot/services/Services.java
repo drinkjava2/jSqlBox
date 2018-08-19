@@ -18,9 +18,8 @@ public class Services {
 	@Transactional
 	public void errorInsert() {
 		new Customer().put("name", "Another B").insert();
-		new Customer().put("name", "Another C").insert();
 		System.out.println("Now have " + entityCountAll(Customer.class) + " records in database, but will roll back to "
-				+ (entityCountAll(Customer.class) - 2) + " records because Div/0 exception will happen.");
-		System.out.println(1 / 0); // div 0!, force transaction roll back
+				+ (entityCountAll(Customer.class) - 1) + " records because Div/0 exception will happen.");
+		System.out.println(1 / 0); // div 0!, show transaction roll back
 	}
 }

@@ -1,4 +1,5 @@
 ## jSqlBox-BeetlSql
+This is a demo project to show how to develop customized Sql template engine in jSqlBox.
 
 这是一个演示项目，演示在jSqlBox中用使用BeetlSql作为模板引擎。  
 编译及运行本项目需Java8, Tomcat7以上环境。  

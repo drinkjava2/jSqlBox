@@ -1,6 +1,7 @@
 package com.github.drinkjava2.test;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
 
 import java.util.List;
 
@@ -52,10 +53,10 @@ public class ActiveEntityTest implements ActiveEntity<ActiveEntityTest> {
 				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""));
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 		for (String ddl : ctx.toCreateDDL(ActiveEntityTest.class))
-			giExecute(ddl);
+			iExecute(ddl);
 		for (int i = 0; i < 100; i++)
 			new ActiveEntityTest().put("name", "name" + i, "age", i).insert();
-		Assert.assertEquals(100, giQueryForLongValue("select count(*) from ActiveEntityTest"));
+		Assert.assertEquals(100, iQueryForLongValue("select count(*) from ActiveEntityTest"));
 	}
 
 	@Test

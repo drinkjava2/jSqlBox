@@ -11,7 +11,7 @@
  */
 package com.jsqlboxdemo.controller;
 
-import com.jsqlboxdemo.init.Initializer.Transaction;
+import com.github.drinkjava2.jbeanbox.TX;
 
 import model.Team;
 
@@ -31,7 +31,7 @@ public class team {
 	}
 
 	public static class team_add_post extends BaseBox {
-		@Transaction
+		@TX
 		public void execute() {
 			Team team = new Team();
 			team.setName((String) this.getObject("name"));
@@ -50,7 +50,7 @@ public class team {
 	}
 
 	public static class team_edit_post extends team_edit {
-		@Transaction
+		@TX
 		public void execute() {
 			super.execute();
 			Team team = getObject("team");
@@ -65,7 +65,7 @@ public class team {
 	}
 
 	public static class team_delete extends team_edit {
-		@Transaction
+		@TX
 		public void execute() {
 			super.execute();
 			Team team = getObject("team");

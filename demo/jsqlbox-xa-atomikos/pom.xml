@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox-xa-atomikos</artifactId>
  <packaging>jar</packaging>
- <version>2.0.3</version>
+ <version>1.0</version>
  
  <name>jsqlbox-xa-atomikos</name>
  <description>This is a demo project to show use jSqlBox + Atomikos XA + Spring in Java8 </description>  

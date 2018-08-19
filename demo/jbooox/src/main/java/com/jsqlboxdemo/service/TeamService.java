@@ -2,8 +2,8 @@ package com.jsqlboxdemo.service;
 
 import java.util.List;
 
+import com.github.drinkjava2.jbeanbox.TX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.jsqlboxdemo.init.Initializer.Transaction;
 
 import model.AbstractTeam;
 import model.Team;
@@ -21,17 +21,17 @@ public class TeamService {
 		return SqlBoxContext.gctx().entityFindAll(Team.class);
 	}
 
-	@Transaction
+	@TX
 	public List<Team> listEqual(Integer rating) {
 		return new Team().queryTeamsRatingEqualTo(rating);
 	}
 
-	@Transaction
+	@TX
 	public List<Team> listNotEqual(Integer rating) {
 		return new Team().queryTeamsRatingNotEqual(rating);
 	}
 
-	@Transaction
+	@TX
 	public List<Team> listBigger(Integer rating) {
 		AbstractTeam team = SqlBoxContext.createMapper(AbstractTeam.class);
 		return team.queryAbstractRatingBiggerThan(rating);

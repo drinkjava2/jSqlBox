@@ -1,7 +1,6 @@
 package com.github.drinkjava2.test;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQuery;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.giQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*; 
 
 import java.util.List;
 
@@ -58,7 +57,7 @@ public class User extends ActiveRecord<User> {
 	}
 
 	public List<User> pageQuery(PaginHandler pagin, Object... conditions) {
-		giQueryForLongValue("select count(1) from usertb where 1=1 ", conditions);
-		return giQuery(new EntityListHandler(), User.class, "select * from usertb where 1=1", conditions, pagin);
+		iQueryForLongValue("select count(1) from usertb where 1=1 ", conditions);
+		return iQuery(new EntityListHandler(), User.class, "select * from usertb where 1=1", conditions, pagin);
 	}
 }

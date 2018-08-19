@@ -18,7 +18,7 @@ import com.github.drinkjava2.jtransactions.spring.SpringTxConnectionManager;
 @SpringBootApplication
 public class JsqlboxInSpringbootApplication {
 	@Autowired
-	DataSource ds; // 如果pom.xml中有H2, SpringBoot会自动注入H2数据源，是不是自动化过头了?
+	DataSource ds; 
 
 	public static void main(String[] args) {
 		SpringApplication.run(JsqlboxInSpringbootApplication.class, args);
@@ -26,7 +26,7 @@ public class JsqlboxInSpringbootApplication {
  
 	/* 声明式事务有3个关键： 
 	 * 1.IOC/AOP工具， 这里就用Spring自带的。 
-	 * 2.声明式事务切面处理器， 因为这个项目pom.xml中只有一个H2的依赖，所以Spring在后台已经悄悄地自动创建了一个DataSourceTransactionManager单例，并将H2数据源注入给它了
+	 * 2.声明式事务切面处理器，因为这个项目pom.xml中只有一个H2的依赖，所以Spring在后台已经悄悄地自动创建了一个DataSourceTransactionManager单例，并将H2数据源注入给它了，这也太自动过头了是不是?
 	 * 3.连接管理器。不同的事务工具获取和关闭connection的方式不一样，在jTransactions中为纯JDBC、jFinal、Spring等都准备了一个连接管理器,这里设成SpringTxConnectionManager。
 	 */
 	@Bean

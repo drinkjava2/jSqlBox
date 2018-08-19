@@ -1,9 +1,5 @@
 package com.jsqlboxdemo.init;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.sql.Connection;
 
 import javax.servlet.ServletContextEvent;
@@ -53,24 +49,17 @@ public class Initializer implements ServletContextListener {
 		}
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD })
-	public static @interface Transaction {
-		public Class<?> value() default Object.class;
-
-	}
-
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
-		// Initialize BeanBox
-		// TX is defined in jBeanBox project
+		// Register Transaction annotation
 		BeanBox.regAopAroundAnnotation(TX.class, TxBox.class);
-		// "Transaction" is a customized AOP annotation
-		BeanBox.regAopAroundAnnotation(Transaction.class, TxBox.class);
-
-		// Initialize Global SqlBoxContext
+		//
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
+
+		// Set transaction manager
 		config.setConnectionManager(TinyTxConnectionManager.instance());
+
+		// 这个仅当用到@Ioc注解时才需要配，通常可以不配
 		config.setIocTool(new IocTool() {
 			@Override
 			public <T> T getBean(Class<?> configClass) {
@@ -78,12 +67,13 @@ public class Initializer implements ServletContextListener {
 			}
 		});
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class), config);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx); // 全局上下文
 
 		// Initialize database
 		String[] ddls = ctx.toDropAndCreateDDL(Team.class);
 		for (String ddl : ddls)
 			ctx.quiteExecute(ddl);
+
 		for (int i = 0; i < 5; i++)
 			new Team().put("name", "Team" + i, "rating", i * 10).insert();
 		Assert.assertEquals(5, ctx.nQueryForLongValue("select count(*) from teams"));

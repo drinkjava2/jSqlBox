@@ -21,7 +21,7 @@
 
   <groupId>org.actframework.demo</groupId>
   <artifactId>jsqlbox-in-actframework</artifactId>
-  <version>2.0.3</version>
+  <version>1.0</version>
 
   <name>jsqlbox-in-actframework Demo</name>
   <description>Demonstrates a simple transaction app with jSqlBox in ActFramework</description>

@@ -104,6 +104,11 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		throw new SqlBoxException("shardTB() method allow at most 2 parameter");
 	}
 
+	/** Build a SHARD_TABLE type sqlItem */
+	public static Object[] shard(Object... shardvalues) {
+		return new Object[] { shardTB(shardvalues), shardDB(shardvalues) };
+	}
+
 	//@formatter:off
 	protected void entity_series_methods_from_SqlBoxContext_____________________() {}// NOSONAR 
 

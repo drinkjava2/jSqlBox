@@ -1,8 +1,12 @@
-## jsqlbox-xa-atomikos （Use Spring)
+## jsqlbox-xa-atomikos 
+This is a demo project to show use jSqlBox with Atomikos
 
 这是一个演示项目，演示jSqlBox进行分库操作时，利用atomikos来实现分布式事务以保证多个数据库之间的数据一致性。
+用到以下工具： H2(Database) + jBeanBox(IOC/AOP) + jSqlBox(ORM/Sharding) + Spring XA(XA support for Atomikos) + Atomikos(XA Transaction)
 
-Reference:
+运行方式： maven test
+
+本示例参考了网上以下文章：   
 https://www.atomikos.com/Main/InstallingTransactionsEssentials
 http://forum.spring.io/forum/spring-projects/integration/119662-spring-integration-flow-and-xa-transactions/page2
 https://www.ibm.com/developerworks/cn/java/j-lo-jta/index.html

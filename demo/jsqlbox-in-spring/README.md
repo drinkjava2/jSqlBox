@@ -1,5 +1,11 @@
-## jsqlbox-in-spring
+## jsqlbox-in-spring 
+This is a demo project to show use jSqlBox in Spring.
 
-这是一个为了演示jSqlBox的事务配置和在Web环境中使用而创建的项目，项目架构来源于https://github.com/Fruzenshtein/spr-mvc-hib 演示项目，原项目架构是Hibernate + SpringTx + SpringIOC + SpringMVC + MySql，本项目将其中的Hibernate用jSqlBox替换掉，MySql用H2内存数据库替换掉(以避免配置数据库的麻烦)，其余部分不变。  
-编译及运行本项目需Java8, Tomcat7以上环境。
-这个项目需要打包成war在Tomcat中运行，已经有点过时。如果使用SpringBoot，请参见Demo目录下另一个示例jsqlbox-in-springboot。
+这是一个传统WebApp演示项目，必须发布到Tomcat目录下运行，已有点过时，推荐使用SpringBoot模式，见jsqlbox-in-springboot目录例子。
+
+本项目架构来源于https://github.com/Fruzenshtein/spr-mvc-hib 演示项目，原项目架构是Hibernate + SpringTx + SpringIOC + SpringMVC + MySql，本项目将其中的Hibernate用jSqlBox替换掉，MySql用H2内存数据库替换掉(以避免配置数据库的麻烦)，其余部分不变。   
+编译及运行本项目需Java8, Tomcat7以上环境，必须发布到Tomcat目录下运行。  
+
+运行方式：修改deploy_tomcat.bat批处理文本,指向本机的Tomcat路径，双击运行  
+查看：浏览器输入 http://localhost  
+单元测试：运行 mvn test  

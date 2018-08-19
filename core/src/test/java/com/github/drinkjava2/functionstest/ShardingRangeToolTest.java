@@ -36,7 +36,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * ActiveRecordDemoTest of jSqlBox configurations
+ * Range strategy sharding test
  * 
  * @author Yong Zhu
  * @since 1.0.0
