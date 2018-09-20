@@ -78,7 +78,7 @@
     <dependency>
         <groupId>com.github.drinkjava2</groupId>
         <artifactId>jbeanbox</artifactId>
-        <version>2.4.7</version><!--Or newest jBeanBox-->
+        <version>2.4.8</version><!--Or newest jBeanBox-->
         <scope>test</scope>
     </dependency> 
      

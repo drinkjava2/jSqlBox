@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -51,7 +52,7 @@ public class BatchTest {
 	@After
 	public void cleanUp() {
 		ctx.quiteExecute("drop table batch_test_tb");
-		BeanBox.defaultContext.close();
+		JBEANBOX.close();
 	}
 
 	@Table(name = "batch_test_tb")

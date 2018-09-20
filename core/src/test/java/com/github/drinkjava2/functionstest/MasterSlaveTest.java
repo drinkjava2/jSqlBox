@@ -11,11 +11,18 @@
  */
 package com.github.drinkjava2.functionstest;
 
+import static com.github.drinkjava2.jbeanbox.JBEANBOX.value;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.sql.Connection;
+
+import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -24,7 +31,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jbeanbox.TX;
+import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -163,7 +170,6 @@ public class MasterSlaveTest {
 		// Build another master but run in Transaction mode
 		SqlBoxContext MasterWithTx = new SqlBoxContext(txDataSource, config);
 		MasterWithTx.setSlaves(master.getSlaves());
-		BeanBox.regAopAroundAnnotation(TX.class, TheTxBox.class);// AOP TX
 		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // Proxy
 		tester.queryInTransaction(MasterWithTx);
 		txDataSource.close();// don't forget close DataSource pool
@@ -187,9 +193,17 @@ public class MasterSlaveTest {
 		Assert.assertEquals("Slave_Row1", u3.getName());
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.METHOD })
+	@AOP
+	public static @interface TX {
+		public Class<?> value() default TheTxBox.class;
+	}
+
 	public static class TheTxBox extends BeanBox {
 		{
-			this.setConstructor(TinyTx.class, txDataSource, Connection.TRANSACTION_READ_COMMITTED);
+			this.injectConstruct(TinyTx.class, DataSource.class, Integer.class, value(txDataSource),
+					value(Connection.TRANSACTION_READ_COMMITTED));
 		}
 	}
 

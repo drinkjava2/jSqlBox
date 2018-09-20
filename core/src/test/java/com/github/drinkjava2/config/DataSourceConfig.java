@@ -25,41 +25,41 @@ public class DataSourceConfig {
 	// H2Database memory database connection URL
 	public static class H2DataSourceBox extends HikariCPBox {
 		{
-			setProperty("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-			setProperty("driverClassName", "org.h2.Driver");
-			setProperty("username", "sa");
-			setProperty("password", "");
+			injectValue("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			injectValue("driverClassName", "org.h2.Driver");
+			injectValue("username", "sa");
+			injectValue("password", "");
 		}
 	}
 
 	// MySql connection URL
 	public static class MySqlDataSourceBox extends HikariCPBox {
 		{
-			setProperty("jdbcUrl",
+			injectValue("jdbcUrl",
 					"jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false");
-			setProperty("driverClassName", "com.mysql.jdbc.Driver");
-			setProperty("username", "root");// change to your user & password
-			setProperty("password", "root888");
+			injectValue("driverClassName", "com.mysql.jdbc.Driver");
+			injectValue("username", "root");// change to your user & password
+			injectValue("password", "root888");
 		}
 	}
 
 	// Oracle connection URL
 	public static class OracleDataSourceBox extends HikariCPBox {
 		{
-			setProperty("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:XE");
-			setProperty("driverClassName", "oracle.jdbc.OracleDriver");
-			setProperty("username", "root");// change to your user & password
-			setProperty("password", "root888");
+			injectValue("jdbcUrl", "jdbc:oracle:thin:@127.0.0.1:1521:XE");
+			injectValue("driverClassName", "oracle.jdbc.OracleDriver");
+			injectValue("username", "root");// change to your user & password
+			injectValue("password", "root888");
 		}
 	}
 
 	// MsSql Server connection URL
 	public static class MsSqlServerDataSourceBox extends HikariCPBox {
 		{
-			setProperty("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
-			setProperty("driverClassName", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			setProperty("username", "sa");// change to your user & password
-			setProperty("password", "root888");
+			injectValue("jdbcUrl", "jdbc:sqlserver://localhost:1433;databaseName=test");
+			injectValue("driverClassName", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			injectValue("username", "sa");// change to your user & password
+			injectValue("password", "root888");
 		}
 	}
 
@@ -74,7 +74,7 @@ public class DataSourceConfig {
 			ds.addDataSourceProperty("useServerPrepStmts", true);
 			ds.setMaximumPoolSize(3);
 			ds.setConnectionTimeout(5000);
-			this.setPreDestory("close");// jBeanBox will close pool
+			this.setPreDestroy("close");// jBeanBox will close pool
 			return ds;
 		}
 	}

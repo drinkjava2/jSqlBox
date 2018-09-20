@@ -18,6 +18,7 @@ import org.junit.Before;
 
 import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -55,7 +56,7 @@ public class TestBase {
 		if (tablesForTest != null)
 			dropTables(tablesForTest);
 		tablesForTest = null;
-		BeanBox.defaultContext.close(); // IOC tool will close dataSource
+		JBEANBOX.close(); // IOC tool will close dataSource
 		SqlBoxContext.resetGlobalVariants();
 	}
 
