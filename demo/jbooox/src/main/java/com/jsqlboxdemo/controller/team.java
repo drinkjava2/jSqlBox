@@ -11,7 +11,7 @@
  */
 package com.jsqlboxdemo.controller;
 
-import com.github.drinkjava2.jbeanbox.TX;
+import com.jsqlboxdemo.init.Initializer.TX;
 
 import model.Team;
 

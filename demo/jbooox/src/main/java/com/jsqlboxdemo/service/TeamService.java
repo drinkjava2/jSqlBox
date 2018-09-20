@@ -2,8 +2,8 @@ package com.jsqlboxdemo.service;
 
 import java.util.List;
 
-import com.github.drinkjava2.jbeanbox.TX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.jsqlboxdemo.init.Initializer.TX;
 
 import model.AbstractTeam;
 import model.Team;

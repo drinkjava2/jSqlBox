@@ -1,6 +1,11 @@
 package com.jsqlboxdemo.init;
 
-import java.sql.Connection;
+import static com.github.drinkjava2.jbeanbox.JBEANBOX.inject;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -9,7 +14,8 @@ import javax.sql.DataSource;
 import org.junit.Assert;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jbeanbox.TX;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
+import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
@@ -37,23 +43,26 @@ public class Initializer implements ServletContextListener {
 			ds.addDataSourceProperty("useServerPrepStmts", true);
 			ds.setMaximumPoolSize(10);
 			ds.setConnectionTimeout(5000);
-			this.setPreDestory("close");// jBeanBox will close pool
+			this.setPreDestroy("close");// jBeanBox will close pool
 			return ds;
 		}
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.METHOD })
+	@AOP
+	public static @interface TX {
+		public Class<?> value() default TxBox.class;
+	}
+
 	public static class TxBox extends BeanBox {
 		{
-			this.setConstructor(TinyTx.class, BeanBox.getBean(DataSourceBox.class),
-					Connection.TRANSACTION_READ_COMMITTED);
+			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
 		}
 	}
 
 	@Override
-	public void contextInitialized(ServletContextEvent context) {
-		// Register Transaction annotation
-		BeanBox.regAopAroundAnnotation(TX.class, TxBox.class);
-		//
+	public void contextInitialized(ServletContextEvent context) { 
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
 
 		// Set transaction manager
@@ -83,7 +92,7 @@ public class Initializer implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent context) {
 		SqlBoxContext.setGlobalSqlBoxContext(null);
-		BeanBox.defaultContext.close();// close the dataSource
+		JBEANBOX.close();// close the dataSource
 		System.out.println("========== com.jsqlboxdemo.init.Initializer destroyed=====");
 
 	}

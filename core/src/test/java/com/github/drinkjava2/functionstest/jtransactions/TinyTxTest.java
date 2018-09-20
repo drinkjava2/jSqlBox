@@ -1,5 +1,8 @@
 package com.github.drinkjava2.functionstest.jtransactions;
 
+import static com.github.drinkjava2.jbeanbox.JBEANBOX.inject;
+import static com.github.drinkjava2.jbeanbox.JBEANBOX.value;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,7 +24,11 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
- * This is to test TinyTx Declarative Transaction
+ * TinyTx is a tiny and clean declarative transaction tool, in this unit test
+ * use jBeanBox's annotation configuration.
+ * 
+ * To make jSqlBox core unit test clean, I put Spring TX demos in jSqlBox's demo
+ * folder.
  *
  * @author Yong Zhu
  *
@@ -53,6 +60,7 @@ public class TinyTxTest {
 	@Test
 	public void doTest() {
 		TinyTxTest tester = BeanBox.getBean(TinyTxTest.class);
+		ctx.quiteExecute("drop table user_tb");
 		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
 
 		Assert.assertEquals(0L, ctx.nQueryForLongValue("select count(*) from user_tb "));
@@ -72,6 +80,10 @@ public class TinyTxTest {
 		JBEANBOX.close();// Release DataSource Pool
 	}
 
+	/*
+	 * AOP is an annotation for annotation, the annotated annotation's value(target)
+	 * is a class implemented AOP alliance's MethodInterceptor interface
+	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD })
 	@AOP
@@ -81,8 +93,8 @@ public class TinyTxTest {
 
 	public static class TheTxBox extends BeanBox {
 		{
-			this.injectConstruct(TinyTx.class, DataSource.class, Integer.class, JBEANBOX.inject(DataSourceBox.class),
-					JBEANBOX.value(Connection.TRANSACTION_READ_COMMITTED));
+			this.injectConstruct(TinyTx.class, DataSource.class, Integer.class, inject(DataSourceBox.class),
+					value(Connection.TRANSACTION_READ_COMMITTED));
 		}
 	}
 

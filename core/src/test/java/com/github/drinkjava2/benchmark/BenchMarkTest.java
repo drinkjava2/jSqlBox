@@ -44,7 +44,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 		Debuger.lastMark = "testNetRelated";
 		testAdd();
 		Debuger.set("add");
-		for (int j = 0; j < 1000; j++) { // change repeat times to test 
+		for (int j = 0; j < 100; j++) { // change repeat times to test 
 			testPageQuery();
 			Debuger.set("pageQry");
 			testUnique();
