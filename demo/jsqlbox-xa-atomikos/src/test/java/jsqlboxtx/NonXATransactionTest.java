@@ -13,8 +13,6 @@ package jsqlboxtx;
 
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
 
-import java.sql.Connection;
-
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Assert;
@@ -22,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jbeanbox.TX;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -65,28 +63,23 @@ public class NonXATransactionTest {
 	public void cleanup() {
 		for (SqlBoxContext ctx : masters)
 			((JdbcConnectionPool) ctx.getDataSource()).dispose();
-		BeanBox.defaultContext.close();
+		JBEANBOX.close();
 	}
 
-	@TX
 	public void insertAccount() {
 		new Bank().put("bankId", 0L, "balance", 100L).insert(); // committed
 		new Bank().put("bankId", 1L, "balance", 1 / 0).insert();// Div 0!
 	}
 
-	public static class TinyTxBox extends BeanBox {
-		{
-			this.setConstructor(TinyTx.class, masters[1].getDataSource(), Connection.TRANSACTION_READ_COMMITTED);
-		}
-	}
-
 	@Test
 	public void doTest() {
-		BeanBox.regAopAroundAnnotation(TX.class, TinyTxBox.class);
+		JBEANBOX.bctx().addGlobalAop(JBEANBOX.value(new TinyTx(masters[1].getDataSource())), NonXATransactionTest.class,
+				"insert*");
 		NonXATransactionTest tester = BeanBox.getBean(NonXATransactionTest.class);
 		try {
 			tester.insertAccount();
 		} catch (Exception e) {
+			System.out.println("Note:" + e.getMessage());
 			System.out.println("Div 0 RuntimeException happened, but 1 database did not rollback ");
 		}
 		Assert.assertEquals(1L, iQueryForLongValue("select count(*) from bank", masters[0]));

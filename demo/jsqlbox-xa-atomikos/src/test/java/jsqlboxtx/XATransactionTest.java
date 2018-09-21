@@ -30,7 +30,7 @@ import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.atomikos.jdbc.AtomikosSQLException;
 import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jbeanbox.TX;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
@@ -71,7 +71,7 @@ public class XATransactionTest {
 	@SuppressWarnings("deprecation")
 	@Before
 	public void init() {
-		BeanBox.regAopAroundAnnotation(TX.class, SpringTxIBox.class);
+		JBEANBOX.bctx().addGlobalAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
 		BeanBox.getBean(SpringTxIBox.class);// Force initialize
 
 		SqlBoxContextConfig.setGlobalNextDialect(Dialect.MySQL57Dialect);
@@ -108,7 +108,6 @@ public class XATransactionTest {
 		um.close();
 	}
 
-	@TX
 	public void insertAccountsBad() {
 		new Bank().put("bankId", 0L, "balance", 100L).insert();
 		Assert.assertEquals(1, iQueryForLongValue("select count(*) from bank", masters[0]));
@@ -117,7 +116,6 @@ public class XATransactionTest {
 		new Bank().put("bankId", 2L, "balance", 1 / 0).insert();// div 0!
 	}
 
-	@TX
 	public void insertAccountsGood() {
 		new Bank().put("bankId", 0L, "balance", 100L).insert();
 		new Bank().put("bankId", 1L, "balance", 100L).insert();
