@@ -24,8 +24,8 @@ public class GuessDialectUtils {
 	private static final Map<DataSource, Dialect> dataSourceDialectCache = new ConcurrentHashMap<DataSource, Dialect>();
 
 	/**
-	 * Guess dialect based on given JDBC connection instance, Note: this method
-	 * does not close connection
+	 * Guess dialect based on given JDBC connection instance, Note: this method does
+	 * not close connection
 	 * 
 	 * @param jdbcConnection
 	 *            The connection
@@ -33,17 +33,19 @@ public class GuessDialectUtils {
 	 */
 	public static Dialect guessDialect(Connection jdbcConnection) {
 		String databaseName;
+		String driverName;
 		int majorVersion;
 		int minorVersion;
 		try {
 			DatabaseMetaData meta = jdbcConnection.getMetaData();
+			driverName = meta.getDriverName();
 			databaseName = meta.getDatabaseProductName();
 			majorVersion = meta.getDatabaseMajorVersion();
 			minorVersion = meta.getDatabaseMinorVersion();
 		} catch (SQLException e) {
 			return (Dialect) DialectException.throwEX(e);
 		}
-		return guessDialect(databaseName, majorVersion, minorVersion);
+		return guessDialect(driverName, databaseName, majorVersion, minorVersion);
 	}
 
 	/**
@@ -84,17 +86,13 @@ public class GuessDialectUtils {
 	}
 
 	/**
-	 * Guess Dialect by give databaseName, MajorVersion, MinorVersion
-	 * 
 	 * @param databaseName
 	 *            The database name
-	 * @param majorVersion
-	 *            The major version, Optional
-	 * @param minorVersion
-	 *            The minor version, Optional
+	 * @param majorVersionMinorVersion
+	 *            The major version,The minor version, Optional optional
 	 * @return dialect or null if not found
 	 */
-	public static Dialect guessDialect(String databaseName, Object... majorVersionMinorVersion) {// NOSONAR
+	public static Dialect guessDialect(String driverName, String databaseName, Object... majorVersionMinorVersion) {// NOSONAR
 		int majorVersion = 0;
 		int minorVersion = 0;
 		for (int i = 0; i < majorVersionMinorVersion.length; i++) {
@@ -109,11 +107,33 @@ public class GuessDialectUtils {
 			return Dialect.HSQLDialect;
 		if ("H2".equals(databaseName))
 			return Dialect.H2Dialect;
-		if ("MySQL".equals(databaseName))
-			if (majorVersion >= 5)
-				return Dialect.MySQL5InnoDBDialect;
-			else
-				return Dialect.MySQLInnoDBDialect;
+		if ("MySQL".equals(databaseName)) {
+			if (majorVersion < 5)
+				return Dialect.MySQLDialect;
+			else if (majorVersion == 5) {
+				if (minorVersion < 5)
+					return Dialect.MySQL5Dialect;
+				else if (minorVersion < 7)
+					return Dialect.MySQL55Dialect;
+				else
+					return Dialect.MySQL57Dialect;
+			}
+			return Dialect.MySQL57Dialect;
+		}
+		if (driverName != null && driverName.startsWith("MariaDB")) {
+			if (majorVersion == 10) {
+				if (minorVersion >= 3)
+					return Dialect.MariaDB103Dialect;
+				else if (minorVersion == 2)
+					return Dialect.MariaDB102Dialect;
+				else if (minorVersion >= 0)
+					return Dialect.MariaDB10Dialect;
+				return Dialect.MariaDB53Dialect;
+			} else if (majorVersion > 5 || (majorVersion == 5 && minorVersion >= 3)) {
+				return Dialect.MariaDB53Dialect;
+			}
+			return Dialect.MariaDBDialect;
+		}
 		if ("PostgreSQL".equals(databaseName)) {
 			if (majorVersion == 9) {
 				if (minorVersion >= 4) {
@@ -195,7 +215,7 @@ public class GuessDialectUtils {
 				return Dialect.Oracle8iDialect;
 			default:
 			}
-			return Dialect.Oracle8iDialect;
+			return Dialect.Oracle12cDialect;
 		}
 		if ("HDB".equals(databaseName))
 			return Dialect.HANAColumnStoreDialect;

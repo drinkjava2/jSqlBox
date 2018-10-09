@@ -50,7 +50,7 @@ public enum Dialect implements CommonDialect {
 
 	Cache71Dialect, CUBRIDDialect, DerbyTenFiveDialect, DataDirectOracle9Dialect, DB2Dialect, DB2390Dialect, DB2400Dialect, DerbyTenSevenDialect, DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect, HANARowStoreDialect, HSQLDialect, InformixDialect, Informix10Dialect, IngresDialect, Ingres10Dialect, Ingres9Dialect, InterbaseDialect, JDataStoreDialect, MariaDBDialect, MariaDB53Dialect, MckoiDialect, MimerSQLDialect, MySQLDialect, MySQL5Dialect, MySQL55Dialect, MySQL57Dialect, MySQL57InnoDBDialect, MySQL5InnoDBDialect, MySQLInnoDBDialect, MySQLMyISAMDialect, Oracle8iDialect, Oracle9iDialect, Oracle10gDialect, Oracle12cDialect, PointbaseDialect, PostgresPlusDialect, PostgreSQLDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL9Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect, PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServerDialect, SQLServer2005Dialect, SQLServer2008Dialect, SQLServer2012Dialect, SybaseDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE15Dialect, SybaseASE157Dialect, TeradataDialect, Teradata14Dialect, TimesTenDialect,
 
-	// Below dialects added from Hibernate 5.3.6.final
+	// Below dialects imported from Hibernate 5.3.6.final
 	DB2390V8Dialect, DB297Dialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect, MySQL8Dialect; 
 	
 	/** If set true will allow use reserved words in DDL, default value is false */
@@ -90,18 +90,7 @@ public enum Dialect implements CommonDialect {
 		DialectFunctionTemplate.initFunctionTemplates();
 	}
 
-	/**
-	 * Guess Dialect by given databaseName, major & minor version if have
-	 * 
-	 * @param databaseName
-	 * @param majorVersionMinorVersion
-	 * @return Dialect
-	 */
-	public static Dialect guessDialect(String databaseName, Object... majorVersionMinorVersion) {
-		return GuessDialectUtils.guessDialect(databaseName, majorVersionMinorVersion);
-	}
-
-	/**
+ 	/**
 	 * Guess Dialect by given connection, note:this method does not close connection
 	 * 
 	 * @param con

@@ -19,7 +19,7 @@
 </p>
 
 # Intro
-jSqlBox is a Java persistence tool 
+jSqlBox is a DAO tool based on Apache-commons-DbUtils core. 
 
 # Advantages
 - **Excellent architecture**: Modular architecture, each module can be separated from jSqlBox alone.
@@ -35,17 +35,19 @@ jSqlBox is a Java persistence tool
 
 # Documentation
 
-[Chinese中文用户手册](https://gitee.com/drinkjava2/jSqlBox/wikis/%E7%AE%80%E4%BB%8B)  |  [English User Manual](../../wiki)  | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
+[Chinese中文](https://gitee.com/drinkjava2/jSqlBox/wikis/%E7%AE%80%E4%BB%8B)  |  [English User Manual](https://github.com/drinkjava2/jSqlBox/wiki)  | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
 
 # Demo
 
-[jBooox MVC Project](../../tree/master/demo/jbooox)
-
-[jSqlBox-in-Spring](../../tree/master/demo/jsqlbox-in-spring)
-
-[Use BeetlSql](../../tree/master/demo/jsqlbox-beetlsql)
-
-[Use in MyBatis](https://github.com/drinkjava2/jDialects/blob/master/demo/demo-mybatis/src/test/java/com/github/drinkjava2/demo/TestDemo.java)
+* [jBooox](https://gitee.com/drinkjava2/jBooox) A micro mvc web demo based on jBeanBox+jSqlBox+jWebBox.
+* [jsqlbox-beetlsql](../../tree/master/demo/jsqlbox-beetlsql) A demo shows how to develop a SqlTemplateEngine.
+* [jsqlbox-in-actframework](../../tree/master/demo/jsqlbox-in-actframework) Shows how to use jSqlBox in ActFramework，and use TinyTx+Guice's AOP to achieve declarative transaction.
+* [jsqlbox-in-jfinal](../../tree/master/demo/jsqlbox-in-jfinal) Shows use jSqlBox in jFinal.
+* [jSqlBox-in-Spring](../../tree/master/demo/jsqlbox-in-spring) Shows use jSqlBox in Spring+Tomcat.
+* [jsqlbox-in-springboot](../../tree/master/demo/jsqlbox-in-springboot) Shows use jSqlBox in SpringBoot.
+* [jsqlbox-in-springboot-mybatis](../../tree/master/demo/jsqlbox-in-springboot-mybatis) Shows mixed use jSqlBox and MyBatis in SpringBoot.
+* [jsqlbox-java8-demo](../../tree/master/demo/jsqlbox-java8-demo) Shows jSqlBox-Java8 version usage and use Lambda to write SQL。
+* [jsqlbox-xa-atomikos](../../tree/master/demo/jsqlbox-xa-atomikos) Shows sharding feature in jSqlBox when use XA transaction be implemented by Atomikos 。
 
 # Download
 
@@ -55,7 +57,7 @@ jSqlBox is a Java persistence tool
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>
-   <version>2.0.2</version> <!--Or latest version-->
+   <version>2.0.4</version> <!--Or latest version-->
 </dependency> 
 ```
 

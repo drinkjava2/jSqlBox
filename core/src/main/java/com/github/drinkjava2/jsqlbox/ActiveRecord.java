@@ -163,7 +163,7 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 
 	@Override
 	public List<T> findBySQL(Object... optionItems) {
-		return (List<T>) ctx(optionItems).iQueryForEntityList(this.getClass(),optionItems);
+		return ctx(optionItems).iQueryForEntityList(this.getClass(), optionItems);
 	}
 
 	@Override
@@ -296,6 +296,11 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
 		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
+	}
+
+	@Override
+	public Object[] shard(Object... optionItems) {
+		return new Object[] { shardTB(optionItems), shardDB(optionItems) };
 	}
 
 }

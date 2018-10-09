@@ -149,5 +149,8 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 
 	/** Return current entity's shardDatabase according its sharding key values */
 	public SqlBoxContext shardDB(Object... optionItems);
+	
+	/** Return current entity's shardTable and shardDatabase according its sharding key values */
+	public Object[] shard(Object... optionItems);
 
 }

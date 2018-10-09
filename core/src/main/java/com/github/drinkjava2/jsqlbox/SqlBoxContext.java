@@ -476,7 +476,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	@Deprecated
 	public void setDialect(Dialect dialect) {// NOSONAR
 		this.dialect = dialect;
 	}
@@ -486,7 +485,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	@Deprecated
 	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {// NOSONAR
 		this.sqlMapperGuesser = sqlMapperGuesser;
 	}
@@ -496,7 +494,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	@Deprecated
 	public void setShardingTools(ShardingTool[] shardingTools) {// NOSONAR
 		this.shardingTools = shardingTools;
 	}
@@ -506,7 +503,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** This method is not thread safe, suggest only use at program starting */
-	@Deprecated
 	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {// NOSONAR
 		this.snowflakeCreator = snowflakeCreator;
 	}

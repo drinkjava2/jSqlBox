@@ -1,11 +1,17 @@
-﻿<p align="center">
+﻿<p align="left">
+  <a href="README_ENG.md">
+	English instruction see "README_ENG.md"
+  </a>
+</p>
+
+<p align="center">
   <a href="https://github.com/drinkjava2/jSqlBox">
    <img alt="jsqlbox-logo" src="jsqlbox-logo.png">
   </a>
 </p>
 
 <p align="center">
-  全栈数据库持久层工具
+  基于DbUtils内核的全功能数据库持久层工具
 </p>
 
 <p align="center">
@@ -20,7 +26,7 @@
 
 # 简介 | Intro
 
-jSqlBox是一个小而全的跨数据库、提供多种SQL写法、ActiveRecord、ORM查询、主从及分库分表、声明式事务等功能的数据库持久层工具。简单地说，是一个全栈数据库持久层工具。  
+jSqlBox是一个基于DbUtils内核开发的跨数据库、提供多种SQL写法、ActiveRecord、ORM查询、主从及分库分表、声明式事务等功能的数据库持久层工具。  
 jSqlBox有Java6和Java8两个版本。
 
 # 架构 | Architecture  
@@ -29,58 +35,85 @@ jSqlBox有Java6和Java8两个版本。
 # 优点 | Advantages
 
 - **架构优良**：模块式架构，各个模块都可以脱离jSqlBox单独存在。
-- **跨数据库**：基于jDialects，支持70多种数据库的分页、函数变换，是Hibernate之外少有的支持跨数据库DDL生成的工具。
-- **尺寸小**： 仅有jSqlBox和DbUtils两个依赖包,合计约500k大小。
-- **与DbUtils兼容**：继承于DbUtils, 原有基于DbUtils的项目可以无缝升级到jSqlBox。
+- **跨数据库**：基于jDialects，支持80多种数据库的分页、函数变换，是Hibernate之外少有的支持DDL生成的工具。
+- **尺寸小**： Java6版仅依赖jSqlBox和DbUtils两个包,合计约500k大小。
+- **与DbUtils兼容**：内核基于DbUtils, 原有基于DbUtils的旧项目可以无缝升级到jSqlBox。
 - **多种SQL写法**：Inline方法、模板方法、DataMapper、ActiveRecord、链式写法等。
 - **多项技术创新**：Inline风格、多行文本支持、实体越级关联查询、树结构查询等。
 - **动态配置**：除了支持实体Bean注解式配置，jSqlBox还支持在运行期动态更改配置。
 - **无会话设计**：无会话设计(Sessionless)，是一个真正轻量级的、全功能的持久层工具，也可以作为其它持久层工具的补丁来使用。
-- **自带声明式事务**：基于独立小巧的声明式事务工具jTransactions。也支持配置成Spring事务。
+- **自带声明式事务**：基于独立的微型声明式事务工具jTransactions。也支持配置成Spring事务。
 - **学习曲线平滑**：模块化学习，了解了各个子模块，就掌握了jSqlBox，jSqlBox主体只有30多个类。
 
 # 文档 | Documentation
 
 [中文](https://gitee.com/drinkjava2/jSqlBox/wikis/pages)  |  [English](https://github.com/drinkjava2/jSqlBox/wiki) | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
 
-# 应用示例 | Demo
+# 入门 | First Example
+以下示例演示了jSqlBox的基本用法:
+```
+public class HelloWorld extends ActiveRecord<HelloWorld> {
+	private String name;
 
-[jBooox项目](https://gitee.com/drinkjava2/jBooox) 这是一个MVC Web项目，基于三个开源软件jBeanBox、jSqlBox、jWebBox。
+	public String getName() {
+		return name;
+	}
 
-[jSqlBox-in-Spring](../../tree/master/demo/jsqlbox-in-spring) 这是一个MVC Web项目，演示jSqlBox在Spring环境下的配置和使用。
+	public void setName(String name) {
+		this.name = name;
+	}
 
-[使用BeetlSql模板](../../tree/master/demo/jsqlbox-beetlsql) 演示如何在jSqlBox中开发和使用其它模板引擎如BeetlSQL。
+	public static void main(String[] args) {
+		DataSource ds = JdbcConnectionPool
+				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+		SqlBoxContext ctx = new SqlBoxContext(ds);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		for (String ddl : ctx.toCreateDDL(HelloWorld.class))
+			ctx.nExecute(ddl);
 
-[在MyBatis中使用](https://gitee.com/drinkjava2/jSqlBox/wikis/%E5%9C%A8MyBatis%E4%B8%AD%E4%BD%BF%E7%94%A8?parent=%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C%2F%E6%BC%94%E7%A4%BA%E9%A1%B9%E7%9B%AE) 演示如何利用jSqlBox为MyBatis添加分页、DDL生成、ActiveRecord功能。
+		new HelloWorld().put("name", "Hello jSqlBox").insert();
+		System.out.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
+	}
+}
+```
 
-# 下载地址 | Download
+# 范例 | Demo
 
-[点此去下载](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)   
+* [jBooox](https://gitee.com/drinkjava2/jBooox) 这是一个微型MVC Web项目，基于三个开源软件jBeanBox、jSqlBox、jWebBox的整合，需发布到Tomcat下运行。
+* [jsqlbox-beetlsql](../../tree/master/demo/jsqlbox-beetlsql) 演示如何在jSqlBox中开发和使用其它模板引擎如BeetlSQL。
+* [jsqlbox-in-actframework](../../tree/master/demo/jsqlbox-in-actframework) 演示jSqlBox与ActFramework框架的整合，用jSqlBox替换掉其自带的EBean持久层工具，并利用TinyTx和Guice的AOP实现声明式事务。
+* [jsqlbox-in-jfinal](../../tree/master/demo/jsqlbox-in-jfinal) 演示jSqlBox与jFinal的整合，用jSqlBox替换掉jFinal自带的DAO工具, 使用jFinal自带的AOP和声明式事务。
+* [jSqlBox-in-Spring](../../tree/master/demo/jsqlbox-in-spring) 这是一个MVC Web项目，演示jSqlBox在Spring+Tomcat环境下的配置和使用, IOC、AOP和声明式事务均使用Spring的。
+* [jsqlbox-in-springboot](../../tree/master/demo/jsqlbox-in-springboot) 演示jSqlBox在SpringBoot环境下的配置和使用。
+* [jsqlbox-in-springboot-mybatis](../../tree/master/demo/jsqlbox-in-springboot-mybatis) 演示在SpringBoot环境下jSqlBox和MyBatis的混合使用。
+* [jsqlbox-java8-demo](../../tree/master/demo/jsqlbox-java8-demo) 演示jSqlBox-Java8版的使用，以及利用Lambda语法来写SQL的演示。
+* [jsqlbox-xa-atomikos](../../tree/master/demo/jsqlbox-xa-atomikos) 演示了jSqlBox的分库分表在分布式事务环境下的使用，使用Atomikos作为分布式事务管理器。
 
-或在pom.xml中加入：
-
+# 在项目中引入 | Configuration
+在pom.xml中加入：  
 ```xml
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
-   <artifactId>jsqlbox</artifactId> <!--用于Java6、7环境-->
-   <version>2.0.2</version>
+   <artifactId>jsqlbox</artifactId> <!--用于Java6、7-->
+   <version>2.0.4</version>
 </dependency> 
 ```
 或
 ```xml
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
-   <artifactId>jsqlbox-java8</artifactId> <!--Java8环境-->
-   <version>2.0.2</version>
+   <artifactId>jsqlbox-java8</artifactId> <!--用于Java8及以上-->
+   <version>2.0.4</version>
 </dependency> 
 ```
 
-# 相关开源项目 | Other Projects
+# 作者其它开源项目 | Other Projects
 
-- [一个通用的数据库方言工具 jDialects](https://gitee.com/drinkjava2/jdialects)
-- [一个独立的声明式事务工具 jTransactions](https://gitee.com/drinkjava2/jTransactions)
-- [一个简单易用的IOC/AOP工具 jBeanBox](https://gitee.com/drinkjava2/jBeanBox)
-- [一个500行源码的服务端布局工具 jWebBox](https://gitee.com/drinkjava2/jWebBox)
+- [一个独立的数据库方言工具（支持80种数据库方言的DDL生成、分页等) jDialects](https://gitee.com/drinkjava2/jdialects)
+- [一个微型的声明式事务工具 jTransactions](https://gitee.com/drinkjava2/jTransactions)
+- [一个微型的IOC/AOP工具 jBeanBox](https://gitee.com/drinkjava2/jBeanBox)
+- [一个微型的JSP/FreeMaker服务端布局工具 jWebBox](https://gitee.com/drinkjava2/jWebBox)
+- [一个以“造人”为目标的人工智能实验项目 人工生命](https://gitee.com/drinkjava2/frog)
 
 # 期望 | Futures
 

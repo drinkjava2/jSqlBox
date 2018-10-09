@@ -5,8 +5,6 @@ import org.osgl.util.E;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 
-import demo.transaction.jsqlbox.TransactionDemoApp.MyTX;
-
 /**
  * The account with a certain amount of money
  * 

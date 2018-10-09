@@ -107,7 +107,7 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 
 	@Override
 	public default List<T> findBySQL(Object... optionItems) {
-		return (List<T>) ctx(optionItems).iQueryForEntityList(this.getClass(), optionItems);
+		return ctx(optionItems).iQueryForEntityList(this.getClass(), optionItems);
 	}
 
 	@Override
@@ -238,4 +238,10 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
+
+	@Override
+	public default Object[] shard(Object... optionItems) {
+		return new Object[] { shardTB(optionItems), shardDB(optionItems) };
+	}
+
 }
