@@ -74,7 +74,6 @@ public class TransactionDemo {
 		System.out.println(1 / 0); // force roll back
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceCfg.class));
 		ctx.setConnectionManager(TinyTxConnectionManager.instance());

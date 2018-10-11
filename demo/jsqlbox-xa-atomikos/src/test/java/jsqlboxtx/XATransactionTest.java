@@ -68,7 +68,6 @@ public class XATransactionTest {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Before
 	public void init() {
 		JBEANBOX.bctx().addGlobalAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
