@@ -2,7 +2,6 @@ package demo.transaction.jsqlbox;
 
 import static act.controller.Controller.Util.redirect;
 import static act.controller.Controller.Util.render;
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.value;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.subclassesOf;
@@ -43,9 +42,9 @@ public class TransactionDemo {
 	}
 
 	@OnAppStart
-	public void onStart() { 
+	public void onStart() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		ctx.setConnectionManager(TinyTxConnectionManager.instance());//这一行是与TinyTx配对的
+		ctx.setConnectionManager(TinyTxConnectionManager.instance());// 这一行是与TinyTx配对的，必须
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// 全局缺省上下文
 
 		for (String ddl : ctx.toCreateDDL(Account.class))// 第一次要建表
@@ -63,8 +62,8 @@ public class TransactionDemo {
 
 	@PostAction("/transfer")
 	public Result transfer(int amount, boolean btnA2B, boolean btnB2A, ActionContext context) {
-		Account dao = INJECTOR.getInstance(Account.class);
-		Account dao2 = JBEANBOX.getInstance(Account.class);
+		Account dao = INJECTOR.getInstance(Account.class); // 使用Guice来创建AOP代理类
+		Account dao2 = JBEANBOX.getInstance(Account.class); // 使用jBeanBox来创建AOP代理类
 		try {
 			if (btnA2B)
 				dao.transfer(amount, ACC_A, ACC_B);
@@ -83,7 +82,7 @@ public class TransactionDemo {
 
 	public static class TinyTxBox extends BeanBox {
 		{
-			this.injectConstruct(TinyTx.class, DataSource.class, value(dataSource));
+			this.injectConstruct(TinyTx.class, DataSource.class, dataSource);
 		}
 	}
 

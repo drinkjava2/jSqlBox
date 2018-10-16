@@ -22,7 +22,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -48,12 +47,12 @@ public class BeetlSqlTemplateDemo {
 		SQLLoader loader = new ClasspathLoader("/sql");
 		UnderlinedNameConversion nc = new UnderlinedNameConversion();
 		SQLManager sqlManager = new SQLManager(dbstyle, loader, source, nc, new Interceptor[] {});
-		// Set BeetlSqlTempalte as global default template engine
-
-		SqlBoxContextConfig.setGlobalNextTemplateEngine(new BeetlSqlTempalte(sqlManager));
-		SqlBoxContextConfig.setGlobalNextAllowShowSql(true); // Log output
-		SqlBoxContext ctx = new SqlBoxContext(ds); // Here you go
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+ 
+		
+		SqlBoxContext ctx = new SqlBoxContext(ds); 
+		ctx.setSqlTemplateEngine(new BeetlSqlTempalte(sqlManager));
+		ctx.setAllowShowSQL(true); //Allow show SQL log 
+		SqlBoxContext.setGlobalSqlBoxContext(ctx); 
 
 		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)

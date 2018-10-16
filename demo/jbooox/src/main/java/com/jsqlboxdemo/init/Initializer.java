@@ -1,7 +1,5 @@
 package com.jsqlboxdemo.init;
 
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.inject;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -57,12 +55,12 @@ public class Initializer implements ServletContextListener {
 
 	public static class TxBox extends BeanBox {
 		{
-			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
+			this.injectConstruct(TinyTx.class, DataSource.class, DataSourceBox.class);
 		}
 	}
 
 	@Override
-	public void contextInitialized(ServletContextEvent context) { 
+	public void contextInitialized(ServletContextEvent context) {
 		SqlBoxContextConfig config = new SqlBoxContextConfig();
 
 		// Set transaction manager
@@ -75,7 +73,7 @@ public class Initializer implements ServletContextListener {
 				return BeanBox.getBean(configClass);
 			}
 		});
-		SqlBoxContext ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class), config);
+		SqlBoxContext ctx = new SqlBoxContext(BeanBox.getBean(DataSourceBox.class), config);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx); // 全局上下文
 
 		// Initialize database

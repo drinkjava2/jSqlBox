@@ -2,7 +2,7 @@ package com.demo.common;
 
 import com.demo.blog.BlogController;
 import com.demo.index.IndexController;
-import com.github.drinkjava2.jdbpro.DbProConfig;
+//import com.github.drinkjava2.jdbpro.DbProConfig;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.jfinal.JFinalTxConnectionManager;
 import com.jfinal.config.Constants;
@@ -41,14 +41,14 @@ public class DemoConfig extends JFinalConfig {
 
 	//@formatter:off
 	/* 声明式事务有3个关键： 
-	 * 1.IOC/AOP工具， 这里 就用jFinal自带的 
+	 * 1.IOC/AOP工具， 这里 就用jFinal自带的 AOP工具
 	 * 2.声明式事务切面处理器， 这里就用jFinal自带的
 	 * 3.连接管理器。不同的声明式事务工具获取和关闭connection的方式不一样，在jTransactions中为纯JDBC、jFinal、Spring等都准备了一个连接管理器,这里设成JFinalTxConnectionManager。
 	 */
 	@Override
-	public void afterJFinalStart() { 
-		DbProConfig.setGlobalNextConnectionManager(JFinalTxConnectionManager.instance());
+	public void afterJFinalStart() {  
 		SqlBoxContext ctx = new SqlBoxContext(DbKit.getConfig().getDataSource());
+		ctx.setConnectionManager(JFinalTxConnectionManager.instance());
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		// 第一次运行，手工建一个H2数据库表

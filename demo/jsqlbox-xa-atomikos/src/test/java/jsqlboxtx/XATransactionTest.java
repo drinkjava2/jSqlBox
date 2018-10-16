@@ -70,7 +70,7 @@ public class XATransactionTest {
 
 	@Before
 	public void init() {
-		JBEANBOX.bctx().addGlobalAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
+		JBEANBOX.bctx().addContextAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
 		BeanBox.getBean(SpringTxIBox.class);// Force initialize
 
 		SqlBoxContextConfig.setGlobalNextDialect(Dialect.MySQL57Dialect);
@@ -101,7 +101,7 @@ public class XATransactionTest {
 
 	@After
 	public void cleanup() {
-		// Usually cleanup job need done by IOC tool's preDestroy callback
+		// Usually cleanup job need done by IOC tool's preDestroy callback, but I'm lazy
 		for (int i = 0; i < DATABASE_QTY; i++)
 			xaDataSources[i].close();
 		um.close();

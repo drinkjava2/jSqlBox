@@ -72,8 +72,7 @@ public class NonXATransactionTest {
 
 	@Test
 	public void doTest() {
-		JBEANBOX.bctx().addGlobalAop(JBEANBOX.value(new TinyTx(masters[1].getDataSource())), NonXATransactionTest.class,
-				"insert*");
+		JBEANBOX.bctx().addContextAop(new TinyTx(masters[1].getDataSource()), NonXATransactionTest.class, "insert*");
 		NonXATransactionTest tester = BeanBox.getBean(NonXATransactionTest.class);
 		try {
 			tester.insertAccount();

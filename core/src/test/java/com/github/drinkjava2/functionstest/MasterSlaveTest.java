@@ -87,8 +87,7 @@ public class MasterSlaveTest {
 			this.name = name;
 		}
 	}
-
-	@SuppressWarnings("deprecation")
+ 
 	@Before
 	public void init() {
 		SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
@@ -158,8 +157,7 @@ public class MasterSlaveTest {
 	}
 
 	private static HikariDataSource txDataSource;
-
-	@SuppressWarnings("deprecation")
+ 
 	@Test
 	public void testMasterSlaveQueryInTransaction() {
 		System.out.println("============Test testMasterSlaveInTransaction==============");

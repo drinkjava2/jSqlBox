@@ -496,8 +496,7 @@ public class UsageAndSpeedTest {
 			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
 		}
 	}
-
-	@SuppressWarnings("deprecation")
+ 
 	@Test
 	public void abstractSqlMapperUseText() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
@@ -524,7 +523,6 @@ public class UsageAndSpeedTest {
 		// below methods are for unit test only, not for speed test
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void sqlMapperUseText2() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
@@ -707,7 +705,6 @@ public class UsageAndSpeedTest {
 		Assert.assertEquals(1, users.size());
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void abstractSqlMapperUseTextUnbindAndBind() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);

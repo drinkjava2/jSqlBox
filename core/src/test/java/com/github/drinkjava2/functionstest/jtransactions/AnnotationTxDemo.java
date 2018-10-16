@@ -1,13 +1,11 @@
 package com.github.drinkjava2.functionstest.jtransactions;
 
 import static com.github.drinkjava2.jbeanbox.JBEANBOX.inject;
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.value;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.sql.Connection;
 
 import javax.sql.DataSource;
 
@@ -19,29 +17,39 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * TinyTx is a tiny and clean declarative transaction tool, in this unit test
- * use jBeanBox's annotation configuration.
+ * This is jSqlBox Transaction Demo, will be put in wiki
  * 
- * To make jSqlBox core unit test clean, I put Spring TX demos in jSqlBox's demo
- * folder.
- *
  * @author Yong Zhu
- *
- * @version 1.0.0
- * @since 1.0.0
+ * @since 2.0.4
  */
-public class TinyTxTest {
+public class AnnotationTxDemo {
+	public static class DataSourceCfg extends BeanBox {
+		{
+			setProperty("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			setProperty("driverClassName", "org.h2.Driver");
+			setProperty("username", "sa");
+			setProperty("password", "");
+		}
+
+		public HikariDataSource create() {
+			HikariDataSource ds = new HikariDataSource();
+			ds.setMaximumPoolSize(10);
+			ds.setConnectionTimeout(5000);
+			this.setPreDestroy("close");// jBeanBox will close pool
+			return ds;
+		}
+	}
+
 	SqlBoxContext ctx;
 	{
 		SqlBoxContext.resetGlobalVariants();
-		SqlBoxContextConfig config = new SqlBoxContextConfig();
-		config.setConnectionManager(TinyTxConnectionManager.instance());
-		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class), config);
+		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class));
+		ctx.setConnectionManager(TinyTxConnectionManager.instance());
 	}
 
 	@TX
@@ -59,7 +67,7 @@ public class TinyTxTest {
 
 	@Test
 	public void doTest() {
-		TinyTxTest tester = BeanBox.getBean(TinyTxTest.class);
+		AnnotationTxText tester = BeanBox.getBean(AnnotationTxText.class);
 		ctx.quiteExecute("drop table user_tb");
 		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
 
@@ -68,7 +76,7 @@ public class TinyTxTest {
 		try {
 			tester.tx_Insert1();// this one inserted 1 record
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
-			tester.tx_Insert2();// this one did not insert, roll back
+			tester.tx_Insert2();// this one did not insert, roll back to 1
 		} catch (Exception e) {
 			// e.printStackTrace();
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
@@ -93,8 +101,7 @@ public class TinyTxTest {
 
 	public static class TheTxBox extends BeanBox {
 		{
-			this.injectConstruct(TinyTx.class, DataSource.class, Integer.class, inject(DataSourceBox.class),
-					value(Connection.TRANSACTION_READ_COMMITTED));
+			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
 		}
 	}
 

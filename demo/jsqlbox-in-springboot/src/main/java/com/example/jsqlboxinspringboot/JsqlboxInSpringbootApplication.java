@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 
 import com.example.jsqlboxinspringboot.entity.Customer;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jtransactions.spring.SpringTxConnectionManager;
 
 //@formatter:off
@@ -31,8 +30,8 @@ public class JsqlboxInSpringbootApplication {
 	 */
 	@Bean
 	public SqlBoxContext createDefaultSqlBoxContext() {
-		SqlBoxContextConfig.setGlobalNextConnectionManager(SpringTxConnectionManager.instance());
 		SqlBoxContext ctx = new SqlBoxContext(ds);
+		ctx.setConnectionManager(SpringTxConnectionManager.instance() );
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// 设定静态全局上下文
 
 		// 第一次运行要建表，利用jSqlBox来做，自已动手更踏实
