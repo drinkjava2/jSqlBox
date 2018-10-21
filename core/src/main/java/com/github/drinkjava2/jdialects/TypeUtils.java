@@ -7,7 +7,6 @@ package com.github.drinkjava2.jdialects;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +53,7 @@ public abstract class TypeUtils {// NOSONAR
 		SQL_MAP_ABLE_TYPES.put(Boolean.class, Type.BOOLEAN);
 		SQL_MAP_ABLE_TYPES.put(Byte.class, Type.TINYINT);
 		SQL_MAP_ABLE_TYPES.put(Character.class, Type.CHAR);
-		SQL_MAP_ABLE_TYPES.put(Date.class, Type.DATE);
+		SQL_MAP_ABLE_TYPES.put(java.util.Date.class, Type.DATE);
 		SQL_MAP_ABLE_TYPES.put(java.sql.Date.class, Type.DATE);
 		SQL_MAP_ABLE_TYPES.put(java.sql.Time.class, Type.TIME);
 		SQL_MAP_ABLE_TYPES.put(java.sql.Timestamp.class, Type.TIMESTAMP);

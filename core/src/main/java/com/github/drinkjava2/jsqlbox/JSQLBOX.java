@@ -110,39 +110,61 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	}
 
 	//@formatter:off
-	protected void entity_series_methods_from_SqlBoxContext_____________________() {}// NOSONAR 
-
-	public static <T> List<T> iQueryForEntityList(Object... optionItems) {return  gctx().iQueryForEntityList(optionItems);}
-	public static <T> List<T> pQueryForEntityList(Object... optionItems) {return  gctx().pQueryForEntityList(optionItems);}
-	public static <T> List<T> tQueryForEntityList(Object... optionItems) {return  gctx().tQueryForEntityList(optionItems);}
-	public static <T> T entityInsert(T entity, Object... optionItems) {return  gctx().entityInsert(entity, optionItems);}
-	public static <T> T entityUpdate(Object entity, Object... optionItems) {return  gctx().entityUpdate(entity, optionItems);}
-	public static int entityUpdateTry(Object entity, Object... optionItems) {return  gctx().entityUpdateTry(entity, optionItems);}
-	public static void entityDelete(Object entity, Object... optionItems) { gctx().entityDelete(entity, optionItems);}
+	
+	//Entity crud methods from SqlBoxContext
+	public static <T> List<T> entityFindAll(Class<T> entityClass) {return gctx().entityFindAll(entityClass);}
+	public static <T> List<T> entityFindAll(Class<T> entityClass, Object... optionItems) {return gctx().entityFindAll(entityClass, optionItems);}
+	public static <T> List<T> entityFindByIds(Class<T> entityClass, Iterable<?> ids) {return gctx().entityFindByIds(entityClass, ids);}
+	public static <T> List<T> entityFindByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {return gctx().entityFindByIds(entityClass, ids, optionItems);}
+	public static <T> List<T> entityFindBySample(Object sampleBean) {return gctx().entityFindBySample(sampleBean);}
+	public static <T> List<T> entityFindBySample(Object sampleBean, Object... optionItems) {return gctx().entityFindBySample(sampleBean, optionItems);}
+	public static <T> List<T> entityFindBySQL() {return gctx().entityFindBySQL();}
+	public static <T> List<T> entityFindBySQL(Object... optionItems) {return gctx().entityFindBySQL(optionItems);}
+	public static <T> List<T> iQueryForEntityList() {return gctx().iQueryForEntityList();}
+	public static <T> List<T> iQueryForEntityList(Object... optionItems) {return gctx().iQueryForEntityList(optionItems);}
+	public static <T> List<T> pQueryForEntityList() {return gctx().pQueryForEntityList();}
+	public static <T> List<T> pQueryForEntityList(Object... optionItems) {return gctx().pQueryForEntityList(optionItems);}
+	public static <T> List<T> tQueryForEntityList() {return gctx().tQueryForEntityList();}
+	public static <T> List<T> tQueryForEntityList(Object... optionItems) {return gctx().tQueryForEntityList(optionItems);}
+	public static <T> T entityInsert(T entity) {return gctx().entityInsert(entity);}
+	public static <T> T entityInsert(T entity, Object... optionItems) {return gctx().entityInsert(entity, optionItems);}
+	public static <T> T entityLoad(T entity) {return gctx().entityLoad(entity);}
+	public static <T> T entityLoad(T entity, Object... optionItems) {return gctx().entityLoad(entity, optionItems);}
+	public static <T> T entityLoadById(Class<T> entityClass, Object entityId) {return gctx().entityLoadById(entityClass, entityId);}
+	public static <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {return gctx().entityLoadById(entityClass, entityId, optionItems);}
+	public static <T> T entityLoadByIdTry(Class<T> entityClass, Object entityId) {return gctx().entityLoadByIdTry(entityClass, entityId);}
+	public static <T> T entityLoadByIdTry(Class<T> entityClass, Object entityId, Object... optionItems) {return gctx().entityLoadByIdTry(entityClass, entityId, optionItems);}
+	public static <T> T entityUpdate(Object entity) {return gctx().entityUpdate(entity);}
+	public static <T> T entityUpdate(Object entity, Object... optionItems) {return gctx().entityUpdate(entity, optionItems);}
+	public static boolean entityExist(Object entity) {return gctx().entityExist(entity);}
+	public static boolean entityExist(Object entity, Object... optionItems) {return gctx().entityExist(entity, optionItems);}
+	public static boolean entityExistById(Class<?> entityClass, Object id) {return gctx().entityExistById(entityClass, id);}
+	public static boolean entityExistById(Class<?> entityClass, Object id, Object... optionItems) {return gctx().entityExistById(entityClass, id, optionItems);}
+	public static int entityCountAll(Class<?> entityClass) {return gctx().entityCountAll(entityClass);}
+	public static int entityCountAll(Class<?> entityClass, Object... optionItems) {return gctx().entityCountAll(entityClass, optionItems);}
+	public static int entityDeleteByIdTry(Class<?> entityClass, Object id) {return gctx().entityDeleteByIdTry(entityClass, id);}
+	public static int entityDeleteByIdTry(Class<?> entityClass, Object id, Object... optionItems) {return gctx().entityDeleteByIdTry(entityClass, id, optionItems);}
+	public static int entityDeleteTry(Object entity) {return gctx().entityDeleteTry(entity);}
 	public static int entityDeleteTry(Object entity, Object... optionItems) {return gctx().entityDeleteTry(entity, optionItems);}
+	public static int entityLoadTry(Object entity) {return gctx().entityLoadTry(entity);}
+	public static int entityLoadTry(Object entity, Object... optionItems) {return gctx().entityLoadTry(entity, optionItems);}
+	public static int entityUpdateTry(Object entity) {return gctx().entityUpdateTry(entity);}
+	public static int entityUpdateTry(Object entity, Object... optionItems) {return gctx().entityUpdateTry(entity, optionItems);}
+	public static void entityDelete(Object entity) { gctx().entityDelete(entity);}
+	public static void entityDelete(Object entity, Object... optionItems) { gctx().entityDelete(entity, optionItems);}
+	public static void entityDeleteById(Class<?> entityClass, Object id) {gctx().entityDeleteById(entityClass, id);;}
 	public static void entityDeleteById(Class<?> entityClass, Object id, Object... optionItems) {gctx().entityDeleteById(entityClass, id, optionItems);;}
-	public static int entityDeleteByIdTry(Class<?> entityClass, Object id, Object... optionItems) {return  gctx().entityDeleteByIdTry(entityClass, id, optionItems);}
-	public static boolean entityExist(Object entity, Object... optionItems) {return  gctx().entityExist(entity, optionItems);}
-	public static boolean entityExistById(Class<?> entityClass, Object id, Object... optionItems) {return  gctx().entityExistById(entityClass, id, optionItems);}
-	public static int entityCountAll(Class<?> entityClass, Object... optionItems) {return  gctx().entityCountAll(entityClass, optionItems);}
-	public static <T> T entityLoad(T entity, Object... optionItems) {return  gctx().entityLoad(entity, optionItems);}
-	public static int entityLoadTry(Object entity, Object... optionItems) {return  gctx().entityLoadTry(entity, optionItems);}
-	public static <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {return  gctx().entityLoadById(entityClass, entityId, optionItems);}
-	public static <T> T entityLoadByIdTry(Class<T> entityClass, Object entityId, Object... optionItems) {return  gctx().entityLoadByIdTry(entityClass, entityId, optionItems);}
-	public static <T> List<T> entityFindAll(Class<T> entityClass, Object... optionItems) {return  gctx().entityFindAll(entityClass, optionItems);}
-	public static <T> List<T> entityFindByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {return  gctx().entityFindByIds(entityClass, ids, optionItems);}
-	public static <T> List<T> entityFindBySQL(Object... optionItems) {return  gctx().entityFindBySQL(optionItems);}
-	public static <T> List<T> entityFindBySample(Object sampleBean, Object... optionItems) {return  gctx().entityFindBySample(sampleBean, optionItems);}
+
+
+	// ORM Query Methods from SqlBoxContext
 	public static EntityNet entityAutoNet(Class<?>... entityClass) {return  gctx().entityAutoNet(entityClass);}
 	public static <E> E entityFindRelatedOne(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedOne(entity, sqlItems);}
 	public static <E> List<E> entityFindRelatedList(Object entityOrIterable, Object... sqlItems) {return  gctx().entityFindRelatedList(entityOrIterable, sqlItems);}
 	public static <E> Set<E> entityFindRelatedSet(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedSet(entity, sqlItems);}
 	public static <E> Map<Object, E> entityFindRelatedMap(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedMap(entity, sqlItems);}
-
 	
 	
-	
-	protected void pint_series_methods_from_DbPro_____________________() {}// NOSONAR 	
+	// pint series methods from DbPro
 	
 	public static <T> T iQuery(Object... inlineSQL) {return  gctx().iQuery(inlineSQL);}
 	public static <T> T iQueryForObject(Object... inlineSQL) {return gctx().iQueryForObject(inlineSQL);}

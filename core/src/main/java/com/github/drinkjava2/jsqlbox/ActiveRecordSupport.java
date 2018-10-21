@@ -82,7 +82,7 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	public List<T> findByIds(Iterable<?> ids, Object... optionItems);
 
 	/** Find entity according SQL, if not found, return empty list */
-	public List<T> findBySQL(Object... optionItems);
+	public List<T> findBySQL(Object... sqlItems);
 
 	/**
 	 * Find entity according a sample bean, ignore null fields, if not found, return
@@ -137,20 +137,21 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	public PreparedSQL guessPreparedSQL(Object... params);
 
 	/**
-	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
-	 * instance,
-	 * 
-	 * Usage: put("key1",value1,"key2",value2...);
+	 * For tXxxx style query using templateEngine, bind parameters to key, usage:
+	 * bind("key1",value1,"key2",value2...);
 	 */
 	public SqlItem bind(Object... parameters);
 
 	/** Return current entity's shardTable according its sharding key values */
-	public String shardTB(Object... optionItems);
+	public String shardTB(Object... shardingKeys);
 
 	/** Return current entity's shardDatabase according its sharding key values */
-	public SqlBoxContext shardDB(Object... optionItems);
-	
-	/** Return current entity's shardTable and shardDatabase according its sharding key values */
-	public Object[] shard(Object... optionItems);
+	public SqlBoxContext shardDB(Object... shardingKeys);
+
+	/**
+	 * Return current entity's shardTable and shardDatabase according its sharding
+	 * key values
+	 */
+	public Object[] shard(Object... shardingKeys);
 
 }

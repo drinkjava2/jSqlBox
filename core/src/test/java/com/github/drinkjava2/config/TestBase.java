@@ -23,6 +23,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -44,7 +45,7 @@ public class TestBase {
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
 
-		//SqlBoxContext.setGlobalNextAllowShowSql(true);
+		SqlBoxContextConfig.setGlobalNextAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource); 
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 		if (tablesForTest != null)
