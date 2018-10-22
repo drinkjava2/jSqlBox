@@ -20,17 +20,18 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.TextUtils;
 
-import activerecordtext.AbstractUser;
+import activerecordtext.Sqls;
 
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
  * 
- * @author Yong Zhu 
+ * @author Yong Zhu
  */
-public class TextUtilsTest {
+public class TextUtilsTest { 
+	
 	@Test
 	public void doTextTest() {
-		String str = TextUtils.getJavaSourceCodeUTF8(AbstractUser.class);
-		Assert.assertTrue(str.indexOf("AbstractUser extends TextedUser") > -1);
+		String str = TextUtils.getJavaSourceCodeUTF8(Sqls.class);
+		Assert.assertTrue(str.indexOf("public class Sqls") > -1);
 	}
 }

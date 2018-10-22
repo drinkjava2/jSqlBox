@@ -15,7 +15,12 @@
  */
 package com.github.drinkjava2.functionstest;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.entityFindAll;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.pQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -30,7 +35,6 @@ import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
-import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
@@ -40,10 +44,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
-import com.github.drinkjava2.jsqlbox.annotation.Ioc;
-import com.github.drinkjava2.jsqlbox.annotation.Model;
-import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.github.drinkjava2.jsqlbox.handler.SSMapListHandler;
@@ -87,17 +87,17 @@ public class SqlHandlersTest extends TestBase {
 			this.age = age;
 		}
 
-		@Sql("select u.* from DemoUser u where u.age>?")
-		public List<DemoUser> selectAgeBiggerThan1(Integer age) {
-			return this.guess(age, new EntityListHandler(), DemoUser.class);
-		}
-
-		@Model(DemoUser.class)
-		@Ioc(EntityListHandlerCfg.class)
-		@Sql("select * from DemoUser u where u.age>?")
-		public List<DemoUser> selectAgeBiggerThan2(Integer age) {
-			return this.guess(age);
-		}
+		// @Sql("select u.* from DemoUser u where u.age>?")
+		// public List<DemoUser> selectAgeBiggerThan1(Integer age) {
+		// return this.guess(age, new EntityListHandler(), DemoUser.class);
+		// }
+		//
+		// @Model(DemoUser.class)
+		// @Ioc(EntityListHandlerCfg.class)
+		// @Sql("select * from DemoUser u where u.age>?")
+		// public List<DemoUser> selectAgeBiggerThan2(Integer age) {
+		// return this.guess(age);
+		// }
 	}
 
 	public static class EntityListHandlerCfg extends BeanBox {
@@ -112,30 +112,6 @@ public class SqlHandlersTest extends TestBase {
 		createAndRegTables(DemoUser.class);
 		for (int i = 0; i < 100; i++)
 			new DemoUser().put("id", "" + i).put("userName", "user" + i).put("age", i).insert();
-	}
-
-	@Test
-	public void testGuessAnnotationNoParam() {
-		DemoUser user = new DemoUser();
-		List<DemoUser> result = user.selectAgeBiggerThan1(0);
-		Assert.assertTrue(result.size() == 99);
-	}
-
-	@Test
-	public void testGuessAnnotationHasParam() {
-		SqlBoxContextConfig cfg = new SqlBoxContextConfig();
-		cfg.setIocTool(new IocTool() {
-			@Override
-			public <T> T getBean(Class<?> configClass) {
-				return BeanBox.getBean(configClass);
-			}
-		});
-		SqlBoxContext ctx2 = new SqlBoxContext(ctx.getDataSource(), cfg);
-
-		DemoUser user = new DemoUser();
-		user.useContext(ctx2);
-		List<DemoUser> result2 = user.selectAgeBiggerThan2(0);
-		Assert.assertTrue(result2.size() == 99);
 	}
 
 	@Test

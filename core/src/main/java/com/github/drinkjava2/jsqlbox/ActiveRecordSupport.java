@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 
 /**
@@ -116,25 +115,7 @@ public interface ActiveRecordSupport<T> {// NOSONAR
 	 * Put values for entity fields, field names should be cached by call putFields
 	 * method first
 	 */
-	public T putValues(Object... values);
-
-	/**
-	 * In SqlMapper style, based on current method @Sql annotated String or Text(see
-	 * user manual) in comments(need put Java file in resources folder, see user
-	 * manual) and parameters, guess a best fit query/update/delete/execute method
-	 * and run it
-	 */
-	public <U> U guess(Object... params);
-
-	/**
-	 * In SqlMapper style, return current method's SQL String based on current
-	 * method @Sql annotated String or Text(see user manual) in comments(need put
-	 * Java file in resources folder, see user manual)
-	 */
-	public String guessSQL();
-
-	/** In SqlMapper style, return current method's prepared SQL */
-	public PreparedSQL guessPreparedSQL(Object... params);
+	public T putValues(Object... values); 
 
 	/**
 	 * For tXxxx style query using templateEngine, bind parameters to key, usage:

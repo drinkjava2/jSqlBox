@@ -18,19 +18,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
-import com.github.drinkjava2.jdbpro.IocTool;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
@@ -40,12 +36,7 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
-import com.github.drinkjava2.jsqlbox.annotation.New;
-import com.github.drinkjava2.jsqlbox.annotation.Sql;
 import com.zaxxer.hikari.HikariDataSource;
-
-import activerecordtext.AbstractUser;
-import activerecordtext.TextedUser;
 
 /**
  * Usage of different SQL style and speed test
@@ -108,10 +99,7 @@ public class UsageAndSpeedTest {
 		runMethod("tXxxStyle");
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
-		runMethod("activeRecordDefaultContext");
-		runMethod("sqlMapperUseText");
-		runMethod("sqlMapperSqlAnnotaion");
-		runMethod("abstractSqlMapperUseText");
+		runMethod("activeRecordDefaultContext");  
 	}
 
 	public void runMethod(String methodName) throws Exception {
@@ -199,41 +187,6 @@ public class UsageAndSpeedTest {
 			this.age = age;
 		}
 
-	}
-
-	public static class UserMapper extends UserAR {
-		@Sql("insert into users (name,address) values(?,?)")
-		public void insertOneUser(String name, String address) {
-			this.guess(name, address);
-		};
-
-		@Sql("update users set name=?, address=?")
-		public void updateAllUser(String name, String address) {
-			this.guess(name, address);
-		};
-
-		@New(MapListHandler.class)
-		@Sql("select * from users where name=? and address=?")
-		public List<Map<String, Object>> selectUsers(String name, String address) {
-			return this.guess(name, address);
-		};
-
-		@New(MapListHandler.class)
-		@Sql("select * from users where name=:name and address=:address")
-		public List<Map<String, Object>> selectUsersBindParam(String name, String address) {
-			return this.guess(bind("name", name, "address", address));
-		};
-
-		@New(MapListHandler.class)
-		@Sql("select * from users where name='${name}' and address=:address")
-		public List<Map<String, Object>> selectUsersUnbindParam(String name, String address) {
-			return this.guess(name, address);
-		};
-
-		@Sql("delete from users where name=? or address=?")
-		public void deleteUsers(String name, String address) {
-			this.guess(name, address);
-		};
 	}
 
 	@Test
@@ -467,93 +420,8 @@ public class UsageAndSpeedTest {
 		}
 	}
 
-	@Test
-	public void sqlMapperSqlAnnotaion() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		UserMapper user = new UserMapper();
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			user.insertOneUser("Sam", "Canada");
-			user.updateAllUser("Tom", "China");
-			List<Map<String, Object>> users = user.selectUsers("Tom", "China");
-			Assert.assertEquals(1, users.size());
-			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
-		}
-	}
-
-	@Test
-	public void sqlMapperUseText() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		TextedUser user = new TextedUser();
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			user.insertOneUser("Sam", "Canada");
-			user.ctx().pUpdate(user.updateAllUserPreSql("Tom", "China"));
-			List<Map<String, Object>> u1 = user.selectUsersMapListByText("Tom", "China");
-			Assert.assertEquals(1, u1.size());
-			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
-		}
-	}
- 
-	@Test
-	public void abstractSqlMapperUseText() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		ctx.setIocTool(new IocTool() {
-			public <T> T getBean(Class<?> configClass) {
-				return BeanBox.getBean(configClass);
-			}
-		});
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		AbstractUser mapper = SqlBoxContext.createMapper(AbstractUser.class);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			mapper.insertOneUser("Sam", "Canada");
-			mapper.updateUserPreparedSQL("Tom", "China");
-			List<Map<String, Object>> users = mapper.selectUserListMap("Tom", "China");
-			Assert.assertEquals(1, users.size());
-			List<TextedUser> users2 = mapper.selectAbstractUserList1("Tom", "China");
-			Assert.assertEquals(1, users2.size());
-			mapper.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, mapper.ctx().pQueryForLongValue("select count(*) from users"));
-		}
-	}
-
 	protected void BelowNotForSpeedTest_JustDoSomeUnitTest__________________() {
 		// below methods are for unit test only, not for speed test
-	}
-
-	@Test
-	public void sqlMapperUseText2() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		ctx.setIocTool(new IocTool() {
-			public <T> T getBean(Class<?> configClass) {
-				return BeanBox.getBean(configClass);
-			}
-		});
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		TextedUser user = new TextedUser();
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			user.insertOneUser("Sam", "Canada");
-			user.ctx().iUpdate(user.updateAllUserPreSql("Tom", "China"));
-			List<Map<String, Object>> u1 = user.selectUsersMapListByText("Tom", "China");
-			Assert.assertEquals(1, u1.size());
-
-			List<Map<String, Object>> u2 = user.selectUsersMapListByText2("Tom", "China");
-			Assert.assertEquals(1, u2.size());
-
-			List<TextedUser> u3 = user.selectUsersByText2("Tom", "China");
-			Assert.assertEquals(1, u3.size());
-
-			List<TextedUser> u4 = user.selectUsersByText3("Tom", "China");
-			Assert.assertEquals(1, u4.size());
-
-			List<TextedUser> u5 = user.selectUsersByText4("Tom", "China");
-			Assert.assertEquals(1, u5.size());
-
-			user.deleteUsers("Tom", "China");
-			Assert.assertEquals(0, user.ctx().pQueryForLongValue("select count(*) from users"));
-		}
 	}
 
 	@Test
@@ -682,46 +550,4 @@ public class UsageAndSpeedTest {
 		ctx.nExecute("delete from users");
 	}
 
-	@Test
-	public void sqlMapperSqlAnnobindParam() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		UserMapper user = new UserMapper();
-		user.insertOneUser("Sam", "Canada");
-		user.updateAllUser("Tom", "China");
-		List<Map<String, Object>> users = user.selectUsersBindParam("Tom", "China");
-		Assert.assertEquals(1, users.size());
-	}
-
-	@Test
-	public void sqlMapperSqlAnnoUnbindParam() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		// ctx.setAllowShowSQL(true);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		UserMapper user = new UserMapper();
-		user.insertOneUser("Sam", "Canada");
-		user.updateAllUser("Tom", "China");
-		List<Map<String, Object>> users = user.selectUsersUnbindParam("Tom", "China");
-		Assert.assertEquals(1, users.size());
-	}
-
-	@Test
-	public void abstractSqlMapperUseTextUnbindAndBind() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
-		ctx.setIocTool(new IocTool() {
-			public <T> T getBean(Class<?> configClass) {
-				return BeanBox.getBean(configClass);
-			}
-		});
-		AbstractUser mapper = SqlBoxContext.createMapper(AbstractUser.class);
-		mapper.insertOneUser("Sam", "Canada");
-		mapper.updateUserPreparedSQL("Tom", "China");
-		List<TextedUser> users2 = mapper.selectAbstractUserList1("Tom", "China");
-		Assert.assertEquals(1, users2.size());
-
-		TextedUser u = users2.get(0);
-		List<TextedUser> users3 = mapper.selectAbstractUserList2("Tom", u);
-		Assert.assertEquals(1, users3.size());
-	}
 }

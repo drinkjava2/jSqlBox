@@ -11,8 +11,6 @@
  */
 package com.github.drinkjava2.functionstest.jdialects;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.entityInsert;
-
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;

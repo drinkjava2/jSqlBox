@@ -27,14 +27,12 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
  */
 public class SqlBoxContextConfig extends DbProConfig {
 	protected static Dialect globalNextDialect = null;
-	protected static SqlMapperGuesser globalNextSqlMapperGuesser = SqlMapperDefaultGuesser.instance;
 	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { new ShardingModTool(),
 			new ShardingRangeTool() };
 	protected static SnowflakeCreator globalNextSnowflakeCreator = null;
 	protected static Object[] globalNextSsModels = null;
 
 	private Dialect dialect = globalNextDialect;
-	private SqlMapperGuesser sqlMapperGuesser = globalNextSqlMapperGuesser;
 	private SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 	private ShardingTool[] shardingTools = globalNextShardingTools;
 
@@ -52,14 +50,6 @@ public class SqlBoxContextConfig extends DbProConfig {
 	public SqlBoxContextConfig setDialect(Dialect dialect) {
 		this.dialect = dialect;
 		return this;
-	}
-
-	public SqlMapperGuesser getSqlMapperGuesser() {
-		return sqlMapperGuesser;
-	}
-
-	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
-		this.sqlMapperGuesser = sqlMapperGuesser;
 	}
 
 	public ShardingTool[] getShardingTools() {
@@ -83,14 +73,6 @@ public class SqlBoxContextConfig extends DbProConfig {
 
 	public static Dialect getGlobalNextDialect() {
 		return globalNextDialect;
-	}
-
-	public static SqlMapperGuesser getGlobalNextSqlMapperGuesser() {
-		return globalNextSqlMapperGuesser;
-	}
-
-	public static void setGlobalNextSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {
-		globalNextSqlMapperGuesser = sqlMapperGuesser;
 	}
 
 	public static void setGlobalNextDialect(Dialect dialect) {

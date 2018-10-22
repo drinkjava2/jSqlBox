@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ArrayUtils;
@@ -257,22 +256,7 @@ public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 		}
 		return (T) this;
 	}
-
-	@Override
-	public <U> U guess(Object... params) {// NOSONAR
-		return ctx().getSqlMapperGuesser().guess(ctx(), this, params);
-	}
-
-	@Override
-	public String guessSQL() {
-		return ctx().getSqlMapperGuesser().guessSQL(ctx(), this);
-	}
-
-	@Override
-	public PreparedSQL guessPreparedSQL(Object... params) {
-		return ctx().getSqlMapperGuesser().doGuessPreparedSQL(ctx(), this, params);
-	}
-
+ 
 	@Override
 	public SqlItem bind(Object... parameters) {
 		return new SqlItem(SqlOption.BIND, parameters);

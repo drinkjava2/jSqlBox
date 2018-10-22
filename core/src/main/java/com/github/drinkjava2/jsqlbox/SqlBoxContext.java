@@ -56,8 +56,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Dialect of current SqlBoxContext, optional */
 	protected Dialect dialect = SqlBoxContextConfig.globalNextDialect;
 
-	/** In SqlMapper style, A guesser needed to guess and execute SQL methods */
-	protected SqlMapperGuesser sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
 	protected ShardingTool[] shardingTools = SqlBoxContextConfig.globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
 
@@ -87,12 +85,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	private void copyConfigs(SqlBoxContextConfig config) {
 		if (config == null) {
-			this.sqlMapperGuesser = SqlBoxContextConfig.globalNextSqlMapperGuesser;
 			this.shardingTools = SqlBoxContextConfig.globalNextShardingTools;
 			this.snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
 		} else {
 			this.dialect = config.getDialect();
-			this.sqlMapperGuesser = config.getSqlMapperGuesser();
 			this.shardingTools = config.getShardingTools();
 			this.snowflakeCreator = config.getSnowflakeCreator();
 		}
@@ -111,7 +107,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContextConfig.setGlobalNextBatchSize(300);
 		SqlBoxContextConfig.setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
 		SqlBoxContextConfig.setGlobalNextDialect(null);
-		SqlBoxContextConfig.setGlobalNextSqlMapperGuesser(SqlMapperDefaultGuesser.instance);
 		SqlBoxContextConfig
 				.setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
 		SqlBoxContextConfig.setGlobalNextIocTool(null);
@@ -181,20 +176,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			return false;
 		return true;
 	}
-
-	/**
-	 * Create a subClass instance of a abstract ActiveRecordSupport class based on
-	 * default global SqlBoxContext
-	 */
-	public static <T> T createMapper(Class<?> abstractClass) {
-		Class<?> childClass = SqlMapperUtils.createChildClass(abstractClass);
-		try {
-			return (T) childClass.newInstance();
-		} catch (Exception e) {
-			throw new SqlBoxException(e);
-		}
-	}
-
+  
 	/** Get the sharded table name by given shard values */
 	public String getShardedTB(Object entityOrClass, Object... shardvalues) {
 		String table = SqlBoxContextUtils.getShardedTB(this, entityOrClass, shardvalues);
@@ -478,15 +460,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** This method is not thread safe, suggest only use at program starting */
 	public void setDialect(Dialect dialect) {// NOSONAR
 		this.dialect = dialect;
-	}
-
-	public SqlMapperGuesser getSqlMapperGuesser() {
-		return sqlMapperGuesser;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setSqlMapperGuesser(SqlMapperGuesser sqlMapperGuesser) {// NOSONAR
-		this.sqlMapperGuesser = sqlMapperGuesser;
 	}
 
 	public ShardingTool[] getShardingTools() {

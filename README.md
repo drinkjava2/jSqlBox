@@ -113,7 +113,7 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 - [一个独立的声明式事务工具 jTransactions](https://gitee.com/drinkjava2/jTransactions)
 - [一个微型IOC/AOP工具 jBeanBox](https://gitee.com/drinkjava2/jBeanBox)
 - [一个微型服务端布局工具 jWebBox](https://gitee.com/drinkjava2/jWebBox)
-- [人工智能实验项目 人工生命](https://gitee.com/drinkjava2/frog)
+- [人工智能实验项目 frog](https://gitee.com/drinkjava2/frog)
 
 # 期望 | Futures
 
