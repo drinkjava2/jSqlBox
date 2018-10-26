@@ -14,7 +14,6 @@ package com.github.drinkjava2.jsqlbox;
 import com.github.drinkjava2.jdbpro.DefaultClassTranslator;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
  * SqlBoxClassTranslator translator a class item into real SqlItem. for example:
@@ -30,13 +29,10 @@ public class SqlBoxClassTranslator extends DefaultClassTranslator {
 
 	@Override
 	public boolean translate(boolean inlineStyle, PreparedSQL predSQL, Class<?> clazz) {
-		if(super.translate(inlineStyle, predSQL, clazz))
+		if (super.translate(inlineStyle, predSQL, clazz))
 			return true;
-		if (TableModel.class.isAssignableFrom(clazz)) {
-			predSQL.addModel(TableModelUtils.entity2ReadOnlyModel(  clazz));
-			SqlBoxContextUtils.createLastAutoAliasName(predSQL);
-			return true;
-		} else
-			return false;
+		predSQL.addModel(TableModelUtils.entity2ReadOnlyModel(clazz));
+		SqlBoxContextUtils.createLastAutoAliasName(predSQL);
+		return true;
 	}
 }

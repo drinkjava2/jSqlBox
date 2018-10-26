@@ -109,7 +109,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/**
-	 * Override DbPro's dealItem method to deal SqlBoxContext's SqlItem
+	 * Override DbPro's dealOneSqlItem method to deal SqlBoxContext's SqlItem
 	 */
 	@Override
 	protected boolean dealOneSqlItem(boolean iXxxStyle, PreparedSQL ps, Object item) {// NOSONAR
@@ -127,7 +127,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			SqlBoxException.assureNotNull(t.getEntityClass());
 			ps.addModel(item);
 			SqlBoxContextUtils.createLastAutoAliasName(ps);
-		} else if (item instanceof Class) {
+		} else if (item instanceof Class) { 
 			return classTranslator.translate(iXxxStyle, ps, (Class<?>)item);
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;

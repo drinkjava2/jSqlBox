@@ -27,13 +27,14 @@ public interface ClassTranslator {
 	 * DefaultClassItemTranslator will translate it to a String
 	 * 
 	 * @param inlineStyle
-	 *            If is inside of a in-line style call?
+	 *            if is inside of a in-line style call?
 	 * @param predSQL
 	 *            the PreparedSQL instance
 	 * @param clazz
 	 *            the class item
-	 * @return If can not translate by current implementation, return false,
+	 * @return if can not translate by current implementation, return false,
 	 *         otherwise return true
 	 */
 	public boolean translate(boolean inlineStyle, PreparedSQL predSQL, Class<?> clazz);
+
 }

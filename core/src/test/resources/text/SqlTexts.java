@@ -1,7 +1,9 @@
 package text;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.pExecute;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.pQueryForString;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.tExecute;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,34 +12,21 @@ import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdbpro.Text;
 
 /**
- * This is a sample to show put SQL in multiple line Strings(Text), a
- * build-helper-maven-plugin in pom.xml is required, otherwise need copy java
- * file in resources folder manually, detail see Readme.md
+ * This is a sample to show put SQL in multiple line Strings(Text), a plug-in
+ * called "build-helper-maven-plugin" in pom.xml is required (can see the
+ * pom.xml file of this project), otherwise need manually put a copy of java
+ * source code file in resources folder.
+ * 
+ * If IDE is Eclipse, comments in this file will not be formatted, because it
+ * use /*- comments
+ * 
  * 
  * @author Yong Zhu
  * @since 2.0.4
  */
 public class SqlTexts extends TestBase {
 
-	public static class SelectUsers extends Text {
-		/*-  
-		select u.* 
-		from 
-		users u
-		where 
-		 u.name=:name and u.address=#{u.address}
-		*/
-	}
-
-	public static class UpdateUsers extends Text {
-		/*-  
-		 update users 
-		 set name=?, address=?
-		 where not(name is null)
-		*/
-	}
-
-	public static class InsertDemo extends Text {
+	public static class InsertDemoSQL extends Text {
 		/*-  
 		insert into demo
 		(id, name)
@@ -45,12 +34,29 @@ public class SqlTexts extends TestBase {
 		*/
 	}
 
+	public static class UpdateDemoSQL extends Text {
+		/*-  
+		 update demo d
+		 set d.name=#{d.name}
+		 where d.id=:d.id
+		*/
+	}
+
+	public static class SelectNameByIdSQL extends Text {
+		/*-  
+		select name from demo 
+		     where id=?
+		*/
+	}
+
 	@Test
 	public void test() {
-		pExecute(new InsertDemo(), "1", "Foo");
-		pExecute(InsertDemo.class, "2", "Bar");
-		Assert.assertEquals("Foo", pQueryForString("select name from demo where id=?", "1"));
-		Assert.assertEquals("Bar", pQueryForString("select name from demo where id=?", "2"));
+		pExecute(new InsertDemoSQL(), "1", "Foo"); 
+
+		Demo d = new Demo().put("id", "1", "name", "Bar");
+		tExecute(UpdateDemoSQL.class, bind("d", d));
+
+		Assert.assertEquals("Bar", pQueryForString(SelectNameByIdSQL.class, "1"));
 	}
 
 }

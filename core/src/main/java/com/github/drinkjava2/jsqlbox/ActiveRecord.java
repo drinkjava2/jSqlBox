@@ -64,6 +64,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 @SuppressWarnings("unchecked")
 public class ActiveRecord<T> implements ActiveRecordSupport<T> {
 	SqlBoxContext ctx;
+	Map<String,Object> tailFields;
 
 	@Override
 	public SqlBoxContext ctx(Object... optionItems) {

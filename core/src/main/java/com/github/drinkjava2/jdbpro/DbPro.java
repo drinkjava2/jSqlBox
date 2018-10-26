@@ -138,9 +138,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 					if (array.length != 0)
 						dealSqlItems(predSQL, inlineStyle, (Object[]) item);
 				} else if (inlineStyle)
-					predSQL.addSql(item); // iXxxx style, unknown is SQL piece
+					predSQL.addSql(item); // iXxxx style, unknown object look as SQL piece
 				else
-					predSQL.addParam(item); // pXxxx style, unknown is parameter
+					predSQL.addParam(item); // pXxxx style, unknown object look as parameter
 			}
 		}
 		predSQL.setSql(predSQL.getSqlBuilder().toString());
