@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jdbpro;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
  * TextUtils is used to read Java source file from sources folder, usuage:
@@ -53,7 +54,7 @@ public abstract class TextUtils {// NOSONAR
 			Class<?> clazz = Class.forName(classFullName);
 			return getJavaSourceCode(clazz, encoding);
 		} catch (ClassNotFoundException e) {
-			throw new SqlBoxException(e);
+			throw new DbProRuntimeException(e);
 		}
 	}
 

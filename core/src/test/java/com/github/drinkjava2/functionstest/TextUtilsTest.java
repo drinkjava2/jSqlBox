@@ -18,9 +18,9 @@ package com.github.drinkjava2.functionstest;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.TextUtils;
+import com.github.drinkjava2.jdbpro.TextUtils;
 
-import text.SqlDemo;
+import text.SqlTexts;
 
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
@@ -31,7 +31,7 @@ public class TextUtilsTest {
 
 	@Test
 	public void doTextTest() {
-		String str = TextUtils.getJavaSourceCodeUTF8(SqlDemo.class);
+		String str = TextUtils.getJavaSourceCodeUTF8(SqlTexts.class);
 		Assert.assertTrue(str.indexOf("public class ") > -1);
 	}
 }

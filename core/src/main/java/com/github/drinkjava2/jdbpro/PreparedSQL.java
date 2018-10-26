@@ -173,8 +173,8 @@ public class PreparedSQL {
 			throw new DbProRuntimeException("addGives at least need 2 alias parameters");
 		givesList.add(gives);
 	}
-	
-	public void giveBoth(String  alias1, String alias2) {  
+
+	public void giveBoth(String alias1, String alias2) {
 		if (givesList == null)
 			givesList = new ArrayList<String[]>();
 		givesList.add(new String[] { alias1, alias2 });
@@ -314,6 +314,16 @@ public class PreparedSQL {
 		if (others == null)
 			others = new ArrayList<SqlItem>();
 		others.add(obj);
+	}
+
+	/** if InlineStyle=true or SQL is empty, add as SQL, else add as parameter */
+	public void addSqlOrParam(boolean inlineStyle, String item) {
+		if (inlineStyle)
+			addSql(item);
+		else if (getSqlBuilder().length() > 0)
+			addParam(item);
+		else
+			addSql(item);
 	}
 
 	protected void GetterSetters_________________________() {// NOSONAR

@@ -16,9 +16,9 @@
 package com.github.drinkjava2.jdbpro;
 
 /**
- * Interface of Normal JDBC methods, this interface is used for other projects
- * to eliminate jar dependency, other projects need copy this interface into
- * there source code folder but always use name
+ * Interface of Normal JDBC methods, this interface is a bridge between jDbPro
+ * and jTransactions to eliminate jar dependency, other projects need copy this
+ * interface into there source code folder but always use name
  * "com.github.drinkjava2.jdbpro.NormalJdbcTool"
  * 
  * @author Yong Zhu

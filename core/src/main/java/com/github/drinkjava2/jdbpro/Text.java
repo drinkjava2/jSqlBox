@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jdbpro;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,22 +29,34 @@ import com.github.drinkjava2.jdialects.StrUtils;
  * @author Yong Zhu
  * @since 2.0.4
  */
-public abstract class Text {
+public class Text {
 	private static final Map<Class<?>, String> textCache = new ConcurrentHashMap<Class<?>, String>();
+
+	public Text() {
+
+	}
+
+	public Text(String id) {
+
+	}
 
 	@Override
 	public String toString() {
-		if (textCache.containsKey(this.getClass()))
-			return textCache.get(this.getClass());
-		String thisPublicStaticClassName = this.getClass().getSimpleName();
-		String javaSourceCode = TextUtils.getJavaSourceCode(this.getClass(), "UTF-8");
+		return classToString(this.getClass());
+	}
+
+	public static String classToString(Class<?> clazz) {
+		if (textCache.containsKey(clazz))
+			return textCache.get(clazz);
+		String thisPublicStaticClassName = clazz.getSimpleName();
+		String javaSourceCode = TextUtils.getJavaSourceCode(clazz, "UTF-8");
 		String classText = StrUtils.substringBetween(javaSourceCode, "public static class " + thisPublicStaticClassName,
 				"*/");
 		if (StrUtils.isEmpty(classText))
 			throw new RuntimeException("Can not find text between \"public static class " + thisPublicStaticClassName
 					+ " and end tag \"*/\"");
 		String s = StrUtils.substringAfter(classText, "/*-");
-		textCache.put(this.getClass(), s);
+		textCache.put(clazz, s);
 		return s;
 	}
 }

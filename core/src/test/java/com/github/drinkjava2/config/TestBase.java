@@ -21,9 +21,11 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -38,6 +40,29 @@ public class TestBase {
 	protected SqlBoxContext ctx;
 	protected TableModel[] tablesForTest;
 
+	public static class Demo extends ActiveRecord<Demo> {
+		@Id
+		@UUID25
+		private String id;
+		private String name;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+
 	@Before
 	public void init() {
 		SqlBoxContext.resetGlobalVariants();
@@ -45,17 +70,20 @@ public class TestBase {
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
 
-		SqlBoxContextConfig.setGlobalNextAllowShowSql(true);
-		ctx = new SqlBoxContext(dataSource); 
+		//SqlBoxContext.setGlobalNextAllowShowSql(true);
+		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		createTables(Demo.class);
 		if (tablesForTest != null)
 			createAndRegTables(tablesForTest);
+		 
 	}
 
 	@After
 	public void cleanUp() {
 		if (tablesForTest != null)
 			dropTables(tablesForTest);
+		dropTables(Demo.class);
 		tablesForTest = null;
 		JBEANBOX.close(); // IOC tool will close dataSource
 		SqlBoxContext.resetGlobalVariants();

@@ -27,7 +27,6 @@ import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
@@ -49,49 +48,36 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
  */
 @SuppressWarnings("unchecked")
 public class SqlBoxContext extends DbPro {// NOSONAR
+
+	protected static Dialect globalNextDialect = null;
+	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { new ShardingModTool(),
+			new ShardingRangeTool() };
+	protected static SnowflakeCreator globalNextSnowflakeCreator = null;
+	protected static Object[] globalNextSsModels = null;
+
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
 	protected static SqlBoxContext globalSqlBoxContext = null;
+	static {
+		globalNextClassTranslator=SqlBoxClassTranslator.instance;
+	}
 
 	/** Dialect of current SqlBoxContext, optional */
-	protected Dialect dialect = SqlBoxContextConfig.globalNextDialect;
+	protected Dialect dialect = globalNextDialect;
 
-	protected ShardingTool[] shardingTools = SqlBoxContextConfig.globalNextShardingTools;
-	protected SnowflakeCreator snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
+	protected ShardingTool[] shardingTools = globalNextShardingTools;
+	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 
 	public SqlBoxContext() {
 		super();
-		this.dialect = SqlBoxContextConfig.globalNextDialect;
-		copyConfigs(null);
+		this.dialect = globalNextDialect;
+		classTranslator=globalNextClassTranslator;
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
-		copyConfigs(null);
-	}
-
-	public SqlBoxContext(SqlBoxContextConfig config) {
-		super(config);
-		copyConfigs(config);
-	}
-
-	public SqlBoxContext(DataSource ds, SqlBoxContextConfig config) {
-		super(ds, config);
-		copyConfigs(config);
-		if (dialect == null)
-			dialect = Dialect.guessDialect(ds);
-	}
-
-	private void copyConfigs(SqlBoxContextConfig config) {
-		if (config == null) {
-			this.shardingTools = SqlBoxContextConfig.globalNextShardingTools;
-			this.snowflakeCreator = SqlBoxContextConfig.globalNextSnowflakeCreator;
-		} else {
-			this.dialect = config.getDialect();
-			this.shardingTools = config.getShardingTools();
-			this.snowflakeCreator = config.getSnowflakeCreator();
-		}
+		classTranslator=globalNextClassTranslator;
 	}
 
 	protected void miscMethods______________________________() {// NOSONAR
@@ -99,18 +85,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	/** Reset all global SqlBox variants to default values */
 	public static void resetGlobalVariants() {
-		SqlBoxContextConfig.setGlobalNextAllowShowSql(false);
-		SqlBoxContextConfig.setGlobalNextMasterSlaveOption(SqlOption.USE_AUTO);
-		SqlBoxContextConfig.setGlobalNextConnectionManager(null);
-		SqlBoxContextConfig.setGlobalNextSqlHandlers((SqlHandler[]) null);
-		SqlBoxContextConfig.setGlobalNextLogger(DefaultDbProLogger.getLog(ImprovedQueryRunner.class));
-		SqlBoxContextConfig.setGlobalNextBatchSize(300);
-		SqlBoxContextConfig.setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
-		SqlBoxContextConfig.setGlobalNextDialect(null);
-		SqlBoxContextConfig
-				.setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
-		SqlBoxContextConfig.setGlobalNextIocTool(null);
-		SqlBoxContextConfig.setGlobalNextSsModels(null);
+		setGlobalNextAllowShowSql(false);
+		setGlobalNextMasterSlaveOption(SqlOption.USE_AUTO);
+		setGlobalNextConnectionManager(null);
+		setGlobalNextSqlHandlers((SqlHandler[]) null);
+		setGlobalNextLogger(DefaultDbProLogger.getLog(ImprovedQueryRunner.class));
+		setGlobalNextBatchSize(300);
+		setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
+		setGlobalNextDialect(null);
+		setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
+		setGlobalNextClassTranslator(SqlBoxClassTranslator.instance);
 		globalSqlBoxContext = null;
 	}
 
@@ -144,8 +128,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			ps.addModel(item);
 			SqlBoxContextUtils.createLastAutoAliasName(ps);
 		} else if (item instanceof Class) {
-			ps.addModel(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
-			SqlBoxContextUtils.createLastAutoAliasName(ps);
+			return classTranslator.translate(iXxxStyle, ps, (Class<?>)item);
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
@@ -176,7 +159,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			return false;
 		return true;
 	}
-  
+
 	/** Get the sharded table name by given shard values */
 	public String getShardedTB(Object entityOrClass, Object... shardvalues) {
 		String table = SqlBoxContextUtils.getShardedTB(this, entityOrClass, shardvalues);
@@ -449,6 +432,34 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	protected void getteSetters__________________________() {// NOSONAR
+	}
+
+	// static global variants setting
+	protected void staticGlobalNextMethods______________________() {// NOSONAR
+	}
+
+	public static Dialect getGlobalNextDialect() {
+		return globalNextDialect;
+	}
+
+	public static void setGlobalNextDialect(Dialect dialect) {
+		globalNextDialect = dialect;
+	}
+
+	public static ShardingTool[] getGlobalNextShardingTools() {
+		return globalNextShardingTools;
+	}
+
+	public static void setGlobalNextShardingTools(ShardingTool[] shardingTools) {
+		globalNextShardingTools = shardingTools;
+	}
+
+	public static SnowflakeCreator getGlobalNextSnowflakeCreator() {
+		return globalNextSnowflakeCreator;
+	}
+
+	public static void setGlobalNextSnowflakeCreator(SnowflakeCreator snowflakeCreator) {
+		globalNextSnowflakeCreator = snowflakeCreator;
 	}
 
 	// =========getter & setter =======

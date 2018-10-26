@@ -38,7 +38,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
@@ -87,7 +86,7 @@ public class MasterSlaveTest {
 			this.name = name;
 		}
 	}
- 
+
 	@Before
 	public void init() {
 		SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
@@ -157,19 +156,19 @@ public class MasterSlaveTest {
 	}
 
 	private static HikariDataSource txDataSource;
- 
+
 	@Test
 	public void testMasterSlaveQueryInTransaction() {
 		System.out.println("============Test testMasterSlaveInTransaction==============");
 		SqlBoxContext.resetGlobalVariants();
-		SqlBoxContextConfig config = new SqlBoxContextConfig();
-		config.setConnectionManager(TinyTxConnectionManager.instance());
 		txDataSource = TestBase.createH2_HikariDataSource("MasterDb");
 		// Build another master but run in Transaction mode
-		SqlBoxContext MasterWithTx = new SqlBoxContext(txDataSource, config);
-		MasterWithTx.setSlaves(master.getSlaves());
+		SqlBoxContext masterWithTx = new SqlBoxContext(txDataSource);
+		masterWithTx.setConnectionManager(TinyTxConnectionManager.instance());
+
+		masterWithTx.setSlaves(master.getSlaves());
 		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // Proxy
-		tester.queryInTransaction(MasterWithTx);
+		tester.queryInTransaction(masterWithTx);
 		txDataSource.close();// don't forget close DataSource pool
 	}
 

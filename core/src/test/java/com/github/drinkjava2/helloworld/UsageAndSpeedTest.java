@@ -35,7 +35,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -425,10 +424,10 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void tXxxUseAnotherSqlTemplateEngine() {
-		SqlBoxContextConfig config = new SqlBoxContextConfig();
-		config.setTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
-		SqlBoxContext ctx = new SqlBoxContext(dataSource, config);
+	public void tXxxUseAnotherSqlTemplateEngine() {  
+		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		ctx.setSqlTemplateEngine(new BasicSqlTemplate("[", "]", true, true)); 
+		
 		UserAR user = new UserAR("Sam", "Canada");
 		UserAR tom = new UserAR("Tom", "China");
 		ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", bind("user", user));

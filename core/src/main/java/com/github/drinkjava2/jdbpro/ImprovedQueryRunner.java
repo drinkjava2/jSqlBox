@@ -30,6 +30,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
+import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
@@ -50,23 +52,27 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
+	protected static Boolean globalNextAllowShowSql = false;
+	protected static SqlOption globalNextMasterSlaveOption = SqlOption.USE_AUTO;
+	protected static ConnectionManager globalNextConnectionManager = null;
+	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
+	protected static Integer globalNextBatchSize = 300;
+	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
+	protected static SqlHandler[] globalNextSqlHandlers = null;
+	protected static ClassTranslator globalNextClassTranslator = DefaultClassTranslator.instance;
 
-	protected SqlTemplateEngine sqlTemplateEngine = DbProConfig.globalNextTemplateEngine;
-	protected ConnectionManager connectionManager = DbProConfig.globalNextConnectionManager;
-	protected Boolean allowShowSQL = DbProConfig.globalNextAllowShowSql;
-	protected SqlOption masterSlaveOption = DbProConfig.globalNextMasterSlaveOption;
-	protected DbProLogger logger = DbProConfig.globalNextLogger;
-	protected Integer batchSize = DbProConfig.globalNextBatchSize;
-	protected SqlHandler[] sqlHandlers = DbProConfig.globalNextSqlHandlers;
+	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
+	protected ConnectionManager connectionManager = globalNextConnectionManager;
+	protected Boolean allowShowSQL = globalNextAllowShowSql;
+	protected SqlOption masterSlaveOption = globalNextMasterSlaveOption;
+	protected DbProLogger logger = globalNextLogger;
+	protected Integer batchSize = globalNextBatchSize;
+	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
+	protected ClassTranslator classTranslator = globalNextClassTranslator;
+
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
 	protected String name;
-
-	/**
-	 * An IOC tool is needed if want use SqlMapper style and Annotation has
-	 * parameters
-	 */
-	protected IocTool iocTool = DbProConfig.globalNextIocTool;
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
@@ -98,11 +104,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public ImprovedQueryRunner(DataSource ds) {
 		super(ds);
-	}
-
-	public ImprovedQueryRunner(DataSource ds, ConnectionManager cm) {
-		super(ds);
-		this.connectionManager = cm;
 	}
 
 	@Override
@@ -752,6 +753,73 @@ public class ImprovedQueryRunner extends QueryRunner {
 		threadLocalSqlHandlers.set(handlers);
 	}
 
+	protected void staticGlobalNextMethods_____________________() {// NOSONAR
+	}
+
+	public static DbProLogger getGlobalNextLogger() {
+		return globalNextLogger;
+	}
+
+	public static void setGlobalNextLogger(DbProLogger dbProLogger) {
+		globalNextLogger = dbProLogger;
+	}
+
+	public static Integer getGlobalNextBatchSize() {
+		return globalNextBatchSize;
+	}
+
+	public static void setGlobalNextBatchSize(Integer batchSize) {
+		globalNextBatchSize = batchSize;
+	}
+
+	public static SqlTemplateEngine getGlobalNextTemplateEngine() {
+		return globalNextTemplateEngine;
+	}
+
+	public static void setGlobalNextTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
+		globalNextTemplateEngine = sqlTemplateEngine;
+	}
+
+	public static Boolean getGlobalNextAllowShowSql() {
+		return globalNextAllowShowSql;
+	}
+
+	public static void setGlobalNextAllowShowSql(Boolean allowShowSql) {
+		globalNextAllowShowSql = allowShowSql;
+	}
+
+	public static SqlOption getGlobalNextMasterSlaveOption() {
+		return globalNextMasterSlaveOption;
+	}
+
+	public static void setGlobalNextMasterSlaveOption(SqlOption masterSlaveOption) {
+		globalNextMasterSlaveOption = masterSlaveOption;
+	}
+
+	public static ConnectionManager getGlobalNextConnectionManager() {
+		return globalNextConnectionManager;
+	}
+
+	public static void setGlobalNextConnectionManager(ConnectionManager connectionManager) {
+		globalNextConnectionManager = connectionManager;
+	}
+
+	public static SqlHandler[] getGlobalNextSqlHandlers() {
+		return globalNextSqlHandlers;
+	}
+
+	public static void setGlobalNextSqlHandlers(SqlHandler... sqlHandlers) {
+		globalNextSqlHandlers = sqlHandlers;
+	}
+
+	public static ClassTranslator getGlobalNextClassTranslator() {
+		return globalNextClassTranslator;
+	}
+
+	public static void setGlobalNextClassTranslator(ClassTranslator globalNextClassTranslator) {
+		ImprovedQueryRunner.globalNextClassTranslator = globalNextClassTranslator;
+	}
+
 	private void normalGetterSetters_____________________() {// NOSONAR
 	}
 
@@ -827,15 +895,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 		this.masters = masters;
 	}
 
-	public IocTool getIocTool() {
-		return iocTool;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setIocTool(IocTool iocTool) {// NOSONAR
-		this.iocTool = iocTool;
-	}
-
 	public SqlOption getMasterSlaveOption() {
 		return masterSlaveOption;
 	}
@@ -860,6 +919,14 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public ThreadLocal<ArrayList<PreparedSQL>> getSqlBatchCache() {
 		return sqlBatchCache;
+	}
+
+	public ClassTranslator getClassTranslator() {
+		return classTranslator;
+	}
+
+	public void setClassTranslator(ClassTranslator classTranslator) {
+		this.classTranslator = classTranslator;
 	}
 
 }
