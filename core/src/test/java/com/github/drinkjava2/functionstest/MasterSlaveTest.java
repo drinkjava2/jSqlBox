@@ -131,7 +131,7 @@ public class MasterSlaveTest {
 		// TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
 		TheUser u1 = new TheUser().useContext(master).put("id", 3L).load(USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
-		TheUser u2 = master.entityLoadById(TheUser.class, 3L, USE_SLAVE);
+		TheUser u2 = master.eLoadById(TheUser.class, 3L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row3", u2.getName());
 	}
 
@@ -140,18 +140,18 @@ public class MasterSlaveTest {
 		System.out.println("============Test testMasterSlaveNoTransaction==================");
 		// AutoChoose, not in Transaction, should use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
-		TheUser u1 = master.entityLoadById(TheUser.class, 1L);
+		TheUser u1 = master.eLoadById(TheUser.class, 1L);
 		Assert.assertEquals("Slave_Row1", u1.getName());
 
 		// Force use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, master.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
-		TheUser u2 = master.entityLoadById(TheUser.class, 1L, USE_MASTER);
+		TheUser u2 = master.eLoadById(TheUser.class, 1L, USE_MASTER);
 		Assert.assertEquals("Master_Row1", u2.getName());
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS,
 				master.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
-		TheUser u3 = master.entityLoadById(TheUser.class, 1L, USE_SLAVE);
+		TheUser u3 = master.eLoadById(TheUser.class, 1L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row1", u3.getName());
 	}
 
@@ -176,12 +176,12 @@ public class MasterSlaveTest {
 	public void queryInTransaction(SqlBoxContext ctx) {
 		// AutoChoose, in Transaction, should use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
-		TheUser u1 = ctx.entityLoadById(TheUser.class, 1L);
+		TheUser u1 = ctx.eLoadById(TheUser.class, 1L);
 		Assert.assertEquals("Master_Row1", u1.getName());
 
 		// Force use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
-		TheUser u2 = ctx.entityLoadById(TheUser.class, 1L, USE_MASTER);
+		TheUser u2 = ctx.eLoadById(TheUser.class, 1L, USE_MASTER);
 		Assert.assertEquals("Master_Row1", u2.getName());
 
 		// Force use slave

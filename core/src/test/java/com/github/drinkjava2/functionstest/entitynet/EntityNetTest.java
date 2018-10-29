@@ -216,12 +216,12 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testManualLoad() {
 		insertDemoData();
-		List<User> users = ctx.entityFindAll(User.class);
+		List<User> users = ctx.eFindAllList(User.class);
 
 		for (User u : users) {
 			System.out.println("User:" + u.getId());
 
-			Address addr = u.findOneRelated(Address.class, " or u.id like ?", param("abcd%"));
+			Address addr = u.findRelatedOne(Address.class, " or u.id like ?", param("abcd%"));
 			System.out.println("  Address:" + addr.getId());
 
 			List<UserRole> userRoles = u.findRelatedList(UserRole.class);
@@ -264,7 +264,7 @@ public class EntityNetTest extends TestBase {
 		User u = net.pickOneEntity(User.class, "u2");
 		System.out.println("User:" + u.getId());
 
-		Address addr = u.findOneRelated(net, Address.class);
+		Address addr = u.findRelatedOne(net, Address.class);
 		System.out.println("  Address:" + addr.getId());
 
 		List<Email> emails = u.findRelatedList(net, Email.class);
@@ -288,7 +288,7 @@ public class EntityNetTest extends TestBase {
 	public void testAutoEntityNet() {
 		insertDemoData();
 		List<User> users = ctx
-				.entityAutoNet(User.class, UserRole.class, Role.class, RolePrivilege.class, Privilege.class)
+				.autoNet(User.class, UserRole.class, Role.class, RolePrivilege.class, Privilege.class)
 				.pickEntityList(User.class);
 
 		for (User u : users) {

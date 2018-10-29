@@ -27,10 +27,10 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * TextUtils is used to read Java source file from sources folder, usuage:
+ * TextUtils is used to read Java source file from sources folder, usage:
  * String src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this
- * function need copy java src file into resources folder or set a plugin in
- * pom.xml, detail see jSqlBox documents
+ * function need copy java src file into resources folder or set a plug-in in
+ * pom.xml, detail see jSqlBox's documents
  * 
  * @author Yong Zhu
  */

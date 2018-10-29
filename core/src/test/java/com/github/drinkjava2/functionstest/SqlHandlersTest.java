@@ -17,7 +17,7 @@ package com.github.drinkjava2.functionstest;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.entityFindAll;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.eFindAll;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.pQuery;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
@@ -188,7 +188,7 @@ public class SqlHandlersTest extends TestBase {
 				"select u.* from DemoUser u where u.age>?", 0, pagin(2, 5));
 		Assert.assertTrue(users2.size() == 5);
 
-		List<DemoUser> users3 = entityFindAll(DemoUser.class, " where age>?", param(0), pagin(2, 5));
+		List<DemoUser> users3 = eFindAll(DemoUser.class, " where age>?", param(0), pagin(2, 5));
 		Assert.assertTrue(users3.size() == 5);
 
 		SqlBoxContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));

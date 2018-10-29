@@ -56,7 +56,7 @@ public class ActiveEntityTest implements ActiveEntity<ActiveEntityTest> {
 	@Test
 	public void doTest() {
 		List<ActiveEntityTest> userList = new ActiveEntityTest()
-				.findBySQL("select * from ActiveEntityTest where age>=?", param(50));
+				.findListBySQL("select * from ActiveEntityTest where age>=?", param(50));
 		Assert.assertEquals(50, userList.size());
 	}
 }

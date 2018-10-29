@@ -398,7 +398,8 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * pXxxx style execute query and force return a String object.
 	 */
 	public String pQueryForString(Object... items) {
-		return String.valueOf(pQueryForObject(items));
+		Object o=pQueryForObject(items);
+		return String.valueOf(o);
 	}
 
 	/**

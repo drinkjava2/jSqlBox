@@ -32,7 +32,6 @@ public class EntitySuperclassTest extends TestBase {
 	public static class Parent<M> extends ActiveRecord<M> {
 		@Id
 		@UUID25
-		@Column(name="aa",columnDefinition="varchar",length=25)
 		String id;
 
 		String name;
@@ -78,6 +77,8 @@ public class EntitySuperclassTest extends TestBase {
 		c.setName("Tom");
 		c.setAddress("China");
 		c.insert();
+		
+		new Child().put("name","Sam").insert();
 
 	}
 

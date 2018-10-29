@@ -24,7 +24,7 @@ import com.github.drinkjava2.jdbpro.Text;
  * @author Yong Zhu
  * @since 2.0.4
  */
-public class SqlTexts extends TestBase {
+public class SqlTextTest extends TestBase {
 
 	public static class InsertDemoSQL extends Text {
 		/*-  
@@ -51,7 +51,7 @@ public class SqlTexts extends TestBase {
 
 	@Test
 	public void test() {
-		pExecute(new InsertDemoSQL(), "1", "Foo"); 
+		pExecute(new InsertDemoSQL(), "1", "Foo");
 
 		Demo d = new Demo().put("id", "1", "name", "Bar");
 		tExecute(UpdateDemoSQL.class, bind("d", d));

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ArrayUtils;
@@ -197,23 +196,8 @@ public interface ActiveEntity<T> extends ActiveRecordSupport<T> {
 			}
 		}
 		return (T) this;
-	}
-
-	@Override
-	public default <U> U guess(Object... params) {// NOSONAR
-		return ctx().getSqlMapperGuesser().guess(ctx(), this, params);
-	}
-
-	@Override
-	public default String guessSQL() {
-		return ctx().getSqlMapperGuesser().guessSQL(ctx(), this);
-	}
-
-	@Override
-	public default PreparedSQL guessPreparedSQL(Object... params) {
-		return ctx().getSqlMapperGuesser().doGuessPreparedSQL(ctx(), this, params);
-	}
-
+	} 
+	
 	@Override
 	public default SqlItem bind(Object... parameters) {
 		return new SqlItem(SqlOption.BIND, parameters);

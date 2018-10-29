@@ -21,7 +21,7 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.ActiveRecordSupport;
+import com.github.drinkjava2.jsqlbox.EntityType;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -141,7 +141,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			if (TypeUtils.canMapToSqlType(entityId.getClass()))
 				return entityId;
 
-			if (entityId instanceof ActiveRecordSupport)// ActiveRecord or ActiveEntity
+			if (entityId instanceof EntityType)// ActiveRecord or ActiveEntity
 				return buildEntityIdFromEntity(entityId, model);
 
 			Annotation[] anno = entityId.getClass().getAnnotations();
@@ -176,7 +176,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			}
 
 			boolean isEntity = false;
-			if (entityId instanceof ActiveRecordSupport)
+			if (entityId instanceof EntityType)
 				isEntity = true;
 			else {
 				Annotation[] anno = entityId.getClass().getAnnotations();
@@ -217,7 +217,7 @@ public abstract class EntityIdUtils {// NOSONAR
 				return entityId;
 
 			boolean isEntity = false;
-			if (entityId instanceof ActiveRecordSupport)
+			if (entityId instanceof EntityType)
 				isEntity = true;
 			else {
 				Annotation[] anno = entityId.getClass().getAnnotations();

@@ -379,11 +379,11 @@ public class UsageAndSpeedTest {
 			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
 			user.setAddress("Canada");
-			ctx.entityInsert(user);
+			ctx.eInsert(user);
 			user.setAddress("China");
-			ctx.entityUpdateTry(user);
-			UserPOJO sam2 = ctx.entityLoadById(UserPOJO.class, "Sam");
-			ctx.entityDeleteTry(sam2);
+			ctx.eUpdateTry(user);
+			UserPOJO sam2 = ctx.eLoadById(UserPOJO.class, "Sam");
+			ctx.eDeleteTry(sam2);
 		}
 	}
 
@@ -414,7 +414,7 @@ public class UsageAndSpeedTest {
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			UserAR user2 = ctx.entityLoadById(UserAR.class, "Sam");
+			UserAR user2 = ctx.eLoadById(UserAR.class, "Sam");
 			user2.delete();
 		}
 	}
@@ -504,24 +504,24 @@ public class UsageAndSpeedTest {
 		for (int i = 1; i <= 10; i++) {
 			user.setName("Tom" + i);
 			user.setAddress("China" + i);
-			ctx.entityInsert(user);
+			ctx.eInsert(user);
 		}
 		user = new UserAR();
 		user.setName("Tom8");
-		ctx.entityLoad(user);
+		ctx.eLoad(user);
 		Assert.assertEquals("China8", user.getAddress());
 
-		user = ctx.entityLoadById(UserAR.class, "Tom7");
+		user = ctx.eLoadById(UserAR.class, "Tom7");
 		Assert.assertEquals("China7", user.getAddress());
 
 		user.setAddress("Canada");
-		ctx.entityUpdateTry(user);
-		Assert.assertEquals("Canada", ctx.entityLoadById(UserAR.class, "Tom7").getAddress());
+		ctx.eUpdateTry(user);
+		Assert.assertEquals("Canada", ctx.eLoadById(UserAR.class, "Tom7").getAddress());
 
-		ctx.entityDeleteTry(user);
-		ctx.entityDeleteTry(user, " or name=?", param("Tom2"));
+		ctx.eDeleteTry(user);
+		ctx.eDeleteTry(user, " or name=?", param("Tom2"));
 
-		Assert.assertEquals(7, ctx.entityFindAll(UserAR.class, " where name>?", param("Tom1")).size());
+		Assert.assertEquals(7, ctx.eFindAllList(UserAR.class, " where name>?", param("Tom1")).size());
 	}
 
 	@Test

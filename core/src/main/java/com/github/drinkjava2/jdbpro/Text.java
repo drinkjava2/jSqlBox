@@ -32,14 +32,6 @@ import com.github.drinkjava2.jdialects.StrUtils;
 public class Text {
 	private static final Map<Class<?>, String> textCache = new ConcurrentHashMap<Class<?>, String>();
 
-	public Text() {
-
-	}
-
-	public Text(String id) {
-
-	}
-
 	@Override
 	public String toString() {
 		return classToString(this.getClass());

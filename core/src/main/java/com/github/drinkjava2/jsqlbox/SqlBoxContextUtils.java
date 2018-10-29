@@ -142,6 +142,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return masterCtx;
 	}
 
+	/**
+	 * if optionItems has a TabelModel, use it, otherwise find tablemodel from
+	 * entityOrClass
+	 */
 	public static TableModel findTableModel(Object entityOrClass, Object... optionItems) {
 		TableModel model = findFirstModel(optionItems);
 		if (model != null)
@@ -338,11 +342,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static void appendLeftJoinSQL(PreparedSQL ps) {
 		Object[] m = ps.getModels();
 		String[] a = ps.getAliases();
-		SqlBoxException.assureTrue(m != null && m != null & m.length == a.length);
+		SqlBoxException.assureTrue(m != null && a != null && m.length == a.length);
 
 		StringBuilder sb = new StringBuilder(" select ");
 		boolean ifFirst = true;
-		for (int i = 0; i < m.length; i++) {
+		for (int i = 0; i < m.length; i++) {// NOSONAR
 
 			TableModel md = (TableModel) m[i];
 			for (ColumnModel col : md.getColumns()) {
@@ -394,7 +398,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Build a.bid1=b.id1 and a.bid2=b.id2 SQL piece */
 	private static void realDoAppendKeyEquelsSqlPiece(StringBuilder sb, String a, TableModel ma, String b,
-			TableModel mb, FKeyModel fkey) {
+			TableModel mb, FKeyModel fkey) {// TODO: delete ma, mb parameter
 		int i = 0;
 		for (String col : fkey.getColumnNames()) {
 			if (i > 0)
@@ -960,7 +964,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return ((Number) ctx.iQueryForObject(jSQL.toObjectArray())).intValue();// NOSONAR
 	}
 
-	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
+	public static <T> List<T> entityFindAllList(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -1013,7 +1017,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return result;
 	}
 
-	public static <T> List<T> entityFindByIds(SqlBoxContext ctx, Class<T> entityClass, Iterable<?> ids, // NOSONAR
+	public static <T> List<T> entityFindListByIds(SqlBoxContext ctx, Class<T> entityClass, Iterable<?> ids, // NOSONAR
 			Object... optionItems) {
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
@@ -1098,7 +1102,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> entityFindBySample(SqlBoxContext ctx, Object sampleBean, Object... sqlItems) {
-		return (List<T>) entityFindAll(ctx, sampleBean.getClass(),
+		return (List<T>) entityFindAllList(ctx, sampleBean.getClass(),
 				new SampleItem(sampleBean).sql(" where ").notNullFields(), sqlItems);
 	}
 

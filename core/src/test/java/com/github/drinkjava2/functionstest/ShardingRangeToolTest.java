@@ -144,8 +144,8 @@ public class ShardingRangeToolTest {
 
 		// only deleted master, if want delete slaves at same time, use "USE_BOTH"
 		u2.delete(new PrintSqlHandler());
-		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
-		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));
+		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shard(), USE_MASTER));
+		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shard()));
 	}
 
 }
