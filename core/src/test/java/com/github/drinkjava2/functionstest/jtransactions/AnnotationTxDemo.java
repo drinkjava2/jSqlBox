@@ -69,7 +69,10 @@ public class AnnotationTxDemo {
 	public void doTest() {
 		AnnotationTxText tester = BeanBox.getBean(AnnotationTxText.class);
 		ctx.quiteExecute("drop table user_tb");
-		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
+		String ddl="create table user_tb (id varchar(40))";
+		if(ctx.getDialect().isMySqlFamily())
+			ddl+="engine=InnoDB";
+		ctx.nExecute(ddl);
 
 		Assert.assertEquals(0L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 

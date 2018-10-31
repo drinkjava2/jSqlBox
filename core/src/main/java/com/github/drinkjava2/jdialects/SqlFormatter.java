@@ -1,10 +1,15 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
+ * Copyright 2016 the original author or authors.
  *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ * OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jdialects.hibernatesrc.utils;
+package com.github.drinkjava2.jdialects;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,13 +18,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
- * Performs formatting of basic SQL statements (DML + query).
- *
- * @author Gavin King
- * @author Steve Ebersole
- * @author Yong Zhu(Modify) 
+ * This tool is used to format SQL
  */
-public class SqlFormatter {
+@SuppressWarnings("all")
+@Deprecated
+public class SqlFormatter {// TODO: rewrite this how class
 
 	private static final Set<String> BEGIN_CLAUSES = new HashSet<String>();
 	private static final Set<String> END_CLAUSES = new HashSet<String>();
@@ -67,7 +70,6 @@ public class SqlFormatter {
 	}
 
 	private static final String INDENT_STRING = "    ";
-	//private static final String INITIAL = System.lineSeparator() + INDENT_STRING;
 	private static final String INITIAL = System.getProperty("line.separator") + INDENT_STRING;
 
 	public static String format(String source) {
@@ -78,7 +80,6 @@ public class SqlFormatter {
 		boolean beginLine = true;
 		boolean afterBeginBeforeEnd;
 		boolean afterByOrSetOrFromOrSelect;
-		//boolean afterValues;
 		boolean afterOn;
 		boolean afterBetween;
 		boolean afterInsert;
@@ -96,7 +97,7 @@ public class SqlFormatter {
 		String lcToken;
 
 		public FormatProcess(String sql) {
-			tokens = new StringTokenizer(sql, "()+*/-=<>'`\"[]," + StringHelper.WHITESPACE, true);
+			tokens = new StringTokenizer(sql, "()+*/-=<>'`\"[]," + StrUtils.WHITESPACE, true);
 		}
 
 		public String perform() {
@@ -168,7 +169,7 @@ public class SqlFormatter {
 					logical();
 				}
 
-				else if (isWhitespace(token)) {
+				else if (StrUtils.WHITESPACE.contains(token)) {
 					white();
 				}
 
@@ -176,7 +177,7 @@ public class SqlFormatter {
 					misc();
 				}
 
-				if (!isWhitespace(token)) {
+				if (!StrUtils.WHITESPACE.contains(token)) {
 					lastToken = lcToken;
 				}
 
@@ -272,9 +273,8 @@ public class SqlFormatter {
 				newline();
 			}
 			out();
-			if (!"union".equals(lcToken)) {
+			if (!"union".equals(lcToken))
 				indent++;
-			}
 			newline();
 			afterBeginBeforeEnd = false;
 			afterByOrSetOrFromOrSelect = "by".equals(lcToken) || "set".equals(lcToken) || "from".equals(lcToken);
@@ -300,7 +300,6 @@ public class SqlFormatter {
 			out();
 			indent++;
 			newline();
-			//afterValues  true;
 		}
 
 		private void closeParen() {
@@ -348,17 +347,12 @@ public class SqlFormatter {
 					&& !DML.contains(tok) && !MISC.contains(tok);
 		}
 
-		private static boolean isWhitespace(String token) {
-			return StringHelper.WHITESPACE.contains(token);
-		}
-
 		private void newline() {
 			result.append(System.getProperty("line.separator"));
-			for (int i = 0; i < indent; i++) {
+			for (int i = 0; i < indent; i++)
 				result.append(INDENT_STRING);
-			}
 			beginLine = true;
 		}
 	}
- 
+
 }

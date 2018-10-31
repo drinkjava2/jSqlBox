@@ -78,7 +78,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 	private SqlBoxContext ctx;
 	private Map<String, Object> tailsMap;
-	private String tailTable;
+	private String tailTable; //TODO work on tail
 
 	protected void miscMethods__________________() {// NOSONAR
 	}

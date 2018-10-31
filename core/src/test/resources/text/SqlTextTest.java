@@ -25,6 +25,9 @@ import com.github.drinkjava2.jdbpro.Text;
  * @since 2.0.4
  */
 public class SqlTextTest extends TestBase {
+	{
+		this.regTables(Demo.class);
+	}
 
 	public static class InsertDemoSQL extends Text {
 		/*-  
@@ -36,9 +39,9 @@ public class SqlTextTest extends TestBase {
 
 	public static class UpdateDemoSQL extends Text {
 		/*-  
-		 update demo d
-		 set d.name=#{d.name}
-		 where d.id=:d.id
+		 update demo 
+		 set name=#{d.name}
+		 where id=:d.id
 		*/
 	}
 

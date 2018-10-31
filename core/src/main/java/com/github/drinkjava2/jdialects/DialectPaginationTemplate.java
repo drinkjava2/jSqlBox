@@ -44,7 +44,7 @@ public class DialectPaginationTemplate {
 			return Dialect.NOT_SUPPORT;
 		case SQLServer2005Dialect:
 		case SQLServer2008Dialect:
-			return "WITH query AS (SELECT TMP_.*, ROW_NUMBER() OVER (ORDER BY CURRENT_TIMESTAMP) as ROW_NUM_ FROM ( select ($DISTINCT) TOP($TOTAL_ROWS) $BODY ) TMP_ ) SELECT $FIELDS_OR_ALIAS FROM query WHERE ROW_NUM_ >= $SKIP_ROWS_PLUS1 AND ROW_NUM_ < $TOTAL_ROWS_PLUS1";
+			return "WITH query AS (SELECT TMP_.*, ROW_NUMBER() OVER (ORDER BY CURRENT_TIMESTAMP) as ROW_NUM_ FROM ( select ($DISTINCT) TOP($TOTAL_ROWS) $BODY ) TMP_ ) SELECT * FROM query WHERE ROW_NUM_ >$SKIP_ROWS AND ROW_NUM_ <= $TOTAL_ROWS";
 		case H2Dialect:
 		case HANAColumnStoreDialect:
 		case HANARowStoreDialect:

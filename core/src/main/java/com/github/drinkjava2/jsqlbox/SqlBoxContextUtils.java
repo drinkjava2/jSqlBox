@@ -1002,7 +1002,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (Object[] values : valuesList) {
 			T bean = SqlBoxContextUtils.entityOrClassToBean(entityClass);
 			try {
-				for (int i = 0; i < values.length; i++) {
+				for (int i = 0; i < allFieldNames.size(); i++) {
 					Method writeMethod = writeMethods.get(allFieldNames.get(i));
 					SqlBoxException.assureNotNull(writeMethod,
 							"Not found write method of field '" + allFieldNames.get(i) + "' in " + bean.getClass());

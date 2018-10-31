@@ -15,12 +15,9 @@
  */
 package com.github.drinkjava2.functionstest;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.dbutils.ResultSetHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,27 +58,9 @@ public class BatchInsertTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
-		createAndRegTables(DummyUser.class);
+		createAndRegTables(DummyUser.class); 
 	}
-
-	@Test
-	public void nInsertBatchTest() {
-		ResultSetHandler<List<Object>> handler = new ResultSetHandler<List<Object>>() {
-			@Override
-			public List<Object> handle(ResultSet rs) throws SQLException {
-				List<Object> objects = new ArrayList<Object>();
-				while (rs.next())
-					objects.add(new Object());
-				return objects;
-			}
-		};
-		List<Object[]> params = new ArrayList<Object[]>();
-		params.add(new Object[] { "test1", 1 });
-		params.add(new Object[] { "test2", 2 });
-		ctx.nInsertBatch("INSERT INTO DummyUser(name, age) VALUES(?,?)", handler, params);
-		Assert.assertEquals(2L, ctx.pQueryForLongValue("select count(*) from DummyUser"));
-	}
-
+ 
 	@Test
 	public void nBatchTest() {
 		List<Object[]> params = new ArrayList<Object[]>();

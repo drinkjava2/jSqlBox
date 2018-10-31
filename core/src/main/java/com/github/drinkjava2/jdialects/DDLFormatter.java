@@ -1,10 +1,15 @@
 /*
- * Hibernate, Relational Persistence for Idiomatic Java
+ * Copyright 2016 the original author or authors.
  *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
- * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ * OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jdialects.hibernatesrc.utils;
+package com.github.drinkjava2.jdialects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +17,17 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
- * Performs formatting of DDL SQL statements.
- *
- * @author Gavin King
- * @author Steve Ebersole
- * @author Yong Zhu(Modify)
+ * This tool is used to format DDL
+ * 
+ * @author Yong Zhu
  */
-public class DDLFormatter {
+@SuppressWarnings("all")
+@Deprecated
+public class DDLFormatter {// TODO: rewrite this how class
 
 	private static final String INITIAL_LINE = System.getProperty("line.separator") + "    ";
 	private static final String OTHER_LINES = System.getProperty("line.separator") + "       ";
-	/**
-	 * Singleton access
-	 */
+
 	private static final DDLFormatter INSTANCE = new DDLFormatter();
 
 	public static String format(String sql) {
@@ -40,7 +43,7 @@ public class DDLFormatter {
 	}
 
 	private String formatDDL(String sql) {
-		if (StringHelper.isEmpty(sql)) {
+		if (StrUtils.isEmpty(sql)) {
 			return sql;
 		}
 
@@ -85,7 +88,7 @@ public class DDLFormatter {
 			if (isQuote(token)) {
 				quoted = !quoted;
 			} else if (!quoted && isBreak(token)) {
-					result.append(OTHER_LINES); 
+				result.append(OTHER_LINES);
 			}
 			result.append(token);
 		}
@@ -93,7 +96,7 @@ public class DDLFormatter {
 		return result.toString();
 	}
 
-	private String formatCreateTable(String sql) {//NOSONAR
+	private String formatCreateTable(String sql) {// NOSONAR
 		final StringBuilder result = new StringBuilder(60).append(INITIAL_LINE);
 		final StringTokenizer tokens = new StringTokenizer(sql, "(,)'[]\"", true);
 

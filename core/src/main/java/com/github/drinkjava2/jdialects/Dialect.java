@@ -13,10 +13,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.NormalJdbcTool;
-import com.github.drinkjava2.jdialects.hibernatesrc.pagination.RowSelection;
-import com.github.drinkjava2.jdialects.hibernatesrc.pagination.SQLServer2005LimitHandler;
-import com.github.drinkjava2.jdialects.hibernatesrc.pagination.SQLServer2012LimitHandler;
-import com.github.drinkjava2.jdialects.hibernatesrc.utils.StringHelper;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -51,8 +47,8 @@ public enum Dialect implements CommonDialect {
 	Cache71Dialect, CUBRIDDialect, DerbyTenFiveDialect, DataDirectOracle9Dialect, DB2Dialect, DB2390Dialect, DB2400Dialect, DerbyTenSevenDialect, DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect, HANARowStoreDialect, HSQLDialect, InformixDialect, Informix10Dialect, IngresDialect, Ingres10Dialect, Ingres9Dialect, InterbaseDialect, JDataStoreDialect, MariaDBDialect, MariaDB53Dialect, MckoiDialect, MimerSQLDialect, MySQLDialect, MySQL5Dialect, MySQL55Dialect, MySQL57Dialect, MySQL57InnoDBDialect, MySQL5InnoDBDialect, MySQLInnoDBDialect, MySQLMyISAMDialect, Oracle8iDialect, Oracle9iDialect, Oracle10gDialect, Oracle12cDialect, PointbaseDialect, PostgresPlusDialect, PostgreSQLDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL9Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect, PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServerDialect, SQLServer2005Dialect, SQLServer2008Dialect, SQLServer2012Dialect, SybaseDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE15Dialect, SybaseASE157Dialect, TeradataDialect, Teradata14Dialect, TimesTenDialect,
 
 	// Below dialects imported from Hibernate 5.3.6.final
-	DB2390V8Dialect, DB297Dialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect, MySQL8Dialect; 
-	
+	DB2390V8Dialect, DB297Dialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect, MySQL8Dialect;
+
 	/** If set true will allow use reserved words in DDL, default value is false */
 	private static Boolean globalAllowReservedWords = false;
 
@@ -70,8 +66,6 @@ public enum Dialect implements CommonDialect {
 	private static final String SKIP_ROWS = "$SKIP_ROWS";
 	private static final String PAGESIZE = "$PAGESIZE";
 	private static final String TOTAL_ROWS = "$TOTAL_ROWS";
-	private static final String SKIP_ROWS_PLUS1 = "$SKIP_ROWS_PLUS1";
-	private static final String TOTAL_ROWS_PLUS1 = "$TOTAL_ROWS_PLUS1";
 	private static final String DISTINCT_TAG = "($DISTINCT)";
 	protected static final DialectLogger logger = DialectLogger.getLog(Dialect.class);
 	private String sqlTemplate = null;
@@ -90,7 +84,7 @@ public enum Dialect implements CommonDialect {
 		DialectFunctionTemplate.initFunctionTemplates();
 	}
 
- 	/**
+	/**
 	 * Guess Dialect by given connection, note:this method does not close connection
 	 * 
 	 * @param con
@@ -170,11 +164,11 @@ public enum Dialect implements CommonDialect {
 
 		if (value.contains("|")) {
 			// format example: varchar($l)<255|lvarchar($l)<32739|varchar($l)
-			String[] mappings = StringHelper.split("|", value);
+			String[] mappings = StrUtils.split("|", value);
 
 			for (String mapping : mappings) {
 				if (mapping.contains("<")) {// varchar($l)<255
-					String[] limitType = StringHelper.split("<", mapping);
+					String[] limitType = StrUtils.split("<", mapping);
 					if (lengths.length > 0 && lengths[0] < Integer.parseInt(limitType[1]))// NOSONAR
 						return putParamters(type, limitType[0], lengths);
 				} else {// varchar($l)
@@ -226,42 +220,7 @@ public enum Dialect implements CommonDialect {
 		return result;
 	}
 
-	/**
-	 * SQLServer is complex, don't want re-invent wheel, copy Hibernate's source
-	 * code in this project to do the dirty job, that's why this project use LGPL
-	 * license
-	 */
-	private static String processSQLServer(Dialect dialect, int pageNumber, int pageSize, String sql) {
-		int skipRows = (pageNumber - 1) * pageSize;
-		int totalRows = pageNumber * pageSize;
-
-		RowSelection selection = new RowSelection(skipRows, totalRows);
-		String result = null;
-		switch (dialect) {
-		case SQLServer2005Dialect:
-		case SQLServer2008Dialect:
-			result = new SQLServer2005LimitHandler().processSql(sql, selection);
-			break;
-		case SQLServer2012Dialect:
-			result = new SQLServer2012LimitHandler().processSql(sql, selection);
-			break;
-		default:
-		}
-		result = StringHelper.replace(result, "__hibernate_row_nr__", "_ROW_NUM_");
-		// Replace a special top tag
-		result = StringHelper.replaceOnce(result, " $Top_Tag(?) ", " TOP(" + totalRows + ") ");
-		result = StringHelper.replaceOnce(result, "_ROW_NUM_ >= ? AND _ROW_NUM_ < ?",
-				"_ROW_NUM_ >= " + (skipRows + 1) + " AND _ROW_NUM_ < " + (totalRows + 1));
-		result = StringHelper.replaceOnce(result, "offset ? rows fetch next ? rows only",
-				"offset " + skipRows + " rows fetch next " + pageSize + " rows only");
-		result = StringHelper.replaceOnce(result, "offset 0 rows fetch next ? rows only",
-				"offset 0 rows fetch next " + pageSize + " rows only");
-
-		if (StrUtils.isEmpty(result))
-			DialectException.throwEX("Unexpected error, please report this bug");
-		return result;
-	}
-
+ 
 	// ====================================================
 	// ====================================================
 
@@ -284,17 +243,6 @@ public enum Dialect implements CommonDialect {
 		DialectException.assureNotNull(sql, "sql string can not be null");
 		String trimedSql = sql.trim();
 		DialectException.assureNotEmpty(trimedSql, "sql string can not be empty");
-		switch (this) {
-		case SQLServer2005Dialect:
-		case SQLServer2008Dialect:
-		case SQLServer2012Dialect: {
-			result = processSQLServer(this, pageNumber, pageSize, trimedSql);
-			if (getGlobalAllowShowSql())
-				logger.info("Paginated sql: " + result);
-			return result;
-		}
-		default:
-		}
 
 		if (!StrUtils.startsWithIgnoreCase(trimedSql, "select "))
 			return (String) DialectException.throwEX("SQL should start with \"select \".");
@@ -305,11 +253,16 @@ public enum Dialect implements CommonDialect {
 		int skipRowsPlus1 = skipRows + 1;
 		int totalRows = pageNumber * pageSize;
 		int totalRowsPlus1 = totalRows + 1;
-		String useTemplate = this.sqlTemplate;
-
-		// use simple limit ? template if offset is 0
-		if (skipRows == 0)
-			useTemplate = this.topLimitTemplate;
+		String useTemplate;
+		if (skipRows == 0) {
+			useTemplate = topLimitTemplate;
+			if (SQLServer2012Dialect.equals(this) && !StrUtils.containsIgnoreCase(trimedSql, "order by "))
+				useTemplate = SQLServer2005Dialect.topLimitTemplate;
+		} else {
+			useTemplate = sqlTemplate;
+			if (SQLServer2012Dialect.equals(this) && !StrUtils.containsIgnoreCase(trimedSql, "order by "))
+				useTemplate = SQLServer2005Dialect.sqlTemplate;
+		}
 
 		if (Dialect.NOT_SUPPORT.equals(useTemplate)) {
 			if (!Dialect.NOT_SUPPORT.equals(this.topLimitTemplate))
@@ -330,12 +283,10 @@ public enum Dialect implements CommonDialect {
 			}
 		}
 
-		// if have $XXX tag, replaced by real values
+		// if have $XXX tag, replaced by real values 
 		result = StrUtils.replaceIgnoreCase(useTemplate, SKIP_ROWS, String.valueOf(skipRows));
 		result = StrUtils.replaceIgnoreCase(result, PAGESIZE, String.valueOf(pageSize));
-		result = StrUtils.replaceIgnoreCase(result, TOTAL_ROWS, String.valueOf(totalRows));
-		result = StrUtils.replaceIgnoreCase(result, SKIP_ROWS_PLUS1, String.valueOf(skipRowsPlus1));
-		result = StrUtils.replaceIgnoreCase(result, TOTAL_ROWS_PLUS1, String.valueOf(totalRowsPlus1));
+		result = StrUtils.replaceIgnoreCase(result, TOTAL_ROWS, String.valueOf(totalRows)); 
 
 		// now insert the customer's real full SQL here
 		result = StrUtils.replace(result, "$SQL", trimedSql);

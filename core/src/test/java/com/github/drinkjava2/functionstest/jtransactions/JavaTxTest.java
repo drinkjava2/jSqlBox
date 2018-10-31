@@ -49,7 +49,10 @@ public class JavaTxTest {
 		TinyTx aop = new TinyTx((DataSource) JBEANBOX.getBean(DataSourceBox.class));
 		JBEANBOX.getBeanBox(JavaTxTest.class).addBeanAop(value(aop), "tx_*");
 		JavaTxTest tester = BeanBox.getBean(JavaTxTest.class);
-		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
+		String ddl = "create table user_tb (id varchar(40))";
+		if (ctx.getDialect().isMySqlFamily())
+			ddl += "engine=InnoDB";
+		ctx.nExecute(ddl);
 
 		Assert.assertEquals(0L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 

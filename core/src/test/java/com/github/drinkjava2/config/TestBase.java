@@ -45,6 +45,7 @@ public class TestBase {
 		@UUID25
 		private String id;
 		private String name;
+		private Integer age;
 
 		public String getId() {
 			return id;
@@ -61,6 +62,14 @@ public class TestBase {
 		public void setName(String name) {
 			this.name = name;
 		}
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
+		}
 	}
 
 	@Before
@@ -70,20 +79,18 @@ public class TestBase {
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
 
-		//SqlBoxContext.setGlobalNextAllowShowSql(true);
+//		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
-		createTables(Demo.class);
 		if (tablesForTest != null)
 			createAndRegTables(tablesForTest);
-		 
+
 	}
 
 	@After
 	public void cleanUp() {
 		if (tablesForTest != null)
 			dropTables(tablesForTest);
-		dropTables(Demo.class);
 		tablesForTest = null;
 		JBEANBOX.close(); // IOC tool will close dataSource
 		SqlBoxContext.resetGlobalVariants();

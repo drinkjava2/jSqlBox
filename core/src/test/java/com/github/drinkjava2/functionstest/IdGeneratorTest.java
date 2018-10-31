@@ -184,6 +184,7 @@ public class IdGeneratorTest extends TestBase {
 
 	@Test
 	public void testSequenceIdGenerator() {
+		System.out.println(dialect);
 		if (!dialect.getDdlFeatures().supportBasicOrPooledSequence())
 			return;
 		TableModel table1 = new TableModel("testTableIdGenerator");
