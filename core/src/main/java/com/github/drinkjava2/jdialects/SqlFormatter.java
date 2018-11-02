@@ -12,347 +12,88 @@
 package com.github.drinkjava2.jdialects;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Locale;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
- * This tool is used to format SQL
+ * @author Yong Zhu
+ * @since 2.0.4
  */
-@SuppressWarnings("all")
-@Deprecated
-public class SqlFormatter {// TODO: rewrite this how class
-
-	private static final Set<String> BEGIN_CLAUSES = new HashSet<String>();
-	private static final Set<String> END_CLAUSES = new HashSet<String>();
-	private static final Set<String> LOGICAL = new HashSet<String>();
-	private static final Set<String> QUANTIFIERS = new HashSet<String>();
-	private static final Set<String> DML = new HashSet<String>();
-	private static final Set<String> MISC = new HashSet<String>();
-
+public class SqlFormatter {
+	private static final Set<String> keywords = new HashSet<String>();
 	static {
-		BEGIN_CLAUSES.add("left");
-		BEGIN_CLAUSES.add("right");
-		BEGIN_CLAUSES.add("inner");
-		BEGIN_CLAUSES.add("outer");
-		BEGIN_CLAUSES.add("group");
-		BEGIN_CLAUSES.add("order");
+		keywords.add("select");
+		keywords.add("insert");
+		keywords.add("update");
+		keywords.add("delete");
+		keywords.add("create");
+		keywords.add("drop");
+		keywords.add("alter");
 
-		END_CLAUSES.add("where");
-		END_CLAUSES.add("set");
-		END_CLAUSES.add("having");
-		END_CLAUSES.add("join");
-		END_CLAUSES.add("from");
-		END_CLAUSES.add("by");
-		END_CLAUSES.add("join");
-		END_CLAUSES.add("into");
-		END_CLAUSES.add("union");
+		keywords.add("from");
+		keywords.add("in");
+		keywords.add("exists");
+		keywords.add("where");
 
-		LOGICAL.add("and");
-		LOGICAL.add("or");
-		LOGICAL.add("when");
-		LOGICAL.add("else");
-		LOGICAL.add("end");
+		keywords.add("order");
+		keywords.add("group");
+		keywords.add("union");
 
-		QUANTIFIERS.add("in");
-		QUANTIFIERS.add("all");
-		QUANTIFIERS.add("exists");
-		QUANTIFIERS.add("some");
-		QUANTIFIERS.add("any");
-
-		DML.add("insert");
-		DML.add("update");
-		DML.add("delete");
-
-		MISC.add("select");
-		MISC.add("on");
+		keywords.add("inner");
+		keywords.add("left");
+		keywords.add("right");
+		keywords.add("outer");
 	}
 
-	private static final String INDENT_STRING = "    ";
-	private static final String INITIAL = System.getProperty("line.separator") + INDENT_STRING;
-
-	public static String format(String source) {
-		return new FormatProcess(source).perform();
+	private static boolean isSpace(char c) {
+		return c <= 32 || c == '\t' || c == '\r' || c == '\n';
 	}
 
-	private static class FormatProcess {
-		boolean beginLine = true;
-		boolean afterBeginBeforeEnd;
-		boolean afterByOrSetOrFromOrSelect;
-		boolean afterOn;
-		boolean afterBetween;
-		boolean afterInsert;
-		int inFunction;
-		int parensSinceSelect;
-		private LinkedList<Integer> parenCounts = new LinkedList<Integer>();
-		private LinkedList<Boolean> afterByOrFromOrSelects = new LinkedList<Boolean>();
-
-		int indent = 1;
-
-		StringBuilder result = new StringBuilder();
-		StringTokenizer tokens;
-		String lastToken;
-		String token;
-		String lcToken;
-
-		public FormatProcess(String sql) {
-			tokens = new StringTokenizer(sql, "()+*/-=<>'`\"[]," + StrUtils.WHITESPACE, true);
-		}
-
-		public String perform() {
-
-			result.append(INITIAL);
-
-			while (tokens.hasMoreTokens()) {
-				token = tokens.nextToken();
-				lcToken = token.toLowerCase(Locale.ROOT);
-
-				if ("'".equals(token)) {
-					String t;
-					do {
-						t = tokens.nextToken();
-						token += t;
-					}
-					// cannot handle single quotes
-					while (!"'".equals(t) && tokens.hasMoreTokens());
-				} else if ("\"".equals(token)) {
-					String t;
-					do {
-						t = tokens.nextToken();
-						token += t;
-					} while (!"\"".equals(t));
+	public static String format(String template) {
+		StringBuilder sb = new StringBuilder();
+		char[] chars = ("  " + template + "  ").toCharArray();
+		// 0 0 ' 1 1 1 ' 0 0 0
+		boolean inStr = false;
+		boolean justAddedSpace = true;
+		StringBuilder lastWord = new StringBuilder();
+		for (int i = 2; i < chars.length - 2; i++) {
+			char c = chars[i];
+			if (isSpace(c)) {
+				if (inStr) {
+					sb.append(c);
+				} else if (!justAddedSpace) {
+					addLast(sb, lastWord);
+					sb.append(' ');
+					justAddedSpace = true;
 				}
-
-				if (afterByOrSetOrFromOrSelect && ",".equals(token)) {
-					commaAfterByOrFromOrSelect();
-				} else if (afterOn && ",".equals(token)) {
-					commaAfterOn();
-				}
-
-				else if ("(".equals(token)) {
-					openParen();
-				} else if (")".equals(token)) {
-					closeParen();
-				}
-
-				else if (BEGIN_CLAUSES.contains(lcToken)) {
-					beginNewClause();
-				}
-
-				else if (END_CLAUSES.contains(lcToken)) {
-					endNewClause();
-				}
-
-				else if ("select".equals(lcToken)) {
-					select();
-				}
-
-				else if (DML.contains(lcToken)) {
-					updateOrInsertOrDelete();
-				}
-
-				else if ("values".equals(lcToken)) {
-					values();
-				}
-
-				else if ("on".equals(lcToken)) {
-					on();
-				}
-
-				else if (afterBetween && lcToken.equals("and")) {
-					misc();
-					afterBetween = false;
-				}
-
-				else if (LOGICAL.contains(lcToken)) {
-					logical();
-				}
-
-				else if (StrUtils.WHITESPACE.contains(token)) {
-					white();
-				}
-
-				else {
-					misc();
-				}
-
-				if (!StrUtils.WHITESPACE.contains(token)) {
-					lastToken = lcToken;
-				}
-
-			}
-			return result.toString();
-		}
-
-		private void commaAfterOn() {
-			out();
-			indent--;
-			newline();
-			afterOn = false;
-			afterByOrSetOrFromOrSelect = true;
-		}
-
-		private void commaAfterByOrFromOrSelect() {
-			out();
-			newline();
-		}
-
-		private void logical() {
-			if ("end".equals(lcToken)) {
-				indent--;
-			}
-			newline();
-			out();
-			beginLine = false;
-		}
-
-		private void on() {
-			indent++;
-			afterOn = true;
-			newline();
-			out();
-			beginLine = false;
-		}
-
-		private void misc() {
-			out();
-			if ("between".equals(lcToken)) {
-				afterBetween = true;
-			}
-			if (afterInsert) {
-				newline();
-				afterInsert = false;
+			} else if (c == '\'') {
+				if (!inStr)
+					addLast(sb, lastWord);
+				sb.append('\'');
+				inStr = !inStr;
+				justAddedSpace = false;
 			} else {
-				beginLine = false;
-				if ("case".equals(lcToken)) {
-					indent++;
-				}
+				justAddedSpace = false;
+				if (inStr)
+					sb.append(c);
+				else
+					lastWord.append(c);
 			}
 		}
-
-		private void white() {
-			if (!beginLine) {
-				result.append(" ");
-			}
-		}
-
-		private void updateOrInsertOrDelete() {
-			out();
-			indent++;
-			beginLine = false;
-			if ("update".equals(lcToken)) {
-				newline();
-			}
-			if ("insert".equals(lcToken)) {
-				afterInsert = true;
-			}
-		}
-
-		private void select() {
-			out();
-			indent++;
-			newline();
-			parenCounts.addLast(parensSinceSelect);
-			afterByOrFromOrSelects.addLast(afterByOrSetOrFromOrSelect);
-			parensSinceSelect = 0;
-			afterByOrSetOrFromOrSelect = true;
-		}
-
-		private void out() {
-			result.append(token);
-		}
-
-		private void endNewClause() {
-			if (!afterBeginBeforeEnd) {
-				indent--;
-				if (afterOn) {
-					indent--;
-					afterOn = false;
-				}
-				newline();
-			}
-			out();
-			if (!"union".equals(lcToken))
-				indent++;
-			newline();
-			afterBeginBeforeEnd = false;
-			afterByOrSetOrFromOrSelect = "by".equals(lcToken) || "set".equals(lcToken) || "from".equals(lcToken);
-		}
-
-		private void beginNewClause() {
-			if (!afterBeginBeforeEnd) {
-				if (afterOn) {
-					indent--;
-					afterOn = false;
-				}
-				indent--;
-				newline();
-			}
-			out();
-			beginLine = false;
-			afterBeginBeforeEnd = true;
-		}
-
-		private void values() {
-			indent--;
-			newline();
-			out();
-			indent++;
-			newline();
-		}
-
-		private void closeParen() {
-			parensSinceSelect--;
-			if (parensSinceSelect < 0) {
-				indent--;
-				parensSinceSelect = parenCounts.removeLast();
-				afterByOrSetOrFromOrSelect = afterByOrFromOrSelects.removeLast();
-			}
-			if (inFunction > 0) {
-				inFunction--;
-				out();
-			} else {
-				if (!afterByOrSetOrFromOrSelect) {
-					indent--;
-					newline();
-				}
-				out();
-			}
-			beginLine = false;
-		}
-
-		private void openParen() {
-			if (isFunctionName(lastToken) || inFunction > 0) {
-				inFunction++;
-			}
-			beginLine = false;
-			if (inFunction > 0) {
-				out();
-			} else {
-				out();
-				if (!afterByOrSetOrFromOrSelect) {
-					indent++;
-					newline();
-					beginLine = true;
-				}
-			}
-			parensSinceSelect++;
-		}
-
-		private static boolean isFunctionName(String tok) {
-			final char begin = tok.charAt(0);
-			final boolean isIdentifier = Character.isJavaIdentifierStart(begin) || '"' == begin;
-			return isIdentifier && !LOGICAL.contains(tok) && !END_CLAUSES.contains(tok) && !QUANTIFIERS.contains(tok)
-					&& !DML.contains(tok) && !MISC.contains(tok);
-		}
-
-		private void newline() {
-			result.append(System.getProperty("line.separator"));
-			for (int i = 0; i < indent; i++)
-				result.append(INDENT_STRING);
-			beginLine = true;
-		}
+		addLast(sb, lastWord);
+		return sb.toString();
 	}
 
+	private static void addLast(StringBuilder sb, StringBuilder lastWord) {
+		if (lastWord.length() == 0)
+			return;
+		String last = lastWord.toString();
+		if (sb.length() > 0 && keywords.contains(last.toLowerCase()))
+			sb.append("\n");
+		sb.append(last);
+		lastWord.setLength(0);
+	}
+
+	public static void main(String[] args) {
+		System.out.println(format("select  \t     * from users \t  \n  where '1=1   or 2=2'\r\n" + "or    3=3 order by id"));
+	}
 }

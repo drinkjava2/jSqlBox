@@ -11,134 +11,57 @@
  */
 package com.github.drinkjava2.jdialects;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringTokenizer;
-
 /**
- * This tool is used to format DDL
- * 
  * @author Yong Zhu
+ * @since 2.0.4
  */
-@SuppressWarnings("all")
-@Deprecated
-public class DDLFormatter {// TODO: rewrite this how class
+public class DDLFormatter {
 
-	private static final String INITIAL_LINE = System.getProperty("line.separator") + "    ";
-	private static final String OTHER_LINES = System.getProperty("line.separator") + "       ";
-
-	private static final DDLFormatter INSTANCE = new DDLFormatter();
-
-	public static String format(String sql) {
-		return INSTANCE.formatDDL(sql);
+	private static boolean isSpace(char c) {
+		return c <= 32 || c == '\t' || c == '\r' || c == '\n';
 	}
 
-	public static String[] format(String[] sql) {
-		List<String> l = new ArrayList<String>();
-		for (String string : sql) {
-			l.add(format(string));
-		}
-		return l.toArray(new String[l.size()]);
-	}
-
-	private String formatDDL(String sql) {
-		if (StrUtils.isEmpty(sql)) {
-			return sql;
-		}
-
-		if (sql.toLowerCase(Locale.ROOT).startsWith("create table")) {
-			return formatCreateTable(sql);
-		} else if (sql.toLowerCase(Locale.ROOT).startsWith("create")) {
-			return sql;
-		} else if (sql.toLowerCase(Locale.ROOT).startsWith("alter table")) {
-			return formatAlterTable(sql);
-		} else if (sql.toLowerCase(Locale.ROOT).startsWith("comment on")) {
-			return formatCommentOn(sql);
-		} else {
-			return INITIAL_LINE + sql;
-		}
-	}
-
-	private String formatCommentOn(String sql) {
-		final StringBuilder result = new StringBuilder(60).append(INITIAL_LINE);
-		final StringTokenizer tokens = new StringTokenizer(sql, " '[]\"", true);
-
-		boolean quoted = false;
-		while (tokens.hasMoreTokens()) {
-			final String token = tokens.nextToken();
-			result.append(token);
-			if (isQuote(token)) {
-				quoted = !quoted;
-			} else if (!quoted && "is".equals(token)) {
-				result.append(OTHER_LINES);
-			}
-		}
-
-		return result.toString();
-	}
-
-	private String formatAlterTable(String sql) {
-		final StringBuilder result = new StringBuilder(60).append(INITIAL_LINE);
-		final StringTokenizer tokens = new StringTokenizer(sql, " (,)'[]\"", true);
-
-		boolean quoted = false;
-		while (tokens.hasMoreTokens()) {
-			final String token = tokens.nextToken();
-			if (isQuote(token)) {
-				quoted = !quoted;
-			} else if (!quoted && isBreak(token)) {
-				result.append(OTHER_LINES);
-			}
-			result.append(token);
-		}
-
-		return result.toString();
-	}
-
-	private String formatCreateTable(String sql) {// NOSONAR
-		final StringBuilder result = new StringBuilder(60).append(INITIAL_LINE);
-		final StringTokenizer tokens = new StringTokenizer(sql, "(,)'[]\"", true);
-
-		int depth = 0;
-		boolean quoted = false;
-		while (tokens.hasMoreTokens()) {
-			final String token = tokens.nextToken();
-			if (isQuote(token)) {
-				quoted = !quoted;
-				result.append(token);
-			} else if (quoted) {
-				result.append(token);
+	public static String format(String template) {
+		StringBuilder sb = new StringBuilder();
+		char[] chars = ("  " + template + "  ").toCharArray();
+		int inBrackets = 0;
+		boolean justReturned = false;
+		for (int i = 2; i < chars.length - 2; i++) {
+			char c = chars[i];
+			if (isSpace(c)) {
+				if (!justReturned)
+					sb.append(c);
+			} else if (c == '(') {
+				sb.append(c);
+				if (inBrackets == 0) {
+					sb.append("\n");
+					justReturned = true;
+				}
+				inBrackets++;
+			} else if (c == ')') {
+				inBrackets--;
+				if (inBrackets == 0) {
+					sb.append("\n");
+					justReturned = true;
+				}
+				sb.append(c);
+			} else if (c == ',') {
+				sb.append(c);
+				if (inBrackets == 1) {
+					sb.append("\n");
+					justReturned = true;
+				}
 			} else {
-				if (")".equals(token)) {
-					depth--;
-					if (depth == 0) {
-						result.append(INITIAL_LINE);
-					}
-				}
-				result.append(token);
-				if (",".equals(token) && depth == 1) {
-					result.append(OTHER_LINES);
-				}
-				if ("(".equals(token)) {
-					depth++;
-					if (depth == 1) {
-						result.append(OTHER_LINES);
-					}
-				}
+				sb.append(c);
+				justReturned = false;
 			}
 		}
-
-		return result.toString();
+		return sb.toString();
 	}
 
-	private static boolean isBreak(String token) {
-		return "drop".equals(token) || "add".equals(token) || "references".equals(token) || "foreign".equals(token)
-				|| "on".equals(token);
+	public static void main(String[] args) {
+		String ddl = "create table users("
+				+ "id int(5), name varchar(10), \t \n age int, price float(10,3), address char)engine=innodb charset=utf8";
+		System.out.println(format(ddl));
 	}
-
-	private static boolean isQuote(String tok) {
-		return "\"".equals(tok) || "`".equals(tok) || "]".equals(tok) || "[".equals(tok) || "'".equals(tok);
-	}
-
 }
