@@ -59,7 +59,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	protected static SqlBoxContext globalSqlBoxContext = null;
 	static {
-		globalNextClassTranslator=SqlBoxClassTranslator.instance;
+		globalNextClassTranslator = SqlBoxClassTranslator.instance;
 	}
 
 	/** Dialect of current SqlBoxContext, optional */
@@ -71,13 +71,13 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public SqlBoxContext() {
 		super();
 		this.dialect = globalNextDialect;
-		classTranslator=globalNextClassTranslator;
+		classTranslator = globalNextClassTranslator;
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
-		classTranslator=globalNextClassTranslator;
+		classTranslator = globalNextClassTranslator;
 	}
 
 	protected void miscMethods______________________________() {// NOSONAR
@@ -120,15 +120,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				ps.setIgnoreNull(true);
 			else if (SqlOption.AUTO_SQL.equals(item))
 				SqlBoxContextUtils.appendLeftJoinSQL(ps);
-			else
+			else if (SqlOption.WITH_TAIL.equals(item)) {
+				// do nothing, EntityListHandler or related entity method will check this
+			} else
 				return false;
 		} else if (item instanceof TableModel) {
 			TableModel t = (TableModel) item;
 			SqlBoxException.assureNotNull(t.getEntityClass());
 			ps.addModel(item);
 			SqlBoxContextUtils.createLastAutoAliasName(ps);
-		} else if (item instanceof Class) { 
-			return classTranslator.translate(iXxxStyle, ps, (Class<?>)item);
+		} else if (item instanceof Class) {
+			return classTranslator.translate(iXxxStyle, ps, (Class<?>) item);
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
@@ -326,7 +328,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
 	}
 
-	/** Find all entity of given entity class as List, if not found, return empty list */
+	/**
+	 * Find all entity of given entity class as List, if not found, return empty
+	 * list
+	 */
 	public <T> List<T> eFindAllList(Class<T> entityClass, Object... optionItems) {
 		return SqlBoxContextUtils.entityFindAllList(this, entityClass, optionItems);
 	}

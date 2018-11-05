@@ -24,107 +24,117 @@ package com.github.drinkjava2.jdbpro;
  */
 public enum SqlOption {
 	// ----------Sql Items explained by DbPro ------------
-	/** Append a SQL String piece */
+	/** Mark a SQL SqlItem, i.e. a Sql String piece */
 	SQL,
 
-	/** Append a parameter or parameter array */
+	/** Mark a SQL parameter SqlItem */
 	PARAM,
 
-	/** Append a "?" String and append a parameter or parameter array */
+	/** Mark a QUESTION_PARAM SqlItem, i.e. a ? String and a parameter */
 	QUESTION_PARAM,
 
-	/** BIND Key-Values pairs "key1,value1, key2,value2..." for SqlTemplateEngine */
+	/**
+	 * Mark a Mark a BIND SqlItem, bind Key-Values pairs "key1,value1,
+	 * key2,value2..." for SqlTemplateEngine
+	 */
 	BIND,
 
 	/**
-	 * Usage: NOT_NUL("user_name=?", name), when name is null, nothing will be
-	 * appended into SQL and parameters, otherwise return a "user_name=?" String and
-	 * a SQL parameter
+	 * Mark a NOT_NULL SqlItem, Usage: NOT_NUL("user_name=?", name), when name is
+	 * null, nothing will be appended into SQL and parameters, otherwise return a
+	 * "user_name=?" String and a SQL parameter
 	 */
 	NOT_NULL,
 
-	/** Append a " values(?,?,?....?)" String at end of SQL */
+	/**
+	 * Mark a VALUES_QUESTIONS SqlItem, append a " values(?,?,?....?)" String at end
+	 * of SQL
+	 */
 	VALUES_QUESTIONS,
 
 	// ----------Special Items ------------
-	/** Switch to another DbPro or subClass (SqlBoxContext) to execute SQL */
+	/**
+	 * Mark a ENABLE_HANDLERS SqlOption, switch to another DbPro or subClass
+	 * (SqlBoxContext) to execute SQL
+	 */
 	SWITCHTO,
 
-	/** Give one or more class as parameter, instance will created by IocTool */
-	IOC,
-
-	/** Disable handles according given handlers' class */
+	/** Mark a ENABLE_HANDLERS SqlOption, disable given handlers */
 	DISABLE_HANDLERS,
 
-	/** Disable handles according given handlers' class */
+	/** Mark a ENABLE_HANDLERS SqlOption, enable given handlers */
 	ENABLE_HANDLERS,
 
-	/** Force use template style */
+	/** Mark a USE_TEMPLATE SqlOption, Force use template style */
 	USE_TEMPLATE,
 
 	// ------Sql Operation type--------
-	/** It's a EXECUTE type SQL */
+	/** Mark a EXECUTE SqlOption */
 	EXECUTE,
 
-	/** It's a UPDATE type SQL */
+	/** Mark a UPDATE SqlOption */
 	UPDATE,
 
-	/** It's a INSERT type SQL */
+	/** Mark a INSERT SqlOption */
 	INSERT,
 
-	/** It's a QUERY type SQL */
+	/** Mark a QUERY SqlOption */
 	QUERY,
 
-	/** OTHER type SqlItem used to store some other items */
+	/** Mark a USE_SLAVE SqlItem, used to store some other items */
 	OTHER,
 
-	// ================================================================
-	// Below items designed for jSqlBox or other projects to explain
-	// ================================================================
+	// =================================
+	// Below items designed for jSqlBox
+	// =================================
 
 	// ------Master_Slave Options-------
 	/**
-	 * Tell system to choose master or slave database automatically (write:master,
-	 * read:if in Transaction use master otherwise use one slave)
+	 * Mark a USE_SLAVE SqlOption, tell system to choose master or slave database
+	 * automatically (write:master, read:if in Transaction use master otherwise use
+	 * one slave)
 	 */
 	USE_AUTO,
 
-	/** Tell system force use master database (write and read:master ) */
+	/** Mark a USE_SLAVE SqlOption, tell system force use master database */
 	USE_MASTER,
 
-	/** Tell system force use slave database (write:all slaves, read:one slave) */
+	/** Mark a USE_SLAVE SqlOption, tell system force use slave database */
 	USE_SLAVE,
 
-	/**
-	 * Tell system force use master and slave database (write: master + all slaves,
-	 * read: master)
-	 */
+	/** Mark a USE_BOTH SqlOption, tell system force use master and slave */
 	USE_BOTH,
 
 	// ------TableModel about options---
-	/** Mark alias names for TableModels */
+	/** Mark a SqlItem stored alias name(s) for latest TableModel in SQL */
 	ALIAS,
 
-	// ------- sharding items -----------
-	/** Tell system this is a "SHARD_TABLE" item */
+	// ------- Sharding about options -----------
+	/** Mark a SHARD_TABLE SqlOption */
 	SHARD_TABLE,
 
-	/** Tell system this is a "SHARD_DATABASE" item */
+	/** Mark a SHARD_DATABASE SqlOption */
 	SHARD_DATABASE,
 
-	/** GIVE, GIVE_BOTH option are designed for ORM query */
+	/** Mark a GIVE SqlItem for ORM purpose */
 	GIVE,
 
+	/** Mark a GIVE_BOTH SqlItem for ORM purpose */
 	GIVE_BOTH,
 
-	// ------- Entity CURD items -----------
+	// ------- Entity CURD options -----------
 	/**
-	 * This option is designed for ORM insert and update CURD method, mark a
-	 * "IGNORE_NULL" item"
+	 * Mark a IGNORE_NULL SqlOption, if true in ORM insert and update method will
+	 * ignore null fields
 	 */
 	IGNORE_NULL,
 
-	// ------- Entity CURD items -----------
-	/** This option is designed for ORM, will be parsed as a left join SQL */
-	AUTO_SQL
+	/** Mark a AUTO_SQL SqlOption, tell ORM to create left join SQL automatically */
+	AUTO_SQL,
+
+	/**
+	 * Mark a WITH_TAIL SqlOption, if true, in ORM insert/update method will include
+	 * with tails, otherwise ignore them
+	 */
+	WITH_TAIL
 }

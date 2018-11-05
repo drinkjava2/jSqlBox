@@ -13,15 +13,13 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.github.drinkjava2.jdbpro.SqlItem;
-import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ArrayUtils;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
@@ -78,25 +76,6 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 	private SqlBoxContext ctx;
 	private Map<String, Object> tailsMap;
-	private String tailTable; //TODO work on tail
-
-	protected void miscMethods__________________() {// NOSONAR
-	}
-
-	public ActiveRecord() {
-
-	}
-
-	public ActiveRecord(String table) {
-
-	}
-
-	@Override
-	public Map<String, Object> tails() {
-		if (tailsMap == null)
-			tailsMap = new HashMap<String, Object>();
-		return tailsMap;
-	}
 
 	public SqlBoxContext ctx(Object... items) {
 		for (Object item : items)
@@ -104,8 +83,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 				return (SqlBoxContext) item;
 		if (ctx == null)
 			ctx = SqlBoxContext.globalSqlBoxContext;
-		if (ctx == null)
-			throw new SqlBoxException(SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+		SqlBoxException.assureNotNull(ctx, SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx;
 	}
 
@@ -114,16 +92,21 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		return (T) this;
 	}
 
+	public Map<String, Object> tails() {
+		if (tailsMap == null)
+			tailsMap = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
+		return tailsMap;
+	}
+
+	public Object get(String fieldOrColumnName) {
+		return ClassCacheUtils.readValueFromBeanField(this, fieldOrColumnName);
+	}
+
 	public T put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {
 			String field = (String) fieldAndValues[i * 2];
 			Object value = fieldAndValues[i * 2 + 1];
-			Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(this.getClass(), field);
-			try {
-				writeMethod.invoke(this, value);
-			} catch (Exception e) {
-				throw new SqlBoxException(e);
-			}
+			ClassCacheUtils.writeValueToBeanField(this, field, value);
 		}
 		return (T) this;
 	}
@@ -151,10 +134,6 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 			}
 		}
 		return (T) this;
-	}
-
-	public SqlItem bind(Object... parameters) {
-		return new SqlItem(SqlOption.BIND, parameters);
 	}
 
 	/** Return current table based on shard key value */
@@ -248,7 +227,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 	public <E> E eFindRelatedOne(Object entity, Object... items) {return  ctx(items).eFindRelatedOne(entity, items);}
 	public <E> List<E> eFindRelatedList(Object entityOrIterable, Object... items) {return  ctx(items).eFindRelatedList(entityOrIterable, items);}
 	public <E> Set<E> eFindRelatedSet(Object entity, Object... items) {return  ctx(items).eFindRelatedSet(entity, items);}
-	public <E> Map<Object, T> eFindRelatedMap(Object entity, Object... items) {return  ctx(items).eFindRelatedMap(entity, items);}
+	public <E> Map<Object, E> eFindRelatedMap(Object entity, Object... items) {return  ctx(items).eFindRelatedMap(entity, items);}
   
 	// PINT series methods from jDbPro
 	public <E> E pQuery(Object... items) {return ctx(items).pQuery(items);}
@@ -299,7 +278,5 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 	public <E> E tInsert(Object... items) {return ctx(items).tInsert(items);}
 	public <E> E tExecute(Object... items) {return ctx(items).tExecute(items);}
 	public <E> List<E> tQueryForEntityList(Class<E> entityClass, Object... items) {return ctx(items).tQueryForEntityList(entityClass, items); }
-
  
-
 }

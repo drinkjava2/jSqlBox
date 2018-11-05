@@ -173,7 +173,7 @@ public interface ActiveEntity<T> extends EntityType {
 	public default <E> E eFindRelatedOne(Object entity, Object... items) {return  ctx(items).eFindRelatedOne(entity, items);}
 	public default <E> List<E> eFindRelatedList(Object entityOrIterable, Object... items) {return  ctx(items).eFindRelatedList(entityOrIterable, items);}
 	public default <E> Set<E> eFindRelatedSet(Object entity, Object... items) {return  ctx(items).eFindRelatedSet(entity, items);}
-	public default <E> Map<Object, T> eFindRelatedMap(Object entity, Object... items) {return  ctx(items).eFindRelatedMap(entity, items);}
+	public default <E> Map<Object, E> eFindRelatedMap(Object entity, Object... items) {return  ctx(items).eFindRelatedMap(entity, items);}
   
 	// PINT series methods from jDbPro
 	public default <E> E pQuery(Object... items) {return ctx(items).pQuery(items);}
@@ -224,6 +224,5 @@ public interface ActiveEntity<T> extends EntityType {
 	public default <E> E tInsert(Object... items) {return ctx(items).tInsert(items);}
 	public default <E> E tExecute(Object... items) {return ctx(items).tExecute(items);}
 	public default <E> List<E> tQueryForEntityList(Class<E> entityClass, Object... items) {return ctx(items).tQueryForEntityList(entityClass, items); } 
-
-
+ 
 }

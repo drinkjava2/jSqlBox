@@ -56,6 +56,10 @@ import com.github.drinkjava2.jsqlbox.sqlitem.SampleItem;
  * @author Yong Zhu
  * @since 1.0.0
  */
+/**
+ * @author Yong Zhu
+ * @since 1.7.0
+ */
 public abstract class SqlBoxContextUtils {// NOSONAR
 	/**
 	 * Read database Meta info into SqlBox[]
@@ -174,6 +178,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return null;
 	}
 
+	/** Check if SqlOption.WITH_TAIL in optionsItems */
+	public static boolean findIfExistWithTail(Object... optionItems) {// NOSONAR
+		for (Object item : optionItems)
+			if (SqlOption.WITH_TAIL.equals(item))
+				return true;
+		return false;
+	}
+
 	/**
 	 * Extract models from sqlItems
 	 */
@@ -276,24 +288,24 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/** Convert one row data into EntityBean */
-	public static <T> T mapToEntityBean(TableModel model, Map<String, Object> oneRow) {
+	public static <T> T mapToEntityBean(TableModel model, Map<String, Object> oneRow) {// NOSONAR
 		if (oneRow == null || oneRow.isEmpty())
 			throw new SqlBoxException("Can not use null or empty row to convert to EntityBean");
 		SqlBoxException.assureNotNull(model.getEntityClass(), "Can not find entityClass setting in model.");
 		@SuppressWarnings("unchecked")
 		T bean = (T) ClassCacheUtils.createNewEntity(model.getEntityClass());
-		for (ColumnModel col : model.getColumns()) {
-			boolean foundValue = false;
-			for (Entry<String, Object> row : oneRow.entrySet()) {
-				if (row.getKey().equalsIgnoreCase(col.getColumnName())) {
-					foundValue = true;
-					SqlBoxException.assureNotEmpty(col.getEntityField(),
-							"EntityField not found for column '" + col.getColumnName() + "'");
-					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), row.getValue());
-				}
-			}
-			if (col.getPkey() && !foundValue)
-				throw new SqlBoxException("One prime-key not set value: '" + col.getColumnName() + "'");
+		boolean isTailSupport = bean instanceof TailSupport;
+		for (Entry<String, Object> entry : oneRow.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			ColumnModel col = model.getColumnByFieldName(key);
+			if (col != null) {
+				if (!col.getTransientable())
+					ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), value);
+			} else if (isTailSupport) {
+				((TailSupport) bean).tails().put(key, value);
+			} else
+				throw new SqlBoxException("Can not write column '" + key + "' to entity " + model.getEntityClass());
 		}
 		return bean;
 	}
@@ -339,6 +351,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * left join xxx c on b.cid=c.id ...
 	 * </pre>
 	 */
+	@SuppressWarnings("all")
 	public static void appendLeftJoinSQL(PreparedSQL ps) {
 		Object[] m = ps.getModels();
 		String[] a = ps.getAliases();
@@ -530,6 +543,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	/** Update entityBean according primary key, return row affected */
 	public static int entityUpdateTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
+		boolean withTail = findIfExistWithTail(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -573,6 +587,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					jSQL.append(col.getColumnName()).append("=? ");
 					jSQL.append(param(value));
 				}
+			}
+		}
+		if (withTail) {
+			for (Entry<String, Object> entry : ((TailSupport) entityBean).tails().entrySet()) {
+				if (!jSQL.isEmpty())
+					jSQL.append(", ");
+				jSQL.append(entry.getKey()).append("=? ");
+				jSQL.append(param(entry.getValue()));
 			}
 		}
 

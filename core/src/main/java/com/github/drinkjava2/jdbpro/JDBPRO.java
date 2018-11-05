@@ -169,14 +169,6 @@ public abstract class JDBPRO {
 	 * Create a SqlOption.IOC_OBJECT type SqlItem instance, args will create
 	 * instance by IocTool
 	 */
-	public static SqlItem ioc(Class<?>... args) {
-		return new SqlItem(SqlOption.IOC, (Object[]) args);
-	}
-
-	/**
-	 * Create a SqlOption.IOC_OBJECT type SqlItem instance, args will create
-	 * instance by IocTool
-	 */
 	public static SqlItem disableHandlers(Class<?>... args) {
 		return new SqlItem(SqlOption.DISABLE_HANDLERS, (Object[]) args);
 	}
