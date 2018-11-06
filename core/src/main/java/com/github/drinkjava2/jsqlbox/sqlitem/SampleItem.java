@@ -101,10 +101,10 @@ public class SampleItem implements CustomizedSqlItem {
 		boolean isfirst = true;
 		Map<String, Method> writeMethods = ClassCacheUtils.getClassWriteMethods(entityBean.getClass());
 		for (String fieldName : writeMethods.keySet()) {
-			ColumnModel col = SqlBoxContextUtils.findMatchColumnForJavaField(fieldName, model);
+			ColumnModel col = SqlBoxContextUtils.findMatchColumnForFieldOrTail(fieldName, model);
 			if (col.getTransientable())
 				continue;
-			Object fieldValue = ClassCacheUtils.readValueFromBeanField(entityBean, fieldName);
+			Object fieldValue = ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName);
 			if (fieldValue != null && (nullFieldsOnly == null || !nullFieldsOnly)) {
 				if (!isfirst)
 					ps.addSql(" and ");
@@ -159,7 +159,7 @@ public class SampleItem implements CustomizedSqlItem {
 							String fieldName = fieldNameSb.toString();
 							SqlBoxException.assureNotEmpty(fieldName);
 							String fieldValue = String
-									.valueOf(ClassCacheUtils.readValueFromBeanField(entityBean, fieldName));
+									.valueOf(ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName));
 							realParam = StrUtils.replaceFirst(s, ":" + fieldName, fieldValue);
 						}
 					}

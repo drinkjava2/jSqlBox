@@ -2,7 +2,6 @@ package com.github.drinkjava2.functionstest;
 
 import static com.github.drinkjava2.jdbpro.SqlOption.WITH_TAIL;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.eFindBySQL;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
 
 import java.util.List;
@@ -12,6 +11,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
+import com.github.drinkjava2.jsqlbox.AR;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 /**
@@ -53,12 +53,11 @@ public class TailTest extends TestBase {
 
 	@Test
 	public void doTailTest() {
-		gctx().setAllowShowSQL(true);
-		new TailSample().setName("Sam").setAge(10).insert();
+		new TailSample().setName("Tom").setAge(10).insert();
 		List<TailSample> tailList = eFindBySQL(TailSample.class, "select *, 'China' as address from TailSample");
 		TailSample tail = tailList.get(0);
 		Assert.assertEquals("China", tail.get("address"));
-		Assert.assertEquals("Sam", tail.get("name"));
+		Assert.assertEquals("Tom", tail.get("name"));
 
 		iExecute("alter table TailSample add address varchar(10)");
 		tail.put("address", "Canada");
@@ -67,6 +66,25 @@ public class TailTest extends TestBase {
 		tailList = eFindBySQL(TailSample.class, "select * from TailSample");
 		tail = tailList.get(0);
 		Assert.assertEquals("Canada", tail.get("address"));
+	}
+
+	@Test
+	public void activeRecordTailTest() {
+		new AR("TailSample").put("name", "Tom", "age", 10).insert(WITH_TAIL);
+		List<AR> tailList = eFindBySQL(AR.class, "select *, 'China' as address from TailSample");
+		AR ar = tailList.get(0);
+		Assert.assertEquals("China", ar.get("address"));
+		Assert.assertEquals("Tom", ar.get("name"));
+
+		iExecute("alter table TailSample add address varchar(10)");
+		ar.put("address", "Canada");
+		ar.model().setTableName("TailSample");
+		ar.model().column("name").id();
+		ar.update(WITH_TAIL);
+
+		tailList = eFindBySQL(AR.class, "select * from TailSample");
+		ar = tailList.get(0);
+		Assert.assertEquals("Canada", ar.get("address"));
 	}
 
 }

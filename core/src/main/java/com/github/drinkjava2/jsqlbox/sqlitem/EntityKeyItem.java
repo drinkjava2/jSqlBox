@@ -56,7 +56,7 @@ public class EntityKeyItem implements CustomizedSqlItem {
 					if (i > 0)
 						ps.addSql(" and ");
 					ps.addSql(alias).append(".").append(col.getColumnName()).append("=? ");
-					Object value = ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField());
+					Object value = ClassCacheUtils.readValueFromBeanFieldOrTail(entity, col.getEntityField());
 					ps.addParam(value);
 					i++;
 				}

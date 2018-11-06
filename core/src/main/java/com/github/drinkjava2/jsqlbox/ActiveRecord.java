@@ -53,13 +53,13 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
  * Data Mapper style:  
  * 
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
- *    SqlBoxContext.setDefaultContext(ctx);           
- *    JSQLBOX.eInsert(pojo);
+ *    ctx.eInsert(pojo);
  *    
  *    or
  *    
  *    SqlBoxContext ctx=new SqlBoxContext(dataSource);
- *    ctx.eInsert(pojo);
+ *    SqlBoxContext.setDefaultContext(ctx);           
+ *    eInsert(pojo); //static import JSQLBOX.eInsert
  *    
  *    or 
  *    
@@ -76,6 +76,20 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 	private SqlBoxContext ctx;
 	private Map<String, Object> tailsMap;
+	private TableModel tableModel;
+
+	public ActiveRecord() {
+
+	}
+
+	public ActiveRecord(String tableName) {
+		tableModel = TableModelUtils.entity2Model(this.getClass());
+		tableModel.setTableName(tableName);
+	}
+
+	public ActiveRecord(TableModel tableModel) {
+		this.tableModel = tableModel;
+	}
 
 	public SqlBoxContext ctx(Object... items) {
 		for (Object item : items)
@@ -85,6 +99,13 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 			ctx = SqlBoxContext.globalSqlBoxContext;
 		SqlBoxException.assureNotNull(ctx, SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx;
+	}
+
+	public TableModel model() {
+		if (tableModel == null)
+			return TableModelUtils.entity2Model(this.getClass());
+		else
+			return tableModel;
 	}
 
 	public T useContext(SqlBoxContext ctx) {
@@ -98,15 +119,16 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		return tailsMap;
 	}
 
-	public Object get(String fieldOrColumnName) {
-		return ClassCacheUtils.readValueFromBeanField(this, fieldOrColumnName);
+	public <V> V get(String fieldOrColumnName) {
+		return (V) ClassCacheUtils.readValueFromBeanFieldOrTail(this, fieldOrColumnName);
 	}
 
 	public T put(Object... fieldAndValues) {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {
 			String field = (String) fieldAndValues[i * 2];
 			Object value = fieldAndValues[i * 2 + 1];
-			ClassCacheUtils.writeValueToBeanField(this, field, value);
+			model().column(field);// if no column, create new one
+			ClassCacheUtils.writeValueToBeanFieldOrTail(this, field, value);
 		}
 		return (T) this;
 	}
@@ -142,7 +164,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedTB(ctx(items), model.getEntityClass(), shardKey1);
 	}
 
@@ -152,7 +174,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedDB(ctx(items), model.getEntityClass(), shardKey1);
 	}
 

@@ -180,7 +180,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 	}
 
 	/** Read value from entityBean field or tail */
-	public static Object readValueFromBeanField(Object entityBean, String fieldName) {
+	public static Object readValueFromBeanFieldOrTail(Object entityBean, String fieldName) {
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
 		if (readMethod == null) {
 			if (entityBean instanceof TailSupport) {
@@ -197,7 +197,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 	}
 
 	/** write value to entityBean field or tail */
-	public static void writeValueToBeanField(Object entityBean, String fieldName, Object value) {
+	public static void writeValueToBeanFieldOrTail(Object entityBean, String fieldName, Object value) {
 		Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
 		if (writeMethod == null) {
 			if (entityBean instanceof TailSupport) {

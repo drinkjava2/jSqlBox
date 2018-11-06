@@ -88,7 +88,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			throw new SqlBoxException("No Pkey setting for '" + model.getTableName() + "'");
 		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
 		// DbUtils don't care UP/LOW case
-		Object firstPKeyValue = ClassCacheUtils.readValueFromBeanField(entity, firstPkeyCol.getEntityField());
+		Object firstPKeyValue = ClassCacheUtils.readValueFromBeanFieldOrTail(entity, firstPkeyCol.getEntityField());
 		if (firstPKeyValue == null)
 			return null;// Single or Compound Pkey not found in entity
 		if (pkeyCount == 1)
@@ -98,7 +98,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
 				sb.append(COMPOUND_ID_SEPARATOR);
-			Object value = ClassCacheUtils.readValueFromBeanField(entity, col.getEntityField());
+			Object value = ClassCacheUtils.readValueFromBeanFieldOrTail(entity, col.getEntityField());
 			if (value == null)
 				return null;
 			sb.append(value);
@@ -163,7 +163,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		if (entityId instanceof Map) {
 			Map<String, Object> idMap = (Map<String, Object>) entityId;
 			for (Entry<String, Object> item : idMap.entrySet())
-				ClassCacheUtils.writeValueToBeanField(bean, item.getKey(), item.getValue());
+				ClassCacheUtils.writeValueToBeanFieldOrTail(bean, item.getKey(), item.getValue());
 		} else {
 			if (TypeUtils.canMapToSqlType(entityId.getClass())) {
 				if (model.getPKeyCount() == 0)
@@ -171,7 +171,7 @@ public abstract class EntityIdUtils {// NOSONAR
 				if (model.getPKeyCount() != 1)
 					throw new SqlBoxException("Not give enough PKey column value for '" + bean.getClass() + "'");
 				ColumnModel col = model.getFirstPKeyColumn();
-				ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
+				ClassCacheUtils.writeValueToBeanFieldOrTail(bean, col.getEntityField(), entityId);
 				return bean;
 			}
 
@@ -191,8 +191,8 @@ public abstract class EntityIdUtils {// NOSONAR
 						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
 			List<ColumnModel> cols = model.getPKeyColsSortByColumnName();
 			for (ColumnModel col : cols) {
-				Object value = ClassCacheUtils.readValueFromBeanField(entityId, col.getEntityField());
-				ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), value);
+				Object value = ClassCacheUtils.readValueFromBeanFieldOrTail(entityId, col.getEntityField());
+				ClassCacheUtils.writeValueToBeanFieldOrTail(bean, col.getEntityField(), value);
 			}
 		}
 		return bean;
@@ -230,7 +230,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			if (!isEntity)
 				throw new SqlBoxException(
 						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
-			return ClassCacheUtils.readValueFromBeanField(entityId, entityFieldName);
+			return ClassCacheUtils.readValueFromBeanFieldOrTail(entityId, entityFieldName);
 		}
 	}
 

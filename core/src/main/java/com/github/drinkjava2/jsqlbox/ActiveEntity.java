@@ -94,7 +94,7 @@ public interface ActiveEntity<T> extends EntityType {
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedTB(ctx(), model.getEntityClass(), shardKey1);
 	}
 
@@ -103,7 +103,7 @@ public interface ActiveEntity<T> extends EntityType {
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanField(this, col.getColumnName());
+		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
 		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 
