@@ -88,10 +88,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static ColumnModel findMatchColumnForFieldOrTail(String entityField, TableModel tableModel) {
 		SqlBoxException.assureNotNull(tableModel, "Can not find column for '" + entityField + "' in null table ");
 		ColumnModel col = tableModel.getColumn(entityField);
-		if(col==null) {
 		SqlBoxException.assureNotNull(col,
 				"Can not find column for '" + entityField + "' in table '" + tableModel.getTableName() + "'");
-		}
 		return col;
 	}
 
@@ -164,8 +162,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			throw new SqlBoxException("Can not build TableModel from null entityOrClass");
 		else if (entityOrClass instanceof TableModel)
 			return (TableModel) entityOrClass;
-		else if (entityOrClass instanceof ActiveRecord)
-			return ((ActiveRecord<?>) entityOrClass).model();
 		else if (entityOrClass instanceof Class)
 			return TableModelUtils.entity2ReadOnlyModel((Class<?>) entityOrClass);
 		else // it's a entity bean
@@ -503,7 +499,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					jSQL.append(", ");
 					foundColumnToInsert = true;
 				}
-			} 
+			}
 			if (col.getPkey()) {
 				if (col.getShardTable() != null) // Sharding Table?
 					shardTableItem = shardTB(ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName));
@@ -515,7 +511,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 
 		if (withTail) {
-			for (Entry<String, Object> entry : ((TailSupport) entityBean).tails().entrySet()) { 
+			for (Entry<String, Object> entry : ((TailSupport) entityBean).tails().entrySet()) {
 				String fieldName = entry.getKey();
 				ColumnModel col = findMatchColumnForFieldOrTail(fieldName, model);
 				if (col.getTransientable() || !col.getUpdatable())
@@ -540,17 +536,17 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 						jSQL.append(param(id));
 						jSQL.append(", ");
 						foundColumnToInsert = true;
-						entry.setValue(id);						
+						entry.setValue(id);
 					} else {// Normal Id Generator
 						jSQL.append(col.getColumnName());
 						Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
 						jSQL.append(param(id));
 						jSQL.append(", ");
 						foundColumnToInsert = true;
-						entry.setValue(id);		
+						entry.setValue(id);
 					}
 				} else {
-					Object value = entry.getValue(); 
+					Object value = entry.getValue();
 					if (value == null && ignoreNull == null) {
 						for (Object itemObject : optionItems)
 							if (SqlOption.IGNORE_NULL.equals(itemObject)) {
@@ -566,7 +562,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 						jSQL.append(", ");
 						foundColumnToInsert = true;
 					}
-				} 
+				}
 				if (col.getPkey()) {
 					if (col.getShardTable() != null) // Sharding Table?
 						shardTableItem = shardTB(entry.getValue());
@@ -574,7 +570,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					if (col.getShardDatabase() != null) // Sharding DB?
 						shardDbItem = shardDB(entry.getValue());
 				} else
-					notAllowSharding(col); 
+					notAllowSharding(col);
 			}
 		}
 
@@ -862,7 +858,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				continue;
 			if (col.getPkey()) {
 				where.append(col.getColumnName()).append("=?")
-						.append(param(ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName))).append(" and ");
+						.append(param(ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName)))
+						.append(" and ");
 				if (col.getShardTable() != null) // Sharding Table?
 					shardTableItem = shardTB(ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName));
 

@@ -75,21 +75,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 public class ActiveRecord<T> implements TailSupport, EntityType {
 	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 	private SqlBoxContext ctx;
-	private Map<String, Object> tailsMap;
-	private TableModel tableModel;
-
-	public ActiveRecord() {
-
-	}
-
-	public ActiveRecord(String tableName) {
-		tableModel = TableModelUtils.entity2Model(this.getClass());
-		tableModel.setTableName(tableName);
-	}
-
-	public ActiveRecord(TableModel tableModel) {
-		this.tableModel = tableModel;
-	}
+	private Map<String, Object> tailsMap;  
 
 	public SqlBoxContext ctx(Object... items) {
 		for (Object item : items)
@@ -99,13 +85,6 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 			ctx = SqlBoxContext.globalSqlBoxContext;
 		SqlBoxException.assureNotNull(ctx, SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx;
-	}
-
-	public TableModel model() {
-		if (tableModel == null)
-			return TableModelUtils.entity2Model(this.getClass());
-		else
-			return tableModel;
 	}
 
 	public T useContext(SqlBoxContext ctx) {
@@ -127,7 +106,6 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		for (int i = 0; i < fieldAndValues.length / 2; i++) {
 			String field = (String) fieldAndValues[i * 2];
 			Object value = fieldAndValues[i * 2 + 1];
-			model().column(field);// if no column, create new one
 			ClassCacheUtils.writeValueToBeanFieldOrTail(this, field, value);
 		}
 		return (T) this;

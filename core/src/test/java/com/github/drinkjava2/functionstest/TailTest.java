@@ -11,7 +11,8 @@ import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
-import com.github.drinkjava2.jsqlbox.AR;
+import com.github.drinkjava2.jdialects.annotation.jpa.Table;
+import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 /**
@@ -26,6 +27,7 @@ public class TailTest extends TestBase {
 		regTables(TailSample.class);
 	}
 
+	@Table(name="tail")
 	public static class TailSample extends ActiveRecord<TailSample> {
 		@PKey
 		String name;
@@ -54,12 +56,12 @@ public class TailTest extends TestBase {
 	@Test
 	public void doTailTest() {
 		new TailSample().setName("Tom").setAge(10).insert();
-		List<TailSample> tailList = eFindBySQL(TailSample.class, "select *, 'China' as address from TailSample");
+		List<TailSample> tailList = eFindBySQL(TailSample.class, "select *, 'China' as address from tail");
 		TailSample tail = tailList.get(0);
 		Assert.assertEquals("China", tail.get("address"));
 		Assert.assertEquals("Tom", tail.get("name"));
 
-		iExecute("alter table TailSample add address varchar(10)");
+		iExecute("alter table tail add address varchar(10)");
 		tail.put("address", "Canada");
 		tail.update(WITH_TAIL);
 
@@ -70,19 +72,17 @@ public class TailTest extends TestBase {
 
 	@Test
 	public void activeRecordTailTest() {
-		new AR("TailSample").put("name", "Tom", "age", 10).insert(WITH_TAIL);
-		List<AR> tailList = eFindBySQL(AR.class, "select *, 'China' as address from TailSample");
-		AR ar = tailList.get(0);
+		new Tail().put("name", "Tom", "age", 10).insert(WITH_TAIL);
+		List<Tail> tailList = eFindBySQL(Tail.class, "select *, 'China' as address from tail");
+		Tail ar = tailList.get(0);
 		Assert.assertEquals("China", ar.get("address"));
 		Assert.assertEquals("Tom", ar.get("name"));
 
-		iExecute("alter table TailSample add address varchar(10)");
+		iExecute("alter table tail add address varchar(10)");
 		ar.put("address", "Canada");
-		ar.model().setTableName("TailSample");
-		ar.model().column("name").id();
 		ar.update(WITH_TAIL);
 
-		tailList = eFindBySQL(AR.class, "select * from TailSample");
+		tailList = eFindBySQL(Tail.class, "select * from tail");
 		ar = tailList.get(0);
 		Assert.assertEquals("Canada", ar.get("address"));
 	}

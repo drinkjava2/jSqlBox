@@ -11,19 +11,5 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import com.github.drinkjava2.jdialects.model.TableModel;
-
-public class AR extends ActiveRecord<AR> {
-
-	public AR() {
-		super();
-	}
-
-	public AR(String tableName) {
-		super(tableName);
-	}
-
-	public AR(TableModel tableModel) {
-		super(tableModel);
-	}
+public class Tail extends ActiveRecord<Tail> {
 }
