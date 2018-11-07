@@ -127,8 +127,8 @@ public class CrudTest extends TestBase {
 		// =======loadByIds (id is basic value list)
 		LinkStyleArrayList<String> ids = new LinkStyleArrayList<String>().append("Name1").append("Name2")
 				.append("Name3");
-		Assert.assertEquals(3, ctx.eFindListByIds(CrudUser.class, ids).size());
-		Assert.assertEquals(3, new CrudUser().findListByIds(ids).size());
+		Assert.assertEquals(3, ctx.eFindByIds(CrudUser.class, ids).size());
+		Assert.assertEquals(3, new CrudUser().findByIds(ids).size());
 
 		// =======loadByIds (id is mp)
 		LinkStyleArrayList<Object> idMapList = new LinkStyleArrayList<Object>();
@@ -139,40 +139,40 @@ public class CrudTest extends TestBase {
 		Map<String, Object> mpId3 = new HashMap<String, Object>();
 		mpId3.put("name", "Name3");
 		idMapList.append(mpId1).append(mpId2).append(mpId3);
-		Assert.assertEquals(3, ctx.eFindListByIds(CrudUser.class, idMapList).size());
-		Assert.assertEquals(3, new CrudUser().findListByIds(idMapList).size());
+		Assert.assertEquals(3, ctx.eFindByIds(CrudUser.class, idMapList).size());
+		Assert.assertEquals(3, new CrudUser().findByIds(idMapList).size());
 
 		// =======findAll
-		Assert.assertEquals(4, ctx.eFindAllList(CrudUser.class).size());
-		Assert.assertEquals(4, new CrudUser().findAllList().size());
+		Assert.assertEquals(4, ctx.eFindAll(CrudUser.class).size());
+		Assert.assertEquals(4, new CrudUser().findAll().size());
 
 		// =======findByIds (id is bean)
 		LinkStyleArrayList<Object> idBeanList = new LinkStyleArrayList<Object>();
 		idBeanList.append(u1).append(u2).append(u3);
-		Assert.assertEquals(3, ctx.eFindListByIds(CrudUser.class, idBeanList).size());
-		Assert.assertEquals(3, new CrudUser().findListByIds(idBeanList).size());
+		Assert.assertEquals(3, ctx.eFindByIds(CrudUser.class, idBeanList).size());
+		Assert.assertEquals(3, new CrudUser().findByIds(idBeanList).size());
 
 		// ========fidnBySql
-		Assert.assertEquals(4, ctx.eFindListBySQL(CrudUser.class, "select * from CrudUser").size());
-		Assert.assertEquals(4, u1.findListBySQL("select * from CrudUser").size());
+		Assert.assertEquals(4, ctx.eFindBySQL(CrudUser.class, "select * from CrudUser").size());
+		Assert.assertEquals(4, u1.findBySQL("select * from CrudUser").size());
 
 		// ========findBySample
-		Assert.assertEquals(1, ctx.eFindListBySample(u1).size());
+		Assert.assertEquals(1, ctx.eFindBySample(u1).size());
 		Assert.assertEquals(1,
-				ctx.eFindAllList(CrudUser.class, new SampleItem(u2).sql(" where  ").notNullFields()).size());
+				ctx.eFindAll(CrudUser.class, new SampleItem(u2).sql(" where  ").notNullFields()).size());
 		CrudUser sample = new CrudUser("Nam", "addr");
-		Assert.assertEquals(4, ctx.eFindAllList(CrudUser.class, new SampleItem(sample).sql(" where (").allFields()
+		Assert.assertEquals(4, ctx.eFindAll(CrudUser.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param(":name%").sql(" order by name")).size());
 		Assert.assertEquals(4,
-				ctx.eFindListBySQL(CrudUser.class, new SampleItem(sample).sql("select * from CrudUser where (")
+				ctx.eFindBySQL(CrudUser.class, new SampleItem(sample).sql("select * from CrudUser where (")
 						.nullFields().sql(") or name like ?").param(":name%").sql(" order by name")).size());
 
-		Assert.assertEquals(1, u1.findListBySample(u2).size());
-		Assert.assertEquals(1, u1.findAllList(new SampleItem(u3).sql(" where  ").notNullFields()).size());
-		Assert.assertEquals(4, u1.findAllList(CrudUser.class, new SampleItem(sample).sql(" where (").allFields()
+		Assert.assertEquals(1, u1.findBySample(u2).size());
+		Assert.assertEquals(1, u1.findAll(new SampleItem(u3).sql(" where  ").notNullFields()).size());
+		Assert.assertEquals(4, u1.findAll(CrudUser.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param("%:name%").sql(" order by name")).size());
 		Assert.assertEquals(4,
-				u1.findListBySQL("select * from CrudUser where (",
+				u1.findBySQL("select * from CrudUser where (",
 						new SampleItem(sample).notNullFields().sql(") or name like ?").param(":name%"), " order by name")
 						.size());
 

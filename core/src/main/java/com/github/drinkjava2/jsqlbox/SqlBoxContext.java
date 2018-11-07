@@ -27,6 +27,7 @@ import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
@@ -58,9 +59,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
 	protected static SqlBoxContext globalSqlBoxContext = null;
-	static {
-		globalNextClassTranslator = SqlBoxClassTranslator.instance;
-	}
 
 	/** Dialect of current SqlBoxContext, optional */
 	protected Dialect dialect = globalNextDialect;
@@ -71,13 +69,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public SqlBoxContext() {
 		super();
 		this.dialect = globalNextDialect;
-		classTranslator = globalNextClassTranslator;
 	}
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
 		dialect = Dialect.guessDialect(ds);
-		classTranslator = globalNextClassTranslator;
 	}
 
 	protected void miscMethods______________________________() {// NOSONAR
@@ -94,7 +90,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
 		setGlobalNextDialect(null);
 		setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
-		setGlobalNextClassTranslator(SqlBoxClassTranslator.instance);
 		globalSqlBoxContext = null;
 	}
 
@@ -120,9 +115,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				ps.setIgnoreNull(true);
 			else if (SqlOption.AUTO_SQL.equals(item))
 				SqlBoxContextUtils.appendLeftJoinSQL(ps);
-			else if (SqlOption.WITH_TAIL.equals(item)) {
-				// do nothing, EntityListHandler or related entity method will check this
-			} else
+			else
 				return false;
 		} else if (item instanceof TableModel) {
 			TableModel t = (TableModel) item;
@@ -130,7 +123,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			ps.addModel(item);
 			SqlBoxContextUtils.createLastAutoAliasName(ps);
 		} else if (item instanceof Class) {
-			return classTranslator.translate(iXxxStyle, ps, (Class<?>) item);
+			ps.addModel(TableModelUtils.entity2ReadOnlyModel((Class<?>) item));
+			SqlBoxContextUtils.createLastAutoAliasName(ps);
+			return true;
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
@@ -323,6 +318,16 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return entity;
 	}
 
+	/** Load one entity according SQL, if not found, return null */
+	public <T> T eLoadBySQL(Object... optionItems) {
+		List<T> entities = iQueryForEntityList(optionItems);
+		if (entities == null || entities.isEmpty())
+			throw new SqlBoxException("No record found in database when try to load entity.");
+		if (entities.size() > 1)
+			throw new SqlBoxException("More than 1 record found when try to load 1 entity.");
+		return entities.get(0);
+	}
+
 	/** Load entity by given id, if not found, return null */
 	public <T> T eLoadByIdTry(Class<T> entityClass, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
@@ -332,25 +337,25 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	 * Find all entity of given entity class as List, if not found, return empty
 	 * list
 	 */
-	public <T> List<T> eFindAllList(Class<T> entityClass, Object... optionItems) {
-		return SqlBoxContextUtils.entityFindAllList(this, entityClass, optionItems);
+	public <T> List<T> eFindAll(Class<T> entityClass, Object... optionItems) {
+		return SqlBoxContextUtils.entityFindAll(this, entityClass, optionItems);
 	}
 
 	/** Find all entity according its id, if not found, return empty list */
-	public <T> List<T> eFindListByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {
-		return SqlBoxContextUtils.entityFindListByIds(this, entityClass, ids, optionItems);
+	public <T> List<T> eFindByIds(Class<T> entityClass, Iterable<?> ids, Object... optionItems) {
+		return SqlBoxContextUtils.entityFindByIds(this, entityClass, ids, optionItems);
 	}
 
 	/** Find entity according SQL, if not found, return empty list */
-	public <T> List<T> eFindListBySQL(Object... optionItems) {
-		return this.iQueryForEntityList(optionItems);
+	public <T> List<T> eFindBySQL(Object... optionItems) {
+		return iQueryForEntityList(optionItems);
 	}
 
 	/**
 	 * Find entity according a sample bean, ignore null fields, if not found, return
 	 * empty list
 	 */
-	public <T> List<T> eFindListBySample(Object sampleBean, Object... optionItems) {
+	public <T> List<T> eFindBySample(Object sampleBean, Object... optionItems) {
 		return SqlBoxContextUtils.entityFindBySample(this, sampleBean, optionItems);
 	}
 

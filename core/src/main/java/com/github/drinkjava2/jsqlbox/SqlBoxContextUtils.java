@@ -162,7 +162,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			throw new SqlBoxException("Can not build TableModel from null entityOrClass");
 		else if (entityOrClass instanceof TableModel)
 			return (TableModel) entityOrClass;
-		else if (entityOrClass instanceof Class)
+		else if (entityOrClass instanceof String) {
+			return new TableModel((String)entityOrClass); // TODO read TableModel from real DB;
+		} else if (entityOrClass instanceof Class)
 			return TableModelUtils.entity2ReadOnlyModel((Class<?>) entityOrClass);
 		else // it's a entity bean
 			return TableModelUtils.entity2ReadOnlyModel(entityOrClass.getClass());
@@ -176,14 +178,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				return TableModelUtils.entity2ReadOnlyModel((Class<?>) item);
 		}
 		return null;
-	}
-
-	/** Check if SqlOption.WITH_TAIL in optionsItems */
-	public static boolean findIfExistWithTail(Object... optionItems) {// NOSONAR
-		for (Object item : optionItems)
-			if (SqlOption.WITH_TAIL.equals(item))
-				return true;
-		return false;
 	}
 
 	/**
@@ -432,7 +426,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 */
 	public static int entityInsertTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
-		boolean withTail = findIfExistWithTail(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -510,70 +503,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				notAllowSharding(col);
 		}
 
-		if (withTail) {
-			for (Entry<String, Object> entry : ((TailSupport) entityBean).tails().entrySet()) {
-				String fieldName = entry.getKey();
-				ColumnModel col = findMatchColumnForFieldOrTail(fieldName, model);
-				if (col.getTransientable() || !col.getUpdatable())
-					continue;
-				if (col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
-					if (col.getIdGenerator() == null)
-						throw new SqlBoxException("No IdGenerator found for column '" + col.getColumnName() + "'");
-					IdGenerator idGen = col.getIdGenerator();
-					if (GenerationType.IDENTITY.equals(idGen.getGenerationType())) {// Identity
-						if (identityFieldName != null)
-							throw new SqlBoxException(
-									"More than 1 identity field found for table '" + model.getTableName() + "'");
-						identityType = col.getColumnType();
-						identityFieldName = fieldName;
-					} else if (GenerationType.SNOWFLAKE.equals(idGen.getGenerationType())) {// Snow
-						jSQL.append(col.getColumnName());
-						SnowflakeCreator snow = ctx.getSnowflakeCreator();
-						if (snow == null)
-							throw new SqlBoxException(
-									"Current SqlBoxContext no SnowflakeCreator found when try to create a Snowflake value");
-						Object id = snow.nextId();
-						jSQL.append(param(id));
-						jSQL.append(", ");
-						foundColumnToInsert = true;
-						entry.setValue(id);
-					} else {// Normal Id Generator
-						jSQL.append(col.getColumnName());
-						Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
-						jSQL.append(param(id));
-						jSQL.append(", ");
-						foundColumnToInsert = true;
-						entry.setValue(id);
-					}
-				} else {
-					Object value = entry.getValue();
-					if (value == null && ignoreNull == null) {
-						for (Object itemObject : optionItems)
-							if (SqlOption.IGNORE_NULL.equals(itemObject)) {
-								ignoreNull = true;
-								break;
-							}
-						if (ignoreNull == null)
-							ignoreNull = false;
-					}
-					if (ignoreNull == null || !ignoreNull || value != null) {
-						jSQL.append(col.getColumnName());
-						jSQL.append(new SqlItem(SqlOption.PARAM, value));
-						jSQL.append(", ");
-						foundColumnToInsert = true;
-					}
-				}
-				if (col.getPkey()) {
-					if (col.getShardTable() != null) // Sharding Table?
-						shardTableItem = shardTB(entry.getValue());
-
-					if (col.getShardDatabase() != null) // Sharding DB?
-						shardDbItem = shardDB(entry.getValue());
-				} else
-					notAllowSharding(col);
-			}
-		}
-
 		if (foundColumnToInsert)
 			jSQL.remove(jSQL.size() - 1);// delete the last ", "
 
@@ -608,7 +537,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	/** Update entityBean according primary key, return row affected */
 	public static int entityUpdateTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
-		boolean withTail = findIfExistWithTail(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
@@ -652,43 +580,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					jSQL.append(col.getColumnName()).append("=? ");
 					jSQL.append(param(value));
 				}
-			}
-		}
-		if (withTail) {
-			for (Entry<String, Object> entry : ((TailSupport) entityBean).tails().entrySet()) {
-				String fieldName = entry.getKey();
-				ColumnModel col = findMatchColumnForFieldOrTail(fieldName, model);
-				if (col.getTransientable() || !col.getUpdatable())
-					continue;
-				Object value = entry.getValue();
-				if (col.getPkey()) {
-					if (!where.isEmpty())
-						where.append(" and ");// NOSONAR
-					where.append(col.getColumnName()).append("=?");
-					where.append(param(value));
-					if (col.getShardTable() != null) // Sharding Table?
-						shardTableItem = shardTB(ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName));
-					if (col.getShardDatabase() != null) // Sharding DB?
-						shardDbItem = shardDB(ClassCacheUtils.readValueFromBeanFieldOrTail(entityBean, fieldName));
-				} else {
-					notAllowSharding(col);
-					if (value == null && ignoreNull == null) {
-						for (Object itemObject : optionItems)
-							if (SqlOption.IGNORE_NULL.equals(itemObject)) {
-								ignoreNull = true;
-								break;
-							}
-						if (ignoreNull == null)
-							ignoreNull = false;
-					}
-					if (ignoreNull == null || !ignoreNull || value != null) {
-						if (!jSQL.isEmpty())
-							jSQL.append(", ");
-						jSQL.append(col.getColumnName()).append("=? ");
-						jSQL.append(param(value));
-					}
-				}
-
 			}
 		}
 
@@ -1081,7 +972,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return ((Number) ctx.iQueryForObject(jSQL.toObjectArray())).intValue();// NOSONAR
 	}
 
-	public static <T> List<T> entityFindAllList(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
+	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -1134,7 +1025,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return result;
 	}
 
-	public static <T> List<T> entityFindListByIds(SqlBoxContext ctx, Class<T> entityClass, Iterable<?> ids, // NOSONAR
+	public static <T> List<T> entityFindByIds(SqlBoxContext ctx, Class<T> entityClass, Iterable<?> ids, // NOSONAR
 			Object... optionItems) {
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
@@ -1219,7 +1110,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> entityFindBySample(SqlBoxContext ctx, Object sampleBean, Object... sqlItems) {
-		return (List<T>) entityFindAllList(ctx, sampleBean.getClass(),
+		return (List<T>) entityFindAll(ctx, sampleBean.getClass(),
 				new SampleItem(sampleBean).sql(" where ").notNullFields(), sqlItems);
 	}
 

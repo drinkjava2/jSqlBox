@@ -143,22 +143,22 @@ public class CrudCompoundIdTest extends TestBase {
 		mpId1.put("sex", true);
 		mpId3.put("name", "Name3");
 		idMapList.append(mpId1).append(mpId2).append(mpId3);
-		Assert.assertEquals(3, ctx.eFindListByIds(CpdUser.class, idMapList).size());
-		Assert.assertEquals(3, new CpdUser().findListByIds(idMapList).size());
+		Assert.assertEquals(3, ctx.eFindByIds(CpdUser.class, idMapList).size());
+		Assert.assertEquals(3, new CpdUser().findByIds(idMapList).size());
 
 		// =======findAll
-		Assert.assertEquals(4, ctx.eFindAllList(CpdUser.class).size());
-		Assert.assertEquals(4, new CpdUser().findAllList().size());
+		Assert.assertEquals(4, ctx.eFindAll(CpdUser.class).size());
+		Assert.assertEquals(4, new CpdUser().findAll().size());
 
 		// =======findByIds (id is bean)
 		LinkStyleArrayList<Object> idBeanList = new LinkStyleArrayList<Object>();
 		idBeanList.append(u1).append(u2).append(u3);
-		Assert.assertEquals(3, ctx.eFindListByIds(CpdUser.class, idBeanList).size());
-		Assert.assertEquals(3, new CpdUser().findListByIds(idBeanList).size());
+		Assert.assertEquals(3, ctx.eFindByIds(CpdUser.class, idBeanList).size());
+		Assert.assertEquals(3, new CpdUser().findByIds(idBeanList).size());
 
 		// ========findBySql
 		Assert.assertEquals(4, ctx.iQueryForEntityList(CpdUser.class, "select * from CpdUser").size());
-		Assert.assertEquals(4, u1.findListBySQL("select * from CpdUser").size());
+		Assert.assertEquals(4, u1.findBySQL("select * from CpdUser").size());
 
 		// =======countAll
 		Assert.assertEquals(4, ctx.eCountAll(CpdUser.class));

@@ -101,7 +101,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testExampleQuery() {
-		List<DemoUser> result = gctx().eFindListBySample(new DemoUser().put("id", 1, "code", "abc"), " or code=?",
+		List<DemoUser> result = gctx().eFindBySample(new DemoUser().put("id", 1, "code", "abc"), " or code=?",
 				param("efg"));
 		if (result.get(0) == null)
 			throw new RuntimeException("Example query error");
@@ -131,7 +131,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 	}
 
 	public void testSqlRelated() {
-		List<DemoOrder> list = gctx().eFindAllList(DemoOrder.class);
+		List<DemoOrder> list = gctx().eFindAll(DemoOrder.class);
 		for (DemoOrder order : list) {
 			DemoCustomer customer = order.findRelatedOne(DemoCustomer.class);
 			if (customer == null)

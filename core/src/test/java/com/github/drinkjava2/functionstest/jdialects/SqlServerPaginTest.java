@@ -12,7 +12,7 @@ import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 
 /**
- * Test SqlServer Pagination
+ * Test SqlServer Pagination, this test need run in SQL Server DataSource
  * 
  * @author Yong Zhu
  * @since 1.7.0

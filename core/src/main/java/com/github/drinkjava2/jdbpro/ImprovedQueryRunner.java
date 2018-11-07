@@ -59,7 +59,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
 	protected static SqlHandler[] globalNextSqlHandlers = null;
-	protected static ClassTranslator globalNextClassTranslator = DefaultClassTranslator.instance;
 
 	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = globalNextConnectionManager;
@@ -68,7 +67,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected DbProLogger logger = globalNextLogger;
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
-	protected ClassTranslator classTranslator = globalNextClassTranslator;
 
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
@@ -812,14 +810,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 		globalNextSqlHandlers = sqlHandlers;
 	}
 
-	public static ClassTranslator getGlobalNextClassTranslator() {
-		return globalNextClassTranslator;
-	}
-
-	public static void setGlobalNextClassTranslator(ClassTranslator globalNextClassTranslator) {
-		ImprovedQueryRunner.globalNextClassTranslator = globalNextClassTranslator;
-	}
-
 	private void normalGetterSetters_____________________() {// NOSONAR
 	}
 
@@ -919,14 +909,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	public ThreadLocal<ArrayList<PreparedSQL>> getSqlBatchCache() {
 		return sqlBatchCache;
-	}
-
-	public ClassTranslator getClassTranslator() {
-		return classTranslator;
-	}
-
-	public void setClassTranslator(ClassTranslator classTranslator) {
-		this.classTranslator = classTranslator;
 	}
 
 }

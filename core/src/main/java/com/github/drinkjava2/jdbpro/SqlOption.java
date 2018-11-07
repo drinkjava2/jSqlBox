@@ -131,10 +131,5 @@ public enum SqlOption {
 
 	/** Mark a AUTO_SQL SqlOption, tell ORM to create left join SQL automatically */
 	AUTO_SQL,
-
-	/**
-	 * Mark a WITH_TAIL SqlOption, if true, in ORM insert/update method will include
-	 * with tails, otherwise ignore them
-	 */
-	WITH_TAIL
+ 
 }

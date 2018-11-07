@@ -1,10 +1,8 @@
 package com.github.drinkjava2.functionstest;
 
-import static com.github.drinkjava2.jdbpro.SqlOption.WITH_TAIL;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.eFindBySQL;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.eLoadBySQL;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
-
-import java.util.List;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,8 +10,9 @@ import org.junit.Test;
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
-import com.github.drinkjava2.jsqlbox.Tail;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.Tail;
 
 /**
  * This is Batch operation function test<br/>
@@ -27,7 +26,7 @@ public class TailTest extends TestBase {
 		regTables(TailSample.class);
 	}
 
-	@Table(name="tail")
+	@Table(name = "tail")
 	public static class TailSample extends ActiveRecord<TailSample> {
 		@PKey
 		String name;
@@ -54,37 +53,34 @@ public class TailTest extends TestBase {
 	}
 
 	@Test
-	public void doTailTest() {
+	public void mixTailTest() {
 		new TailSample().setName("Tom").setAge(10).insert();
-		List<TailSample> tailList = eFindBySQL(TailSample.class, "select *, 'China' as address from tail");
-		TailSample tail = tailList.get(0);
+		TailSample tail = eLoadBySQL(TailSample.class, "select *, 'China' as address from tail");
 		Assert.assertEquals("China", tail.get("address"));
 		Assert.assertEquals("Tom", tail.get("name"));
 
 		iExecute("alter table tail add address varchar(10)");
 		tail.put("address", "Canada");
-		tail.update(WITH_TAIL);
+		TableModel m=model(tail);
+		m.column("address");
+		tail.update(m);
 
-		tailList = eFindBySQL(TailSample.class, "select * from TailSample");
-		tail = tailList.get(0);
+		tail = eLoadBySQL(TailSample.class, "select * from tail");
 		Assert.assertEquals("Canada", tail.get("address"));
 	}
 
-	@Test
-	public void activeRecordTailTest() {
-		new Tail().put("name", "Tom", "age", 10).insert(WITH_TAIL);
-		List<Tail> tailList = eFindBySQL(Tail.class, "select *, 'China' as address from tail");
-		Tail ar = tailList.get(0);
-		Assert.assertEquals("China", ar.get("address"));
-		Assert.assertEquals("Tom", ar.get("name"));
+	public void tailTest() {
+		new Tail().put("name", "Tom", "age", 10).insert();
+		Tail t = eLoadBySQL(Tail.class, "select *, 'China' as address from tail");
+		Assert.assertEquals("China", t.get("address"));
+		Assert.assertEquals("Tom", t.get("name"));
 
 		iExecute("alter table tail add address varchar(10)");
-		ar.put("address", "Canada");
-		ar.update(WITH_TAIL);
+		t.put("address", "Canada");
+		t.update();
 
-		tailList = eFindBySQL(Tail.class, "select * from tail");
-		ar = tailList.get(0);
-		Assert.assertEquals("Canada", ar.get("address"));
+		t = eLoadBySQL(Tail.class, "select * from tail");
+		Assert.assertEquals("Canada", t.get("address"));
 	}
 
 }

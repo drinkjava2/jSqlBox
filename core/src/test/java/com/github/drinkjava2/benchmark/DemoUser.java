@@ -37,7 +37,7 @@ public class DemoUser extends ActiveRecord<DemoUser> {
 		// Or iQueryForLongValue("select count(1) from sys_user where 1=1 ", conditions,
 		// noPagin());
 
-		List<DemoUser> users = this.findAllList(" where 1=1 ", conditions, " order by id");
+		List<DemoUser> users = this.findAll(" where 1=1 ", conditions, " order by id");
 		// Or iQueryForEntityList(DemoUser.class, "select * from sys_user where 1=1 ",
 		// conditions, " order by id");
 

@@ -243,8 +243,14 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			predSQL.addHandler((SqlHandler) item);
 		else if (item instanceof ResultSetHandler)
 			predSQL.setResultSetHandler((ResultSetHandler) item);
-		else if (item instanceof Class)
-			return classTranslator.translate(inlineStyle, predSQL, (Class) item);
+		else if (item instanceof Class){
+			if (Text.class.isAssignableFrom((Class)item)) {
+				String text = Text.classToString((Class)item);
+				predSQL.addSqlOrParam(inlineStyle, text);
+				return true;
+			} else
+				return false;
+		}
 		else if (item instanceof CustomizedSqlItem) {
 			((CustomizedSqlItem) item).doPrepare(predSQL);
 		} else

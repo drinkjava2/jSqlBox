@@ -142,20 +142,20 @@ public interface ActiveEntity<T> extends EntityType {
 	public default int loadTry(Object... items) {return ctx(items).eLoadTry(this, items);}
 	public default T loadById(Object id, Object... items) {return (T) ctx(items).eLoadById(this.getClass(), id, items);}
 	public default T loadByIdTry(Object id, Object... items) {return (T) ctx(items).eLoadByIdTry(this.getClass(), id, items);}
-	public default List<T> findAllList(Object... items) {return (List<T>) ctx(items).eFindAllList(this.getClass(), items);}
-	public default List<T> findListByIds(Iterable<?> ids, Object... items) {return (List<T>) ctx(items).eFindListByIds(this.getClass(), ids, items);}
+	public default List<T> findAllList(Object... items) {return (List<T>) ctx(items).eFindAll(this.getClass(), items);}
+	public default List<T> findListByIds(Iterable<?> ids, Object... items) {return (List<T>) ctx(items).eFindByIds(this.getClass(), ids, items);}
 	public default List<T> findListBySQL(Object... items) {return ctx(items).iQueryForEntityList(this.getClass(), items);}
-	public default List<T> findListBySample(Object sampleBean, Object... items) {return ctx(items).eFindListBySample(sampleBean, items);} 
+	public default List<T> findListBySample(Object sampleBean, Object... items) {return ctx(items).eFindBySample(sampleBean, items);} 
 	public default EntityNet autoNet(Class<?>... entityClass) {return  ctx().autoNet(entityClass);}
 	public default <E> E findRelatedOne(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedOne(this, newItems);}
 	public default <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedList(this, newItems);}
 	public default <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedSet(this, newItems);}
 	public default <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedMap(this, newItems);}
  
-	public default <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx(items).eFindAllList(entityClass, items);}
-	public default <E> List<E> eFindByIds(Class<E> entityClass, Iterable<?> ids, Object... items) {return ctx(items).eFindListByIds(entityClass, ids, items);}
-	public default <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx(items).eFindListBySample(sampleBean, items);}
-	public default <E> List<E> eFindBySQL(Object... items) {return ctx(items).eFindListBySQL(items);}   
+	public default <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx(items).eFindAll(entityClass, items);}
+	public default <E> List<E> eFindByIds(Class<E> entityClass, Iterable<?> ids, Object... items) {return ctx(items).eFindByIds(entityClass, ids, items);}
+	public default <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx(items).eFindBySample(sampleBean, items);}
+	public default <E> List<E> eFindBySQL(Object... items) {return ctx(items).eFindBySQL(items);}   
 	public default <E> E eInsert(E entity, Object... items) {return ctx(items).eInsert(entity, items);} 
 	public default <E> E eLoad(E entity, Object... items) {return ctx(items).eLoad(entity, items);} 
 	public default <E> E eLoadById(Class<E> entityClass, Object entityId, Object... items) {return ctx(items).eLoadById(entityClass, entityId, items);}

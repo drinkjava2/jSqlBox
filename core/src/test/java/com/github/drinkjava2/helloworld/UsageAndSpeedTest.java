@@ -521,7 +521,7 @@ public class UsageAndSpeedTest {
 		ctx.eDeleteTry(user);
 		ctx.eDeleteTry(user, " or name=?", param("Tom2"));
 
-		Assert.assertEquals(7, ctx.eFindAllList(UserAR.class, " where name>?", param("Tom1")).size());
+		Assert.assertEquals(7, ctx.eFindAll(UserAR.class, " where name>?", param("Tom1")).size());
 	}
 
 	@Test

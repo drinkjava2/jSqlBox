@@ -216,7 +216,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testManualLoad() {
 		insertDemoData();
-		List<User> users = ctx.eFindAllList(User.class);
+		List<User> users = ctx.eFindAll(User.class);
 
 		for (User u : users) {
 			System.out.println("User:" + u.getId());

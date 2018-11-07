@@ -21,6 +21,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import com.github.drinkjava2.jdbpro.JDBPRO;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
@@ -52,6 +53,13 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
+ 
+	/** Build a PaginHandler handler */
+	public static TableModel model(Object entityOrClassOrTableName) {
+		return SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClassOrTableName).newCopy();
+	}
+	
+	
 	/** Build a PaginHandler handler */
 	public static PaginHandler pagin(int pageNumber, int pageSize) {
 		return new PaginHandler(pageNumber, pageSize);
@@ -112,15 +120,17 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	//@formatter:off
 	
 	//Entity series methods from SqlBoxContext
-	public static <T> List<T> eFindAll(Class<T> entityClass, Object... items) {return gctx().eFindAllList(entityClass, items);}
-	public static <T> List<T> eFindByIds(Class<T> entityClass, Iterable<?> ids, Object... items) {return gctx().eFindListByIds(entityClass, ids, items);}
-	public static <T> List<T> eFindBySample(Object sampleBean, Object... items) {return gctx().eFindListBySample(sampleBean, items);}
-	public static <T> List<T> eFindBySQL(Object... items) {return gctx().eFindListBySQL(items);}   
+	public static <T> List<T> eFindAll(Class<T> entityClass, Object... items) {return gctx().eFindAll(entityClass, items);}
+	public static <T> List<T> eFindByIds(Class<T> entityClass, Iterable<?> ids, Object... items) {return gctx().eFindByIds(entityClass, ids, items);}
+	public static <T> List<T> eFindBySample(Object sampleBean, Object... items) {return gctx().eFindBySample(sampleBean, items);}
+	public static <T> List<T> eFindBySQL(Object... items) {return gctx().eFindBySQL(items);}   
 	public static <T> T eInsert(T entity, Object... items) {return gctx().eInsert(entity, items);} 
 	public static <T> T eLoad(T entity, Object... items) {return gctx().eLoad(entity, items);} 
 	public static <T> T eLoadById(Class<T> entityClass, Object entityId, Object... items) {return gctx().eLoadById(entityClass, entityId, items);}
     public static <T> T eLoadByIdTry(Class<T> entityClass, Object entityId, Object... items) {return gctx().eLoadByIdTry(entityClass, entityId, items);}
-	public static <T> T eUpdate(Object entity, Object... items) {return gctx().eUpdate(entity, items);}
+    public static <T> T eLoadBySQL(Object... items) {return gctx().eLoadBySQL(items);}
+	
+    public static <T> T eUpdate(Object entity, Object... items) {return gctx().eUpdate(entity, items);}
 	public static boolean eExist(Object entity, Object... items) {return gctx().eExist(entity, items);}
 	public static boolean eExistById(Class<?> entityClass, Object id, Object... items) {return gctx().eExistById(entityClass, id, items);}
 	public static int eCountAll(Class<?> entityClass, Object... items) {return gctx().eCountAll(entityClass, items);}

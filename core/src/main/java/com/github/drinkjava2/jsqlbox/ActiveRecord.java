@@ -75,7 +75,10 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 public class ActiveRecord<T> implements TailSupport, EntityType {
 	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
 	private SqlBoxContext ctx;
-	private Map<String, Object> tailsMap;  
+	private Map<String, Object> tailsMap;
+
+	protected void miscMethods__________________() {// NOSONAR
+	}
 
 	public SqlBoxContext ctx(Object... items) {
 		for (Object item : items)
@@ -85,6 +88,10 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 			ctx = SqlBoxContext.globalSqlBoxContext;
 		SqlBoxException.assureNotNull(ctx, SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx;
+	}
+	
+	public TableModel model() {
+		return SqlBoxContextUtils.findEntityOrClassTableModel(this).newCopy();
 	}
 
 	public T useContext(SqlBoxContext ctx) {
@@ -196,20 +203,23 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 	public int loadTry(Object... items) {return ctx(items).eLoadTry(this, items);}
 	public T loadById(Object id, Object... items) {return (T) ctx(items).eLoadById(this.getClass(), id, items);}
 	public T loadByIdTry(Object id, Object... items) {return (T) ctx(items).eLoadByIdTry(this.getClass(), id, items);}
-	public List<T> findAllList(Object... items) {return (List<T>) ctx(items).eFindAllList(this.getClass(), items);}
-	public List<T> findListByIds(Iterable<?> ids, Object... items) {return (List<T>) ctx(items).eFindListByIds(this.getClass(), ids, items);}
-	public List<T> findListBySQL(Object... items) {return ctx(items).iQueryForEntityList(this.getClass(), items);}
-	public List<T> findListBySample(Object sampleBean, Object... items) {return ctx(items).eFindListBySample(sampleBean, items);} 
+	public T loadBySQL(Object... items) {return (T) ctx(items).eLoadBySQL(items);}
+	
+	
+	public List<T> findAll(Object... items) {return (List<T>) ctx(items).eFindAll(this.getClass(), items);}
+	public List<T> findByIds(Iterable<?> ids, Object... items) {return (List<T>) ctx(items).eFindByIds(this.getClass(), ids, items);}
+	public List<T> findBySQL(Object... items) {return ctx(items).eFindBySQL(this.getClass(), items);}
+	public List<T> findBySample(Object sampleBean, Object... items) {return ctx(items).eFindBySample(sampleBean, items);} 
 	public EntityNet autoNet(Class<?>... entityClass) {return  ctx().autoNet(entityClass);}
 	public <E> E findRelatedOne(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedOne(this, newItems);}
 	public <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedList(this, newItems);}
 	public <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedSet(this, newItems);}
 	public <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedMap(this, newItems);}
  
-	public <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx(items).eFindAllList(entityClass, items);}
-	public <E> List<E> eFindByIds(Class<E> entityClass, Iterable<?> ids, Object... items) {return ctx(items).eFindListByIds(entityClass, ids, items);}
-	public <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx(items).eFindListBySample(sampleBean, items);}
-	public <E> List<E> eFindBySQL(Object... items) {return ctx(items).eFindListBySQL(items);}   
+	public <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx(items).eFindAll(entityClass, items);}
+	public <E> List<E> eFindByIds(Class<E> entityClass, Iterable<?> ids, Object... items) {return ctx(items).eFindByIds(entityClass, ids, items);}
+	public <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx(items).eFindBySample(sampleBean, items);}
+	public <E> List<E> eFindBySQL(Object... items) {return ctx(items).eFindBySQL(items);}   
 	public <E> E eInsert(E entity, Object... items) {return ctx(items).eInsert(entity, items);} 
 	public <E> E eLoad(E entity, Object... items) {return ctx(items).eLoad(entity, items);} 
 	public <E> E eLoadById(Class<E> entityClass, Object entityId, Object... items) {return ctx(items).eLoadById(entityClass, entityId, items);}
