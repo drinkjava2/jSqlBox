@@ -57,27 +57,30 @@ public class TailTest extends TestBase {
 		new TailSample().setName("Tom").setAge(10).insert();
 		TailSample tail = eLoadBySQL(TailSample.class, "select *, 'China' as address from tail");
 		Assert.assertEquals("China", tail.get("address"));
-		Assert.assertEquals("Tom", tail.get("name"));
+		Assert.assertEquals("Tom", tail.getName());
 
 		iExecute("alter table tail add address varchar(10)");
 		tail.put("address", "Canada");
 		TableModel m=model(tail);
-		m.column("address");
+		m.addColumn("address");
 		tail.update(m);
 
 		tail = eLoadBySQL(TailSample.class, "select * from tail");
 		Assert.assertEquals("Canada", tail.get("address"));
 	}
 
+	@Test
 	public void tailTest() {
-		new Tail().put("name", "Tom", "age", 10).insert();
+		TableModel m=model(TailSample.class); 
+		new Tail().put("name", "Tom", "age", 10).insert(m);
 		Tail t = eLoadBySQL(Tail.class, "select *, 'China' as address from tail");
 		Assert.assertEquals("China", t.get("address"));
 		Assert.assertEquals("Tom", t.get("name"));
 
 		iExecute("alter table tail add address varchar(10)");
 		t.put("address", "Canada");
-		t.update();
+		m.addColumn("address");
+		t.update(m);
 
 		t = eLoadBySQL(Tail.class, "select * from tail");
 		Assert.assertEquals("Canada", t.get("address"));

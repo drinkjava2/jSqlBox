@@ -186,7 +186,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 			if (entityBean instanceof TailSupport) {
 				return ((TailSupport) entityBean).tails().get(fieldName);
 			} else
-				throw new DialectException("Can not find Java bean read method for column '" + fieldName + "' in '"
+				throw new DialectException("Can not find field '" + fieldName + "' in '"
 						+ entityBean.getClass() + "'");
 		} else
 			try {

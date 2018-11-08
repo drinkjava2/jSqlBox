@@ -44,23 +44,22 @@ public abstract class EntityIdUtils {// NOSONAR
 	/**
 	 * Build entityId from titles, oneRow, model, alias
 	 */
-	public static Object buildEntityIdFromOneRow(String[] titles, Object[] oneRow, TableModel model,
-			String alias) {// NOSONAR
+	public static Object buildEntityIdFromOneRow(String[] titles, Object[] oneRow, TableModel model, String alias) {// NOSONAR
 		int pkeyCount = model.getPKeyCount();
 		if (pkeyCount == 0)
 			throw new SqlBoxException(" No Pkey setting for '" + model.getTableName() + "'");
 		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
 		// DbUtils don't care UP/LOW case
-		
-		Object firstPKeyValue =null; 
-	       String keColName=new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString();
-	       for (int i = 0; i < titles.length; i++) {
-			if(titles[i].equalsIgnoreCase(keColName))
-				firstPKeyValue=oneRow[i];
-		} 
+
+		Object firstPKeyValue = null;
+		String keColName = new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString();
+		for (int i = 0; i < titles.length; i++) {
+			if (titles[i].equalsIgnoreCase(keColName))
+				firstPKeyValue = oneRow[i];
+		}
 		if (firstPKeyValue == null)
-			return null;// 
-		
+			return null;//
+
 		if (pkeyCount == 1)
 			return firstPKeyValue;
 		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
@@ -68,15 +67,15 @@ public abstract class EntityIdUtils {// NOSONAR
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
 				sb.append(COMPOUND_ID_SEPARATOR);
-			
-			Object value =null; 
-		         keColName=new StringBuilder(alias).append("_").append(col.getColumnName()).toString();
-		       for (int i = 0; i < titles.length; i++) {
-				if(titles[i].equalsIgnoreCase(keColName))
-					value=oneRow[i];
-			} 
+
+			Object value = null;
+			keColName = new StringBuilder(alias).append("_").append(col.getColumnName()).toString();
+			for (int i = 0; i < titles.length; i++) {
+				if (titles[i].equalsIgnoreCase(keColName))
+					value = oneRow[i];
+			}
 			if (value == null)
-				return null;// 
+				return null;//
 			sb.append(value);
 		}
 		return sb.toString();
@@ -215,21 +214,6 @@ public abstract class EntityIdUtils {// NOSONAR
 		} else {
 			if (TypeUtils.canMapToSqlType(entityId.getClass()))
 				return entityId;
-
-			boolean isEntity = false;
-			if (entityId instanceof EntityType)
-				isEntity = true;
-			else {
-				Annotation[] anno = entityId.getClass().getAnnotations();
-				for (Annotation annotation : anno)
-					if (annotation.annotationType().getName().endsWith(".Entity")) {
-						isEntity = true;
-						break;
-					}
-			}
-			if (!isEntity)
-				throw new SqlBoxException(
-						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
 			return ClassCacheUtils.readValueFromBeanFieldOrTail(entityId, entityFieldName);
 		}
 	}
