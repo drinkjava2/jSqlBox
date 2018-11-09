@@ -28,46 +28,41 @@ public abstract class TableModelUtilsOfDb {
 	/**
 	 * Convert JDBC connected database structure to TableModels, note: <br/>
 	 * 1)This method does not close connection <br/>
-	 * 2)This method does not support sequence, foreign keys, primary keys...,
-	 * but will improve later.
+	 * 2)This method does not support sequence, foreign keys, primary keys..., but
+	 * will improve later.
 	 */
 	public static TableModel[] db2Model(Connection con, Dialect dialect) {// NOSONAR
-		List<String> tableNames = new ArrayList<String>();
 		List<TableModel> tableModels = new ArrayList<TableModel>();
 		SQLException sqlException = null;
 		ResultSet rs = null;
 		PreparedStatement pst = null;
+
 		try {
 			DatabaseMetaData meta = con.getMetaData();
-			if (dialect.isOracleFamily()) {
-				pst = con.prepareStatement("SELECT TABLE_NAME FROM USER_TABLES");// NOSONAR
-				rs = pst.executeQuery();
-				while (rs.next())
-					tableNames.add(rs.getString(TABLE_NAME));
-				rs.close();
-				pst.close();
-				// } else if (dialect.isSQLServerFamily()) {
-				// pst = con.prepareStatement("select name from sysobjects where
-				// xtype='U'");
-				// rs = pst.executeQuery();
-				// while (rs.next())
-				// tableNames.add(rs.getString(TABLE_NAME));
-				// rs.close();
-				// pst.close();
-			} else {
-				rs = meta.getTables(null, null, null, new String[] { "TABLE" });
-				while (rs.next())
-					tableNames.add(rs.getString(TABLE_NAME));
-				rs.close();
-			}
 
-			for (String dbTableName : tableNames) {
-				rs = con.getMetaData().getColumns(null, null, dbTableName, null);
-				TableModel oneTable = new TableModel(dbTableName);
+			// get Tables
+			rs = meta.getTables(con.getCatalog(), dialect.isOracleFamily() ? meta.getUserName() : null, null,
+					new String[] { "TABLE" });
+			while (rs.next()) {
+				String tableName = rs.getString(TABLE_NAME);
+				if (!StrUtils.isEmpty(tableName)) {
+					TableModel model = new TableModel(tableName);
+					tableModels.add(model);
+					String comment = rs.getString("REMARKS");
+					if (!StrUtils.isEmpty(comment))
+						model.setComment(comment);
+				}
+			}
+			rs.close();
+
+			// Build Columns
+			for (TableModel model : tableModels) {
+				String tableName = model.getTableName();
+				rs = meta.getColumns(null, null, tableName, null);
 				while (rs.next()) {// NOSONAR
 					String colName = rs.getString("COLUMN_NAME");
-					oneTable.column(colName);
-					ColumnModel col = oneTable.getColumnByColName(colName);
+					model.column(colName);
+					ColumnModel col = model.getColumnByColName(colName);
 					int javaSqlType = rs.getInt("DATA_TYPE");
 					// col.setPropertyTypeName(rs.getString("TYPE_NAME"));
 
@@ -80,6 +75,7 @@ public abstract class TableModelUtilsOfDb {
 					col.setLength(rs.getInt("COLUMN_SIZE"));
 					col.setNullable(rs.getInt("NULLABLE") > 0);
 					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
+					col.setLengths(new Integer[] { col.getLength(), col.getPrecision(), col.getPrecision() });
 					try {
 						if (((Boolean) (true)).equals(rs.getBoolean("IS_AUTOINCREMENT")))
 							col.identityId();
@@ -91,11 +87,18 @@ public abstract class TableModelUtilsOfDb {
 							col.identityId();
 					} catch (Exception e) {
 					}
-
 				}
-				tableModels.add(oneTable);
 				rs.close();
 			}
+
+			// Get Primary Keys
+			for (TableModel model : tableModels) {
+				rs = meta.getPrimaryKeys(con.getCatalog(), null, model.getTableName());
+				while (rs.next())
+					model.getColumnByColName(rs.getString("COLUMN_NAME")).setPkey(true);
+				rs.close();
+			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			sqlException = e;

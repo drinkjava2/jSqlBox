@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +30,7 @@ import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
@@ -65,6 +68,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	protected ShardingTool[] shardingTools = globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
+	protected TableModel[] dbModels; // database TableModels, only used for tail entity
 
 	public SqlBoxContext() {
 		super();
@@ -237,6 +241,28 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Build a entityNet, only give both between start class and end classes */
 	public EntityNet autoNet(Class<?>... entityClass) {
 		return SqlBoxContextUtils.entityAutoNet(this, entityClass);
+	}
+
+	/**
+	 * Manually call this method to reload DbModels, if database structure be
+	 * changed
+	 */
+	public synchronized void reloadDbModels() {
+		DataSource ds = getDataSource();
+		SqlBoxException.assureNotNull(ds, "Can not load Db TableModels when datasource is null");
+		Connection conn = null;
+		try {
+			conn = getDataSource().getConnection();
+			dbModels = TableModelUtilsOfDb.db2Model(conn, dialect);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	protected void entityCrudMethods______________________________() {// NOSONAR
@@ -503,6 +529,14 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static void setGlobalSqlBoxContext(SqlBoxContext globalSqlBoxContext) {
 		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
+	}
+
+	public TableModel[] getDbModels() {
+		return dbModels;
+	}
+
+	public void setDbModels(TableModel[] dbModels) {
+		this.dbModels = dbModels;
 	}
 
 }

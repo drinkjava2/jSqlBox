@@ -28,7 +28,7 @@ public abstract class DebugUtils {//// NOSONAR
 
 	public static String getColumnModelDebugInfo(ColumnModel c) {
 		StringBuilder sb = new StringBuilder();
- 		sb.append("columnName=" + c.getColumnName()).append(", ");
+		sb.append("columnName=" + c.getColumnName()).append(", ");
 		sb.append("transient=" + c.getTransientable()).append(", ");
 		sb.append("type=" + c.getColumnType()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
@@ -39,9 +39,12 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("idGenerator=" + c.getIdGenerator()).append(", ");
 		sb.append("lengths=");
 		if (c.getLengths() != null)
-			for (Integer length : c.getLengths())
-				sb.append(length).append(", ");
-		sb.append("entityField=" + c.getEntityField());
+			sb.append(Arrays.deepToString(c.getLengths()));
+		sb.append(", ");
+		sb.append("entityField=" + c.getEntityField()).append(", ");
+		sb.append("length=" + c.getLength()).append(", ");
+		sb.append("precisio=" + c.getPrecision()).append(", ");
+		sb.append("scale" + c.getScale()).append(", ");
 		return sb.toString();
 	}
 
@@ -60,7 +63,7 @@ public abstract class DebugUtils {//// NOSONAR
 	public static String getTableModelDebugInfo(TableModel model) {
 		StringBuilder sb = new StringBuilder("\r\n=======================================================\r\n");
 		sb.append("tableName=" + model.getTableName()).append("\r\n");
-		sb.append("getEntityClass=" + model.getEntityClass()).append("\r\n"); 
+		sb.append("getEntityClass=" + model.getEntityClass()).append("\r\n");
 		sb.append("readOnly=" + model.getReadOnly()).append("\r\n");
 		sb.append(getFkeyDebugInfo(model));
 		List<ColumnModel> columns = model.getColumns();
