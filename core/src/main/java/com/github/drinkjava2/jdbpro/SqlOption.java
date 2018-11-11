@@ -131,5 +131,7 @@ public enum SqlOption {
 
 	/** Mark a AUTO_SQL SqlOption, tell ORM to create left join SQL automatically */
 	AUTO_SQL,
- 
+
+	/** Mark a TAIL SqlItem, tell ORM to use this model do CRUD */
+	TAIL
 }

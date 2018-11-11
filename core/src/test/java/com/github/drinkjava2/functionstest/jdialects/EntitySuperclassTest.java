@@ -78,7 +78,7 @@ public class EntitySuperclassTest extends TestBase {
 		c.setAddress("China");
 		c.insert();
 		
-		new Child().put("name","Sam").insert();
+		new Child().putField("name","Sam").insert();
 
 	}
 

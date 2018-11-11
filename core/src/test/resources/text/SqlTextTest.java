@@ -56,7 +56,7 @@ public class SqlTextTest extends TestBase {
 	public void test() {
 		pExecute(new InsertDemoSQL(), "1", "Foo");
 
-		Demo d = new Demo().put("id", "1", "name", "Bar");
+		Demo d = new Demo().putField("id", "1", "name", "Bar");
 		tExecute(UpdateDemoSQL.class, bind("d", d));
 
 		Assert.assertEquals("Bar", pQueryForString(SelectNameByIdSQL.class, "1"));

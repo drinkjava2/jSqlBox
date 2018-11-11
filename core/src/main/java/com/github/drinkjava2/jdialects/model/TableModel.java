@@ -628,8 +628,6 @@ public class TableModel {
 	}
 
 	public void setReadOnly(Boolean readOnly) {
-		if (this.readOnly)
-			throw new DialectException("TableModel '" + tableName + "' is readOnly, can not be modified.");
 		this.readOnly = readOnly;
 	}
 

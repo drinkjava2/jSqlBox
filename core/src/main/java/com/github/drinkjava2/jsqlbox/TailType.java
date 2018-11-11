@@ -14,8 +14,8 @@ package com.github.drinkjava2.jsqlbox;
 import java.util.Map;
 
 /**
- * TailSupport has a tails method return a map, store tails
+ * TailType has a tails() method return a map instance stored tail values
  */
-public interface TailSupport {
+public interface TailType {
 	public Map<String, Object> tails();
 }

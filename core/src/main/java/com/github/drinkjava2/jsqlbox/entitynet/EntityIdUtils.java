@@ -22,6 +22,8 @@ import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.EntityType;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -87,7 +89,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			throw new SqlBoxException("No Pkey setting for '" + model.getTableName() + "'");
 		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
 		// DbUtils don't care UP/LOW case
-		Object firstPKeyValue = ClassCacheUtils.readValueFromBeanFieldOrTail(entity, firstPkeyCol.getEntityField());
+		Object firstPKeyValue = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entity, firstPkeyCol);
 		if (firstPKeyValue == null)
 			return null;// Single or Compound Pkey not found in entity
 		if (pkeyCount == 1)
@@ -97,7 +99,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
 				sb.append(COMPOUND_ID_SEPARATOR);
-			Object value = ClassCacheUtils.readValueFromBeanFieldOrTail(entity, col.getEntityField());
+			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entity, col);
 			if (value == null)
 				return null;
 			sb.append(value);
@@ -162,7 +164,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		if (entityId instanceof Map) {
 			Map<String, Object> idMap = (Map<String, Object>) entityId;
 			for (Entry<String, Object> item : idMap.entrySet())
-				ClassCacheUtils.writeValueToBeanFieldOrTail(bean, item.getKey(), item.getValue());
+				ClassCacheUtils.writeValueToBeanField(bean, item.getKey(), item.getValue());
 		} else {
 			if (TypeUtils.canMapToSqlType(entityId.getClass())) {
 				if (model.getPKeyCount() == 0)
@@ -170,7 +172,7 @@ public abstract class EntityIdUtils {// NOSONAR
 				if (model.getPKeyCount() != 1)
 					throw new SqlBoxException("Not give enough PKey column value for '" + bean.getClass() + "'");
 				ColumnModel col = model.getFirstPKeyColumn();
-				ClassCacheUtils.writeValueToBeanFieldOrTail(bean, col.getEntityField(), entityId);
+				ClassCacheUtils.writeValueToBeanField(bean, col.getEntityField(), entityId);
 				return bean;
 			}
 
@@ -190,8 +192,8 @@ public abstract class EntityIdUtils {// NOSONAR
 						"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
 			List<ColumnModel> cols = model.getPKeyColsSortByColumnName();
 			for (ColumnModel col : cols) {
-				Object value = ClassCacheUtils.readValueFromBeanFieldOrTail(entityId, col.getEntityField());
-				ClassCacheUtils.writeValueToBeanFieldOrTail(bean, col.getEntityField(), value);
+				Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entityId, col);
+				SqlBoxContextUtils.writeValueToBeanFieldOrTail(bean, col, value);
 			}
 		}
 		return bean;
@@ -205,17 +207,12 @@ public abstract class EntityIdUtils {// NOSONAR
 	 * field value from it.
 	 * 
 	 */
-	public static Object readFeidlValueFromEntityId(Object entityId, TableModel model, String entityFieldName) {
-		SqlBoxException.assureNotNull(entityId, "entityId can not be null.");
-		if (entityId instanceof Map) {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> idMap = (Map<String, Object>) entityId;
-			return idMap.get(entityFieldName);
-		} else {
+	public static Object readFeidlValueFromEntityId(SqlBoxContext ctx, Object entityId, ColumnModel col) {
+		SqlBoxException.assureNotNull(entityId, "entityId can not be null."); 
 			if (TypeUtils.canMapToSqlType(entityId.getClass()))
 				return entityId;
-			return ClassCacheUtils.readValueFromBeanFieldOrTail(entityId, entityFieldName);
-		}
+			else
+			return SqlBoxContextUtils.readValueFromBeanFieldOrTail(entityId, col); 
 	}
 
 	/**

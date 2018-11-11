@@ -12,8 +12,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 /**
- * Any class implemented EntityType interface or has a @Entity annotation on it
- * means it's a entity type
+ * EntityType means a standard Java Bean be mapped to a database table
  * 
  * @author Yong Zhu
  * @since 2.0.4

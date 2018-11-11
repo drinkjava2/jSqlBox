@@ -125,7 +125,7 @@ public class ShardingShardMethodTest {
 		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
 
 		// Don't know saved to where, becuase Snowflake is random number
-		TheUser u1 = new TheUser().put("name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
+		TheUser u1 = new TheUser().putField("name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(u1.shardDB(), gctx().getShardedDB(TheUser.class, u1.getId())); 
 
 		u1.setName("Sam");

@@ -21,7 +21,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import com.github.drinkjava2.jdbpro.JDBPRO;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
@@ -44,6 +43,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
 	public static final SqlOption IGNORE_NULL = SqlOption.IGNORE_NULL;
 	public static final SqlOption AUTO_SQL = SqlOption.AUTO_SQL;
+	public static final SqlItem TAIL = new SqlItem(SqlOption.TAIL);
 
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
@@ -53,13 +53,11 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
- 
-	/** Build a PaginHandler handler */
-	public static TableModel model(Object entityOrClassOrTableName) {
-		return SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClassOrTableName).newCopy();
+	/** Build a TAIL SqlItem, tableName is the only parameter */
+	public static SqlItem tail(Object... tableName) {
+		return new SqlItem(SqlOption.TAIL, tableName);
 	}
-	
-	
+
 	/** Build a PaginHandler handler */
 	public static PaginHandler pagin(int pageNumber, int pageSize) {
 		return new PaginHandler(pageNumber, pageSize);

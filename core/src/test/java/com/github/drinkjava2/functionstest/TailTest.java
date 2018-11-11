@@ -1,18 +1,23 @@
 package com.github.drinkjava2.functionstest;
 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.TAIL;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.eLoadBySQL;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.model;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.tail;
+
+import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
+import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
-import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.Tail;
+import com.github.drinkjava2.jsqlbox.TailType;
 
 /**
  * This is Batch operation function test<br/>
@@ -26,18 +31,23 @@ public class TailTest extends TestBase {
 		regTables(TailSample.class);
 	}
 
-	@Table(name = "tail")
+	@Table(name = "tailTb")
 	public static class TailSample extends ActiveRecord<TailSample> {
 		@PKey
-		String name;
+		@Column(name = "user_name")
+		String userName;
+
 		Integer age;
 
-		public String getName() {
-			return name;
+		@Column(name = "birth_day")
+		Date birthDay;
+
+		public String getUserName() {
+			return userName;
 		}
 
-		public TailSample setName(String name) {
-			this.name = name;
+		public TailSample setUserName(String userName) {
+			this.userName = userName;
 			return this;
 		}
 
@@ -50,40 +60,50 @@ public class TailTest extends TestBase {
 			return this;
 		}
 
+		public Date getBirthDay() {
+			return birthDay;
+		}
+
+		public void setBirthDay(Date birthDay) {
+			this.birthDay = birthDay;
+		}
+
 	}
 
 	@Test
 	public void mixTailTest() {
-		new TailSample().setName("Tom").setAge(10).insert();
-		TailSample tail = eLoadBySQL(TailSample.class, "select *, 'China' as address from tail");
-		Assert.assertEquals("China", tail.get("address"));
-		Assert.assertEquals("Tom", tail.getName());
+		new TailSample().setUserName("Tom").putTail("age", 10).insert(TAIL);
+		TailSample t = eLoadBySQL(TailSample.class, "select *, 'China' as address from tailTb");
+		Assert.assertEquals("China", t.getTail("address"));
+		Assert.assertEquals("Tom", t.getUserName());
+		t.putField("birthDay", new Date());
+		t.update();
 
-		iExecute("alter table tail add address varchar(10)");
-		tail.put("address", "Canada");
-		TableModel m=model(tail);
-		m.addColumn("address");
-		tail.update(m);
+		iExecute("alter table tailTb add address varchar(10)");
+		gctx().reloadTailModels();
+		t.putTail("address", "Canada");
+		t.update(TAIL);
 
-		tail = eLoadBySQL(TailSample.class, "select * from tail");
-		Assert.assertEquals("Canada", tail.get("address"));
+		t = eLoadBySQL(TailSample.class, "select * from tailTb");
+		Assert.assertEquals("Canada", t.getTail("address"));
 	}
 
 	@Test
-	public void tailTest() {
-		TableModel m=model(TailSample.class); 
-		new Tail().put("name", "Tom", "age", 10).insert(m);
-		Tail t = eLoadBySQL(Tail.class, "select *, 'China' as address from tail");
-		Assert.assertEquals("China", t.get("address"));
-		Assert.assertEquals("Tom", t.get("name"));
+	public void tailTest() { new Tail().putTail("user_name", "Tom", "age", 10).insert(tail("tailTb"));
+		Tail t = eLoadBySQL(Tail.class, "select *, 'China' as address from tailTb");
+		Assert.assertEquals("China", t.getTail("address"));
+		Assert.assertEquals("Tom", t.getTail("user_name"));
+		t.update(tail("tailTb"));
 
-		iExecute("alter table tail add address varchar(10)");
-		t.put("address", "Canada");
-		m.addColumn("address");
-		t.update(m);
+		iExecute("alter table tailTb add address varchar(10)");
+		gctx().reloadTailModels();
+		t.putTail("address", "Canada" );
+		t.update(tail("tailTb"));
 
-		t = eLoadBySQL(Tail.class, "select * from tail");
-		Assert.assertEquals("Canada", t.get("address"));
+		t = eLoadBySQL(Tail.class, "select * from tailTb");
+		Assert.assertEquals("Canada", t.getTail("address"));
+
+		Assert.assertEquals(1, t.deleteTry(tail("tailTb")));
 	}
 
 }

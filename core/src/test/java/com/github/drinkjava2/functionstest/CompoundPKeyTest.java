@@ -103,7 +103,7 @@ public class CompoundPKeyTest extends TestBase {
 		super.init();
 		createAndRegTables(CmpEntity.class);
 		for (int i = 1; i <= 10; i++)
-			new CmpEntity().put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", i, "address", "China")
+			new CmpEntity().putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", i, "address", "China")
 					.insert();
 	}
 
@@ -125,7 +125,7 @@ public class CompoundPKeyTest extends TestBase {
 
 		// Entity as entityId
 		CmpEntity entityBean = new CmpEntity();
-		entityBean.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 6);
+		entityBean.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 6);
 		CmpEntity entity2 = net.pickOneEntity(CmpEntity.class, entityBean);
 		Assert.assertEquals(new Integer(6), entity2.getAge());
 	}
@@ -134,11 +134,11 @@ public class CompoundPKeyTest extends TestBase {
 	public void testActiveRecord() {
 		ctx.setAllowShowSQL(true);
 		CmpEntity entity3 = new CmpEntity();
-		entity3.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 7).load();
+		entity3.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 7).load();
 		Assert.assertEquals("China", entity3.getAddress());
 
 		CmpEntity entity4 = new CmpEntity();
-		entity4.put("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 8);
+		entity4.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 8);
 		CmpEntity entity5 = new CmpEntity().loadById(entity4);
 		Assert.assertEquals(new Integer(8), entity5.getAge());
 		Assert.assertEquals("China", entity5.getAddress());

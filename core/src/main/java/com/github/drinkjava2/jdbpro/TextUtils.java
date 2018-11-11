@@ -24,13 +24,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * TextUtils is used to read Java source file from sources folder, usage:
- * String src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this
- * function need copy java src file into resources folder or set a plug-in in
- * pom.xml, detail see jSqlBox's documents
+ * TextUtils is used to read Java source file from sources folder, usage: String
+ * src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this function
+ * need copy java src file into resources folder or set a plug-in in pom.xml,
+ * detail see jSqlBox's documents
  * 
  * @author Yong Zhu
  */
@@ -96,13 +95,13 @@ public abstract class TextUtils {// NOSONAR
 			javaFileCache.put(clazz.getName(), javaSrc);
 			return javaSrc;
 		} catch (IOException e) {
-			throw new SqlBoxException(e);
+			throw new RuntimeException(e);
 		} finally {
 			if (inputStream != null)
 				try {
 					inputStream.close();
 				} catch (IOException e) {
-					throw new SqlBoxException(e);
+					throw new RuntimeException(e);
 				}
 		}
 	}

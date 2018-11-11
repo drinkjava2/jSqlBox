@@ -38,7 +38,7 @@ public class IdGeneratorInEntityTest extends TestBase {
 	@Test
 	public void IdGeneratorInEntity1() {
 		for (int i = 0; i < 5; i++)
-			new TeamDemo().put("name", "Team" + i).insert(new PrintSqlHandler());
+			new TeamDemo().putField("name", "Team" + i).insert(new PrintSqlHandler());
 	}
 	
 	

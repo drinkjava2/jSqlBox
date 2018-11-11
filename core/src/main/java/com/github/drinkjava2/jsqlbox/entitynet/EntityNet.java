@@ -226,7 +226,7 @@ public class EntityNet {
 				if (oneRow[i]!=null && titles[i].equalsIgnoreCase(alias + "_" + col.getColumnName())) {
 					SqlBoxException.assureNotEmpty(col.getEntityField(),
 							"EntityField not set for column '" + col.getColumnName() + "'");
-					ClassCacheUtils.writeValueToBeanFieldOrTail(entity, col.getEntityField(), oneRow[i]);
+					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), oneRow[i]);
 				}
 			}
 		}
@@ -250,33 +250,33 @@ public class EntityNet {
 						col.getEntityField());
 				Class<?> fieldType = readMethod.getReturnType();
 				if (fieldType.isAssignableFrom(List.class)) {
-					List list = (List) ClassCacheUtils.readValueFromBeanFieldOrTail(to, tofield);
+					List list = (List) ClassCacheUtils.readValueFromBeanField(to, tofield);
 					if (list == null) {
 						list = new ArrayList<Object>();
-						ClassCacheUtils.writeValueToBeanFieldOrTail(to, tofield, list);
+						ClassCacheUtils.writeValueToBeanField(to, tofield, list);
 					}
 					if (!list.contains(from))
 						list.add(from);
 				} else if (fieldType.isAssignableFrom(Set.class)) {
-					Set set = (Set) ClassCacheUtils.readValueFromBeanFieldOrTail(to, tofield);
+					Set set = (Set) ClassCacheUtils.readValueFromBeanField(to, tofield);
 					if (set == null) {
 						set = new HashSet<Object>();
-						ClassCacheUtils.writeValueToBeanFieldOrTail(to, tofield, set);
+						ClassCacheUtils.writeValueToBeanField(to, tofield, set);
 					}
 					if (!set.contains(from))
 						set.add(from);
 				} else if (fieldType.isAssignableFrom(Map.class)) {
-					Map map = (Map) ClassCacheUtils.readValueFromBeanFieldOrTail(to, tofield);
+					Map map = (Map) ClassCacheUtils.readValueFromBeanField(to, tofield);
 					if (map == null) {
 						map = new HashMap();
-						ClassCacheUtils.writeValueToBeanFieldOrTail(to, tofield, map);
+						ClassCacheUtils.writeValueToBeanField(to, tofield, map);
 					}
 					Object entityId = oneRow.get("#" + fromAlias);
 					SqlBoxException.assureNotNull(entityId, "Can not find entityId for '" + fromAlias + "'");
 					if (!map.containsKey(entityId))
 						map.put(entityId, from);
 				} else {// No matter what type, give "from" value to "to"
-					ClassCacheUtils.writeValueToBeanFieldOrTail(to, tofield, from);
+					ClassCacheUtils.writeValueToBeanField(to, tofield, from);
 				}
 			}
 		}
@@ -375,8 +375,8 @@ public class EntityNet {
 			String refCol = fkey.getRefTableAndColumns()[i + 1];
 			ColumnModel c1 = m1.getColumnByColName(col);
 			ColumnModel c2 = m2.getColumnByColName(refCol);
-			Object value1 = ClassCacheUtils.readValueFromBeanFieldOrTail(e1, c1.getEntityField());
-			Object value2 = ClassCacheUtils.readValueFromBeanFieldOrTail(e2, c2.getEntityField());
+			Object value1 = ClassCacheUtils.readValueFromBeanField(e1, c1.getEntityField());
+			Object value2 = ClassCacheUtils.readValueFromBeanField(e2, c2.getEntityField());
 			if (value1 == null || value2 == null || !value1.equals(value2))
 				return false;
 			i++;

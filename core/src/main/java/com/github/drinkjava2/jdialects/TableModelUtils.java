@@ -47,4 +47,10 @@ public abstract class TableModelUtils {// NOSONAR
 		return TableModelUtilsOfDb.db2Model(con, dialect);
 	}
 
+	/**
+	 * This method bind a tableModel to a entity class, this is a global setting
+	 */
+	public static void bindTableModel(Class<?> entityClass, TableModel tableModel) {
+		TableModelUtilsOfEntity.globalTableModelCache.put(entityClass, tableModel);
+	}
 }

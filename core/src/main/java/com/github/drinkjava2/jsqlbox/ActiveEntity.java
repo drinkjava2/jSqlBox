@@ -61,12 +61,12 @@ public interface ActiveEntity<T> extends EntityType {
 	}
 
 	public default T putFields(String... fieldNames) {
-		ActiveRecord.lastTimePutFieldsCache.set(fieldNames);
+		ActiveRecord.forFieldsOrTails.set(fieldNames);
 		return (T) this;
 	}
 
 	public default T putValues(Object... values) {
-		String[] fields = ActiveRecord.lastTimePutFieldsCache.get();
+		String[] fields = ActiveRecord.forFieldsOrTails.get();
 		if (values.length == 0 || fields == null || fields.length == 0)
 			throw new SqlBoxException("putValues fields or values can not be empty");
 		if (values.length != fields.length)
@@ -94,7 +94,7 @@ public interface ActiveEntity<T> extends EntityType {
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
+		Object shardKey1 = SqlBoxContextUtils.readValueFromBeanFieldOrTail(this, col);
 		return SqlBoxContextUtils.getShardedTB(ctx(), model.getEntityClass(), shardKey1);
 	}
 
@@ -103,7 +103,7 @@ public interface ActiveEntity<T> extends EntityType {
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
+		Object shardKey1 = SqlBoxContextUtils.readValueFromBeanFieldOrTail(this, col);
 		return SqlBoxContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 

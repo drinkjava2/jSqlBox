@@ -28,7 +28,7 @@ public class SqlServerPaginTest extends TestBase {
 	public void init() {
 		super.init();
 		for (int i = 1; i <= 50; i++) {
-			new Demo().put("name", "Foo" + i, "age", i).insert();
+			new Demo().putField("name", "Foo" + i, "age", i).insert();
 		}
 	}
 

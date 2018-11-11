@@ -99,10 +99,10 @@ public class MasterSlaveTest {
 			master.iExecute(ddl, USE_BOTH);
 
 		for (long j = 0; j < SLAVE_RECORD_ROWS; j++)// insert 5 row in slaves
-			new TheUser().useContext(master).put("id", j, "name", "Slave_Row" + j).insert(USE_SLAVE);
+			new TheUser().useContext(master).putField("id", j, "name", "Slave_Row" + j).insert(USE_SLAVE);
 
 		for (long j = 0; j < MASTER_RECORD_ROWS; j++)// insert 10 row in masters
-			new TheUser().useContext(master).put("id", j, "name", "Master_Row" + j).insert(USE_MASTER);
+			new TheUser().useContext(master).putField("id", j, "name", "Master_Row" + j).insert(USE_MASTER);
 	}
 
 	@After
@@ -129,7 +129,7 @@ public class MasterSlaveTest {
 		// AutoChoose, not in Transaction, should use Master
 		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
 		// TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
-		TheUser u1 = new TheUser().useContext(master).put("id", 3L).load(USE_MASTER);
+		TheUser u1 = new TheUser().useContext(master).putField("id", 3L).load(USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
 		TheUser u2 = master.eLoadById(TheUser.class, 3L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row3", u2.getName());
@@ -186,7 +186,7 @@ public class MasterSlaveTest {
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
-		TheUser u3 = new TheUser().useContext(ctx).put("id", 1L).load(USE_SLAVE);
+		TheUser u3 = new TheUser().useContext(ctx).putField("id", 1L).load(USE_SLAVE);
 		Assert.assertEquals("Slave_Row1", u3.getName());
 	}
 

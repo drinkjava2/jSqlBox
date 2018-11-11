@@ -45,7 +45,7 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 		for (String ddl : ctx.toCreateDDL(HelloWorld.class))
 			ctx.nExecute(ddl);
 
-		new HelloWorld().put("name", "Hello jSqlBox").insert();
+		new HelloWorld().putField("name", "Hello jSqlBox").insert();
 		System.out.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
 	}
 }

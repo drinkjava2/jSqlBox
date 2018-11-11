@@ -130,7 +130,7 @@ public class ShardingModToolTest {
 		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
 
 		// Don't know saved to where
-		TheUser u1 = new TheUser().put("name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
+		TheUser u1 = new TheUser().putField("name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(u1.shardDB(), masters[4].getShardedDB(TheUser.class, u1.getDatabaseId()));
 		Assert.assertEquals(u1.shardTB(), masters[4].getShardedTB(TheUser.class, u1.getId()));
 

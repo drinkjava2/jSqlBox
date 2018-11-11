@@ -25,8 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
-import com.github.drinkjava2.jsqlbox.TailSupport;
+import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils; 
 
 /**
  * ClassCacheUtils is utility class to cache some info of classes read and write
@@ -179,15 +178,12 @@ public abstract class ClassCacheUtils {// NOSONAR
 		return getClassWriteMethods(clazz).get(fieldName);
 	}
 
-	/** Read value from entityBean field or tail */
-	public static Object readValueFromBeanFieldOrTail(Object entityBean, String fieldName) {
+	/** Read value from entityBean field */
+	public static Object readValueFromBeanField(Object entityBean, String fieldName) {
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
 		if (readMethod == null) {
-			if (entityBean instanceof TailSupport) {
-				return ((TailSupport) entityBean).tails().get(fieldName);
-			} else
-				throw new DialectException("Can not find field '" + fieldName + "' in '"
-						+ entityBean.getClass() + "'");
+			throw new DialectException(
+					"No mapping found for field '" + fieldName + "' in '" + entityBean.getClass() + "'");
 		} else
 			try {
 				return readMethod.invoke(entityBean);
@@ -196,22 +192,20 @@ public abstract class ClassCacheUtils {// NOSONAR
 			}
 	}
 
-	/** write value to entityBean field or tail */
-	public static void writeValueToBeanFieldOrTail(Object entityBean, String fieldName, Object value) {
+
+	/** write value to entityBean field */
+	public static void writeValueToBeanField(Object entityBean, String fieldName, Object value) {
 		Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
 		if (writeMethod == null) {
-			if (entityBean instanceof TailSupport) {
-				((TailSupport) entityBean).tails().put(fieldName, value);
-			} else
-				throw new DialectException("Can not find Java bean read method for column '" + fieldName + "'");
+			throw new DialectException("Can not find Java bean read method for column '" + fieldName + "'");
 		} else
 			try {
 				writeMethod.invoke(entityBean, value);
 			} catch (Exception e) {
 				throw new DialectException("fieldName '" + fieldName + "' can not write with value '" + value + "'", e);
 			}
-	}
-
+	} 
+	
 	/**
 	 * Create a new Object by given entityClass, if any exception happen, throw
 	 * {@link DialectException}

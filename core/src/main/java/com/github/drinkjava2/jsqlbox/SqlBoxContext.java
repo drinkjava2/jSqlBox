@@ -68,7 +68,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	protected ShardingTool[] shardingTools = globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
-	protected TableModel[] dbModels; // database TableModels, only used for tail entity
+	protected TableModel[] tailModels; // TableModels loaded from DB, only used for tail mode
 
 	public SqlBoxContext() {
 		super();
@@ -122,8 +122,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 			else
 				return false;
 		} else if (item instanceof TableModel) {
-			TableModel t = (TableModel) item;
-			SqlBoxException.assureNotNull(t.getEntityClass());
 			ps.addModel(item);
 			SqlBoxContextUtils.createLastAutoAliasName(ps);
 		} else if (item instanceof Class) {
@@ -151,6 +149,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 				if (sqItem.getParameters().length == 0)
 					throw new SqlBoxException("alias method need parameter");
 				ps.setLastAliases((String[]) sqItem.getParameters());// NOSONAR
+			} else if (SqlOption.TAIL.equals(sqlItemType)) {
+				return true; // do nothing
 			} else
 				return false;
 		} else if (item instanceof EntityNet) {
@@ -243,25 +243,33 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityAutoNet(this, entityClass);
 	}
 
+	/** If dbModels not loaded, loaded from database */
+	public void ensureTailModelLoaded() {
+		if (tailModels != null)
+			return;
+		reloadTailModels();
+	}
+
 	/**
-	 * Manually call this method to reload DbModels, if database structure be
-	 * changed
+	 * Manually call this method to reload tail TableModels when database structure
+	 * be changed by DDL command
 	 */
-	public synchronized void reloadDbModels() {
+	public synchronized void reloadTailModels() {
 		DataSource ds = getDataSource();
-		SqlBoxException.assureNotNull(ds, "Can not load Db TableModels when datasource is null");
+		SqlBoxException.assureNotNull(ds, "Can not load tail TableModels when datasource is null");
 		Connection conn = null;
 		try {
 			conn = getDataSource().getConnection();
-			dbModels = TableModelUtilsOfDb.db2Model(conn, dialect);
+			tailModels = TableModelUtilsOfDb.db2Model(conn, dialect);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new SqlBoxException(e);
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			if (conn != null)
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					SqlBoxException.eatException(e);
+				}
 		}
 	}
 
@@ -531,12 +539,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		SqlBoxContext.globalSqlBoxContext = globalSqlBoxContext;
 	}
 
-	public TableModel[] getDbModels() {
-		return dbModels;
+	public TableModel[] getTailModels() {
+		return tailModels;
 	}
 
-	public void setDbModels(TableModel[] dbModels) {
-		this.dbModels = dbModels;
+	public void setTailModels(TableModel[] tailModels) {
+		this.tailModels = tailModels;
 	}
 
 }

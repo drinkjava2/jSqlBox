@@ -30,7 +30,7 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 @SuppressWarnings("all")
 public abstract class TableModelUtilsOfEntity {// NOSONAR
 
-	private static Map<Class<?>, TableModel> tableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
+	public static Map<Class<?>, TableModel> globalTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
 
 	private static boolean matchNameCheck(String annotationName, String cName) {
 		if (("javax.persistence." + annotationName).equals(cName))
@@ -99,16 +99,16 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 	}
 
 	/**
-	 * Convert entity class to a read-only TableModel instance  
+	 * Convert entity class to a read-only TableModel instance
 	 */
 	public static TableModel entity2ReadOnlyModel(Class<?> entityClass) {
 		DialectException.assureNotNull(entityClass, "Entity class can not be null");
-		TableModel model = tableModelCache.get(entityClass);
+		TableModel model = globalTableModelCache.get(entityClass);
 		if (model != null)
 			return model;
 		model = entity2ModelWithConfig(entityClass);
 		model.setReadOnly(true);
-		tableModelCache.put(entityClass, model);
+		globalTableModelCache.put(entityClass, model);
 		return model;
 	}
 
@@ -122,16 +122,16 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 	}
 
 	/**
-	 * Convert entity class to a Editable TableModel instance  
+	 * Convert entity class to a Editable TableModel instance
 	 */
 	public static TableModel entity2EditableModel(Class<?> entityClass) {
 		DialectException.assureNotNull(entityClass, "Entity class can not be null");
-		TableModel model = tableModelCache.get(entityClass);
+		TableModel model = globalTableModelCache.get(entityClass);
 		if (model != null)
 			return model.newCopy();
 		model = entity2ModelWithConfig(entityClass);
 		model.setReadOnly(true);
-		tableModelCache.put(entityClass, model);
+		globalTableModelCache.put(entityClass, model);
 		return model.newCopy();
 	}
 
@@ -235,7 +235,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 		for (PropertyDescriptor pd : pds) {
 			String entityfieldName = pd.getName();
 			if ("class".equals(entityfieldName) || "simpleName".equals(entityfieldName)
-					|| "canonicalName".equals(entityfieldName) )
+					|| "canonicalName".equals(entityfieldName))
 				continue;
 			Class<?> propertyClass = pd.getPropertyType();
 

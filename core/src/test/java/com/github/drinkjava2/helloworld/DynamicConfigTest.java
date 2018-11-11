@@ -101,7 +101,7 @@ public class DynamicConfigTest extends TestBase {
 	@Test
 	public void doQueryTest() {
 		createAndRegTables(UserDemo.class);
-		UserDemo u = new UserDemo().put("id", "u1", "userName", "Tom").insert();
+		UserDemo u = new UserDemo().putField("id", "u1", "userName", "Tom").insert();
 
 		TableModel t = TableModelUtils.entity2Model(UserDemo.class);
 		t.getColumnByFieldName("id").pkey();// Fake Pkey
@@ -125,7 +125,7 @@ public class DynamicConfigTest extends TestBase {
 	@Test(expected = SqlBoxException.class)
 	public void doExceptionTest() {
 		createAndRegTables(UserDemo.class);
-		UserDemo u = new UserDemo().put("userName", "Tom").insert();
+		UserDemo u = new UserDemo().putField("userName", "Tom").insert();
 		ctx.eLoadById(UserDemo.class, u.getId());
 	}
 

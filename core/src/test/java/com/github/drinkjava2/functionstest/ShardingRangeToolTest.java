@@ -129,7 +129,7 @@ public class ShardingRangeToolTest {
 	public void testActiveRecord() {// issue: XA or TCC transaction needed
 		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
 		TheUser u1 = new TheUser();
-		u1.put("id", tbID, "databaseId", dbID, "name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
+		u1.putField("id", tbID, "databaseId", dbID, "name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals("Master2", u1.shardDB().getName());
 		Assert.assertEquals("TheUser_3", u1.shardTB());
 

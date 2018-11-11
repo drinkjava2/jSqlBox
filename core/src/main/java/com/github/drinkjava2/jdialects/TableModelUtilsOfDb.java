@@ -61,11 +61,10 @@ public abstract class TableModelUtilsOfDb {
 				rs = meta.getColumns(null, null, tableName, null);
 				while (rs.next()) {// NOSONAR
 					String colName = rs.getString("COLUMN_NAME");
-					model.column(colName);
-					ColumnModel col = model.getColumnByColName(colName);
-					int javaSqlType = rs.getInt("DATA_TYPE");
-					// col.setPropertyTypeName(rs.getString("TYPE_NAME"));
+					ColumnModel col = new ColumnModel(colName); 
+					model.addColumn(col);
 
+					int javaSqlType = rs.getInt("DATA_TYPE");
 					try {
 						col.setColumnType(TypeUtils.javaSqlTypeToDialectType(javaSqlType));
 					} catch (Exception e1) {
@@ -126,5 +125,34 @@ public abstract class TableModelUtilsOfDb {
 			throw new DialectException(sqlException);
 		return tableModels.toArray(new TableModel[tableModels.size()]);
 	}
+//
+//	/**
+//	 * map column name to entity field name, example: <br/>
+//	 * user_name -> userName <br/>
+//	 * USER_NAME -> userName <br/>
+//	 * User_naMe -> userName <br/>
+//	 * UserName -> userName <br/>
+//	 * USERNAME -> uSERNAME <br/>
+//	 * userName -> userName <br/>
+//	 * username -> username <br/>
+//	 */
+//	public static String transColumnNameToFieldName(String colName) {
+//		if (StrUtils.isEmpty(colName))
+//			return colName;
+//		if (!colName.contains("_"))
+//			return StrUtils.toLowerCaseFirstOne(colName);
+//		StringBuilder sb = new StringBuilder();
+//		char[] chars = colName.toLowerCase().toCharArray();
+//		for (int i = 0; i < chars.length; i++) {
+//			char c = chars[i];
+//			if (c == '_')
+//				continue;
+//			if ((i > 0) && (chars[i - 1]) == '_' && sb.length() > 0)
+//				sb.append(Character.toUpperCase(c));
+//			else
+//				sb.append(c);
+//		}
+//		return sb.toString();
+//	}
 
 }

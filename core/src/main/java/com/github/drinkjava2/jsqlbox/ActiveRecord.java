@@ -11,7 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +71,9 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
  * @since 1.0.0
  */
 @SuppressWarnings("unchecked")
-public class ActiveRecord<T> implements TailSupport, EntityType {
-	static final ThreadLocal<String[]> lastTimePutFieldsCache = new ThreadLocal<String[]>();
+public class ActiveRecord<T> implements TailType, EntityType {
+	static final ThreadLocal<String[]> forFieldsOrTails = new ThreadLocal<String[]>();
+	static final ThreadLocal<Boolean> isForfield = new ThreadLocal<Boolean>();
 	private SqlBoxContext ctx;
 	private Map<String, Object> tailsMap;
 
@@ -89,7 +89,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		SqlBoxException.assureNotNull(ctx, SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return ctx;
 	}
-	
+
 	public TableModel model() {
 		return SqlBoxContextUtils.findEntityOrClassTableModel(this).newCopy();
 	}
@@ -105,41 +105,53 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		return tailsMap;
 	}
 
-	public <V> V get(String fieldOrColumnName) {
-		return (V) ClassCacheUtils.readValueFromBeanFieldOrTail(this, fieldOrColumnName);
+	public <V> V getField(String fieldName) {
+		return (V) ClassCacheUtils.readValueFromBeanField(this, fieldName);
 	}
 
-	public T put(Object... fieldAndValues) {
-		for (int i = 0; i < fieldAndValues.length / 2; i++) {
-			String field = (String) fieldAndValues[i * 2];
-			Object value = fieldAndValues[i * 2 + 1];
-			ClassCacheUtils.writeValueToBeanFieldOrTail(this, field, value);
-		}
+	public <V> V getTail(String columnName) {
+		if (tailsMap == null)
+			return null;
+		return (V) tailsMap.get(columnName);
+	}
+
+	public T putTail(Object... columAndValues) {
+		SqlBoxException.assureTrue(columAndValues.length % 2 == 0, "Column and values should be paired");
+		for (int i = 0; i < columAndValues.length / 2; i++)
+			tails().put((String) columAndValues[i * 2], columAndValues[i * 2 + 1]);
 		return (T) this;
 	}
 
-	public T putFields(String... fieldNames) {
-		lastTimePutFieldsCache.set(fieldNames);
+	public T putField(Object... fieldAndValues) {
+		SqlBoxException.assureTrue(fieldAndValues.length % 2 == 0, "Field and values should be paired");
+		for (int i = 0; i < fieldAndValues.length / 2; i++)
+			ClassCacheUtils.writeValueToBeanField(this, (String) fieldAndValues[i * 2], fieldAndValues[i * 2 + 1]);
+		return (T) this;
+	}
+
+	public T forFields(String... fieldNames) {
+		forFieldsOrTails.set(fieldNames);
+		isForfield.set(true);
+		return (T) this;
+	}
+
+	public T forTails(String... columnNames) {
+		forFieldsOrTails.set(columnNames);
+		isForfield.set(false);
 		return (T) this;
 	}
 
 	public T putValues(Object... values) {
-		String[] fields = lastTimePutFieldsCache.get();
+		String[] fields = forFieldsOrTails.get();
 		if (values.length == 0 || fields == null || fields.length == 0)
 			throw new SqlBoxException("putValues fields or values can not be empty");
 		if (values.length != fields.length)
-			throw new SqlBoxException("putValues fields and values number not match");
-		for (int i = 0; i < fields.length; i++) {
-			Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(this.getClass(), fields[i]);
-			if (writeMethod == null)
-				throw new SqlBoxException(
-						"Not found writeMethod for '" + this.getClass() + "' class's method '" + fields[i] + "'");
-			try {
-				writeMethod.invoke(this, values[i]);
-			} catch (Exception e) {
-				throw new SqlBoxException(e);
-			}
-		}
+			throw new SqlBoxException("putValues quantity does not match forFields or forColumns");
+		for (int i = 0; i < fields.length; i++)
+			if (isForfield.get())
+				ClassCacheUtils.writeValueToBeanField(this, fields[i], values[i]);
+			else
+				tails().put(fields[i], values[i]);
 		return (T) this;
 	}
 
@@ -149,7 +161,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
+		Object shardKey1 = SqlBoxContextUtils.readValueFromBeanFieldOrTail(this, col);
 		return SqlBoxContextUtils.getShardedTB(ctx(items), model.getEntityClass(), shardKey1);
 	}
 
@@ -159,7 +171,7 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = ClassCacheUtils.readValueFromBeanFieldOrTail(this, col.getColumnName());
+		Object shardKey1 = SqlBoxContextUtils.readValueFromBeanFieldOrTail(this, col);
 		return SqlBoxContextUtils.getShardedDB(ctx(items), model.getEntityClass(), shardKey1);
 	}
 
@@ -288,5 +300,5 @@ public class ActiveRecord<T> implements TailSupport, EntityType {
 	public <E> E tInsert(Object... items) {return ctx(items).tInsert(items);}
 	public <E> E tExecute(Object... items) {return ctx(items).tExecute(items);}
 	public <E> List<E> tQueryForEntityList(Class<E> entityClass, Object... items) {return ctx(items).tQueryForEntityList(entityClass, items); }
- 
+  
 }

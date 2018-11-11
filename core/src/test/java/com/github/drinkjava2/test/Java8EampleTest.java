@@ -38,7 +38,7 @@ public class Java8EampleTest {
 		for (String ddl : ctx.toCreateDDL(User.class))
 			iExecute(ddl);
 		for (int i = 0; i < 100; i++)
-			new User().put("name", "Foo" + i, "age", i).insert();
+			new User().putField("name", "Foo" + i, "age", i).insert();
 		Assert.assertEquals(100, iQueryForLongValue("select count(*) from usertb"));
 	}
 

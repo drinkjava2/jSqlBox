@@ -13,9 +13,9 @@ package com.github.drinkjava2.jsqlbox.sqlitem;
 
 import com.github.drinkjava2.jdbpro.CustomizedSqlItem;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -56,7 +56,7 @@ public class EntityKeyItem implements CustomizedSqlItem {
 					if (i > 0)
 						ps.addSql(" and ");
 					ps.addSql(alias).append(".").append(col.getColumnName()).append("=? ");
-					Object value = ClassCacheUtils.readValueFromBeanFieldOrTail(entity, col.getEntityField());
+					Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entity, col);
 					ps.addParam(value);
 					i++;
 				}
