@@ -219,7 +219,6 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	
 	
 	public List<T> findAll(Object... items) {return (List<T>) ctx(items).eFindAll(this.getClass(), items);}
-	public List<T> findByIds(Iterable<?> ids, Object... items) {return (List<T>) ctx(items).eFindByIds(this.getClass(), ids, items);}
 	public List<T> findBySQL(Object... items) {return ctx(items).eFindBySQL(this.getClass(), items);}
 	public List<T> findBySample(Object sampleBean, Object... items) {return ctx(items).eFindBySample(sampleBean, items);} 
 	public EntityNet autoNet(Class<?>... entityClass) {return  ctx().autoNet(entityClass);}
@@ -229,7 +228,6 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedMap(this, newItems);}
  
 	public <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx(items).eFindAll(entityClass, items);}
-	public <E> List<E> eFindByIds(Class<E> entityClass, Iterable<?> ids, Object... items) {return ctx(items).eFindByIds(entityClass, ids, items);}
 	public <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx(items).eFindBySample(sampleBean, items);}
 	public <E> List<E> eFindBySQL(Object... items) {return ctx(items).eFindBySQL(items);}   
 	public <E> E eInsert(E entity, Object... items) {return ctx(items).eInsert(entity, items);} 

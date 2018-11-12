@@ -1,6 +1,7 @@
 package com.github.drinkjava2.functionstest;
 
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.IGNORE_NULL;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.TAIL;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.TestBase;
-import com.github.drinkjava2.jdbpro.LinkStyleArrayList;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
@@ -23,12 +23,13 @@ public class CrudCompoundIdTest extends TestBase {
 		regTables(CpdUser.class);
 	}
 
+	// name and sex are compound primary keys
 	public static class CpdUser extends ActiveRecord<CpdUser> {
 		@Id
 		String name;
 
 		@Id
-		Boolean sex;
+		Boolean sex;// true male, false female
 
 		String address;
 
@@ -131,30 +132,9 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(CpdUser.class, u3).getAddress());
 		Assert.assertEquals("NewAddress4", u1.loadByIdTry(u4).getAddress());
 
-		// =======loadByIds (id is mp)
-		LinkStyleArrayList<Object> idMapList = new LinkStyleArrayList<Object>();
-		Map<String, Object> mpId1 = new HashMap<String, Object>();
-		mpId1.put("sex", true);
-		mpId1.put("name", "Name1");
-		Map<String, Object> mpId2 = new HashMap<String, Object>();
-		mpId1.put("sex", true);
-		mpId2.put("name", "Name2");
-		Map<String, Object> mpId3 = new HashMap<String, Object>();
-		mpId1.put("sex", true);
-		mpId3.put("name", "Name3");
-		idMapList.append(mpId1).append(mpId2).append(mpId3);
-		Assert.assertEquals(3, ctx.eFindByIds(CpdUser.class, idMapList).size());
-		Assert.assertEquals(3, new CpdUser().findByIds(idMapList).size());
-
 		// =======findAll
 		Assert.assertEquals(4, ctx.eFindAll(CpdUser.class).size());
 		Assert.assertEquals(4, new CpdUser().findAll().size());
-
-		// =======findByIds (id is bean)
-		LinkStyleArrayList<Object> idBeanList = new LinkStyleArrayList<Object>();
-		idBeanList.append(u1).append(u2).append(u3);
-		Assert.assertEquals(3, ctx.eFindByIds(CpdUser.class, idBeanList).size());
-		Assert.assertEquals(3, new CpdUser().findByIds(idBeanList).size());
 
 		// ========findBySql
 		Assert.assertEquals(4, ctx.iQueryForEntityList(CpdUser.class, "select * from CpdUser").size());
@@ -177,6 +157,12 @@ public class CrudCompoundIdTest extends TestBase {
 		m2.put("name", "Name2");
 		Assert.assertEquals(true, ctx.eExistById(CpdUser.class, m1));
 		Assert.assertEquals(false, u1.existById(m2));
+
+		// =======existById (id is Tail)
+		CpdUser t1 = new CpdUser().putTail("name", "Name1", "sex", true);
+		CpdUser t2 = new CpdUser().putTail("name", "Name2", "sex", true);
+		Assert.assertEquals(true, ctx.eExistById(CpdUser.class, t1, TAIL));
+		Assert.assertEquals(true, u1.existById(t2, TAIL));
 
 		// =======existById (id is entity bean)
 		Assert.assertEquals(true, ctx.eExistById(CpdUser.class, u1));

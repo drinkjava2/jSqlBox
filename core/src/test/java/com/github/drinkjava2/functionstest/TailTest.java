@@ -17,7 +17,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.Tail;
-import com.github.drinkjava2.jsqlbox.TailType;
 
 /**
  * This is Batch operation function test<br/>

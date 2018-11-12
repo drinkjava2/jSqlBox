@@ -27,6 +27,7 @@ public class SqlServerPaginTest extends TestBase {
 	@Before
 	public void init() {
 		super.init();
+		System.out.println(ctx.getDialect());
 		for (int i = 1; i <= 50; i++) {
 			new Demo().putField("name", "Foo" + i, "age", i).insert();
 		}

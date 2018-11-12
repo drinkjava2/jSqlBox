@@ -119,7 +119,6 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	
 	//Entity series methods from SqlBoxContext
 	public static <T> List<T> eFindAll(Class<T> entityClass, Object... items) {return gctx().eFindAll(entityClass, items);}
-	public static <T> List<T> eFindByIds(Class<T> entityClass, Iterable<?> ids, Object... items) {return gctx().eFindByIds(entityClass, ids, items);}
 	public static <T> List<T> eFindBySample(Object sampleBean, Object... items) {return gctx().eFindBySample(sampleBean, items);}
 	public static <T> List<T> eFindBySQL(Object... items) {return gctx().eFindBySQL(items);}   
 	public static <T> T eInsert(T entity, Object... items) {return gctx().eInsert(entity, items);} 
