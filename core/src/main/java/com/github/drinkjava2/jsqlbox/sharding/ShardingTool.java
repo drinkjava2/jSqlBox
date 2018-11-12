@@ -27,8 +27,9 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 public interface ShardingTool {// NOSONAR
 	/**
-	 * Dealing a SqlItem(SqlOption.SHARD_TABLE, entityOrClass, shardKey1,
-	 * optionalShardKey2) item, return real table names array
+	 * Dealing a shardKey array based on current SqlBoxContext and TableModel,
+	 * return table name array, in this jSqlBox version, only support return 1 table
+	 * name
 	 * 
 	 * @param ctx
 	 *            Current SqlBoxContext instance
@@ -42,7 +43,9 @@ public interface ShardingTool {// NOSONAR
 	public String[] handleShardTable(SqlBoxContext ctx, TableModel tableModel, Object... shardKey);
 
 	/**
-	 * Dealing a ShardTable SqlItem, return real master SqlBoxContexts array
+	 * Dealing a shardKey array based on current SqlBoxContext and TableModel,
+	 * return SqlBoxContext array, in this jSqlBox version, only support return 1
+	 * SqlBoxContext
 	 * 
 	 * @param ctx
 	 *            Current SqlBoxContext instance

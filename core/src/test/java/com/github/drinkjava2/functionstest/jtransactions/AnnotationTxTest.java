@@ -30,7 +30,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
  * @author Yong Zhu
  * @since 2.0
  */
-public class AnnotationTxText {
+public class AnnotationTxTest {
 	SqlBoxContext ctx;
 	{
 		SqlBoxContext.resetGlobalVariants();
@@ -53,7 +53,7 @@ public class AnnotationTxText {
 
 	@Test
 	public void doTest() {
-		AnnotationTxText tester = BeanBox.getBean(AnnotationTxText.class);
+		AnnotationTxTest tester = BeanBox.getBean(AnnotationTxTest.class);
 		ctx.quiteExecute("drop table user_tb"); 
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())

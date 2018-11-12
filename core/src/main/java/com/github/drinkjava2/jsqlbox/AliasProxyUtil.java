@@ -19,7 +19,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
  * @since 1.7.0
  */
 public class AliasProxyUtil {
-	public static ThreadLocal<AliasItemInfo> thdMethodName = new ThreadLocal<AliasItemInfo>();// NOSONAR
+	public static ThreadLocal<AliasItemInfo> aliasItemInfo = new ThreadLocal<AliasItemInfo>();// NOSONAR
 
 	static class AliasItemInfo {
 		public String tableName = null;// NOSONAR
@@ -34,8 +34,13 @@ public class AliasProxyUtil {
 	}
 
 	/**
-	 * This proxy bean return null for all methods call, but based on current
-	 * methodName write TableName, Alias,ColumnName into ThreadLocal cache
+	 * This proxy bean return null for all methods call, but based on current method
+	 * name write TableName, Alias,ColumnName these info into a ThreadLocal variant
+	 * aliasItemInfo.
+	 * 
+	 * The MethodInterceptor depends on CgLib, not AOP alliance, CgLib is included
+	 * in jBeanBox(changed package name), jBeanBox is included in jBeanBox's Java8
+	 * version
 	 */
 	static class ProxyBean implements MethodInterceptor {
 		private TableModel tableModel;
@@ -48,14 +53,14 @@ public class AliasProxyUtil {
 
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy cgLibMethodProxy)
 				throws Throwable {
-			thdMethodName.remove();
+			aliasItemInfo.remove();
 			if (method != null && tableModel != null) {
 				String fieldName = method.getName().substring(3);
 				String columnName = null;
 				for (ColumnModel col : tableModel.getColumns())
 					if (col.getEntityField().equalsIgnoreCase(fieldName))
 						columnName = col.getColumnName();
-				thdMethodName.set(new AliasItemInfo(tableModel.getTableName(), alias, columnName));
+				aliasItemInfo.set(new AliasItemInfo(tableModel.getTableName(), alias, columnName));
 			}
 			return null;
 		}
@@ -91,13 +96,13 @@ public class AliasProxyUtil {
 	}
 
 	public static SqlItem clean() {
-		thdMethodName.remove();
+		aliasItemInfo.remove();
 		return new SqlItem("");
 	}
 
 	public static SqlItem alias(Object o) {// NOSONAR
 		try {
-			AliasItemInfo a = thdMethodName.get();
+			AliasItemInfo a = aliasItemInfo.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
 			if (StrUtils.isEmpty(a.alias))
@@ -106,13 +111,13 @@ public class AliasProxyUtil {
 				return new SqlItem(new StringBuilder(a.alias).append(".").append(a.colName).append(" as ")
 						.append(a.alias).append("_").append(a.colName).toString());
 		} finally {
-			thdMethodName.remove();
+			aliasItemInfo.remove();
 		}
 	}
 
 	public static SqlItem c_alias(Object o) {// NOSONAR
 		try {
-			AliasItemInfo a = thdMethodName.get();
+			AliasItemInfo a = aliasItemInfo.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
 			if (StrUtils.isEmpty(a.alias))
@@ -121,13 +126,13 @@ public class AliasProxyUtil {
 				return new SqlItem(new StringBuilder(", ").append(a.alias).append(".").append(a.colName).append(" as ")
 						.append(a.alias).append("_").append(a.colName).toString());
 		} finally {
-			thdMethodName.remove();
+			aliasItemInfo.remove();
 		}
 	}
 
 	public static SqlItem col(Object o) {// NOSONAR
 		try {
-			AliasItemInfo a = thdMethodName.get();
+			AliasItemInfo a = aliasItemInfo.get();
 			if (StrUtils.isEmpty(a.colName))
 				throw new SqlBoxException("Column name not found.");
 			if (StrUtils.isEmpty(a.alias))
@@ -135,20 +140,20 @@ public class AliasProxyUtil {
 			else
 				return new SqlItem(new StringBuilder(a.alias).append(".").append(a.colName).toString());
 		} finally {
-			thdMethodName.remove();
+			aliasItemInfo.remove();
 		}
 	}
 
 	public static SqlItem table(Object o) {
 		try {
 			o.toString();
-			AliasItemInfo a = thdMethodName.get();
+			AliasItemInfo a = aliasItemInfo.get();
 			if (StrUtils.isEmpty(a.alias))
 				return new SqlItem(a.tableName);
 			else
 				return new SqlItem(new StringBuilder(a.tableName).append(" ").append(a.alias).toString());
 		} finally {
-			thdMethodName.remove();
+			aliasItemInfo.remove();
 		}
 	}
 

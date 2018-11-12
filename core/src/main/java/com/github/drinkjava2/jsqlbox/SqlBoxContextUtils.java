@@ -456,7 +456,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				throw new DialectException("Can not read tail value from instance which is not TailSupport");
 		} else {
 			Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
-			SqlBoxException.assureNotNull(readMethod, "No read method for '"+fieldName+"'");
+			SqlBoxException.assureNotNull(readMethod, "No read method for '" + fieldName + "'");
 			try {
 				return readMethod.invoke(entityBean);
 			} catch (Exception e) {
@@ -875,16 +875,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		Map<String, ColumnModel> cols = new HashMap<String, ColumnModel>();
 		for (ColumnModel col : model.getColumns())
 			cols.put(col.getColumnName().toLowerCase(), col);
-		TableModel tailModel = null;
-		if (id instanceof TailType) {
-			tailModel = SqlBoxContextUtils.findTailModel(ctx, model, optionItems);
-			if (tailModel != null)
-				for (String colName : ((TailType) id).tails().keySet()) {
-					ColumnModel col = tailModel.getColumnByColName(colName);
-					if (col != null)
-						cols.put(col.getColumnName().toLowerCase(), col);
-				}
-		}
+		TableModel tailModel = SqlBoxContextUtils.findTailModel(ctx, model, optionItems);
+		if (tailModel != null)
+			for (ColumnModel col : tailModel.getColumns())
+				if (col != null)
+					cols.put(col.getColumnName().toLowerCase(), col);
 
 		T bean = SqlBoxContextUtils.entityOrClassToBean(entityClass);
 		bean = EntityIdUtils.setEntityIdValues(bean, id, cols.values());

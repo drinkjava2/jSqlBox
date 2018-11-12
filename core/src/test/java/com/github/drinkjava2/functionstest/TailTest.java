@@ -27,11 +27,11 @@ import com.github.drinkjava2.jsqlbox.Tail;
  */
 public class TailTest extends TestBase {
 	{
-		regTables(TailSample.class);
+		regTables(TailDemo.class);
 	}
 
-	@Table(name = "tailTb")
-	public static class TailSample extends ActiveRecord<TailSample> {
+	@Table(name = "tail_demo")
+	public static class TailDemo extends ActiveRecord<TailDemo> {
 		@PKey
 		@Column(name = "user_name")
 		String userName;
@@ -45,7 +45,7 @@ public class TailTest extends TestBase {
 			return userName;
 		}
 
-		public TailSample setUserName(String userName) {
+		public TailDemo setUserName(String userName) {
 			this.userName = userName;
 			return this;
 		}
@@ -54,7 +54,7 @@ public class TailTest extends TestBase {
 			return age;
 		}
 
-		public TailSample setAge(Integer age) {
+		public TailDemo setAge(Integer age) {
 			this.age = age;
 			return this;
 		}
@@ -71,38 +71,67 @@ public class TailTest extends TestBase {
 
 	@Test
 	public void mixTailTest() {
-		new TailSample().setUserName("Tom").putTail("age", 10).insert(TAIL);
-		TailSample t = eLoadBySQL(TailSample.class, "select *, 'China' as address from tailTb");
+		new TailDemo().setUserName("Tom").putTail("age", 10).insert(TAIL);
+		TailDemo t = eLoadBySQL(TailDemo.class, "select *, 'China' as address from tail_demo");
 		Assert.assertEquals("China", t.getTail("address"));
 		Assert.assertEquals("Tom", t.getUserName());
 		t.putField("birthDay", new Date());
 		t.update();
 
-		iExecute("alter table tailTb add address varchar(10)");
+		iExecute("alter table tail_demo add address varchar(10)");
 		gctx().reloadTailModels();
 		t.putTail("address", "Canada");
 		t.update(TAIL);
 
-		t = eLoadBySQL(TailSample.class, "select * from tailTb");
+		t = eLoadBySQL(TailDemo.class, "select * from tail_demo");
 		Assert.assertEquals("Canada", t.getTail("address"));
 	}
 
 	@Test
-	public void tailTest() { new Tail().putTail("user_name", "Tom", "age", 10).insert(tail("tailTb"));
-		Tail t = eLoadBySQL(Tail.class, "select *, 'China' as address from tailTb");
+	public void tailTest() {
+		new Tail().putTail("user_name", "Tom", "age", 10).insert(tail("tail_demo"));
+		Tail t = eLoadBySQL(Tail.class, "select *, 'China' as address from tail_demo");
 		Assert.assertEquals("China", t.getTail("address"));
 		Assert.assertEquals("Tom", t.getTail("user_name"));
-		t.update(tail("tailTb"));
+		t.update(tail("tail_demo"));
 
-		iExecute("alter table tailTb add address varchar(10)");
+		iExecute("alter table tail_demo add address varchar(10)");
 		gctx().reloadTailModels();
-		t.putTail("address", "Canada" );
-		t.update(tail("tailTb"));
+		t.putTail("address", "Canada");
+		t.update(tail("tail_demo"));
 
-		t = eLoadBySQL(Tail.class, "select * from tailTb");
+		t = eLoadBySQL(Tail.class, "select * from tail_demo");
 		Assert.assertEquals("Canada", t.getTail("address"));
 
-		Assert.assertEquals(1, t.deleteTry(tail("tailTb")));
+		Assert.assertEquals(1, t.deleteTry(tail("tail_demo")));
+	}
+
+	@Test
+	public void putValuesTest() {
+		TailDemo t = new TailDemo();
+		t.iExecute("delete from tail_demo");
+		t.forFields("userName", "age", "birthDay");
+		t.putValues("Foo", 10, new Date()).insert();
+		t.putValues("Bar", 20, new Date()).insert();
+		Assert.assertEquals(2, t.countAll());
+
+		t.iExecute("delete from tail_demo");
+		t.forTails("user_name", "age", "birth_Day");
+		t.putValues("Foo", 30, new Date()).insert(TAIL);
+		t.putValues("Bar", 40, new Date()).insert(TAIL);
+		Assert.assertEquals(2, t.countAll());
+
+		Tail tail = new Tail();
+		tail.iExecute("delete from tail_demo");
+		tail.forTails("user_name", "age", "birth_Day");
+		tail.putValues("Foo", 30, new Date()).insert(tail("tail_demo"));
+		tail.putValues("Bar", 40, new Date()).insert(tail("tail_demo"));
+		Assert.assertEquals(2, t.countAll());
+
+		Tail t2 = tail.loadById("Foo", tail("tail_demo")).putTail("age", 100).update(tail("tail_demo"))
+				.load(tail("tail_demo"));
+		Assert.assertEquals(100, (int) t2.getTail("age"));
+
 	}
 
 }

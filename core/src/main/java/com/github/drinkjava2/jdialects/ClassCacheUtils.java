@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils; 
+import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 
 /**
  * ClassCacheUtils is utility class to cache some info of classes read and write
@@ -192,20 +192,19 @@ public abstract class ClassCacheUtils {// NOSONAR
 			}
 	}
 
-
 	/** write value to entityBean field */
 	public static void writeValueToBeanField(Object entityBean, String fieldName, Object value) {
 		Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
 		if (writeMethod == null) {
-			throw new DialectException("Can not find Java bean read method for column '" + fieldName + "'");
+			throw new DialectException("Can not find Java bean read method '" + fieldName + "'");
 		} else
 			try {
 				writeMethod.invoke(entityBean, value);
 			} catch (Exception e) {
-				throw new DialectException("fieldName '" + fieldName + "' can not write with value '" + value + "'", e);
+				throw new DialectException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);
 			}
-	} 
-	
+	}
+
 	/**
 	 * Create a new Object by given entityClass, if any exception happen, throw
 	 * {@link DialectException}

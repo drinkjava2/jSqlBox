@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
 
 import javax.sql.DataSource;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
@@ -22,12 +21,15 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * This is jSqlBox Transaction Demo, will be put in wiki
+ * This is jSqlBox Transaction Demo by using Annotation
+ * 
+ * To make jSqlBox core unit test clean, I put Spring TX demos in jSqlBox's demo
+ * folder.
  * 
  * @author Yong Zhu
  * @since 2.0.4
  */
-public class AnnotationTxDemo {
+public class AnnotationTxDemoTest {
 	public static class DataSourceCfg extends BeanBox {
 		{
 			setProperty("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
@@ -45,6 +47,19 @@ public class AnnotationTxDemo {
 		}
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.METHOD })
+	@AOP
+	public static @interface TX { // This is a customized AOP annotation
+		public Class<?> value() default TheTxBox.class;
+	}
+
+	public static class TheTxBox extends BeanBox {
+		{
+			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
+		}
+	}
+
 	SqlBoxContext ctx;
 	{
 		SqlBoxContext.resetGlobalVariants();
@@ -53,59 +68,26 @@ public class AnnotationTxDemo {
 	}
 
 	@TX
-	public void tx_Insert1() {
+	public void txInsert() {
 		ctx.nExecute("insert into user_tb (id) values('123')");
-	}
-
-	@TX
-	public void tx_Insert2() {
-		ctx.nExecute("insert into user_tb (id) values('456')");
-		Assert.assertEquals(2, ctx.nQueryForLongValue("select count(*) from user_tb "));
-		System.out.println("Now have 2 records in user_tb, but will roll back to 1");
-		System.out.println(1 / 0);
+		System.out.println(1 / 0); // DIV 0!
 	}
 
 	@Test
 	public void doTest() {
-		AnnotationTxText tester = BeanBox.getBean(AnnotationTxText.class);
+		AnnotationTxDemoTest tester = BeanBox.getBean(AnnotationTxDemoTest.class);
 		ctx.quiteExecute("drop table user_tb");
-		String ddl="create table user_tb (id varchar(40))";
-		if(ctx.getDialect().isMySqlFamily())
-			ddl+="engine=InnoDB";
+		String ddl = "create table user_tb (id varchar(40))";
+		if (ctx.getDialect().isMySqlFamily())
+			ddl += "engine=InnoDB";
 		ctx.nExecute(ddl);
-
-		Assert.assertEquals(0L, ctx.nQueryForLongValue("select count(*) from user_tb "));
-
 		try {
-			tester.tx_Insert1();// this one inserted 1 record
-			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
-			tester.tx_Insert2();// this one did not insert, roll back to 1
+			tester.txInsert();// this one did not insert, rolled back
 		} catch (Exception e) {
-			// e.printStackTrace();
-			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
-			System.out.println("div/0 exception found, tx_Insert2 should roll back");
+			e.printStackTrace();
 		}
-		Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
-
 		ctx.nExecute("drop table user_tb");
-		JBEANBOX.close();// Release DataSource Pool
-	}
-
-	/*
-	 * AOP is an annotation for annotation, the annotated annotation's value(target)
-	 * is a class implemented AOP alliance's MethodInterceptor interface
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD })
-	@AOP
-	public static @interface TX {
-		public Class<?> value() default TheTxBox.class;
-	}
-
-	public static class TheTxBox extends BeanBox {
-		{
-			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
-		}
+		JBEANBOX.close();// Close DataSource Pool
 	}
 
 }

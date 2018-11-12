@@ -12,8 +12,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * TinyTx is a tiny and clean declarative transaction tool, in this unit test
- * use jBeanBox's pure Java configuration.
+ * This is jSqlBox Transaction Demo by using Java Configuration
  * 
  * To make jSqlBox core unit test clean, I put Spring TX demos in jSqlBox's demo
  * folder.
@@ -21,7 +20,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Yong Zhu
  * @since 2.0.4
  */
-public class JavaTxDemo {
+public class JavaTxDemoTest {
 
 	public static class DataSourceCfg extends BeanBox {
 		{
@@ -49,14 +48,14 @@ public class JavaTxDemo {
 
 	public void txInsert() {
 		ctx.nExecute("insert into user_tb (id) values('abc')");
-		System.out.println(1 / 0);
+		System.out.println(1 / 0); // DIV 0!
 	}
 
 	@Test
 	public void doTest() throws Exception {
 		TinyTx aop = new TinyTx((DataSource) JBEANBOX.getBean(DataSourceCfg.class));
-		JBEANBOX.getBeanBox(JavaTxDemo.class).addBeanAop(aop, "tx*");
-		JavaTxDemo tester = BeanBox.getBean(JavaTxDemo.class);
+		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(aop, "tx*");
+		JavaTxDemoTest tester = BeanBox.getBean(JavaTxDemoTest.class);
 		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
 		try {
 			tester.txInsert();// this one did not insert, rolled back
@@ -64,6 +63,6 @@ public class JavaTxDemo {
 			e.printStackTrace();
 		}
 		ctx.nExecute("drop table user_tb");
-		JBEANBOX.close();// Release DataSource Pool
+		JBEANBOX.close();// Close DataSource Pool
 	}
 }
