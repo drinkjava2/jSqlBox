@@ -125,34 +125,6 @@ public abstract class TableModelUtilsOfDb {
 			throw new DialectException(sqlException);
 		return tableModels.toArray(new TableModel[tableModels.size()]);
 	}
-//
-//	/**
-//	 * map column name to entity field name, example: <br/>
-//	 * user_name -> userName <br/>
-//	 * USER_NAME -> userName <br/>
-//	 * User_naMe -> userName <br/>
-//	 * UserName -> userName <br/>
-//	 * USERNAME -> uSERNAME <br/>
-//	 * userName -> userName <br/>
-//	 * username -> username <br/>
-//	 */
-//	public static String transColumnNameToFieldName(String colName) {
-//		if (StrUtils.isEmpty(colName))
-//			return colName;
-//		if (!colName.contains("_"))
-//			return StrUtils.toLowerCaseFirstOne(colName);
-//		StringBuilder sb = new StringBuilder();
-//		char[] chars = colName.toLowerCase().toCharArray();
-//		for (int i = 0; i < chars.length; i++) {
-//			char c = chars[i];
-//			if (c == '_')
-//				continue;
-//			if ((i > 0) && (chars[i - 1]) == '_' && sb.length() > 0)
-//				sb.append(Character.toUpperCase(c));
-//			else
-//				sb.append(c);
-//		}
-//		return sb.toString();
-//	}
+ 
 
 }

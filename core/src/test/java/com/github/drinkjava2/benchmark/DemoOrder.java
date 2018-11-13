@@ -2,11 +2,13 @@ package com.github.drinkjava2.benchmark;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
+import com.github.drinkjava2.jdialects.annotation.jpa.Entity;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "sys_order")
+@Entity(name = "sys_order")
 public class DemoOrder extends ActiveRecord<DemoOrder> {
 	@Id
 	private Integer id;

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * SQL Type definitions
@@ -65,6 +66,14 @@ public abstract class TypeUtils {// NOSONAR
 		SQL_MAP_ABLE_TYPES.put(Long.class, Type.BIGINT);
 		SQL_MAP_ABLE_TYPES.put(Short.class, Type.SMALLINT);
 		SQL_MAP_ABLE_TYPES.put(String.class, Type.VARCHAR);
+	}
+
+	public static Class<?> typeToJavaClass(Type type) {// NOSONAR
+		for (Entry<Class<?>, Type> entry : SQL_MAP_ABLE_TYPES.entrySet()) {
+			if (entry.getValue().equals(type))
+				return entry.getKey();
+		}
+		return null;
 	}
 
 	/** Check if a class type can map to a SQL type */
