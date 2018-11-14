@@ -1,17 +1,19 @@
 /*
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later. See
- * the lgpl.txt file in the root directory or
- * <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * Copyright 2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ * OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
  */
 package com.github.drinkjava2.jdialects;
 
-import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
-import com.github.drinkjava2.jdialects.annotation.jpa.Column;
-import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
+import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 /**
  * The tool to convert TableModel to Java source code
@@ -73,62 +75,14 @@ public abstract class TableModelUtilsOfJavaSrc {
 		return className;
 	}
 
-	@Table(name = "demo_entity")
-	public class DemoEntity extends ActiveRecord<DemoEntity> {
-		@Id
-		private Integer id;
-
-		@Column(length = 10)
-		private String name;
-
-		@Column(name = "cust_id")
-		@SingleFKey(refs = { "sys_customer", "id" })
-		private Integer custId;
-
-		DemoEntity demoEntity;
-
-		public Integer getId() {
-			return id;
-		}
-
-		public void setId(Integer id) {
-			this.id = id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public Integer getCustId() {
-			return custId;
-		}
-
-		public void setCustId(Integer custId) {
-			this.custId = custId;
-		}
-
-		public DemoEntity getDemoEntity() {
-			return demoEntity;
-		}
-
-		public void setDemoEntity(DemoEntity demoEntity) {
-			this.demoEntity = demoEntity;
-		}
-
-	}
-
 	/**
 	 * Convert a TablemModel instance to Java entity class source code
 	 * 
 	 * @param model
 	 *            The TableModel instance
-	 * @param linkStyleGetterSetter
-	 *            if true, create linked style setter/getter, otherwise create
-	 *            normal getter/setter
+	 * @param linkStyle
+	 *            if true, create linked style setter, otherwise create normal
+	 *            setter
 	 * @param activeRecord
 	 *            if true, build a jSqlBox ActiveRecord Entity class, otherwise
 	 *            build a POJO class
@@ -136,56 +90,132 @@ public abstract class TableModelUtilsOfJavaSrc {
 	 *            Optional, the package name of this entity class
 	 * @return Java Bean source code of entity
 	 */
-	public static String modelToJavaSourceCode(TableModel model, boolean linkStyleGetterSetter, boolean activeRecord,
+	public static String modelToJavaSourceCode(TableModel model, boolean linkStyle, boolean activeRecord,
 			String optionalPackageName) {
-		//head
-		StringBuilder head = new StringBuilder();
-		if (!StrUtils.isEmpty(optionalPackageName))
-			head.append("package ").append(optionalPackageName).append(";\n");
-		head.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
-		head.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
-		if (activeRecord) {
-			head.append("import com.github.drinkjava2.jsqlbox.*;\n");
-			head.append("import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;\n");
-		}
-		head.append("\n");
-
-		 //Class
+		// head
 		StringBuilder body = new StringBuilder();
+		if (!StrUtils.isEmpty(optionalPackageName))
+			body.append("package ").append(optionalPackageName).append(";\n");
+		body.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
+		body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
+		if (activeRecord) {
+			body.append("import com.github.drinkjava2.jsqlbox.*;\n");
+			body.append("import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;\n");
+		}
+		body.append("\n");
+
+		// @table
 		String className = getClassNameFromTableModel(model);
 		if (!className.equals(model.getTableName())) {
-			body.append("@Table").append("");
-		} 
-		body.append("\n");
+			body.append("@Table").append("(name=\"").append(model.getTableName()).append("\")\n");
+		}
+
+		// Compound FKEY
+		int fkeyCount = 0;
+		for (FKeyModel fkey : model.getFkeyConstraints()) {
+			if (fkey.getColumnNames().size() <= 1)// Not compound Fkey
+				continue;
+			body.append("@FKey");
+			if (fkeyCount > 0)
+				body.append(fkeyCount);
+			body.append("(");
+			fkeyCount++;
+			if (!StrUtils.isEmpty(fkey.getFkeyName()))
+				body.append("name=\"").append(fkey.getFkeyName()).append("\", ");
+			if (!fkey.getDdl())
+				body.append("ddl=false, ");
+			String fkeyCols = StrUtils.listToString(fkey.getColumnNames());
+			fkeyCols = StrUtils.replace(fkeyCols, ",", "\",\"");
+			String refCols = StrUtils.arrayToString(fkey.getRefTableAndColumns());
+			refCols = StrUtils.replace(refCols, ",", "\",\"");
+			body.append("columns={\"").append(fkeyCols).append("\"}, refs={\"").append(refCols).append("\"}");
+			body.append(")\n");
+		}
+
+		// class
 		if (activeRecord)
 			body.append("public class ").append(className).append(" extends ActiveRecord<").append(className)
 					.append("> {\n");
 		else
 			body.append("public class ").append(className).append(" {\n");
- 
-		//Fields
-		for (ColumnModel col : model.getColumns()) { 
+
+		// Fields
+		StringBuilder pkeySB = new StringBuilder();
+		StringBuilder normalSB = new StringBuilder();
+		StringBuilder sb = null;
+		for (ColumnModel col : model.getColumns()) {
 			Class<?> javaType = TypeUtils.typeToJavaClass(col.getColumnType());
 			if (javaType == null)
 				continue;
+			sb = col.getPkey() ? pkeySB : normalSB;
 			String fieldName = col.getEntityField();
 			if (StrUtils.isEmpty(fieldName))
 				fieldName = transColumnNameToFieldName(col.getColumnName());
+			// @Id
+			if (col.getPkey())
+				sb.append("  @Id\n");
 
-			if (!fieldName.equalsIgnoreCase(col.getColumnName()) || 255 != col.getLength()) {
-				body.append("   @Column(name=\"").append(col.getColumnName()).append("\"");
-				if (255 != col.getLength())
-					body.append(", length=").append(col.getLength());
-				body.append(")\n");
+			// @Column
+			boolean isStr=Type.VARCHAR.equals(col.getColumnType()) || Type.CHAR.equals(col.getColumnType());
+			if (!fieldName.equalsIgnoreCase(col.getColumnName()) || ( isStr && 255 != col.getLength())) {
+				sb.append("  @Column(name=\"").append(col.getColumnName()).append("\"");
+				if ( isStr && 255 != col.getLength())
+					sb.append(", length=").append(col.getLength());
+				sb.append(")\n");
 			}
-			body.append("   private ").append(javaType.getSimpleName()).append(" ").append(fieldName).append(";\n");
+
+			// @SingleFKey
+			for (FKeyModel fkey : model.getFkeyConstraints()) {
+				if (fkey.getColumnNames().size() != 1)// Not compound Fkey
+					continue;
+				if (!col.getColumnName().equalsIgnoreCase(fkey.getColumnNames().get(0)))
+					continue;
+				sb.append("  @SingleFKey");
+				sb.append("(");
+				fkeyCount++;
+				if (!StrUtils.isEmpty(fkey.getFkeyName()))
+					sb.append("name=\"").append(fkey.getFkeyName()).append("\", ");
+				if (!fkey.getDdl())
+					sb.append("ddl=false, ");
+				String refCols = StrUtils.arrayToString(fkey.getRefTableAndColumns());
+				refCols = StrUtils.replace(refCols, ",", "\",\"");
+				sb.append("refs={\"").append(refCols).append("\"}");
+				sb.append(")\n");
+			}
+			sb.append("  private ").append(javaType.getSimpleName()).append(" ").append(fieldName).append(";\n\n");
 		}
+		body.append(pkeySB.toString()).append(normalSB.toString());
 
-		return head.toString() + body.toString();
+		pkeySB.setLength(0);
+		normalSB.setLength(0);
+		for (ColumnModel col : model.getColumns()) {
+			// getter
+			Class<?> javaType = TypeUtils.typeToJavaClass(col.getColumnType());
+			if (javaType == null)
+				continue;
+			sb = col.getPkey() ? pkeySB : normalSB;
+			String fieldName = col.getEntityField();
+			if (StrUtils.isEmpty(fieldName))
+				fieldName = transColumnNameToFieldName(col.getColumnName());
+			String getFieldName = "get" + StrUtils.toUpperCaseFirstOne(fieldName);
+			sb.append("  public ").append(javaType.getSimpleName()).append(" ").append(getFieldName).append("(){\n");
+			sb.append("    return ").append(fieldName).append(";\n");
+			sb.append("  }\n\n");
+
+			// settter
+			String setFieldName = "set" + StrUtils.toUpperCaseFirstOne(fieldName);
+			sb.append("  public ").append(linkStyle ? className : "void").append(" ").append(setFieldName).append("(")
+					.append(javaType.getSimpleName()).append(" ").append(fieldName).append("){\n");
+			sb.append("    this.").append(fieldName).append("=").append(fieldName).append(";\n");
+			if (linkStyle)
+				sb.append("    return this;\n");
+			sb.append("  }\n\n");
+		}
+		body.append(pkeySB.toString()).append(normalSB.toString());
+
+		body.append("}");
+
+		return body.toString();
 	}
 
-	public static void main(String[] args) {
-		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(DemoEntity.class);
-		System.out.println(modelToJavaSourceCode(model, true, true, "somepackage"));
-	}
 }

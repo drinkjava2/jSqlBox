@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  * <pre>
  *   Example:
  *
- *   &#064;FKey(name="fk_1", columns="field1,field2", ref="OtherTable, field1, field2")
+ * &#64;FKey(name = "fkey1", ddl = true, columns = { "field1", "field2" }, refs = { "Entity1", "field1", "field2" })
  *   public class SomeClass()
  * </pre>
  *
@@ -43,8 +43,8 @@ public @interface FKey {
 	String[] columns() default {};
 
 	/**
-	 * Referenced table name and columns, first is table name, followed by
-	 * column names, like "table1, col1, col2..."
+	 * Referenced table name and columns, first is table name, followed by column
+	 * names, like "table1, col1, col2..."
 	 */
 	String[] refs() default {};
 
