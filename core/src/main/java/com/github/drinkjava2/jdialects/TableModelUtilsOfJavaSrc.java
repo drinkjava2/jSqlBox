@@ -5,7 +5,10 @@
  */
 package com.github.drinkjava2.jdialects;
 
-import com.github.drinkjava2.benchmark.DemoOrder;
+import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
+import com.github.drinkjava2.jdialects.annotation.jpa.Column;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -70,6 +73,54 @@ public abstract class TableModelUtilsOfJavaSrc {
 		return className;
 	}
 
+	@Table(name = "demo_entity")
+	public class DemoEntity extends ActiveRecord<DemoEntity> {
+		@Id
+		private Integer id;
+
+		@Column(length = 10)
+		private String name;
+
+		@Column(name = "cust_id")
+		@SingleFKey(refs = { "sys_customer", "id" })
+		private Integer custId;
+
+		DemoEntity demoEntity;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public Integer getCustId() {
+			return custId;
+		}
+
+		public void setCustId(Integer custId) {
+			this.custId = custId;
+		}
+
+		public DemoEntity getDemoEntity() {
+			return demoEntity;
+		}
+
+		public void setDemoEntity(DemoEntity demoEntity) {
+			this.demoEntity = demoEntity;
+		}
+
+	}
+
 	/**
 	 * Convert a TablemModel instance to Java entity class source code
 	 * 
@@ -85,41 +136,56 @@ public abstract class TableModelUtilsOfJavaSrc {
 	 *            Optional, the package name of this entity class
 	 * @return Java Bean source code of entity
 	 */
-	public String modelToJavaSourceCode(TableModel model, boolean linkStyleGetterSetter, boolean activeRecord,
+	public static String modelToJavaSourceCode(TableModel model, boolean linkStyleGetterSetter, boolean activeRecord,
 			String optionalPackageName) {
+		//head
 		StringBuilder head = new StringBuilder();
 		if (!StrUtils.isEmpty(optionalPackageName))
-			head.append("package ").append(optionalPackageName).append("\n");
+			head.append("package ").append(optionalPackageName).append(";\n");
 		head.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
 		head.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
 		if (activeRecord) {
 			head.append("import com.github.drinkjava2.jsqlbox.*;\n");
 			head.append("import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;\n");
 		}
+		head.append("\n");
 
+		 //Class
 		StringBuilder body = new StringBuilder();
 		String className = getClassNameFromTableModel(model);
 		if (!className.equals(model.getTableName())) {
 			body.append("@Table").append("");
-		}
-
+		} 
 		body.append("\n");
 		if (activeRecord)
 			body.append("public class ").append(className).append(" extends ActiveRecord<").append(className)
 					.append("> {\n");
 		else
 			body.append("public class ").append(className).append(" {\n");
-
-		for (ColumnModel col : model.getColumns()) {
+ 
+		//Fields
+		for (ColumnModel col : model.getColumns()) { 
+			Class<?> javaType = TypeUtils.typeToJavaClass(col.getColumnType());
+			if (javaType == null)
+				continue;
 			String fieldName = col.getEntityField();
 			if (StrUtils.isEmpty(fieldName))
 				fieldName = transColumnNameToFieldName(col.getColumnName());
-			if (!fieldName.equalsIgnoreCase(col.getColumnName()))
-				body.append("	@Column(name=\"").append(col.getColumnName()).append("\")\n");
-			Class<?> javaType=TypeUtils.typeToJavaClass(col.getColumnType());
-			body.append("	private ").append(col.getColumnType()) 
+
+			if (!fieldName.equalsIgnoreCase(col.getColumnName()) || 255 != col.getLength()) {
+				body.append("   @Column(name=\"").append(col.getColumnName()).append("\"");
+				if (255 != col.getLength())
+					body.append(", length=").append(col.getLength());
+				body.append(")\n");
+			}
+			body.append("   private ").append(javaType.getSimpleName()).append(" ").append(fieldName).append(";\n");
 		}
 
-		return null;
+		return head.toString() + body.toString();
+	}
+
+	public static void main(String[] args) {
+		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(DemoEntity.class);
+		System.out.println(modelToJavaSourceCode(model, true, true, "somepackage"));
 	}
 }
