@@ -348,6 +348,8 @@ public class TableModel {
 	 * Get a FKeyModel by given fkeyName
 	 */
 	public FKeyModel getFkey(String fkeyName) {
+		if (fkeyConstraints == null)
+			return null;
 		for (FKeyModel fkey : fkeyConstraints)
 			if (!StrUtils.isEmpty(fkeyName) && fkeyName.equalsIgnoreCase(fkey.getFkeyName()))
 				return fkey;

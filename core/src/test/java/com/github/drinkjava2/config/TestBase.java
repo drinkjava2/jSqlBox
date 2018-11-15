@@ -79,7 +79,7 @@ public class TestBase {
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
 
-		SqlBoxContext.setGlobalNextAllowShowSql(true);
+		//SqlBoxContext.setGlobalNextAllowShowSql(true);
 		ctx = new SqlBoxContext(dataSource);
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 		if (tablesForTest != null)

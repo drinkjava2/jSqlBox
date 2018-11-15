@@ -9,11 +9,10 @@ import org.junit.Test;
 import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
-import com.github.drinkjava2.jdialects.DDLFormatter;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
-import com.github.drinkjava2.jdialects.TableModelUtilsOfJavaSrc;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.FKey;
+import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
@@ -27,36 +26,36 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  */
 public class TableModelUtilsOfDbTest extends TestBase {
 	{
-		regTables(studentSample.class);
-		regTables(DbSample.class);
+		regTables(studentSample.class, DbSample.class);
 	}
 
 	@Table(name = "student_sample")
 	public static class studentSample {
 		@Id
-		String name;
+		String stName;
 
 		@Id
-		String address;
+		String stAddr;
 
-		public String getName() {
-			return name;
+		public String getStName() {
+			return stName;
 		}
 
-		public void setName(String name) {
-			this.name = name;
+		public void setStName(String stName) {
+			this.stName = stName;
 		}
 
-		public String getAddress() {
-			return address;
+		public String getStAddr() {
+			return stAddr;
 		}
 
-		public void setAddress(String address) {
-			this.address = address;
+		public void setStAddr(String stAddr) {
+			this.stAddr = stAddr;
 		}
+
 	}
 
-	@FKey(name = "fkey1", ddl = true, columns = { "address", "email" }, refs = { "student_sample", "address", "email" })
+	@FKey(name = "fkey1", ddl = true, columns = { "name", "address" }, refs = { "student_sample", "stName", "stAddr" })
 	public static class DbSample {
 		@Id
 		@UUID25
@@ -69,7 +68,8 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 		String email;
 
-		String studentCode;
+		@SingleFKey(refs = { "student_sample", "stAddr" })
+		String address2;
 
 		public String getId() {
 			return id;
@@ -103,13 +103,14 @@ public class TableModelUtilsOfDbTest extends TestBase {
 			this.email = email;
 		}
 
-		public String getStudentCode() {
-			return studentCode;
+		public String getAddress2() {
+			return address2;
 		}
 
-		public void setStudentCode(String studentCode) {
-			this.studentCode = studentCode;
+		public void setAddress2(String address2) {
+			this.address2 = address2;
 		}
+
 	}
 
 	public static class DbSample2 {
@@ -124,15 +125,18 @@ public class TableModelUtilsOfDbTest extends TestBase {
 		Connection conn = null;
 		conn = ds.getConnection();
 		Dialect dialect = Dialect.guessDialect(conn);
-		TableModel[] models = TableModelUtilsOfDb.db2Model(conn, dialect);
+		TableModel[] models = TableModelUtils.db2Models(conn, dialect);
 		for (TableModel model : models) {
-			for (String ddl : dialect.toCreateDDL(model)) {
-				System.out.println(DDLFormatter.format(ddl));
-			}
-
-			System.out.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, true, true, "somepackage"));
+			System.out.println("\n\n\n\n");
+			System.out.println(TableModelUtils.model2JavaSrc(model, true, true, "somepackage"));
 		}
 		conn.close();
+	}
+
+	@Test
+	public void doDbToJavaSrcFiles() {
+		DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
+		TableModelUtils.db2JavaSrcFiles(ds, Dialect.MySQLDialect, true, true, "temp", "c:/temp");
 	}
 
 }

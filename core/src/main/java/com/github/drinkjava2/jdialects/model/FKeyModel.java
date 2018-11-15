@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.drinkjava2.jdialects.ArrayUtils;
 import com.github.drinkjava2.jdialects.DialectException;
 
 /**
@@ -37,7 +38,7 @@ import com.github.drinkjava2.jdialects.DialectException;
 public class FKeyModel {
 	private String fkeyName;
 	private String tableName;
-	private List<String> columnNames = new ArrayList<String>();
+	private List<String> columnNames = new ArrayList<>();
 	private String fkeyTail;
 	private TableModel tableModel; // belong to which tableModel
 
@@ -73,7 +74,7 @@ public class FKeyModel {
 
 	public FKeyModel columns(String... columnNames) {
 		checkReadOnly();
-		this.columnNames = Arrays.asList(columnNames);
+		this.columnNames = ArrayUtils.strArrayToList(columnNames);
 		return this;
 	}
 

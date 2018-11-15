@@ -11,14 +11,17 @@
  */
 package com.github.drinkjava2.jdialects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Array Utilities usually used inside of framework
  * 
  * @author Yong Zhu
  * @since 2.0.1
  */
-public class ArrayUtils {//NOSONAR
-	
+public class ArrayUtils {// NOSONAR
+
 	/** Insert an Object at front of array */
 	public static Object[] insertArray(Object obj, Object[] arr) {
 		Object[] newArr = new Object[arr.length + 1];
@@ -33,5 +36,30 @@ public class ArrayUtils {//NOSONAR
 		System.arraycopy(arr, 0, newArr, 0, arr.length);
 		newArr[arr.length] = obj;
 		return newArr;
+	}
+
+	/** Append a String at end of String array */
+	public static String[] appendStrArray(String[] arr, String str) {
+		String[] newArr = new String[arr.length + 1];
+		System.arraycopy(arr, 0, newArr, 0, arr.length);
+		newArr[arr.length] = str;
+		return newArr;
+	}
+
+	/** Transfer a String array to String List */
+	public static List<String> strArrayToList(String[] arr) {
+		List<String> result = new ArrayList<String>();
+		if (arr == null || arr.length == 0)
+			return result;
+		for (String str : arr)
+			result.add(str);
+		return result;
+	}
+
+	/** Transfer a String List to String array */
+	public static String[] strListToArray(List<String> list) {
+		if (list == null)
+			return new String[0];
+		return list.toArray(new String[list.size()]);
 	}
 }

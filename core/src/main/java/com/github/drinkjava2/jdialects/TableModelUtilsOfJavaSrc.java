@@ -62,7 +62,7 @@ public abstract class TableModelUtilsOfJavaSrc {
 	 * userName -> UserName <br/>
 	 * username -> Username <br/>
 	 */
-	private static String getClassNameFromTableModel(TableModel model) {
+	public static String getClassNameFromTableModel(TableModel model) {
 		DialectException.assureNotNull(model, "TableModel can not be null");
 		String className;
 		if (model.getEntityClass() != null)
@@ -86,16 +86,16 @@ public abstract class TableModelUtilsOfJavaSrc {
 	 * @param activeRecord
 	 *            if true, build a jSqlBox ActiveRecord Entity class, otherwise
 	 *            build a POJO class
-	 * @param optionalPackageName
+	 * @param packageName
 	 *            Optional, the package name of this entity class
 	 * @return Java Bean source code of entity
 	 */
 	public static String modelToJavaSourceCode(TableModel model, boolean linkStyle, boolean activeRecord,
-			String optionalPackageName) {
+			String packageName) {
 		// head
 		StringBuilder body = new StringBuilder();
-		if (!StrUtils.isEmpty(optionalPackageName))
-			body.append("package ").append(optionalPackageName).append(";\n");
+		if (!StrUtils.isEmpty(packageName))
+			body.append("package ").append(packageName).append(";\n");
 		body.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
 		body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
 		if (activeRecord) {
@@ -156,10 +156,10 @@ public abstract class TableModelUtilsOfJavaSrc {
 				sb.append("  @Id\n");
 
 			// @Column
-			boolean isStr=Type.VARCHAR.equals(col.getColumnType()) || Type.CHAR.equals(col.getColumnType());
-			if (!fieldName.equalsIgnoreCase(col.getColumnName()) || ( isStr && 255 != col.getLength())) {
+			boolean isStr = Type.VARCHAR.equals(col.getColumnType()) || Type.CHAR.equals(col.getColumnType());
+			if (!fieldName.equalsIgnoreCase(col.getColumnName()) || (isStr && 255 != col.getLength())) {
 				sb.append("  @Column(name=\"").append(col.getColumnName()).append("\"");
-				if ( isStr && 255 != col.getLength())
+				if (isStr && 255 != col.getLength())
 					sb.append(", length=").append(col.getLength());
 				sb.append(")\n");
 			}

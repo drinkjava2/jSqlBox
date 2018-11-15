@@ -260,7 +260,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		Connection conn = null;
 		try {
 			conn = getDataSource().getConnection();
-			tailModels = TableModelUtilsOfDb.db2Model(conn, dialect);
+			tailModels = TableModelUtilsOfDb.db2Models(conn, dialect);
 		} catch (SQLException e) {
 			throw new SqlBoxException(e);
 		} finally {
