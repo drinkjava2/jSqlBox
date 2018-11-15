@@ -45,12 +45,10 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			return true;
 		if (("com.github.drinkjava2.jdialects.annotation.jdia." + annotationName).equals(cName))
 			return true;
-		if (("com.github.drinkjava2.jdialects.annotation.jdia." + annotationName + "1").equals(cName))
-			return true;
-		if (("com.github.drinkjava2.jdialects.annotation.jdia." + annotationName + "2").equals(cName))
-			return true;
-		if (("com.github.drinkjava2.jdialects.annotation.jdia." + annotationName + "3").equals(cName))
-			return true;
+		for (int i = 0; i <= 9; i++) {
+			if (("com.github.drinkjava2.jdialects.annotation.jdia." + annotationName + i).equals(cName))
+				return true;
+		}
 		return false;
 	}
 

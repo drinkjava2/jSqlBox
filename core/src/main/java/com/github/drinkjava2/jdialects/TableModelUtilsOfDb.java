@@ -116,25 +116,14 @@ public abstract class TableModelUtilsOfDb {
 					String pkTablenName = foreignKeyResultSet.getString("PKTABLE_NAME");
 					String pkColumnName = foreignKeyResultSet.getString("PKCOLUMN_NAME");
 					FKeyModel fkeyModel = model.getFkey(fkname);
-					 
+
 					if (keyseq == 1) {
 						model.fkey(fkname).columns(fkColumnName).refs(pkTablenName, pkColumnName);
 					} else {
-						System.out.println("fkeyModel="+fkeyModel);
-						System.out.println("pkTablenName="+pkTablenName);
-						System.out.println("fkColumnName="+fkColumnName);
-						System.out.println("fkeyModel.getColumnNames()="+fkeyModel.getColumnNames());
-						
-						fkeyModel.getColumnNames().add(fkColumnName); 
-						String[] newRefs= ArrayUtils.appendStrArray(fkeyModel.getRefTableAndColumns(), pkColumnName);
+						fkeyModel.getColumnNames().add(fkColumnName);
+						String[] newRefs = ArrayUtils.appendStrArray(fkeyModel.getRefTableAndColumns(), pkColumnName);
 						fkeyModel.setRefTableAndColumns(newRefs);
 					}
-
-					System.out.println("fkname=" + fkname);
-					System.out.println("keyseq=" + keyseq);
-					System.out.println("fkColumnName=" + fkColumnName);
-					System.out.println("pkTablenName=" + pkTablenName);
-					System.out.println("pkColumnName=" + pkColumnName); 
 				}
 			}
 
