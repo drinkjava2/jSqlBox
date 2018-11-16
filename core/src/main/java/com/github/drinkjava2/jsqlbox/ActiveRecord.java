@@ -114,7 +114,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 			return null;
 		return (V) tailsMap.get(columnName);
 	}
-
+  
 	public T putTail(Object... columAndValues) {
 		SqlBoxException.assureTrue(columAndValues.length % 2 == 0, "Column and values should be paired");
 		for (int i = 0; i < columAndValues.length / 2; i++)

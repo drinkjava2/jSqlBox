@@ -11,3 +11,5 @@ This demo use H2 memory database do test.
 
 命令行下输入:  mvn clean compile exec:exec  
 浏览器下查看： http://localhost  
+
+(注意这个示例有个小问题，DOS窗口关闭后,后台的Web服务不能自动退出，并占用Web端口，必须在windows下打开任务管理器手工杀掉一个Java.exe进程，这与ActFramework的Web服务有关，已向作者提交issue)

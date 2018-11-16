@@ -69,7 +69,7 @@ public class TransactionDemo {
 
 	@TX
 	public void save() {
-		new User().put("name", "Tom").insert();
+		new User().putField("name", "Tom").insert();
 		System.out.println(SqlBoxContext.gctx().iQueryForString("select name from usertb"));
 		System.out.println(1 / 0); // force roll back
 	}

@@ -1,8 +1,6 @@
 package com.github.drinkjava2.test;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
 
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class ActiveEntityTest implements ActiveEntity<ActiveEntityTest> {
 		for (String ddl : ctx.toCreateDDL(ActiveEntityTest.class))
 			iExecute(ddl);
 		for (int i = 0; i < 100; i++)
-			new ActiveEntityTest().put("name", "name" + i, "age", i).insert();
+			new ActiveEntityTest().putField("name", "name" + i, "age", i).insert();
 		Assert.assertEquals(100, iQueryForLongValue("select count(*) from ActiveEntityTest"));
 	}
 

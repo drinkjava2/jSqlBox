@@ -37,15 +37,18 @@
 	<dependency>
 		<groupId>com.jfinal</groupId>
 		<artifactId>jfinal</artifactId>
-		<version>3.4</version>
+		<version>3.5</version>
 	</dependency>
 	
 	<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
-    <dependency>  
-       <groupId>com.jfinal</groupId>
-       <artifactId>jetty-server</artifactId>      
-       <version>8.1.8</version>  
-	   <!--scope>provided</scope--><!-- 以War方式在Tomcat下运行要加这行-->
+    <dependency>
+    	<groupId>com.jfinal</groupId>
+    	<artifactId>jetty-server</artifactId>
+    	<version>2018.11</version>
+    	<!--
+			此处的 scope 值为 compile 仅为支持 IDEA 下启动项目
+			打 war 包时需要改成 provided，以免将一些无用的 jar 打进去
+		-->
     </dependency>
 	 
 	<!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
@@ -76,7 +79,7 @@
       <version>2.0.4</version><!--Or newest jSqlBox -->
     </dependency>  
 	
-    <!-- H2Database memory database for demo -->
+    <!-- H2Database memory database for jSqlBox demo -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>

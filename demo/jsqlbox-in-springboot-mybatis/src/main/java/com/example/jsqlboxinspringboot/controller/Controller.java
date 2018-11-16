@@ -1,6 +1,6 @@
 package com.example.jsqlboxinspringboot.controller;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.entityCountAll;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.nQueryForLongValue;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ public class Controller {
 
 	@RequestMapping("/")
 	public String home() {
-		return toHtml("Now have " + entityCountAll(Customer.class) + " records in database.");
+		return toHtml("Now have " + eCountAll(Customer.class) + " records in database.");
 	}
 
 	@RequestMapping("/insert")

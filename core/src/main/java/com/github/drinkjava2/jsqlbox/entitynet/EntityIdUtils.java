@@ -146,7 +146,7 @@ public abstract class EntityIdUtils {// NOSONAR
 
 			Annotation[] anno = entityId.getClass().getAnnotations();
 			for (Annotation annotation : anno)
-				if (annotation.annotationType().getName().endsWith(".Entity"))// TODO:unit test
+				if (annotation.annotationType().getName().endsWith(".Entity"))
 					return buildEntityIdFromEntity(entityId, model);
 			throw new SqlBoxException(
 					"Can not determine entityId type, if it's a entity, put @Entity annotation on it");

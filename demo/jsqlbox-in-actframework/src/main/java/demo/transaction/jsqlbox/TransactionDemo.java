@@ -49,8 +49,8 @@ public class TransactionDemo {
 
 		for (String ddl : ctx.toCreateDDL(Account.class))// 第一次要建表
 			gctx().nExecute(ddl);
-		new Account(ACC_A).put("amount", $.random(IntRange.of(100, 2000))).insert();// 第一次要准备数据
-		new Account(ACC_B).put("amount", $.random(IntRange.of(200, 300))).insert();
+		new Account(ACC_A).putField("amount", $.random(IntRange.of(100, 2000))).insert();// 第一次要准备数据
+		new Account(ACC_B).putField("amount", $.random(IntRange.of(200, 300))).insert();
 	}
 
 	@GetAction

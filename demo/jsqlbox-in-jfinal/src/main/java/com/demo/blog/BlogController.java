@@ -31,7 +31,7 @@ public class BlogController extends Controller {
 	 */
 	@Before(BlogValidator.class)
 	public void save() {
-		getBean(Blog.class).put("id", nextId++).insert();
+		getBean(Blog.class).putField("id", nextId++).insert();
 		redirect("/blog");
 	}
 

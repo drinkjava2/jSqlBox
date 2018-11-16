@@ -26,7 +26,7 @@ public class TeamService {
 	}
 
 	public void deleteTeam(int id) {
-		new Team().put("id", id).delete();
+		new Team().putField("id", id).delete();
 	}
 
 	public List<Team> getTeams() {

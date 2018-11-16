@@ -41,7 +41,7 @@ public class TeamServiceTest {
 		for (String ddl : ddls)
 			sbCtx.nExecute(ddl);
 		for (int i = 0; i < 5; i++)
-			new Team().put("name", "Team" + i, "rating", i * 10).insert(new PrintSqlHandler());
+			new Team().putField("name", "Team" + i, "rating", i * 10).insert(new PrintSqlHandler());
 		System.out.println("========== TeamServiceTest initialized=====");
 	}
 

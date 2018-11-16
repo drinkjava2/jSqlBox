@@ -8,7 +8,10 @@ import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.col;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*; 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQuery;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForMapList;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +38,7 @@ public class Java6ExampleTest {
 		for (String ddl : ctx.toCreateDDL(User.class))
 			iExecute(ddl);
 		for (int i = 0; i < 100; i++)
-			new User().put("name", "Foo" + i, "age", i).insert();
+			new User().putField("name", "Foo" + i, "age", i).insert();
 		Assert.assertEquals(100, iQueryForLongValue("select count(*) from usertb"));
 	}
 

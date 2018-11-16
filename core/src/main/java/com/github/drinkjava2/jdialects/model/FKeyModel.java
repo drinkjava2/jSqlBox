@@ -12,7 +12,6 @@
 package com.github.drinkjava2.jdialects.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.ArrayUtils;
@@ -38,7 +37,7 @@ import com.github.drinkjava2.jdialects.DialectException;
 public class FKeyModel {
 	private String fkeyName;
 	private String tableName;
-	private List<String> columnNames = new ArrayList<>();
+	private List<String> columnNames = new ArrayList<String>();
 	private String fkeyTail;
 	private TableModel tableModel; // belong to which tableModel
 

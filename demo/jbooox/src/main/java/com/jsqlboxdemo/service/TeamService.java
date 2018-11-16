@@ -1,11 +1,11 @@
 package com.jsqlboxdemo.service;
 
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.eFindAll;
+
 import java.util.List;
 
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.jsqlboxdemo.init.Initializer.TX;
 
-import model.AbstractTeam;
 import model.Team;
 
 /**
@@ -18,7 +18,7 @@ import model.Team;
 public class TeamService {
 
 	public List<Team> listAll() {
-		return SqlBoxContext.gctx().entityFindAll(Team.class);
+		return eFindAll(Team.class);
 	}
 
 	@TX
@@ -33,8 +33,7 @@ public class TeamService {
 
 	@TX
 	public List<Team> listBigger(Integer rating) {
-		AbstractTeam team = SqlBoxContext.createMapper(AbstractTeam.class);
-		return team.queryAbstractRatingBiggerThan(rating);
+		return new Team().queryTeamsRatingBiggerThan(rating);
 	}
 
 }

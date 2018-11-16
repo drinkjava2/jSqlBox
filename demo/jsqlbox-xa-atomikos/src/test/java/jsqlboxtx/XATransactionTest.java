@@ -38,7 +38,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 
 /**
  * Atomikos Transaction test, H2 + jBeanBox + jSqlBox + Spring XA + Atomikos
@@ -73,7 +72,7 @@ public class XATransactionTest {
 		JBEANBOX.bctx().addContextAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
 		BeanBox.getBean(SpringTxIBox.class);// Force initialize
 
-		SqlBoxContextConfig.setGlobalNextDialect(Dialect.MySQL57Dialect);
+		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < DATABASE_QTY; i++) {
 			JdbcDataSource ds = new JdbcDataSource();
 			ds.setUrl("jdbc:h2:mem:H2DB" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
@@ -108,17 +107,17 @@ public class XATransactionTest {
 	}
 
 	public void insertAccountsBad() {
-		new Bank().put("bankId", 0L, "balance", 100L).insert();
+		new Bank().putField("bankId", 0L, "balance", 100L).insert();
 		Assert.assertEquals(1, iQueryForLongValue("select count(*) from bank", masters[0]));
 		System.out.println("In insertAccountsBad() method, 1 record inserted in database0, but will rollback");
-		new Bank().put("bankId", 1L, "balance", 100L).insert();
-		new Bank().put("bankId", 2L, "balance", 1 / 0).insert();// div 0!
+		new Bank().putField("bankId", 1L, "balance", 100L).insert();
+		new Bank().putField("bankId", 2L, "balance", 1 / 0).insert();// div 0!
 	}
 
 	public void insertAccountsGood() {
-		new Bank().put("bankId", 0L, "balance", 100L).insert();
-		new Bank().put("bankId", 1L, "balance", 100L).insert();
-		new Bank().put("bankId", 2L, "balance", 100L).insert();
+		new Bank().putField("bankId", 0L, "balance", 100L).insert();
+		new Bank().putField("bankId", 1L, "balance", 100L).insert();
+		new Bank().putField("bankId", 2L, "balance", 100L).insert();
 	}
 
 	@Test

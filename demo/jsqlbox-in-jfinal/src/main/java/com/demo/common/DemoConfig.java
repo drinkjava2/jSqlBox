@@ -35,7 +35,7 @@ public class DemoConfig extends JFinalConfig {
 	// private static final String path = "target/jsqlbox-in-jfinal-1.0";
 
 	public static void main(String[] args) {
-		JFinal.start(path, 80, "/");
+		JFinal.start(path, 80, "/", 0);
 
 	}
 
@@ -57,7 +57,7 @@ public class DemoConfig extends JFinalConfig {
 			ctx.nExecute(ddl);
 
 		// 第一次运行，插入数据
-		new Blog().putFields("id", "title", "content");
+		new Blog().forFields("id", "title", "content");
 		new Blog().putValues(1, "JFinal Demo Title here (这一行是声明式事务自动回滚演示，删不掉) ", "JFinal Demo Content here").insert();
 		for (int i = 2; i < 30; i++)
 			new Blog().putValues(i, "test " + i, "test " + i).insert();

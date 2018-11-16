@@ -3,7 +3,7 @@
 1. 启动jFinal: 双击批处理文件 maven start jfinal.bat  
 2. 在浏览器查看效果： http://localhost  
 
-注意数据的第一行演示删不掉，目的是为了演示jFinal的声明式事务，删除了之后紧接抛出一个Div/0错误，事务会自动回滚。  
+注意数据的第一行演示删不掉，目的是为了演示jSqlBox使用jFinal的声明式事务，删除第一行会抛出一个Div/0错误，事务会自动回滚。  
  
 注意：如果要导入Eclipse中运行，必须：  
 1）命令行下运行maven_eclipse:eclipse，生成Eclipse的配置文件.classpath和.project，导入Eclipse  

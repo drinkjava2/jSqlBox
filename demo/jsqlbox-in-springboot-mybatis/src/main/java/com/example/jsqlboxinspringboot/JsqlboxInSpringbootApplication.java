@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 
 import com.example.jsqlboxinspringboot.entity.Customer;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextConfig;
 import com.github.drinkjava2.jtransactions.spring.SpringTxConnectionManager;
 
 //@formatter:off
@@ -30,9 +29,9 @@ public class JsqlboxInSpringbootApplication {
 	 * 3.连接管理器。不同的事务工具获取和关闭connection的方式不一样，在jTransactions中为纯JDBC、jFinal、Spring等都准备了一个连接管理器,这里设成SpringTxConnectionManager。
 	 */
 	@Bean
-	public SqlBoxContext createDefaultSqlBoxContext() {
-		SqlBoxContextConfig.setGlobalNextConnectionManager(SpringTxConnectionManager.instance());
+	public SqlBoxContext createDefaultSqlBoxContext() { 
 		SqlBoxContext ctx = new SqlBoxContext(ds);
+		ctx.setConnectionManager(SpringTxConnectionManager.instance());
 		SqlBoxContext.setGlobalSqlBoxContext(ctx);// 设定静态全局上下文
 
 		// 第一次运行要建表，利用jSqlBox来做，自已动手更踏实

@@ -47,12 +47,11 @@ public class BeetlSqlTemplateDemo {
 		SQLLoader loader = new ClasspathLoader("/sql");
 		UnderlinedNameConversion nc = new UnderlinedNameConversion();
 		SQLManager sqlManager = new SQLManager(dbstyle, loader, source, nc, new Interceptor[] {});
- 
-		
-		SqlBoxContext ctx = new SqlBoxContext(ds); 
+
+		SqlBoxContext ctx = new SqlBoxContext(ds);
 		ctx.setSqlTemplateEngine(new BeetlSqlTempalte(sqlManager));
-		ctx.setAllowShowSQL(true); //Allow show SQL log 
-		SqlBoxContext.setGlobalSqlBoxContext(ctx); 
+		ctx.setAllowShowSQL(true); // Allow show SQL log
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 
 		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)
@@ -74,8 +73,8 @@ public class BeetlSqlTemplateDemo {
 		List<Map<String, Object>> result = ctx.tQueryForMapList("user.select", bind("age", 50));
 		Assert.assertEquals(50, result.size());
 
-		List<User> users = ctx.tQuery("user.selectUserEntity", bind("u", new User().put("age", 50, "name", "Foo100")),
-				new EntityListHandler(), User.class);
+		List<User> users = ctx.tQuery("user.selectUserEntity",
+				bind("u", new User().putField("age", 50, "name", "Foo100")), new EntityListHandler(), User.class);
 		Assert.assertEquals(1, users.size());
 		Assert.assertTrue(users.get(0).getAge().equals(100));
 

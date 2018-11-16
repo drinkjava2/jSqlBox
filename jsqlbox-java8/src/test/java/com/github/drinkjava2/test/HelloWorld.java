@@ -45,7 +45,7 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
-		new HelloWorld().put("name", "Hello jSqlBox").insert();
+		new HelloWorld().putField("name", "Hello jSqlBox").insert();
 		System.out.println(ctx.pQueryForString("select name from HelloWorld"));
 	}
 }

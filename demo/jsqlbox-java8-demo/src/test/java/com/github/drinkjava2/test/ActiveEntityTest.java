@@ -1,7 +1,6 @@
 package com.github.drinkjava2.test;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
+import static com.github.drinkjava2.jdbpro.JDBPRO.question;
 
 import java.util.List;
 
@@ -13,8 +12,6 @@ import org.junit.Test;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.annotation.Sql;
-import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 /**
  * ActiveEntity is a interface has default methods only supported for Java8+, so
@@ -42,9 +39,8 @@ public class ActiveEntityTest implements ActiveEntity<ActiveEntityTest> {
 		this.age = age;
 	}
 
-	@Sql("select * from ActiveEntityTest where age>=?")
 	public List<ActiveEntityTest> selectUsers(Integer age) {
-		return guess(age, new EntityListHandler(), ActiveEntityTest.class);
+		return this.findAll(" where age>=", question(age));
 	};
 
 	@Before
@@ -55,7 +51,7 @@ public class ActiveEntityTest implements ActiveEntity<ActiveEntityTest> {
 		for (String ddl : ctx.toCreateDDL(ActiveEntityTest.class))
 			iExecute(ddl);
 		for (int i = 0; i < 100; i++)
-			new ActiveEntityTest().put("name", "name" + i, "age", i).insert();
+			new ActiveEntityTest().putField("name", "name" + i, "age", i).insert();
 		Assert.assertEquals(100, iQueryForLongValue("select count(*) from ActiveEntityTest"));
 	}
 

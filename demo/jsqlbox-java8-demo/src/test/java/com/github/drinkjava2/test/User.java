@@ -1,7 +1,5 @@
 package com.github.drinkjava2.test;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*; 
-
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;

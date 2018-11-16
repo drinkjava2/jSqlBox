@@ -41,7 +41,7 @@ public class BlogService {
 		if (id == 1) {
 			System.out.println("Now have " + new Blog().countAll() + " records, but will rollback to "
 					+ (new Blog().countAll() - 1) + " because I want demostrate transaction roll back");
-			System.out.println(1 / 0); // DIV 0!
+			System.out.println(1 / 0); // DIV 0! 演示事务自动回滚
 		}
 	}
 }

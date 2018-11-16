@@ -1,15 +1,14 @@
 package model;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
+
 import java.util.List;
 
+import com.github.drinkjava2.jdbpro.Text;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.annotation.Model;
-import com.github.drinkjava2.jsqlbox.annotation.New;
-import com.github.drinkjava2.jsqlbox.annotation.Sql;
-import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 @Table(name = "teams")
 public class Team extends ActiveRecord<Team> {
@@ -46,19 +45,32 @@ public class Team extends ActiveRecord<Team> {
 		this.rating = rating;
 	}
 
-	@Model(Team.class)
-	@New(EntityListHandler.class)
-	@Sql("select * from teams where rating<>:rating")
 	public List<Team> queryTeamsRatingNotEqual(Integer rating) {
-		return guess(rating);
+		return tQueryForEntityList(Team.class, "select * from teams where rating<>:rating", bind("rating", rating));
 	}
 
 	public List<Team> queryTeamsRatingEqualTo(Integer rating) {
-		return guess(bind("rating", rating), new EntityListHandler(), Team.class);
+		return tQueryForEntityList(Team.class, TeamsRatingEqualText.class, bind("rating", rating));
 	}
-	/*- 
-	 select t.*
-	    from teams t
-	    where t.rating=:rating
-	*/
+
+	public static class TeamsRatingEqualText extends Text {
+		/*- 
+		 select t.*
+		    from teams t
+		    where t.rating=:rating
+		*/
+	}
+
+	public List<Team> queryTeamsRatingBiggerThan(Integer rating) {
+		return tQueryForEntityList(Team.class, TeamsRatingBiggerThanText.class, bind("rating", rating));
+	}
+
+	public static class TeamsRatingBiggerThanText extends Text {
+		/*- 
+		 select t.*
+		from teams t
+		where t.rating>:rating
+		*/
+	}
+
 }
