@@ -157,7 +157,7 @@
  </dependencies> 
  
  <build>
-        <plugins>
+     <plugins>
  
  
      <plugin>
@@ -195,7 +195,7 @@
         </executions>
       </plugin> 
       
-            <plugin>
+      <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${version.compiler-plugin}</version>
@@ -204,8 +204,10 @@
                     <target>${version.java}</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
-            </plugin> 
-        </plugins>
+       </plugin> 
+            
+            
+      </plugins>
     </build>
 	 
 		

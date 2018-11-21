@@ -152,7 +152,8 @@ public class CrudTest extends TestBase {
 				ctx.eFindBySQL(CrudUser.class, new SampleItem(sample).sql("select * from CrudUser where (").nullFields()
 						.sql(") or name like ?").param(":name%").sql(" order by name")).size());
 
-		Assert.assertEquals(1, u1.findBySample(u2).size());
+		Assert.assertEquals(1, u2.findBySample().size());
+		Assert.assertEquals(1, u1.eFindBySample(u2).size());
 		Assert.assertEquals(1, u1.findAll(new SampleItem(u3).sql(" where  ").notNullFields()).size());
 		Assert.assertEquals(4, u1.findAll(CrudUser.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param("%:name%").sql(" order by name")).size());

@@ -31,6 +31,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.TailType;
 
 /**
  * EntityNet is Entity net, after created by using EntityNetHandler, can use
@@ -192,19 +193,19 @@ public class EntityNet {
 			TableModel model = config.getValue();
 			String alias = config.getKey();
 
-			// find and build entityID 
+			// find and build entityID
 			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(titles, oneRow, model, alias);
 			if (entityId == null)
-				continue;// not found entity ID columns 
+				continue;// not found entity ID columns
 			SqlBoxException.assureNotNull(model.getEntityClass());
-			Object entity = getOneEntity(model.getEntityClass(), entityId); 
+			Object entity = getOneEntity(model.getEntityClass(), entityId);
 			// create new Entity
 			if (entity == null) {
 				entity = createEntity(titles, oneRow, model, alias);
 				this.putOneEntity(model.getEntityClass(), entityId, entity);
 			} else {
-			 updateEntity(titles, entity, oneRow, model, alias);
-			} 
+				updateEntity(titles, entity, oneRow, model, alias);
+			}
 			oneRowEntities.put(alias, entity);
 			oneRowEntities.put("#" + alias, entity);
 		}
@@ -220,15 +221,18 @@ public class EntityNet {
 	private static Object updateEntity(String[] titles, Object entity, Object[] oneRow, TableModel model,
 			String alias) {
 		for (int i = 0; i < titles.length; i++) {
-			for (ColumnModel col : model.getColumns()) {
-				if (col.getTransientable())
-					continue;
-				if (oneRow[i]!=null && titles[i].equalsIgnoreCase(alias + "_" + col.getColumnName())) {
-					SqlBoxException.assureNotEmpty(col.getEntityField(),
-							"EntityField not set for column '" + col.getColumnName() + "'");
-					ClassCacheUtils.writeValueToBeanField(entity, col.getEntityField(), oneRow[i]);
-				}
-			}
+			String titleAlias = StrUtils.substringBefore(titles[i], "_");
+			if (!alias.equalsIgnoreCase(titleAlias))
+				continue;
+			String colName = StrUtils.substringAfter(titles[i], "_");
+			ColumnModel col = model.getColumnByColName(colName);
+			if (col != null && col.getTransientable())
+				continue;
+			if (col == null) {
+				if (entity instanceof TailType)
+					((TailType) entity).tails().put(colName, oneRow[i]);
+			} else
+				SqlBoxContextUtils.writeValueToBeanFieldOrTail(entity, col, oneRow[i]);
 		}
 		return entity;
 	}

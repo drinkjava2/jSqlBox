@@ -125,10 +125,18 @@ public abstract class JDBPRO {
 	/**
 	 * Cache parameters and return a "?" String
 	 */
+	public static SqlItem ques(Object... parameters) {//NOSONAR
+		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
+	}
+	
+
+	/**
+	 * Cache parameters and return a "?" String
+	 */
 	public static SqlItem question(Object... parameters) {
 		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
 	}
-
+	  
 	/**
 	 * If last param is not null, then add all items in SQL
 	 * 

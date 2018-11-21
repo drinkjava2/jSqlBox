@@ -144,7 +144,7 @@ public abstract class TableModelUtilsOfJavaSrc {
 		StringBuilder normalSB = new StringBuilder();
 		StringBuilder sb = null;
 		for (ColumnModel col : model.getColumns()) {
-			Class<?> javaType = TypeUtils.typeToJavaClass(col.getColumnType());
+			Class<?> javaType = TypeUtils.dialectTypeToJavaType(col.getColumnType());
 			if (javaType == null)
 				continue;
 			sb = col.getPkey() ? pkeySB : normalSB;
@@ -190,7 +190,7 @@ public abstract class TableModelUtilsOfJavaSrc {
 		normalSB.setLength(0);
 		for (ColumnModel col : model.getColumns()) {
 			// getter
-			Class<?> javaType = TypeUtils.typeToJavaClass(col.getColumnType());
+			Class<?> javaType = TypeUtils.dialectTypeToJavaType(col.getColumnType());
 			if (javaType == null)
 				continue;
 			sb = col.getPkey() ? pkeySB : normalSB;

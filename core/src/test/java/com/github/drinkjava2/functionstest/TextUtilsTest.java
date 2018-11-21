@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdbpro.TextUtils;
 
-import text.SqlTextTest;
+import text.TextTest;
 
 /**
  * TextUtils is base class for Java text support (multiple line Strings).
@@ -31,7 +31,7 @@ public class TextUtilsTest {
 
 	@Test
 	public void doTextTest() {
-		String str = TextUtils.getJavaSourceCodeUTF8(SqlTextTest.class);
+		String str = TextUtils.getJavaSourceCodeUTF8(TextTest.class);
 		Assert.assertTrue(str.indexOf("public class ") > -1);
 	}
 }

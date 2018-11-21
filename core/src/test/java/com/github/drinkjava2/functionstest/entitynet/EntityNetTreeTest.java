@@ -13,7 +13,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
 public class EntityNetTreeTest extends TestBase {
 	@Before
-	public void init() {// See "orm.png" in root folder
+	public void init() {// See "orm.png" in jSqlBox project's root folder
 		super.init();
 		createAndRegTables(TreeNode.class);
 		TreeNode t = new TreeNode();
@@ -57,7 +57,7 @@ public class EntityNetTreeTest extends TestBase {
 
 	/**
 	 * Use one SQL to load a whole sub-tree,see
-	 * https://my.oschina.net/drinkjava2/blog/1818631
+	 * https://my.oschina.net/drinkjava2/blog/1818631 (海底捞算法 )
 	 */
 	public void loadSubTreeByGivenNode(TreeNode d) {
 		EntityNet net = ctx.pQuery(targets,

@@ -24,7 +24,7 @@ import com.github.drinkjava2.jdbpro.Text;
  * @author Yong Zhu
  * @since 2.0.4
  */
-public class SqlTextTest extends TestBase {
+public class TextTest extends TestBase {
 	{
 		this.regTables(Demo.class);
 	}

@@ -3,7 +3,8 @@ package com.github.drinkjava2.functionstest.entitynet;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.AUTO_SQL;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
+import static com.github.drinkjava2.jsqlbox.JSQLBOX.giveBoth;
 
 import java.util.HashMap;
 import java.util.List;
@@ -287,8 +288,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testAutoEntityNet() {
 		insertDemoData();
-		List<User> users = ctx
-				.autoNet(User.class, UserRole.class, Role.class, RolePrivilege.class, Privilege.class)
+		List<User> users = ctx.autoNet(User.class, UserRole.class, Role.class, RolePrivilege.class, Privilege.class)
 				.pickEntityList(User.class);
 
 		for (User u : users) {
@@ -334,4 +334,24 @@ public class EntityNetTest extends TestBase {
 					System.out.println("  Email:" + e.getId());
 		}
 	}
+
+	@Test
+	public void testTail() {
+		insertDemoData();
+		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, UserRole.class, Role.class, giveBoth("r", "u"), //
+				"select u.**, u.username as u_name2, ur.**, r.**, r.id as r_id2 from usertb u ", //
+				" left join userroletb ur on u.id=ur.userid ", //
+				" left join roletb r on ur.rid=r.id ");
+		Set<User> userList = net.pickEntitySet("u");
+		for (User u : userList) {
+			System.out.print("User name:" + u.getId());
+			System.out.println(", name2:" + u.getTail("name2"));
+			Assert.assertEquals(u.getUserName(), (String) u.getTail("name2"));
+			List<Role> roles = u.getRoleList();
+			if (roles != null)
+				for (Role r : roles)
+					System.out.println("  Role id:" + r.getId() + ", id2:" + r.getTail("id2"));
+		}
+	}
+
 }

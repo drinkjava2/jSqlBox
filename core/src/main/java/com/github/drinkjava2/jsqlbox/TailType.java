@@ -15,6 +15,9 @@ import java.util.Map;
 
 /**
  * TailType has a tails() method return a map instance stored tail values
+ * 
+ * @author Yong Zhu
+ * @since 2.0.4
  */
 public interface TailType {
 	public Map<String, Object> tails();

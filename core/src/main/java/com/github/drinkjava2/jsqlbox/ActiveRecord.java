@@ -220,7 +220,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	
 	public List<T> findAll(Object... items) {return (List<T>) ctx(items).eFindAll(this.getClass(), items);}
 	public List<T> findBySQL(Object... items) {return ctx(items).eFindBySQL(this.getClass(), items);}
-	public List<T> findBySample(Object sampleBean, Object... items) {return ctx(items).eFindBySample(sampleBean, items);} 
+	public List<T> findBySample(Object... items) {return ctx(items).eFindBySample(this, items);} 
 	public EntityNet autoNet(Class<?>... entityClass) {return  ctx().autoNet(entityClass);}
 	public <E> E findRelatedOne(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedOne(this, newItems);}
 	public <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).eFindRelatedList(this, newItems);}

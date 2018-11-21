@@ -15,9 +15,10 @@ package com.github.drinkjava2.jsqlbox;
  * Tail is an empty entity only used to deal tables no any entity mapping, so
  * each CURD need add a tail("table") as parameter, for example:
  * 
- * new Tail().putTail("user_name", "Tom", "age", 10).insert(tail("some_table"));
+ * new Tail().putTail("user_name", "Tom", "age", 10).insert(JSQLBOX.tail("some_table"));
  * 
- * @author yongz 2.0.4
+ * @author Yong Zhu
+ * @since 2.0.4
  */
 public class Tail extends ActiveRecord<Tail> {
 }

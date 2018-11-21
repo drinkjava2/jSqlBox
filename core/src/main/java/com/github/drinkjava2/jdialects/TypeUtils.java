@@ -74,7 +74,7 @@ public abstract class TypeUtils {// NOSONAR
 		SQL_MAP_ABLE_TYPES.put(String.class, Type.VARCHAR);
 	}
 
-	public static Class<?> typeToJavaClass(Type type) {// NOSONAR
+	public static Class<?> dialectTypeToJavaType(Type type) {// NOSONAR
 		for (Entry<Class<?>, Type> entry : SQL_MAP_ABLE_TYPES.entrySet()) {
 			if (entry.getValue().equals(type))
 				return entry.getKey();

@@ -124,8 +124,8 @@ public abstract class TableModelUtils {// NOSONAR
 	/**
 	 * This method bind a tableModel to a entity class, this is a global setting
 	 */
-	public static void bindTableModel(Class<?> entityClass, TableModel tableModel) {
+	public static void bindGlobalModel(Class<?> entityClass, TableModel tableModel) {
 		TableModelUtilsOfEntity.globalTableModelCache.put(entityClass, tableModel);
-	}
+	} 
 
 }

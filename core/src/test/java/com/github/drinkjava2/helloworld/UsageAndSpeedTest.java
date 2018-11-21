@@ -8,7 +8,7 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES;
 import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jdbpro.JDBPRO.question;
+import static com.github.drinkjava2.jdbpro.JDBPRO.ques;
 import static com.github.drinkjava2.jdbpro.JDBPRO.sql;
 import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
 
@@ -336,7 +336,7 @@ public class UsageAndSpeedTest {
 			ctx.iExecute("update users set name=?,address=?", param("Tom", "China"));
 			Assert.assertEquals(1L, ctx.iQueryForLongValue("select count(*) from users where name=? and address=?",
 					param("Tom", "China")));
-			ctx.iExecute("delete from users where name=", question("Tom"), " or address=", question("China"));
+			ctx.iExecute("delete from users where name=", ques("Tom"), " or address=", ques("China"));
 		}
 	}
 
@@ -463,8 +463,8 @@ public class UsageAndSpeedTest {
 				UserAR.ADDRESS, " ", param("Canada"), //
 				") ", valuesQuestions());
 		ctx.iExecute("delete from users where ", //
-				UserAR.NAME, "=", question("Sam"), //
-				" or ", UserAR.ADDRESS, "=", question("Canada")//
+				UserAR.NAME, "=", ques("Sam"), //
+				" or ", UserAR.ADDRESS, "=", ques("Canada")//
 		);
 	}
 
