@@ -8,8 +8,8 @@ import static com.github.drinkjava2.jsqlbox.JSQLBOX.tExecute;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.config.TestBase;
 import com.github.drinkjava2.jdbpro.Text;
+import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 /**
  * This is a sample to show put SQL in multiple line Strings(Text), a plug-in
