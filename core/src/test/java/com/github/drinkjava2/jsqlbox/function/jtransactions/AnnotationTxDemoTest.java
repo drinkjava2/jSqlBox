@@ -11,7 +11,8 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
@@ -70,7 +71,7 @@ public class AnnotationTxDemoTest {
 	@TX
 	public void txInsert() {
 		ctx.nExecute("insert into user_tb (id) values('123')");
-		System.out.println(1 / 0); // DIV 0!
+		Systemout.println(1 / 0); // DIV 0!
 	}
 
 	@Test
@@ -84,7 +85,7 @@ public class AnnotationTxDemoTest {
 		try {
 			tester.txInsert();// this one did not insert, rolled back
 		} catch (Exception e) {
-			e.printStackTrace();
+			Systemout.println("Exception found: " + e.getMessage());
 		}
 		ctx.nExecute("drop table user_tb");
 		JBEANBOX.close();// Close DataSource Pool

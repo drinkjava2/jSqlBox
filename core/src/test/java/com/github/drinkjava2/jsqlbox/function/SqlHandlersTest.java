@@ -31,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
@@ -149,7 +150,7 @@ public class SqlHandlersTest extends TestBase {
 		}
 		long end = System.currentTimeMillis();
 		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
-		System.out.println(String.format("%40s: %6s s", "With SimpleCacheHandler Cache", timeused));
+		Systemout.println(String.format("%40s: %6s s", "With SimpleCacheHandler Cache", timeused));
 
 		start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
@@ -159,7 +160,7 @@ public class SqlHandlersTest extends TestBase {
 		}
 		end = System.currentTimeMillis();
 		timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
-		System.out.println(String.format("%40s: %6s s", "No  Cache", timeused));
+		Systemout.println(String.format("%40s: %6s s", "No  Cache", timeused));
 
 	}
 
@@ -218,9 +219,9 @@ public class SqlHandlersTest extends TestBase {
 	public static class MyDemoAroundSqlHandler extends DefaultOrderSqlHandler {
 		@Override
 		public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-			System.out.println("Hello");
+			Systemout.println("Hello");
 			Object result = runner.runPreparedSQL(ps);
-			System.out.println("Bye");
+			Systemout.println("Bye");
 			return result;
 		}
 	}

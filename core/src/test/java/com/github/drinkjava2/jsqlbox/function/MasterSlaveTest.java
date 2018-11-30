@@ -29,6 +29,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jdbpro.DbPro;
@@ -120,12 +121,12 @@ public class MasterSlaveTest {
 		Assert.assertEquals(5L, master.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
 		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", JSQLBOX.param("Tom"), USE_MASTER,
 				new PrintSqlHandler());
-		System.out.println(u.getName());
+		Systemout.println(u.getName());
 	}
 
 	@Test
 	public void testMasterSlaveUpdate() {
-		System.out.println("============Test testMasterSlaveUpdate==================");
+		Systemout.println("============Test testMasterSlaveUpdate==================");
 		// AutoChoose, not in Transaction, should use Master
 		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
 		// TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
@@ -137,7 +138,7 @@ public class MasterSlaveTest {
 
 	@Test
 	public void testMasterSlaveQuery() {
-		System.out.println("============Test testMasterSlaveNoTransaction==================");
+		Systemout.println("============Test testMasterSlaveNoTransaction==================");
 		// AutoChoose, not in Transaction, should use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
 		TheUser u1 = master.eLoadById(TheUser.class, 1L);
@@ -159,7 +160,7 @@ public class MasterSlaveTest {
 
 	@Test
 	public void testMasterSlaveQueryInTransaction() {
-		System.out.println("============Test testMasterSlaveInTransaction==============");
+		Systemout.println("============Test testMasterSlaveInTransaction==============");
 		SqlBoxContext.resetGlobalVariants();
 		txDataSource = TestBase.createH2_HikariDataSource("MasterDb");
 		// Build another master but run in Transaction mode

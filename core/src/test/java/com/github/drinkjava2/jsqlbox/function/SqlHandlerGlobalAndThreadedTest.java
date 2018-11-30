@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
@@ -54,7 +55,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 
 		@Override
 		public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-			System.out.println("This is first printed===================");
+			Systemout.println("This is first printed===================");
 			return super.handle(runner, ps);
 		}
 	}
@@ -67,7 +68,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 
 		@Override
 		public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
-			System.out.println("This is last printed==================");
+			Systemout.println("This is last printed==================");
 			return super.handle(runner, ps);
 		}
 	}

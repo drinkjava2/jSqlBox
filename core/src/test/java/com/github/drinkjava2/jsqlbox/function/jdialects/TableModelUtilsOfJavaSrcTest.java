@@ -2,6 +2,7 @@ package com.github.drinkjava2.jsqlbox.function.jdialects;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.TableModelUtilsOfEntity;
 import com.github.drinkjava2.jdialects.TableModelUtilsOfJavaSrc;
 import com.github.drinkjava2.jdialects.annotation.jdia.FKey;
@@ -75,6 +76,6 @@ public class TableModelUtilsOfJavaSrcTest {
 	@Test
 	public void modelToJavaSrcTest() {
 		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
-		System.out.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, true, true, "somepackage"));
+		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, true, true, "somepackage"));
 	}
 }

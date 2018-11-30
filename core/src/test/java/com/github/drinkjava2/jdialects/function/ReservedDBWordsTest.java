@@ -10,6 +10,7 @@ package com.github.drinkjava2.jdialects.function;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.ReservedDBWords;
@@ -41,7 +42,7 @@ public class ReservedDBWordsTest {
 	@Test
 	public void doTestNoExceptionThrow() {
 		Dialect.setGlobalAllowReservedWords(true);
-		System.out.println(Dialect.MySQL55Dialect.toCreateDDL(ReservedDBWordsTest.class)[0]);
+		Systemout.println(Dialect.MySQL55Dialect.toCreateDDL(ReservedDBWordsTest.class)[0]);
 		Dialect.setGlobalAllowReservedWords(false);// remember to restore this global setting!
 	}
 }

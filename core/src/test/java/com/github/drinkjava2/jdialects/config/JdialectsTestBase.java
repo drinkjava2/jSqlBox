@@ -12,7 +12,8 @@ import javax.sql.DataSource;
 import org.junit.After;
 import org.junit.Before;
 
-import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
@@ -33,7 +34,7 @@ public class JdialectsTestBase {
 
 	@Before
 	public void initDao() {
-		System.out.println("Current guessedDialect=" + guessedDialect);
+		Systemout.println("Current guessedDialect=" + guessedDialect);
 		// db.setAllowShowSQL(true);
 	}
 
@@ -44,7 +45,7 @@ public class JdialectsTestBase {
 
 	protected static void printDDLs(String[] ddl) {
 		for (String str : ddl) {
-			System.out.println(str);
+			Systemout.println(str);
 		}
 	}
 
@@ -87,8 +88,7 @@ public class JdialectsTestBase {
 	}
 
 	protected void testOnCurrentRealDatabase(TableModel... tables) {
-		System.out.println("======Test on real Database of dialect: " + guessedDialect + "=====");
-
+		Systemout.println("======Test on real Database of dialect: " + guessedDialect + "=====");
 		String[] ddls = guessedDialect.toDropDDL(tables);
 
 		quietExecuteDDLs(ddls);
@@ -104,28 +104,26 @@ public class JdialectsTestBase {
 	}
 
 	protected static void printOneDialectsDDLs(Dialect dialect, TableModel... tables) {
-		System.out.println("======" + dialect + "=====");
+		Systemout.println("======" + dialect + "=====");
 		try {
 			String[] ddls = dialect.toDropAndCreateDDL(tables);
 			printDDLs(ddls);
 			// printDDLs(DDLFormatter.format(ddls));
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Exception found: " + e.getMessage());
+			Systemout.println("Exception found: " + e.getMessage());
 		}
 	}
 
 	protected static void printAllDialectsDDLs(TableModel... tables) {
 		Dialect[] diaList = Dialect.values();
 		for (Dialect dialect : diaList) {
-			System.out.println("======" + dialect + "=====");
+			Systemout.println("======" + dialect + "=====");
 			try {
 				String[] ddls = dialect.toDropAndCreateDDL(tables);
 				printDDLs(ddls);
 				// printDDLs(DDLFormatter.format(ddls));
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("Exception found: " + e.getMessage());
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 	}

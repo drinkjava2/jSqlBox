@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.github.drinkjava2.common.Systemout;
+
 /**
  * A small tool to debug method execute time, see:
  * https://my.oschina.net/drinkjava2/blog/1622179
@@ -41,7 +43,7 @@ public class Debuger {// NOSONAR
 
 	public static void print() {
 		for (Entry<String, Long> entry : timeMap.entrySet()) {
-			System.out.println(// NOSONAR
+			Systemout.println(// NOSONAR
 					String.format(
 							"%40s,    Total times(ns):%13s,      Repeat times:%8s,     Avg times(ns):%13s     times/s:%8s",
 							entry.getKey(), //

@@ -10,6 +10,7 @@ package com.github.drinkjava2.jdialects;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
@@ -34,18 +35,18 @@ public class TableModelTest {
 		Assert.assertNotNull(t1.getColumn("name").getTableModel());
 
 		TableModel t2 = t1.newCopy();
-		System.out.println(t1);
-		System.out.println(t2);
+		Systemout.println(t1);
+		Systemout.println(t2);
 		Assert.assertNotEquals(t1, t2);
 		Assert.assertNotNull(t2.getColumn("name").getTableModel());
 
-		System.out.println("================");
+		Systemout.println("================");
 		for (ColumnModel item : t1.getColumns()) {
-			System.out.println(item);
+			Systemout.println(item);
 		}
-		System.out.println("================");
+		Systemout.println("================");
 		for (ColumnModel item : t2.getColumns()) {
-			System.out.println(item);
+			Systemout.println(item);
 		}
 	}
 }

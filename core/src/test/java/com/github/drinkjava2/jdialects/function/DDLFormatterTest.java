@@ -8,6 +8,7 @@ package com.github.drinkjava2.jdialects.function;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.DDLFormatter;
 
 /**
@@ -20,9 +21,9 @@ public class DDLFormatterTest {
 
 	@Test
 	public void testDDLFormatter() {
-		System.out.println(DDLFormatter.format(
+		Systemout.println(DDLFormatter.format(
 				"create column table customertable (id varchar(32) not null, customer_name varchar(30), primary key (id))"));
-		System.out.println(DDLFormatter.format(
+		Systemout.println(DDLFormatter.format(
 				"create table customertable (id varchar(32) not null, customer_name varchar(30), primary key (id)) engine=InnoDB"));
 	}
 

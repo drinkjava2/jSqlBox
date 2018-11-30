@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -34,35 +35,35 @@ public class DialectTest {
 	public void testPagination() {
 		Dialect[] dialects = Dialect.values();
 		for (Dialect dialect : dialects) {
-			System.out.println("=========" + dialect + "==========");
+			Systemout.println("=========" + dialect + "==========");
 			String result = "";
 			try {
-				System.out.println(dialect);
+				Systemout.println(dialect);
 				result = dialect.pagin(1, 10, sql1);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 			try {
 				result = dialect.pagin(3, 10, sql1);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 			try {
 				result = dialect.pagin(1, 10, sql2);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 			try {
 				result = dialect.pagin(3, 10, sql2);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 		}
@@ -72,37 +73,37 @@ public class DialectTest {
 	public void testPagination2() {
 		Dialect[] dialects = Dialect.values();
 		for (Dialect dialect : dialects) {
-			System.out.println("=========" + dialect + "==========");
+			Systemout.println("=========" + dialect + "==========");
 			String result = "";
 			try {
 				result = dialect.pagin(1, 10, sql3);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 			Assert.assertTrue(StrUtils.isEmpty(result) || 1 == StrUtils.countMatches(result, '?'));
 			try {
 				result = dialect.pagin(3, 10, sql4);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 			Assert.assertTrue(StrUtils.isEmpty(result) || 1 == StrUtils.countMatches(result, '?'));
 			try {
 				result = dialect.pagin(1, 10, sql3);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 			Assert.assertTrue(StrUtils.isEmpty(result) || 1 == StrUtils.countMatches(result, '?'));
 			try {
 				result = dialect.pagin(3, 10, sql4);
-				System.out.println(result);
+				Systemout.println(result);
 			} catch (DialectException e) {
-				System.out.println("Error:" + e.getMessage());
+				Systemout.println("Error:" + e.getMessage());
 			}
 			Assert.assertFalse(result.contains("$"));
 			Assert.assertTrue(StrUtils.isEmpty(result) || 1 == StrUtils.countMatches(result, '?'));
@@ -142,18 +143,18 @@ public class DialectTest {
 			con = ds.getConnection();
 			dialectName = Dialect.guessDialect(con).toString();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Systemout.println("Exception found: " + e.getMessage());
 		} finally {
 			try {
 				con.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 		Assert.assertEquals("H2Dialect", dialectName);
 		ds.close();
 	}
- 
+
 	@Test(expected = DialectException.class)
 	public void testDDLTypeMapping4() {
 		Dialect.setGlobalAllowReservedWords(false);
@@ -203,7 +204,7 @@ public class DialectTest {
 	public void testDropTable() {
 		for (Dialect d : Dialect.values()) {
 			String dropTable = d.dropTableDDL("testTable");
-			System.out.println(dropTable);
+			Systemout.println(dropTable);
 			Assert.assertTrue(StrUtils.containsIgnoreCase(dropTable, "drop"));
 			Assert.assertTrue(StrUtils.containsIgnoreCase(dropTable, "testTable"));
 		}

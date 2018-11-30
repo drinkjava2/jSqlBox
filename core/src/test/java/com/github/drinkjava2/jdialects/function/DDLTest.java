@@ -9,6 +9,7 @@ package com.github.drinkjava2.jdialects.function;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
@@ -355,7 +356,7 @@ public class DDLTest extends JdialectsTestBase {
 
 		String[] dropAndCreateDDL = Dialect.H2Dialect.toDropAndCreateDDL(t1, t2);
 		for (String ddl : dropAndCreateDDL)
-			System.out.println(ddl);
+			Systemout.println(ddl);
 		testOnCurrentRealDatabase(t1, t2);
 	}
 
@@ -389,7 +390,7 @@ public class DDLTest extends JdialectsTestBase {
 
 		String[] dropAndCreateDDL = Dialect.H2Dialect.toDropAndCreateDDL(t1, t2, t3);
 		for (String ddl : dropAndCreateDDL)
-			System.out.println(ddl);
+			Systemout.println(ddl);
 
 		testOnCurrentRealDatabase(t1, t2, t3);
 	}

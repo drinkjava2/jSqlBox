@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jtransactions.config;
+package com.github.drinkjava2.jtransactions.utils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
@@ -26,11 +27,11 @@ public class JTransTinyJdbc {
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql) {
-		System.out.println("SQL="+sql);
+		Systemout.println("SQL="+sql);
 		Connection con = getConnection();
  		PreparedStatement pst = null;
 		try {
-			//System.out.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
+			//DebugUtil.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
 			pst = con.prepareStatement(sql);
 			ResultSet rs = pst.executeQuery();
 			rs.next();
@@ -46,11 +47,11 @@ public class JTransTinyJdbc {
 	}
 
 	public void executeSql(String sql) {
-		System.out.println("SQL="+sql);
+		Systemout.println("SQL="+sql);
 		Connection con = getConnection();
 		PreparedStatement pst = null;
 		try {
-			//System.out.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
+			//DebugUtil.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
 			pst = con.prepareStatement(sql);
 			pst.execute();
 		} catch (SQLException e) {

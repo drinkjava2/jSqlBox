@@ -9,6 +9,7 @@ package com.github.drinkjava2.jdialects.function;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectLogger;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
@@ -27,6 +28,6 @@ public class LoggerTest extends JdialectsTestBase {
 		Dialect.setGlobalAllowShowSql(true);
 		Dialect.MySQL55Dialect.pagin(10, 10, "select * from sometable");
 		logger.info("Message1 output");
-		System.out.println("Message2 output");
+		Systemout.println("Message2 output");
 	}
 }

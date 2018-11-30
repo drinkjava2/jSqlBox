@@ -6,7 +6,8 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
@@ -127,8 +128,8 @@ public class TableModelUtilsOfDbTest extends TestBase {
 		Dialect dialect = Dialect.guessDialect(conn);
 		TableModel[] models = TableModelUtils.db2Models(conn, dialect);
 		for (TableModel model : models) {
-			System.out.println("\n\n\n\n");
-			System.out.println(TableModelUtils.model2JavaSrc(model, true, true, "somepackage"));
+			Systemout.println("\n\n\n\n");
+			Systemout.println(TableModelUtils.model2JavaSrc(model, true, true, "somepackage"));
 		}
 		conn.close();
 	}

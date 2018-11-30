@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
@@ -79,7 +80,7 @@ public class UsageAndSpeedTest {
 			runTestMethods();
 			PRINT_TIMEUSED = true;
 			REPEAT_TIMES = 1;// Change to 10000 to do speed test
-			System.out.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
+			Systemout.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
 			PRINT_TIMEUSED = false;
@@ -108,7 +109,7 @@ public class UsageAndSpeedTest {
 		long end = System.currentTimeMillis();
 		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
 		if (PRINT_TIMEUSED)
-			System.out.println(String.format("%35s: %6s s", methodName, timeused));
+			Systemout.println(String.format("%35s: %6s s", methodName, timeused));
 	}
 
 	@Table(name = "users")
@@ -254,12 +255,12 @@ public class UsageAndSpeedTest {
 						"select count(*) from users where name=? and address=?", "Tom", "China"));
 				ctx.execute(conn, "delete from users where name=? or address=?", "Tom", "China");
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			} finally {
 				try {
 					ctx.close(conn);
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Systemout.println("Exception found: " + e.getMessage());
 				}
 			}
 		}
@@ -276,7 +277,7 @@ public class UsageAndSpeedTest {
 						ctx.queryForLongValue("select count(*) from users where name=? and address=?", "Tom", "China"));
 				ctx.execute("delete from users where name=? or address=?", "Tom", "China");
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 	}
@@ -307,7 +308,7 @@ public class UsageAndSpeedTest {
 						new ScalarHandler<Long>(), PARAMS()));
 				runner.execute("delete from users where name=? or address=?" + PARA0("Tom", "China"), PARAMS());
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 	}

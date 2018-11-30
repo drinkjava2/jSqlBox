@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -46,6 +47,6 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 			ctx.nExecute(ddl);
 
 		new HelloWorld().putField("name", "Hello jSqlBox").insert();
-		System.out.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
+		Systemout.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
 	}
 }

@@ -2,7 +2,7 @@ package com.github.drinkjava2.jtransactions.tinytx;
 
 import java.sql.Connection;
 
-import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 
 /**

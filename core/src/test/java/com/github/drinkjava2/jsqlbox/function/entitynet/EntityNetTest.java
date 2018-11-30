@@ -15,6 +15,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.function.entitynet.entity.Address;
@@ -97,51 +98,51 @@ public class EntityNetTest extends TestBase {
 				" order by u.id, ur.id, r.id, rp.id, p.id");
 		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
-			System.out.println("User:" + u.getId());
+			Systemout.println("User:" + u.getId());
 
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles)
-					System.out.println("  Roles:" + r.getId());
+					Systemout.println("  Roles:" + r.getId());
 
 			Map<Integer, Role> roleMap = u.getRoleMap();
 			if (roleMap != null)
 				for (Role r : roleMap.values())
-					System.out.println("  Roles:" + r.getId());
+					Systemout.println("  Roles:" + r.getId());
 
 			Set<Privilege> privileges = u.getPrivilegeSet();
 			if (privileges != null)
 				for (Privilege privilege : privileges)
-					System.out.println("  Privilege:" + privilege.getId());
+					Systemout.println("  Privilege:" + privilege.getId());
 		}
 
-		System.out.println("===========pick entity set================");
+		Systemout.println("===========pick entity set================");
 		Set<Privilege> privileges = net.pickEntitySet(Privilege.class);
 		for (Privilege p : privileges) {
-			System.out.println("Privilege:" + p.getId());
-			System.out.println("  User:" + p.getUser().getId());
+			Systemout.println("Privilege:" + p.getId());
+			Systemout.println("  User:" + p.getUser().getId());
 		}
 
-		System.out.println("===========pick entity Map================");
+		Systemout.println("===========pick entity Map================");
 		Map<Object, Role> roleMap = net.pickEntityMap(Role.class);
 		for (Entry<Object, Role> entry : roleMap.entrySet()) {
-			System.out.println("RoleId:" + entry.getKey());
+			Systemout.println("RoleId:" + entry.getKey());
 			Role r = entry.getValue();
-			System.out.println("Role:" + r.getId());
-			System.out.println("  user=" + r.getUser().getId());
+			Systemout.println("Role:" + r.getId());
+			Systemout.println("  user=" + r.getUser().getId());
 		}
 
-		System.out.println("===========pick one entity by value================");
+		Systemout.println("===========pick one entity by value================");
 		Role r3 = net.pickOneEntity(Role.class, "r3");
 		Assert.assertEquals("r3", r3.getId());
 
-		System.out.println("===========pick one entity by bean ================");
+		Systemout.println("===========pick one entity by bean ================");
 		Role temp = new Role();
 		temp.putField("id", "r4");
 		Role r4 = net.pickOneEntity(Role.class, temp);
 		Assert.assertEquals("r4", r4.getId());
 
-		System.out.println("===========pick one entity by map ================");
+		Systemout.println("===========pick one entity by map ================");
 		Map<String, Object> mp = new HashMap<String, Object>();
 		mp.put("id", "r2");
 		Role r2 = net.pickOneEntity(Role.class, mp);
@@ -154,11 +155,11 @@ public class EntityNetTest extends TestBase {
 		EntityNet net = ctx.iQuery(targets, AUTO_SQL);
 		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
-			System.out.println("User:" + u.getId());
+			Systemout.println("User:" + u.getId());
 			Set<Privilege> privileges = u.getPrivilegeSet();
 			if (privileges != null)
 				for (Privilege privilege : privileges)
-					System.out.println("  Privilege:" + privilege.getId());
+					Systemout.println("  Privilege:" + privilege.getId());
 		}
 	}
 
@@ -169,25 +170,25 @@ public class EntityNetTest extends TestBase {
 		ctx.iQuery(net, User.class, Email.class, give("e", "u"), AUTO_SQL);
 		ctx.iQuery(net, User.class, Address.class, giveBoth("a", "u"), AUTO_SQL);
 		User u = net.pickOneEntity(User.class, "u2");
-		System.out.println(u);
+		Systemout.println(u);
 
-		System.out.println("User:" + u.getId());
+		Systemout.println("User:" + u.getId());
 		List<Role> roles = u.getRoleList();
 		if (roles != null)
 			for (Role r : roles)
-				System.out.println("  Roles:" + r.getId());
+				Systemout.println("  Roles:" + r.getId());
 
 		Set<Privilege> privileges = u.getPrivilegeSet();
 		if (privileges != null)
 			for (Privilege privilege : privileges)
-				System.out.println("  Privilege:" + privilege.getId());
+				Systemout.println("  Privilege:" + privilege.getId());
 
 		if (u.getEmailList() != null)
 			for (Email e : u.getEmailList())
-				System.out.println("  Email:" + e.getId());
+				Systemout.println("  Email:" + e.getId());
 
 		if (u.getAddress() != null) {
-			System.out.println("  Address:" + u.getAddress().getId());
+			Systemout.println("  Address:" + u.getAddress().getId());
 			Assert.assertTrue(u == u.getAddress().getUser());
 		}
 
@@ -201,16 +202,16 @@ public class EntityNetTest extends TestBase {
 				" order by t.id, tr.id, r.id, rp.id, p.id");
 		List<User> userList = net.pickEntityList(User.class);
 		for (User u : userList) {
-			System.out.println("User:" + u.getId());
+			Systemout.println("User:" + u.getId());
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles)
-					System.out.println("  Roles:" + r.getId());
+					Systemout.println("  Roles:" + r.getId());
 
 			Set<Privilege> privileges = u.getPrivilegeSet();
 			if (privileges != null)
 				for (Privilege privilege : privileges)
-					System.out.println("  Privilege:" + privilege.getId());
+					Systemout.println("  Privilege:" + privilege.getId());
 		}
 	}
 
@@ -220,34 +221,34 @@ public class EntityNetTest extends TestBase {
 		List<User> users = ctx.eFindAll(User.class);
 
 		for (User u : users) {
-			System.out.println("User:" + u.getId());
+			Systemout.println("User:" + u.getId());
 
 			Address addr = u.findRelatedOne(Address.class, " or u.id like ?", param("abcd%"));
-			System.out.println("  Address:" + addr.getId());
+			Systemout.println("  Address:" + addr.getId());
 
 			List<UserRole> userRoles = u.findRelatedList(UserRole.class);
 			if (userRoles != null)
 				for (UserRole ur : userRoles) {
-					System.out.println("  UserRole:" + ur.getUserId() + "," + ur.getRid());
+					Systemout.println("  UserRole:" + ur.getUserId() + "," + ur.getRid());
 				}
 
 			List<Role> roles = u.findRelatedList(UserRole.class, Role.class);
 			if (roles != null)
 				for (Role r : roles) {
-					System.out.println("  Roles:" + r.getId());
+					Systemout.println("  Roles:" + r.getId());
 				}
 
 			Object path = new Object[] { UserRole.class, Role.class, RolePrivilege.class, Privilege.class };
 			Set<Privilege> privileges = u.findRelatedSet(path);
 			if (privileges != null)
 				for (Privilege privilege : privileges) {
-					System.out.println("  Privilege:" + privilege.getId());
+					Systemout.println("  Privilege:" + privilege.getId());
 				}
 
 			Map<Object, Privilege> privilegeMap = u.findRelatedMap(path);
 			if (privilegeMap != null)
 				for (Entry<Object, Privilege> entry : privilegeMap.entrySet()) {
-					System.out.println("  PrivilegeMap " + entry.getKey() + "=" + entry.getValue().getId());
+					Systemout.println("  PrivilegeMap " + entry.getKey() + "=" + entry.getValue().getId());
 				}
 		}
 	}
@@ -263,26 +264,26 @@ public class EntityNetTest extends TestBase {
 		ctx.iQuery(net, Address.class, AUTO_SQL);
 		ctx.iQuery(net, Email.class, AUTO_SQL);
 		User u = net.pickOneEntity(User.class, "u2");
-		System.out.println("User:" + u.getId());
+		Systemout.println("User:" + u.getId());
 
 		Address addr = u.findRelatedOne(net, Address.class);
-		System.out.println("  Address:" + addr.getId());
+		Systemout.println("  Address:" + addr.getId());
 
 		List<Email> emails = u.findRelatedList(net, Email.class);
 		if (emails != null)
 			for (Email e : emails)
-				System.out.println("  Email:" + e.getId());
+				Systemout.println("  Email:" + e.getId());
 
 		Set<Role> roles = u.findRelatedSet(net, UserRole.class, Role.class);
 		if (roles != null)
 			for (Role r : roles)
-				System.out.println("  Roles:" + r.getId());
+				Systemout.println("  Roles:" + r.getId());
 
 		Object path = new Object[] { UserRole.class, Role.class, RolePrivilege.class, Privilege.class };
 		List<Privilege> privileges = u.findRelatedList(net, path);
 		if (privileges != null)
 			for (Privilege privilege : privileges)
-				System.out.println("  Privilege:" + privilege.getId());
+				Systemout.println("  Privilege:" + privilege.getId());
 	}
 
 	@Test
@@ -292,17 +293,17 @@ public class EntityNetTest extends TestBase {
 				.pickEntityList(User.class);
 
 		for (User u : users) {
-			System.out.println("User:" + u.getId());
+			Systemout.println("User:" + u.getId());
 
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles)
-					System.out.println("  Roles:" + r.getId());
+					Systemout.println("  Roles:" + r.getId());
 
 			Set<Privilege> privileges = u.getPrivilegeSet();
 			if (privileges != null)
 				for (Privilege privilege : privileges)
-					System.out.println("  Privilege:" + privilege.getId());
+					Systemout.println("  Privilege:" + privilege.getId());
 		}
 	}
 
@@ -327,11 +328,11 @@ public class EntityNetTest extends TestBase {
 		Assert.assertTrue(null != userList.get(0).getUserName());
 
 		for (User u : userList) {
-			System.out.println("User:" + u.getUserName());
-			System.out.println("  Addr:" + u.getAddress().getAddressName());
+			Systemout.println("User:" + u.getUserName());
+			Systemout.println("  Addr:" + u.getAddress().getAddressName());
 			if (u.getEmailList() != null)
 				for (Email e : u.getEmailList())
-					System.out.println("  Email:" + e.getId());
+					Systemout.println("  Email:" + e.getId());
 		}
 	}
 
@@ -344,13 +345,13 @@ public class EntityNetTest extends TestBase {
 				" left join roletb r on ur.rid=r.id ");
 		Set<User> userList = net.pickEntitySet("u");
 		for (User u : userList) {
-			System.out.print("User name:" + u.getId());
-			System.out.println(", name2:" + u.getTail("name2"));
+			Systemout.print("User name:" + u.getId());
+			Systemout.println(", name2:" + u.getTail("name2"));
 			Assert.assertEquals(u.getUserName(), (String) u.getTail("name2"));
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles)
-					System.out.println("  Role id:" + r.getId() + ", id2:" + r.getTail("id2"));
+					Systemout.println("  Role id:" + r.getId() + ", id2:" + r.getTail("id2"));
 		}
 	}
 

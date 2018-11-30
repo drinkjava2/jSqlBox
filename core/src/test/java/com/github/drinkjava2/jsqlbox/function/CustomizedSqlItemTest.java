@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.CustomizedSqlItem;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
@@ -55,7 +56,7 @@ public class CustomizedSqlItemTest extends TestBase {
 
 		@Override
 		public void doPrepare(PreparedSQL ps) {
-			System.out.println("This is DemoCustomizedSqlItem");
+			Systemout.println("This is DemoCustomizedSqlItem");
 			ps.addSql("select count(*) from ");
 		}
 	}

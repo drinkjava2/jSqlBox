@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
@@ -113,7 +114,7 @@ public class ShardingShardMethodTest {
 
 	@Test
 	public void testInsertSQLs() {
-		System.out.println("=========================================================");
+		Systemout.println("=========================================================");
 		masters[2].iExecute(TheUser.class, "insert into ", shard(3), " (id, name) values(?,?)", param(10, "u1"),
 				USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shard(3),

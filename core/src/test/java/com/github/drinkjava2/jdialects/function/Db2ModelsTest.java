@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
@@ -60,25 +61,25 @@ public class Db2ModelsTest extends JdialectsTestBase {
 			tableModels = TableModelUtils.db2Models(con, guessedDialect);
 			for (TableModel tableModel : tableModels) {
 				List<ColumnModel> columns = tableModel.getColumns();
-				System.out.println(tableModel.getTableName());
+				Systemout.println(tableModel.getTableName());
 				for (ColumnModel columnModel : columns) {
-					System.out.print(columnModel.getColumnName()+",");
-					System.out.print(columnModel.getColumnType()+",");
-					System.out.print(columnModel.getLength()+",");
-					System.out.print(columnModel.getPrecision()+",");
-					System.out.print(columnModel.getScale()+"\r");
+					Systemout.print(columnModel.getColumnName() + ",");
+					Systemout.print(columnModel.getColumnType() + ",");
+					Systemout.print(columnModel.getLength() + ",");
+					Systemout.print(columnModel.getPrecision() + ",");
+					Systemout.print(columnModel.getScale() + "\r");
 				}
-				System.out.println();
+				Systemout.println();
 			}
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Systemout.println("Exception found: " + e.getMessage());
 		} finally {
 			try {
 				if (con != null)
 					con.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 

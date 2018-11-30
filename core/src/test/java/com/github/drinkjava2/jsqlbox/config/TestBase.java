@@ -16,7 +16,8 @@ import javax.sql.DataSource;
 import org.junit.After;
 import org.junit.Before;
 
-import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
@@ -156,7 +157,7 @@ public class TestBase {
 	}
 
 	public static void printTimeUsed(long startTimeMillis, String msg) {
-		System.out.println(String.format("%50s: %7s s", msg, (System.currentTimeMillis() - startTimeMillis) / 1000.0));
+		Systemout.println(String.format("%50s: %7s s", msg, (System.currentTimeMillis() - startTimeMillis) / 1000.0));
 	}
 
 	public static HikariDataSource createH2_HikariDataSource(String h2DbName) {

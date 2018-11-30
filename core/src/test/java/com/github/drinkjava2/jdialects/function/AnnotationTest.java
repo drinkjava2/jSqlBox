@@ -10,6 +10,7 @@ package com.github.drinkjava2.jdialects.function;
 import org.h2.engine.User;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
@@ -174,10 +175,10 @@ public class AnnotationTest extends JdialectsTestBase {
 		String[] dropAndCreateDDL = Dialect.H2Dialect
 				.toCreateDDL(TableModelUtils.entity2Models(Entity1.class, Entity2.class));
 		for (String ddl : dropAndCreateDDL)
-			System.out.println(ddl);
+			Systemout.println(ddl);
 
 		testCreateAndDropDatabase(TableModelUtils.entity2Models(Entity1.class, Entity2.class));
 		
-		System.out.println(DebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(Entity2.class)));
+		Systemout.println(DebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(Entity2.class)));
 	}
 }

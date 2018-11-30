@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
@@ -117,7 +118,7 @@ public class ActiveRecordDemoTest {
 		Assert.assertEquals(10, users.size());
 
 		for (Map<String, Object> map : users)
-			System.out.println("UserName=" + map.get("USERNAME") + ", age=" + map.get("AGE"));
+			Systemout.println("UserName=" + map.get("USERNAME") + ", age=" + map.get("AGE"));
 
 		ds.close();
 	}

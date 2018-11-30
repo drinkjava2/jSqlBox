@@ -6,6 +6,7 @@ import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.function.entitynet.entity.TreeNode;
@@ -31,7 +32,7 @@ public class EntityNetTreeTest extends TestBase {
 		t.putValues("L", "uploaded", "H", 11, 4).insert();
 		t.putValues("I", "well done!", "D", 12, 3).insert();
 		t.putValues("END", "end tag", null, 13, 0).insert();
-		System.out.println();
+		Systemout.println();
 	}
 
 	private static final Object[] targets = new Object[] { new EntityNetHandler(), TreeNode.class, TreeNode.class,
@@ -43,14 +44,14 @@ public class EntityNetTreeTest extends TestBase {
 		TreeNode node = net.pickOneEntity("t", "A");
 		printTree(node, 0);
 
-		System.out.println("====================");
+		Systemout.println("====================");
 		node = net.pickOneEntity("t", "D");
 		printTree(node, 0);
 	}
 
 	@Test
 	public void subTreeSearch() {// see https://my.oschina.net/drinkjava2/blog/181863
-		System.out.println("==========Sub trea load==========");
+		Systemout.println("==========Sub trea load==========");
 		TreeNode d = new TreeNode().loadById("D");
 		loadSubTreeByGivenNode(d);
 	}
@@ -70,8 +71,8 @@ public class EntityNetTreeTest extends TestBase {
 	private static void printTree(TreeNode node, int space) {
 		space++;
 		for (int i = 1; i < space; i++)
-			System.out.print("  ");
-		System.out.println(node.getId() + (node.getParent() != null ? "  Parent:" + node.getParent().getId() : " "));
+			Systemout.print("  ");
+		Systemout.println(node.getId() + (node.getParent() != null ? "  Parent:" + node.getParent().getId() : " "));
 		if (node.getChilds() != null)
 			for (TreeNode c : node.getChilds())
 				printTree(c, space);

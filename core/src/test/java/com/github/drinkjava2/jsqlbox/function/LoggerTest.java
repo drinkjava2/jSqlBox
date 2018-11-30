@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectLogger;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -54,7 +55,7 @@ public class LoggerTest {
 		Dialect.setGlobalAllowShowSql(true);
 		Dialect.MySQL55Dialect.paginAndTrans(10, 10, "select * from sometable");
 		logger.info("Logger test message1 output ok");
-		System.out.println("Logger test message2 output ok");
+		Systemout.println("Logger test message2 output ok");
 		Dialect.setGlobalAllowShowSql(false);
 	}
 

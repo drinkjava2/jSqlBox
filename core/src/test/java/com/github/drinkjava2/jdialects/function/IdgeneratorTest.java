@@ -18,6 +18,7 @@ package com.github.drinkjava2.jdialects.function;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
@@ -61,9 +62,9 @@ public class IdgeneratorTest extends JdialectsTestBase {
 			Object id1 = guessedDialect.getNexID(UUID25Generator.INSTANCE, dbPro, null);
 			Object id2 = guessedDialect.getNexID(UUID32Generator.INSTANCE, dbPro, null);
 			Object id3 = guessedDialect.getNexID(UUID36Generator.INSTANCE, dbPro, null);
-			System.out.println(id1);
-			System.out.println(id2);
-			System.out.println(id3);
+			Systemout.println(id1);
+			Systemout.println(id2);
+			Systemout.println(id3);
 			Assert.assertTrue(("" + id1).length() == 25);
 			Assert.assertTrue(("" + id2).length() == 32);
 			Assert.assertTrue(("" + id3).length() == 36);
@@ -80,11 +81,11 @@ public class IdgeneratorTest extends JdialectsTestBase {
 
 		IdGenerator gen = table.getColumn("id").getIdGenerator();
 		for (int i = 0; i < 5; i++)
-			System.out.println(gen.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen.getNextID(dbPro, guessedDialect, null));
 
 		gen = AutoIdGenerator.INSTANCE;
 		for (int i = 0; i < 5; i++)
-			System.out.println(gen.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen.getNextID(dbPro, guessedDialect, null));
 		dropDB(table);
 	}
 
@@ -99,11 +100,11 @@ public class IdgeneratorTest extends JdialectsTestBase {
 
 		IdGenerator gen1 = table.getIdGenerator("sorteduuid");
 		for (int i = 0; i < 10; i++)
-			System.out.println(gen1.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen1.getNextID(dbPro, guessedDialect, null));
 
 		IdGenerator gen2 = table.getIdGenerator("sorteduuid2");
 		for (int i = 0; i < 10; i++)
-			System.out.println(gen2.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen2.getNextID(dbPro, guessedDialect, null));
 		dropDB(table);
 	}
 
@@ -126,15 +127,15 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		IdGenerator gen1 = table1.getIdGenerator("seq1");
 		IdGenerator gen2 = table1.getIdGenerator("seq2");
 		for (int i = 0; i < 3; i++) {
-			System.out.println(gen1.getNextID(dbPro, guessedDialect, null));
-			System.out.println(gen2.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen1.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen2.getNextID(dbPro, guessedDialect, null));
 		}
 
 		IdGenerator gen3 = table2.getIdGenerator("seq3");
 		IdGenerator gen4 = table2.getIdGenerator("seq2");
 		for (int i = 0; i < 3; i++) {
-			System.out.println(gen3.getNextID(dbPro, guessedDialect, null));
-			System.out.println(gen4.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen3.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen4.getNextID(dbPro, guessedDialect, null));
 		}
 		dropDB(table1, table2);
 	}
@@ -158,15 +159,15 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		IdGenerator gen1 = table1.getIdGenerator("tab1");
 		IdGenerator gen2 = table1.getIdGenerator("tab2");
 		for (int i = 0; i < 3; i++) {
-			System.out.println(gen1.getNextID(dbPro, guessedDialect, null));
-			System.out.println(gen2.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen1.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen2.getNextID(dbPro, guessedDialect, null));
 		}
 
 		IdGenerator gen3 = table2.getIdGenerator("tab3");
 		IdGenerator gen4 = table2.getIdGenerator("tab2");
 		for (int i = 0; i < 3; i++) {
-			System.out.println(gen3.getNextID(dbPro, guessedDialect, null));
-			System.out.println(gen4.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen3.getNextID(dbPro, guessedDialect, null));
+			Systemout.println(gen4.getNextID(dbPro, guessedDialect, null));
 		}
 		dropDB(table1, table2);
 	}
@@ -181,10 +182,10 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		dbPro.nExecute("insert into testIdentity (name) values(?)", "Tom");
 		dbPro.nExecute("insert into testIdentity (name) values(?)", "Sam");
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
-		System.out.println(idGen.getNextID(dbPro, guessedDialect, Type.INTEGER));
+		Systemout.println(idGen.getNextID(dbPro, guessedDialect, Type.INTEGER));
 
 		idGen = table.getColumn("id").getIdGenerator();
-		System.out.println(idGen.getNextID(dbPro, guessedDialect, Type.INTEGER));
+		Systemout.println(idGen.getNextID(dbPro, guessedDialect, Type.INTEGER));
 		dropDB(table);
 	}
 

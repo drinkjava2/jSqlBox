@@ -12,7 +12,8 @@ import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.config.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
@@ -47,14 +48,14 @@ public class AnnotationTxTest {
 	public void tx_Insert2() {
 		ctx.nExecute("insert into user_tb (id) values('456')");
 		Assert.assertEquals(2, ctx.nQueryForLongValue("select count(*) from user_tb "));
-		System.out.println("Now have 2 records in user_tb, but will roll back to 1");
-		System.out.println(1 / 0);
+		Systemout.println("Now have 2 records in user_tb, but will roll back to 1");
+		Systemout.println(1 / 0);
 	}
 
 	@Test
 	public void doTest() {
 		AnnotationTxTest tester = BeanBox.getBean(AnnotationTxTest.class);
-		ctx.quiteExecute("drop table user_tb"); 
+		ctx.quiteExecute("drop table user_tb");
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
@@ -67,9 +68,8 @@ public class AnnotationTxTest {
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			tester.tx_Insert2();// this one did not insert, roll back to 1
 		} catch (Exception e) {
-			// e.printStackTrace();
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
-			System.out.println("div/0 exception found, tx_Insert2 should roll back");
+			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}
 		Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 
