@@ -22,7 +22,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.NormalJdbcTool;
 
 /**
@@ -57,13 +56,13 @@ public class TinyJdbc implements NormalJdbcTool {
 			else
 				return null;
 		} catch (SQLException e) {
-			Systemout.println("Exception found: " + e.getMessage());
+			e.printStackTrace();
 		} finally {
 			try {
 				if (con != null)
 					con.close();
 			} catch (SQLException e) {
-				Systemout.println("Exception found: " + e.getMessage());
+				e.printStackTrace();
 			}
 		}
 		return null;
@@ -87,13 +86,13 @@ public class TinyJdbc implements NormalJdbcTool {
 			pst.execute();
 			return 1;
 		} catch (SQLException e) {
-			Systemout.println("Exception found: " + e.getMessage());
+			e.printStackTrace();
 		} finally {
 			try {
 				if (con != null)
 					con.close();
 			} catch (SQLException e) {
-				Systemout.println("Exception found: " + e.getMessage());
+				e.printStackTrace();
 			}
 		}
 		return 0;

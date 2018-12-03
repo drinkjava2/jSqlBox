@@ -127,7 +127,7 @@ public class BatchTest {
 					ctx.batch("insert into batch_test_tb (name, address) values(?,?)", paramsArray);
 					j = 0;
 				} catch (SQLException e) {
-					Systemout.println("Exception found: " + e.getMessage());
+					e.printStackTrace();
 				}
 			}
 		}

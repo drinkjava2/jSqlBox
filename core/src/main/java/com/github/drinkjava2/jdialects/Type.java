@@ -38,7 +38,7 @@ public enum Type {
 	, NCLOB//
 	, NUMERIC//
 	, NVARCHAR//
-	, OTHER//
+	, UNKNOW//
 	, REAL//
 	, SMALLINT//
 	, TIME//

@@ -39,7 +39,7 @@ public class AliasProxyUtil {
 	 * aliasItemInfo.
 	 * 
 	 * The MethodInterceptor depends on CgLib, not AOP alliance, CgLib is included
-	 * in jBeanBox(changed package name), jBeanBox is included in jSqlBox's Java8
+	 * in jBeanBox(changed package name), jBeanBox is included in jBeanBox's Java8
 	 * version
 	 */
 	static class ProxyBean implements MethodInterceptor {

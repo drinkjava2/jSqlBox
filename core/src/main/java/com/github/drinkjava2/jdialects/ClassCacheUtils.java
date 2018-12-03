@@ -40,8 +40,6 @@ public abstract class ClassCacheUtils {// NOSONAR
 	protected static Map<Class<?>, Map<String, Object>> uniqueMethodCache = new ConcurrentHashMap<Class<?>, Map<String, Object>>();
 	protected static Map<Class<?>, Map<String, Method>> classReadMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
 	protected static Map<Class<?>, Map<String, Method>> classWriteMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
-	// protected static Map<Class<?>, Field> boxFieldCache = new
-	// ConcurrentHashMap<Class<?>, Field>();
 
 	protected static class ClassOrMethodNotExist {// NOSONAR
 	}

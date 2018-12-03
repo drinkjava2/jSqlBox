@@ -66,6 +66,13 @@ public class ColumnModel {
 	// =======================================================================
 
 	// =====Below fields are designed only for ORM tools ==========
+	/**
+	 * If not equal null, means this column has a converter class to translate field
+	 * value to column value or reverse. Note: @Version and @Enumerated annotated
+	 * will also be recorded as converterClass in this field
+	 */
+	private Object converterClassOrName;
+
 	/** Map to a Java entity field, for ORM tool use only */
 	private String entityField;
 
@@ -132,6 +139,7 @@ public class ColumnModel {
 		col.idGenerationType = idGenerationType;
 		col.shardTable = shardTable;
 		col.shardDatabase = shardDatabase;
+		col.converterClassOrName=converterClassOrName;
 		return col;
 	}
 
@@ -385,9 +393,10 @@ public class ColumnModel {
 
 	public void checkReadOnly() {
 		if (tableModel != null && tableModel.getReadOnly())
-			throw new DialectException("TableModel '" + tableModel.getTableName() + "' is readOnly, can not be modified.");
+			throw new DialectException(
+					"TableModel '" + tableModel.getTableName() + "' is readOnly, can not be modified.");
 	}
-	
+
 	//@formatter:off shut off eclipse's formatter
 	public ColumnModel LONG() {this.columnType=Type.BIGINT;return this;} 
 	public ColumnModel BOOLEAN() {this.columnType=Type.BOOLEAN;return this;} 
@@ -416,7 +425,7 @@ public class ColumnModel {
 	public ColumnModel NCLOB() {this.columnType=Type.NCLOB;return this;} 
 	public ColumnModel NUMERIC(Integer... lengths) {this.columnType=Type.NUMERIC;this.lengths=lengths;return this;} 
 	public ColumnModel NVARCHAR(Integer length) {this.columnType=Type.NVARCHAR;   this.lengths=new Integer[]{length};return this;} 
-	public ColumnModel OTHER(Integer... lengths) {this.columnType=Type.OTHER;this.lengths=lengths;return this;} 
+	public ColumnModel OTHER(Integer... lengths) {this.columnType=Type.UNKNOW;this.lengths=lengths;return this;} 
 	public ColumnModel REAL() {this.columnType=Type.REAL;return this;} 
 	public ColumnModel SMALLINT() {this.columnType=Type.SMALLINT;return this;} 
 	public ColumnModel TINYINT() {this.columnType=Type.TINYINT;return this;} 
@@ -593,6 +602,12 @@ public class ColumnModel {
 		this.shardDatabase = shardDatabase;
 	}
 
- 
+	public Object getConverterClassOrName() {
+		return converterClassOrName;
+	}
+
+	public void setConverterClassOrName(Object converterClassOrName) {
+		this.converterClassOrName = converterClassOrName;
+	}
 
 }

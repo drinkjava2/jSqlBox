@@ -11,16 +11,16 @@ public class Systemout {
 
 	public static void print(Object obj) {
 		if (allowPrint)
-			Systemout.println(obj);
+			System.out.println(obj);
 	}
 
 	public static void println(Object obj) {
 		if (allowPrint)
-			Systemout.println(obj);
+			System.out.println(obj);
 	}
 
 	public static void println() {
 		if (allowPrint)
-			Systemout.println();
+			System.out.println();
 	}
 }

@@ -18,7 +18,7 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
-import com.github.drinkjava2.jtransactions.utils.JTransTinyJdbc;
+import com.github.drinkjava2.jtransactions.config.JTransTinyJdbc;
 
 /**
  * This is to test TinyTx Declarative Transaction
@@ -29,8 +29,7 @@ import com.github.drinkjava2.jtransactions.utils.JTransTinyJdbc;
  * @since 1.0.0
  */
 public class TinyTxTester {
-	JTransTinyJdbc tiny = new JTransTinyJdbc((DataSource) getBean(DataSourceBox.class),
-			TinyTxConnectionManager.instance());
+	JTransTinyJdbc tiny = new JTransTinyJdbc((DataSource) getBean(DataSourceBox.class), TinyTxConnectionManager.instance());
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD })
@@ -44,13 +43,13 @@ public class TinyTxTester {
 			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
 		}
 	}
-
-	@TX
+	
+	@TX 
 	public void tx_Insert1() {
 		tiny.executeSql("insert into users (id) values('123')");
 	}
 
-	@TX
+	@TX 
 	public void tx_Insert2() {
 		tiny.executeSql("insert into users (id) values('456')");
 		Assert.assertEquals(2L, tiny.queryForObject("select count(*) from users"));
@@ -75,7 +74,7 @@ public class TinyTxTester {
 			tester.tx_Insert1();// this one inserted 1 record
 			tester.tx_Insert2();// this one did not insert, roll back
 		} catch (Exception e) {
-			Systemout.println("Exception found: " + e.getMessage());
+			e.printStackTrace();
 			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}
 		Assert.assertEquals(1L, tiny.queryForObject("select count(*) from users"));

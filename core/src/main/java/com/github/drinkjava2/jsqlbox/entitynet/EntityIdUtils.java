@@ -88,7 +88,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			throw new SqlBoxException("No Pkey setting for '" + model.getTableName() + "'");
 		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
 		// DbUtils don't care UP/LOW case
-		Object firstPKeyValue = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entity, firstPkeyCol);
+		Object firstPKeyValue = SqlBoxContextUtils.readValueFromBeanFieldOrTail(firstPkeyCol, entity);
 		if (firstPKeyValue == null)
 			return null;// Single or Compound Pkey not found in entity
 		if (pkeyCount == 1)
@@ -98,7 +98,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
 				sb.append(COMPOUND_ID_SEPARATOR);
-			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entity, col);
+			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
 			if (value == null)
 				return null;
 			sb.append(value);
@@ -170,7 +170,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		if (TypeUtils.canMapToSqlType(entityId.getClass())) {
 			for (ColumnModel col : cols) {
 				if (!col.getTransientable() && col.getPkey()) {
-					SqlBoxContextUtils.writeValueToBeanFieldOrTail(bean, col, entityId);
+					SqlBoxContextUtils.writeValueToBeanFieldOrTail(col, bean, entityId);
 					return bean;
 				}
 			}
@@ -180,8 +180,8 @@ public abstract class EntityIdUtils {// NOSONAR
 		for (ColumnModel col : cols) {
 			if (!col.getPkey())
 				continue;
-			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entityId, col);
-			SqlBoxContextUtils.writeValueToBeanFieldOrTail(bean, col, value);
+			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entityId);
+			SqlBoxContextUtils.writeValueToBeanFieldOrTail(col, bean, value);
 		}
 		return bean;
 	}
@@ -208,7 +208,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		if (TypeUtils.canMapToSqlType(entityId.getClass()))
 			return entityId;
 		else
-			return SqlBoxContextUtils.readValueFromBeanFieldOrTail(entityId, col);
+			return SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entityId);
 	}
 
 }

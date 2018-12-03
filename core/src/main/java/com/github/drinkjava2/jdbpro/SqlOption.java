@@ -72,6 +72,12 @@ public enum SqlOption {
 	/** Mark a EXECUTE SqlOption */
 	EXECUTE,
 
+	/** Mark a (entity) LOAD SqlOption */
+	LOAD,
+
+	/** Mark a (entity) DELETE SqlOption */
+	DELETE,
+
 	/** Mark a UPDATE SqlOption */
 	UPDATE,
 

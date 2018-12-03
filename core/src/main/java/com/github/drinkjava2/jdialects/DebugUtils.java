@@ -30,13 +30,14 @@ public abstract class DebugUtils {//// NOSONAR
 		StringBuilder sb = new StringBuilder();
 		sb.append("columnName=" + c.getColumnName()).append(", ");
 		sb.append("transient=" + c.getTransientable()).append(", ");
-		sb.append("type=" + c.getColumnType()).append(", ");
+		sb.append("columnType=" + c.getColumnType()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
 		sb.append("shardTable=" + c.getShardTable()).append(", ");
 		sb.append("shardDatabase=" + c.getShardDatabase()).append(", ");
 		sb.append("idGenerationType=" + c.getIdGenerationType()).append(", ");
 		sb.append("idGeneratorName=" + c.getIdGeneratorName()).append(", ");
 		sb.append("idGenerator=" + c.getIdGenerator()).append(", ");
+		sb.append("converterClassOrName=" + c.getConverterClassOrName()).append(", ");
 		sb.append("lengths=");
 		if (c.getLengths() != null)
 			sb.append(Arrays.deepToString(c.getLengths()));

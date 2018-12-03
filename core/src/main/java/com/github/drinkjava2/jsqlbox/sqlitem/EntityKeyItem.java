@@ -19,8 +19,8 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
- * This EntityKeyItem is used to build a " alias.id1=? and alias.id2=?
- * ..." SQL piece, alias is based on current PreparedSQL's setting
+ * This EntityKeyItem is used to build a " alias.id1=? and alias.id2=? ..." SQL
+ * piece, alias is based on current PreparedSQL's setting
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -56,7 +56,7 @@ public class EntityKeyItem implements CustomizedSqlItem {
 					if (i > 0)
 						ps.addSql(" and ");
 					ps.addSql(alias).append(".").append(col.getColumnName()).append("=? ");
-					Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(entity, col);
+					Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
 					ps.addParam(value);
 					i++;
 				}

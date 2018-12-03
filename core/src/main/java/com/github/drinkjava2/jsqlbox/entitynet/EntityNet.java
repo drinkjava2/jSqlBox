@@ -232,7 +232,7 @@ public class EntityNet {
 				if (entity instanceof TailType)
 					((TailType) entity).tails().put(colName, oneRow[i]);
 			} else
-				SqlBoxContextUtils.writeValueToBeanFieldOrTail(entity, col, oneRow[i]);
+				SqlBoxContextUtils.writeValueToBeanFieldOrTail(col, entity, oneRow[i]);
 		}
 		return entity;
 	}

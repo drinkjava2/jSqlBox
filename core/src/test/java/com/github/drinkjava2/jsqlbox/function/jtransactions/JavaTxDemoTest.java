@@ -61,7 +61,7 @@ public class JavaTxDemoTest {
 		try {
 			tester.txInsert();// this one did not insert, rolled back
 		} catch (Exception e) {
-			Systemout.println("Exception found: " + e.getMessage());
+			e.printStackTrace();
 		}
 		ctx.nExecute("drop table user_tb");
 		JBEANBOX.close();// Close DataSource Pool

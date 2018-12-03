@@ -1,9 +1,7 @@
 /*
- * jDialects, a tiny SQL dialect tool
- *
- * License: GNU Lesser General Public License (LGPL), version 2.1 or later. See
- * the lgpl.txt file in the root directory or
- * <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * Copyright 2016 the original author or authors. 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
  */
 package com.github.drinkjava2.jdialects;
 

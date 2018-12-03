@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jtransactions.utils;
+package com.github.drinkjava2.jtransactions.config;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,7 +31,7 @@ public class JTransTinyJdbc {
 		Connection con = getConnection();
  		PreparedStatement pst = null;
 		try {
-			//DebugUtil.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
+			//Systemout.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
 			pst = con.prepareStatement(sql);
 			ResultSet rs = pst.executeQuery();
 			rs.next();
@@ -51,7 +51,7 @@ public class JTransTinyJdbc {
 		Connection con = getConnection();
 		PreparedStatement pst = null;
 		try {
-			//DebugUtil.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
+			//Systemout.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
 			pst = con.prepareStatement(sql);
 			pst.execute();
 		} catch (SQLException e) {

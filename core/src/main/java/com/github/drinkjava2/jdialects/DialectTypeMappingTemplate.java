@@ -52,7 +52,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.NCLOB, "nclob");
 		mp.put(Type.NUMERIC, "numeric($p,$s)");
 		mp.put(Type.NVARCHAR, "nvarchar($l)");
-		mp.put(Type.OTHER, "N/A");
+		mp.put(Type.UNKNOW, "N/A");
 		mp.put(Type.REAL, "real");
 		mp.put(Type.SMALLINT, "smallint");
 		mp.put(Type.TIME, "time");
@@ -71,7 +71,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.FLOAT, "float");
 		mp.put(Type.JAVA_OBJECT, "java_object");
 		mp.put(Type.LONGVARBINARY, "longvarbinary");
-		mp.put(Type.OTHER, "currency");
+		mp.put(Type.UNKNOW, "currency");
 		mp.put(Type.TIME, "timestamp");
 		mp.put(Type.TIMESTAMP, "timestamp");
 		mp.put(Type.VARBINARY, "varbinary<255|bit varying($l)");
@@ -81,7 +81,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.BLOB, "blob");
 		mp.put(Type.CLOB, "clob");
 		mp.put(Type.JAVA_OBJECT, "longvarchar");
-		mp.put(Type.OTHER, "N/A");
+		mp.put(Type.UNKNOW, "N/A");
 		mp.put(Type.SMALLINT, "numeric(5,0)");
 		mp.put(Type.TIME, "time");
 		mp.put(Type.TINYINT, "numeric(3,0)");
@@ -92,13 +92,13 @@ public class DialectTypeMappingTemplate {
 		copyTo(mp, Dialect.TextDialect);
 		mp.put(Type.BIGINT, "integer");
 		mp.put(Type.DECIMAL, "N/A");
-		mp.put(Type.OTHER, "ole");
+		mp.put(Type.UNKNOW, "ole");
 		mp.put(Type.SMALLINT, "smallint");
 		mp.put(Type.TINYINT, "tinyint");
 		copyTo(mp, Dialect.ParadoxDialect);
 		mp.put(Type.BIGINT, "bigint");
 		mp.put(Type.DECIMAL, "decimal($p,$s)");
-		mp.put(Type.OTHER, "N/A");
+		mp.put(Type.UNKNOW, "N/A");
 		copyTo(mp, Dialect.CobolDialect);
 		mp.put(Type.DECIMAL, "N/A");
 		mp.put(Type.JAVA_OBJECT, "longvarchar");
@@ -108,7 +108,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.BIGINT, "integer");
 		mp.put(Type.BINARY, "binary<255|N/A");
 		mp.put(Type.JAVA_OBJECT, "java_object");
-		mp.put(Type.OTHER, "blob");
+		mp.put(Type.UNKNOW, "blob");
 		mp.put(Type.SMALLINT, "smallint");
 		mp.put(Type.TINYINT, "tinyint");
 		mp.put(Type.VARBINARY, "varbinary<255|bit varying($l)");
@@ -121,7 +121,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.CLOB, "longvarchar");
 		mp.put(Type.DECIMAL, "decimal");
 		mp.put(Type.JAVA_OBJECT, "N/A");
-		mp.put(Type.OTHER, "N/A");
+		mp.put(Type.UNKNOW, "N/A");
 		mp.put(Type.VARBINARY, "longvarbinary");
 		copyTo(mp, Dialect.Cache71Dialect);
 		mp.put(Type.BIGINT, "bigint");
@@ -492,7 +492,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.LONGVARBINARY, "bytea");
 		mp.put(Type.LONGVARCHAR, "text");
 		mp.put(Type.NUMERIC, "numeric($p, $s)");
-		mp.put(Type.OTHER, "uuid");
+		mp.put(Type.UNKNOW, "uuid");
 		mp.put(Type.SMALLINT, "int2");
 		mp.put(Type.TINYINT, "int2");
 		mp.put(Type.VARBINARY, "bytea");
@@ -520,7 +520,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.LONGVARBINARY, "bit varying($l)");
 		mp.put(Type.LONGVARCHAR, "varchar($l)");
 		mp.put(Type.NUMERIC, "numeric($p,$s)");
-		mp.put(Type.OTHER, "N/A");
+		mp.put(Type.UNKNOW, "N/A");
 		mp.put(Type.SMALLINT, "smallint");
 		mp.put(Type.TINYINT, "tinyint");
 		mp.put(Type.VARBINARY, "varbinary($l)");

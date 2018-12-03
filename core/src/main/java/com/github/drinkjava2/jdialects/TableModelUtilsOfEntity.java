@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.github.drinkjava2.jdialects.annotation.jpa.EnumType;
+import com.github.drinkjava2.jdialects.annotation.jpa.Version;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
@@ -248,7 +250,27 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			if (field == null)
 				continue;
 
-			if (!getFirstEntityAnno(field, "Transient").isEmpty() || !TypeUtils.canMapToSqlType(propertyClass)) {
+			Object convertClassOrName = null;
+			Map<String, Object> convertMap = getFirstEntityAnno(field, "Version"); // @Version
+			if (!convertMap.isEmpty())
+				convertClassOrName = "Version";
+			else {
+				convertMap = getFirstEntityAnno(field, "Convert");
+				if (!convertMap.isEmpty()) {
+					convertClassOrName = (Class<?>) convertMap.get("value");// jdia's annotation
+					if (convertClassOrName == null || convertClassOrName == void.class)
+						convertClassOrName = (Class<?>) convertMap.get("converter");// JPA's annotation
+					if (convertClassOrName == void.class)
+						convertClassOrName = null;
+				}
+
+				convertMap = getFirstEntityAnno(field, "Enumerated"); // @Enumerated
+				if (!convertMap.isEmpty())
+					convertClassOrName = "EnumType." + convertMap.get("value"); // ORDINAL or String
+			}
+
+			if (!getFirstEntityAnno(field, "Transient").isEmpty()
+					|| (convertClassOrName == null && !TypeUtils.canMapToSqlType(propertyClass))) {
 				ColumnModel col = new ColumnModel(entityfieldName);
 				col.setColumnType(TypeUtils.toType(propertyClass));
 				col.setLengths(new Integer[] { 255, 0, 0 });
@@ -258,14 +280,14 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 				model.addColumn(col);
 			} else {
 
-				// SequenceGenerator
+				// @SequenceGenerator
 				Map<String, Object> map = getFirstEntityAnno(field, "SequenceGenerator");
 				if (!map.isEmpty()) {
 					model.sequenceGenerator((String) map.get("name"), (String) map.get("sequenceName"),
 							(Integer) map.get("initialValue"), (Integer) map.get("allocationSize"));
 				}
 
-				// TableGenerator
+				// @TableGenerator
 				map = getFirstEntityAnno(field, "TableGenerator");
 				if (!map.isEmpty()) {
 					model.tableGenerator((String) map.get("name"), (String) map.get("table"),
@@ -274,14 +296,17 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 							(Integer) map.get("allocationSize"));
 				}
 
-				// UUIDAny
+				// @UUIDAny
 				map = getFirstEntityAnno(field, "UUIDAny");
 				if (!map.isEmpty()) {
 					model.uuidAny((String) map.get("name"), (Integer) map.get("length"));
 				}
 
+				// @Version annotation
 				ColumnModel col = new ColumnModel(entityfieldName);
 				col.entityField(entityfieldName);
+				col.setConverterClassOrName(convertClassOrName);// @Convert's value
+
 				// Column
 				Map<String, Object> colMap = getFirstEntityAnno(field, "Column");
 				if (!colMap.isEmpty()) {
@@ -303,17 +328,21 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setColumnType(TypeUtils.toType(propertyClass));
 					col.setLengths(new Integer[] { 255, 0, 0 });
 				}
+				if ("EnumType.ORDINAL".equals(col.getConverterClassOrName()))
+					col.setColumnType(Type.INTEGER);
+				else if ("EnumType.STRING".equals(col.getConverterClassOrName()))
+					col.setColumnType(Type.VARCHAR);
 
-				// Id
+				// @Id
 				if (!getFirstEntityAnno(field, "Id").isEmpty() || !getFirstEntityAnno(field, "PKey").isEmpty())
 					col.pkey();
 
-				// Is a ShardTable column?
+				// @ShardTable
 				Map<String, Object> shardTableMap = getFirstEntityAnno(field, "ShardTable");
 				if (!shardTableMap.isEmpty())
 					col.shardTable((String[]) shardTableMap.get("value"));
 
-				// Is ShardDatabase?
+				// @ShardDatabase
 				Map<String, Object> shardDatabaseMap = getFirstEntityAnno(field, "ShardDatabase");
 				if (!shardDatabaseMap.isEmpty())
 					col.shardDatabase((String[]) shardDatabaseMap.get("value"));
@@ -345,7 +374,6 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					Object strategy = gvMap.get("strategy");
 					if (strategy != null) {
 						String strategyStr = strategy.toString();
-
 						if ("AUTO".equals(strategyStr))
 							col.autoId();
 						else if ("IDENTITY".equals(strategyStr))

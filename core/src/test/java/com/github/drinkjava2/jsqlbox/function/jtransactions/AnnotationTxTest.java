@@ -55,7 +55,7 @@ public class AnnotationTxTest {
 	@Test
 	public void doTest() {
 		AnnotationTxTest tester = BeanBox.getBean(AnnotationTxTest.class);
-		ctx.quiteExecute("drop table user_tb");
+		ctx.quiteExecute("drop table user_tb"); 
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
@@ -68,6 +68,7 @@ public class AnnotationTxTest {
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			tester.tx_Insert2();// this one did not insert, roll back to 1
 		} catch (Exception e) {
+			// e.printStackTrace();
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}

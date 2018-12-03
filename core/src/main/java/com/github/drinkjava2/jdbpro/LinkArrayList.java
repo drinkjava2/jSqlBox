@@ -18,26 +18,26 @@ package com.github.drinkjava2.jdbpro;
 import java.util.ArrayList;
 
 /**
- * AppendableArrayList make ArrayList support link style
+ * LinkArrayList make ArrayList support link style
  * 
  * @author Yong Zhu
  * @since 2.0.0
  */
 
 @SuppressWarnings("serial")
-public class LinkStyleArrayList<T> extends ArrayList<T> {
+public class LinkArrayList<T> extends ArrayList<T> {
 
-	public LinkStyleArrayList<T> frontAdd(T element) {
+	public LinkArrayList<T> frontAdd(T element) {
 		super.add(0, element);
 		return this;
 	}
 
-	public LinkStyleArrayList<T> append(T element) {
+	public LinkArrayList<T> append(T element) {
 		super.add(element);
 		return this;
 	}
 
-	public LinkStyleArrayList<T> insert(int index, T element) {
+	public LinkArrayList<T> insert(int index, T element) {
 		super.add(index, element);
 		return this;
 	}
