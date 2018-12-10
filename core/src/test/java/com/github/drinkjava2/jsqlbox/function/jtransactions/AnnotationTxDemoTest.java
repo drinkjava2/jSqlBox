@@ -85,7 +85,7 @@ public class AnnotationTxDemoTest {
 		try {
 			tester.txInsert();// this one did not insert, rolled back
 		} catch (Exception e) {
-			e.printStackTrace();
+			Systemout.println("Exception found: " + e.getMessage());
 		}
 		ctx.nExecute("drop table user_tb");
 		JBEANBOX.close();// Close DataSource Pool

@@ -255,12 +255,12 @@ public class UsageAndSpeedTest {
 						"select count(*) from users where name=? and address=?", "Tom", "China"));
 				ctx.execute(conn, "delete from users where name=? or address=?", "Tom", "China");
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			} finally {
 				try {
 					ctx.close(conn);
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Systemout.println("Exception found: " + e.getMessage());
 				}
 			}
 		}
@@ -277,7 +277,7 @@ public class UsageAndSpeedTest {
 						ctx.queryForLongValue("select count(*) from users where name=? and address=?", "Tom", "China"));
 				ctx.execute("delete from users where name=? or address=?", "Tom", "China");
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 	}
@@ -308,7 +308,7 @@ public class UsageAndSpeedTest {
 						new ScalarHandler<Long>(), PARAMS()));
 				runner.execute("delete from users where name=? or address=?" + PARA0("Tom", "China"), PARAMS());
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 	}

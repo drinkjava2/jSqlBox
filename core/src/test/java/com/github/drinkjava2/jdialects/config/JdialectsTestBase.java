@@ -33,7 +33,9 @@ public class JdialectsTestBase {
 	@Before
 	public void initDao() {
 		Systemout.println("Current guessedDialect=" + guessedDialect);
-		// db.setAllowShowSQL(true);
+		Dialect.setGlobalAllowReservedWords(false);
+		Dialect.setGlobalAllowShowSql(false);
+		Dialect.setGlobalSqlFunctionPrefix(null);
 	}
 
 	@After
@@ -109,7 +111,6 @@ public class JdialectsTestBase {
 			printDDLs(ddls);
 			// printDDLs(DDLFormatter.format(ddls));
 		} catch (Exception e) {
-			e.printStackTrace();
 			Systemout.println("Exception found: " + e.getMessage());
 		}
 	}
@@ -123,7 +124,6 @@ public class JdialectsTestBase {
 				printDDLs(ddls);
 				// printDDLs(DDLFormatter.format(ddls));
 			} catch (Exception e) {
-				e.printStackTrace();
 				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}

@@ -32,9 +32,8 @@ public class PaginHandler extends DefaultOrderSqlHandler {
 	}
 
 	@Override
-	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
+	public void beforeExecute(ImprovedQueryRunner runner, PreparedSQL ps) {
 		ps.setSql(((SqlBoxContext) runner).getDialect().pagin(pageNumber, pageSize, ps.getSql()));
-		return runner.runPreparedSQL(ps);
 	}
 
 }

@@ -132,7 +132,6 @@ public class CompoundPKeyTest extends TestBase {
 
 	@Test
 	public void testActiveRecord() {
-		ctx.setAllowShowSQL(true);
 		CmpEntity entity3 = new CmpEntity();
 		entity3.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 7).load();
 		Assert.assertEquals("China", entity3.getAddress());

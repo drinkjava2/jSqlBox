@@ -22,7 +22,6 @@ package com.github.drinkjava2.jdbpro;
  * @since 1.7.0.2
  */
 public interface SqlHandler {// NOSONAR
- 
 
 	/**
 	 * @return The order number, usually when add a SqlHandler into a existed
@@ -47,4 +46,16 @@ public interface SqlHandler {// NOSONAR
 	 * @return The result Object
 	 */
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps);
+
+	/**
+	 * The method may be called by hander method, to modify PreparedSQL setting, but
+	 * not always
+	 */
+	public void beforeExecute(ImprovedQueryRunner runner, PreparedSQL ps);
+
+	/**
+	 * The method may be called by hander method, modify result to a new result
+	 * object, but not always
+	 */
+	public Object afterExecute(ImprovedQueryRunner runner, PreparedSQL ps, Object result);
 }

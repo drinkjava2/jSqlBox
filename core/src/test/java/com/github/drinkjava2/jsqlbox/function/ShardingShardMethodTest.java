@@ -80,7 +80,6 @@ public class ShardingShardMethodTest {
 			masters[i].setSlaves(slaves);
 			masters[i].setSnowflakeCreator(new SnowflakeCreator(5, 5, 0, i));
 			masters[i].setName("Master" + i);
-			masters[i].setAllowShowSQL(true);
 			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
 				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}

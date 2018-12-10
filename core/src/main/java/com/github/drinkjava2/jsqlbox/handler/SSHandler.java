@@ -18,6 +18,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -36,7 +37,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class SSHandler extends DefaultOrderSqlHandler {
 
 	@Override
-	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
+	public void beforeExecute(ImprovedQueryRunner runner, PreparedSQL ps) {
 		Object[] tableModels = ps.getModels();
 		if (tableModels == null || tableModels.length == 0)
 			throw new SqlBoxException("TableModel items needed for SSHandler");
@@ -45,7 +46,6 @@ public class SSHandler extends DefaultOrderSqlHandler {
 			throw new SqlBoxException("Alias qty not same as TableModel qty.");
 		String sql = explainNetQuery(ps);
 		ps.setSql(sql);
-		return runner.runPreparedSQL(ps);
 	}
 
 	/**

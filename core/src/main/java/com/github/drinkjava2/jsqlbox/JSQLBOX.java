@@ -47,9 +47,6 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 
 	/** Shortcut method equal to SqlBoxContext.getGlobalSqlBoxContext() */
 	public static SqlBoxContext gctx() {
-		if (SqlBoxContext.getGlobalSqlBoxContext() == null)
-			throw new SqlBoxException(
-					"Global SqlBoxContext needed, please use SqlBoxContext.setGlobalSqlBoxContext() method to set a global default SqlBoxContext");
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 
@@ -148,6 +145,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static <T> T pQuery(Object... items) {return gctx().pQuery(items);}
 	public static <T> T pQueryForObject(Object... items) {return gctx().pQueryForObject(items);}
 	public static long pQueryForLongValue(Object... items) {return gctx().pQueryForLongValue(items);}
+	public static int pQueryForIntValue(Object... items) {return gctx().pQueryForIntValue(items);}
 	public static String pQueryForString(Object... items) {return gctx().pQueryForString(items);}
 	public static List<Map<String, Object>> pQueryForMapList(Object... items) {return gctx().pQueryForMapList(items);}
 	public static int pUpdate(Object... items) {return gctx().pUpdate(items);}
@@ -158,6 +156,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static <T> T iQuery(Object... items) {return  gctx().iQuery(items);}
 	public static <T> T iQueryForObject(Object... items) {return gctx().iQueryForObject(items);}
 	public static long iQueryForLongValue(Object... items) {return gctx().iQueryForLongValue(items);}
+	public static int iQueryForIntValue(Object... items) {return gctx().iQueryForIntValue(items);}
 	public static String iQueryForString(Object... items) {return gctx().iQueryForString(items);}
 	public static List<Map<String, Object>> iQueryForMapList(Object... items) {return gctx().iQueryForMapList(items);}
 	public static int iUpdate(Object... items) {return gctx().iUpdate(items);}
@@ -169,6 +168,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static <T> T nQueryForObject(Connection conn, String sql, Object... items) {return gctx().nQueryForObject(conn, sql, items);}
 	public static String nQueryForString(Connection conn, String sql, Object... items) {return gctx().nQueryForString(conn, sql, items);}
 	public static long nQueryForLongValue(Connection conn, String sql, Object... items) {return gctx().nQueryForLongValue(conn, sql, items);}
+	public static int nQueryForIntValue(Connection conn, String sql, Object... items) {return gctx().nQueryForIntValue(conn, sql, items);}
 	public static List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... items) {return gctx().nQueryForMapList(conn, sql, items);}
 	public static int nUpdate(Connection conn, String sql, Object... items) {return gctx().nUpdate(conn, sql, items);}
 	public static <T> T nInsert(Connection conn, ResultSetHandler<T> rsh, String sql, Object... items) {return gctx().nInsert(conn, rsh, sql, items);}
@@ -178,6 +178,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static <T> T nQueryForObject(String sql, Object... items) {return gctx().nQueryForObject(sql, items);}
 	public static String nQueryForString(String sql, Object... items) {return gctx().nQueryForString(sql, items);}
 	public static long nQueryForLongValue(String sql, Object... items) {return gctx().nQueryForLongValue(sql, items);}
+	public static int nQueryForIntValue(String sql, Object... items) {return gctx().nQueryForIntValue(sql, items);}
 	public static List<Map<String, Object>> nQueryForMapList(String sql, Object... items) {return gctx().nQueryForMapList(sql, items);}
 	public static int nUpdate(String sql, Object... items) {return gctx().nUpdate(sql, items);}
 	public static <T> T nInsert(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... items) {return gctx().nInsert(rsh, sql, items);}
@@ -187,6 +188,7 @@ public abstract class JSQLBOX extends JDBPRO {// NOSONAR
 	public static <T> T tQuery(Object... items) {return gctx().tQuery(items);}
 	public static <T> T tQueryForObject(Object... items) {return gctx().tQueryForObject(items);}
 	public static long tQueryForLongValue(Object... items) {return gctx().tQueryForLongValue(items);}
+	public static int tQueryForIntValue(Object... items) {return gctx().tQueryForIntValue(items);}
 	public static String tQueryForString(Object... items) {return gctx().tQueryForString(items);}
 	public static List<Map<String, Object>> tQueryForMapList(Object... items) {return gctx().tQueryForMapList(items);}
 	public static int tUpdate(Object... items) {return gctx().tUpdate(items);}

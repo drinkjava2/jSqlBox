@@ -74,7 +74,6 @@ public class TinyTxTester {
 			tester.tx_Insert1();// this one inserted 1 record
 			tester.tx_Insert2();// this one did not insert, roll back
 		} catch (Exception e) {
-			e.printStackTrace();
 			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}
 		Assert.assertEquals(1L, tiny.queryForObject("select count(*) from users"));

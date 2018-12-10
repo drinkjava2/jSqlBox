@@ -26,21 +26,28 @@ import javax.sql.DataSource;
 public interface ConnectionManager {
 	/**
 	 * A ConnectionManager implementation determine how to get connection from
-	 * DataSource or ThreadLocal or from Spring or JTA or some container...
+	 * DataSource or ThreadLocal or from Spring or JTA or some container...<br/>
+	 * <br/>
+	 * For ManualTx, usually get a connection directly from dataSource
 	 */
 	public Connection getConnection(DataSource dataSource) throws SQLException;
 
 	/**
 	 * A ConnectionManager implementation determine how to close connection or
 	 * return connection to ThreadLocal or return to Spring or JTA or some
-	 * container...
+	 * container...<br/>
+	 * <br/>
+	 * For ManualTx, usually directly close a connection
 	 */
 	public void releaseConnection(Connection conn, DataSource dataSource) throws SQLException;
 
 	/**
 	 * Check if a connection already be get from given dataSource and be cached as
-	 * it started a Transaction
+	 * it started a Transaction <br/>
+	 * <br/>
+	 * For ManualTx, return true if getConnection be called and connection not be
+	 * closed.
 	 */
-	boolean isInTransaction(DataSource dataSource);
-
+	public boolean isInTransaction(DataSource dataSource);
+ 
 }

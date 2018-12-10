@@ -21,6 +21,8 @@ import com.github.drinkjava2.jdialects.id.AutoIdGenerator;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.SequenceIdGenerator;
 import com.github.drinkjava2.jdialects.id.TableIdGenerator;
+import com.github.drinkjava2.jdialects.log.DialectLog;
+import com.github.drinkjava2.jdialects.log.DialectLogFactory;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.IndexModel;
@@ -33,7 +35,8 @@ import com.github.drinkjava2.jdialects.model.UniqueModel;
  * @author Yong Zhu
  * @since 1.0.2
  */
-public class DDLDropUtils {
+public class DDLDropUtils { 
+	private static final DialectLog logger = DialectLogFactory.getLog(DDLDropUtils.class);
 
 	/**
 	 * Transfer tables to drop DDL and without format it
@@ -93,7 +96,7 @@ public class DDLDropUtils {
 
 		String[] result = stringResultList.toArray(new String[stringResultList.size()]);
 		if (Dialect.getGlobalAllowShowSql())
-			Dialect.logger.info("Drop DDL:\r" + StrUtils.arrayToString(result, "\r"));
+			logger.info("Drop DDL:\r" + StrUtils.arrayToString(result, "\r"));
 		return result;
 
 	}

@@ -90,4 +90,5 @@ public class TinyTxConnectionManager implements ConnectionManager {
 				conn.close();
 		}
 	}
+
 }

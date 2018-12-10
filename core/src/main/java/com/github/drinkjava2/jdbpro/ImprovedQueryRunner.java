@@ -30,7 +30,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
+import com.github.drinkjava2.jdbpro.log.DbProLog;
+import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -52,10 +53,12 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  */
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner {
+	protected static final DbProLog logger = DbProLogFactory.getLog(ImprovedQueryRunner.class);
+
 	protected static Boolean globalNextAllowShowSql = false;
 	protected static SqlOption globalNextMasterSlaveOption = SqlOption.USE_AUTO;
 	protected static ConnectionManager globalNextConnectionManager = null;
-	protected static DbProLogger globalNextLogger = DefaultDbProLogger.getLog(ImprovedQueryRunner.class);
+
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
 	protected static SqlHandler[] globalNextSqlHandlers = null;
@@ -64,7 +67,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	protected ConnectionManager connectionManager = globalNextConnectionManager;
 	protected Boolean allowShowSQL = globalNextAllowShowSql;
 	protected SqlOption masterSlaveOption = globalNextMasterSlaveOption;
-	protected DbProLogger logger = globalNextLogger;
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
 
@@ -170,7 +172,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	private <T> T addToCacheIfFullFlush(PreparedSQL ps) {
 		if (ps == null)
-			throw new DbProRuntimeException("PreparedSQL can not be null.");
+			throw new DbProException("PreparedSQL can not be null.");
 		Object result = null;
 		List<PreparedSQL> cached = sqlBatchCache.get();
 		if (cached.size() >= this.batchSize)
@@ -197,7 +199,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			break;
 		}
 		default:
-			throw new DbProRuntimeException("Unknow batch sql operation type:" + ps.getOperationType());
+			throw new DbProException("Unknow batch sql operation type:" + ps.getOperationType());
 		}
 		return (T) result;
 	}
@@ -237,13 +239,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 					else
 						result = ((int[]) batch(first.getSql(), allParams)).length;
 				} catch (SQLException e) {
-					throw new DbProRuntimeException(e);
+					throw new DbProException(e);
 				}
 				break;
 			}
 			case INSERT: {
 				if (first.getResultSetHandler() == null)
-					throw new DbProRuntimeException("insertBatch need a ResultSetHandler.");
+					throw new DbProException("insertBatch need a ResultSetHandler.");
 				try {
 					if (first.getConnection() != null)
 						result = insertBatch(first.getConnection(), first.getSql(), first.getResultSetHandler(),
@@ -251,12 +253,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 					else
 						result = insertBatch(first.getSql(), first.getResultSetHandler(), allParams);
 				} catch (SQLException e) {
-					throw new DbProRuntimeException(e);
+					throw new DbProException(e);
 				}
 				break;
 			}
 			default:
-				throw new DbProRuntimeException("Unknow batch sql operation type:" + first.getOperationType());
+				throw new DbProException("Unknow batch sql operation type:" + first.getOperationType());
 			}
 		}
 		sqlBatchCache.get().clear();
@@ -319,6 +321,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	/**
+	 * Query for a int value
+	 * 
+	 * @param sql
+	 *            The SQL
+	 * @param params
+	 *            The parameters
+	 * @return A int value
+	 * @throws SQLException
+	 */
+	public int queryForIntValue(Connection conn, String sql, Object... params) throws SQLException {
+		return ((Number) queryForObject(conn, sql, params)).intValue();
+	}
+
+	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
 	 * if no result found, SQLException may be threw if some SQL operation Exception
@@ -347,6 +363,20 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	public long queryForLongValue(String sql, Object... params) throws SQLException {
 		return ((Number) queryForObject(sql, params)).longValue();
+	}
+
+	/**
+	 * Query for a int value
+	 * 
+	 * @param sql
+	 *            The SQL
+	 * @param params
+	 *            The parameters
+	 * @return A int value
+	 * @throws SQLException
+	 */
+	public int queryForIntValue(String sql, Object... params) throws SQLException {
+		return ((Number) queryForObject(sql, params)).intValue();
 	}
 
 	/**
@@ -384,7 +414,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/** Execute real SQL operation according PreparedSql's SqlType */
 	public Object runRealSqlMethod(PreparedSQL ps) {
 		if (ps.getOperationType() == null)
-			throw new DbProRuntimeException("PreparedSQL's type not set");
+			throw new DbProException("PreparedSQL's type not set");
 
 		if (batchEnabled.get()) {
 			switch (ps.getOperationType()) {
@@ -410,12 +440,12 @@ public class ImprovedQueryRunner extends QueryRunner {
 			} else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveOption())) {
 				Object result = null;
 				if (this.getSlaves() == null || this.getSlaves().length == 0)
-					throw new DbProRuntimeException("Try to write slaves but slave list not found");
+					throw new DbProException("Try to write slaves but slave list not found");
 				for (DbPro dbPro : this.getSlaves())
 					result = runWriteOperations(dbPro, ps);
 				return result;
 			} else
-				throw new DbProRuntimeException("Should never run to here");
+				throw new DbProException("Should never run to here");
 		}
 		case QUERY: {
 			if (SqlOption.USE_MASTER.equals(ps.getMasterSlaveOption())
@@ -424,16 +454,16 @@ public class ImprovedQueryRunner extends QueryRunner {
 			else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveOption())) {
 				DbPro db = chooseOneSlave();
 				if (db == null)
-					throw new DbProRuntimeException("Try to query on slave but slave list not found");
+					throw new DbProException("Try to query on slave but slave list not found");
 				return db.runQuery(ps);
 			} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveOption())) {
 				DbPro db = autoChooseMasterOrSlaveQuery(ps);
 				return db.runQuery(ps);
 			} else
-				throw new DbProRuntimeException("Should never run to here");
+				throw new DbProException("Should never run to here");
 		}
 		}
-		throw new DbProRuntimeException("Unknow SQL operation type " + ps.getOperationType());
+		throw new DbProException("Unknow SQL operation type " + ps.getOperationType());
 	}
 
 	private Object runReadOperation(PreparedSQL ps) {
@@ -443,13 +473,13 @@ public class ImprovedQueryRunner extends QueryRunner {
 		else if (SqlOption.USE_SLAVE.equals(ps.getMasterSlaveOption())) {
 			DbPro db = chooseOneSlave();
 			if (db == null)
-				throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
+				throw new DbProException("Try to run a slave DbPro but slave list is null or empty");
 			return db.runQuery(ps);
 		} else if (SqlOption.USE_AUTO.equals(ps.getMasterSlaveOption())) {
 			DbPro db = autoChooseMasterOrSlaveQuery(ps);
 			return db.runQuery(ps);
 		} else
-			throw new DbProRuntimeException("masterSlaveSelect property not set.");
+			throw new DbProException("masterSlaveSelect property not set.");
 	}
 
 	private Object runWriteOperations(ImprovedQueryRunner dbPro, PreparedSQL ps) {
@@ -461,7 +491,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		case UPDATE:
 			return dbPro.runUpdate(ps);
 		}
-		throw new DbProRuntimeException("Should never run to here");
+		throw new DbProException("Should never run to here");
 	}
 
 	/**
@@ -486,10 +516,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 						return (T) query(ps.getSql(), ps.getResultSetHandler());
 				}
 			} catch (SQLException e) {
-				throw new DbProRuntimeException(e);
+				throw new DbProException(e);
 			}
 		} else
-			throw new DbProRuntimeException("A ResultSetHandler is required by query method");
+			throw new DbProException("A ResultSetHandler is required by query method");
 	}
 
 	private DbPro autoChooseMasterOrSlaveQuery(PreparedSQL ps) {
@@ -498,7 +528,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			return (DbPro) this;
 		DbPro slave = chooseOneSlave();
 		if (slave == null)
-			throw new DbProRuntimeException("Try to run a slave DbPro but slave list is null or empty");
+			throw new DbProException("Try to run a slave DbPro but slave list is null or empty");
 		return slave;
 	}
 
@@ -543,10 +573,10 @@ public class ImprovedQueryRunner extends QueryRunner {
 						return (T) insert(ps.getSql(), ps.getResultSetHandler());
 				}
 			} catch (SQLException e) {
-				throw new DbProRuntimeException(e);
+				throw new DbProException(e);
 			}
 		} else
-			throw new DbProRuntimeException("A ResultSetHandler is required by insert method");
+			throw new DbProException("A ResultSetHandler is required by insert method");
 	}
 
 	/**
@@ -570,7 +600,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 					return (T) (Integer) this.execute(ps.getSql(), ps.getParams());
 			}
 		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 
@@ -598,7 +628,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 					return update(ps.getSql());
 			}
 		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 
@@ -620,7 +650,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 			else
 				return (T) query(ps.getSql(), ps.getResultSetHandler(), ps.getParams());
 		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 
@@ -637,7 +667,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		try {
 			return batch(sql, objectsListToArray2D(params));
 		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 
@@ -657,7 +687,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		try {
 			return batch(conn, sql, objectsListToArray2D(params));
 		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 
@@ -679,7 +709,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		try {
 			return insertBatch(sql, rsh, objectsListToArray2D(params));
 		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 
@@ -703,7 +733,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 		try {
 			return this.insertBatch(conn, sql, rsh, objectsListToArray2D(params));
 		} catch (SQLException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 
@@ -752,14 +782,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR
-	}
-
-	public static DbProLogger getGlobalNextLogger() {
-		return globalNextLogger;
-	}
-
-	public static void setGlobalNextLogger(DbProLogger dbProLogger) {
-		globalNextLogger = dbProLogger;
 	}
 
 	public static Integer getGlobalNextBatchSize() {
@@ -838,15 +860,6 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/** This method is not thread safe, suggest only use at program starting */
 	public void setConnectionManager(ConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
-	}
-
-	public DbProLogger getLogger() {
-		return logger;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setLogger(DbProLogger logger) {
-		this.logger = logger;
 	}
 
 	public Integer getBatchSize() {

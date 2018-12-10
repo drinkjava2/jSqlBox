@@ -142,12 +142,12 @@ public class DialectTest {
 			con = ds.getConnection();
 			dialectName = Dialect.guessDialect(con).toString();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Systemout.println("Exception found: " + e.getMessage());
 		} finally {
 			try {
 				con.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 		Assert.assertEquals("H2Dialect", dialectName);

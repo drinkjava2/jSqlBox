@@ -20,9 +20,7 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.DbPro;
-import com.github.drinkjava2.jdbpro.DbProLogger.DefaultDbProLogger;
-import com.github.drinkjava2.jdbpro.DbProRuntimeException;
-import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
+import com.github.drinkjava2.jdbpro.DbProException;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdbpro.SqlItem;
@@ -77,7 +75,15 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public SqlBoxContext(DataSource ds) {
 		super(ds);
-		dialect = Dialect.guessDialect(ds);
+		if (globalNextDialect != null)
+			dialect = globalNextDialect;
+		else
+			dialect = Dialect.guessDialect(ds);
+	}
+
+	public SqlBoxContext(DataSource ds, Dialect dialect) {
+		super(ds);
+		this.dialect = dialect;
 	}
 
 	protected void miscMethods______________________________() {// NOSONAR
@@ -89,7 +95,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		setGlobalNextMasterSlaveOption(SqlOption.USE_AUTO);
 		setGlobalNextConnectionManager(null);
 		setGlobalNextSqlHandlers((SqlHandler[]) null);
-		setGlobalNextLogger(DefaultDbProLogger.getLog(ImprovedQueryRunner.class));
 		setGlobalNextBatchSize(300);
 		setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
 		setGlobalNextDialect(null);
@@ -374,7 +379,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public <T> List<T> eFindAll(Class<T> entityClass, Object... optionItems) {
 		return SqlBoxContextUtils.entityFindAll(this, entityClass, optionItems);
 	}
- 
+
 	/** Find entity according SQL, if not found, return empty list */
 	public <T> List<T> eFindBySQL(Object... optionItems) {
 		return iQueryForEntityList(optionItems);
@@ -467,7 +472,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	private void assertDialectNotNull() {
 		if (dialect == null)
-			throw new DbProRuntimeException("Try use a dialect method but dialect is null");
+			throw new DbProException("Try use a dialect method but dialect is null");
 	}
 
 	protected void getteSetters__________________________() {// NOSONAR

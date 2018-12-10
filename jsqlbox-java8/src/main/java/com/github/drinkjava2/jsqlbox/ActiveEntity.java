@@ -43,6 +43,8 @@ public interface ActiveEntity<T> extends EntityType {
 		for (Object item : optionItems)
 			if (item != null && item instanceof SqlBoxContext)
 				return (SqlBoxContext) item;
+		SqlBoxException.assureNotNull(SqlBoxContext.getGlobalSqlBoxContext(),
+				SqlBoxContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return SqlBoxContext.getGlobalSqlBoxContext();
 	}
 

@@ -68,7 +68,7 @@ public class AnnotationTxTest {
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			tester.tx_Insert2();// this one did not insert, roll back to 1
 		} catch (Exception e) {
-			// e.printStackTrace();
+			// Systemout.println("Exception found: " + e.getMessage());
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}

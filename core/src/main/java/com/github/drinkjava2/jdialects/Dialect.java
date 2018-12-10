@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.NormalJdbcTool;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
+import com.github.drinkjava2.jdialects.log.DialectLog;
+import com.github.drinkjava2.jdialects.log.DialectLogFactory;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -57,6 +59,8 @@ public enum Dialect implements CommonDialect {
 
 	/** If set true will allow use reserved words in DDL, default value is false */
 	private static Boolean globalAllowReservedWords = false;
+	
+	private static final DialectLog logger = DialectLogFactory.getLog(Dialect.class);
 
 	/**
 	 * If set true will output log for each paginate, translate, paginAndTranslate,
@@ -72,8 +76,7 @@ public enum Dialect implements CommonDialect {
 	private static final String SKIP_ROWS = "$SKIP_ROWS";
 	private static final String PAGESIZE = "$PAGESIZE";
 	private static final String TOTAL_ROWS = "$TOTAL_ROWS";
-	private static final String DISTINCT_TAG = "($DISTINCT)";
-	protected static final DialectLogger logger = DialectLogger.getLog(Dialect.class);
+	private static final String DISTINCT_TAG = "($DISTINCT)"; 
 	private String sqlTemplate = null;
 	private String topLimitTemplate = null;
 	protected final Map<Type, String> typeMappings = new EnumMap<Type, String>(Type.class);

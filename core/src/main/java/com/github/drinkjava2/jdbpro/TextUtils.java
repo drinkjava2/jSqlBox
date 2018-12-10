@@ -53,7 +53,7 @@ public abstract class TextUtils {// NOSONAR
 			Class<?> clazz = Class.forName(classFullName);
 			return getJavaSourceCode(clazz, encoding);
 		} catch (ClassNotFoundException e) {
-			throw new DbProRuntimeException(e);
+			throw new DbProException(e);
 		}
 	}
 

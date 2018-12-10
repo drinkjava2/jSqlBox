@@ -88,17 +88,6 @@ public class SqlHandlersTest extends TestBase {
 			this.age = age;
 		}
 
-		// @Sql("select u.* from DemoUser u where u.age>?")
-		// public List<DemoUser> selectAgeBiggerThan1(Integer age) {
-		// return this.guess(age, new EntityListHandler(), DemoUser.class);
-		// }
-		//
-		// @Model(DemoUser.class)
-		// @Ioc(EntityListHandlerCfg.class)
-		// @Sql("select * from DemoUser u where u.age>?")
-		// public List<DemoUser> selectAgeBiggerThan2(Integer age) {
-		// return this.guess(age);
-		// }
 	}
 
 	public static class EntityListHandlerCfg extends BeanBox {

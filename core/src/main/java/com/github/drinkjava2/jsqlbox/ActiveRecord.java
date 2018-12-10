@@ -253,6 +253,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public <E> E pQuery(Object... items) {return ctx(items).pQuery(items);}
 	public <E> E pQueryForObject(Object... items) {return ctx(items).pQueryForObject(items);}
 	public long pQueryForLongValue(Object... items) {return ctx(items).pQueryForLongValue(items);}
+	public int pQueryForIntValue(Object... items) {return ctx(items).pQueryForIntValue(items);}
 	public String pQueryForString(Object... items) {return ctx(items).pQueryForString(items);}
 	public List<Map<String, Object>> pQueryForMapList(Object... items) {return ctx(items).pQueryForMapList(items);}
 	public int pUpdate(Object... items) {return ctx(items).pUpdate(items);}
@@ -263,6 +264,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public <E> E iQuery(Object... items) {return  ctx(items).iQuery(items);}
 	public <E> E iQueryForObject(Object... items) {return ctx(items).iQueryForObject(items);}
 	public long iQueryForLongValue(Object... items) {return ctx(items).iQueryForLongValue(items);}
+	public int iQueryForIntgValue(Object... items) {return ctx(items).iQueryForIntValue(items);}
 	public String iQueryForString(Object... items) {return ctx(items).iQueryForString(items);}
 	public List<Map<String, Object>> iQueryForMapList(Object... items) {return ctx(items).iQueryForMapList(items);}
 	public int iUpdate(Object... items) {return ctx(items).iUpdate(items);}
@@ -274,6 +276,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public <E> E nQueryForObject(Connection conn, String sql, Object... items) {return ctx(items).nQueryForObject(conn, sql, items);}
 	public String nQueryForString(Connection conn, String sql, Object... items) {return ctx(items).nQueryForString(conn, sql, items);}
 	public long nQueryForLongValue(Connection conn, String sql, Object... items) {return ctx(items).nQueryForLongValue(conn, sql, items);}
+	public int nQueryForIntValue(Connection conn, String sql, Object... items) {return ctx(items).nQueryForIntValue(conn, sql, items);}
 	public List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... items) {return ctx(items).nQueryForMapList(conn, sql, items);}
 	public int nUpdate(Connection conn, String sql, Object... items) {return ctx(items).nUpdate(conn, sql, items);}
 	public <E> E nInsert(Connection conn, ResultSetHandler<E> rsh, String sql, Object... items) {return ctx(items).nInsert(conn, rsh, sql, items);}
@@ -283,6 +286,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public <E> E nQueryForObject(String sql, Object... items) {return ctx(items).nQueryForObject(sql, items);}
 	public String nQueryForString(String sql, Object... items) {return ctx(items).nQueryForString(sql, items);}
 	public long nQueryForLongValue(String sql, Object... items) {return ctx(items).nQueryForLongValue(sql, items);}
+	public int nQueryForIntValue(String sql, Object... items) {return ctx(items).nQueryForIntValue(sql, items);}
 	public List<Map<String, Object>> nQueryForMapList(String sql, Object... items) {return ctx(items).nQueryForMapList(sql, items);}
 	public int nUpdate(String sql, Object... items) {return ctx(items).nUpdate(sql, items);}
 	public <E> E nInsert(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... items) {return ctx(items).nInsert(rsh, sql, items);}
@@ -292,6 +296,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public <E> E tQuery(Object... items) {return ctx(items).tQuery(items);}
 	public <E> E tQueryForObject(Object... items) {return ctx(items).tQueryForObject(items);}
 	public long tQueryForLongValue(Object... items) {return ctx(items).tQueryForLongValue(items);}
+	public int tQueryForIntValue(Object... items) {return ctx(items).tQueryForIntValue(items);}
 	public String tQueryForString(Object... items) {return ctx(items).tQueryForString(items);}
 	public List<Map<String, Object>> tQueryForMapList(Object... items) {return ctx(items).tQueryForMapList(items);}
 	public int tUpdate(Object... items) {return ctx(items).tUpdate(items);}

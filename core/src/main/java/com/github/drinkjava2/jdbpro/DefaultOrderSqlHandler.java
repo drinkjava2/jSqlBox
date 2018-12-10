@@ -35,4 +35,20 @@ public abstract class DefaultOrderSqlHandler implements SqlHandler {// NOSONAR
 		this.order = order;
 	}
 
+	@Override
+	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
+		beforeExecute(runner, ps);
+		Object result = runner.runPreparedSQL(ps);
+		return afterExecute(runner, ps, result);
+	}
+
+	@Override
+	public void beforeExecute(ImprovedQueryRunner runner, PreparedSQL ps) {
+	}
+
+	@Override
+	public Object afterExecute(ImprovedQueryRunner runner, PreparedSQL ps, Object result) {
+		return result;
+	}
+
 }

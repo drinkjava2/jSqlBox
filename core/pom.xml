@@ -68,11 +68,19 @@
       <version>1.7</version>
     </dependency> 
     
+ 
+
     <!-- ==================================================================================================  -->
     <!-- Below dependencies are for unit test only, scope be set to "test"                                   -->
     <!-- jSqlBox only test on H2, MySql5, MSSQL2012 and Oracle11g although it should support many databases  -->  
     <!-- Note: Oracle11g JDBC driver need installed manually by yourself                                     -->  	
     <!-- ==================================================================================================  --> 
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency> 
     
     <!-- jBeanBox is a small IOC/AOP tool -->
     <dependency>
@@ -80,29 +88,8 @@
         <artifactId>jbeanbox</artifactId>
         <version>2.4.9</version><!--Or newest jBeanBox-->
         <scope>test</scope>
-    </dependency> 
+    </dependency>   
      
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.2</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>  
-      <groupId>log4j</groupId>  
-      <artifactId>log4j</artifactId>  
-      <version>1.2.17</version> 
-      <scope>test</scope> 
-    </dependency>    
- 
    <!-- HikariCP is a dataSource pool quicker than c3p0 -->
     <dependency>
         <groupId>com.zaxxer</groupId>
@@ -126,10 +113,40 @@
         <version>5.1.43</version>
         <scope>test</scope>
     </dependency>
+    
+    <!-- ==================================================  -->
+    <!-- No longer needed                                    -->
+    <!-- ==================================================  -->     
+    
+    <!--dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.2</version>
+      <scope>test</scope>
+    </dependency-->
+    
+    <!--dependency>  
+      <groupId>log4j</groupId>  
+      <artifactId>log4j</artifactId>  
+      <version>1.2.17</version> 
+      <scope>test</scope> 
+    </dependency-->  
  
-    <!-- Oracle JDBC driver missing, need install it manually, 
-	see https://www.mkyong.com/maven/how-to-add-oracle-jdbc-driver-in-your-maven-local-repository/--> 
-  
+    <!--dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+	</dependency--> 
+	
+    <!--dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency-->  
+ 
+    <!-- Oracle JDBC driver missing, need install it manually -->  
 	<!-- ojdbc6.jar example -->
 	<!-- dependency>
 		<groupId>com.oracle</groupId>
@@ -211,8 +228,7 @@
     </build>
 	 
 		
-    <profiles>
-
+    <profiles> 
         <profile>
             <id>release</id>
             <build>
@@ -271,7 +287,18 @@
                         </executions>
                     </plugin>
                 </plugins>
+                
+			<resources>    
+				<resource>    
+					<directory>src/main/resources</directory>    
+				<includes>    
+					<include>**/*.*</include>    
+				</includes>
+				</resource>    
+			</resources>
+			   
             </build>
+            
             <distributionManagement>
 			   <!-- Release, if is offical verison, will release to centre lib, if is "-SNAPSHOT" version, 
 			        will release to sanpshot site, but they use same command:
@@ -288,35 +315,6 @@
            </distributionManagement>
         </profile>
 		
-		<!-- If want release to private or company server, can take a look this releaseLocal profile -->
-        <profile>
-            <id>releaseLocal</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>${version.source-plugin}</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <attach>true</attach>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-            <distributionManagement>
-                <repository>
-                    <id>nexus-197</id>
-                    <url>http://192.168.1.197:8081/content/repositories/releases</url>
-                </repository>
-            </distributionManagement>
-        </profile>
+ 
     </profiles> 
 </project>

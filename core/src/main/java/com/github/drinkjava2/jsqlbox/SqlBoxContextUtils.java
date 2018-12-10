@@ -1040,7 +1040,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				sqlBody.append(item);
 		if (optionModel == null)
 			sqlBody.frontAdd(model);
-		return ((Number) ctx.iQueryForObject(sqlBody.toObjectArray())).intValue();// NOSONAR
+		return  ctx.iQueryForIntValue(sqlBody.toObjectArray());// NOSONAR
 	}
 
 	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR

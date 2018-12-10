@@ -9,8 +9,9 @@ import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.DialectLogger;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
+import com.github.drinkjava2.jdialects.log.DialectLog;
+import com.github.drinkjava2.jdialects.log.DialectLogFactory;
 
 /**
  * This is unit test for DDL
@@ -18,14 +19,15 @@ import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
  * @author Yong Z.
  * @since 1.0.2
  */
-public class LoggerTest extends JdialectsTestBase {
-	DialectLogger logger = DialectLogger.getLog(LoggerTest.class);
-
+public class DialectLogTest extends JdialectsTestBase {
+	private static final DialectLog logger = DialectLogFactory.getLog(DialectLogTest.class);
+  
 	@Test
 	public void doLoggerTest() {
 		Dialect.setGlobalAllowShowSql(true);
 		Dialect.MySQL55Dialect.pagin(10, 10, "select * from sometable");
 		logger.info("Message1 output");
 		Systemout.println("Message2 output");
+		System.out.println(logger);
 	}
 }

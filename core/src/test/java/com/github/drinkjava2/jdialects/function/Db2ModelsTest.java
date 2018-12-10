@@ -63,13 +63,13 @@ public class Db2ModelsTest extends JdialectsTestBase {
 			}
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Systemout.println("Exception found: " + e.getMessage());
 		} finally {
 			try {
 				if (con != null)
 					con.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Systemout.println("Exception found: " + e.getMessage());
 			}
 		}
 

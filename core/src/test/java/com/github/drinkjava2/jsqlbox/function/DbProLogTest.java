@@ -16,8 +16,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
+import com.github.drinkjava2.jdbpro.log.DbProLog;
+import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.DialectLogger;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -27,7 +28,9 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Yong Z.
  * @since 1.0.2
  */
-public class LoggerTest {
+public class DbProLogTest {
+	DbProLog log = DbProLogFactory.getLog(DbProLogTest.class);
+
 	@Before
 	public void init() {
 		SqlBoxContext.resetGlobalVariants();
@@ -48,13 +51,11 @@ public class LoggerTest {
 		this.name = name;
 	}
 
-	DialectLogger logger = DialectLogger.getLog(LoggerTest.class);
-
 	@Test
 	public void doDialectLoggerTest() {
 		Dialect.setGlobalAllowShowSql(true);
 		Dialect.MySQL55Dialect.paginAndTrans(10, 10, "select * from sometable");
-		logger.info("Logger test message1 output ok");
+		log.info("Logger test message1 output ok");
 		Systemout.println("Logger test message2 output ok");
 		Dialect.setGlobalAllowShowSql(false);
 	}
@@ -68,13 +69,14 @@ public class LoggerTest {
 		dataSource.setPassword("");
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		for (String ddl : ctx.getDialect().toDropAndCreateDDL(LoggerTest.class))
+		for (String ddl : ctx.getDialect().toDropAndCreateDDL(DbProLogTest.class))
 			ctx.quiteExecute(ddl);
-		LoggerTest t = new LoggerTest();
+		DbProLogTest t = new DbProLogTest();
 		t.setName("Tom");
 		ctx.eInsert(t);
-		SqlBoxContext.getGlobalNextLogger().info("Logger test message3 output ok");
-		SqlBoxContext.getGlobalNextLogger().info("Logger test message4 output ok");
+		log.info("Logger test message3 output ok");
+		log.info("Logger test message4 output ok");
+		System.out.println(log);
 		SqlBoxContext.setGlobalNextAllowShowSql(false);
 	}
 

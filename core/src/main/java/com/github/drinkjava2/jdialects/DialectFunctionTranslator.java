@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.drinkjava2.jdialects.log.DialectLog;
+import com.github.drinkjava2.jdialects.log.DialectLogFactory;
+
 /**
  * TranslateUtil parse a Sql, translate all universal functions like fn_sin() to
  * native SQL functions like sin()
@@ -25,6 +28,9 @@ import java.util.Map;
  * @since 1.0.0
  */
 public class DialectFunctionTranslator {
+
+	private static final DialectLog logger = DialectLogFactory.getLog(DialectFunctionTranslator.class);
+
 	public static final DialectFunctionTranslator instance = new DialectFunctionTranslator();
 	private Map<String, Integer> functionMap = new HashMap<String, Integer>();
 
@@ -295,7 +301,7 @@ public class DialectFunctionTranslator {
 		}
 		String result = join(d, true, null, items);
 		if (Dialect.getGlobalAllowShowSql())
-			Dialect.logger.info("Translated sql: " + result);
+			logger.info("Translated sql: " + result);
 		return result;
 	}
 
