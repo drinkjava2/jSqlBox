@@ -26,12 +26,12 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  * @author Yong Zhu
  * @since 2.0.5
  */
-public class JdbcTxConnectionManager implements ConnectionManager {
+public class ManualTxConnectionManager implements ConnectionManager {
 	private Connection connection;
 	private DataSource dataSource;
 	private Integer transactionIsolationLevel;
 
-	public JdbcTxConnectionManager(DataSource ds, Integer transactionIsolationLevel) {
+	public ManualTxConnectionManager(DataSource ds, Integer transactionIsolationLevel) {
 		dataSource = ds;
 		this.transactionIsolationLevel = transactionIsolationLevel;
 	}

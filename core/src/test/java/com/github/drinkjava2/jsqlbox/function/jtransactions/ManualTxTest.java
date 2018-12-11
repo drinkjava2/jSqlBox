@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.Tail;
-import com.github.drinkjava2.jtransactions.jdbc.JdbcTxConnectionManager;
+import com.github.drinkjava2.jtransactions.jdbc.ManualTxConnectionManager;
 import com.mysql.jdbc.Connection;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -43,7 +43,7 @@ public class ManualTxTest {
 
 	@Test
 	public void DemoTest() {
-		JdbcTxConnectionManager tx = new JdbcTxConnectionManager(dataSource, Connection.TRANSACTION_READ_COMMITTED);
+		ManualTxConnectionManager tx = new ManualTxConnectionManager(dataSource, Connection.TRANSACTION_READ_COMMITTED);
 		ctx.setConnectionManager(tx);
 		tx.beginTransaction();
 		try {

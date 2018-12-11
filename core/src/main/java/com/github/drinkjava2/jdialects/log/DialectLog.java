@@ -16,7 +16,7 @@
 package com.github.drinkjava2.jdialects.log;
 
 /**
- * DialectLog used for jDialects project, if a "DialectLog.properties" file if
+ * DialectLog used for jDialects project, if a "DialectLog.properties" file
  * found on class root folder (main/resources), will try load the designated
  * DialectLog implementation, otherwise use default DialectPrintLog as log
  * output. <br/>
