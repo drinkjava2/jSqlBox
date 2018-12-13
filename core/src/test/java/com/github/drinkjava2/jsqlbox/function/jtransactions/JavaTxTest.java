@@ -62,7 +62,8 @@ public class JavaTxTest {
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			tester.tx_Insert2();// this one did not insert, roll back
 		} catch (Exception e) {
-			Systemout.println("Exception found: " + e.getMessage());
+			Systemout.println("Exception found: ");
+			e.printStackTrace();
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}

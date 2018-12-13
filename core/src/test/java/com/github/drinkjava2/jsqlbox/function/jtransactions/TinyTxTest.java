@@ -9,17 +9,18 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.Tail;
-import com.github.drinkjava2.jtransactions.manual.ManualTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.mysql.jdbc.Connection;
 import com.zaxxer.hikari.HikariDataSource;
 
-public class ManualTxTest {
+public class TinyTxTest {
 
 	HikariDataSource dataSource;
 	SqlBoxContext ctx;
 
 	@Before
-	public void init() { 
+	public void init() {
 		dataSource = new HikariDataSource();// DataSource
 		// H2 is a memory database
 		dataSource.setDriverClassName("org.h2.Driver");
@@ -28,6 +29,7 @@ public class ManualTxTest {
 		dataSource.setPassword("");
 
 		ctx = new SqlBoxContext(dataSource);
+		ctx.setConnectionManager(TinyTxConnectionManager.instance());
 		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)
 			ctx.quiteExecute(ddl);
@@ -41,10 +43,8 @@ public class ManualTxTest {
 	}
 
 	@Test
-	public void DemoTest() {
-		ManualTx tx = new ManualTx(dataSource, Connection.TRANSACTION_READ_COMMITTED);
-		ctx.setConnectionManager(tx);
-		
+	public void DemoTest() { 
+		TinyTx tx = new TinyTx(dataSource, Connection.TRANSACTION_READ_COMMITTED);
 		for (int i = 0; i < 1000; i++) {
 			tx.beginTransaction();
 			try {
@@ -58,7 +58,7 @@ public class ManualTxTest {
 				tx.rollback();
 			}
 			Assert.assertEquals(100, ctx.eCountAll(Tail.class, tail("users")));
-		} 
+		}
 
 		tx.beginTransaction();
 		try {
@@ -74,6 +74,7 @@ public class ManualTxTest {
 
 		ctx.setConnectionManager(null);
 		Assert.assertEquals(102, ctx.eCountAll(Tail.class, tail("users")));
+
 	}
 
 }

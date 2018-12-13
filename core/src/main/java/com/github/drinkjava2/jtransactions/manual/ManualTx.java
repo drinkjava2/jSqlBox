@@ -9,7 +9,7 @@
 * OF ANY KIND, either express or implied. See the License for the specific
 * language governing permissions and limitations under the License.
 */
-package com.github.drinkjava2.jtransactions.jdbc;
+package com.github.drinkjava2.jtransactions.manual;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,12 +26,12 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  * @author Yong Zhu
  * @since 2.0.5
  */
-public class ManualTxConnectionManager implements ConnectionManager {
+public class ManualTx implements ConnectionManager {
 	private Connection connection;
 	private DataSource dataSource;
 	private Integer transactionIsolationLevel;
 
-	public ManualTxConnectionManager(DataSource ds, Integer transactionIsolationLevel) {
+	public ManualTx(DataSource ds, Integer transactionIsolationLevel) {
 		dataSource = ds;
 		this.transactionIsolationLevel = transactionIsolationLevel;
 	}
