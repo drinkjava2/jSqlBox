@@ -38,14 +38,14 @@ public interface SqlTemplateEngine {
 	 * @param paramMap
 	 *            A Map instance, key is String type, value is Object type
 	 * @param unbindedParams
-	 *            Optional, some time un-binded parameter can make template SQL
-	 *            executed like normal SQL, i.e., use normal params to replace
-	 *            placeholder according apperance order
+	 *            Optional, sometimes un-binded parameter can make template SQL
+	 *            executed like normal SQL, i.e., use normal parameters to replace
+	 *            placeholder according appearance order
 	 * 
 	 *            <pre>
 	 *            For example: 
-	 *            Template "delete from #{tb}", use put("tb","users") method,      will get "delete from ?"
-	 *            Template "delete from ${tb}", use replace("tb","users") method,   will get "delete from users"
+	 *            Template "delete from #{tb}", use put("tb","users") method,      will get "delete from ?" and parameter "users"
+	 *            Template "delete from ${tb}", use replace("$tb","users") method,   will get "delete from users"
 	 *            Template "delete from #{tb}", use replace("tb","users") method,   will cause an Exception
 	 *            Template "delete from ${tb}", use put("tb","users") method,      will cause an Exception
 	 * 
