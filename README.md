@@ -25,7 +25,7 @@
 </p>
 
 ## 简介 | Intro
-jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久层工具，在架构合理性、功能完备性、易用性等方面都不输于其它持久层工具。  
+jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久层工具，在架构、功能、易用性等方面都不输于其它持久层工具。  
 
 ## 与其它持久层工具对比
 请见[与其它DAO工具对比](https://gitee.com/drinkjava2/jSqlBox/wikis/pages?title=%E9%99%84%E5%BD%952%EF%BC%9ADAO%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94&parent=%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C)  
@@ -57,7 +57,7 @@ jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久�
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId> <!--用于Java6、7环境-->
-   <version>2.0.4</version> <!--或最新版-->
+   <version>2.0.5</version> <!--或最新版-->
 </dependency> 
 ```
 或
@@ -65,7 +65,7 @@ jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久�
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox-java8</artifactId> <!--用于Java8及以上环境-->
-   <version>2.0.4</version> <!--或最新版-->
+   <version>2.0.5</version> <!--或最新版-->
 </dependency> 
 ```
 
