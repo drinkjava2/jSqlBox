@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
@@ -34,120 +35,134 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  * @since 1.0.0
  */
 public class GroupTxConnectionManager implements ConnectionManager {
+	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
+	DataSource[] dataSources;
 
-	private static class InnerGroupTxConnectionManager {// NOSONAR
-		private static final GroupTxConnectionManager INSTANCE = new GroupTxConnectionManager();
+	public GroupTxConnectionManager(DataSource... dataSources) {
+		this.dataSources = dataSources;
 	}
 
-	/**
-	 * @return A singleton instance of TinyTxConnectionManager
-	 */
-	public static final GroupTxConnectionManager instance() {
-		return InnerGroupTxConnectionManager.INSTANCE;
+	public GroupTxConnectionManager(Integer transactionIsolation, DataSource... dataSources) {
+		this.transactionIsolation = transactionIsolation;
+		this.dataSources = dataSources;
 	}
 
-	private static final ThreadLocal<Map<DataSource, Connection>> threadLocalConnections = new ThreadLocal<Map<DataSource, Connection>>() {
+	private ThreadLocal<Map<DataSource, Connection>> threadLocalConnections = new ThreadLocal<Map<DataSource, Connection>>() {
 		@Override
 		protected Map<DataSource, Connection> initialValue() {
 			return new HashMap<DataSource, Connection>();
 		}
 	};
 
-	@Override
-	public boolean isInTransaction(DataSource ds) {
-		TransactionsException.assureNotNull(ds, "DataSource can not be null in isInTransaction method");
-		return null != threadLocalConnections.get().get(ds);
+	public boolean isInGroupTransaction() {
+		return threadLocalConnections.get() != null;
 	}
 
-	public Connection startTransaction(DataSource ds, int transactionIsolation) {
-		TransactionsException.assureNotNull(ds, "DataSource can not be null in startTransaction method");
-		if (null != threadLocalConnections.get().get(ds))
-			throw new TransactionsException("Can not start transaction in an existing transaction.");
-		Connection conn = null;
+	public void startGroupTransaction() {
+		threadLocalConnections.set(new HashMap<DataSource, Connection>());
+	}
+
+	public void endGroupTransaction() {
+		threadLocalConnections.remove();
+	}
+
+	public void commitGroupTx() {
 		try {
-			conn = getConnection(ds);
-			TransactionsException.assureNotNull(conn, "Can not obtain a connection from DataSource");
-			conn.setTransactionIsolation(transactionIsolation);
-			conn.setAutoCommit(false);
-		} catch (SQLException e) {
-			if (conn != null) {
+			Map<DataSource, Connection> map = threadLocalConnections.get();
+			if (map == null)
+				return;
+			boolean errorFound = false;
+			SQLException lastExp = null;
+			for (Entry<DataSource, Connection> entry : map.entrySet()) {
+				Connection conn = entry.getValue();
 				try {
-					conn.close();
-				} catch (SQLException e2) {
-					throw new TransactionsException("Fail to close connection" + e2 + ", root cause:" + e);
+					if (errorFound)
+						conn.rollback();
+				} catch (SQLException e) {
+					errorFound = true;
+					if (lastExp != null)
+						e.setNextException(lastExp);
+					lastExp = e;
 				}
 			}
-			throw new TransactionsException(e);
-		}
-
-		threadLocalConnections.get().put(ds, conn);
-		return conn;
-	}
-
-	public void commit(DataSource ds) throws SQLException {
-		Connection conn = null;
-		try {
-			conn = threadLocalConnections.get().get(ds);
-			TransactionsException.assureNotNull(conn, "Connection can not get from DataSource");
-			conn.commit();
-			setAutoCommitTrue(conn);
-		} finally {
-			if (conn != null)
-				endTransaction(conn, ds);
+			for (Entry<DataSource, Connection> entry : map.entrySet())
+				try {
+					entry.getValue().setAutoCommit(true);
+				} catch (SQLException e) {
+					if (lastExp != null)
+						e.setNextException(lastExp);
+					lastExp = e;
+				}
+			if (lastExp != null)
+				throw new TransactionsException(lastExp);
+		} catch (Exception e) {
+			endGroupTransaction();
 		}
 	}
 
-	public void rollback(DataSource ds) {
-		Connection conn = threadLocalConnections.get().get(ds);
+	public void rollbackGroupTx() {
 		try {
-			if (conn != null) {
-				conn.rollback();
-				setAutoCommitTrue(conn);
-				endTransaction(conn, ds);
+			Map<DataSource, Connection> map = threadLocalConnections.get();
+			if (map == null)
+				return;
+			SQLException lastExp = null;
+			for (Entry<DataSource, Connection> entry : map.entrySet()) {
+				Connection conn = entry.getValue();
+				try {
+					conn.rollback();
+				} catch (SQLException e) {
+					if (lastExp != null)
+						e.setNextException(lastExp);
+					lastExp = e;
+				}
 			}
-		} catch (SQLException e) {
-			throw new TransactionsException(e);
+			for (Entry<DataSource, Connection> entry : map.entrySet())
+				try {
+					entry.getValue().setAutoCommit(true);
+				} catch (SQLException e) {
+					if (lastExp != null)
+						e.setNextException(lastExp);
+					lastExp = e;
+				}
+			if (lastExp != null)
+				throw new TransactionsException(lastExp);
+		} catch (Exception e) {
+			endGroupTransaction();
 		}
 	}
 
-	private void endTransaction(Connection conn, DataSource ds) throws SQLException {
-		TransactionsException.assureNotNull(ds, "DataSource can not be null");
-		threadLocalConnections.get().remove(ds);
-		releaseConnection(conn, ds);
+	@Override
+	public boolean isInTransaction(DataSource ds) {
+		return isInGroupTransaction();
 	}
 
 	@Override
 	public Connection getConnection(DataSource ds) throws SQLException {
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
-		// Try get a connection already in current transaction
-		Connection conn = threadLocalConnections.get().get(ds);
-		if (conn == null)
+		Connection conn = null;
+		if (isInGroupTransaction()) {
+			conn = threadLocalConnections.get().get(ds);
+			if (conn == null) {
+				conn = ds.getConnection(); // NOSONAR Have to get a new connection
+				TransactionsException.assureNotNull(conn, "Can not obtain a connection from DataSource");
+				conn.setTransactionIsolation(transactionIsolation);
+				conn.setAutoCommit(false); // start real transaction
+				threadLocalConnections.get().put(ds, conn);
+			}
+		} else {
 			conn = ds.getConnection(); // Have to get a new connection
+		}
 		TransactionsException.assureNotNull(conn, "Fail to get a connection from DataSource");
 		return conn;
 	}
 
 	@Override
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		Connection saved = threadLocalConnections.get().get(ds);
-		if (saved != null && saved == conn) {
+		if (isInGroupTransaction()) {
 			// Do nothing, because this connection is used in a current thread's transaction
 		} else {
 			if (conn != null)
 				conn.close();
-		}
-	}
-
-	/**
-	 * set autoCommit to true, restore normal status. so this connection can be
-	 * re-used by other thread
-	 */
-	private void setAutoCommitTrue(Connection conn) {
-		try {
-			if (conn != null && !conn.getAutoCommit())
-				conn.setAutoCommit(true);
-		} catch (SQLException e) {
-			throw new TransactionsException("Fail to setAutoCommit to true", e);
 		}
 	}
 

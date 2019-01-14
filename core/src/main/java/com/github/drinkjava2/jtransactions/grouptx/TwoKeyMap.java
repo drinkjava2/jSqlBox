@@ -19,31 +19,26 @@ package com.github.drinkjava2.jtransactions.grouptx;
 import java.util.Collection;
 import java.util.Set;
 
-/** 
- * Compound Key Map
- * <pre> 
- * key------+ 
- *          |-->value 
- * param----+ 
- * <pre> 
- *  
- * @author lixiaohui 
+/**
+ * TwoKeyMap is a map use 2 keys 
  * @author Yong Zhu
  * @since 2.0.6
  */
-public interface CompoundKeyMap<K, P, V> {
+public interface TwoKeyMap<K, P, V> {
 
-	V get(K key, P param);
+	V get(K key1, P key2);
 
-	V get(K key, P param, V defValue);
+	V get(K key1, P key2, V defValue);
 
-	V put(K key, P param, V value);
+	V put(K key1, P key2, V value);
+	
+	void remove(K key1, P key2);
 
-	V putIfAbsent(K key, P param, V value);
+	V putIfAbsent(K key1, P key2, V value);
 
-	Set<java.util.Map.Entry<CompoundKey<K, P>, V>> entrySet();
+	Set<java.util.Map.Entry<TwoKey<K, P>, V>> entrySet();
 
-	Set<CompoundKey<K, P>> keys();
+	Set<TwoKey<K, P>> keys();
 
 	Collection<V> values();
 
@@ -51,10 +46,10 @@ public interface CompoundKeyMap<K, P, V> {
 
 	boolean isEmpty();
 
-	public interface CompoundKey<K, P> {
-		K getKey();
+	public interface TwoKey<K, P> {
+		K getKey1();
 
-		P getParam();
+		P getkey2();
 	}
 
 }
