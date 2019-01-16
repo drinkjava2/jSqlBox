@@ -47,6 +47,13 @@ public class GroupTxConnectionManager implements ConnectionManager {
 		this.dataSources = dataSources;
 	}
 
+	private ThreadLocal<Boolean> inTransation = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return false;
+		}
+	};
+
 	private ThreadLocal<Map<DataSource, Connection>> threadLocalConnections = new ThreadLocal<Map<DataSource, Connection>>() {
 		@Override
 		protected Map<DataSource, Connection> initialValue() {
@@ -55,15 +62,24 @@ public class GroupTxConnectionManager implements ConnectionManager {
 	};
 
 	public boolean isInGroupTransaction() {
-		return threadLocalConnections.get() != null;
+		return inTransation.get();
 	}
 
 	public void startGroupTransaction() {
-		threadLocalConnections.set(new HashMap<DataSource, Connection>());
+		inTransation.set(true);
 	}
 
 	public void endGroupTransaction() {
-		threadLocalConnections.remove();
+		inTransation.set(false);
+		Map<DataSource, Connection> map = threadLocalConnections.get();
+		if (map == null)
+			return;
+		for (Entry<DataSource, Connection> entry : map.entrySet())
+			try {
+				entry.getValue().setAutoCommit(true);
+			} catch (SQLException e) {
+			}
+		map.clear();
 	}
 
 	public void commitGroupTx() {
@@ -76,6 +92,7 @@ public class GroupTxConnectionManager implements ConnectionManager {
 			for (Entry<DataSource, Connection> entry : map.entrySet()) {
 				Connection conn = entry.getValue();
 				try {
+					conn.commit();
 					if (errorFound)
 						conn.rollback();
 				} catch (SQLException e) {
@@ -85,17 +102,7 @@ public class GroupTxConnectionManager implements ConnectionManager {
 					lastExp = e;
 				}
 			}
-			for (Entry<DataSource, Connection> entry : map.entrySet())
-				try {
-					entry.getValue().setAutoCommit(true);
-				} catch (SQLException e) {
-					if (lastExp != null)
-						e.setNextException(lastExp);
-					lastExp = e;
-				}
-			if (lastExp != null)
-				throw new TransactionsException(lastExp);
-		} catch (Exception e) {
+		} finally {
 			endGroupTransaction();
 		}
 	}
@@ -116,17 +123,7 @@ public class GroupTxConnectionManager implements ConnectionManager {
 					lastExp = e;
 				}
 			}
-			for (Entry<DataSource, Connection> entry : map.entrySet())
-				try {
-					entry.getValue().setAutoCommit(true);
-				} catch (SQLException e) {
-					if (lastExp != null)
-						e.setNextException(lastExp);
-					lastExp = e;
-				}
-			if (lastExp != null)
-				throw new TransactionsException(lastExp);
-		} catch (Exception e) {
+		} finally {
 			endGroupTransaction();
 		}
 	}

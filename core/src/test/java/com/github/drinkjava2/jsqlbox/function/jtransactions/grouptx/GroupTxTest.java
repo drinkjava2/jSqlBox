@@ -11,8 +11,6 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.User;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
-import com.mysql.jdbc.Connection;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class GroupTxTest {
@@ -28,6 +26,8 @@ public class GroupTxTest {
 		// H2 is a memory database
 		ds1.setDriverClassName("org.h2.Driver");
 		ds1.setJdbcUrl("jdbc:h2:mem:DBName1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		ds1.setMaximumPoolSize(3);
+		ds1.setConnectionTimeout(1000);
 		ds1.setUsername("sa");
 		ds1.setPassword("");
 
@@ -35,6 +35,8 @@ public class GroupTxTest {
 		// H2 is a memory database
 		ds2.setDriverClassName("org.h2.Driver");
 		ds2.setJdbcUrl("jdbc:h2:mem:DBName2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		ds2.setMaximumPoolSize(3);
+		ds2.setConnectionTimeout(1000);
 		ds2.setUsername("sa");
 		ds2.setPassword("");
 
@@ -56,6 +58,8 @@ public class GroupTxTest {
 			new User().putField("firstName", "Foo" + i, "lastName", "Bar" + i, "age", i).insert(ctx1);
 		for (int i = 1; i <= 100; i++)
 			new User().putField("firstName", "FOO" + i, "lastName", "BAR" + i, "age", i).insert(ctx2);
+		Assert.assertEquals(100, ctx1.eCountAll(User.class));
+		Assert.assertEquals(100, ctx2.eCountAll(User.class));
 	}
 
 	@After
@@ -66,20 +70,28 @@ public class GroupTxTest {
 
 	@Test
 	public void DemoTest() {
-		gm.startGroupTransaction();
-		try {
-			Assert.assertEquals(100, ctx1.eCountAll(User.class));
-			//new User().putField("firstName", "Foo").insert(ctx1);
-			//Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));
-			// System.out.println(1 / 0);
-			//new User().putField("firstName", "Bar").insert(ctx1);
-			gm.commitGroupTx();
-			System.out.println("Commited");
-		} catch (Exception e) {
-			e.printStackTrace( );
-			gm.rollbackGroupTx(); 
+		for (int i = 0; i < 1000; i++) {
+			gm.startGroupTransaction();
+			try {
+				Assert.assertEquals(100, ctx1.eCountAll(User.class));
+				new User().putField("firstName", "Foo").insert(ctx1);
+				Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));
+
+				Assert.assertEquals(100, ctx2.eCountAll(User.class));
+				new User().putField("firstName", "Foo").insert(ctx2);
+				Assert.assertEquals(101, ctx2.eCountAll(Tail.class, tail("users")));
+
+				System.out.println(1 / 0);
+				new User().putField("firstName", "Bar").insert(ctx1);
+				gm.commitGroupTx();
+				System.out.println("Transaction commited");
+			} catch (Exception e) {
+				System.out.println("Transaction rollbacked:" + e.getMessage());
+				gm.rollbackGroupTx();
+			}
+			Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
+			Assert.assertEquals(100, ctx2.eCountAll(Tail.class, tail("users")));
 		}
-		Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
 
 		gm.startGroupTransaction();
 		try {
