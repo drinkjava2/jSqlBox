@@ -1029,8 +1029,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (ColumnModel col : cols.values()) {
 			if (col.getTransientable())
 				continue;
-			if ((col.getShardTable() != null || col.getShardDatabase() != null))
-				throw new SqlBoxException("Fail to count all entity because sharding columns exist.");
+//			if ((col.getShardTable() != null || col.getShardDatabase() != null))
+//				throw new SqlBoxException("Fail to count all entity because sharding columns exist.");
 		}
 
 		LinkArrayList<Object> sqlBody = new LinkArrayList<Object>();

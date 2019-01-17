@@ -30,7 +30,7 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>2.0.5</version><!--Or newest jSqlBox -->
+      <version>2.0.6</version><!--Or newest jSqlBox -->
     </dependency>  
 
     <!-- H2Database memory database used for this demo -->

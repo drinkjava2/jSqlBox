@@ -17,7 +17,6 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTx;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
@@ -28,24 +27,27 @@ import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
  * @author Yong Zhu
  * @since 2.0
  */
-public class AnnotationGroupTxTest {
+public class GroupShardTxTest {
 	SqlBoxContext ctx1 = JBEANBOX.getBean(SqlBoxContextBox1.class);
 	SqlBoxContext ctx2 = JBEANBOX.getBean(SqlBoxContextBox2.class);
 
 	@Before
 	public void init() {
-		String[] ddlArray = ctx1.toCreateDDL(Usr.class);
+		String[] ddlArray = ctx1.toDropAndCreateDDL(ShardUser.class);
 		for (String ddl : ddlArray) {
 			ctx1.nExecute(ddl);
 			ctx2.nExecute(ddl);
 		}
-		for (int i = 1; i <= 100; i++) {
-			new Usr().setFirstName("Foo" + i).setLastName("Bar" + i).setAge(i).insert(ctx1);
-			new Usr().setFirstName("FOO" + i).setLastName("BAR" + i).setAge(i).insert(ctx2);
-		}
+		SqlBoxContext[] masters = new SqlBoxContext[] { ctx1, ctx2 };
+		ctx1.setMasters(masters);
+		ctx2.setMasters(masters);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx1);
 
-		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
+		for (int i = 1; i <= 100; i++)
+			new ShardUser().setId(i).setName("Foo" + i).insert( ); // Sharded!
+
+		Assert.assertEquals(50, ctx1.eCountAll(ShardUser.class));
+		Assert.assertEquals(50, ctx2.eCountAll(ShardUser.class));
 	}
 
 	@After
@@ -55,31 +57,31 @@ public class AnnotationGroupTxTest {
 
 	@GTransaction
 	public void groupRollback() { // test group roll back
-		new Usr().setFirstName("Foo").insert(ctx1);
-		new Usr().setFirstName("Bar").insert(ctx2);
+		new ShardUser().setName("Foo").insert(ctx1);
+		new ShardUser().setName("Bar").insert(ctx2);
 		System.out.println(1 / 0); // div 0!
 	}
 
 	@GTransaction
 	public void groupCommit() { // test group roll back
-		new Usr().setFirstName("Foo").insert(ctx1);
-		new Usr().setFirstName("Bar").insert(ctx2);
+		new ShardUser().setId(200).setName("Foo").insert();
+		new ShardUser().setId(201).setName("Bar").insert();
 	}
 
 	@Test
 	public void groupTest() {
-		AnnotationGroupTxTest t = JBEANBOX.getBean(AnnotationGroupTxTest.class);
+		GroupShardTxTest t = JBEANBOX.getInstance(GroupShardTxTest.class);
 		try {
 			t.groupRollback();
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(50, ctx1.eCountAll(ShardUser.class));
+		Assert.assertEquals(50, ctx2.eCountAll(ShardUser.class));
 
 		t.groupCommit();
-		Assert.assertEquals(101, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(101, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
+		Assert.assertEquals(51, ctx2.eCountAll(ShardUser.class));
 
 	}
 
