@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlbox.function.jtransactions;
+package com.github.drinkjava2.jsqlbox.function.jtransactions.tinytx;
 
 import javax.sql.DataSource;
 

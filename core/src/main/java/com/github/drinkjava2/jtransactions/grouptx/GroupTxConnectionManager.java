@@ -74,40 +74,61 @@ public class GroupTxConnectionManager implements ConnectionManager {
 		Map<DataSource, Connection> map = threadLocalConnections.get();
 		if (map == null)
 			return;
+		SQLException lastExp = null;
+
 		for (Entry<DataSource, Connection> entry : map.entrySet())
 			try {
-				entry.getValue().setAutoCommit(true);
+				entry.getValue().setAutoCommit(true); // restore auto commit
 			} catch (SQLException e) {
+				if (lastExp != null)
+					e.setNextException(lastExp);
+				lastExp = e;
 			}
+
+		for (Entry<DataSource, Connection> entry : map.entrySet())
+			try {
+				entry.getValue().close(); // Close
+			} catch (SQLException e) {
+				if (lastExp != null)
+					e.setNextException(lastExp);
+				lastExp = e;
+			}
+
 		map.clear();
+		if (lastExp != null)
+			throw new TransactionsException(lastExp);
 	}
 
 	public void commitGroupTx() {
+		if (!isInGroupTransaction())
+			return;
 		try {
 			Map<DataSource, Connection> map = threadLocalConnections.get();
 			if (map == null)
 				return;
-			boolean errorFound = false;
 			SQLException lastExp = null;
 			for (Entry<DataSource, Connection> entry : map.entrySet()) {
 				Connection conn = entry.getValue();
 				try {
 					conn.commit();
-					if (errorFound)
+					if (lastExp != null)
 						conn.rollback();
 				} catch (SQLException e) {
-					errorFound = true;
 					if (lastExp != null)
 						e.setNextException(lastExp);
 					lastExp = e;
 				}
 			}
+			if (lastExp != null)
+				throw new TransactionsException(lastExp);
 		} finally {
 			endGroupTransaction();
 		}
 	}
 
 	public void rollbackGroupTx() {
+		if (!isInGroupTransaction())
+			return;
 		try {
 			Map<DataSource, Connection> map = threadLocalConnections.get();
 			if (map == null)
@@ -123,6 +144,8 @@ public class GroupTxConnectionManager implements ConnectionManager {
 					lastExp = e;
 				}
 			}
+			if (lastExp != null)
+				throw new TransactionsException(lastExp);
 		} finally {
 			endGroupTransaction();
 		}
