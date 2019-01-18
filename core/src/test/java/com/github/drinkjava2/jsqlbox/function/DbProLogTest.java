@@ -19,6 +19,8 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.log.DbProLog;
 import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.log.DialectLog;
+import com.github.drinkjava2.jdialects.log.DialectLogFactory;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -29,6 +31,7 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.2
  */
 public class DbProLogTest {
+	DialectLog dialectLog = DialectLogFactory.getLog(DbProLogTest.class);
 	DbProLog log = DbProLogFactory.getLog(DbProLogTest.class);
 
 	@Before
@@ -55,9 +58,11 @@ public class DbProLogTest {
 	public void doDialectLoggerTest() {
 		Dialect.setGlobalAllowShowSql(true);
 		Dialect.MySQL55Dialect.paginAndTrans(10, 10, "select * from sometable");
-		log.info("Logger test message1 output ok");
+		dialectLog.info("Logger test message1 output ok");
 		Systemout.println("Logger test message2 output ok");
+		Systemout.println(dialectLog);
 		Dialect.setGlobalAllowShowSql(false);
+		Systemout.println("======================================");
 	}
 
 	@Test
@@ -76,7 +81,7 @@ public class DbProLogTest {
 		ctx.eInsert(t);
 		log.info("Logger test message3 output ok");
 		log.info("Logger test message4 output ok");
-		System.out.println(log);
+		Systemout.println(log);
 		SqlBoxContext.setGlobalNextAllowShowSql(false);
 	}
 

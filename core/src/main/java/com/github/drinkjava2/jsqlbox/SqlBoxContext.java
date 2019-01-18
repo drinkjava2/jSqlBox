@@ -59,7 +59,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global SqlBoxContext found, need use method SqlBoxContext.setGlobalSqlBoxContext() to set a global default SqlBoxContext instance at the beginning of appication.";
 
-	protected static SqlBoxContext globalSqlBoxContext = null;
+	protected static SqlBoxContext globalSqlBoxContext = new SqlBoxContext(); //this is a empty ctx
 
 	/** Dialect of current SqlBoxContext, optional */
 	protected Dialect dialect = globalNextDialect;
@@ -99,7 +99,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
 		setGlobalNextDialect(null);
 		setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
-		globalSqlBoxContext = null;
+		globalSqlBoxContext = new SqlBoxContext();
 	}
 
 	/** Shortcut method equal to getGlobalSqlBoxContext() */

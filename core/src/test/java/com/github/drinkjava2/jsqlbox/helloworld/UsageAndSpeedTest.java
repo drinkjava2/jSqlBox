@@ -59,7 +59,7 @@ public class UsageAndSpeedTest {
 		dataSource.setPassword("");
 		// SqlBoxContext.setGlobalAllowShowSql(true);
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.setGlobalSqlBoxContext(null);
+		SqlBoxContext.resetGlobalVariants();
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
 			try {
 				ctx.nExecute(ddl);
@@ -99,7 +99,7 @@ public class UsageAndSpeedTest {
 		runMethod("tXxxStyle");
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
-		runMethod("activeRecordDefaultContext");  
+		runMethod("activeRecordDefaultContext");
 	}
 
 	public void runMethod(String methodName) throws Exception {
@@ -391,15 +391,14 @@ public class UsageAndSpeedTest {
 	@Test
 	public void activeRecordStyle() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		UserAR user = new UserAR();
-		user.useContext(ctx); // Use ctx as SqlBoxContext
+		UserAR user = new UserAR(); 
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.setName("Sam");
 			user.setAddress("Canada");
-			user.insert();
+			user.insert(ctx);
 			user.setAddress("China");
-			user.update();
-			UserAR user2 = new UserAR().useContext(ctx).loadById("Sam");
+			user.update(ctx);
+			UserAR user2 = new UserAR().loadById("Sam",ctx);
 			user2.delete(ctx);
 		}
 	}
@@ -425,10 +424,10 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void tXxxUseAnotherSqlTemplateEngine() {  
+	public void tXxxUseAnotherSqlTemplateEngine() {
 		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		ctx.setSqlTemplateEngine(new BasicSqlTemplate("[", "]", true, true)); 
-		
+		ctx.setSqlTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
+
 		UserAR user = new UserAR("Sam", "Canada");
 		UserAR tom = new UserAR("Tom", "China");
 		ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", bind("user", user));

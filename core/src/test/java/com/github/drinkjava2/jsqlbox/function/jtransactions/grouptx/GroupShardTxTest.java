@@ -33,6 +33,7 @@ public class GroupShardTxTest {
 
 	@Before
 	public void init() {
+		ctx1.setAllowShowSQL(true);
 		String[] ddlArray = ctx1.toDropAndCreateDDL(ShardUser.class);
 		for (String ddl : ddlArray) {
 			ctx1.nExecute(ddl);
@@ -40,11 +41,12 @@ public class GroupShardTxTest {
 		}
 		SqlBoxContext[] masters = new SqlBoxContext[] { ctx1, ctx2 };
 		ctx1.setMasters(masters);
+		ctx1.setName("ctx1");
 		ctx2.setMasters(masters);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx1);
+		ctx2.setName("ctx2");
 
 		for (int i = 1; i <= 100; i++)
-			new ShardUser().setId(i).setName("Foo" + i).insert( ); // Sharded!
+			new ShardUser().setId(i).setName("Foo" + i).insert(ctx1); // Sharded!
 
 		Assert.assertEquals(50, ctx1.eCountAll(ShardUser.class));
 		Assert.assertEquals(50, ctx2.eCountAll(ShardUser.class));
