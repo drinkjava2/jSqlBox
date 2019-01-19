@@ -268,6 +268,19 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 	}
 
+	private static SqlBoxContext extractCtx(Object... sqlItems) {
+		for (Object item : sqlItems) {
+			if (item instanceof SqlBoxContext) {// NOSONAR
+				return (SqlBoxContext) item;
+			} else if (item != null && item.getClass().isArray()) {
+				SqlBoxContext ctx = extractCtx(item);
+				if (ctx != null)
+					return ctx;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Create auto Alias name based on capital letters of class name in models of
 	 * PreparedSQL, if alias already exists, put a number at end, for example: <br/>
@@ -515,6 +528,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * IdGenerator (identity or sequence or UUID...), return row affected
 	 */
 	public static int entityInsertTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null && paramCtx != ctx)
+			return entityInsertTry(paramCtx, entityBean, optionItems);
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -1029,8 +1045,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (ColumnModel col : cols.values()) {
 			if (col.getTransientable())
 				continue;
-//			if ((col.getShardTable() != null || col.getShardDatabase() != null))
-//				throw new SqlBoxException("Fail to count all entity because sharding columns exist.");
+			// if ((col.getShardTable() != null || col.getShardDatabase() != null))
+			// throw new SqlBoxException("Fail to count all entity because sharding columns
+			// exist.");
 		}
 
 		LinkArrayList<Object> sqlBody = new LinkArrayList<Object>();
@@ -1040,7 +1057,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				sqlBody.append(item);
 		if (optionModel == null)
 			sqlBody.frontAdd(model);
-		return  ctx.iQueryForIntValue(sqlBody.toObjectArray());// NOSONAR
+		return ctx.iQueryForIntValue(sqlBody.toObjectArray());// NOSONAR
 	}
 
 	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
@@ -1168,4 +1185,5 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				new EntityKeyItem(entity), notModelAlias);
 		return (Map<Object, E>) net.pickEntityMap(models[models.length - 1].getEntityClass());
 	}
+
 }

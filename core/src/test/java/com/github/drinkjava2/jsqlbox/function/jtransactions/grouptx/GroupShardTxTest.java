@@ -16,6 +16,9 @@ import com.github.drinkjava2.common.DataSourceConfig.HikariCPBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
+import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTx;
@@ -31,21 +34,35 @@ public class GroupShardTxTest {
 	SqlBoxContext ctx1 = JBEANBOX.getBean(SqlBoxContextBox1.class);
 	SqlBoxContext ctx2 = JBEANBOX.getBean(SqlBoxContextBox2.class);
 
+	public static class ShardUser extends ActiveRecord<ShardUser> {
+		@Id
+		@ShardDatabase({ "MOD", "2" })
+		Integer id;
+		String name;
+
+		//@formatter:off
+		public Integer getId() {return id;}
+		public ShardUser setId(Integer id) {	this.id = id; return this;}
+		public String getName() {return name;}
+		public ShardUser setName(String name) {this.name = name;return this;}		 
+		//@formatter:on
+	}
+
 	@Before
 	public void init() {
-		ctx1.setAllowShowSQL(true);
 		String[] ddlArray = ctx1.toDropAndCreateDDL(ShardUser.class);
 		for (String ddl : ddlArray) {
 			ctx1.nExecute(ddl);
 			ctx2.nExecute(ddl);
 		}
+
 		SqlBoxContext[] masters = new SqlBoxContext[] { ctx1, ctx2 };
 		ctx1.setMasters(masters);
 		ctx1.setName("ctx1");
 		ctx2.setMasters(masters);
 		ctx2.setName("ctx2");
 
-		for (int i = 1; i <= 100; i++)
+		for (int i = 1; i <= 150; i++)
 			new ShardUser().setId(i).setName("Foo" + i).insert(ctx1); // Sharded!
 
 		Assert.assertEquals(50, ctx1.eCountAll(ShardUser.class));
@@ -57,15 +74,15 @@ public class GroupShardTxTest {
 		JBEANBOX.close();
 	}
 
-	@GTransaction
+	@GrpTX
 	public void groupRollback() { // test group roll back
 		new ShardUser().setName("Foo").insert(ctx1);
 		new ShardUser().setName("Bar").insert(ctx2);
 		System.out.println(1 / 0); // div 0!
 	}
 
-	@GTransaction
-	public void groupCommit() { // test group roll back
+	@GrpTX
+	public void groupCommit() { // test group commit
 		new ShardUser().setId(200).setName("Foo").insert();
 		new ShardUser().setId(201).setName("Bar").insert();
 	}
@@ -131,7 +148,7 @@ public class GroupShardTxTest {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD })
 	@AOP
-	public static @interface GTransaction {
+	public static @interface GrpTX {
 		public Class<?> value() default GpTXBox.class;
 	}
 
@@ -141,4 +158,10 @@ public class GroupShardTxTest {
 		}
 	}
 
+	public static void a(String f, Object... ss) {
+
+		for (Object s : ss) {
+			System.out.println(s);
+		}
+	}
 }
