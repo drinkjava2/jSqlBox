@@ -44,7 +44,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 		Debuger.lastMark = "testNetRelated";
 		testAdd();
 		Debuger.set("add");
-		for (int j = 0; j < 100; j++) { // change repeat times to test 
+		for (int j = 0; j < 100; j++) { // change repeat times to test
 			testPageQuery();
 			Debuger.set("pageQry");
 			testUnique();
@@ -109,8 +109,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testOrmQUery() {
-		List<DemoOrder> list = gctx().autoNet(DemoOrder.class, DemoCustomer.class)
-				.pickEntityList(DemoOrder.class);
+		List<DemoOrder> list = gctx().autoNet(DemoOrder.class, DemoCustomer.class).pickEntityList(DemoOrder.class);
 		for (DemoOrder order : list) {
 			DemoCustomer customer = order.getDemoCustomer();
 			if (customer == null)

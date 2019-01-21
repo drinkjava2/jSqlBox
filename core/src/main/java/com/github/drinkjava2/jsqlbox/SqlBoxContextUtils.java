@@ -268,17 +268,41 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 	}
 
+	/**
+	 * Extract SqlBoxContext param from sqlitems
+	 */
 	private static SqlBoxContext extractCtx(Object... sqlItems) {
 		for (Object item : sqlItems) {
 			if (item instanceof SqlBoxContext) {// NOSONAR
 				return (SqlBoxContext) item;
 			} else if (item != null && item.getClass().isArray()) {
-				SqlBoxContext ctx = extractCtx(item);
+				SqlBoxContext ctx = extractCtx((Object[]) item);
 				if (ctx != null)
 					return ctx;
 			}
 		}
 		return null;
+	}
+
+	/** Remove first found SqlBoxContext From sqlItems */
+	private static void removeSqlBoxContextFromParam(List<Object> resultList, boolean founded, Object... sqlItems) {
+		for (Object item : sqlItems) {
+			if (item instanceof SqlBoxContext) {// NOSONAR
+				if (founded)
+					resultList.add(item);
+				founded = true;
+			} else if (item != null && item.getClass().isArray()) {
+				removeSqlBoxContextFromParam(resultList, founded, (Object[]) item);
+			} else
+				resultList.add(item);
+		}
+	}
+
+	/** Remove first found SqlBoxContext From sqlItems */
+	private static Object[] cleanUpParam(Object... sqlItems) {
+		List<Object> resultList = new ArrayList<Object>();
+		removeSqlBoxContextFromParam(resultList, false, sqlItems);
+		return resultList.toArray(new Object[resultList.size()]);
 	}
 
 	/**
@@ -529,8 +553,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 */
 	public static int entityInsertTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
-		if (paramCtx != null && paramCtx != ctx)
-			return entityInsertTry(paramCtx, entityBean, optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityInsertTry(paramCtx, entityBean, newParams);
+		}
+
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -658,6 +685,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Update entityBean according primary key, return row affected */
 	public static int entityUpdateTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityUpdateTry(paramCtx, entityBean, newParams);
+		}
+
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -765,6 +798,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Try delete entity by Id, return row affected, return row affected
 	 */
 	public static int entityDeleteByIdTry(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityDeleteByIdTry(paramCtx, entityClass, id, newParams);
+		}
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -841,6 +879,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Load entity according entity's id fields, return row affected */
 	public static int entityLoadTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityLoadTry(paramCtx, entityBean, newParams);
+		}
+
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -954,6 +998,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Try delete entity by Id, return row affected
 	 */
 	public static boolean entityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityExistById(paramCtx, entityClass, id, newParams);
+		}
+
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -1027,6 +1077,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Count quantity of all entity, this method does not support sharding */
 	public static int entityCountAll(SqlBoxContext ctx, Class<?> entityClass, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityCountAll(paramCtx, entityClass, newParams);
+		}
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -1045,9 +1100,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (ColumnModel col : cols.values()) {
 			if (col.getTransientable())
 				continue;
-			// if ((col.getShardTable() != null || col.getShardDatabase() != null))
-			// throw new SqlBoxException("Fail to count all entity because sharding columns
-			// exist.");
+			if (col.getShardTable() != null)
+				throw new SqlBoxException("Fail to count all entity because shardTable columns exist.");
 		}
 
 		LinkArrayList<Object> sqlBody = new LinkArrayList<Object>();
@@ -1061,6 +1115,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityFindAll(paramCtx, entityClass, newParams);
+		}
+
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -1083,8 +1143,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		for (ColumnModel col : cols.values()) {
 			if (col.getTransientable())
 				continue;
-			if ((col.getShardTable() != null || col.getShardDatabase() != null))
-				throw new SqlBoxException("Fail to load all entity because sharding columns exist.");
+			if (col.getShardTable() != null)
+				throw new SqlBoxException("Fail to load all entity because ShardTable columns exist.");
 			sqlBody.append(col.getColumnName()).append(", ");
 			effectColumns.add(col);
 		}
