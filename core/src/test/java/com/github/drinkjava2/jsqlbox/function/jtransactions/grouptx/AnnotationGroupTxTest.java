@@ -21,6 +21,7 @@ import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTx;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * Annotation GroupTx unit Test
@@ -66,12 +67,19 @@ public class AnnotationGroupTxTest {
 		new Usr().setFirstName("Bar").insert(ctx2);
 	}
 
+	@GTransaction
+	public void groupPartialCommit() { // test group Partial Commit
+		new Usr().setFirstName("Foo").insert(ctx1);
+		new Usr().setFirstName("Bar").insert(ctx2);
+		((HikariDataSource) JBEANBOX.getBean(Ds2.class)).close();
+	}
+
 	@Test
 	public void groupTest() {
 		AnnotationGroupTxTest t = JBEANBOX.getBean(AnnotationGroupTxTest.class);
 		try {
 			t.groupRollback();
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
@@ -80,6 +88,13 @@ public class AnnotationGroupTxTest {
 		t.groupCommit();
 		Assert.assertEquals(101, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(101, ctx2.eCountAll(Usr.class));
+		
+		try {
+			t.groupPartialCommit();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		Assert.assertEquals(102, ctx1.eCountAll(Usr.class));
 
 	}
 
