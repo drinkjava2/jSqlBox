@@ -100,6 +100,12 @@ public class ColumnModel {
 	/** ShardDatabase strategy and parameters, for ORM tool use only */
 	private String[] shardDatabase = null;
 
+	/** the value of column, designed to ORM tool use */
+	private Object value;
+
+	/** If column value exist , designed to ORM tool use */
+	private Boolean valueExist = false;
+
 	public ColumnModel(String columnName) {
 		if (StrUtils.isEmpty(columnName))
 			DialectException.throwEX("columnName is not allowed empty");
@@ -139,7 +145,7 @@ public class ColumnModel {
 		col.idGenerationType = idGenerationType;
 		col.shardTable = shardTable;
 		col.shardDatabase = shardDatabase;
-		col.converterClassOrName=converterClassOrName;
+		col.converterClassOrName = converterClassOrName;
 		return col;
 	}
 
@@ -608,6 +614,22 @@ public class ColumnModel {
 
 	public void setConverterClassOrName(Object converterClassOrName) {
 		this.converterClassOrName = converterClassOrName;
+	}
+
+	public Object getValue() {
+		return value;
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
+	public Boolean getValueExist() {
+		return valueExist;
+	}
+
+	public void setValueExist(Boolean valueExist) {
+		this.valueExist = valueExist;
 	}
 
 }

@@ -33,8 +33,8 @@ public interface ShardingTool {// NOSONAR
 	 * 
 	 * @param ctx
 	 *            Current SqlBoxContext instance
-	 * @param entityOrClass
-	 *            The entity or class need do sharding
+	 * @param tableModel
+	 *            The tableModel of an entity need do sharding
 	 * @param shardKey
 	 *            The shard key or keys
 	 * @return A String[] stored table names or null if the sharding strategy is not
@@ -49,8 +49,8 @@ public interface ShardingTool {// NOSONAR
 	 * 
 	 * @param ctx
 	 *            Current SqlBoxContext instance
-	 * @param entityOrClass
-	 *            The entity or class need do sharding
+	 * @param tableModel
+	 *            The tableModel of an entity need do sharding
 	 * @param shardKey
 	 *            The shard key or keys
 	 * @return A SqlBoxContext[] stored master SqlBoxContexts or null if the

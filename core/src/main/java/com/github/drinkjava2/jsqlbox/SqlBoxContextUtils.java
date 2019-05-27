@@ -299,7 +299,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/** Remove first found SqlBoxContext From sqlItems */
-	private static Object[] cleanUpParam(Object... sqlItems) {
+	private static Object[] removeFirstCtx(Object... sqlItems) {
 		List<Object> resultList = new ArrayList<Object>();
 		removeSqlBoxContextFromParam(resultList, false, sqlItems);
 		return resultList.toArray(new Object[resultList.size()]);
@@ -554,14 +554,28 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static int entityInsertTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
-			Object[] newParams = cleanUpParam(optionItems);
+			Object[] newParams = removeFirstCtx(optionItems);
 			return entityInsertTry(paramCtx, entityBean, newParams);
 		}
+		int realInserted;
+		int logInserted = 0;
+		realInserted = doEntityInsertTry(paramCtx, entityBean, false, optionItems);// normal insert
+		if (realInserted > 0 && ctx.isGtxOpen()) // save GTX log
+			logInserted = doEntityInsertTry(paramCtx, entityBean, true, optionItems);
+		SqlBoxException.assureTrue(realInserted == logInserted,
+				"Inserted row is" + realInserted + ", but Gtx log inserted row is " + logInserted);
+		return realInserted;
+	}
 
+	private static int doEntityInsertTry(SqlBoxContext ctx, Object entityBean, boolean isGtxLog,
+			Object... optionItems) {
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
+		if (isGtxLog)
+			model = model.toTxlogModel("insert", ctx.getGtxid() );//same log only
+
 		Map<String, ColumnModel> cols = new HashMap<String, ColumnModel>();
 		for (ColumnModel col : model.getColumns())
 			cols.put(col.getColumnName().toLowerCase(), col);
@@ -687,7 +701,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static int entityUpdateTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
-			Object[] newParams = cleanUpParam(optionItems);
+			Object[] newParams = removeFirstCtx(optionItems);
 			return entityUpdateTry(paramCtx, entityBean, newParams);
 		}
 
@@ -800,7 +814,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static int entityDeleteByIdTry(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
-			Object[] newParams = cleanUpParam(optionItems);
+			Object[] newParams = removeFirstCtx(optionItems);
 			return entityDeleteByIdTry(paramCtx, entityClass, id, newParams);
 		}
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
@@ -881,7 +895,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static int entityLoadTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
-			Object[] newParams = cleanUpParam(optionItems);
+			Object[] newParams = removeFirstCtx(optionItems);
 			return entityLoadTry(paramCtx, entityBean, newParams);
 		}
 
@@ -995,12 +1009,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Try delete entity by Id, return row affected
+	 * Check if entityBean exist in database by its id
 	 */
 	public static boolean entityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
-			Object[] newParams = cleanUpParam(optionItems);
+			Object[] newParams = removeFirstCtx(optionItems);
 			return entityExistById(paramCtx, entityClass, id, newParams);
 		}
 
@@ -1079,7 +1093,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static int entityCountAll(SqlBoxContext ctx, Class<?> entityClass, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
-			Object[] newParams = cleanUpParam(optionItems);
+			Object[] newParams = removeFirstCtx(optionItems);
 			return entityCountAll(paramCtx, entityClass, newParams);
 		}
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
@@ -1117,7 +1131,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	public static <T> List<T> entityFindAll(SqlBoxContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
-			Object[] newParams = cleanUpParam(optionItems);
+			Object[] newParams = removeFirstCtx(optionItems);
 			return entityFindAll(paramCtx, entityClass, newParams);
 		}
 
