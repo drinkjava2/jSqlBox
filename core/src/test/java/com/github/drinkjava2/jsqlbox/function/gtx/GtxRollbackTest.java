@@ -26,12 +26,11 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Atomikos Transaction test, H2 + jBeanBox + jSqlBox + Spring XA + Atomikos
+ * Global Transaction commit Test
  * 
  * @author Yong Zhu
- * @since 1.0.0
+ * @since 2.0.7
  */
-
 public class GtxRollbackTest {
 	static int DATABASE_QTY = 3;
 	static SqlBoxContext[] masters = new SqlBoxContext[DATABASE_QTY];
@@ -45,6 +44,7 @@ public class GtxRollbackTest {
 					"jdbc:h2:mem:DBName" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 			masters[i] = new SqlBoxContext(xaDataSources[i]);
 			masters[i].setMasters(masters);
+			masters[i].openGtx("");
 		}
 		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);// random choose 1
 		TableModel model = TableModelUtils.entity2Model(BankAccount.class);

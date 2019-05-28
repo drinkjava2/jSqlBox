@@ -18,8 +18,8 @@ package com.github.drinkjava2.jsqlbox.gtx;
  * @since 2.0.7
  */
 public class GtxInfo {
-	private Boolean gtxOpen;
-	private String gtxid;
+	private Boolean gtxOpen = false;
+	private String gtxid=null;
 
 	public Boolean getGtxOpen() {
 		return gtxOpen;

@@ -547,8 +547,8 @@ public class TableModel {
 
 	public TableModel toTxlogModel(String tx_log_type, String tx_log_gtxid) {
 		TableModel t = toTxlogModel();
-		t.getColumn(TX_LOG_TYPE).setValue(tx_log_type);
-		t.getColumn(TX_LOG_GTXID).setValue(tx_log_gtxid);
+		t.getColumn(TX_LOG_TYPE).setValue(tx_log_type).setValueExist(true);
+		t.getColumn(TX_LOG_GTXID).setValue(tx_log_gtxid).setValueExist(true);
 		return t;
 	}
 

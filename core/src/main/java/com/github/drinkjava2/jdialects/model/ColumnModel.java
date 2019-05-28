@@ -620,16 +620,18 @@ public class ColumnModel {
 		return value;
 	}
 
-	public void setValue(Object value) {
+	public ColumnModel setValue(Object value) {
 		this.value = value;
+		return this;
 	}
 
 	public Boolean getValueExist() {
 		return valueExist;
 	}
 
-	public void setValueExist(Boolean valueExist) {
+	public ColumnModel setValueExist(Boolean valueExist) {
 		this.valueExist = valueExist;
+		return this;
 	}
 
 }

@@ -31,13 +31,13 @@ public class BaseFieldConverter implements FieldConverter {
 	public void handleSQL(SqlOption sqlOption, SqlBoxContext ctx, ColumnModel col, Object entity,
 			LinkArrayList<Object> sqlBody, LinkArrayList<Object> sqlWhere) {
 		if (SqlOption.UPDATE.equals(sqlOption)) {
-			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
+			Object value = SqlBoxContextUtils.readValueFromColModelorBeanFieldOrTail(col, entity);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
 			sqlBody.append(col.getColumnName()).append("=?").append(param(value));
 		} else if (SqlOption.DELETE.equals(sqlOption)) {
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
-			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
+			Object value = SqlBoxContextUtils.readValueFromColModelorBeanFieldOrTail(col, entity);
 			sqlBody.append(col.getColumnName());
 			sqlBody.append(param(value)).append(",");
 		}

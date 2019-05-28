@@ -46,6 +46,8 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("length=" + c.getLength()).append(", ");
 		sb.append("precisio=" + c.getPrecision()).append(", ");
 		sb.append("scale" + c.getScale()).append(", ");
+		sb.append("valueExist=" + c.getValueExist()).append(", ");
+		sb.append("value=" + c.getValue()).append(", ");
 		return sb.toString();
 	}
 

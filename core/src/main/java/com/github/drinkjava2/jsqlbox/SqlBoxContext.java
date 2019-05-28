@@ -83,16 +83,21 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public boolean isGtxOpen() {
 		return gtxInfo.get().getGtxOpen();
 	}
-	
+
 	/** If current SqlBoxContext opened Global Transaction */
 	public String getGtxid() {
 		return gtxInfo.get().getGtxid();
-	} 
+	}
 
-	/** Set current SqlBoxContext allow a Global Transaction in current thread */
-	public void setGtxInfo(boolean gtxOpen, String gtxid) {
-		gtxInfo.get().setGtxOpen(gtxOpen);
+	/** Open current SqlBoxContext's Transaction in current thread */
+	public void openGtx(String gtxid) {
+		gtxInfo.get().setGtxOpen(true);
 		gtxInfo.get().setGtxid(gtxid);
+	}
+
+	/** Close current SqlBoxContext's Transaction in current thread */
+	public void closeGtx() {
+		gtxInfo.get().setGtxOpen(false);
 	}
 	// ==========================end=============
 

@@ -24,12 +24,11 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Atomikos Transaction test, H2 + jBeanBox + jSqlBox + Spring XA + Atomikos
+ * Global Transaction commit Test
  * 
  * @author Yong Zhu
- * @since 1.0.0
+ * @since 2.0.7
  */
-
 public class GtxCommitTest {
 	static int DATABASE_QTY = 3;
 	static SqlBoxContext[] masters = new SqlBoxContext[DATABASE_QTY];
@@ -44,12 +43,13 @@ public class GtxCommitTest {
 					"jdbc:h2:mem:DBName" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 			masters[i] = new SqlBoxContext(xaDataSources[i]);
 			masters[i].setMasters(masters);
+			masters[i].openGtx("gtxid");
 		}
 		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);// random choose 1
 		TableModel model = TableModelUtils.entity2Model(BankAccount.class);
 		for (int i = 0; i < DATABASE_QTY; i++)
 			for (String ddl : masters[i].toCreateDDLandTxlogDDL(model))
-				masters[i].iExecute(ddl); 
+				masters[i].iExecute(ddl);
 	}
 
 	public void insertAccountsSucess() {
@@ -66,4 +66,5 @@ public class GtxCommitTest {
 		Assert.assertEquals(200, new BankAccount(1L).load().getBalance().longValue());
 		Assert.assertEquals(300, new BankAccount(2L).load().getBalance().longValue());
 	}
+
 }

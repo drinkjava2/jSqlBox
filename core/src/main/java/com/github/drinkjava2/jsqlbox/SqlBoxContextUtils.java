@@ -33,6 +33,7 @@ import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
+import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -483,13 +484,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/** Read value from entityBean field or tail */
-	public static Object readValueFromBeanFieldOrTail(ColumnModel columnModel, Object entityBean) {
-		SqlBoxException.assureNotNull(columnModel, "columnModel can not be null");
-		if (columnModel.getConverterClassOrName() != null) {
-			FieldConverter cust = FieldConverterUtils.getFieldConverter(columnModel.getConverterClassOrName());
-			return cust.entityFieldToDbValue(columnModel, entityBean);
+	public static Object readValueFromColModelorBeanFieldOrTail(ColumnModel col, Object entityBean) {
+		if (col.getValueExist()) //value is stored in model
+			return col.getValue();
+		SqlBoxException.assureNotNull(col, "columnModel can not be null");
+		if (col.getConverterClassOrName() != null) { //value need convert from fieldConverter
+			FieldConverter cust = FieldConverterUtils.getFieldConverter(col.getConverterClassOrName());
+			return cust.entityFieldToDbValue(col, entityBean);
 		}
-		return doReadFromFieldOrTail(columnModel, entityBean);
+		return doReadFromFieldOrTail(col, entityBean); //value is stored in Bean or tail
 	}
 
 	/** Read value from entityBean field or tail */
@@ -559,11 +562,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 		int realInserted;
 		int logInserted = 0;
-		realInserted = doEntityInsertTry(paramCtx, entityBean, false, optionItems);// normal insert
-		if (realInserted > 0 && ctx.isGtxOpen()) // save GTX log
-			logInserted = doEntityInsertTry(paramCtx, entityBean, true, optionItems);
-		SqlBoxException.assureTrue(realInserted == logInserted,
-				"Inserted row is" + realInserted + ", but Gtx log inserted row is " + logInserted);
+		realInserted = doEntityInsertTry(ctx, entityBean, false, optionItems);// normal insert
+		if (realInserted > 0 && ctx.isGtxOpen()) {// save GTX log
+			logInserted = doEntityInsertTry(ctx, entityBean, true, optionItems);
+			SqlBoxException.assureTrue(realInserted == logInserted,
+					"Inserted " + realInserted + " row record, but Gtx log inserted " + logInserted + " row record");
+		}
 		return realInserted;
 	}
 
@@ -573,9 +577,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
-		if (isGtxLog)
-			model = model.toTxlogModel("insert", ctx.getGtxid() );//same log only
-
+		if (isGtxLog) { 
+			model = model.toTxlogModel("insert", ctx.getGtxid());// same log only
+		System.out.println(ctx.getGtxid());
+		System.out.println(DebugUtils.getTableModelDebugInfo(model));
+		}
+		
 		Map<String, ColumnModel> cols = new HashMap<String, ColumnModel>();
 		for (ColumnModel col : model.getColumns())
 			cols.put(col.getColumnName().toLowerCase(), col);
@@ -639,7 +646,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				}
 			} else {
-				Object value = readValueFromBeanFieldOrTail(col, entityBean);
+				Object value = readValueFromColModelorBeanFieldOrTail(col, entityBean);
 				if (value == null && ignoreNull == null) {
 					for (Object itemObject : optionItems)
 						if (SqlOption.IGNORE_NULL.equals(itemObject)) {
@@ -658,10 +665,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			}
 			if (col.getPkey()) {
 				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean));
+					shardTableItem = shardTB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 
 				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean));
+					shardDbItem = shardDB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 			} else
 				notAllowSharding(col);
 		}
@@ -746,16 +753,16 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				converter.handleSQL(SqlOption.UPDATE, ctx, col, entityBean, sqlBody, sqlWhere);
 				continue;
 			}
-			Object value = readValueFromBeanFieldOrTail(col, entityBean);
+			Object value = readValueFromColModelorBeanFieldOrTail(col, entityBean);
 			if (col.getPkey()) {
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");// NOSONAR
 				sqlWhere.append(col.getColumnName()).append("=?");
 				sqlWhere.append(param(value));
 				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean));
+					shardTableItem = shardTB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean));
+					shardDbItem = shardDB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 
 			} else {
 				notAllowSharding(col);
@@ -931,12 +938,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				continue;
 			if (col.getPkey()) {
 				sqlWhere.append(col.getColumnName()).append("=?")
-						.append(param(readValueFromBeanFieldOrTail(col, entityBean))).append(" and ");
+						.append(param(readValueFromColModelorBeanFieldOrTail(col, entityBean))).append(" and ");
 				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean));
+					shardTableItem = shardTB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 
 				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean));
+					shardDbItem = shardDB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 			} else
 				notAllowSharding(col);
 			sqlBody.append(col.getColumnName()).append(", ");
