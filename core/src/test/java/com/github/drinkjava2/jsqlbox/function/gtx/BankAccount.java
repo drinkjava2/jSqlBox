@@ -12,6 +12,7 @@
 package com.github.drinkjava2.jsqlbox.function.gtx;
 
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
+import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
@@ -25,6 +26,7 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
 public class BankAccount extends ActiveRecord<BankAccount> {
 
 	@ShardDatabase({ "MOD", "3" })
+	@ShardTable({ "MOD", "3" })
 	@Id
 	private Long bankId;
 	private Long balance;

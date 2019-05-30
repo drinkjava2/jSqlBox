@@ -492,13 +492,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Shortcut call to dialect.toCreateDDL method */
-	public String[] toCreateDDLandTxlogDDL(TableModel... tables) {
+	public String[] toCreateTxlogDDL(TableModel... tables) {
+		assertDialectNotNull();
 		List<String> result = new ArrayList<String>();
 		for (TableModel t : tables) {
-			String[] ddl = this.toCreateDDL(t);
-			for (String s : ddl)
-				result.add(s);
-			ddl = this.toCreateDDL(t.toTxlogModel());
+			String[] ddl = this.toCreateDDL(t.toTxlogModel());
 			for (String s : ddl)
 				result.add(s);
 		}

@@ -73,6 +73,7 @@ public class ShardingShardMethodTest {
 
 	@Before
 	public void init() {
+		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
 			SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
 			masters[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("masters" + i));

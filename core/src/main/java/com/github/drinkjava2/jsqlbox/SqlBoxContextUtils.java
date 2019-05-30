@@ -33,7 +33,6 @@ import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
-import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -577,10 +576,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
-		if (isGtxLog) { 
-			model = model.toTxlogModel("insert", ctx.getGtxid());// same log only
-		System.out.println(ctx.getGtxid());
-		System.out.println(DebugUtils.getTableModelDebugInfo(model));
+		if (isGtxLog) { // save to tx_log 
+			model = model.toTxlogModel("insert", ctx.getGtxid()); 
 		}
 		
 		Map<String, ColumnModel> cols = new HashMap<String, ColumnModel>();

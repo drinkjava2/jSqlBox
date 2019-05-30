@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jsqlbox.function.gtx;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
+
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -30,26 +32,36 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 2.0.7
  */
 public class GtxCommitTest {
-	static int DATABASE_QTY = 3;
-	static SqlBoxContext[] masters = new SqlBoxContext[DATABASE_QTY];
-	static DataSource[] xaDataSources = new DataSource[DATABASE_QTY];
+	final static int DATABASE_QTY = 3; // total has 3 databases
+	final static int TABLE_QTY = 3; // each table has 3 sharding tables
+
+	static SqlBoxContext[] masterDBs = new SqlBoxContext[DATABASE_QTY];
+	static DataSource[] datasources = new DataSource[DATABASE_QTY];
 
 	@Before
 	public void init() {
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < DATABASE_QTY; i++) {
-			xaDataSources[i] = JdbcConnectionPool.create(
-					"jdbc:h2:mem:DBName" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-			masters[i] = new SqlBoxContext(xaDataSources[i]);
-			masters[i].setMasters(masters);
-			masters[i].openGtx("gtxid");
+			datasources[i] = JdbcConnectionPool.create(
+					"jdbc:h2:mem:DB" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+			masterDBs[i] = new SqlBoxContext(datasources[i]);
+			masterDBs[i].setMasters(masterDBs);
+			masterDBs[i].openGtx("gtxid");
+			masterDBs[i].setName("DB"+i);
 		}
-		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);// random choose 1
+		SqlBoxContext.setGlobalSqlBoxContext(masterDBs[0]);// random choose 1
 		TableModel model = TableModelUtils.entity2Model(BankAccount.class);
-		for (int i = 0; i < DATABASE_QTY; i++)
-			for (String ddl : masters[i].toCreateDDLandTxlogDDL(model))
-				masters[i].iExecute(ddl);
+		for (int i = 0; i < DATABASE_QTY; i++) {
+			for (String ddl : masterDBs[i].toCreateTxlogDDL(model)) // create txlog table
+				masterDBs[i].iExecute(ddl);
+			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
+				model.setTableName("BankAccount" + "_" + j);
+				for (String ddl : Dialect.MySQL57Dialect.toCreateDDL(model))
+					masterDBs[i].iExecute(ddl, USE_BOTH);
+				model.setTableName("BankAccount");
+			}
+		}
 	}
 
 	public void insertAccountsSucess() {

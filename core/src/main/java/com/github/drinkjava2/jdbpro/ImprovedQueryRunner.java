@@ -125,7 +125,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	@Override
 	protected CallableStatement prepareCall(Connection conn, String sql) throws SQLException {
 		if (this.getAllowShowSQL() && !batchEnabled.get())
-			logger.info("SQL: " + sql);
+			logger.info(formatSqlForLoggerOutput(sql));
 		return super.prepareCall(conn, sql);
 	}
 
@@ -149,6 +149,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
+		if (name != null)
+			return new StringBuilder("SQL in ").append(name).append(":").append(sql).toString();
 		return "SQL: " + sql;
 	}
 

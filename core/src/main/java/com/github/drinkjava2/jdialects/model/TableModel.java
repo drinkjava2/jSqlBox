@@ -523,22 +523,22 @@ public class TableModel {
 			throw new DialectException("TableModel '" + tableName + "' is readOnly, can not be modified.");
 	}
 
-	public static final String TX_LOG_TABLE_SUFFIX = "_txlog";// suffix of tx log table
-	public static final String TX_LOG_ID = "tx_log_id";// tx log id
-	public static final String TX_LOG_TYPE = "tx_log_type";// tx log type, can be update/exist/insert/delete
-	public static final String TX_LOG_GTXID = "tx_log_gtxid";// tx log gtxid
-	public static final String TX_LOG_SHARD_CODE = "tx_log_shard_code";// tx log sharding code
+	public static final String TXLOG_SUFFIX = "_txlog";// suffix of tx log table
+	public static final String TXLOG_ID = "txlog_id";// tx log id
+	public static final String TXLOG_TYPE = "txlog_type";// tx log type, can be update/exist/insert/delete
+	public static final String TXLOG_GTXID = "txlog_gtxid";// tx log gtxid
+	public static final String TXLOG_TB_SHARD = "txlog_tb_Shard";// tx log sharding code
 
 	/** Create TX log TableModel for global transaction log purpose */
 	public TableModel toTxlogModel() {
 		TableModel t = this.newCopy();
 		t.setReadOnly(false);
-		t.setTableName(this.getTableName() + TX_LOG_TABLE_SUFFIX); 
+		t.setTableName(this.getTableName() + TXLOG_SUFFIX); 
 
-		t.column(TX_LOG_ID).LONG().id().setIdGenerationType(GenerationType.TIMESTAMP);
-		t.column(TX_LOG_TYPE).VARCHAR(10);
-		t.column(TX_LOG_GTXID).VARCHAR(250);
-		t.column(TX_LOG_SHARD_CODE).VARCHAR(10);
+		t.column(TXLOG_ID).LONG().id().setIdGenerationType(GenerationType.TIMESTAMP);
+		t.column(TXLOG_TYPE).VARCHAR(10);
+		t.column(TXLOG_GTXID).VARCHAR(250);
+		t.column(TXLOG_TB_SHARD).VARCHAR(10);
 		t.setIdGenerators(null);
 		t.setIndexConsts(null);
 		t.setUniqueConsts(null);
@@ -547,8 +547,8 @@ public class TableModel {
 
 	public TableModel toTxlogModel(String tx_log_type, String tx_log_gtxid) {
 		TableModel t = toTxlogModel();
-		t.getColumn(TX_LOG_TYPE).setValue(tx_log_type).setValueExist(true);
-		t.getColumn(TX_LOG_GTXID).setValue(tx_log_gtxid).setValueExist(true);
+		t.getColumn(TXLOG_TYPE).setValue(tx_log_type).setValueExist(true);
+		t.getColumn(TXLOG_GTXID).setValue(tx_log_gtxid).setValueExist(true);
 		return t;
 	}
 
