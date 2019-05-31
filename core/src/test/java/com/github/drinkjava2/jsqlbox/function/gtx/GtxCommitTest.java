@@ -66,6 +66,7 @@ public class GtxCommitTest {
 
 	public void insertAccountsSucess() {
 		new BankAccount().putField("bankId", 0L, "balance", 100L).insert();
+		new BankAccount().putField("bankId", 0L ).delete();
 		new BankAccount().putField("bankId", 1L, "balance", 200L).insert();
 		new BankAccount().putField("bankId", 2L, "balance", 300L).insert();
 	}

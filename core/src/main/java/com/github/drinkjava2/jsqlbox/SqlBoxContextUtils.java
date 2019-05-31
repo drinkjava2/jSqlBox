@@ -484,14 +484,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Read value from entityBean field or tail */
 	public static Object readValueFromColModelorBeanFieldOrTail(ColumnModel col, Object entityBean) {
-		if (col.getValueExist()) //value is stored in model
+		if (col.getValueExist()) // value is stored in model
 			return col.getValue();
 		SqlBoxException.assureNotNull(col, "columnModel can not be null");
-		if (col.getConverterClassOrName() != null) { //value need convert from fieldConverter
+		if (col.getConverterClassOrName() != null) { // value need convert from fieldConverter
 			FieldConverter cust = FieldConverterUtils.getFieldConverter(col.getConverterClassOrName());
 			return cust.entityFieldToDbValue(col, entityBean);
 		}
-		return doReadFromFieldOrTail(col, entityBean); //value is stored in Bean or tail
+		return doReadFromFieldOrTail(col, entityBean); // value is stored in Bean or tail
 	}
 
 	/** Read value from entityBean field or tail */
@@ -559,15 +559,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = removeFirstCtx(optionItems);
 			return entityInsertTry(paramCtx, entityBean, newParams);
 		}
-		int realInserted;
+		int affectedRows;
 		int logInserted = 0;
-		realInserted = doEntityInsertTry(ctx, entityBean, false, optionItems);// normal insert
-		if (realInserted > 0 && ctx.isGtxOpen()) {// save GTX log
+		affectedRows = doEntityInsertTry(ctx, entityBean, false, optionItems);// normal insert
+		if (affectedRows > 0 && ctx.isGtxOpen()) {// save GTX log
 			logInserted = doEntityInsertTry(ctx, entityBean, true, optionItems);
-			SqlBoxException.assureTrue(realInserted == logInserted,
-					"Inserted " + realInserted + " row record, but Gtx log inserted " + logInserted + " row record");
+			SqlBoxException.assureTrue(affectedRows == logInserted,
+					"Inserted " + affectedRows + " row record, but Gtx log inserted " + logInserted + " row record");
 		}
-		return realInserted;
+		return affectedRows;
 	}
 
 	private static int doEntityInsertTry(SqlBoxContext ctx, Object entityBean, boolean isGtxLog,
@@ -576,10 +576,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		TableModel model = optionModel;
 		if (model == null)
 			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
-		if (isGtxLog) { // save to tx_log 
-			model = model.toTxlogModel("insert", ctx.getGtxid()); 
+		if (isGtxLog) { // save to tx_log
+			model = model.toTxlogModel("insert", ctx.getGtxid());
 		}
-		
+
 		Map<String, ColumnModel> cols = new HashMap<String, ColumnModel>();
 		for (ColumnModel col : model.getColumns())
 			cols.put(col.getColumnName().toLowerCase(), col);
@@ -661,7 +661,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				}
 			}
 			if (col.getPkey()) {
-				if (col.getShardTable() != null) // Sharding Table?
+				// global transaction log no need sharding table
+				if (col.getShardTable() != null && !isGtxLog) // Sharding Table?
 					shardTableItem = shardTB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 
 				if (col.getShardDatabase() != null) // Sharding DB?
@@ -821,6 +822,19 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = removeFirstCtx(optionItems);
 			return entityDeleteByIdTry(paramCtx, entityClass, id, newParams);
 		}
+		int affectedRows;
+		int logInserted = 0;
+		affectedRows = doEntityDeleteByIdTry(ctx, entityClass, false, optionItems);// normal insert
+		if (affectedRows > 0 && ctx.isGtxOpen()) {// save GTX log
+			logInserted = doEntityDeleteByIdTry(ctx, entityClass, true, optionItems);
+			SqlBoxException.assureTrue(affectedRows == logInserted,
+					"Deleted " + affectedRows + " row record, but Gtx log inserted " + logInserted + " row record");
+		}
+		return affectedRows;
+	}
+
+	private static int doEntityDeleteByIdTry(SqlBoxContext ctx, Class<?> entityClass, Object id,
+			Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
