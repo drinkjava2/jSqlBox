@@ -33,10 +33,11 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  */
 public class GtxCommitTest {
 	final static int DATABASE_QTY = 3; // total has 3 databases
-	final static int TABLE_QTY = 3; // each table has 3 sharding tables
+	final static int TABLE_QTY = 2; // each databases has 2 sharding tables
 
 	static SqlBoxContext[] masterDBs = new SqlBoxContext[DATABASE_QTY];
 	static DataSource[] datasources = new DataSource[DATABASE_QTY];
+	static int db = -1;
 
 	@Before
 	public void init() {
@@ -44,11 +45,11 @@ public class GtxCommitTest {
 		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < DATABASE_QTY; i++) {
 			datasources[i] = JdbcConnectionPool.create(
-					"jdbc:h2:mem:DB" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+					"jdbc:h2:mem:DB" + ++db + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 			masterDBs[i] = new SqlBoxContext(datasources[i]);
 			masterDBs[i].setMasters(masterDBs);
 			masterDBs[i].openGtx("gtxid");
-			masterDBs[i].setName("DB"+i);
+			masterDBs[i].setName("DB" + db);
 		}
 		SqlBoxContext.setGlobalSqlBoxContext(masterDBs[0]);// random choose 1
 		TableModel model = TableModelUtils.entity2Model(BankAccount.class);
@@ -64,20 +65,58 @@ public class GtxCommitTest {
 		}
 	}
 
-	public void insertAccountsSucess() {
-		new BankAccount().putField("bankId", 0L, "balance", 100L).insert();
-		new BankAccount().putField("bankId", 0L ).delete();
-		new BankAccount().putField("bankId", 1L, "balance", 200L).insert();
-		new BankAccount().putField("bankId", 2L, "balance", 300L).insert();
+	@Test
+	public void crudTest() {
+		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 10L).insert();
+		System.out.println("---------------");
+		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 20L).update();
+		System.out.println("---------------");
+		System.out.println(new BankAccount().putField("bankId", 0L, "userId", 0L).exist());
+		System.out.println("---------------");
+		System.out.println(new BankAccount().putField("bankId", 0L, "userId", 5L).exist());
+		System.out.println("---------------");
+		new BankAccount().putField("bankId", 0L, "userId", 0L).load();
+		System.out.println("---------------");
+		new BankAccount().putField("bankId", 0L, "userId", 0L).delete();
+		System.out.println("---------------");
+
+		// new BankAccount().putField("bankId", 0L, "userId", 1L, "balance",
+		// 10L).insert();
+		// new BankAccount().putField("bankId", 0L, "userId", 1L, "balance",
+		// 20L).update();
+		// new BankAccount().putField("bankId", 0L, "userId", 1L).delete();
+		//
+		// new BankAccount().putField("bankId", 1L, "userId", 0L, "balance",
+		// 10L).insert();
+		// new BankAccount().putField("bankId", 1L, "userId", 0L, "balance",
+		// 20L).update();
+		// new BankAccount().putField("bankId", 1L, "userId", 0L).delete();
+		//
+		// new BankAccount().putField("bankId", 1L, "userId", 1L, "balance",
+		// 10L).insert();
+		// new BankAccount().putField("bankId", 1L, "userId", 1L, "balance",
+		// 20L).update();
+		// new BankAccount().putField("bankId", 1L, "userId", 1L).delete();
 	}
 
-	@Test
-	public void testXATransaction() {
+	public void insertAccountsSucess() {
+		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 100L).insert();
+		new BankAccount().putField("bankId", 0L, "userId", 1L, "balance", 200L).insert();
+		new BankAccount().putField("bankId", 1L, "userId", 0L, "balance", 300L).insert();
+		new BankAccount().putField("bankId", 1L, "userId", 1L, "balance", 400L).insert();
+		new BankAccount().putField("bankId", 2L, "userId", 0L, "balance", 500L).insert();
+		new BankAccount().putField("bankId", 2L, "userId", 1L, "balance", 600L).insert();
+	}
+
+	public void testCommitTransaction() {
 		GtxCommitTest tester = new GtxCommitTest();
 		tester.insertAccountsSucess();
-		Assert.assertEquals(100, new BankAccount(0L).load().getBalance().longValue());
-		Assert.assertEquals(200, new BankAccount(1L).load().getBalance().longValue());
-		Assert.assertEquals(300, new BankAccount(2L).load().getBalance().longValue());
+		Assert.assertEquals(100, new BankAccount(0L, 0L).load().getBalance().longValue());
+		Assert.assertEquals(200, new BankAccount(0L, 1L).load().getBalance().longValue());
+		Assert.assertEquals(300, new BankAccount(1L, 0L).load().getBalance().longValue());
+		Assert.assertEquals(400, new BankAccount(1L, 1L).load().getBalance().longValue());
+		Assert.assertEquals(500, new BankAccount(2L, 0L).load().getBalance().longValue());
+		Assert.assertEquals(600, new BankAccount(2L, 1L).load().getBalance().longValue());
 	}
 
 }

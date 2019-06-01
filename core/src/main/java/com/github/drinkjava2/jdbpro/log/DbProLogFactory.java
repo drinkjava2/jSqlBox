@@ -21,8 +21,8 @@ import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 /**
- * For default DbProLog use DbProPrinterLog, unless put a class called
- * "DbProRootLog" in class root folder
+ * For default DbProLog use DbProPrintLog, unless config it in
+ * "DbProLog.properties"
  * 
  * @author Yong Zhu
  * @since 1.7.0

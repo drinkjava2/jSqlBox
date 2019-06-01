@@ -18,8 +18,16 @@ package com.github.drinkjava2.jsqlbox.gtx;
  * @since 2.0.7
  */
 public class GtxInfo {
+	public static final String INSERT = "INSERT";
+	public static final String DELETE = "DELETE";
+	public static final String BEFORE_UPDATE = "BEFORE";
+	public static final String AFTER_UPDATE = "AFTER";
+	public static final String LOAD = "LOAD";
+	public static final String EXIST = "EXIST";
+	public static final String NOT_EXIST = "NOT_EXIST";
+
 	private Boolean gtxOpen = false;
-	private String gtxid=null;
+	private String gtxid = null;
 
 	public Boolean getGtxOpen() {
 		return gtxOpen;

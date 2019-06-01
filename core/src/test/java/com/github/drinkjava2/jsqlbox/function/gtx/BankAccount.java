@@ -16,26 +16,26 @@ import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
-/**
- * Atomikos Transaction test, H2 + jBeanBox + jSqlBox + Spring XA + Atomikos
- * 
- * @author Yong Zhu
- * @since 1.0.0
- */
+/** BankAccount is an ActiveRecord entity */
 
 public class BankAccount extends ActiveRecord<BankAccount> {
 
 	@ShardDatabase({ "MOD", "3" })
-	@ShardTable({ "MOD", "3" })
 	@Id
 	private Long bankId;
+
+	@ShardTable({ "MOD", "2" })
+	@Id
+	private Long userId;
+
 	private Long balance;
 
 	public BankAccount() {
 	}
 
-	public BankAccount(Long id) {
-		this.bankId = id;
+	public BankAccount(Long bankId, Long userId) {
+		this.bankId = bankId;
+		this.userId = userId;
 	}
 
 	public Long getBankId() {
@@ -44,6 +44,14 @@ public class BankAccount extends ActiveRecord<BankAccount> {
 
 	public void setBankId(Long bankId) {
 		this.bankId = bankId;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 	public Long getBalance() {

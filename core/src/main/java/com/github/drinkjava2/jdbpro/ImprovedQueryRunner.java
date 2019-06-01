@@ -150,7 +150,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
 		if (name != null)
-			return new StringBuilder("SQL in ").append(name).append(":").append(sql).toString();
+			return new StringBuilder("SQL in ").append(name).append(": ").append(sql).toString();
 		return "SQL: " + sql;
 	}
 
@@ -159,6 +159,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 * customise parameters format
 	 */
 	protected String formatParametersForLoggerOutput(Object... params) {
+		if (name != null)
+			return new StringBuilder("PAR in ").append(name).append(": ").append(Arrays.deepToString(params))
+					.toString();
 		return "PAR: " + Arrays.deepToString(params);
 	}
 

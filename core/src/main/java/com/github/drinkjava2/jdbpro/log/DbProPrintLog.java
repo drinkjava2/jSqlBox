@@ -16,7 +16,7 @@
 package com.github.drinkjava2.jdbpro.log;
 
 /**
- * DbProConsoleLog output log to console
+ * DbProPrintLog is the default logger of jDbPro and jSqlBox project
  * 
  * @author Yong Zhu
  * @since 1.7.0

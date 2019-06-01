@@ -23,6 +23,8 @@ import com.github.drinkjava2.jdbpro.DbProException;
  * “DbProLog.properties” in main/resources folder with below:
  * log=com.github.drinkjava2.jdbpro.log.DbProSLF4JLog
  * 
+ * And of cause, if use this Logger, related SLF4J Log jars are needed
+ * 
  * @author Yong Zhu
  * @since 2.0.5
  */

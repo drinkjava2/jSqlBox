@@ -526,8 +526,7 @@ public class TableModel {
 	public static final String TXLOG_SUFFIX = "_txlog";// suffix of tx log table
 	public static final String TXLOG_ID = "txlog_id";// tx log id
 	public static final String TXLOG_TYPE = "txlog_type";// tx log type, can be update/exist/insert/delete
-	public static final String TXLOG_GTXID = "txlog_gtxid";// tx log gtxid
-	public static final String TXLOG_TB_SHARD = "txlog_tb_Shard";// tx log sharding code
+	public static final String TXLOG_GTXID = "txlog_gtxid";// tx log gtxid 
 
 	/** Create TX log TableModel for global transaction log purpose */
 	public TableModel toTxlogModel() {
@@ -536,9 +535,8 @@ public class TableModel {
 		t.setTableName(this.getTableName() + TXLOG_SUFFIX); 
 
 		t.column(TXLOG_ID).LONG().id().setIdGenerationType(GenerationType.TIMESTAMP);
-		t.column(TXLOG_TYPE).VARCHAR(10);
-		t.column(TXLOG_GTXID).VARCHAR(250);
-		t.column(TXLOG_TB_SHARD).VARCHAR(10);
+		t.column(TXLOG_TYPE).VARCHAR(14);
+		t.column(TXLOG_GTXID).VARCHAR(250); 
 		t.setIdGenerators(null);
 		t.setIndexConsts(null);
 		t.setUniqueConsts(null);

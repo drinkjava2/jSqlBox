@@ -373,7 +373,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	/** Load entity according its id, if not 1 row round, throw SqlBoxException */
 	public <T> T eLoad(T entity, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityLoadTry(this, entity, optionItems);
-		checkOnlyOneRowAffected(result, "insert");
+		checkOnlyOneRowAffected(result, "load");
 		return entity;
 	}
 
