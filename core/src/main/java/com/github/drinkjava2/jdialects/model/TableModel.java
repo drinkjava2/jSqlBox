@@ -522,34 +522,6 @@ public class TableModel {
 		if (readOnly)
 			throw new DialectException("TableModel '" + tableName + "' is readOnly, can not be modified.");
 	}
-
-	public static final String TXLOG_SUFFIX = "_txlog";// suffix of tx log table
-	public static final String TXLOG_ID = "txlog_id";// tx log id
-	public static final String TXLOG_TYPE = "txlog_type";// tx log type, can be update/exist/insert/delete
-	public static final String TXLOG_GTXID = "txlog_gtxid";// tx log gtxid 
-
-	/** Create TX log TableModel for global transaction log purpose */
-	public TableModel toTxlogModel() {
-		TableModel t = this.newCopy();
-		t.setReadOnly(false);
-		t.setTableName(this.getTableName() + TXLOG_SUFFIX); 
-
-		t.column(TXLOG_ID).LONG().id().setIdGenerationType(GenerationType.TIMESTAMP);
-		t.column(TXLOG_TYPE).VARCHAR(14);
-		t.column(TXLOG_GTXID).VARCHAR(250); 
-		t.setIdGenerators(null);
-		t.setIndexConsts(null);
-		t.setUniqueConsts(null);
-		return t;
-	}
-
-	public TableModel toTxlogModel(String tx_log_type, String tx_log_gtxid) {
-		TableModel t = toTxlogModel();
-		t.getColumn(TXLOG_TYPE).setValue(tx_log_type).setValueExist(true);
-		t.getColumn(TXLOG_GTXID).setValue(tx_log_gtxid).setValueExist(true);
-		return t;
-	}
-
 	// getter & setter=========================
 
 	protected void getAndSetters____________________________() {// NOSONAR

@@ -51,6 +51,12 @@ public class TimeStampIdGenerator implements IdGenerator {
 		return System.currentTimeMillis() * 1000000 + getNextCount();
 	}
 
+	public Object getNextID() {
+		if (count > 999999)
+			count = 1;
+		return System.currentTimeMillis() * 1000000 + getNextCount();
+	}
+
 	@Override
 	public Boolean dependOnAutoIdGenerator() {
 		return false;

@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jtransactions.gtx;
+package com.github.drinkjava2.jsqlbox.gtx;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 
@@ -35,22 +36,26 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  * @since 1.0.0
  */
 public class GtxConnectionManager implements ConnectionManager {
-	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
-	DataSource[] dataSources;
 
-	public GtxConnectionManager(DataSource... dataSources) {
+	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
+	private DataSource[] dataSources;
+	private SqlBoxContext lockServer;
+
+	public GtxConnectionManager(SqlBoxContext lockServer, DataSource... dataSources) {
+		this.lockServer = lockServer;
 		this.dataSources = dataSources;
 	}
 
-	public GtxConnectionManager(Integer transactionIsolation, DataSource... dataSources) {
+	public GtxConnectionManager(SqlBoxContext lockServer, Integer transactionIsolation, DataSource... dataSources) {
+		this.lockServer = lockServer;
 		this.transactionIsolation = transactionIsolation;
 		this.dataSources = dataSources;
 	}
 
-	private ThreadLocal<Boolean> inTransation = new ThreadLocal<Boolean>() {
+	private ThreadLocal<String> gtxLockId = new ThreadLocal<String>() {
 		@Override
-		protected Boolean initialValue() {
-			return false;
+		protected String initialValue() {
+			return null;
 		}
 	};
 
@@ -61,16 +66,29 @@ public class GtxConnectionManager implements ConnectionManager {
 		}
 	};
 
-	public boolean isInGroupTransaction() {
-		return inTransation.get();
+	public int insertGtxLockId(String gtxLock) {
+		return lockServer.nUpdate("insert into gtxlock (id) values(?)", gtxLock);
 	}
 
-	public void startGroupTransaction() {
-		inTransation.set(true);
+	public int deleteGtxLockId(String gtxLock) {
+		return lockServer.nUpdate("delete from gtxlock where id=?", gtxLock);
 	}
 
-	public void endGroupTransaction() {
-		inTransation.set(false);
+	public String getGtxLockId() {
+		return gtxLockId.get();
+	}
+
+	@Override
+	public boolean isInTransaction(DataSource ds) {
+		return gtxLockId.get() != null;
+	}
+
+	public void startGtx(String _gtxLockId) {
+		gtxLockId.set(_gtxLockId);
+	}
+
+	public void endGtx() {
+		gtxLockId.set(null);
 		Map<DataSource, Connection> map = threadLocalConnections.get();
 		if (map == null)
 			return;
@@ -99,68 +117,19 @@ public class GtxConnectionManager implements ConnectionManager {
 			throw new TransactionsException(lastExp);
 	}
 
-	public void commitGroupTx() {
-		if (!isInGroupTransaction())
-			return;
-		try {
-			Map<DataSource, Connection> map = threadLocalConnections.get();
-			if (map == null)
-				return;
-			SQLException lastExp = null;
-			for (Entry<DataSource, Connection> entry : map.entrySet()) {
-				Connection conn = entry.getValue();
-				try {
-					conn.commit();
-					if (lastExp != null)
-						conn.rollback();
-				} catch (SQLException e) {
-					if (lastExp != null)
-						e.setNextException(lastExp);
-					lastExp = e;
-				}
-			}
-			if (lastExp != null)
-				throw new TransactionsException(lastExp);
-		} finally {
-			endGroupTransaction();
-		}
+	public void commitGtx() {// TODO
+
 	}
 
-	public void rollbackGroupTx() {
-		if (!isInGroupTransaction())
-			return;
-		try {
-			Map<DataSource, Connection> map = threadLocalConnections.get();
-			if (map == null)
-				return;
-			SQLException lastExp = null;
-			for (Entry<DataSource, Connection> entry : map.entrySet()) {
-				Connection conn = entry.getValue();
-				try {
-					conn.rollback();
-				} catch (SQLException e) {
-					if (lastExp != null)
-						e.setNextException(lastExp);
-					lastExp = e;
-				}
-			}
-			if (lastExp != null)
-				throw new TransactionsException(lastExp);
-		} finally {
-			endGroupTransaction();
-		}
-	}
+	public void rollbackGtx() {// TODO
 
-	@Override
-	public boolean isInTransaction(DataSource ds) {
-		return isInGroupTransaction();
 	}
 
 	@Override
 	public Connection getConnection(DataSource ds) throws SQLException {
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		Connection conn = null;
-		if (isInGroupTransaction()) {
+		if (isInTransaction(ds)) {// TODO
 			conn = threadLocalConnections.get().get(ds);
 			if (conn == null) {
 				conn = ds.getConnection(); // NOSONAR Have to get a new connection
@@ -178,12 +147,20 @@ public class GtxConnectionManager implements ConnectionManager {
 
 	@Override
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		if (isInGroupTransaction()) {
+		if (isInTransaction(ds)) {
 			// Do nothing, because this connection is used in a current thread's transaction
 		} else {
 			if (conn != null)
 				conn.close();
 		}
+	}
+
+	public DataSource[] getDataSources() {
+		return dataSources;
+	}
+
+	public void setDataSources(DataSource[] dataSources) {
+		this.dataSources = dataSources;
 	}
 
 }

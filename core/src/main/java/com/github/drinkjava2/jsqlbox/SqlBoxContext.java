@@ -13,7 +13,6 @@ package com.github.drinkjava2.jsqlbox;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +32,7 @@ import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
+import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
@@ -70,37 +69,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 	protected TableModel[] tailModels; // TableModels loaded from DB, only used for tail mode
 
-	// ==========================Global Transaction about================
-	/** Thread local variant gtxOpen is the global transaction switch */
-	private ThreadLocal<GtxInfo> gtxInfo = new ThreadLocal<GtxInfo>() {
-		@Override
-		protected GtxInfo initialValue() {
-			return new GtxInfo();
-		}
-	};
-
-	/** If current SqlBoxContext opened Global Transaction */
-	public boolean isGtxOpen() {
-		return gtxInfo.get().getGtxOpen();
-	}
-
-	/** If current SqlBoxContext opened Global Transaction */
-	public String getGtxid() {
-		return gtxInfo.get().getGtxid();
-	}
-
-	/** Open current SqlBoxContext's Transaction in current thread */
-	public void openGtx(String gtxid) {
-		gtxInfo.get().setGtxOpen(true);
-		gtxInfo.get().setGtxid(gtxid);
-	}
-
-	/** Close current SqlBoxContext's Transaction in current thread */
-	public void closeGtx() {
-		gtxInfo.get().setGtxOpen(false);
-	}
-	// ==========================end=============
-
 	public SqlBoxContext() {
 		super();
 		this.dialect = globalNextDialect;
@@ -118,6 +86,25 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		super(ds);
 		this.dialect = dialect;
 	}
+
+	// ==========================Global Transaction about================
+	/** If current GtxConnectionManager opened global Transaction */
+	public boolean isGtxOpen() {
+		return connectionManager != null && connectionManager instanceof GtxConnectionManager
+				&& connectionManager.isInTransaction(getDataSource());
+	}
+
+	/** Get current GtxLockId, should be called inside of a global transaction */
+	public String getGtxLockId() {
+		return getGtxManager().getGtxLockId();
+	}
+
+	/** Get current ConnectionManager and assume it's a GtxConnectionManager */
+	public GtxConnectionManager getGtxManager() {
+		return (GtxConnectionManager) connectionManager;
+	}
+
+	// ==========================end=============
 
 	protected void miscMethods______________________________() {// NOSONAR
 	}
@@ -491,36 +478,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return dialect.toCreateDDL(tables);
 	}
 
-	/** Shortcut call to dialect.toCreateDDL method */
-	public String[] toCreateTxlogDDL(TableModel... tables) {
-		assertDialectNotNull();
-		List<String> result = new ArrayList<String>();
-		for (TableModel t : tables) {
-			String[] ddl = this.toCreateDDL(t.toTxlogModel());
-			for (String s : ddl)
-				result.add(s);
-		}
-		return result.toArray(new String[result.size()]);
-	}
-
 	/** Shortcut call to dialect.toDropDDL method */
 	public String[] toDropDDL(TableModel... tables) {
 		assertDialectNotNull();
 		return dialect.toDropDDL(tables);
-	}
-
-	/** Shortcut call to dialect.toCreateDDL method */
-	public String[] toDropDDLandTxlogDDL(TableModel... tables) {
-		List<String> result = new ArrayList<String>();
-		for (TableModel t : tables) {
-			String[] ddl = this.toDropDDL(t);
-			for (String s : ddl)
-				result.add(s);
-			ddl = this.toDropDDL(t.toTxlogModel());
-			for (String s : ddl)
-				result.add(s);
-		}
-		return result.toArray(new String[result.size()]);
 	}
 
 	/** Shortcut call to dialect.toDropAndCreateDDL method */

@@ -24,6 +24,8 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
+import com.github.drinkjava2.jsqlbox.gtx.GtxUndoLog;
 
 /**
  * Global Transaction commit Test
@@ -32,71 +34,60 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 2.0.7
  */
 public class GtxCommitTest {
+	static {
+		SqlBoxContext.setGlobalNextAllowShowSql(true);
+	}
 	final static int DATABASE_QTY = 3; // total has 3 databases
 	final static int TABLE_QTY = 2; // each databases has 2 sharding tables
 
-	static SqlBoxContext[] masterDBs = new SqlBoxContext[DATABASE_QTY];
+	static SqlBoxContext[] ctxs = new SqlBoxContext[DATABASE_QTY];
 	static DataSource[] datasources = new DataSource[DATABASE_QTY];
+
+	static DataSource lockServerDS = JdbcConnectionPool
+			.create("jdbc:h2:mem:lockServer;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+	static SqlBoxContext lockerServ = new SqlBoxContext(lockServerDS);
+
+	GtxConnectionManager gtxMgr = new GtxConnectionManager(lockerServ, datasources);
 	static int db = -1;
 
 	@Before
 	public void init() {
-		SqlBoxContext.setGlobalNextAllowShowSql(true);
+		lockerServ.setName("GTX Lock Server");
+		lockerServ.nExecute("create table gtxlock (id varchar(500),  primary key (id)) engine=InnoDB ");
 		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < DATABASE_QTY; i++) {
 			datasources[i] = JdbcConnectionPool.create(
-					"jdbc:h2:mem:DB" + ++db + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-			masterDBs[i] = new SqlBoxContext(datasources[i]);
-			masterDBs[i].setMasters(masterDBs);
-			masterDBs[i].openGtx("gtxid");
-			masterDBs[i].setName("DB" + db);
+					"jdbc:h2:mem:GTXTEST_DB" + ++db + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa",
+					"");
+			ctxs[i] = new SqlBoxContext(datasources[i]);
+			ctxs[i].setMasters(ctxs);
+			ctxs[i].setConnectionManager(gtxMgr);
+			ctxs[i].setName("DB" + db);
 		}
-		SqlBoxContext.setGlobalSqlBoxContext(masterDBs[0]);// random choose 1
-		TableModel model = TableModelUtils.entity2Model(BankAccount.class);
+		SqlBoxContext.setGlobalSqlBoxContext(ctxs[0]);// random choose 1
 		for (int i = 0; i < DATABASE_QTY; i++) {
-			for (String ddl : masterDBs[i].toCreateTxlogDDL(model)) // create txlog table
-				masterDBs[i].iExecute(ddl);
-			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
-				model.setTableName("BankAccount" + "_" + j);
+			for (String ddl : ctxs[i].toCreateDDL(GtxUndoLog.class))
+				ctxs[i].iExecute(ddl);// create GtxLog table
+			for (int j = 0; j < TABLE_QTY; j++) {
+				TableModel model = TableModelUtils.entity2Model(BankAccount.class);
+				model.setTableName("BankAccount" + "_" + j); // create sharding tables
 				for (String ddl : Dialect.MySQL57Dialect.toCreateDDL(model))
-					masterDBs[i].iExecute(ddl, USE_BOTH);
-				model.setTableName("BankAccount");
+					ctxs[i].iExecute(ddl, USE_BOTH);
 			}
 		}
 	}
 
 	@Test
 	public void crudTest() {
+		gtxMgr.startGtx("Test");
 		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 10L).insert();
-		System.out.println("---------------");
 		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 20L).update();
-		System.out.println("---------------");
-		System.out.println(new BankAccount().putField("bankId", 0L, "userId", 0L).exist());
-		System.out.println("---------------");
-		System.out.println(new BankAccount().putField("bankId", 0L, "userId", 5L).exist());
-		System.out.println("---------------");
-		new BankAccount().putField("bankId", 0L, "userId", 0L).load();
-		System.out.println("---------------");
-		new BankAccount().putField("bankId", 0L, "userId", 0L).delete();
-		System.out.println("---------------");
-
-		// new BankAccount().putField("bankId", 0L, "userId", 1L, "balance",
-		// 10L).insert();
-		// new BankAccount().putField("bankId", 0L, "userId", 1L, "balance",
-		// 20L).update();
-		// new BankAccount().putField("bankId", 0L, "userId", 1L).delete();
-		//
-		// new BankAccount().putField("bankId", 1L, "userId", 0L, "balance",
-		// 10L).insert();
-		// new BankAccount().putField("bankId", 1L, "userId", 0L, "balance",
-		// 20L).update();
-		// new BankAccount().putField("bankId", 1L, "userId", 0L).delete();
-		//
-		// new BankAccount().putField("bankId", 1L, "userId", 1L, "balance",
-		// 10L).insert();
-		// new BankAccount().putField("bankId", 1L, "userId", 1L, "balance",
-		// 20L).update();
-		// new BankAccount().putField("bankId", 1L, "userId", 1L).delete();
+		// System.out.println(new BankAccount().putField("bankId", 0L, "userId",
+		// 0L).exist());
+		// System.out.println(new BankAccount().putField("bankId", 0L, "userId",
+		// 5L).exist());
+		// new BankAccount().putField("bankId", 0L, "userId", 0L).load();
+		// new BankAccount().putField("bankId", 0L, "userId", 0L).delete();
 	}
 
 	public void insertAccountsSucess() {
@@ -110,7 +101,13 @@ public class GtxCommitTest {
 
 	public void testCommitTransaction() {
 		GtxCommitTest tester = new GtxCommitTest();
-		tester.insertAccountsSucess();
+		gtxMgr.startGtx("Test");
+		try {
+			tester.insertAccountsSucess();
+			gtxMgr.commitGtx();
+		} catch (Exception e) {
+			gtxMgr.rollbackGtx();
+		}
 		Assert.assertEquals(100, new BankAccount(0L, 0L).load().getBalance().longValue());
 		Assert.assertEquals(200, new BankAccount(0L, 1L).load().getBalance().longValue());
 		Assert.assertEquals(300, new BankAccount(1L, 0L).load().getBalance().longValue());
