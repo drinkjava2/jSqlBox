@@ -38,23 +38,15 @@ public class TimeStampIdGenerator implements IdGenerator {
 		return "TimeStampId";
 	}
 
-	private static synchronized long getNextCount() {
-		if (count > 999999)
-			count = 1;
-		return ++count;
-	}
-
 	@Override
 	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		if (count > 999999)
-			count = 1;
-		return System.currentTimeMillis() * 1000000 + getNextCount();
+		return getNextID();
 	}
 
-	public Object getNextID() {
+	public static synchronized Object getNextID() {
 		if (count > 999999)
 			count = 1;
-		return System.currentTimeMillis() * 1000000 + getNextCount();
+		return System.currentTimeMillis() * 1000000 + count++;
 	}
 
 	@Override

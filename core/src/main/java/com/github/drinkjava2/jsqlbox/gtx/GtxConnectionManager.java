@@ -38,18 +38,15 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
 public class GtxConnectionManager implements ConnectionManager {
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
-	private DataSource[] dataSources;
-	private SqlBoxContext lockServer;
+	private SqlBoxContext gtxServer;
 
-	public GtxConnectionManager(SqlBoxContext lockServer, DataSource... dataSources) {
-		this.lockServer = lockServer;
-		this.dataSources = dataSources;
+	public GtxConnectionManager(SqlBoxContext gtxServer) {
+		this.gtxServer = gtxServer;
 	}
 
-	public GtxConnectionManager(SqlBoxContext lockServer, Integer transactionIsolation, DataSource... dataSources) {
-		this.lockServer = lockServer;
+	public GtxConnectionManager(SqlBoxContext gtxServer, Integer transactionIsolation, DataSource... dataSources) {
+		this.gtxServer = gtxServer;
 		this.transactionIsolation = transactionIsolation;
-		this.dataSources = dataSources;
 	}
 
 	private ThreadLocal<String> gtxLockId = new ThreadLocal<String>() {
@@ -67,11 +64,11 @@ public class GtxConnectionManager implements ConnectionManager {
 	};
 
 	public int insertGtxLockId(String gtxLock) {
-		return lockServer.nUpdate("insert into gtxlock (id) values(?)", gtxLock);
+		return gtxServer.nUpdate("insert into gtxlock (id) values(?)", gtxLock);
 	}
 
 	public int deleteGtxLockId(String gtxLock) {
-		return lockServer.nUpdate("delete from gtxlock where id=?", gtxLock);
+		return gtxServer.nUpdate("delete from gtxlock where id=?", gtxLock);
 	}
 
 	public String getGtxLockId() {
@@ -127,40 +124,11 @@ public class GtxConnectionManager implements ConnectionManager {
 
 	@Override
 	public Connection getConnection(DataSource ds) throws SQLException {
-		TransactionsException.assureNotNull(ds, "DataSource can not be null");
-		Connection conn = null;
-		if (isInTransaction(ds)) {// TODO
-			conn = threadLocalConnections.get().get(ds);
-			if (conn == null) {
-				conn = ds.getConnection(); // NOSONAR Have to get a new connection
-				TransactionsException.assureNotNull(conn, "Can not obtain a connection from DataSource");
-				conn.setTransactionIsolation(transactionIsolation);
-				conn.setAutoCommit(false); // start real transaction
-				threadLocalConnections.get().put(ds, conn);
-			}
-		} else {
-			conn = ds.getConnection(); // Have to get a new connection
-		}
-		TransactionsException.assureNotNull(conn, "Fail to get a connection from DataSource");
-		return conn;
+		return null;
 	}
 
 	@Override
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		if (isInTransaction(ds)) {
-			// Do nothing, because this connection is used in a current thread's transaction
-		} else {
-			if (conn != null)
-				conn.close();
-		}
-	}
-
-	public DataSource[] getDataSources() {
-		return dataSources;
-	}
-
-	public void setDataSources(DataSource[] dataSources) {
-		this.dataSources = dataSources;
 	}
 
 }

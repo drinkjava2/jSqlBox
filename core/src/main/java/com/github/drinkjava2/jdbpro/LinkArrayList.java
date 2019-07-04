@@ -46,10 +46,4 @@ public class LinkArrayList<T> extends ArrayList<T> {
 		return this.toArray(new Object[this.size()]);
 	}
 
-	public LinkArrayList<T> newCopy() {
-		LinkArrayList<T> newcopy = new LinkArrayList<T>();
-		newcopy.addAll(this);
-		return newcopy;
-	}
-
 }

@@ -22,13 +22,6 @@ import java.util.List;
  */
 public class ArrayUtils {// NOSONAR
 
-	/** clone a Object[] */
-	public static Object[] cloneArray(Object[] arr) {
-		Object[] newArr = new Object[arr.length];
-		System.arraycopy(arr, 0, newArr, 0, arr.length); 
-		return newArr;
-	}
-	
 	/** Insert an Object at front of array */
 	public static Object[] insertArray(Object obj, Object[] arr) {
 		Object[] newArr = new Object[arr.length + 1];

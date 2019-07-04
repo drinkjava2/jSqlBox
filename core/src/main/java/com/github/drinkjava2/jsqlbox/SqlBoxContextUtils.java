@@ -600,7 +600,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		if (isGtxOpen) {
 			gtxLogSql.append(" (");
 			gm = TableModelUtils.entity2ReadOnlyModel(GtxUndoLog.class);
-			gtxLogSql.append("id").append(param(TimeStampIdGenerator.INSTANCE.getNextID()));
+			gtxLogSql.append("id").append(param(TimeStampIdGenerator.INSTANCE.getNextID(null,null,null)));
 			gtxLogSql.append(", gtxLockId").append(param(ctx.getGtxLockId()));
 			gtxLogSql.append(", entityClass").append(param(entityBean.getClass().getName()));
 			gtxLogSql.append(", sqlType").append(param("INSERT")).append(", ");
