@@ -490,6 +490,12 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return dialect.toDropAndCreateDDL(tables);
 	}
 
+	/** Execute DDL stored in a String array */
+	public void executeDDL(String[] ddls) {
+		for (String ddl : ddls)
+			nExecute(ddl);
+	}
+
 	private void assertDialectNotNull() {
 		if (dialect == null)
 			throw new DbProException("Try use a dialect method but dialect is null");

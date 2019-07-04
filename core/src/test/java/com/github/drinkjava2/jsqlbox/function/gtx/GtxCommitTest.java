@@ -11,7 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox.function.gtx;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
@@ -26,6 +28,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUndoLog;
+import com.github.drinkjava2.jtransactions.manual.ManualTx;
 
 /**
  * Global Transaction commit Test
@@ -34,43 +37,49 @@ import com.github.drinkjava2.jsqlbox.gtx.GtxUndoLog;
  * @since 2.0.7
  */
 public class GtxCommitTest {
-	final static int DATABASE_QTY = 10; // 10 sharding databases
+	final static int DB_QTY = 10; // 10 sharding databases
 	final static int TABLE_QTY = 2; // Each database have 2 sharding tables
 
-	final static int GTX_SERV_QTY = 2; // Total have 2 gtx server
-	GtxConnectionManager gtxMgr = null;
+	final static int GTX_DB_QTY = 2; // Total have 2 gtx databases
+	GtxConnectionManager gtxMgr;
 
 	@Before
 	public void init() {
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
+		 
+		SqlBoxContext[] gtxServs = new SqlBoxContext[DB_QTY];
+		for (int i = 0; i < GTX_DB_QTY; i++) {
+			DataSource ds = JdbcConnectionPool.create(
+					"jdbc:h2:mem:gtxServ_" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""); 
+			gtxServs[i] = new SqlBoxContext(ds);
+			gtxServs[i].setMasters(gtxServs);
+			gtxServs[i].setName("gtxServ_" + i); 
+			gtxServs[i].executeDDL(gtxServs[i].toCreateDDL(GtxUndoLog.class) );  
+		}
 
-		SqlBoxContext[] dbs = new SqlBoxContext[DATABASE_QTY];
+ 
+		
+		SqlBoxContext[] dbs = new SqlBoxContext[DB_QTY];
 		SqlBoxContext.setGlobalSqlBoxContext(dbs[0]);// random choose 1
-		DataSource[] datasources = new DataSource[DATABASE_QTY];
-		for (int i = 0; i < DATABASE_QTY; i++) {
+		DataSource[] datasources = new DataSource[DB_QTY];
+		for (int i = 0; i < DB_QTY; i++) {
 			datasources[i] = JdbcConnectionPool.create(
-					"jdbc:h2:mem:GTXTEST_DB" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+					"jdbc:h2:mem:DB_" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 			dbs[i] = new SqlBoxContext(datasources[i]);
 			dbs[i].setMasters(dbs);
 			dbs[i].setConnectionManager(gtxMgr);
 			dbs[i].setName("DB" + i);
 
-			for (String ddl : dbs[i].toCreateDDL(GtxUndoLog.class))
-				dbs[i].iExecute(ddl);// create GtxLog table
+			dbs[i].executeDDL(dbs[i].toCreateDDL(GtxUndoLog.class) ); 
 			for (int j = 0; j < TABLE_QTY; j++) {
 				TableModel model = TableModelUtils.entity2Model(BankAccount.class);
-				model.setTableName(model.getTableName() + "_" + j); // create sharding tables
-				for (String ddl : Dialect.MySQL57Dialect.toCreateDDL(model))
-					dbs[i].iExecute(ddl);
+				model.setTableName(model.getTableName() + "_" + j); // For each database, create sharding tables
+				dbs[i].executeDDL( dbs[i].toCreateDDL(model )); 
 			}
 		}
 
-		DataSource gtxServDS = JdbcConnectionPool
-				.create("jdbc:h2:mem:gtxServ;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-		SqlBoxContext gtxServ = new SqlBoxContext(gtxServDS);
-		gtxServ.setName("GTX Lock Server");
-		gtxServ.nExecute("create table gtxlock (id varchar(500),  primary key (id)) engine=InnoDB ");
+		 
 
 	}
 

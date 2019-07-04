@@ -29,7 +29,11 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
 public class ManualTx implements ConnectionManager {
 	private Connection connection;
 	private DataSource dataSource;
-	private Integer transactionIsolationLevel;
+	private Integer transactionIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
+
+	public ManualTx(DataSource ds) {
+		dataSource = ds;
+	}
 
 	public ManualTx(DataSource ds, Integer transactionIsolationLevel) {
 		dataSource = ds;
