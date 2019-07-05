@@ -40,10 +40,6 @@ public class GtxConnectionManager implements ConnectionManager {
 	private int txIsolation = Connection.TRANSACTION_READ_COMMITTED;
 	private SqlBoxContext gtxServer;
 
-	public GtxConnectionManager( ) {
-		this.gtxServer = gtxServer;
-	}
-	
 	public GtxConnectionManager(SqlBoxContext gtxServer) {
 		this.gtxServer = gtxServer;
 	}
@@ -135,7 +131,6 @@ public class GtxConnectionManager implements ConnectionManager {
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
 	}
 
-	
-	//=======getter & setter=====
-	
+	// =======getter & setter=====
+
 }

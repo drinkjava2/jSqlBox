@@ -11,10 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox.function.gtx;
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -26,9 +22,10 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.gtx.Gtx;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
-import com.github.drinkjava2.jsqlbox.gtx.GtxUndoLog;
-import com.github.drinkjava2.jtransactions.manual.ManualTx;
+import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
+import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 
 /**
  * Global Transaction commit Test
@@ -37,55 +34,54 @@ import com.github.drinkjava2.jtransactions.manual.ManualTx;
  * @since 2.0.7
  */
 public class GtxCommitTest {
-	final static int DB_QTY = 10; // 10 sharding databases
-	final static int TABLE_QTY = 2; // Each database have 2 sharding tables
+	final static int DB_QTY = 3; // 3 sharding databases
+	final static int TABLE_QTY = 2; // Each database has 2 sharding tables
 
-	final static int GTX_DB_QTY = 2; // Total have 2 gtx databases
+	final static int GTX_DB_QTY = 2; // Total have 3 gtx databases
 	GtxConnectionManager gtxMgr;
 
 	@Before
 	public void init() {
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
-		 
-		SqlBoxContext[] gtxServs = new SqlBoxContext[DB_QTY];
+
+		SqlBoxContext[] gtxs = new SqlBoxContext[GTX_DB_QTY];
 		for (int i = 0; i < GTX_DB_QTY; i++) {
 			DataSource ds = JdbcConnectionPool.create(
-					"jdbc:h2:mem:gtxServ_" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""); 
-			gtxServs[i] = new SqlBoxContext(ds);
-			gtxServs[i].setMasters(gtxServs);
-			gtxServs[i].setName("gtxServ_" + i); 
-			gtxServs[i].executeDDL(gtxServs[i].toCreateDDL(GtxUndoLog.class) );  
+					"jdbc:h2:mem:gtxServ_" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+			gtxs[i] = new SqlBoxContext(ds);
+			gtxs[i].setMasters(gtxs);
+			gtxs[i].setName("gtxServ_" + i);
+			//gtxs[i].setConnectionManager(new ManualTx(ds));
+			gtxs[i].executeDDL(gtxs[i].toCreateDDL(Gtx.class));
+			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxLock.class));
+			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.toGTxlogModel(BankAccount.class)));
 		}
-
- 
+		gtxMgr=new GtxConnectionManager(gtxs[0]);
 		
-		SqlBoxContext[] dbs = new SqlBoxContext[DB_QTY];
-		SqlBoxContext.setGlobalSqlBoxContext(dbs[0]);// random choose 1
+		SqlBoxContext[] dbs = new SqlBoxContext[DB_QTY]; 
 		DataSource[] datasources = new DataSource[DB_QTY];
 		for (int i = 0; i < DB_QTY; i++) {
-			datasources[i] = JdbcConnectionPool.create(
-					"jdbc:h2:mem:DB_" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+			datasources[i] = JdbcConnectionPool
+					.create("jdbc:h2:mem:DB_" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 			dbs[i] = new SqlBoxContext(datasources[i]);
 			dbs[i].setMasters(dbs);
-			dbs[i].setConnectionManager(gtxMgr);
+			//dbs[i].setConnectionManager(gtxMgr);
 			dbs[i].setName("DB" + i);
-
-			dbs[i].executeDDL(dbs[i].toCreateDDL(GtxUndoLog.class) ); 
+ 
 			for (int j = 0; j < TABLE_QTY; j++) {
 				TableModel model = TableModelUtils.entity2Model(BankAccount.class);
 				model.setTableName(model.getTableName() + "_" + j); // For each database, create sharding tables
-				dbs[i].executeDDL( dbs[i].toCreateDDL(model )); 
+				dbs[i].executeDDL(dbs[i].toCreateDDL(model));
 			}
 		}
-
-		 
+		SqlBoxContext.setGlobalSqlBoxContext(dbs[0]);// random choose 1
 
 	}
 
 	@Test
-	public void crudTest() {
-		gtxMgr.startGtx("Test");
+	public void crudTest() { 
+		//gtxMgr.startGtx("Test");
 		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 10L).insert();
 		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 20L).update();
 		// System.out.println(new BankAccount().putField("bankId", 0L, "userId",

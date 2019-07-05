@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
@@ -33,7 +34,7 @@ public class GtxUtils {
 	/**
 	 * Convert an entity class to gtxLog entity class, i.e., add some columns for it
 	 */
-	public TableModel toGTxlogModel(Class<?> entityClass) {
+	public static TableModel toGTxlogModel(Class<?> entityClass) {
 		TableModel model = globalGtxTableModelCache.get(entityClass);
 		if (model != null)
 			return model;
@@ -41,6 +42,11 @@ public class GtxUtils {
 		t.setIdGenerators(null);
 		t.setIndexConsts(null);
 		t.setUniqueConsts(null);
+		for (ColumnModel col : t.getColumns()) {
+			col.setPkey(false);
+			col.setIdGenerationType(null);
+			col.setIdGeneratorName(null);
+		}
 		t.column(GTX_ID).VARCHAR(32);
 		t.column(GTX_TYPE).VARCHAR(14);
 		t.column(GTX_LOG_ID).LONG().id(); // ID is assigned by outside

@@ -27,6 +27,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.0
  */
 @Table(name = "gtx_log")
+@Deprecated
 public class GtxUndoLog {
 	@Id
 	private String id; // id for this GTX log
