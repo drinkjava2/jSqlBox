@@ -58,6 +58,7 @@ public class GtxCommitTest {
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.toGTxlogModel(BankAccount.class)));
 		}
 		gtxMgr=new GtxConnectionManager(gtxs[0]);
+		System.out.println("=========================================================================");
 		
 		SqlBoxContext[] dbs = new SqlBoxContext[DB_QTY]; 
 		DataSource[] datasources = new DataSource[DB_QTY];

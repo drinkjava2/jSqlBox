@@ -42,7 +42,6 @@ import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
-import com.github.drinkjava2.jdialects.id.TimeStampIdGenerator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -50,7 +49,6 @@ import com.github.drinkjava2.jsqlbox.converter.FieldConverter;
 import com.github.drinkjava2.jsqlbox.converter.FieldConverterUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.gtx.GtxUndoLog;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 import com.github.drinkjava2.jsqlbox.sqlitem.EntityKeyItem;
@@ -397,13 +395,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		else // it's a bean
 			return (T) entityOrClass;
 	}
-
-	private static void notAllowSharding(ColumnModel col) {
-		if (col.getShardTable() != null || col.getShardDatabase() != null)
-			throw new SqlBoxException(
-					"Fail to execute entity CRUD operation because found sharding column is not included in prime Key columns");
-	}
-
+ 
 	/**
 	 * Based on PreparedSQL's models and alias, automatically build and append a SQL
 	 * like below:
@@ -485,7 +477,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/** Read value from entityBean field or tail */
-	public static Object readValueFromColModelorBeanFieldOrTail(ColumnModel columnModel, Object entityBean) {
+	public static Object readValueFromBeanFieldOrTail(ColumnModel columnModel, Object entityBean) {
 		SqlBoxException.assureNotNull(columnModel, "columnModel can not be null");
 		if (columnModel.getValueExist()) // value is stored in model
 			return columnModel.getValue();
@@ -584,28 +576,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			tableName = tailModel.getTableName();
 
 		LinkArrayList<Object> sqlBody = new LinkArrayList<Object>();
-		LinkArrayList<Object> gtxLogSql = null;
-
-		int gtxIndex = 1;
-		boolean isGtxOpen = ctx.isGtxOpen();
-		if (isGtxOpen)
-			gtxLogSql = new LinkArrayList<Object>();
-
 		ColumnModel identityCol = null;
 		Type identityType = null;
 		Boolean ignoreNull = null;
 		sqlBody.append(" (");
-
-		TableModel gm = null;
-		if (isGtxOpen) {
-			gtxLogSql.append(" (");
-			gm = TableModelUtils.entity2ReadOnlyModel(GtxUndoLog.class);
-			gtxLogSql.append("id").append(param(TimeStampIdGenerator.INSTANCE.getNextID(null,null,null)));
-			gtxLogSql.append(", gtxLockId").append(param(ctx.getGtxLockId()));
-			gtxLogSql.append(", entityClass").append(param(entityBean.getClass().getName()));
-			gtxLogSql.append(", sqlType").append(param("INSERT")).append(", ");
-		}
-
+		boolean foundColumnToInsert = false;
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
 		for (ColumnModel col : cols.values()) {
@@ -635,26 +610,18 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					Object id = snow.nextId();
 					sqlBody.append(param(id));
 					sqlBody.append(", ");
-					if (isGtxOpen) {
-						gtxLogSql.append("c" + gtxIndex++);
-						gtxLogSql.append(param(col.getColumnName() + ":" + id));
-						gtxLogSql.append(", ");
-					}
+					foundColumnToInsert = true;
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				} else {// Normal Id Generator
 					sqlBody.append(col.getColumnName());
 					Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
 					sqlBody.append(param(id));
 					sqlBody.append(", ");
-					if (isGtxOpen) {
-						gtxLogSql.append("c" + gtxIndex++);
-						gtxLogSql.append(param(col.getColumnName() + ":" + id));
-						gtxLogSql.append(", ");
-					}
+					foundColumnToInsert = true;
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				}
 			} else {
-				Object value = readValueFromColModelorBeanFieldOrTail(col, entityBean);
+				Object value = readValueFromBeanFieldOrTail(col, entityBean);
 				if (value == null && ignoreNull == null) {
 					for (Object itemObject : optionItems)
 						if (SqlOption.IGNORE_NULL.equals(itemObject)) {
@@ -668,29 +635,20 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					sqlBody.append(col.getColumnName());
 					sqlBody.append(new SqlItem(SqlOption.PARAM, value));
 					sqlBody.append(", ");
-					if (isGtxOpen) {
-						gtxLogSql.append("c" + gtxIndex++);
-						gtxLogSql.append(param(col.getColumnName() + ":" + value));
-						gtxLogSql.append(", ");
-					}
+					foundColumnToInsert = true;
 				}
 			}
-			if (col.getPkey()) {
-				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
 
-				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
-			} else
-				notAllowSharding(col);
+			if (col.getShardTable() != null) // Sharding Table?
+				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean));
+
+			if (col.getShardDatabase() != null) // Sharding DB?
+				shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean));
 		}
 
-		sqlBody.remove(sqlBody.size() - 1);// delete the last ", "
-		if (isGtxOpen)
-			gtxLogSql.remove(gtxLogSql.size() - 1);
+		if (foundColumnToInsert)
+			sqlBody.remove(sqlBody.size() - 1);// delete the last ", "
 
-		if (isGtxOpen)
-			gtxLogSql.frontAdd(gm.getTableName());
 		if (shardTableItem != null)
 			sqlBody.frontAdd(shardTableItem);
 		else
@@ -701,24 +659,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		sqlBody.frontAdd("insert into ");// insert into xxx (
 		sqlBody.append(") "); // insert into xxx ()
 		sqlBody.append(valuesQuestions()); // insert into xxx () values(?,?)
-		if (isGtxOpen) {
-			gtxLogSql.frontAdd("insert into ");
-			gtxLogSql.append(") ");
-			gtxLogSql.append(valuesQuestions());
-		}
 
 		if (optionItems != null) // optional SqlItems put at end
-			for (Object item : optionItems) {
+			for (Object item : optionItems)
 				sqlBody.append(item);
-				if (isGtxOpen)
-					gtxLogSql.append(item);
-			}
 
 		if (optionModel == null)// No optional model, force use entity's
 			sqlBody.frontAdd(model);
+
 		int result = ctx.iUpdate(sqlBody.toArray());
-		if (isGtxOpen)
-			ctx.iUpdate(gtxLogSql.toArray()); // write to gtx log
 		if (ctx.isBatchEnabled())
 			return 1; // in batch mode, direct return 1
 		if (identityCol != null) {// write identity id to Bean field
@@ -777,19 +726,13 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				converter.handleSQL(SqlOption.UPDATE, ctx, col, entityBean, sqlBody, sqlWhere);
 				continue;
 			}
-			Object value = readValueFromColModelorBeanFieldOrTail(col, entityBean);
+			Object value = readValueFromBeanFieldOrTail(col, entityBean);
 			if (col.getPkey()) {
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");// NOSONAR
 				sqlWhere.append(col.getColumnName()).append("=?");
 				sqlWhere.append(param(value));
-				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
-				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
-
 			} else {
-				notAllowSharding(col);
 				if (value == null && ignoreNull == null) {
 					for (Object itemObject : optionItems)
 						if (SqlOption.IGNORE_NULL.equals(itemObject)) {
@@ -806,6 +749,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					sqlBody.append(param(value));
 				}
 			}
+			if (col.getShardTable() != null) // Sharding Table?
+				shardTableItem = shardTB(value);
+			if (col.getShardDatabase() != null) // Sharding DB?
+				shardDbItem = shardDB(value);
 		}
 
 		sqlBody.frontAdd(" set ");
@@ -888,13 +835,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					sqlWhere.append(" and ");
 				sqlWhere.append(param(value));
 				sqlWhere.append(col.getColumnName()).append("=? ");
-				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
-
-				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
-			} else
-				notAllowSharding(col);
+			}
+			if (col.getShardTable() != null) // Sharding Table?
+				shardTableItem = shardTB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
+			if (col.getShardDatabase() != null) // Sharding DB?
+				shardDbItem = shardDB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
 		}
 		if (sqlWhere.isEmpty())
 			throw new SqlBoxException("No primary key found for entityBean");
@@ -962,14 +907,12 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				continue;
 			if (col.getPkey()) {
 				sqlWhere.append(col.getColumnName()).append("=?")
-						.append(param(readValueFromColModelorBeanFieldOrTail(col, entityBean))).append(" and ");
-				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
-
-				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(readValueFromColModelorBeanFieldOrTail(col, entityBean));
-			} else
-				notAllowSharding(col);
+						.append(param(readValueFromBeanFieldOrTail(col, entityBean))).append(" and ");
+			}
+			if (col.getShardTable() != null) // Sharding Table?
+				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean));
+			if (col.getShardDatabase() != null) // Sharding DB?
+				shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean));
 			sqlBody.append(col.getColumnName()).append(", ");
 			effectColumns.add(col);
 		}
@@ -1040,7 +983,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Check entity exist by id
+	 * Check if entityBean exist in database by its id
 	 */
 	public static boolean entityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
@@ -1083,13 +1026,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					sqlWhere.append(" and ");
 				sqlWhere.append(param(value));
 				sqlWhere.append(col.getColumnName()).append("=? ");
-				if (col.getShardTable() != null) // Sharding Table?
-					shardTableItem = shardTB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
-
-				if (col.getShardDatabase() != null) // Sharding DB?
-					shardDbItem = shardDB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
-			} else
-				notAllowSharding(col);
+			}
+			if (col.getShardTable() != null) // Sharding Table?
+				shardTableItem = shardTB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
+			if (col.getShardDatabase() != null) // Sharding DB?
+				shardDbItem = shardDB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
 		}
 		if (sqlWhere.isEmpty())
 			throw new SqlBoxException("No primary key found for entityBean");
@@ -1146,7 +1087,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			if (col.getTransientable())
 				continue;
 			if (col.getShardTable() != null)
-				throw new SqlBoxException("Fail to count all entity because shardTable columns exist.");
+				throw new SqlBoxException(
+						"Fail to count all entity because shardTable column " + col.getColumnName() + " exist.");
 		}
 
 		LinkArrayList<Object> sqlBody = new LinkArrayList<Object>();
