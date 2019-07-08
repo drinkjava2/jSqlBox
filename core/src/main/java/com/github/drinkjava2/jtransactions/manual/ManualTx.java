@@ -58,7 +58,11 @@ public class ManualTx implements ConnectionManager {
 	@Override
 	public boolean isInTransaction(DataSource dataSource) {
 		try {
-			return connection != null && !connection.getAutoCommit();
+			if (connection == null)
+				return false;
+			if (connection.getAutoCommit())
+				throw new TransactionsException("ManualTx transaction open but autoCommit found.");
+			return true;
 		} catch (SQLException e) {
 			throw new TransactionsException(e);
 		}

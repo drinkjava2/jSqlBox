@@ -91,10 +91,6 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	// ==========================Global Transaction about================
 	/** If current GtxConnectionManager opened global Transaction */
 	public boolean isGtxOpen() {
-		System.out.println(connectionManager);
-		System.out.println(connectionManager instanceof GtxConnectionManager);
-		System.out.println(getGtxManager().isGtxOpen());  
-		
 		return connectionManager != null && connectionManager instanceof GtxConnectionManager
 				&& getGtxManager().isGtxOpen();
 	}
