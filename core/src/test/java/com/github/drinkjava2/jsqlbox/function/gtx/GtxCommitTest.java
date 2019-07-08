@@ -52,45 +52,58 @@ public class GtxCommitTest {
 			gtxs[i] = new SqlBoxContext(ds);
 			gtxs[i].setMasters(gtxs);
 			gtxs[i].setName("gtxServ_" + i);
-			//gtxs[i].setConnectionManager(new ManualTx(ds));
+			// gtxs[i].setConnectionManager(new ManualTx(ds));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(Gtx.class));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxLock.class));
-			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.toGTxlogModel(BankAccount.class)));
+			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.entity2GtxModel(BankAccount.class)));
 		}
-		gtxMgr=new GtxConnectionManager(gtxs[0]);
-		System.out.println("=========================================================================");
-		
-		SqlBoxContext[] dbs = new SqlBoxContext[DB_QTY]; 
+		gtxMgr = new GtxConnectionManager(gtxs[0]);
+		System.out.println("================gtxs tables created======================\r");
+
+		SqlBoxContext[] ctxs = new SqlBoxContext[DB_QTY];
 		DataSource[] datasources = new DataSource[DB_QTY];
 		for (int i = 0; i < DB_QTY; i++) {
 			datasources[i] = JdbcConnectionPool
 					.create("jdbc:h2:mem:DB_" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-			dbs[i] = new SqlBoxContext(datasources[i]);
-			dbs[i].setMasters(dbs);
-			//dbs[i].setConnectionManager(gtxMgr);
-			dbs[i].setName("DB" + i);
- 
+			ctxs[i] = new SqlBoxContext(datasources[i]);
+			ctxs[i].setMasters(ctxs);
+			ctxs[i].setConnectionManager(gtxMgr);
+			ctxs[i].setName("DB" + i);
 			for (int j = 0; j < TABLE_QTY; j++) {
 				TableModel model = TableModelUtils.entity2Model(BankAccount.class);
 				model.setTableName(model.getTableName() + "_" + j); // For each database, create sharding tables
-				dbs[i].executeDDL(dbs[i].toCreateDDL(model));
+				ctxs[i].executeDDL(ctxs[i].toCreateDDL(model));
 			}
 		}
-		SqlBoxContext.setGlobalSqlBoxContext(dbs[0]);// random choose 1
+		SqlBoxContext.setGlobalSqlBoxContext(ctxs[0]);// random choose 1
+		System.out.println("================ctxs tables created======================\r");
 
 	}
 
 	@Test
-	public void crudTest() { 
-		//gtxMgr.startGtx("Test");
-		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 10L).insert();
-		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 20L).update();
-		// System.out.println(new BankAccount().putField("bankId", 0L, "userId",
-		// 0L).exist());
-		// System.out.println(new BankAccount().putField("bankId", 0L, "userId",
-		// 5L).exist());
-		// new BankAccount().putField("bankId", 0L, "userId", 0L).load();
-		// new BankAccount().putField("bankId", 0L, "userId", 0L).delete();
+	public void crudTest() {
+		gtxMgr.startGtx();
+		new BankAccount().forFields("bankId", "userId", "balance");
+		new BankAccount().putValues(0L, 0L, 10L).insert();
+		if (1 == 1)
+			return;
+		new BankAccount().putValues(0L, 0L, 20L).update();
+		Assert.assertTrue(new BankAccount().setBankId(0L).setUserId(0L).exist());
+		Assert.assertTrue(new BankAccount().setBankId(0L).setUserId(0L).load().existStrict());
+		Assert.assertFalse(new BankAccount().setBankId(0L).setUserId(0L).existStrict());
+		Assert.assertFalse(new BankAccount().setBankId(0L).setUserId(5L).exist());
+		new BankAccount().setBankId(0L).setUserId(0L).load().delete();
+		Assert.assertFalse(new BankAccount().setBankId(0L).setUserId(0L).exist());
+		System.out.println("-------CURD on DB0 Test finish--------\r");
+
+		new BankAccount().forFields("bankId", "userId", "balance");
+		new BankAccount().putValues(1L, 0L, 10L).insert();
+		new BankAccount().putValues(1L, 0L, 20L).update();
+		Assert.assertTrue(new BankAccount().setBankId(1L).setUserId(0L).exist());
+		Assert.assertFalse(new BankAccount().setBankId(1L).setUserId(5L).exist());
+		new BankAccount().setBankId(1L).setUserId(0L).load().delete();
+		Assert.assertFalse(new BankAccount().setBankId(1L).setUserId(0L).exist());
+		System.out.println("-------CURD on DB1 Test finish--------\r");
 	}
 
 	public void insertAccountsSucess() {
@@ -104,7 +117,7 @@ public class GtxCommitTest {
 
 	public void testCommitTransaction() {
 		GtxCommitTest tester = new GtxCommitTest();
-		gtxMgr.startGtx("Test");
+		gtxMgr.startGtx();
 		try {
 			tester.insertAccountsSucess();
 			gtxMgr.commitGtx();

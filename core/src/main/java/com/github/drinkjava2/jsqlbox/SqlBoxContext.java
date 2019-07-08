@@ -32,6 +32,7 @@ import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
+import com.github.drinkjava2.jsqlbox.gtx.Gtx;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
@@ -90,13 +91,17 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	// ==========================Global Transaction about================
 	/** If current GtxConnectionManager opened global Transaction */
 	public boolean isGtxOpen() {
+		System.out.println(connectionManager);
+		System.out.println(connectionManager instanceof GtxConnectionManager);
+		System.out.println(getGtxManager().isGtxOpen());  
+		
 		return connectionManager != null && connectionManager instanceof GtxConnectionManager
-				&& connectionManager.isInTransaction(getDataSource());
+				&& getGtxManager().isGtxOpen();
 	}
 
 	/** Get current GtxLockId, should be called inside of a global transaction */
-	public String getGtxLockId() {
-		return getGtxManager().getGtxLockId();
+	public Gtx getGtx() {
+		return getGtxManager().getGtx();
 	}
 
 	/** Get current ConnectionManager and assume it's a GtxConnectionManager */
@@ -342,6 +347,11 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityDeleteByIdTry(this, entityClass, id, optionItems);
 	}
 
+	/** Check if entity exist by its id */
+	public boolean eExistStrict(Object entity, Object... optionItems) {
+		return SqlBoxContextUtils.entityExistStrict(this, entity, optionItems);
+	}
+	
 	/** Check if entity exist by its id */
 	public boolean eExist(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityExist(this, entity, optionItems);

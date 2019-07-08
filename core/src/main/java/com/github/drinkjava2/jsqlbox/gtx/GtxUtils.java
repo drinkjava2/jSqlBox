@@ -34,7 +34,7 @@ public class GtxUtils {
 	/**
 	 * Convert an entity class to gtxLog entity class, i.e., add some columns for it
 	 */
-	public static TableModel toGTxlogModel(Class<?> entityClass) {
+	public static TableModel entity2GtxModel(Class<?> entityClass) {
 		TableModel model = globalGtxTableModelCache.get(entityClass);
 		if (model != null)
 			return model;
@@ -46,6 +46,8 @@ public class GtxUtils {
 			col.setPkey(false);
 			col.setIdGenerationType(null);
 			col.setIdGeneratorName(null);
+			col.setShardTable(null);
+			col.setShardDatabase(null);
 		}
 		t.column(GTX_ID).VARCHAR(32);
 		t.column(GTX_TYPE).VARCHAR(14);

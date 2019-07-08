@@ -32,8 +32,16 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("transient=" + c.getTransientable()).append(", ");
 		sb.append("columnType=" + c.getColumnType()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
-		sb.append("shardTable=" + c.getShardTable()).append(", ");
-		sb.append("shardDatabase=" + c.getShardDatabase()).append(", ");
+		if (c.getShardTable() != null)
+			sb.append("shardTable=" + Arrays.deepToString(c.getShardTable())).append(", ");
+		else
+			sb.append("shardTable=null").append(", ");
+
+		if (c.getShardDatabase() != null)
+			sb.append("shardDatabase=" + Arrays.deepToString(c.getShardDatabase())).append(", ");
+		else
+			sb.append("shardDatabase=null").append(", ");
+
 		sb.append("idGenerationType=" + c.getIdGenerationType()).append(", ");
 		sb.append("idGeneratorName=" + c.getIdGeneratorName()).append(", ");
 		sb.append("idGenerator=" + c.getIdGenerator()).append(", ");

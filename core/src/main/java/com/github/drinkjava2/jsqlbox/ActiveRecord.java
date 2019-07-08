@@ -205,6 +205,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public int deleteTry(Object... items) {return ctx().eDeleteTry(this, items);}
 	public void deleteById(Object id, Object... items) {ctx().eDeleteById(this.getClass(), id, items);}
 	public int deleteByIdTry(Object id, Object... items) {return ctx().eDeleteByIdTry(this.getClass(), id, items);}
+	public boolean existStrict(Object... items) {return ctx().eExistStrict(this, items);}
 	public boolean exist(Object... items) {return ctx().eExist(this, items);}
 	public boolean existById(Object id, Object... items) {return ctx().eExistById(this.getClass(), id, items);}
 	public int countAll(Object... items) {return ctx().eCountAll(this.getClass(), items);} 

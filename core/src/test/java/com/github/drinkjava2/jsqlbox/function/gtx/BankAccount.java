@@ -42,24 +42,27 @@ public class BankAccount extends ActiveRecord<BankAccount> {
 		return bankId;
 	}
 
-	public void setBankId(Long bankId) {
+	public BankAccount setBankId(Long bankId) {
 		this.bankId = bankId;
+		return this;
 	}
 
 	public Long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(Long userId) {
+	public BankAccount setUserId(Long userId) {
 		this.userId = userId;
+		return this;
 	}
 
 	public Long getBalance() {
 		return balance;
 	}
 
-	public void setBalance(Long balance) {
+	public BankAccount setBalance(Long balance) {
 		this.balance = balance;
+		return this;
 	}
 
 }

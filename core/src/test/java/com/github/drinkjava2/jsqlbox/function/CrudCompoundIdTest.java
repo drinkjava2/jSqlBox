@@ -112,7 +112,7 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(1, ctx.eLoadTry(u3));
 		Assert.assertEquals("NewAddress3", u3.getAddress());
 		Assert.assertEquals(1, u4.loadTry());
-		Assert.assertEquals("NewAddress4", u4.getAddress());
+		Assert.assertEquals("NewAddress4", u4.getAddress()); 
 
 		// =======load by id (id is map)
 		Map<String, Object> mp = new HashMap<String, Object>();
@@ -147,6 +147,11 @@ public class CrudCompoundIdTest extends TestBase {
 		// =======exist
 		Assert.assertEquals(true, ctx.eExist(u1));
 		Assert.assertEquals(true, u2.exist());
+		
+		// =======existStrict
+		Assert.assertTrue(u1.existStrict());
+		u1.setAge(1000);
+		Assert.assertFalse(u1.existStrict());
 
 		// =======existById (id is Map)
 		Map<String, Object> m1 = new HashMap<String, Object>();

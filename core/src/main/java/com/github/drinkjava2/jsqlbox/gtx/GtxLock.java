@@ -11,6 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 
 /**
@@ -23,7 +26,7 @@ public class GtxLock {
 	@Id
 	private String lockKey;
 	private String gtxId;
-
+ 
 	public String getLockKey() {
 		return lockKey;
 	}
@@ -39,5 +42,7 @@ public class GtxLock {
 	public void setGtxId(String gtxId) {
 		this.gtxId = gtxId;
 	}
+
+ 
 
 }

@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
+import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
@@ -37,7 +38,7 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  */
 public class GtxConnectionManager implements ConnectionManager {
 
-	private int txIsolation = Connection.TRANSACTION_READ_COMMITTED;
+	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 	private SqlBoxContext gtxServer;
 
 	public GtxConnectionManager(SqlBoxContext gtxServer) {
@@ -46,15 +47,10 @@ public class GtxConnectionManager implements ConnectionManager {
 
 	public GtxConnectionManager(SqlBoxContext gtxServer, Integer transactionIsolation, DataSource... dataSources) {
 		this.gtxServer = gtxServer;
-		this.txIsolation = transactionIsolation;
+		this.transactionIsolation = transactionIsolation;
 	}
 
-	private ThreadLocal<String> gtxLockId = new ThreadLocal<String>() {
-		@Override
-		protected String initialValue() {
-			return null;
-		}
-	};
+	private ThreadLocal<Gtx> threadedGTX = new ThreadLocal<Gtx>();
 
 	private ThreadLocal<Map<DataSource, Connection>> threadLocalConnections = new ThreadLocal<Map<DataSource, Connection>>() {
 		@Override
@@ -71,21 +67,27 @@ public class GtxConnectionManager implements ConnectionManager {
 		return gtxServer.nUpdate("delete from gtxlock where id=?", gtxLock);
 	}
 
-	public String getGtxLockId() {
-		return gtxLockId.get();
+	public Gtx getGtx() {
+		return threadedGTX.get();
+	}
+
+	public boolean isGtxOpen() {
+		return threadedGTX.get() != null;
 	}
 
 	@Override
 	public boolean isInTransaction(DataSource ds) {
-		return gtxLockId.get() != null;
+		return threadedGTX.get() != null;
 	}
 
-	public void startGtx(String _gtxLockId) {
-		gtxLockId.set(_gtxLockId);
+	public void startGtx() {
+		Gtx gtx = new Gtx();
+		gtx.setGtxId((String) UUID32Generator.INSTANCE.getNextID(null, null, null));
+		threadedGTX.set(gtx);
 	}
 
 	public void endGtx() {
-		gtxLockId.set(null);
+		threadedGTX.set(null);
 		Map<DataSource, Connection> map = threadLocalConnections.get();
 		if (map == null)
 			return;
@@ -124,11 +126,32 @@ public class GtxConnectionManager implements ConnectionManager {
 
 	@Override
 	public Connection getConnection(DataSource ds) throws SQLException {
-		return null;
+		TransactionsException.assureNotNull(ds, "DataSource can not be null");
+		Connection conn = null;
+		if (isInTransaction(ds)) {// TODO
+			conn = threadLocalConnections.get().get(ds);
+			if (conn == null) {
+				conn = ds.getConnection(); // NOSONAR Have to get a new connection
+				TransactionsException.assureNotNull(conn, "Can not obtain a connection from DataSource");
+				conn.setTransactionIsolation(transactionIsolation);
+				conn.setAutoCommit(false); // start real transaction
+				threadLocalConnections.get().put(ds, conn);
+			}
+		} else {
+			conn = ds.getConnection(); // Have to get a new connection
+		}
+		TransactionsException.assureNotNull(conn, "Fail to get a connection from DataSource");
+		return conn;
 	}
 
 	@Override
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
+		if (isInTransaction(ds)) {
+			// Do nothing, because this connection is used in a current thread's transaction
+		} else {
+			if (conn != null)
+				conn.close();
+		}
 	}
 
 	// =======getter & setter=====

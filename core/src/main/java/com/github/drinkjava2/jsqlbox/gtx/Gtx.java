@@ -12,6 +12,8 @@
 package com.github.drinkjava2.jsqlbox.gtx;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 
@@ -25,6 +27,8 @@ public class Gtx {
 	@Id
 	private String gtxId;
 	private Timestamp createTime;
+	private Integer logIndex = 0;
+	private List<GtxLock> gtxLockList = new ArrayList<GtxLock>();
 
 	public String getGtxId() {
 		return gtxId;
@@ -40,6 +44,22 @@ public class Gtx {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public Integer getLogIndex() {
+		return logIndex;
+	}
+
+	public void setLogIndex(Integer logIndex) {
+		this.logIndex = logIndex;
+	}
+
+	public List<GtxLock> getGtxLockList() {
+		return gtxLockList;
+	}
+
+	public void setGtxLockList(List<GtxLock> gtxLockList) {
+		this.gtxLockList = gtxLockList;
 	}
 
 }
