@@ -40,20 +40,6 @@ public class ManualTx implements ConnectionManager {
 		this.transactionIsolationLevel = transactionIsolationLevel;
 	}
 
-	/** Check if manualTx already started a transaction */
-	@Override
-	public boolean isInTransaction(DataSource dataSource) {
-		try {
-			if (connection == null)
-				return false;
-			if (connection.getAutoCommit())
-				throw new TransactionsException("ManualTx transaction opened but found autoCommit is true.");
-			return true;
-		} catch (SQLException e) {
-			throw new TransactionsException(e);
-		}
-	}
-
 	/** Borrow a connection from manualTx to use */
 	@Override
 	public Connection getConnection(DataSource dataSource) throws SQLException {
@@ -74,6 +60,20 @@ public class ManualTx implements ConnectionManager {
 		}
 	}
 
+	/** Check if manualTx already started a transaction */
+	@Override
+	public boolean isInTransaction(DataSource dataSource) {
+		try {
+			if (connection == null)
+				return false;
+			if (connection.getAutoCommit())
+				throw new TransactionsException("ManualTx transaction open but autoCommit found.");
+			return true;
+		} catch (SQLException e) {
+			throw new TransactionsException(e);
+		}
+	}
+
 	/**
 	 * Start a transaction, if connection is null, get a new connection, set
 	 * AutoCommit =false
@@ -87,14 +87,26 @@ public class ManualTx implements ConnectionManager {
 			} else
 				throw new TransactionsException("Transaction already started");
 		} catch (SQLException e) {
-			throw new TransactionsException("Fail to open a transaction.", e);
+			throw new TransactionsException("Fail to begin a transaction.", e);
 		}
 		try {
 			connection.setAutoCommit(false);
 		} catch (SQLException e) {
-			throw new TransactionsException("Fail to set AutoCommit to false", e);
+			throw new TransactionsException("Fail to setAutoCommit to false", e);
 		}
 		return connection;
+	}
+
+	/** Commit the transaction, */
+	public void commit() throws SQLException {
+		try {
+			if (connection != null && !connection.getAutoCommit())
+				connection.commit();
+			else
+				throw new TransactionsException("Transaction not opened, can not commit");
+		} finally {
+			cleanupConnection();
+		}
 	}
 
 	/** roll back the transaction, close connection */
@@ -102,30 +114,33 @@ public class ManualTx implements ConnectionManager {
 		try {
 			if (connection != null && !connection.getAutoCommit())
 				connection.rollback();
+			else
+				throw new TransactionsException("Transaction not opened, can not rollback");
 		} catch (SQLException e) {
 			throw new TransactionsException(e);
+		} finally {
+			cleanupConnection();
 		}
-		clearConnection();
-	}
-
-	/** Commit the transaction, */
-	public void commit() throws SQLException {
-		if (connection != null && !connection.getAutoCommit())
-			connection.commit();
-		clearConnection();
 	}
 
 	/**
 	 * set autoCommit to true, restore normal status. so this connection can be
 	 * re-used by other thread
 	 */
-	private void clearConnection() {
+	private void cleanupConnection() {
 		try {
 			if (connection != null && !connection.getAutoCommit())
 				connection.setAutoCommit(true);
-			connection = null;
 		} catch (SQLException e) {
 			throw new TransactionsException("Fail to setAutoCommit to true", e);
+		} finally {
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					throw new TransactionsException("Fail to close connection", e);
+				}
+			connection = null;
 		}
 	}
 

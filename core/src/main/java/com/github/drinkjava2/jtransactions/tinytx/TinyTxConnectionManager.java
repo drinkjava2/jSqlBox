@@ -103,17 +103,24 @@ public class TinyTxConnectionManager implements ConnectionManager {
 			if (conn != null) {
 				conn.rollback();
 				setAutoCommitTrue(conn);
-				endTransaction(conn, ds);
-			}
+			} else
+				throw new TransactionsException("Can not rollback transaction on null connection");
 		} catch (SQLException e) {
 			throw new TransactionsException(e);
+		} finally {
+			if (conn != null)
+				endTransaction(conn, ds);
 		}
 	}
 
-	private void endTransaction(Connection conn, DataSource ds) throws SQLException {
+	private void endTransaction(Connection conn, DataSource ds) {
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		threadLocalConnections.get().remove(ds);
-		releaseConnection(conn, ds);
+		try {
+			releaseConnection(conn, ds);
+		} catch (SQLException e) {
+			throw new TransactionsException(e);
+		}
 	}
 
 	@Override

@@ -570,9 +570,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return entityInsertTry(paramCtx, entityBean, newParams);
 		}
 		if (ctx.isGtxOpen()) {
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		} else System.out.println("2222222222222222222222");
-
+			System.out.println("debug isGtxOpen");
+		}
 		return doEntityInsertTry(ctx, entityBean, optionItems);
 	}
 
