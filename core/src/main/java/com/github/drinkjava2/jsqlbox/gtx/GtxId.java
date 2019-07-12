@@ -18,12 +18,13 @@ import java.util.List;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 
 /**
- * This is an entity class to store gtxId
+ * This is an entity class to store gtxId (global transaction ID)
+ * If no gtx sharding key, there is only one gtxid table 
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class Gtx {
+public class GtxId {
 	@Id
 	private String gtxId;
 	private Timestamp createTime;

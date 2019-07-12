@@ -50,7 +50,7 @@ public class GtxConnectionManager implements ConnectionManager {
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	private ThreadLocal<Gtx> threadedGTX = new ThreadLocal<Gtx>();
+	private ThreadLocal<GtxId> threadedGTX = new ThreadLocal<GtxId>();
 
 	private ThreadLocal<Map<DataSource, Connection>> threadLocalConnections = new ThreadLocal<Map<DataSource, Connection>>() {
 		@Override
@@ -67,7 +67,7 @@ public class GtxConnectionManager implements ConnectionManager {
 		return gtxServer.nUpdate("delete from gtxlock where id=?", gtxLock);
 	}
 
-	public Gtx getGtx() {
+	public GtxId getGtx() {
 		return threadedGTX.get();
 	}
 
@@ -81,7 +81,7 @@ public class GtxConnectionManager implements ConnectionManager {
 	}
 
 	public void startGtx() {
-		Gtx gtx = new Gtx();
+		GtxId gtx = new GtxId();
 		gtx.setGtxId((String) UUID32Generator.INSTANCE.getNextID(null, null, null));
 		threadedGTX.set(gtx);
 	}

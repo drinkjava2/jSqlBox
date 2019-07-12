@@ -32,7 +32,7 @@ import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.gtx.Gtx;
+import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
@@ -96,7 +96,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Get current GtxLockId, should be called inside of a global transaction */
-	public Gtx getGtx() {
+	public GtxId getGtx() {
 		return getGtxManager().getGtx();
 	}
 

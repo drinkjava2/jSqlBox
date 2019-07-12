@@ -22,7 +22,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.gtx.Gtx;
+import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
@@ -53,7 +53,7 @@ public class GtxCommitTest {
 			gtxs[i].setMasters(gtxs);
 			gtxs[i].setName("gtxServ_" + i);
 			// gtxs[i].setConnectionManager(new ManualTx(ds));
-			gtxs[i].executeDDL(gtxs[i].toCreateDDL(Gtx.class));
+			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxId.class));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxLock.class));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.entity2GtxModel(BankAccount.class)));
 		}
