@@ -33,12 +33,13 @@ import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.gtx.GtxId;
-import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
+import com.github.drinkjava2.jsqlbox.gtx.GlobalTxCM;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingRangeTool;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
  * SqlBoxContext is extended from DbPro, DbPro is extended from QueryRunner, by
@@ -89,10 +90,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	// ==========================Global Transaction about================
-	/** If current GtxConnectionManager opened global Transaction */
+	/** If current GlobalTxCM opened global Transaction */
 	public boolean isGtxOpen() {
-		return connectionManager != null && connectionManager instanceof GtxConnectionManager
-				&& getGtxManager().isGtxOpen();
+		return connectionManager != null && connectionManager instanceof GlobalTxCM
+				&& getGtxManager().isInTransaction();
 	}
 
 	/** Get current GtxLockId, should be called inside of a global transaction */
@@ -100,9 +101,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return getGtxManager().getGtx();
 	}
 
-	/** Get current ConnectionManager and assume it's a GtxConnectionManager */
-	public GtxConnectionManager getGtxManager() {
-		return (GtxConnectionManager) connectionManager;
+	/** Get current ConnectionManager and assume it's a GlobalTxCM */
+	public GlobalTxCM getGtxManager() {
+		return (GlobalTxCM) connectionManager;
 	}
 
 	// ==========================end=============
@@ -114,7 +115,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public static void resetGlobalVariants() {
 		setGlobalNextAllowShowSql(false);
 		setGlobalNextMasterSlaveOption(SqlOption.USE_AUTO);
-		setGlobalNextConnectionManager(null);
+		setGlobalNextConnectionManager(TinyTxConnectionManager.instance());
 		setGlobalNextSqlHandlers((SqlHandler[]) null);
 		setGlobalNextBatchSize(300);
 		setGlobalNextTemplateEngine(BasicSqlTemplate.instance());

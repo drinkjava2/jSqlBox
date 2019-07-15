@@ -21,10 +21,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.annotation.jpa.EnumType;
-import com.github.drinkjava2.jdialects.annotation.jpa.Version;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
@@ -39,6 +38,26 @@ import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
 public abstract class TableModelUtilsOfEntity {// NOSONAR
 
 	public static Map<Class<?>, TableModel> globalTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
+
+	public static Map<String, Class<?>> globalTableToEntityCache = new ConcurrentHashMap<String, Class<?>>();
+
+	/**
+	 * Convert tableName to entity class, note: before use this method
+	 * entity2Models() method should be called first to cache talbeModels in memory
+	 */
+	public static Class<?> tableNameToEntityClass(String tableName) {
+		String lowCase = tableName.toLowerCase();
+		Class<?> result = globalTableToEntityCache.get(lowCase);
+		if (result != null)
+			return result;
+		for (Entry<Class<?>, TableModel> entry : globalTableModelCache.entrySet()) {
+			if (lowCase.equalsIgnoreCase(entry.getValue().getTableName())) {
+				globalTableToEntityCache.put(lowCase, entry.getKey());
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
 
 	private static boolean matchNameCheck(String annotationName, String cName) {
 		if (("javax.persistence." + annotationName).equals(cName))

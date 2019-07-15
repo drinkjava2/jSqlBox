@@ -51,6 +51,6 @@ public interface MethodInterceptor extends Interceptor {
 	 * @throws Throwable if the interceptors or the target object
 	 * throws an exception
 	 */
-	Object invoke(MethodInvocation invocation) throws Throwable;//NOSONAR
+	Object invoke(MethodInvocation invocation) throws Throwable;
 
 }

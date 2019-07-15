@@ -25,29 +25,33 @@ import javax.sql.DataSource;
  */
 public interface ConnectionManager {
 	/**
+	 * Check if a connection already be get from given dataSource and be cached as
+	 * it started a Transaction
+	 */
+	public boolean isInTransaction();
+
+	/** Start a transaction */
+	public void startTransaction();
+
+	/** Start a transaction with given connection isolation level */
+	public void startTransaction(int txIsolationLevel);
+
+	/**
 	 * A ConnectionManager implementation determine how to get connection from
-	 * DataSource or ThreadLocal or from Spring or JTA or some container...<br/>
-	 * <br/>
-	 * For ManualTx, usually get a connection directly from dataSource
+	 * DataSource or ThreadLocal or from Spring or JTA or some container...
 	 */
 	public Connection getConnection(DataSource dataSource) throws SQLException;
 
 	/**
 	 * A ConnectionManager implementation determine how to close connection or
 	 * return connection to ThreadLocal or return to Spring or JTA or some
-	 * container...<br/>
-	 * <br/>
-	 * For ManualTx, usually directly close a connection
+	 * container...
 	 */
 	public void releaseConnection(Connection conn, DataSource dataSource) throws SQLException;
 
-	/**
-	 * Check if a connection already be get from given dataSource and be cached as
-	 * it started a Transaction <br/>
-	 * <br/>
-	 * For ManualTx, return true if getConnection be called and connection not be
-	 * closed.
-	 */
-	public boolean isInTransaction(DataSource dataSource);
- 
+	/** Commit the transaction, */
+	public void commit();
+
+	/** Roll back the transaction */
+	public void rollback();
 }

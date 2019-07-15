@@ -35,6 +35,7 @@ import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
  * ImprovedQueryRunner made below improvements compare DbUtils's QueryRunner:
@@ -57,7 +58,7 @@ public class ImprovedQueryRunner extends QueryRunner {
 
 	protected static Boolean globalNextAllowShowSql = false;
 	protected static SqlOption globalNextMasterSlaveOption = SqlOption.USE_AUTO;
-	protected static ConnectionManager globalNextConnectionManager = null;
+	protected static ConnectionManager globalNextConnectionManager = TinyTxConnectionManager.instance();
 
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
@@ -528,8 +529,8 @@ public class ImprovedQueryRunner extends QueryRunner {
 	}
 
 	private DbPro autoChooseMasterOrSlaveQuery(PreparedSQL ps) {
-		if (this.getSlaves() == null || this.getSlaves().length == 0 || (this.getConnectionManager() != null
-				&& this.getConnectionManager().isInTransaction(this.getDataSource())))
+		if (this.getSlaves() == null || this.getSlaves().length == 0
+				|| (this.getConnectionManager() != null && this.getConnectionManager().isInTransaction()))
 			return (DbPro) this;
 		DbPro slave = chooseOneSlave();
 		if (slave == null)
@@ -784,6 +785,54 @@ public class ImprovedQueryRunner extends QueryRunner {
 	 */
 	public static void setThreadLocalSqlHandlers(SqlHandler... handlers) {
 		threadLocalSqlHandlers.set(handlers);
+	}
+
+	protected void connectionManagerWrapMethods_____________________() {// NOSONAR
+	}
+
+	/**
+	 * Check if a connection already be get from given dataSource and be cached as
+	 * it started a Transaction
+	 */
+	public boolean isInTransaction() {
+		return this.getConnectionManager().isInTransaction();
+	}
+
+	/** Start a transaction */
+	public void startTransaction() {
+		this.getConnectionManager().startTransaction();
+	}
+
+	/** Start a transaction with given connection isolation level */
+	public void startTransaction(int txIsolationLevel) {
+		this.getConnectionManager().startTransaction(txIsolationLevel);
+	}
+
+	/**
+	 * A ConnectionManager implementation determine how to get connection from
+	 * DataSource or ThreadLocal or from Spring or JTA or some container...
+	 */
+	public Connection getConnection() throws SQLException {
+		return this.getConnectionManager().getConnection(this.getDataSource());
+	}
+
+	/**
+	 * A ConnectionManager implementation determine how to close connection or
+	 * return connection to ThreadLocal or return to Spring or JTA or some
+	 * container...
+	 */
+	public void releaseConnection(Connection conn) throws SQLException {
+		this.getConnectionManager().releaseConnection(conn, this.getDataSource());
+	}
+
+	/** Commit the transaction, */
+	public void commit() {
+		this.getConnectionManager().commit();
+	}
+
+	/** Roll back the transaction */
+	public void rollback() {
+		this.getConnectionManager().rollback();
 	}
 
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR

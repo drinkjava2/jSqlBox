@@ -18,7 +18,6 @@ import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
-import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTx;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
@@ -88,7 +87,7 @@ public class AnnotationGroupTxTest {
 		t.groupCommit();
 		Assert.assertEquals(101, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(101, ctx2.eCountAll(Usr.class));
-		
+
 		try {
 			t.groupPartialCommit();
 		} catch (Exception e) {
@@ -115,17 +114,10 @@ public class AnnotationGroupTxTest {
 		}
 	}
 
-	public static class GroupConnMgr extends BeanBox {
-		public Object create() {
-			return new GroupTxConnectionManager((DataSource) JBEANBOX.getBean(Ds1.class),
-					(DataSource) JBEANBOX.getBean(Ds2.class));
-		}
-	}
-
 	public static class SqlBoxContextBox1 extends BeanBox {
 		public Object create() {
 			SqlBoxContext ctx = new SqlBoxContext((DataSource) JBEANBOX.getBean(Ds1.class));
-			ctx.setConnectionManager((ConnectionManager) JBEANBOX.getBean(GroupConnMgr.class));
+			ctx.setConnectionManager(GroupTxConnectionManager.instance());
 			return ctx;
 		}
 	}
@@ -133,7 +125,7 @@ public class AnnotationGroupTxTest {
 	public static class SqlBoxContextBox2 extends BeanBox {
 		public Object create() {
 			SqlBoxContext ctx = new SqlBoxContext((DataSource) JBEANBOX.getBean(Ds2.class));
-			ctx.setConnectionManager((ConnectionManager) JBEANBOX.getBean(GroupConnMgr.class));
+			ctx.setConnectionManager(GroupTxConnectionManager.instance());
 			return ctx;
 		}
 	}
@@ -143,13 +135,7 @@ public class AnnotationGroupTxTest {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface GTransaction {
-		public Class<?> value() default GpTXBox.class;
-	}
-
-	public static class GpTXBox extends BeanBox {
-		public Object create() {
-			return new GroupTx((GroupTxConnectionManager) JBEANBOX.getBean(GroupConnMgr.class));
-		}
-	}
+		public Class<?> value() default GroupTx.class;
+	} 
 
 }

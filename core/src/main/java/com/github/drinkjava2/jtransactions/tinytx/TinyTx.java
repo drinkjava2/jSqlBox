@@ -19,8 +19,6 @@ package com.github.drinkjava2.jtransactions.tinytx;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -36,41 +34,38 @@ public class TinyTx implements MethodInterceptor {
 	private static final TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
-	private DataSource ds;
 
-	public TinyTx(DataSource ds) {
-		this.ds = ds;
+	public TinyTx() {
 	}
 
-	public TinyTx(DataSource ds, Integer transactionIsolation) {
-		this.ds = ds;
+	public TinyTx(Integer transactionIsolation) {
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	public Connection beginTransaction() {
-		return cm.startTransaction(ds, transactionIsolation);
+	public void beginTransaction() {
+		cm.startTransaction(transactionIsolation);
 	}
 
 	public void commit() throws SQLException {
-		cm.commit(ds);
+		cm.commit();
 	}
 
 	public void rollback() {
-		cm.rollback(ds);
+		cm.rollback();
 	}
 
 	@Override
 	public Object invoke(MethodInvocation caller) throws Throwable {// NOSONAR
-		if (cm.isInTransaction(ds)) {
+		if (cm.isInTransaction()) {
 			return caller.proceed();
 		} else {
 			Object invokeResult = null;
 			try {
-				cm.startTransaction(ds, transactionIsolation);
+				cm.startTransaction(transactionIsolation);
 				invokeResult = caller.proceed();
-				cm.commit(ds);
+				cm.commit();
 			} catch (Throwable t) {
-				cm.rollback(ds);
+				cm.rollback();
 				throw new TransactionsException("TinyTx found a runtime Exception, transaction rollbacked.", t);
 			}
 			return invokeResult;

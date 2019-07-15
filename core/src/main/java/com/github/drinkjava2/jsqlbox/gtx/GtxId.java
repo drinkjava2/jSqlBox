@@ -11,15 +11,17 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
 
 /**
- * This is an entity class to store gtxId (global transaction ID)
- * If no gtx sharding key, there is only one gtxid table 
+ * This is an entity class to store gtxId (global transaction ID) If no gtx
+ * sharding key, there is only one gtxid table
  * 
  * @author Yong Zhu
  * @since 2.0.7
@@ -27,8 +29,16 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 public class GtxId {
 	@Id
 	private String gtxId;
+
 	private Timestamp createTime;
+
+	@Transient
 	private Integer logIndex = 0;
+
+	@Transient
+	private Integer txIsolation = Connection.TRANSACTION_READ_COMMITTED;
+
+	@Transient
 	private List<GtxLock> gtxLockList = new ArrayList<GtxLock>();
 
 	public String getGtxId() {
@@ -53,6 +63,14 @@ public class GtxId {
 
 	public void setLogIndex(Integer logIndex) {
 		this.logIndex = logIndex;
+	}
+
+	public Integer getTxIsolation() {
+		return txIsolation;
+	}
+
+	public void setTxIsolation(Integer txIsolation) {
+		this.txIsolation = txIsolation;
 	}
 
 	public List<GtxLock> getGtxLockList() {

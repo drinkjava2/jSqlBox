@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
@@ -30,27 +29,27 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 
 /**
- * DataSourceManager determine how to get or release connection from DataSource,
- * it can be different transaction strategies like JDBC/SpringManaged/JTA..
+ * GlobalTxCM determine how to get or release connection from
+ * dataSources, this is a distribute transaction tool
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class GtxConnectionManager implements ConnectionManager {
+public class GlobalTxCM implements ConnectionManager {
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 	private SqlBoxContext gtxServer;
 
-	public GtxConnectionManager(SqlBoxContext gtxServer) {
+	public GlobalTxCM(SqlBoxContext gtxServer) {
 		this.gtxServer = gtxServer;
 	}
 
-	public GtxConnectionManager(SqlBoxContext gtxServer, Integer transactionIsolation, DataSource... dataSources) {
+	public GlobalTxCM(SqlBoxContext gtxServer, Integer transactionIsolation) {
 		this.gtxServer = gtxServer;
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	private ThreadLocal<GtxId> threadedGTX = new ThreadLocal<GtxId>();
+	private ThreadLocal<GtxId> gtxId = new ThreadLocal<GtxId>();
 
 	private ThreadLocal<Map<DataSource, Connection>> threadLocalConnections = new ThreadLocal<Map<DataSource, Connection>>() {
 		@Override
@@ -68,59 +67,23 @@ public class GtxConnectionManager implements ConnectionManager {
 	}
 
 	public GtxId getGtx() {
-		return threadedGTX.get();
-	}
-
-	public boolean isGtxOpen() {
-		return threadedGTX.get() != null;
+		return gtxId.get();
 	}
 
 	@Override
-	public boolean isInTransaction(DataSource ds) {
-		return threadedGTX.get() != null;
+	public boolean isInTransaction() {
+		return gtxId.get() != null;
 	}
 
-	public void startGtx() {
+	public void startTransaction() {
 		GtxId gtx = new GtxId();
 		gtx.setGtxId((String) UUID32Generator.INSTANCE.getNextID(null, null, null));
-		threadedGTX.set(gtx);
+		gtxId.set(gtx);
 	}
 
-	public void endGtx() {
-		threadedGTX.set(null);
-		Map<DataSource, Connection> map = threadLocalConnections.get();
-		if (map == null)
-			return;
-		SQLException lastExp = null;
-
-		for (Entry<DataSource, Connection> entry : map.entrySet())
-			try {
-				entry.getValue().setAutoCommit(true); // restore auto commit
-			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
-			}
-
-		for (Entry<DataSource, Connection> entry : map.entrySet())
-			try {
-				entry.getValue().close(); // Close
-			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
-			}
-
-		map.clear();
-		if (lastExp != null)
-			throw new TransactionsException(lastExp);
-	}
-
-	public void commitGtx() {// TODO
-
-	}
-
-	public void rollbackGtx() {// TODO
+	@Override
+	public void startTransaction(int txIsolationLevel) {
+		// TODO Auto-generated method stub
 
 	}
 
@@ -128,7 +91,7 @@ public class GtxConnectionManager implements ConnectionManager {
 	public Connection getConnection(DataSource ds) throws SQLException {
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		Connection conn = null;
-		if (isInTransaction(ds)) {// TODO
+		if (isInTransaction()) {// TODO
 			conn = threadLocalConnections.get().get(ds);
 			if (conn == null) {
 				conn = ds.getConnection(); // NOSONAR Have to get a new connection
@@ -146,7 +109,7 @@ public class GtxConnectionManager implements ConnectionManager {
 
 	@Override
 	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		if (isInTransaction(ds)) {
+		if (isInTransaction()) {
 			// Do nothing, because this connection is used in a current thread's transaction
 		} else {
 			if (conn != null)
@@ -154,6 +117,12 @@ public class GtxConnectionManager implements ConnectionManager {
 		}
 	}
 
-	// =======getter & setter=====
+	public void commit() {// TODO
+
+	}
+
+	public void rollback() {// TODO
+
+	}
 
 }

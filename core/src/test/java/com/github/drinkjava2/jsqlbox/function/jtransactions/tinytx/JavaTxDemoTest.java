@@ -9,7 +9,6 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -44,7 +43,6 @@ public class JavaTxDemoTest {
 	{
 		SqlBoxContext.resetGlobalVariants();
 		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceCfg.class));
-		ctx.setConnectionManager(TinyTxConnectionManager.instance());
 	}
 
 	public void txInsert() {
@@ -54,8 +52,7 @@ public class JavaTxDemoTest {
 
 	@Test
 	public void doTest() throws Exception {
-		TinyTx aop = new TinyTx((DataSource) JBEANBOX.getBean(DataSourceCfg.class));
-		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(aop, "tx*");
+		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(new TinyTx(), "tx*");
 		JavaTxDemoTest tester = BeanBox.getBean(JavaTxDemoTest.class);
 		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
 		try {

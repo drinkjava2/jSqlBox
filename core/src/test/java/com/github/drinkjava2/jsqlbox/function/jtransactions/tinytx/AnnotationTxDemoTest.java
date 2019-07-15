@@ -18,7 +18,6 @@ import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -65,7 +64,6 @@ public class AnnotationTxDemoTest {
 	{
 		SqlBoxContext.resetGlobalVariants();
 		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class));
-		ctx.setConnectionManager(TinyTxConnectionManager.instance());
 	}
 
 	@TX

@@ -11,7 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.value;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
@@ -20,9 +19,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.sql.Connection;
-
-import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -40,7 +36,6 @@ import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /*- 
@@ -165,7 +160,6 @@ public class MasterSlaveTest {
 		txDataSource = TestBase.createH2_HikariDataSource("MasterDb");
 		// Build another master but run in Transaction mode
 		SqlBoxContext masterWithTx = new SqlBoxContext(txDataSource);
-		masterWithTx.setConnectionManager(TinyTxConnectionManager.instance());
 
 		masterWithTx.setSlaves(master.getSlaves());
 		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // Proxy
@@ -195,14 +189,8 @@ public class MasterSlaveTest {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface TX {
-		public Class<?> value() default TheTxBox.class;
+		public Class<?> value() default TinyTx.class;
 	}
-
-	public static class TheTxBox extends BeanBox {
-		{
-			this.injectConstruct(TinyTx.class, DataSource.class, Integer.class, value(txDataSource),
-					value(Connection.TRANSACTION_READ_COMMITTED));
-		}
-	}
+ 
 
 }

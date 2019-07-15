@@ -1,7 +1,6 @@
 package com.github.drinkjava2.jtransactions.tinytx;
 
 import static com.github.drinkjava2.jbeanbox.JBEANBOX.getBean;
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.inject;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,21 +34,15 @@ public class TinyTxTester {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface TX {
-		public Class<?> value() default TheTxBox.class;
+		public Class<?> value() default TinyTx.class;
 	}
 
-	public static class TheTxBox extends BeanBox {
-		{
-			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
-		}
-	}
-	
-	@TX 
+	@TX
 	public void tx_Insert1() {
 		tiny.executeSql("insert into users (id) values('123')");
 	}
 
-	@TX 
+	@TX
 	public void tx_Insert2() {
 		tiny.executeSql("insert into users (id) values('456')");
 		Assert.assertEquals(2L, tiny.queryForObject("select count(*) from users"));
@@ -74,7 +67,7 @@ public class TinyTxTester {
 			tester.tx_Insert1();// this one inserted 1 record
 			tester.tx_Insert2();// this one did not insert, roll back
 		} catch (Exception e) {
-			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
+			Systemout.println("div/0 exception should happen, tx_Insert2 should roll back.\r" + e.getMessage());
 		}
 		Assert.assertEquals(1L, tiny.queryForObject("select count(*) from users"));
 		JBEANBOX.bctx().close();// Release DataSource Pool

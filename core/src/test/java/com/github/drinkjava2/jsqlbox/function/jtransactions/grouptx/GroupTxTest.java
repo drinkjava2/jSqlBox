@@ -14,7 +14,6 @@ import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class GroupTxTest {
-	GroupTxConnectionManager gm;
 	HikariDataSource ds1;
 	HikariDataSource ds2;
 	SqlBoxContext ctx1;
@@ -40,13 +39,11 @@ public class GroupTxTest {
 		ds2.setUsername("sa");
 		ds2.setPassword("");
 
-		gm = new GroupTxConnectionManager(ds1, ds2);
-
 		ctx1 = new SqlBoxContext(ds1);
-		ctx1.setConnectionManager(gm);
+		ctx1.setConnectionManager(GroupTxConnectionManager.instance());
 
 		ctx2 = new SqlBoxContext(ds2);
-		ctx2.setConnectionManager(gm);
+		ctx2.setConnectionManager(GroupTxConnectionManager.instance());
 
 		String[] ddlArray = ctx1.toDropAndCreateDDL(Usr.class);
 		for (String ddl : ddlArray) {
@@ -71,7 +68,7 @@ public class GroupTxTest {
 	@Test
 	public void groupRollbackTest() { // test group roll back
 		for (int i = 0; i < 100; i++) {
-			gm.startGroupTransaction();
+			ctx1.startTransaction();
 			try {
 				Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx1);
@@ -81,9 +78,9 @@ public class GroupTxTest {
 				new Usr().putField("firstName", "Foo").insert(ctx2);
 				Assert.assertEquals(101, ctx2.eCountAll(Tail.class, tail("users")));
 				System.out.println(1 / 0); // Div 0!
-				gm.commitGroupTx();
+				ctx1.commit();
 			} catch (Exception e) {
-				gm.rollbackGroupTx();
+				ctx1.rollback();
 			}
 			Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
 			Assert.assertEquals(100, ctx2.eCountAll(Tail.class, tail("users")));
@@ -93,14 +90,14 @@ public class GroupTxTest {
 	@Test
 	public void groupCommitTest() { // test group commit
 		for (int i = 0; i < 100; i++) {
-			gm.startGroupTransaction();
+			ctx1.startTransaction();
 			try {
 				new Usr().putField("firstName", "Foo").insert(ctx1);
 				ctx1.eInsert(new Usr().setFirstName("Foo"), ctx2);
 				new Usr().putField("firstName", "Bar").insert(ctx2);
-				gm.commitGroupTx();
+				ctx1.commit();
 			} catch (Exception e) {
-				gm.rollbackGroupTx();
+				ctx1.rollback();
 			}
 		}
 		Assert.assertEquals(200, ctx1.eCountAll(Tail.class, tail("users")));
@@ -114,14 +111,15 @@ public class GroupTxTest {
 	@Test
 	public void groupPartialCommitTest() { // simulate partial commit test
 		Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
-		gm.startGroupTransaction();
+		ctx1.startTransaction();
 		try {
 			new Usr().putField("firstName", "Foo").insert(ctx1);
 			new Usr().putField("firstName", "Foo").insert(ctx2);
 			ds2.close();
-			gm.commitGroupTx();
+			ctx1.commit();
 		} catch (Exception e) {
-			gm.rollbackGroupTx();
+			e.printStackTrace();
+			ctx1.rollback();
 		}
 		Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));
 	}

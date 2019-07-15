@@ -46,7 +46,7 @@ public interface Joinpoint {
 	 * @return see the children interfaces' proceed definition
 	 * @throws Throwable if the joinpoint throws an exception
 	 */
-	Object proceed() throws Throwable;//NOSONAR
+	Object proceed() throws Throwable;
 
 	/**
 	 * Return the object that holds the current joinpoint's static part.

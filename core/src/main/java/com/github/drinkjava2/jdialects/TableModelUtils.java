@@ -29,6 +29,15 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.5
  */
 public abstract class TableModelUtils {// NOSONAR
+
+	/**
+	 * Convert tableName to entity class, note: before use this method
+	 * entity2Models() method should be called first to cache talbeModels in memory
+	 */
+	public static Class<?> tableNameToEntityClass(String tableName) {
+		return TableModelUtilsOfEntity.tableNameToEntityClass(tableName);
+	}
+
 	/** Convert entity class to a editable TableModel instance */
 	public static TableModel entity2Model(Class<?> entityClass) {
 		return TableModelUtilsOfEntity.entity2EditableModel(entityClass);
@@ -84,7 +93,7 @@ public abstract class TableModelUtils {// NOSONAR
 			TableModel[] models = db2Models(conn, dialect);
 			for (TableModel model : models) {
 				File writename = new File(
-						outputfolder + "/" + TableModelUtilsOfJavaSrc.getClassNameFromTableModel(model)+".java");
+						outputfolder + "/" + TableModelUtilsOfJavaSrc.getClassNameFromTableModel(model) + ".java");
 				writename.createNewFile();// NOSONAR
 				BufferedWriter out = new BufferedWriter(new FileWriter(writename));
 				String javaSrc = model2JavaSrc(model, linkStyle, activeRecord, packageName);
@@ -126,6 +135,6 @@ public abstract class TableModelUtils {// NOSONAR
 	 */
 	public static void bindGlobalModel(Class<?> entityClass, TableModel tableModel) {
 		TableModelUtilsOfEntity.globalTableModelCache.put(entityClass, tableModel);
-	} 
+	}
 
 }

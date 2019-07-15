@@ -1,7 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jtransactions.tinytx;
 
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.value;
-
 import javax.sql.DataSource;
 
 import org.junit.Assert;
@@ -13,7 +11,6 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
  * TinyTx is a tiny and clean declarative transaction tool, in this unit test
@@ -31,7 +28,6 @@ public class JavaTxTest {
 	{
 		SqlBoxContext.resetGlobalVariants();
 		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class));
-		ctx.setConnectionManager(TinyTxConnectionManager.instance());
 	}
 
 	public void tx_Insert1() {
@@ -47,8 +43,7 @@ public class JavaTxTest {
 
 	@Test
 	public void doTest() throws Exception {
-		TinyTx aop = new TinyTx((DataSource) JBEANBOX.getBean(DataSourceBox.class));
-		JBEANBOX.getBeanBox(JavaTxTest.class).addBeanAop(value(aop), "tx_*");
+		JBEANBOX.getBeanBox(JavaTxTest.class).addBeanAop(new TinyTx(), "tx_*");
 		JavaTxTest tester = BeanBox.getBean(JavaTxTest.class);
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())

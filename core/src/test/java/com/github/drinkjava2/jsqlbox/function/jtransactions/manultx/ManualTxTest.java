@@ -10,8 +10,7 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
-import com.github.drinkjava2.jtransactions.manual.ManualTx;
-import com.mysql.jdbc.Connection;
+import com.github.drinkjava2.jtransactions.manual.ManualTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class ManualTxTest {
@@ -20,7 +19,7 @@ public class ManualTxTest {
 	SqlBoxContext ctx;
 
 	@Before
-	public void init() { 
+	public void init() {
 		dataSource = new HikariDataSource();// DataSource
 		// H2 is a memory database
 		dataSource.setDriverClassName("org.h2.Driver");
@@ -43,33 +42,31 @@ public class ManualTxTest {
 
 	@Test
 	public void DemoTest() {
-		ManualTx tx = new ManualTx(dataSource, Connection.TRANSACTION_READ_COMMITTED);
-		ctx.setConnectionManager(tx);
-		
+		ctx.setConnectionManager(new ManualTxConnectionManager());
 		for (int i = 0; i < 1000; i++) {
-			tx.beginTransaction();
+			ctx.startTransaction();
 			try {
 				Assert.assertEquals(100, ctx.eCountAll(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx);
 				Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
 				System.out.println(1 / 0);
 				new Usr().putField("firstName", "Bar").insert(ctx);
-				tx.commit();
+				ctx.commit();
 			} catch (Exception e) {
-				tx.rollback();
+				ctx.rollback();
 			}
 			Assert.assertEquals(100, ctx.eCountAll(Tail.class, tail("users")));
-		} 
+		}
 
-		tx.beginTransaction();
+		ctx.startTransaction();
 		try {
 			Assert.assertEquals(100, ctx.eCountAll(Usr.class));
 			new Usr().putField("firstName", "Foo").insert(ctx);
 			Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
 			new Usr().putField("firstName", "Bar").insert(ctx);
-			tx.commit();
+			ctx.commit();
 		} catch (Exception e) {
-			tx.rollback();
+			ctx.rollback();
 		}
 		Assert.assertEquals(102, ctx.eCountAll(Tail.class, tail("users")));
 

@@ -40,15 +40,13 @@ public abstract class ClassCacheUtils {// NOSONAR
 	protected static Map<Class<?>, Map<String, Object>> uniqueMethodCache = new ConcurrentHashMap<Class<?>, Map<String, Object>>();
 	protected static Map<Class<?>, Map<String, Method>> classReadMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
 	protected static Map<Class<?>, Map<String, Method>> classWriteMethods = new ConcurrentHashMap<Class<?>, Map<String, Method>>();
-
-	protected static class ClassOrMethodNotExist {// NOSONAR
-	}
+ 
 
 	/** * Check class if exist, if exit return it, otherwise return null */
 	public static Class<?> checkClassExist(String className) {
 		Class<?> result = classExistCache.get(className);
 		if (result != null) {
-			if (ClassOrMethodNotExist.class.equals(result))
+			if (Object.class.equals(result))
 				return null;
 			else
 				return result;
@@ -58,11 +56,11 @@ public abstract class ClassCacheUtils {// NOSONAR
 			if (result != null)
 				classExistCache.put(className, result);
 			else
-				classExistCache.put(className, ClassOrMethodNotExist.class);
+				classExistCache.put(className, Object.class);
 			return result;
 		} catch (Exception e) {
 			DialectException.eatException(e);
-			classExistCache.put(className, ClassOrMethodNotExist.class);
+			classExistCache.put(className, Object.class);
 			return null;
 		}
 	}
@@ -82,7 +80,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 		if (methodMap != null && !methodMap.isEmpty()) {
 			Object result = methodMap.get(uniqueMethodName);
 			if (result != null) {
-				if (ClassOrMethodNotExist.class.equals(result))
+				if (Object.class.equals(result))
 					return null;
 				else
 					return (Method) result;
@@ -98,7 +96,7 @@ public abstract class ClassCacheUtils {// NOSONAR
 				methodMap.put(uniqueMethodName, method);
 				return method;
 			}
-		methodMap.put(uniqueMethodName, ClassOrMethodNotExist.class);
+		methodMap.put(uniqueMethodName, Object.class);
 		return null;
 	}
 

@@ -22,23 +22,23 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.gtx.GlobalTxCM;
 import com.github.drinkjava2.jsqlbox.gtx.GtxId;
-import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 
 /**
- * Global Transaction commit Test
+ * Global Transaction Test
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GtxCommitTest {
+public class GlobalTxTest {
 	final static int DB_QTY = 3; // 3 sharding databases
 	final static int TABLE_QTY = 2; // Each database has 2 sharding tables
 
 	final static int GTX_DB_QTY = 2; // Total have 3 gtx databases
-	GtxConnectionManager gtxMgr;
+	GlobalTxCM gtxMgr;
 
 	@Before
 	public void init() {
@@ -57,7 +57,7 @@ public class GtxCommitTest {
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxLock.class));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.entity2GtxModel(BankAccount.class)));
 		}
-		gtxMgr = new GtxConnectionManager(gtxs[0]);
+		gtxMgr = new GlobalTxCM(gtxs[0]);
 		System.out.println("================gtxs tables created======================\r");
 
 		SqlBoxContext[] ctxs = new SqlBoxContext[DB_QTY];
@@ -82,7 +82,7 @@ public class GtxCommitTest {
 
 	@Test
 	public void crudTest() {
-		gtxMgr.startGtx();
+		gtxMgr.startTransaction();
 		new BankAccount().forFields("bankId", "userId", "balance");
 		new BankAccount().putValues(0L, 0L, 10L).insert();
 		if (1 == 1)
@@ -116,13 +116,13 @@ public class GtxCommitTest {
 	}
 
 	public void testCommitTransaction() {
-		GtxCommitTest tester = new GtxCommitTest();
-		gtxMgr.startGtx();
+		GlobalTxTest tester = new GlobalTxTest();
+		gtxMgr.startTransaction();
 		try {
 			tester.insertAccountsSucess();
-			gtxMgr.commitGtx();
+			gtxMgr.commit();
 		} catch (Exception e) {
-			gtxMgr.rollbackGtx();
+			gtxMgr.rollback();
 		}
 		Assert.assertEquals(100, new BankAccount(0L, 0L).load().getBalance().longValue());
 		Assert.assertEquals(200, new BankAccount(0L, 1L).load().getBalance().longValue());

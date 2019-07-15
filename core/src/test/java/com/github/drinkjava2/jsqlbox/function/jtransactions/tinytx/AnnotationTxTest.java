@@ -1,7 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jtransactions.tinytx;
 
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.inject;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,7 +17,6 @@ import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
  * TinyTx is a tiny and clean declarative transaction tool, in this unit test
@@ -36,7 +33,6 @@ public class AnnotationTxTest {
 	{
 		SqlBoxContext.resetGlobalVariants();
 		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class));
-		ctx.setConnectionManager(TinyTxConnectionManager.instance());
 	}
 
 	@TX
@@ -55,7 +51,7 @@ public class AnnotationTxTest {
 	@Test
 	public void doTest() {
 		AnnotationTxTest tester = BeanBox.getBean(AnnotationTxTest.class);
-		ctx.quiteExecute("drop table user_tb"); 
+		ctx.quiteExecute("drop table user_tb");
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
@@ -86,13 +82,7 @@ public class AnnotationTxTest {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface TX {
-		public Class<?> value() default TheTxBox.class;
-	}
-
-	public static class TheTxBox extends BeanBox {
-		{
-			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
-		}
+		public Class<?> value() default TinyTx.class;
 	}
 
 }
