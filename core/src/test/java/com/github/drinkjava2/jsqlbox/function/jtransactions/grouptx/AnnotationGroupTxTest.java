@@ -79,7 +79,7 @@ public class AnnotationGroupTxTest {
 		try {
 			t.groupRollback();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace(); 
 		}
 		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));

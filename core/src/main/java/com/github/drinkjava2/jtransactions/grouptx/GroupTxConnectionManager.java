@@ -95,50 +95,51 @@ public class GroupTxConnectionManager implements ConnectionManager {
 		Collection<Connection> conns = threadedGroupTxInfo.get().getConnectionCache().values();
 		for (Connection con : conns) {
 			try {
-				con.commit();
+				if (lastExp != null)
+					con.rollback();
+				else
+					con.commit();
 			} catch (SQLException e) {
 				if (lastExp != null)
 					e.setNextException(lastExp);
 				lastExp = e;
 			}
 		}
-		if (lastExp == null)
-			endTransaction();
+		if (lastExp != null)
+			throw new TransactionsException(lastExp);
+		else
+			endTransaction(lastExp);
 	}
 
 	@Override
 	public void rollback() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
-		try {
-			Collection<Connection> conns = threadedGroupTxInfo.get().getConnectionCache().values();
-			if (conns.isEmpty())
-				return; // no actual transaction open
-			for (Connection con : conns) {
-				if (con.getAutoCommit())
-					throw new TransactionsException("Connection is auto commit status, can not commit");
+		SQLException lastExp = null;
+		Collection<Connection> conns = threadedGroupTxInfo.get().getConnectionCache().values();
+		for (Connection con : conns) {
+			try {
 				con.rollback();
+			} catch (SQLException e) {
+				if (lastExp != null)
+					e.setNextException(lastExp);
+				lastExp = e;
 			}
-		} catch (SQLException e) {
-			throw new TransactionsException(e);
-		} finally {
-			endTransaction();
 		}
+		endTransaction(lastExp);
 	}
 
-	private void endTransaction() {// NOSONAR
+	private void endTransaction(SQLException lastExp) {// NOSONAR
 		if (!isInTransaction())
 			return;
 		Collection<Connection> conns = threadedGroupTxInfo.get().getConnectionCache().values();
 		threadedGroupTxInfo.set(null);
 		if (conns.isEmpty())
 			return; // no actual transaction open
-		SQLException lastExp = null;
 		for (Connection con : conns) {
 			if (con == null)
 				continue;
 			try {
-				con.rollback();
 				if (!con.getAutoCommit())
 					con.setAutoCommit(true);
 			} catch (SQLException e) {
@@ -155,8 +156,8 @@ public class GroupTxConnectionManager implements ConnectionManager {
 			}
 		}
 		conns.clear();
-		if (lastExp != null)
-			throw new TransactionsException(lastExp);
+//		if (lastExp != null)
+//			throw new TransactionsException(lastExp);
 	}
 
 }

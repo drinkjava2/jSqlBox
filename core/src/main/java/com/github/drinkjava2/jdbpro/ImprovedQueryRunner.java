@@ -941,6 +941,9 @@ public class ImprovedQueryRunner extends QueryRunner {
 	/** This method is not thread safe, suggest only use at program starting */
 	public void setSlaves(DbPro[] slaves) {// NOSONAR
 		this.slaves = slaves;
+		for (DbPro dbPro : slaves)
+			if (dbPro != null)
+				dbPro.setConnectionManager(null); // Slave should not open transaction
 	}
 
 	public DbPro[] getMasters() {
