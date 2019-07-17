@@ -33,12 +33,9 @@ public class AnnotationGroupTxTest {
 	SqlBoxContext ctx2 = JBEANBOX.getBean(SqlBoxContextBox2.class);
 
 	@Before
-	public void init() {
-		String[] ddlArray = ctx1.toCreateDDL(Usr.class);
-		for (String ddl : ddlArray) {
-			ctx1.nExecute(ddl);
-			ctx2.nExecute(ddl);
-		}
+	public void init() {  
+		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
+		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
 		for (int i = 1; i <= 100; i++) {
 			new Usr().setFirstName("Foo" + i).setLastName("Bar" + i).setAge(i).insert(ctx1);
 			new Usr().setFirstName("FOO" + i).setLastName("BAR" + i).setAge(i).insert(ctx2);
@@ -101,7 +98,7 @@ public class AnnotationGroupTxTest {
 
 	public static class Ds1 extends HikariCPBox {
 		{
-			injectValue("jdbcUrl", "jdbc:h2:mem:Ds1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			injectValue("jdbcUrl", "jdbc:h2:mem:AnnoGroupTxDs1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 			injectValue("driverClassName", "org.h2.Driver");
 			injectValue("username", "sa");
 			injectValue("password", "");
@@ -110,7 +107,7 @@ public class AnnotationGroupTxTest {
 
 	public static class Ds2 extends Ds1 {
 		{
-			injectValue("jdbcUrl", "jdbc:h2:mem:Ds2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			injectValue("jdbcUrl", "jdbc:h2:mem:AnnoGroupTxDs2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		}
 	}
 

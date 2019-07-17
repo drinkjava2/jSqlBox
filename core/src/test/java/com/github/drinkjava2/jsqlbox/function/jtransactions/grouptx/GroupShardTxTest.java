@@ -130,7 +130,7 @@ public class GroupShardTxTest {
 
 	public static class Ds1 extends HikariCPBox {
 		{
-			injectValue("jdbcUrl", "jdbc:h2:mem:Ds1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			injectValue("jdbcUrl", "jdbc:h2:mem:GpShardDs1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 			injectValue("driverClassName", "org.h2.Driver");
 			injectValue("username", "sa");
 			injectValue("password", "");
@@ -139,7 +139,7 @@ public class GroupShardTxTest {
 
 	public static class Ds2 extends Ds1 {
 		{
-			injectValue("jdbcUrl", "jdbc:h2:mem:Ds2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			injectValue("jdbcUrl", "jdbc:h2:mem:GpShardDs2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		}
 	}
 

@@ -2,6 +2,8 @@ package com.github.drinkjava2.jsqlbox.function.jtransactions.grouptx;
 
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.tail;
 
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,7 +26,7 @@ public class GroupTxTest {
 		ds1 = new HikariDataSource();// DataSource
 		// H2 is a memory database
 		ds1.setDriverClassName("org.h2.Driver");
-		ds1.setJdbcUrl("jdbc:h2:mem:DBName1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		ds1.setJdbcUrl("jdbc:h2:mem:DBName_ds1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		ds1.setMaximumPoolSize(9);
 		ds1.setConnectionTimeout(1000);
 		ds1.setUsername("sa");
@@ -33,7 +35,7 @@ public class GroupTxTest {
 		ds2 = new HikariDataSource();// DataSource
 		// H2 is a memory database
 		ds2.setDriverClassName("org.h2.Driver");
-		ds2.setJdbcUrl("jdbc:h2:mem:DBName2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		ds2.setJdbcUrl("jdbc:h2:mem:DBName_ds2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		ds2.setMaximumPoolSize(9);
 		ds2.setConnectionTimeout(1000);
 		ds2.setUsername("sa");
@@ -118,10 +120,10 @@ public class GroupTxTest {
 			ds2.close();
 			ctx1.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+		 	//e.printStackTrace();
 			ctx1.rollback();
 		}
-		Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));
+		Assert.assertEquals(10000, ctx1.eCountAll(Tail.class, tail("users")));//TODO debug
 	}
 
 }

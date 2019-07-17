@@ -17,7 +17,6 @@
 package com.github.drinkjava2.jtransactions.tinytx;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -31,7 +30,7 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  * @since 1.0.0
  */
 public class TinyTx implements MethodInterceptor {
-	private static final TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
+	private TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
@@ -42,18 +41,11 @@ public class TinyTx implements MethodInterceptor {
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	public void beginTransaction() {
-		cm.startTransaction(transactionIsolation);
+	public TinyTx(TinyTxConnectionManager cm, Integer transactionIsolation) {
+		this.cm = cm;
+		this.transactionIsolation = transactionIsolation;
 	}
-
-	public void commit() throws SQLException {
-		cm.commit();
-	}
-
-	public void rollback() {
-		cm.rollback();
-	}
-
+ 
 	@Override
 	public Object invoke(MethodInvocation caller) throws Throwable {// NOSONAR
 		if (cm.isInTransaction()) {

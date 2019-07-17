@@ -10,7 +10,6 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class TinyTxTest {
@@ -42,31 +41,30 @@ public class TinyTxTest {
 
 	@Test
 	public void DemoTest() {
-		TinyTx tx = new TinyTx();
 		for (int i = 0; i < 1000; i++) {
-			tx.beginTransaction();
+			ctx.startTransaction();
 			try {
 				Assert.assertEquals(100, ctx.eCountAll(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx);
 				Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
 				System.out.println(1 / 0);
 				new Usr().putField("firstName", "Bar").insert(ctx);
-				tx.commit();
+				ctx.commit();
 			} catch (Exception e) {
-				tx.rollback();
+				ctx.rollback();
 			}
 			Assert.assertEquals(100, ctx.eCountAll(Tail.class, tail("users")));
 		}
 
-		tx.beginTransaction();
+		ctx.startTransaction();
 		try {
 			Assert.assertEquals(100, ctx.eCountAll(Usr.class));
 			new Usr().putField("firstName", "Foo").insert(ctx);
 			Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
 			new Usr().putField("firstName", "Bar").insert(ctx);
-			tx.commit();
+			ctx.commit();
 		} catch (Exception e) {
-			tx.rollback();
+			ctx.rollback();
 		}
 		Assert.assertEquals(102, ctx.eCountAll(Tail.class, tail("users")));
 

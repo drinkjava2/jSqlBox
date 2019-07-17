@@ -68,10 +68,12 @@ public class GroupTxConnectionManager implements ConnectionManager {
 	public Connection getConnection(DataSource ds) throws SQLException {
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		if (isInTransaction()) {
-			Connection conn = threadedGroupTxInfo.get().getConnectionCache().get(ds);
+			TxInfo tx = threadedGroupTxInfo.get();
+			Connection conn = tx.getConnectionCache().get(ds);
 			if (conn == null) {
 				conn = ds.getConnection(); // NOSONAR
 				conn.setAutoCommit(false);
+				conn.setTransactionIsolation(tx.getTxIsolationLevel());
 				threadedGroupTxInfo.get().getConnectionCache().put(ds, conn);
 			}
 			return conn;
@@ -156,8 +158,8 @@ public class GroupTxConnectionManager implements ConnectionManager {
 			}
 		}
 		conns.clear();
-//		if (lastExp != null)
-//			throw new TransactionsException(lastExp);
+		// if (lastExp != null)
+		// throw new TransactionsException(lastExp);
 	}
 
 }

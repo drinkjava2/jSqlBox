@@ -17,13 +17,11 @@
 package com.github.drinkjava2.jtransactions.grouptx;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import com.github.drinkjava2.jtransactions.TransactionsException;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
  * A transaction MethodInterceptor
@@ -32,7 +30,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
  * @since 1.0.0
  */
 public class GroupTx implements MethodInterceptor {
-	private static final TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
+	private GroupTxConnectionManager cm = GroupTxConnectionManager.instance();
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
@@ -43,16 +41,9 @@ public class GroupTx implements MethodInterceptor {
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	public void beginTransaction() {
-		cm.startTransaction(transactionIsolation);
-	}
-
-	public void commit() throws SQLException {
-		cm.commit();
-	}
-
-	public void rollback() {
-		cm.rollback();
+	public GroupTx(GroupTxConnectionManager cm, Integer transactionIsolation) {
+		this.cm = cm;
+		this.transactionIsolation = transactionIsolation;
 	}
 
 	@Override

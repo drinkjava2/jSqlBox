@@ -62,13 +62,17 @@ public class TinyTxConnectionManager implements ConnectionManager {
 	public Connection getConnection(DataSource ds) throws SQLException {
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		if (isInTransaction()) {
-			Connection conn = threadedTxInfo.get().getConnectionCache().get(ds);
-			if (conn == null && !threadedTxInfo.get().getConnectionCache().isEmpty())
+			TxInfo tx = threadedTxInfo.get();
+			if (tx.getConnectionCache().size() > 1)
+				throw new TransactionsException(
+						"TinyTxConnectionManager can only support one connection in one thread");
+			Connection conn = tx.getConnectionCache().get(ds);
+			if (conn == null && !tx.getConnectionCache().isEmpty())
 				throw new TransactionsException("Error: TinyTx do not support get multiple connections in one thread");
 			if (conn == null) {
 				conn = ds.getConnection(); // NOSONAR
 				conn.setAutoCommit(false);
-				conn.setTransactionIsolation(threadedTxInfo.get().getTxIsolationLevel());
+				conn.setTransactionIsolation(tx.getTxIsolationLevel());
 				threadedTxInfo.get().getConnectionCache().put(ds, conn);
 			}
 			return conn;
@@ -113,13 +117,11 @@ public class TinyTxConnectionManager implements ConnectionManager {
 			Collection<Connection> conns = threadedTxInfo.get().getConnectionCache().values();
 			if (conns.size() == 0)
 				return; // no actual transaction open
-			if (conns.size() > 1)
-				throw new TransactionsException(
-						"TinyTx can only support one dataSource in one thread, can not rollback");
 			Connection con = conns.iterator().next();
 			if (con.getAutoCommit())
 				throw new TransactionsException("Connection is auto commit status, can not rollback");
 			con.rollback();
+			con.setAutoCommit(true);
 		} catch (SQLException e) {
 			throw new TransactionsException(e);
 		} finally {
@@ -139,9 +141,7 @@ public class TinyTxConnectionManager implements ConnectionManager {
 				throw new TransactionsException(
 						"TinyTx can only support one dataSource in one thread, can not end transaction");
 			con = conns.iterator().next();
-			if (con.getAutoCommit())
-				throw new TransactionsException("Connection is auto commit status, can not end transaction");
-			else
+			if (!con.getAutoCommit())
 				con.setAutoCommit(true);
 		} catch (SQLException e) {
 			throw new TransactionsException("Fail to setAutoCommit to true", e);
