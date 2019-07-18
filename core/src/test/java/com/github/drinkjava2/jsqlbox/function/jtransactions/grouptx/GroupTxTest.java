@@ -2,8 +2,6 @@ package com.github.drinkjava2.jsqlbox.function.jtransactions.grouptx;
 
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.tail;
 
-import java.util.Random;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -120,10 +118,9 @@ public class GroupTxTest {
 			ds2.close();
 			ctx1.commit();
 		} catch (Exception e) {
-		 	//e.printStackTrace();
 			ctx1.rollback();
 		}
-		Assert.assertEquals(10000, ctx1.eCountAll(Tail.class, tail("users")));//TODO debug
+		Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));// TODO debug
 	}
 
 }

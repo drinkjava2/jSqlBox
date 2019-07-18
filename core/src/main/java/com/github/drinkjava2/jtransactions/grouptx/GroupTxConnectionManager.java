@@ -97,10 +97,7 @@ public class GroupTxConnectionManager implements ConnectionManager {
 		Collection<Connection> conns = threadedGroupTxInfo.get().getConnectionCache().values();
 		for (Connection con : conns) {
 			try {
-				if (lastExp != null)
-					con.rollback();
-				else
-					con.commit();
+				con.commit();
 			} catch (SQLException e) {
 				if (lastExp != null)
 					e.setNextException(lastExp);
@@ -110,7 +107,7 @@ public class GroupTxConnectionManager implements ConnectionManager {
 		if (lastExp != null)
 			throw new TransactionsException(lastExp);
 		else
-			endTransaction(lastExp);
+			endTransaction(null);
 	}
 
 	@Override
