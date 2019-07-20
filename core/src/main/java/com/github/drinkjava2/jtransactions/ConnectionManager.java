@@ -24,17 +24,21 @@ import javax.sql.DataSource;
  * @since 1.0.0
  */
 public interface ConnectionManager {
-	/**
-	 * Check if a connection already be get from given dataSource and be cached as
-	 * it started a Transaction
-	 */
-	public boolean isInTransaction();
 
-	/** Start a transaction */
+	/** Get current thread's transaction info */
+	public TxInfo getThreadTxInfo();
+
+	/** Get current thread's transaction info */
+	public void setThreadTxInfo(TxInfo txInfo);
+
+	/** Start a transaction with default connection isolation level */
 	public void startTransaction();
 
 	/** Start a transaction with given connection isolation level */
 	public void startTransaction(int txIsolationLevel);
+
+	/** Check if is in transaction */
+	public boolean isInTransaction();
 
 	/**
 	 * A ConnectionManager implementation determine how to get connection from

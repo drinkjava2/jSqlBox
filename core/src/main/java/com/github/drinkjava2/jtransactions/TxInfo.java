@@ -22,13 +22,13 @@ import javax.sql.DataSource;
  * transaction started.
  */
 public class TxInfo {
-	private Integer txIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
+	protected Integer txIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
 
 	// This is designed for bind connection on ds
-	private Map<DataSource, Connection> connectionCache;
+	protected Map<DataSource, Connection> connectionCache;
 
 	// This is designed for just store connection in TxInfo
-	private Connection connection = null;
+	protected Connection connection = null;
 
 	public TxInfo() {
 	}
@@ -37,6 +37,7 @@ public class TxInfo {
 		this.txIsolationLevel = txIsolationLevel;
 	}
 
+	// ===============getter setters==================
 	public Integer getTxIsolationLevel() {
 		return txIsolationLevel;
 	}

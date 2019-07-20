@@ -17,7 +17,7 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.jtransactions.ConnectionManager;
+import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
 
@@ -28,7 +28,7 @@ import com.github.drinkjava2.jtransactions.TxInfo;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class TinyTxConnectionManager implements ConnectionManager {
+public class TinyTxConnectionManager extends ThreadConnectionManager {
 
 	private static class InnerTinyTxCM {// NOSONAR
 		private static final TinyTxConnectionManager INSTANCE = new TinyTxConnectionManager();
@@ -41,28 +41,11 @@ public class TinyTxConnectionManager implements ConnectionManager {
 		return InnerTinyTxCM.INSTANCE;
 	}
 
-	private static final ThreadLocal<TxInfo> threadedTxInfo = new ThreadLocal<TxInfo>();
-
-	@Override
-	public boolean isInTransaction() {
-		return threadedTxInfo.get() != null;
-	}
-
-	@Override
-	public void startTransaction() {
-		threadedTxInfo.set(new TxInfo());
-	}
-
-	@Override
-	public void startTransaction(int txIsolationLevel) {
-		threadedTxInfo.set(new TxInfo(txIsolationLevel));
-	}
-
 	@Override
 	public Connection getConnection(DataSource ds) throws SQLException {
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		if (isInTransaction()) {
-			TxInfo tx = threadedTxInfo.get();
+			TxInfo tx = getThreadTxInfo();
 			if (tx.getConnectionCache().size() > 1)
 				throw new TransactionsException(
 						"TinyTxConnectionManager can only support one connection in one thread");
@@ -73,7 +56,7 @@ public class TinyTxConnectionManager implements ConnectionManager {
 				conn = ds.getConnection(); // NOSONAR
 				conn.setAutoCommit(false);
 				conn.setTransactionIsolation(tx.getTxIsolationLevel());
-				threadedTxInfo.get().getConnectionCache().put(ds, conn);
+				tx.getConnectionCache().put(ds, conn);
 			}
 			return conn;
 		} else
@@ -93,7 +76,7 @@ public class TinyTxConnectionManager implements ConnectionManager {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		try {
-			Collection<Connection> conns = threadedTxInfo.get().getConnectionCache().values();
+			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 			if (conns.size() == 0)
 				return; // no actual transaction open
 			if (conns.size() > 1)
@@ -114,7 +97,7 @@ public class TinyTxConnectionManager implements ConnectionManager {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		try {
-			Collection<Connection> conns = threadedTxInfo.get().getConnectionCache().values();
+			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 			if (conns.size() == 0)
 				return; // no actual transaction open
 			Connection con = conns.iterator().next();
@@ -134,8 +117,8 @@ public class TinyTxConnectionManager implements ConnectionManager {
 			return;
 		Connection con = null;
 		try {
-			Collection<Connection> conns = threadedTxInfo.get().getConnectionCache().values();
-			if (conns.size() == 0)
+			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
+			if (conns.isEmpty())
 				return; // no actual transaction open
 			if (conns.size() > 1)
 				throw new TransactionsException(
@@ -146,8 +129,8 @@ public class TinyTxConnectionManager implements ConnectionManager {
 		} catch (SQLException e) {
 			throw new TransactionsException("Fail to setAutoCommit to true", e);
 		} finally {
-			threadedTxInfo.get().getConnectionCache().clear();
-			threadedTxInfo.set(null);
+			getThreadTxInfo().getConnectionCache().clear();
+			setThreadTxInfo(null);
 			if (con != null)
 				try {
 					con.close();

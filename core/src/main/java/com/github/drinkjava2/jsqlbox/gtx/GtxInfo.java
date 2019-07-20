@@ -11,13 +11,12 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
-import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
+import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
  * This is an entity class to store gtxId (global transaction ID) If no gtx
@@ -26,20 +25,17 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GtxId {
+public class GtxInfo extends TxInfo {
 	@Id
-	private String gtxId;
+	protected String gtxId;
 
-	private Timestamp createTime;
+	protected Timestamp createTime;
 
-	@Transient
-	private Integer logIndex = 0;
+	protected List<GtxLock> gtxLockList = null;
 
-	@Transient
-	private Integer txIsolation = Connection.TRANSACTION_READ_COMMITTED;
+	protected List<Object> gtxUndoLog = null;
 
-	@Transient
-	private List<GtxLock> gtxLockList = new ArrayList<GtxLock>();
+	protected Integer gtxLockQty = 0;
 
 	public String getGtxId() {
 		return gtxId;
@@ -57,22 +53,6 @@ public class GtxId {
 		this.createTime = createTime;
 	}
 
-	public Integer getLogIndex() {
-		return logIndex;
-	}
-
-	public void setLogIndex(Integer logIndex) {
-		this.logIndex = logIndex;
-	}
-
-	public Integer getTxIsolation() {
-		return txIsolation;
-	}
-
-	public void setTxIsolation(Integer txIsolation) {
-		this.txIsolation = txIsolation;
-	}
-
 	public List<GtxLock> getGtxLockList() {
 		return gtxLockList;
 	}
@@ -80,5 +60,24 @@ public class GtxId {
 	public void setGtxLockList(List<GtxLock> gtxLockList) {
 		this.gtxLockList = gtxLockList;
 	}
+
+	public List<Object> getGtxUndoLog() {
+		if(gtxUndoLog==null)
+			gtxUndoLog=new ArrayList<Object>();
+		return gtxUndoLog;
+	}
+
+	public void setGtxUndoLog(List<Object> gtxUndoLog) { 
+		this.gtxUndoLog = gtxUndoLog;
+	}
+
+	public Integer getGtxLockQty() {
+		return gtxLockQty;
+	}
+
+	public void setGtxLockQty(Integer gtxLockQty) {
+		this.gtxLockQty = gtxLockQty;
+	}
+	
 
 }

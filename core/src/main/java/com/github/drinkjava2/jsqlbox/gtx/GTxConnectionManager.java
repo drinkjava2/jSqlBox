@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jtransactions.grouptx;
+package com.github.drinkjava2.jsqlbox.gtx;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -27,24 +27,21 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
- * GroupTxConnectionManager determine how to get or release connection from a
- * group of DataSource, but transaction only available for 1 dataSource, usually
- * used for sharding databases.
+ * GTxConnectionManager determine how to get or release connection from
+ * dataSources, this is a distribute transaction ConnectionManager
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class GroupTxConnectionManager extends ThreadConnectionManager {
+public class GTxConnectionManager extends ThreadConnectionManager {
 
-	private static class InnerGroupTxMgr {// NOSONAR
-		private static final GroupTxConnectionManager INSTANCE = new GroupTxConnectionManager();
+	private static class InnerGtxMgr {// NOSONAR
+		private static final GTxConnectionManager INSTANCE = new GTxConnectionManager();
 	}
 
-	/**
-	 * @return A singleton instance of GroupTxConnectionManager
-	 */
-	public static final GroupTxConnectionManager instance() {
-		return InnerGroupTxMgr.INSTANCE;
+	/** @return A singleton GTxConnectionManager instance */
+	public static final GTxConnectionManager instance() {
+		return InnerGtxMgr.INSTANCE;
 	}
 
 	@Override
@@ -138,8 +135,6 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 			}
 		}
 		conns.clear();
-		if (lastExp != null)
-			throw new TransactionsException(lastExp);
 	}
 
 }

@@ -18,10 +18,11 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
+import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
- * SpringTxConnectionManager is the implementation of ConnectionManager, get connection and
- * release connection from Spring environment
+ * SpringTxConnectionManager is the implementation of ConnectionManager, get
+ * connection and release connection from Spring environment
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -36,7 +37,8 @@ public class SpringTxConnectionManager implements ConnectionManager {
 		try {
 			dataSourceUtilClass = Class.forName("org.springframework.jdbc.datasource.DataSourceUtils");
 		} catch (ClassNotFoundException e) {
-			throw new TransactionsException("Error:spring-jdbc jar missing, fail to build SpringTxConnectionManager.", e);
+			throw new TransactionsException("Error:spring-jdbc jar missing, fail to build SpringTxConnectionManager.",
+					e);
 		}
 		Class<?> transactionSynchronizationManagerClass;
 		try {
@@ -94,7 +96,8 @@ public class SpringTxConnectionManager implements ConnectionManager {
 		try {
 			return (Connection) getConnectionMethod.invoke(null, dataSource);
 		} catch (Exception e) {
-			throw new TransactionsException("Error: SpringTxConnectionManager fail to get connection from dataSource.", e);
+			throw new TransactionsException("Error: SpringTxConnectionManager fail to get connection from dataSource.",
+					e);
 		}
 	}
 
@@ -113,14 +116,25 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	@Override
 	public void commit() {
 		throw new TransactionsException(
-				"commit method not implemented by current jTransactions version, please use Spring's method directly or submit a pull request");
+				"commit method not implemented by current jTransactions version, please use Spring's method directly");
 	}
 
 	@Override
 	public void rollback() {
 		throw new TransactionsException(
-				"rollback method not implemented by current jTransactions version, please use Spring's method directly or submit a pull request");
+				"rollback method not implemented by current jTransactions version, please use Spring's method directly");
+	}
 
+	@Override
+	public TxInfo getThreadTxInfo() {
+		throw new TransactionsException(
+				"getThreadTxInfo method not implemented by current jTransactions version, please use Spring's method directly");
+	}
+
+	@Override
+	public void setThreadTxInfo(TxInfo txInfo) {
+		throw new TransactionsException(
+				"setThreadTxInfo method not implemented by current jTransactions version, please use Spring's method directly");
 	}
 
 }

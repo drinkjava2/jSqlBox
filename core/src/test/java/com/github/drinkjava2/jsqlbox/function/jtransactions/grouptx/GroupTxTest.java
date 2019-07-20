@@ -118,7 +118,11 @@ public class GroupTxTest {
 			ds2.close();
 			ctx1.commit();
 		} catch (Exception e) {
-			ctx1.rollback();
+			try {
+				ctx1.rollback();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
 		Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));// TODO debug
 	}

@@ -32,8 +32,8 @@ import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.gtx.GtxId;
-import com.github.drinkjava2.jsqlbox.gtx.GlobalTxCM;
+import com.github.drinkjava2.jsqlbox.gtx.GTxConnectionManager;
+import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
@@ -92,18 +92,18 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	// ==========================Global Transaction about================
 	/** If current GlobalTxCM opened global Transaction */
 	public boolean isGtxOpen() {
-		return connectionManager != null && connectionManager instanceof GlobalTxCM
+		return connectionManager != null && connectionManager instanceof GTxConnectionManager
 				&& getGtxManager().isInTransaction();
 	}
 
 	/** Get current GtxLockId, should be called inside of a global transaction */
-	public GtxId getGtx() {
-		return getGtxManager().getGtx();
+	public GtxInfo getGtxInfo() {
+		return (GtxInfo) getGtxManager().getThreadTxInfo();
 	}
 
 	/** Get current ConnectionManager and assume it's a GlobalTxCM */
-	public GlobalTxCM getGtxManager() {
-		return (GlobalTxCM) connectionManager;
+	public GTxConnectionManager getGtxManager() {
+		return (GTxConnectionManager) connectionManager;
 	}
 
 	// ==========================end=============
@@ -348,7 +348,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	public boolean eExistStrict(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityExistStrict(this, entity, optionItems);
 	}
-	
+
 	/** Check if entity exist by its id */
 	public boolean eExist(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityExist(this, entity, optionItems);

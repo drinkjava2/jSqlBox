@@ -19,10 +19,11 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
+import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
- * JFinalTxManager is the implementation of ConnectionManager, get connection and
- * release connection from jFinal environment
+ * JFinalTxManager is the implementation of ConnectionManager, get connection
+ * and release connection from jFinal environment
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -121,13 +122,25 @@ public class JFinalTxManager implements ConnectionManager {
 	@Override
 	public void commit() {
 		throw new TransactionsException(
-				"commit method not implemented by current jTransactions version, please use JFinal's method directly or submit a pull request");
+				"commit method not implemented by current jTransactions version, please use JFinal's method directly");
 	}
 
 	@Override
 	public void rollback() {
 		throw new TransactionsException(
-				"rollback method not implemented by current jTransactions version, please use JFinal's method directly or submit a pull request");
+				"rollback method not implemented by current jTransactions version, please use JFinal's method directly");
+	}
+
+	@Override
+	public TxInfo getThreadTxInfo() {
+		throw new TransactionsException(
+				"getThreadTxInfo method not implemented by current jTransactions version, please use JFinal's method directly");
+	}
+
+	@Override
+	public void setThreadTxInfo(TxInfo txInfo) {
+		throw new TransactionsException(
+				"setThreadTxInfo method not implemented by current jTransactions version, please use JFinal's method directly");
 	}
 
 }

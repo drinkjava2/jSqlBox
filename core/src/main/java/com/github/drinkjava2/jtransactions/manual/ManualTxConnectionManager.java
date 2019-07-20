@@ -144,4 +144,14 @@ public class ManualTxConnectionManager implements ConnectionManager {
 		}
 	}
 
+	@Override
+	public TxInfo getThreadTxInfo() {
+		return txInfo;
+	}
+
+	@Override
+	public void setThreadTxInfo(TxInfo txInfo) {
+		this.txInfo = txInfo;
+	}
+
 }
