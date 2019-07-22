@@ -712,16 +712,13 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = cleanUpParam(optionItems);
 			return entityUpdateTry(paramCtx, entityBean, newParams);
 		}
-		boolean gtxOpen = ctx.isGtxOpen();// if in GTX transaction?
 		Object oldEntity = null;
-		if (gtxOpen)
+		if (ctx.isGtxOpen())// if in GTX transaction?
 			oldEntity = doEntityLoadByIdTry(ctx, entityBean.getClass(), entityBean, optionItems);
 		int result = doEntityUpdateTry(ctx, entityBean, optionItems);
-		if (gtxOpen) {
-			if (oldEntity != null)
-				GtxUtils.logExistStrict(ctx, oldEntity);
-			if (result == 1)
-				GtxUtils.logUpdate(ctx, entityBean); 
+		if (result == 1 && ctx.isGtxOpen()) {
+			GtxUtils.logExistStrict(ctx, oldEntity);
+			GtxUtils.logUpdate(ctx, entityBean);
 		}
 		return result;
 	}
@@ -826,7 +823,6 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * affected
 	 */
 	public static int entityDeleteTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
-		//TODO work on here
 		return entityDeleteByIdTry(ctx, entityBean.getClass(), entityBean, optionItems);
 	}
 
@@ -834,6 +830,22 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * Try delete entity by Id, return row affected, return row affected
 	 */
 	public static int entityDeleteByIdTry(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityDeleteByIdTry(paramCtx, entityClass, id, newParams);
+		}
+		Object oldEntity = null;
+		if (ctx.isGtxOpen())// if in GTX transaction?
+			oldEntity = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
+		int result = doEntityDeleteByIdTry(ctx, entityClass, id, optionItems);
+		if (result == 1 && ctx.isGtxOpen())
+			GtxUtils.logDelete(ctx, oldEntity);
+		return result;
+	}
+
+	private static int doEntityDeleteByIdTry(SqlBoxContext ctx, Class<?> entityClass, Object id,
+			Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
 			Object[] newParams = cleanUpParam(optionItems);
@@ -918,7 +930,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = cleanUpParam(optionItems);
 			return entityLoadTry(paramCtx, entityBean, newParams);
 		}
-		return doEntityLoadTry(ctx, entityBean, optionItems);
+		int result = doEntityLoadTry(ctx, entityBean, optionItems);
+		if (result == 1 && ctx.isGtxOpen())
+			GtxUtils.logExistStrict(ctx, entityBean);
+		return result;
 	}
 
 	/** Load entity according entity's id fields, return row affected */
@@ -1002,7 +1017,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = cleanUpParam(optionItems);
 			return entityLoadByIdTry(paramCtx, entityClass, id, newParams);
 		}
-		return doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
+		T result = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
+		if (result != null && ctx.isGtxOpen())
+			GtxUtils.logExistStrict(ctx, result);
+		return result;
 	}
 
 	/**
@@ -1026,7 +1044,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 		T bean = SqlBoxContextUtils.entityOrClassToBean(entityClass);
 		bean = EntityIdUtils.setEntityIdValues(bean, id, cols.values());
-		int result = entityLoadTry(ctx, bean, optionItems);
+		int result = doEntityLoadTry(ctx, bean, optionItems);
 		if (result != 1)
 			return null;
 		else
@@ -1048,7 +1066,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Check if entityBean exist in database by its id
+	 * Equal to entityExistById method, Check if entityBean exist in database by its id
 	 */
 	public static boolean entityExist(SqlBoxContext ctx, Object entityBean, Object... optionItems) {
 		return entityExistById(ctx, entityBean.getClass(), entityBean, optionItems);
@@ -1063,7 +1081,21 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = cleanUpParam(optionItems);
 			return entityExistById(paramCtx, entityClass, id, newParams);
 		}
+		boolean result= doEntityExistById(ctx, entityClass, id, optionItems);
+		if(result && ctx.isGtxOpen()) {
+			Object oldEntity=doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
+			GtxUtils.logExist(ctx, oldEntity);
+		}
+		return result;
+	}
 
+	private static boolean doEntityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id,
+			Object... optionItems) {// NOSONAR
+		SqlBoxContext paramCtx = extractCtx(optionItems);
+		if (paramCtx != null) {
+			Object[] newParams = cleanUpParam(optionItems);
+			return entityExistById(paramCtx, entityClass, id, newParams);
+		}
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
