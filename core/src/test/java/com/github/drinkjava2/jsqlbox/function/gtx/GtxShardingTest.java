@@ -22,23 +22,23 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.gtx.GTxConnectionManager;
+import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 
 /**
- * Global Transaction with sharding Test
+ * Global Transaction in sharding environment
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GlobalTxShardTest {
+public class GtxShardingTest {
 	final static int DB_QTY = 3; // 3 sharding databases
 	final static int TABLE_QTY = 2; // Each database has 2 sharding tables
 
 	final static int GTX_DB_QTY = 2; // Total have 3 gtx databases
-	GTxConnectionManager gtxMgr;
+	GtxConnectionManager gtxMgr;
 
 	@Before
 	public void init() {
@@ -55,8 +55,8 @@ public class GlobalTxShardTest {
 			// gtxs[i].setConnectionManager(new ManualTx(ds));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxInfo.class));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxLock.class));
-			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.entity2GtxModel(BankAccount.class)));
-		} 
+			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.entity2GtxUndoLogModel(BankAccount.class)));
+		}
 		System.out.println("================gtxs tables created======================\r");
 
 		SqlBoxContext[] ctxs = new SqlBoxContext[DB_QTY];
@@ -107,29 +107,41 @@ public class GlobalTxShardTest {
 	}
 
 	public void insertAccountsSucess() {
-//		new BankAccount().putField("bankId", 0L, "userId", 0L, "balance", 100L).insert();
-//		new BankAccount().putField("bankId", 0L, "userId", 1L, "balance", 200L).insert();
-//		new BankAccount().putField("bankId", 1L, "userId", 0L, "balance", 300L).insert();
-//		new BankAccount().putField("bankId", 1L, "userId", 1L, "balance", 400L).insert();
-//		new BankAccount().putField("bankId", 2L, "userId", 0L, "balance", 500L).insert();
-//		new BankAccount().putField("bankId", 2L, "userId", 1L, "balance", 600L).insert();
+		// new BankAccount().putField("bankId", 0L, "userId", 0L, "balance",
+		// 100L).insert();
+		// new BankAccount().putField("bankId", 0L, "userId", 1L, "balance",
+		// 200L).insert();
+		// new BankAccount().putField("bankId", 1L, "userId", 0L, "balance",
+		// 300L).insert();
+		// new BankAccount().putField("bankId", 1L, "userId", 1L, "balance",
+		// 400L).insert();
+		// new BankAccount().putField("bankId", 2L, "userId", 0L, "balance",
+		// 500L).insert();
+		// new BankAccount().putField("bankId", 2L, "userId", 1L, "balance",
+		// 600L).insert();
 	}
 
 	public void testCommitTransaction() {
-//		GlobalTxShardTest tester = new GlobalTxShardTest();
-//		gtxMgr.startTransaction();
-//		try {
-//			tester.insertAccountsSucess();
-//			gtxMgr.commit();
-//		} catch (Exception e) {
-//			gtxMgr.rollback();
-//		}
-//		Assert.assertEquals(100, new BankAccount(0L, 0L).load().getBalance().longValue());
-//		Assert.assertEquals(200, new BankAccount(0L, 1L).load().getBalance().longValue());
-//		Assert.assertEquals(300, new BankAccount(1L, 0L).load().getBalance().longValue());
-//		Assert.assertEquals(400, new BankAccount(1L, 1L).load().getBalance().longValue());
-//		Assert.assertEquals(500, new BankAccount(2L, 0L).load().getBalance().longValue());
-//		Assert.assertEquals(600, new BankAccount(2L, 1L).load().getBalance().longValue());
+		// GtxShardingTest tester = new GtxShardingTest();
+		// gtxMgr.startTransaction();
+		// try {
+		// tester.insertAccountsSucess();
+		// gtxMgr.commit();
+		// } catch (Exception e) {
+		// gtxMgr.rollback();
+		// }
+		// Assert.assertEquals(100, new BankAccount(0L,
+		// 0L).load().getBalance().longValue());
+		// Assert.assertEquals(200, new BankAccount(0L,
+		// 1L).load().getBalance().longValue());
+		// Assert.assertEquals(300, new BankAccount(1L,
+		// 0L).load().getBalance().longValue());
+		// Assert.assertEquals(400, new BankAccount(1L,
+		// 1L).load().getBalance().longValue());
+		// Assert.assertEquals(500, new BankAccount(2L,
+		// 0L).load().getBalance().longValue());
+		// Assert.assertEquals(600, new BankAccount(2L,
+		// 1L).load().getBalance().longValue());
 	}
 
 }

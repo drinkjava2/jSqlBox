@@ -65,14 +65,6 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		if (isInTransaction()) {
-			// do nothing
-		} else if (conn != null)
-			conn.close();
-	}
-
-	@Override
 	public void commit() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");

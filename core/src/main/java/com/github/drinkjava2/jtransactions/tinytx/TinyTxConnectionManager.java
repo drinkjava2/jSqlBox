@@ -64,20 +64,12 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		if (isInTransaction()) {
-			// do nothing
-		} else if (conn != null)
-			conn.close();
-	}
-
-	@Override
 	public void commit() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		try {
 			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
-			if (conns.size() == 0)
+			if (conns.isEmpty())
 				return; // no actual transaction open
 			if (conns.size() > 1)
 				throw new TransactionsException("TinyTx can only support one dataSource in one thread, can not commit");
@@ -98,7 +90,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		try {
 			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
-			if (conns.size() == 0)
+			if (conns.isEmpty())
 				return; // no actual transaction open
 			Connection con = conns.iterator().next();
 			if (con.getAutoCommit())

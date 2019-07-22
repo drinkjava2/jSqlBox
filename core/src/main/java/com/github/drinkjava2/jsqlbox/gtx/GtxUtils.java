@@ -17,24 +17,45 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
- * Public static methods of GTX
+ * Gtx public static methods
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
 public class GtxUtils {
-	public static Map<Class<?>, TableModel> globalGtxTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
-
-	private static final String GTX_ID = "gtx_id";
-	private static final String GTX_TYPE = "gtx_type";// tx log type, can be update/exist/insert/delete
 	private static final String GTX_LOG_ID = "gtx_log_id";// log number, this is the P-Key of this log table
+	private static final String GTX_ID = "gtx_id";
+	private static final String GTX_TYPE = "gtx_type";// tx log type, can be update/exist/existStrict/insert/delete
+
+	protected static final Map<Class<?>, TableModel> globalGtxTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
+
+	public static void logInsert(SqlBoxContext ctx, Object entity) {
+		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("insert", entity));
+	}
+
+	public static void logExist(SqlBoxContext ctx, Object entity) {
+		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("exist", entity));
+	}
+
+	public static void logExistStrict(SqlBoxContext ctx, Object entity) {
+		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("existStrict", entity));
+	}
+
+	public static void logDelete(SqlBoxContext ctx, Object entity) {
+		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("delete", entity));
+	}
+
+	public static void logUpdate(SqlBoxContext ctx, Object entity) {
+		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("update", entity));
+	}
 
 	/**
 	 * Convert an entity class to gtxLog entity class, i.e., add some columns for it
 	 */
-	public static TableModel entity2GtxModel(Class<?> entityClass) {
+	public static TableModel entity2GtxUndoLogModel(Class<?> entityClass) {
 		TableModel model = globalGtxTableModelCache.get(entityClass);
 		if (model != null)
 			return model;

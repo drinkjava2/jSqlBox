@@ -33,10 +33,21 @@ public class GtxInfo extends TxInfo {
 
 	protected List<GtxLock> gtxLockList = null;
 
-	protected List<Object> gtxUndoLog = null;
+	protected List<Object> logEntityList = null;
 
 	protected Integer gtxLockQty = 0;
 
+	public List<Object> getLogEntityList() {
+		if (logEntityList == null)
+			logEntityList = new ArrayList<Object>();
+		return logEntityList;
+	}
+
+	public void setLogEntityList(List<Object> logEntityList) {
+		this.logEntityList = logEntityList;
+	}
+
+	// getter & setter=========
 	public String getGtxId() {
 		return gtxId;
 	}
@@ -61,16 +72,6 @@ public class GtxInfo extends TxInfo {
 		this.gtxLockList = gtxLockList;
 	}
 
-	public List<Object> getGtxUndoLog() {
-		if(gtxUndoLog==null)
-			gtxUndoLog=new ArrayList<Object>();
-		return gtxUndoLog;
-	}
-
-	public void setGtxUndoLog(List<Object> gtxUndoLog) { 
-		this.gtxUndoLog = gtxUndoLog;
-	}
-
 	public Integer getGtxLockQty() {
 		return gtxLockQty;
 	}
@@ -78,6 +79,5 @@ public class GtxInfo extends TxInfo {
 	public void setGtxLockQty(Integer gtxLockQty) {
 		this.gtxLockQty = gtxLockQty;
 	}
-	
 
 }

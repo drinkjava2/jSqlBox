@@ -32,7 +32,7 @@ import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.gtx.GTxConnectionManager;
+import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
@@ -92,7 +92,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	// ==========================Global Transaction about================
 	/** If current GlobalTxCM opened global Transaction */
 	public boolean isGtxOpen() {
-		return connectionManager != null && connectionManager instanceof GTxConnectionManager
+		return connectionManager != null && connectionManager instanceof GtxConnectionManager
 				&& getGtxManager().isInTransaction();
 	}
 
@@ -102,8 +102,8 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Get current ConnectionManager and assume it's a GlobalTxCM */
-	public GTxConnectionManager getGtxManager() {
-		return (GTxConnectionManager) connectionManager;
+	public GtxConnectionManager getGtxManager() {
+		return (GtxConnectionManager) connectionManager;
 	}
 
 	// ==========================end=============

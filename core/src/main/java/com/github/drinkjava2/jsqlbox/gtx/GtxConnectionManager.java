@@ -27,21 +27,33 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
- * GTxConnectionManager determine how to get or release connection from
- * dataSources, this is a distribute transaction ConnectionManager
+ * GTX means Global Transaction, this is a distribute transaction
+ * ConnectionManager
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class GTxConnectionManager extends ThreadConnectionManager {
+public class GtxConnectionManager extends ThreadConnectionManager {
 
 	private static class InnerGtxMgr {// NOSONAR
-		private static final GTxConnectionManager INSTANCE = new GTxConnectionManager();
+		private static final GtxConnectionManager INSTANCE = new GtxConnectionManager();
 	}
 
-	/** @return A singleton GTxConnectionManager instance */
-	public static final GTxConnectionManager instance() {
+	/** @return A singleton GtxConnectionManager instance */
+	public static final GtxConnectionManager instance() {
 		return InnerGtxMgr.INSTANCE;
+	}
+
+	@Override
+	public void startTransaction() {
+		threadedTxInfo.set(new GtxInfo());
+	}
+
+	@Override
+	public void startTransaction(int txIsolationLevel) {
+		GtxInfo txInfo = new GtxInfo();
+		txInfo.setTxIsolationLevel(txIsolationLevel);
+		threadedTxInfo.set(txInfo);
 	}
 
 	@Override
@@ -59,14 +71,6 @@ public class GTxConnectionManager extends ThreadConnectionManager {
 			return conn;
 		} else
 			return ds.getConnection(); // AutoCommit mode
-	}
-
-	@Override
-	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
-		if (isInTransaction()) {
-			// do nothing
-		} else if (conn != null)
-			conn.close();
 	}
 
 	@Override

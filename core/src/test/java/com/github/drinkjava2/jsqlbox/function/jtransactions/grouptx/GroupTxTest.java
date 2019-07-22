@@ -124,7 +124,7 @@ public class GroupTxTest {
 				e1.printStackTrace();
 			}
 		}
-		Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));// TODO debug
+		Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));
 	}
 
 }
