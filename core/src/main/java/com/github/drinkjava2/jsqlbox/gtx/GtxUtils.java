@@ -33,29 +33,29 @@ public class GtxUtils {
 	protected static final Map<Class<?>, TableModel> globalGtxTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
 
 	public static void logInsert(SqlBoxContext ctx, Object entity) {
-		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("insert", entity));
+		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("insert", entity));
 	}
 
 	public static void logExist(SqlBoxContext ctx, Object entity) {
-		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("exist", entity));
+		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("exist", entity));
 	}
 
 	public static void logExistStrict(SqlBoxContext ctx, Object entity) {
-		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("existStrict", entity));
+		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("existStrict", entity));
 	}
 
 	public static void logDelete(SqlBoxContext ctx, Object entity) {
-		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("delete", entity));
+		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("delete", entity));
 	}
 
 	public static void logUpdate(SqlBoxContext ctx, Object entity) {
-		ctx.getGtxInfo().getLogEntityList().add(new GtxUndoLog("update", entity));
+		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("update", entity));
 	}
 
 	/**
 	 * Convert an entity class to gtxLog entity class, i.e., add some columns for it
 	 */
-	public static TableModel entity2GtxUndoLogModel(Class<?> entityClass) {
+	public static TableModel entity2GtxLogModel(Class<?> entityClass) {
 		TableModel model = globalGtxTableModelCache.get(entityClass);
 		if (model != null)
 			return model;
@@ -69,6 +69,8 @@ public class GtxUtils {
 			col.setIdGeneratorName(null);
 			col.setShardTable(null);
 			col.setShardDatabase(null);
+			col.setShardDatabase(null);
+			col.setShardTable(null);
 		}
 		t.column(GTX_ID).VARCHAR(32);
 		t.column(GTX_TYPE).VARCHAR(14);

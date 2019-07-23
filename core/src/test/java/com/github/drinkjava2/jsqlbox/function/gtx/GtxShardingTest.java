@@ -55,7 +55,7 @@ public class GtxShardingTest {
 			// gtxs[i].setConnectionManager(new ManualTx(ds));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxInfo.class));
 			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxLock.class));
-			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.entity2GtxUndoLogModel(BankAccount.class)));
+			gtxs[i].executeDDL(gtxs[i].toCreateDDL(GtxUtils.entity2GtxLogModel(BankAccount.class)));
 		}
 		System.out.println("================gtxs tables created======================\r");
 

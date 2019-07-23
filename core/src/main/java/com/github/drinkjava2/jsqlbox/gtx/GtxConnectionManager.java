@@ -22,6 +22,7 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
@@ -35,13 +36,18 @@ import com.github.drinkjava2.jtransactions.TxInfo;
  */
 public class GtxConnectionManager extends ThreadConnectionManager {
 
-	private static class InnerGtxMgr {// NOSONAR
-		private static final GtxConnectionManager INSTANCE = new GtxConnectionManager();
+	private SqlBoxContext gtxSqlBoxContext;
+
+	public SqlBoxContext getGtxSqlBoxContext() {
+		return gtxSqlBoxContext;
 	}
 
-	/** @return A singleton GtxConnectionManager instance */
-	public static final GtxConnectionManager instance() {
-		return InnerGtxMgr.INSTANCE;
+	public GtxConnectionManager(SqlBoxContext gtxSqlBoxContext) {
+		this.gtxSqlBoxContext = gtxSqlBoxContext;
+	}
+
+	public void setGtxSqlBoxContext(SqlBoxContext gtxSqlBoxContext) {
+		this.gtxSqlBoxContext = gtxSqlBoxContext;
 	}
 
 	@Override
@@ -77,8 +83,10 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 	public void commit() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
+		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
+		System.out.println(gtxInfo.getDebugInfo());
 		SQLException lastExp = null;
-		Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
+		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
 		for (Connection con : conns) {
 			try {
 				con.commit();

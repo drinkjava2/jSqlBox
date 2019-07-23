@@ -1,5 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function.gtx;
 
+import javax.sql.DataSource;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +9,9 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
+import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
+import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
+import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -19,42 +24,42 @@ public class GtxTest {
 	SqlBoxContext ctx1;
 	SqlBoxContext ctx2;
 
+	private static DataSource buildDataSource(String dsName) {
+		HikariDataSource ds = new HikariDataSource();
+		ds.setDriverClassName("org.h2.Driver");
+		ds.setJdbcUrl("jdbc:h2:mem:" + dsName + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		ds.setConnectionTimeout(2000);
+		ds.setUsername("sa");
+		ds.setPassword("");
+		return ds;
+	}
+
 	@Before
 	public void init() {
-		HikariDataSource ds1 = new HikariDataSource();
-		ds1.setDriverClassName("org.h2.Driver");
-		ds1.setJdbcUrl("jdbc:h2:mem:GlobalTxTst_ds1;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-		ds1.setConnectionTimeout(1000);
-		ds1.setUsername("sa");
-		ds1.setPassword("");
-
-		HikariDataSource ds2 = new HikariDataSource();
-		ds2.setDriverClassName("org.h2.Driver");
-		ds2.setJdbcUrl("jdbc:h2:mem:GlobalTxTst_ds2;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-		ds2.setConnectionTimeout(1000);
-		ds2.setUsername("sa");
-		ds2.setPassword("");
-
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
-		ctx1 = new SqlBoxContext(ds1);
+		SqlBoxContext gtxCtx = new SqlBoxContext(buildDataSource("GtxTest_gtxServ"));
+		GtxConnectionManager gtx = new GtxConnectionManager(gtxCtx);
+
+		ctx1 = new SqlBoxContext(buildDataSource("GtxTest_ds1"));
 		ctx1.setName("ctx1");
-		ctx1.setConnectionManager(GtxConnectionManager.instance());
-		SqlBoxContext.setGlobalSqlBoxContext(ctx1);
+		ctx1.setConnectionManager(gtx);
 
-		ctx2 = new SqlBoxContext(ds2);
+		ctx2 = new SqlBoxContext(buildDataSource("GtxTest_ds2"));
 		ctx2.setName("ctx2");
-		ctx2.setConnectionManager(GtxConnectionManager.instance());
+		ctx2.setConnectionManager(gtx);
 
+		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxInfo.class));
+		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxLock.class));
+		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxUtils.entity2GtxLogModel(Usr.class)));
 		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
-
 	}
 
 	@Test
 	public void commitTest() { // test group commit
 		ctx1.startTransaction();
 		try {
-			new Usr().putField("id", "UserA").insert();
+			new Usr().putField("id", "UserA").insert(ctx1);
 			new Usr().putField("id", "UserB").insert(ctx2);
 			new Usr().putField("id", "UserC").insert(ctx2);
 			ctx1.commit();

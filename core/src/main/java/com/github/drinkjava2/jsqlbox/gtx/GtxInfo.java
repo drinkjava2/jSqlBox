@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
@@ -33,18 +34,29 @@ public class GtxInfo extends TxInfo {
 
 	protected List<GtxLock> gtxLockList = null;
 
-	protected List<Object> logEntityList = null;
+	protected List<GtxLog> gtxLogList = null;
 
-	protected Integer gtxLockQty = 0;
-
-	public List<Object> getLogEntityList() {
-		if (logEntityList == null)
-			logEntityList = new ArrayList<Object>();
-		return logEntityList;
+	public static void config(TableModel t) {// This is jDialect's configuration method
+		t.column("createTime").setDefaultValue("now ()");
 	}
 
-	public void setLogEntityList(List<Object> logEntityList) {
-		this.logEntityList = logEntityList;
+	public List<GtxLog> getGtxLogList() {
+		if (gtxLogList == null)
+			gtxLogList = new ArrayList<GtxLog>();
+		return gtxLogList;
+	}
+
+	public void setGtxLogList(List<GtxLog> gtxLogList) {
+		this.gtxLogList = gtxLogList;
+	}
+
+	public String getDebugInfo() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("gtxId=" + gtxId).append("\r");
+		sb.append("createTime=" + createTime).append("\r");
+		sb.append("gtxLockList=" + gtxLockList).append("\r");
+		sb.append("gtxLogList=" + gtxLogList).append("\r");
+		return sb.toString();
 	}
 
 	// getter & setter=========
@@ -70,14 +82,6 @@ public class GtxInfo extends TxInfo {
 
 	public void setGtxLockList(List<GtxLock> gtxLockList) {
 		this.gtxLockList = gtxLockList;
-	}
-
-	public Integer getGtxLockQty() {
-		return gtxLockQty;
-	}
-
-	public void setGtxLockQty(Integer gtxLockQty) {
-		this.gtxLockQty = gtxLockQty;
 	}
 
 }

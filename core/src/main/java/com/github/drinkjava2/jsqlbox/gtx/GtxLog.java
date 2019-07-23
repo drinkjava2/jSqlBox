@@ -17,12 +17,12 @@ package com.github.drinkjava2.jsqlbox.gtx;
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GtxUndoLog {
+public class GtxLog {
 
 	private String logType;
 	private Object entity;
 	
-	public GtxUndoLog(String logType, Object entity) {
+	public GtxLog(String logType, Object entity) {
 		this.logType=logType;
 		this.entity=entity;
 	}
