@@ -22,6 +22,9 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
+import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.id.UUID32Generator;
+import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
@@ -36,30 +39,30 @@ import com.github.drinkjava2.jtransactions.TxInfo;
  */
 public class GtxConnectionManager extends ThreadConnectionManager {
 
-	private SqlBoxContext gtxSqlBoxContext;
+	private SqlBoxContext lockCtx;
 
-	public SqlBoxContext getGtxSqlBoxContext() {
-		return gtxSqlBoxContext;
+	public SqlBoxContext getLockCtx() {
+		return lockCtx;
 	}
 
-	public GtxConnectionManager(SqlBoxContext gtxSqlBoxContext) {
-		this.gtxSqlBoxContext = gtxSqlBoxContext;
+	public void setLockCtx(SqlBoxContext lockCtx) {
+		this.lockCtx = lockCtx;
 	}
 
-	public void setGtxSqlBoxContext(SqlBoxContext gtxSqlBoxContext) {
-		this.gtxSqlBoxContext = gtxSqlBoxContext;
+	public GtxConnectionManager(SqlBoxContext lockCtx) {
+		this.lockCtx = lockCtx;
 	}
 
 	@Override
 	public void startTransaction() {
-		threadedTxInfo.set(new GtxInfo());
+		setThreadTxInfo(new GtxInfo());
 	}
 
 	@Override
 	public void startTransaction(int txIsolationLevel) {
 		GtxInfo txInfo = new GtxInfo();
 		txInfo.setTxIsolationLevel(txIsolationLevel);
-		threadedTxInfo.set(txInfo);
+		setThreadTxInfo(txInfo);
 	}
 
 	@Override
@@ -84,7 +87,12 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
-		System.out.println(gtxInfo.getDebugInfo());
+		if (StrUtils.isEmpty(gtxInfo.getGtxId()))
+			gtxInfo.setGtxId(
+					UUID32Generator.INSTANCE.getNextID(null, null, null) + UUIDAnyGenerator.getAnyLengthRadix36UUID(8));
+		lockCtx.eInsert(gtxInfo);
+		GtxInfo gtxInfo2 = lockCtx.eLoad(gtxInfo); 
+
 		SQLException lastExp = null;
 		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
 		for (Connection con : conns) {

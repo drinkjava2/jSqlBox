@@ -12,6 +12,7 @@ import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -37,8 +38,11 @@ public class GtxTest {
 	@Before
 	public void init() {
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
-		SqlBoxContext gtxCtx = new SqlBoxContext(buildDataSource("GtxTest_gtxServ"));
-		GtxConnectionManager gtx = new GtxConnectionManager(gtxCtx);
+
+		SqlBoxContext lockCtx = new SqlBoxContext(buildDataSource("GtxTest_gtxServ"));
+		lockCtx.setName("lockCtx");
+		lockCtx.setConnectionManager(new TinyTxConnectionManager());
+		GtxConnectionManager gtx = new GtxConnectionManager(lockCtx);
 
 		ctx1 = new SqlBoxContext(buildDataSource("GtxTest_ds1"));
 		ctx1.setName("ctx1");
@@ -48,9 +52,9 @@ public class GtxTest {
 		ctx2.setName("ctx2");
 		ctx2.setConnectionManager(gtx);
 
-		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxInfo.class));
-		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxLock.class));
-		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxUtils.entity2GtxLogModel(Usr.class)));
+		lockCtx.executeDDL(lockCtx.toCreateDDL(GtxInfo.class));
+		lockCtx.executeDDL(lockCtx.toCreateDDL(GtxLock.class));
+		lockCtx.executeDDL(lockCtx.toCreateDDL(GtxUtils.entity2GtxLogModel(Usr.class)));
 		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
 	}

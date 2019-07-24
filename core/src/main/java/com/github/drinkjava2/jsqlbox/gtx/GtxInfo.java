@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jtransactions.TxInfo;
@@ -30,6 +31,7 @@ public class GtxInfo extends TxInfo {
 	@Id
 	protected String gtxId;
 
+	@Column(insertable = false)
 	protected Timestamp createTime;
 
 	protected List<GtxLock> gtxLockList = null;

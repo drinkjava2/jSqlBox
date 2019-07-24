@@ -72,7 +72,7 @@ public class UUIDAnyGenerator implements IdGenerator {
 		return new UUIDAnyGenerator(name, length);
 	}
 
-	protected static String getAnyLengthRadix36UUID(Integer length) {
+	public static String getAnyLengthRadix36UUID(Integer length) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			sb.append(ALPHABET[random.nextInt(32)]);

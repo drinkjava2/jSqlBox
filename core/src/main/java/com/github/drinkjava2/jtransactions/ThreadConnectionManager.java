@@ -25,7 +25,7 @@ import javax.sql.DataSource;
  */
 public abstract class ThreadConnectionManager implements ConnectionManager {
 
-	protected static final ThreadLocal<TxInfo> threadedTxInfo = new ThreadLocal<TxInfo>();
+	private ThreadLocal<TxInfo> threadedTxInfo = new ThreadLocal<TxInfo>();
 
 	@Override
 	public boolean isInTransaction() {
@@ -50,12 +50,10 @@ public abstract class ThreadConnectionManager implements ConnectionManager {
 		threadedTxInfo.set(new TxInfo(txIsolationLevel));
 	}
 
-	@Override
 	public TxInfo getThreadTxInfo() {
 		return threadedTxInfo.get();
 	}
 
-	@Override
 	public void setThreadTxInfo(TxInfo txInfo) {
 		threadedTxInfo.set(txInfo);
 	}

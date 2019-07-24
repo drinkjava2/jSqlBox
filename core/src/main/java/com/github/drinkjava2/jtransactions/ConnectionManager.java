@@ -25,12 +25,6 @@ import javax.sql.DataSource;
  */
 public interface ConnectionManager {
 
-	/** Get current thread's transaction info */
-	public TxInfo getThreadTxInfo();
-
-	/** Get current thread's transaction info */
-	public void setThreadTxInfo(TxInfo txInfo);
-
 	/** Start a transaction with default connection isolation level */
 	public void startTransaction();
 
@@ -56,6 +50,6 @@ public interface ConnectionManager {
 	/** Commit the transaction, */
 	public void commit();
 
-	/** Roll back the transaction */
+	/** Roll back soft transaction */
 	public void rollback();
 }

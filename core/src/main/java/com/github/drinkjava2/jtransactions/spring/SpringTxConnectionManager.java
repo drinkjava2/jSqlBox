@@ -18,7 +18,6 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
-import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
  * SpringTxConnectionManager is the implementation of ConnectionManager, get
@@ -79,13 +78,13 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	@Override
 	public void startTransaction() {
 		throw new TransactionsException(
-				"startTransaction method not implemented by current jTransactions version, please use Spring's method directly or submit a pull request");
+				"startTransaction method not implemented by current version, please use Spring's method directly or submit a pull request");
 	}
 
 	@Override
 	public void startTransaction(int txIsolationLevel) {
 		throw new TransactionsException(
-				"startTransaction method not implemented by current jTransactions version, please use Spring's method directly or submit a pull request");
+				"startTransaction method not implemented by current version, please use Spring's method directly or submit a pull request");
 	}
 
 	/*
@@ -116,25 +115,13 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	@Override
 	public void commit() {
 		throw new TransactionsException(
-				"commit method not implemented by current jTransactions version, please use Spring's method directly");
+				"commit method not implemented by current version, please use Spring's method directly");
 	}
 
 	@Override
 	public void rollback() {
 		throw new TransactionsException(
-				"rollback method not implemented by current jTransactions version, please use Spring's method directly");
-	}
-
-	@Override
-	public TxInfo getThreadTxInfo() {
-		throw new TransactionsException(
-				"getThreadTxInfo method not implemented by current jTransactions version, please use Spring's method directly");
-	}
-
-	@Override
-	public void setThreadTxInfo(TxInfo txInfo) {
-		throw new TransactionsException(
-				"setThreadTxInfo method not implemented by current jTransactions version, please use Spring's method directly");
+				"rollback method not implemented by current version, please use Spring's method directly");
 	}
 
 }
