@@ -14,8 +14,6 @@ package com.github.drinkjava2.jtransactions;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
-
 /**
  * A ConnectionManager implementation determine how to get or release connection
  * from DataSource or ThreadLocal or from Spring or JTA or some container...
@@ -33,7 +31,7 @@ public abstract class ThreadConnectionManager implements ConnectionManager {
 	}
 
 	@Override
-	public void releaseConnection(Connection conn, DataSource ds) throws SQLException {
+	public void releaseConnection(Connection conn, Object dsOwner) throws SQLException {
 		if (isInTransaction()) {
 			// do nothing
 		} else if (conn != null)

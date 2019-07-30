@@ -15,8 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 
-import javax.sql.DataSource;
-
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 
@@ -99,7 +97,7 @@ public class JFinalTxManager implements ConnectionManager {
 	}
 
 	@Override
-	public Connection getConnection(DataSource dataSource) {
+	public Connection getConnection(Object dataSource) {
 		try {
 			Object config = getConfig();
 			return (Connection) getConnectionMethod.invoke(config);
@@ -109,7 +107,7 @@ public class JFinalTxManager implements ConnectionManager {
 	}
 
 	@Override
-	public void releaseConnection(Connection conn, DataSource dataSource) {
+	public void releaseConnection(Connection conn, Object dataSource) {
 		try {
 			Object config = getConfig();
 			releaseConnectionMethod.invoke(config, conn);

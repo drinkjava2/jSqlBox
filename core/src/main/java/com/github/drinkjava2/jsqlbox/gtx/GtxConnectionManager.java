@@ -26,6 +26,7 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jtransactions.DataSourceOwner;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
@@ -66,7 +67,8 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public Connection getConnection(DataSource ds) throws SQLException {
+	public Connection getConnection(Object dsOwner) throws SQLException {
+		DataSource ds = ((DataSourceOwner) dsOwner).getDataSource();
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		if (isInTransaction()) {
 			TxInfo tx = getThreadTxInfo();

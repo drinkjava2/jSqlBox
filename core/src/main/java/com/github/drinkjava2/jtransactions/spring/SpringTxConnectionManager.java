@@ -91,7 +91,7 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	 * Equal to Spring's DataSourceUtils.getConnection()
 	 */
 	@Override
-	public Connection getConnection(DataSource dataSource) {
+	public Connection getConnection(Object dataSource) {
 		try {
 			return (Connection) getConnectionMethod.invoke(null, dataSource);
 		} catch (Exception e) {
@@ -104,7 +104,7 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	 * Equal to Spring's DataSourceUtils.releaseConnection()
 	 */
 	@Override
-	public void releaseConnection(Connection conn, DataSource dataSource) {
+	public void releaseConnection(Connection conn, Object dataSource) {
 		try {
 			releaseConnectionMethod.invoke(null, conn, dataSource);
 		} catch (Exception e) {

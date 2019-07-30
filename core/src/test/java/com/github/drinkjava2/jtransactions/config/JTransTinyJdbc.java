@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
+import com.github.drinkjava2.jtransactions.DataSourceOwner;
 
 /**
  * A Tiny JDBC tool only for unit test
@@ -16,7 +17,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class JTransTinyJdbc {
+public class JTransTinyJdbc implements DataSourceOwner {
 	ConnectionManager cm;
 	DataSource ds;
 
@@ -27,11 +28,11 @@ public class JTransTinyJdbc {
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql) {
-		Systemout.println("SQL="+sql);
+		Systemout.println("SQL=" + sql);
 		Connection con = getConnection();
- 		PreparedStatement pst = null;
+		PreparedStatement pst = null;
 		try {
-			//Systemout.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
+			// Systemout.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());
 			pst = con.prepareStatement(sql);
 			ResultSet rs = pst.executeQuery();
 			rs.next();
@@ -47,11 +48,11 @@ public class JTransTinyJdbc {
 	}
 
 	public void executeSql(String sql) {
-		Systemout.println("SQL="+sql);
+		Systemout.println("SQL=" + sql);
 		Connection con = getConnection();
 		PreparedStatement pst = null;
 		try {
-			//Systemout.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());	
+			// Systemout.println("Con="+con.hashCode()+", autoCommit="+con.getAutoCommit());
 			pst = con.prepareStatement(sql);
 			pst.execute();
 		} catch (SQLException e) {
@@ -76,7 +77,7 @@ public class JTransTinyJdbc {
 
 	private Connection getConnection() {
 		try {
-			return cm.getConnection(ds);
+			return cm.getConnection(this);
 		} catch (SQLException e) {
 			throw new RuntimeException("Fail to get Connection", e);
 		}
@@ -84,10 +85,20 @@ public class JTransTinyJdbc {
 
 	private void releaseConnection(Connection conn) {
 		try {
-			cm.releaseConnection(conn, ds);
+			cm.releaseConnection(conn, this);
 		} catch (SQLException e) {
 			throw new RuntimeException("Fail to release Connection", e);
 		}
+	}
+
+	@Override
+	public DataSource getDataSource() {
+		return ds;
+	}
+
+	@Override
+	public Object getOwner() {
+		return this;
 	}
 
 }

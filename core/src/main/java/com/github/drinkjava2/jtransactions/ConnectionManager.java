@@ -14,8 +14,6 @@ package com.github.drinkjava2.jtransactions;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
-
 /**
  * A ConnectionManager implementation determine how to get or release connection
  * from DataSource or ThreadLocal or from Spring or JTA or some container...
@@ -38,14 +36,14 @@ public interface ConnectionManager {
 	 * A ConnectionManager implementation determine how to get connection from
 	 * DataSource or ThreadLocal or from Spring or JTA or some container...
 	 */
-	public Connection getConnection(DataSource dataSource) throws SQLException;
+	public Connection getConnection(Object dataSourceOrOwner) throws SQLException;
 
 	/**
 	 * A ConnectionManager implementation determine how to close connection or
 	 * return connection to ThreadLocal or return to Spring or JTA or some
 	 * container...
 	 */
-	public void releaseConnection(Connection conn, DataSource dataSource) throws SQLException;
+	public void releaseConnection(Connection conn, Object dataSourceOrOwner) throws SQLException;
 
 	/** Commit the transaction, */
 	public void commit();
