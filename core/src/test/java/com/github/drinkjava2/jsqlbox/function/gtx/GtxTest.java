@@ -11,6 +11,7 @@ import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
+import com.github.drinkjava2.jsqlbox.gtx.GtxTag;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
@@ -39,27 +40,28 @@ public class GtxTest {
 	public void init() {
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 
-		SqlBoxContext lockCtx = new SqlBoxContext(buildDataSource("GtxTest_gtxServ"));
-		lockCtx.setName("lockCtx");
-		lockCtx.setConnectionManager(new TinyTxConnectionManager());
-		GtxConnectionManager gtx = new GtxConnectionManager(lockCtx);
+		SqlBoxContext gtxCtx = new SqlBoxContext(buildDataSource("GtxTest_gtxServ"));
+		gtxCtx.setName("gtxCtx");
+		gtxCtx.setConnectionManager(new TinyTxConnectionManager());
+		GtxConnectionManager gtx = new GtxConnectionManager(gtxCtx);
+		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxInfo.class));
+		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxLock.class));
+		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxUtils.entity2GtxLogModel(Usr.class)));
 
 		ctx1 = new SqlBoxContext(buildDataSource("GtxTest_ds1"));
 		ctx1.setName("ctx1");
 		ctx1.setConnectionManager(gtx);
+		ctx1.executeDDL(ctx1.toCreateDDL(GtxTag.class));
+		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 
 		ctx2 = new SqlBoxContext(buildDataSource("GtxTest_ds2"));
 		ctx2.setName("ctx2");
 		ctx2.setConnectionManager(gtx);
-
-		lockCtx.executeDDL(lockCtx.toCreateDDL(GtxInfo.class));
-		lockCtx.executeDDL(lockCtx.toCreateDDL(GtxLock.class));
-		lockCtx.executeDDL(lockCtx.toCreateDDL(GtxUtils.entity2GtxLogModel(Usr.class)));
-		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
+		ctx2.executeDDL(ctx2.toCreateDDL(GtxTag.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
+
 	}
 
-	@Test
 	public void commitTest() { // test group commit
 		ctx1.startTransaction();
 		try {
@@ -68,15 +70,27 @@ public class GtxTest {
 			new Usr().putField("id", "UserC").insert(ctx2);
 			ctx1.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			ctx1.rollback();
 		}
 		Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
 	}
 
+	@Test
 	public void rollbackTest() {
-		// TODO: to add
+		ctx1.startTransaction();
+		try {
+			new Usr().putField("id", "UserA").insert(ctx1);
+			new Usr().putField("id", "UserB").insert(ctx2);
+			new Usr().putField("id", "UserC").insert(ctx2);
+			ctx1.commit();
+			((HikariDataSource) (ctx2.getDataSource())).close();
+		} catch (Exception e) {
+			// e.printStackTrace();
+			ctx1.rollback();
+		}
+		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
 	}
 
 }

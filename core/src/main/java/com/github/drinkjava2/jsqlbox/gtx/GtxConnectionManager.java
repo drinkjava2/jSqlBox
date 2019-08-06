@@ -93,7 +93,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			gtxInfo.setGtxId(
 					UUID32Generator.INSTANCE.getNextID(null, null, null) + UUIDAnyGenerator.getAnyLengthRadix36UUID(8));
 		lockCtx.eInsert(gtxInfo);
-		GtxInfo gtxInfo2 = lockCtx.eLoad(gtxInfo); 
+		//GtxInfo gtxInfo2 = lockCtx.eLoad(gtxInfo); 
 
 		SQLException lastExp = null;
 		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
