@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
-import com.github.drinkjava2.jtransactions.DataSourceOwner;
+import com.github.drinkjava2.jtransactions.DataSourceHolder;
 
 /**
  * A Tiny JDBC tool only for unit test
@@ -17,7 +17,7 @@ import com.github.drinkjava2.jtransactions.DataSourceOwner;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class JTransTinyJdbc implements DataSourceOwner {
+public class JTransTinyJdbc implements DataSourceHolder {
 	ConnectionManager cm;
 	DataSource ds;
 
@@ -97,7 +97,7 @@ public class JTransTinyJdbc implements DataSourceOwner {
 	}
 
 	@Override
-	public Object getOwner() {
+	public Object getHolder() {
 		return this;
 	}
 

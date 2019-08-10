@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,30 +27,59 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @since 2.0.7
  */
 public class GtxUtils {
-	private static final String GTX_LOG_ID = "gtx_log_id";// log number, this is the P-Key of this log table
-	private static final String GTX_ID = "gtx_id";
-	private static final String GTX_TYPE = "gtx_type";// tx log type, can be update/exist/existStrict/insert/delete
+	public static final String GTX_LOG_ID = "gtx_log_id";// log number, this is the P-Key of this log table
+	public static final String GTX_ID = "gtx_id";
+	public static final String GTX_TYPE = "gtx_type";// tx log type, can be update/exist/existStrict/insert/delete
 
 	protected static final Map<Class<?>, TableModel> globalGtxTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
 
 	public static void logInsert(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("insert", entity));
+		addLock(ctx, entity);
 	}
 
 	public static void logExist(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("exist", entity));
+		addLock(ctx, entity);
 	}
 
 	public static void logExistStrict(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("existStrict", entity));
+		addLock(ctx, entity);
 	}
 
 	public static void logDelete(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("delete", entity));
+		addLock(ctx, entity);
 	}
 
 	public static void logUpdate(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("update", entity));
+		addLock(ctx, entity);
+	}
+
+	public static void addLock(SqlBoxContext ctx, Object entity) {
+		List<GtxLock> locks = ctx.getGtxInfo().getGtxLockList();
+		boolean found = false;
+		String db = ctx.getName();
+		
+		
+		
+		String table = "";
+		Object id = "";
+		
+		
+		for (GtxLock lk : locks)
+			if (lk.getDb().equals(db) || lk.getTable().equals(table) || lk.getId().equals(id)) {
+				found = true;
+				break;
+			}
+		if (!found) {
+			GtxLock lock = new GtxLock();
+			lock.setDb(ctx.getName());
+			lock.setTable(""); 
+		}
+
 	}
 
 	/**

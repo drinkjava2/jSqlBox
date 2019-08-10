@@ -26,11 +26,10 @@ public class GtxTest {
 	SqlBoxContext ctx1;
 	SqlBoxContext ctx2;
 
-	private static DataSource buildDataSource(String dsName) {
+	private static DataSource newDataSource(String dsName) {
 		HikariDataSource ds = new HikariDataSource();
 		ds.setDriverClassName("org.h2.Driver");
 		ds.setJdbcUrl("jdbc:h2:mem:" + dsName + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-		ds.setConnectionTimeout(2000);
 		ds.setUsername("sa");
 		ds.setPassword("");
 		return ds;
@@ -40,7 +39,7 @@ public class GtxTest {
 	public void init() {
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 
-		SqlBoxContext gtxCtx = new SqlBoxContext(buildDataSource("GtxTest_gtxServ"));
+		SqlBoxContext gtxCtx = new SqlBoxContext(newDataSource("GtxTest_gtxServ"));
 		gtxCtx.setName("gtxCtx");
 		gtxCtx.setConnectionManager(new TinyTxConnectionManager());
 		GtxConnectionManager gtx = new GtxConnectionManager(gtxCtx);
@@ -48,13 +47,13 @@ public class GtxTest {
 		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxLock.class));
 		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxUtils.entity2GtxLogModel(Usr.class)));
 
-		ctx1 = new SqlBoxContext(buildDataSource("GtxTest_ds1"));
+		ctx1 = new SqlBoxContext(newDataSource("GtxTest_ds1"));
 		ctx1.setName("ctx1");
 		ctx1.setConnectionManager(gtx);
 		ctx1.executeDDL(ctx1.toCreateDDL(GtxTag.class));
 		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 
-		ctx2 = new SqlBoxContext(buildDataSource("GtxTest_ds2"));
+		ctx2 = new SqlBoxContext(newDataSource("GtxTest_ds2"));
 		ctx2.setName("ctx2");
 		ctx2.setConnectionManager(gtx);
 		ctx2.executeDDL(ctx2.toCreateDDL(GtxTag.class));

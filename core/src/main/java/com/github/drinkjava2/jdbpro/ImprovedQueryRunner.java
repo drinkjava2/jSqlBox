@@ -36,7 +36,7 @@ import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
-import com.github.drinkjava2.jtransactions.DataSourceOwner;
+import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
@@ -55,7 +55,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
  * @since 1.7.0
  */
 @SuppressWarnings({ "all" })
-public class ImprovedQueryRunner extends QueryRunner implements DataSourceOwner {
+public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder {
 	protected static final DbProLog logger = DbProLogFactory.getLog(ImprovedQueryRunner.class);
 
 	protected static Boolean globalNextAllowShowSql = false;
@@ -110,7 +110,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceOwner 
 	}
 
 	@Override
-	public Object getOwner() {// This is to implement DataSourceOwner interface
+	public Object getHolder() {// This is to implement DataSourceHolder interface
 		return this;
 	}
 

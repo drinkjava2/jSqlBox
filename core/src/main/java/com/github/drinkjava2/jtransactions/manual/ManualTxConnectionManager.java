@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
-import com.github.drinkjava2.jtransactions.DataSourceOwner;
+import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
 
@@ -57,7 +57,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 	/** Borrow a connection from manualTx to use */
 	@Override
 	public Connection getConnection(Object dsOwner) throws SQLException {
-		DataSource ds = ((DataSourceOwner) dsOwner).getDataSource();
+		DataSource ds = ((DataSourceHolder) dsOwner).getDataSource();
 		if (isInTransaction()) {
 			if (txInfo.getConnection() == null) {
 				Connection con = ds.getConnection();

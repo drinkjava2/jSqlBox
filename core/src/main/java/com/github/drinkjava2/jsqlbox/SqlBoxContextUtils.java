@@ -571,9 +571,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return entityInsertTry(paramCtx, entityBean, newParams);
 		}
 
-		int result = doEntityInsertTry(ctx, entityBean, optionItems);
-		if (result == 1 && ctx.isGtxOpen()) // if in GTX transaction?
-			GtxUtils.logInsert(ctx, entityBean);
+		int result = doEntityInsertTry(ctx, entityBean, optionItems); 
+		if (result == 1 && ctx.isGtxOpen())   // if in GTX transaction? 
+			GtxUtils.logInsert(ctx, entityBean); 
 		return result;
 	}
 

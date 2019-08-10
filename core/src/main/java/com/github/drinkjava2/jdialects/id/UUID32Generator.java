@@ -41,6 +41,10 @@ public class UUID32Generator implements IdGenerator {
 
 	@Override
 	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
+		return getUUID32();
+	}
+
+	public static String getUUID32() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}
 

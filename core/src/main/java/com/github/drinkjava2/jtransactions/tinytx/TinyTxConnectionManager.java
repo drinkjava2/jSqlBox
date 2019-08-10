@@ -17,7 +17,7 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.jtransactions.DataSourceOwner;
+import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
@@ -44,7 +44,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 
 	@Override
 	public Connection getConnection(Object dsOwner) throws SQLException {
-		DataSource ds = ((DataSourceOwner) dsOwner).getDataSource();
+		DataSource ds = ((DataSourceHolder) dsOwner).getDataSource();
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		if (isInTransaction()) {
 			TxInfo tx = getThreadTxInfo();

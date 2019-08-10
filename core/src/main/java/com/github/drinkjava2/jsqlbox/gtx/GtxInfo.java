@@ -13,11 +13,14 @@ package com.github.drinkjava2.jsqlbox.gtx;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
@@ -34,22 +37,30 @@ public class GtxInfo extends TxInfo {
 	@Column(insertable = false)
 	protected Timestamp createTime;
 
-	protected List<GtxLock> gtxLockList = null;
-
 	protected List<GtxLog> gtxLogList = null;
+
+	protected List<GtxLock> gtxLockList = null;
 
 	public static void config(TableModel t) {// This is jDialect's configuration method
 		t.column("createTime").setDefaultValue("now ()");
 	}
 
-	public List<GtxLog> getGtxLogList() {
-		if (gtxLogList == null)
-			gtxLogList = new ArrayList<GtxLog>();
-		return gtxLogList;
-	}
+	public void saveGtxInfo(SqlBoxContext gtxCtx) {
+		Long logId = 1L;
+		for (GtxLog gtxLog : getGtxLogList()) {
+			Object entity = gtxLog.getEntity();
+			TableModel md = GtxUtils.entity2GtxLogModel(entity.getClass());
+			md.getColumnByColName(GtxUtils.GTX_ID).setValue(gtxId);
+			md.getColumnByColName(GtxUtils.GTX_LOG_ID).setValue(logId++);
+			md.getColumnByColName(GtxUtils.GTX_TYPE).setValue(gtxLog.getLogType());
+			gtxCtx.eInsert(entity, md);
 
-	public void setGtxLogList(List<GtxLog> gtxLogList) {
-		this.gtxLogList = gtxLogList;
+		}
+		Map<String, Object> locks = new HashMap<String, Object>();
+		for (GtxLock lock : getGtxLockList()) {
+			gtxCtx.eInsert(lock);
+		}
+
 	}
 
 	public String getDebugInfo() {
@@ -59,6 +70,18 @@ public class GtxInfo extends TxInfo {
 		sb.append("gtxLockList=" + gtxLockList).append("\r");
 		sb.append("gtxLogList=" + gtxLogList).append("\r");
 		return sb.toString();
+	}
+
+	public List<GtxLock> getGtxLockList() {
+		if (gtxLockList == null)
+			gtxLockList = new ArrayList<GtxLock>();
+		return gtxLockList;
+	}
+
+	public List<GtxLog> getGtxLogList() {
+		if (gtxLogList == null)
+			gtxLogList = new ArrayList<GtxLog>();
+		return gtxLogList;
 	}
 
 	// getter & setter=========
@@ -78,8 +101,8 @@ public class GtxInfo extends TxInfo {
 		this.createTime = createTime;
 	}
 
-	public List<GtxLock> getGtxLockList() {
-		return gtxLockList;
+	public void setGtxLogList(List<GtxLog> gtxLogList) {
+		this.gtxLogList = gtxLogList;
 	}
 
 	public void setGtxLockList(List<GtxLock> gtxLockList) {

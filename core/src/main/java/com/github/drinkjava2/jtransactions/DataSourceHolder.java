@@ -14,14 +14,14 @@ package com.github.drinkjava2.jtransactions;
 import javax.sql.DataSource;
 
 /**
- * DataSourceOwner hold a dataSource, it should have a getDataSource method and
- * a getOwner method
+ * DataSourceHolder hold a dataSource, it should have a getDataSource method and
+ * a getHolder method
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
-public interface DataSourceOwner {
+public interface DataSourceHolder {
 	public DataSource getDataSource();
 
-	public Object getOwner(); // the owner who hold the data source
+	public Object getHolder(); // the holder who hold the data source
 }

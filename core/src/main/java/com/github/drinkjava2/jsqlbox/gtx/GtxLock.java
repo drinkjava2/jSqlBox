@@ -21,16 +21,38 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
  */
 public class GtxLock {
 	@Id
-	private String lockKey;
+	private String db;
+
+	@Id
+	private String table;
+
+	@Id
+	private String id;
 
 	private String gtxId;
 
-	public String getLockKey() {
-		return lockKey;
+	public String getDb() {
+		return db;
 	}
 
-	public void setLockKey(String lockKey) {
-		this.lockKey = lockKey;
+	public void setDb(String db) {
+		this.db = db;
+	}
+
+	public String getTable() {
+		return table;
+	}
+
+	public void setTable(String table) {
+		this.table = table;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getGtxId() {
