@@ -21,7 +21,6 @@ import java.util.Set;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -34,9 +33,11 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingModTool implements ShardingTool {
 
 	@Override
-	public String[] handleShardTable(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
+	public Integer[] handleShardTable(TableModel model, Object... shardkey) {// NOSONAR
 		ColumnModel col = model.getShardTableColumn();
-		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
+		if (col == null)
+			return null;
+		if (col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new SqlBoxException("Not found ShardTable setting for table '" + model.getTableName() + "'");
 
 		// return null if is not "MOD" shardTable strategy
@@ -60,29 +61,31 @@ public class ShardingModTool implements ShardingTool {
 		if (shardKey1 == null)
 			throw new SqlBoxException("ShardTable key value can not be null");
 
-		Set<String> set = new HashSet<String>();
+		Set<Integer> set = new HashSet<Integer>();
 
 		if (shardkey2 != null) {
 			throw new SqlBoxException("ShardingModTool does not support shardBetween type method");
 		} else {
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateTableName(model.getTableName(), key, modNumber));
-				return set.toArray(new String[set.size()]);
+					set.add(calculateMod(key, modNumber));
+				return set.toArray(new Integer[set.size()]);
 			} else if (shardKey1.getClass().isArray()) {
 				for (Object key : (Object[]) shardKey1)
-					set.add(calculateTableName(model.getTableName(), key, modNumber));
-				return set.toArray(new String[set.size()]);
+					set.add(calculateMod(key, modNumber));
+				return set.toArray(new Integer[set.size()]);
 			} else
-				return new String[] { calculateTableName(model.getTableName(), shardKey1, modNumber) };
+				return new Integer[] { calculateMod(shardKey1, modNumber) };
 		}
 	}
 
 	@Override
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
+	public Integer[] handleShardDatabase(TableModel model, Object... shardkey) {// NOSONAR
 
 		ColumnModel col = model.getShardDatabaseColumn();
-		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
+		if (col == null)
+			return null;
+		if (col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new SqlBoxException("Not found ShardDatabase setting for table '" + model.getTableName() + "'");
 
 		// return null if is not "MOD" shardTable strategy
@@ -93,7 +96,7 @@ public class ShardingModTool implements ShardingTool {
 		Object shardKey1 = null;
 		Object shardkey2 = null;
 		Class<?> entityOrClass = model.getEntityClass();
-		SqlBoxException.assureNotNull(entityOrClass); 
+		SqlBoxException.assureNotNull(entityOrClass);
 		if (shardkey == null || shardkey.length == 0)
 			throw new SqlBoxException("ShardDatabase key parameter needed");
 		else if (shardkey.length == 1) {
@@ -105,30 +108,22 @@ public class ShardingModTool implements ShardingTool {
 		if (shardKey1 == null)
 			throw new SqlBoxException("ShardDatabase key value can not be null");
 
-		Set<SqlBoxContext> set = new HashSet<SqlBoxContext>();
+		Set<Integer> set = new HashSet<Integer>();
 
 		if (shardkey2 != null)
 			throw new SqlBoxException("ShardingModTool does not support shardBetween type method");
 		else {
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateMaster(ctx, key, modNumber));
-				return set.toArray(new SqlBoxContext[set.size()]);
+					set.add(calculateMod(key, modNumber));
+				return set.toArray(new Integer[set.size()]);
 			} else if (shardKey1.getClass().isArray()) {
 				for (Object key : (Object[]) shardKey1)
-					set.add(calculateMaster(ctx, key, modNumber));
-				return set.toArray(new SqlBoxContext[set.size()]);
+					set.add(calculateMod(key, modNumber));
+				return set.toArray(new Integer[set.size()]);
 			} else
-				return new SqlBoxContext[] { calculateMaster(ctx, shardKey1, modNumber) };
+				return new Integer[] { calculateMod(shardKey1, modNumber) };
 		}
-	}
-
-	private static String calculateTableName(String tableName, Object keyValue, String modNumber) {
-		return new StringBuilder(tableName).append("_").append(calculateMod(keyValue, modNumber)).toString();
-	}
-
-	private static SqlBoxContext calculateMaster(SqlBoxContext ctx, Object keyValue, String modNumber) {
-		return (SqlBoxContext) (ctx.getMasters()[calculateMod(keyValue, modNumber)]);
 	}
 
 	private static int calculateMod(Object keyValue, String modNumber) {

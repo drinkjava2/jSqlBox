@@ -91,56 +91,69 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Use current SqlBoxContext's shardingTools to calculate the real shardTable
-	 * name
-	 */
-	public static String getShardedTB(SqlBoxContext ctx, Object entityOrClass, Object... shardKey) {
-		if (ctx.getShardingTools() == null || ctx.getShardingTools().length == 0)
-			throw new SqlBoxException("No shardingTools be set.");
-		TableModel model = SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClass);
-		String table = null;
-		for (ShardingTool sh : ctx.getShardingTools()) {
-			String[] result = sh.handleShardTable(ctx, model, shardKey);
-			if (result != null) {
-				if (result.length == 0)
-					throw new SqlBoxException(
-							"Can not find sharding table for target '" + model.getEntityClass() + "'");
-				if (result.length > 1)
-					throw new SqlBoxException("Found more than 1 sharding tables for target '" + model.getEntityClass()
-							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardTable search condition");
-				table = result[0];
-				break;
-			}
-		}
-		return table;
-	}
-
-	/**
 	 * Use current SqlBoxContext's shardingTools to calculate the master
 	 * SqlBoxContext
 	 */
 	public static SqlBoxContext getShardedDB(SqlBoxContext currentCtx, Object entityOrClass, Object... shardKey) {
-		if (currentCtx.getMasters() == null || currentCtx.getMasters().length == 0)
-			throw new SqlBoxException(
-					"Current SqlBoxContext did not set masters property but try do shardDatabase opertation.");
-		if (currentCtx.getShardingTools() == null || currentCtx.getShardingTools().length == 0)
-			throw new SqlBoxException("No shardingTools be set.");
+		Integer shardDBCode = getShardedDBCode(currentCtx, entityOrClass, shardKey);
+		if (shardDBCode == null)
+			return currentCtx;
+		else
+			return (SqlBoxContext) currentCtx.getMasters()[shardDBCode];
+	}
+
+	/**
+	 * Use current SqlBoxContext's shardingTools to calculate the shardedDBCode
+	 */
+	public static Integer getShardedDBCode(SqlBoxContext ctx, Object entityOrClass, Object... shardKey) {
+		if (ctx.getMasters() == null || ctx.getMasters().length == 0)
+			return null;
+		if (ctx.getShardingTools() == null || ctx.getShardingTools().length == 0)
+			return null;
 		TableModel model = SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClass);
-		SqlBoxContext masterCtx = null;
-		for (ShardingTool sh : currentCtx.getShardingTools()) {
-			SqlBoxContext[] result = sh.handleShardDatabase(currentCtx, model, shardKey);
+		for (ShardingTool sh : ctx.getShardingTools()) {
+			Integer[] result = sh.handleShardDatabase(model, shardKey);
 			if (result != null) {
-				if (result.length == 0)
-					throw new SqlBoxException("Can not find master SqlBoxContext for '" + model.getEntityClass() + "'");
 				if (result.length > 1)
 					throw new SqlBoxException("Found more than 1 SqlBoxContext tables for target '"
 							+ model.getEntityClass()
 							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardDatabase search condition.");
-				masterCtx = result[0];
-				break;
+				return result[0];
 			}
 		}
-		return masterCtx;
+		return null;
+	}
+
+	/**
+	 * Use current SqlBoxContext's shardingTools to calculate the real shardTable
+	 * name
+	 */
+	public static String getShardedTB(SqlBoxContext ctx, Object entityOrClass, Object... shardKey) {
+		Integer shardedTBCode = getShardedTBCode(ctx, entityOrClass, shardKey);
+		TableModel model = SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClass);
+		if (shardedTBCode == null)
+			return model.getTableName();
+		else
+			return model.getTableName() + "_" + shardedTBCode;
+	}
+
+	/**
+	 * Use current SqlBoxContext's shardingTools to calculate the shardedTBCode
+	 */
+	public static Integer getShardedTBCode(SqlBoxContext ctx, Object entityOrClass, Object... shardKey) {
+		if (ctx.getShardingTools() == null || ctx.getShardingTools().length == 0)
+			return null;
+		TableModel model = SqlBoxContextUtils.findEntityOrClassTableModel(entityOrClass);
+		for (ShardingTool sh : ctx.getShardingTools()) {
+			Integer[] result = sh.handleShardTable(model, shardKey);
+			if (result != null) {
+				if (result.length > 1)
+					throw new SqlBoxException("Found more than 1 sharding tables for target '" + model.getEntityClass()
+							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardTable search condition");
+				return result[0];
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -154,15 +167,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return findEntityOrClassTableModel(entityOrClass);
 	}
 
-	public static TableModel findEntityOrClassTableModel(Object entityOrClass) {
-		if (entityOrClass == null)
+	public static TableModel findEntityOrClassTableModel(Object entityOrClassOrModel) {
+		if (entityOrClassOrModel == null)
 			throw new SqlBoxException("Can not build TableModel from null entityOrClass");
-		else if (entityOrClass instanceof TableModel)
-			return (TableModel) entityOrClass;
-		else if (entityOrClass instanceof Class)
-			return TableModelUtils.entity2ReadOnlyModel((Class<?>) entityOrClass);
+		else if (entityOrClassOrModel instanceof TableModel)
+			return (TableModel) entityOrClassOrModel;
+		else if (entityOrClassOrModel instanceof Class)
+			return TableModelUtils.entity2ReadOnlyModel((Class<?>) entityOrClassOrModel);
 		else // it's a entity bean
-			return TableModelUtils.entity2ReadOnlyModel(entityOrClass.getClass());
+			return TableModelUtils.entity2ReadOnlyModel(entityOrClassOrModel.getClass());
 	}
 
 	public static TableModel findFirstModel(Object... optionItems) {// NOSONAR
@@ -287,13 +300,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Remove first found SqlBoxContext From sqlItems */
 	private static void removeSqlBoxContextFromParam(List<Object> resultList, boolean founded, Object... sqlItems) {
+		boolean found=founded;
 		for (Object item : sqlItems) {
 			if (item instanceof SqlBoxContext) {// NOSONAR
 				if (founded)
 					resultList.add(item);
-				founded = true;
+				found = true;
 			} else if (item != null && item.getClass().isArray()) {
-				removeSqlBoxContextFromParam(resultList, founded, (Object[]) item);
+				removeSqlBoxContextFromParam(resultList, found, (Object[]) item);
 			} else
 				resultList.add(item);
 		}
@@ -479,7 +493,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/** Read value from entityBean field or tail */
 	public static Object readValueFromBeanFieldOrTail(ColumnModel columnModel, Object entityBean) {
-		SqlBoxException.assureNotNull(columnModel, "columnModel can not be null");
+		SqlBoxException.assureNotNull(columnModel, "columnModel can not be null.");
 		if (columnModel.getValueExist()) // value is stored in model
 			return columnModel.getValue();
 		if (columnModel.getConverterClassOrName() != null) {
@@ -571,9 +585,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return entityInsertTry(paramCtx, entityBean, newParams);
 		}
 
-		int result = doEntityInsertTry(ctx, entityBean, optionItems); 
-		if (result == 1 && ctx.isGtxOpen())   // if in GTX transaction? 
-			GtxUtils.logInsert(ctx, entityBean); 
+		int result = doEntityInsertTry(ctx, entityBean, optionItems);
+		if (result == 1 && ctx.isGtxOpen()) // if in GTX transaction?
+			GtxUtils.logInsert(ctx, entityBean);
 		return result;
 	}
 
@@ -611,7 +625,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		boolean foundColumnToInsert = false;
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
-		for (ColumnModel col : cols.values()) {
+		for (ColumnModel col : cols.values()) {//NOSONAR
 			if (col == null || col.getTransientable() || !col.getInsertable())
 				continue;
 			if (col.getConverterClassOrName() != null) { // converter
@@ -752,7 +766,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlItem shardDbItem = null;
 		Boolean ignoreNull = null;
 
-		for (ColumnModel col : cols.values()) {
+		for (ColumnModel col : cols.values()) {//NOSONAR
 			if (col.getTransientable() || !col.getUpdatable())
 				continue;
 			String fieldName = col.getEntityField();
@@ -877,7 +891,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
 
-		for (ColumnModel col : cols.values()) {
+		for (ColumnModel col : cols.values()) {//NOSONAR
 			if (col == null || col.getTransientable())
 				continue;
 			if (col.getConverterClassOrName() != null) { // converter
@@ -1066,7 +1080,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Equal to entityExistById method, Check if entityBean exist in database by its id
+	 * Equal to entityExistById method, Check if entityBean exist in database by its
+	 * id
 	 */
 	public static boolean entityExist(SqlBoxContext ctx, Object entityBean, Object... optionItems) {
 		return entityExistById(ctx, entityBean.getClass(), entityBean, optionItems);
@@ -1081,9 +1096,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = cleanUpParam(optionItems);
 			return entityExistById(paramCtx, entityClass, id, newParams);
 		}
-		boolean result= doEntityExistById(ctx, entityClass, id, optionItems);
-		if(result && ctx.isGtxOpen()) {
-			Object oldEntity=doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
+		boolean result = doEntityExistById(ctx, entityClass, id, optionItems);
+		if (result && ctx.isGtxOpen()) {
+			Object oldEntity = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
 			GtxUtils.logExist(ctx, oldEntity);
 		}
 		return result;
@@ -1293,7 +1308,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	@SuppressWarnings("unchecked")
 	public static <E> List<E> entityFindRelatedList(SqlBoxContext ctx, Object entity, Object... sqlItems) {
 		if (sqlItems.length == 0)
-			throw new SqlBoxException("Target entity class is required");
+			throw new SqlBoxException("Target entity class is required.");
 		for (Object item : sqlItems)
 			if (item instanceof EntityNet)
 				return ((EntityNet) item).findRelatedList(ctx, entity, sqlItems);

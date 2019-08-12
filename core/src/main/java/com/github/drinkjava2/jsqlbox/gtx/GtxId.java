@@ -14,12 +14,19 @@ package com.github.drinkjava2.jsqlbox.gtx;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 
 /**
- * GtxTag used for databases to store a GtxId to tag a global transactions is
+ * GtxId used for databases to store a GtxId to tag a global transactions is
  * committed on this database
  */
-public class GtxTag {
+public class GtxId {
 	@Id
 	protected String gtxId;
+
+	public GtxId() {// default constructor
+	}
+
+	public GtxId(String gtxId) {// default constructor
+		this.gtxId = gtxId;
+	}
 
 	public String getGtxId() {
 		return gtxId;

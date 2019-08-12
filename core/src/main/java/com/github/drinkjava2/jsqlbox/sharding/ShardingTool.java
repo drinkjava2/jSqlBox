@@ -16,7 +16,6 @@
 package com.github.drinkjava2.jsqlbox.sharding;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * This interface defines some Sharding methods
@@ -31,31 +30,27 @@ public interface ShardingTool {// NOSONAR
 	 * return table name array, in this jSqlBox version, only support return 1 table
 	 * name
 	 * 
-	 * @param ctx
-	 *            Current SqlBoxContext instance
 	 * @param tableModel
 	 *            The tableModel of an entity need do sharding
 	 * @param shardKey
 	 *            The shard key or keys
-	 * @return A String[] stored table names or null if the sharding strategy is not
+	 * @return A Integer[] stored table names or null if the sharding strategy is not
 	 *         fit for current implementation
 	 */
-	public String[] handleShardTable(SqlBoxContext ctx, TableModel tableModel, Object... shardKey);
+	public Integer[] handleShardTable(TableModel tableModel, Object... shardKey);
 
 	/**
 	 * Dealing a shardKey array based on current SqlBoxContext and TableModel,
 	 * return SqlBoxContext array, in this jSqlBox version, only support return 1
 	 * SqlBoxContext
 	 * 
-	 * @param ctx
-	 *            Current SqlBoxContext instance
 	 * @param tableModel
 	 *            The tableModel of an entity need do sharding
 	 * @param shardKey
 	 *            The shard key or keys
-	 * @return A SqlBoxContext[] stored master SqlBoxContexts or null if the
+	 * @return A Integer[] stored SqlBoxContext name order, start from 0, or null if the
 	 *         sharding strategy is not fit for current implementation
 	 */
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, TableModel tableModel, Object... shardKey);
+	public Integer[] handleShardDatabase(TableModel tableModel, Object... shardKey);
 
 }

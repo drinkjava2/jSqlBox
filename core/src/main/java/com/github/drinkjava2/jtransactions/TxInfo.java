@@ -15,17 +15,18 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.sql.DataSource;
+import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
 
 /**
  * If a TxInfo existed in current thread's threadlocal variant, it means a
  * transaction started.
  */
 public class TxInfo {
-	protected Integer txIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
+	@Transient
+	private Integer txIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
 
 	// This is designed for bind connection on ds
-	protected Map<DataSource, Connection> connectionCache;
+	protected Map<Object, Connection> connectionCache;
 
 	// This is designed for just store connection in TxInfo
 	protected Connection connection = null;
@@ -46,13 +47,13 @@ public class TxInfo {
 		this.txIsolationLevel = txIsolationLevel;
 	}
 
-	public Map<DataSource, Connection> getConnectionCache() {
+	public Map<Object, Connection> getConnectionCache() {
 		if (connectionCache == null)
-			connectionCache = new ConcurrentHashMap<DataSource, Connection>();
+			connectionCache = new ConcurrentHashMap<Object, Connection>();
 		return connectionCache;
 	}
 
-	public void setConnectionCache(Map<DataSource, Connection> connectionCache) {
+	public void setConnectionCache(Map<Object, Connection> connectionCache) {
 		this.connectionCache = connectionCache;
 	}
 

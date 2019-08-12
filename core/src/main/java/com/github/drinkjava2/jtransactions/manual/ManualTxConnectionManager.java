@@ -56,8 +56,12 @@ public class ManualTxConnectionManager implements ConnectionManager {
 
 	/** Borrow a connection from manualTx to use */
 	@Override
-	public Connection getConnection(Object dsOwner) throws SQLException {
-		DataSource ds = ((DataSourceHolder) dsOwner).getDataSource();
+	public Connection getConnection(Object dsOrHolder) throws SQLException {
+		DataSource ds;
+		if (dsOrHolder instanceof DataSource)
+			ds = (DataSource) dsOrHolder;
+		else
+			ds = ((DataSourceHolder) dsOrHolder).getDataSource();
 		if (isInTransaction()) {
 			if (txInfo.getConnection() == null) {
 				Connection con = ds.getConnection();

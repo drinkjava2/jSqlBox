@@ -24,4 +24,5 @@ public interface DataSourceHolder {
 	public DataSource getDataSource();
 
 	public Object getHolder(); // the holder who hold the data source
+
 }

@@ -49,8 +49,12 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public Connection getConnection(Object dsOwner) throws SQLException {
-		DataSource ds = ((DataSourceHolder) dsOwner).getDataSource();
+	public Connection getConnection(Object dsOrHolder) throws SQLException {
+		DataSource ds;
+		if (dsOrHolder instanceof DataSource)
+			ds = (DataSource) dsOrHolder;
+		else
+			ds = ((DataSourceHolder) dsOrHolder).getDataSource();
 		TransactionsException.assureNotNull(ds, "DataSource can not be null");
 		if (isInTransaction()) {
 			TxInfo tx = getThreadTxInfo();

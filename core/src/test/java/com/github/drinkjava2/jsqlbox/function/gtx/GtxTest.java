@@ -9,9 +9,8 @@ import org.junit.Test;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
-import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
+import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
-import com.github.drinkjava2.jsqlbox.gtx.GtxTag;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
@@ -43,20 +42,20 @@ public class GtxTest {
 		gtxCtx.setName("gtxCtx");
 		gtxCtx.setConnectionManager(new TinyTxConnectionManager());
 		GtxConnectionManager gtx = new GtxConnectionManager(gtxCtx);
-		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxInfo.class));
+		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxId.class));
 		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxLock.class));
-		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxUtils.entity2GtxLogModel(Usr.class)));
+		gtxCtx.executeDDL(gtxCtx.toCreateGtxLogDDL(Usr.class));
 
 		ctx1 = new SqlBoxContext(newDataSource("GtxTest_ds1"));
 		ctx1.setName("ctx1");
 		ctx1.setConnectionManager(gtx);
-		ctx1.executeDDL(ctx1.toCreateDDL(GtxTag.class));
+		ctx1.executeDDL(ctx1.toCreateDDL(GtxId.class));
 		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 
 		ctx2 = new SqlBoxContext(newDataSource("GtxTest_ds2"));
 		ctx2.setName("ctx2");
 		ctx2.setConnectionManager(gtx);
-		ctx2.executeDDL(ctx2.toCreateDDL(GtxTag.class));
+		ctx2.executeDDL(ctx2.toCreateDDL(GtxId.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
 
 	}
@@ -69,7 +68,7 @@ public class GtxTest {
 			new Usr().putField("id", "UserC").insert(ctx2);
 			ctx1.commit();
 		} catch (Exception e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 			ctx1.rollback();
 		}
 		Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
@@ -83,10 +82,10 @@ public class GtxTest {
 			new Usr().putField("id", "UserA").insert(ctx1);
 			new Usr().putField("id", "UserB").insert(ctx2);
 			new Usr().putField("id", "UserC").insert(ctx2);
-			ctx1.commit();
 			((HikariDataSource) (ctx2.getDataSource())).close();
+			ctx1.commit();
 		} catch (Exception e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 			ctx1.rollback();
 		}
 		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));

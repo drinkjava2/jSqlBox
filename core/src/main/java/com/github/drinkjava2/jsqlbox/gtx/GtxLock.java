@@ -21,38 +21,38 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
  */
 public class GtxLock {
 	@Id
-	private String db;
+	private Integer dbCode; // DB sharding code, 0, 1,2 ..., -1 means no sharding
 
 	@Id
-	private String table;
+	private String tbName; // table name
 
 	@Id
-	private String id;
+	private String entityId; // entity entityId value
 
 	private String gtxId;
 
-	public String getDb() {
-		return db;
+	public Integer getDbCode() {
+		return dbCode;
 	}
 
-	public void setDb(String db) {
-		this.db = db;
+	public void setDbCode(Integer dbCode) {
+		this.dbCode = dbCode;
 	}
 
-	public String getTable() {
-		return table;
+	public String getTbName() {
+		return tbName;
 	}
 
-	public void setTable(String table) {
-		this.table = table;
+	public void setTbName(String tbName) {
+		this.tbName = tbName;
 	}
 
-	public String getId() {
-		return id;
+	public String getEntityId() {
+		return entityId;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setEntityId(String entityId) {
+		this.entityId = entityId;
 	}
 
 	public String getGtxId() {

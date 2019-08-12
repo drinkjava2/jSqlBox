@@ -34,6 +34,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
+import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingModTool;
@@ -485,6 +486,15 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return dialect.toCreateDDL(tables);
 	}
 
+	/** Shortcut call to dialect.toCreateDDL method */
+	public String[] toCreateGtxLogDDL(Class<?>... entityClasses) {
+		assertDialectNotNull();
+		TableModel[] mds = new TableModel[entityClasses.length];
+		for (int i = 0; i < entityClasses.length; i++)
+			mds[i] = GtxUtils.entity2GtxLogModel(entityClasses[i]);
+		return dialect.toCreateDDL(mds);
+	}
+
 	/** Shortcut call to dialect.toDropDDL method */
 	public String[] toDropDDL(TableModel... tables) {
 		assertDialectNotNull();
@@ -498,9 +508,9 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	}
 
 	/** Execute DDL stored in a String array */
-	public void executeDDL(String[] ddls) {
-		for (String ddl : ddls)
-			nExecute(ddl);
+	public void executeDDL(String[] sqls) {
+		for (String sql : sqls)
+			nExecute(sql);
 	}
 
 	private void assertDialectNotNull() {

@@ -21,7 +21,6 @@ import java.util.Set;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
 
 /**
@@ -35,10 +34,10 @@ import com.github.drinkjava2.jsqlbox.SqlBoxException;
 public class ShardingRangeTool implements ShardingTool {
 
 	@Override
-	public String[] handleShardTable(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
+	public Integer[] handleShardTable(TableModel model, Object... shardkey) {// NOSONAR
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null)
-			throw new SqlBoxException("Not found ShardTable setting for table '" + model.getTableName() + "'");
+			return null;
 		if (!"RANGE".equalsIgnoreCase(col.getShardTable()[0]))
 			return null;// NOSONAR
 		String tableSize = col.getShardTable()[1];
@@ -59,29 +58,29 @@ public class ShardingRangeTool implements ShardingTool {
 			throw new SqlBoxException("ShardTable key value can not be null");
 
 		if (shardkey2 != null) {
-			return calculateTableNames(model.getTableName(), shardKey1, shardkey2, tableSize);
+			return calculateTableNames(shardKey1, shardkey2, tableSize);
 		} else {
-			Set<String> set = new HashSet<String>();
+			Set<Integer> set = new HashSet<Integer>();
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateTableName(model.getTableName(), key, tableSize));
-				return set.toArray(new String[set.size()]);
+					set.add(calculateTableName(key, tableSize));
+				return set.toArray(new Integer[set.size()]);
 			} else if (shardKey1.getClass().isArray()) {
 				for (Object key : (Object[]) shardKey1)
-					set.add(calculateTableName(model.getTableName(), key, tableSize));
-				return set.toArray(new String[set.size()]);
+					set.add(calculateTableName(key, tableSize));
+				return set.toArray(new Integer[set.size()]);
 			} else {
-				set.add(calculateTableName(model.getTableName(), shardKey1, tableSize));
-				return set.toArray(new String[set.size()]);
+				set.add(calculateTableName(shardKey1, tableSize));
+				return set.toArray(new Integer[set.size()]);
 			}
 		}
 	}
 
 	@Override
-	public SqlBoxContext[] handleShardDatabase(SqlBoxContext ctx, TableModel model, Object... shardkey) {// NOSONAR
+	public Integer[] handleShardDatabase(TableModel model, Object... shardkey) {// NOSONAR
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null)
-			throw new SqlBoxException("Not found ShardDatabase setting for table '" + model.getTableName() + "'");
+			return null;
 		if (!"RANGE".equalsIgnoreCase(col.getShardDatabase()[0]))
 			return null;// NOSONAR
 		String tableSize = col.getShardDatabase()[1];
@@ -102,19 +101,19 @@ public class ShardingRangeTool implements ShardingTool {
 			throw new SqlBoxException("ShardDatabase key value can not be null");
 
 		if (shardkey2 != null) {
-			return calculateDatabases(ctx, shardKey1, shardkey2, tableSize);
+			return calculateDatabases(shardKey1, shardkey2, tableSize);
 		} else {
-			Set<SqlBoxContext> set = new HashSet<SqlBoxContext>();
+			Set<Integer> set = new HashSet<Integer>();
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateDatabase(ctx, key, tableSize));
-				return set.toArray(new SqlBoxContext[set.size()]);
+					set.add(calculateDatabase(key, tableSize));
+				return set.toArray(new Integer[set.size()]);
 			} else if (shardKey1.getClass().isArray()) {
 				for (Object key : (Object[]) shardKey1)
-					set.add(calculateDatabase(ctx, key, tableSize));
-				return set.toArray(new SqlBoxContext[set.size()]);
+					set.add(calculateDatabase(key, tableSize));
+				return set.toArray(new Integer[set.size()]);
 			} else
-				return new SqlBoxContext[] { calculateDatabase(ctx, shardKey1, tableSize) };
+				return new Integer[] { calculateDatabase(shardKey1, tableSize) };
 		}
 
 	}
@@ -122,48 +121,47 @@ public class ShardingRangeTool implements ShardingTool {
 	/**
 	 * Give tableName, keyValue, tableSize, calculate a tableName_x String
 	 */
-	private static String calculateTableName(String tableName, Object keyValue, String tableSize) {
+	private static Integer calculateTableName(Object keyValue, String tableSize) {
 		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
 		long size = Long.parseLong(tableSize);
-		return new StringBuffer(tableName).append("_").append(shardKeyValue / size).toString();
+		return (int) (shardKeyValue / size);
 	}
 
 	/**
 	 * Give tableName, firstKey, secondKey, tableSize, return a tableName_x String
 	 * Array
 	 */
-	private static String[] calculateTableNames(String tableName, Object firstKey, Object secondKey, String tableSize) {
+	private static Integer[] calculateTableNames(Object firstKey, Object secondKey, String tableSize) {
 		long from = Long.parseLong(String.valueOf(firstKey));
 		long last = Long.parseLong(String.valueOf(secondKey));
 		long size = Long.parseLong(String.valueOf(tableSize));
 		int firstTable = (int) (from / size);
 		int lastTable = (int) (last / size);
 		if (lastTable < firstTable)
-			return new String[] {};
-		String[] result = new String[lastTable - firstTable + 1];
+			return new Integer[] {};
+		Integer[] result = new Integer[lastTable - firstTable + 1];
 		for (int i = firstTable; i <= lastTable; i++)
-			result[i - firstTable] = new StringBuffer(tableName).append("_").append(i).toString();
+			result[i - firstTable] = i;
 		return result;
 	}
 
-	private static SqlBoxContext calculateDatabase(SqlBoxContext ctx, Object keyValue, String tableSize) {
+	private static Integer calculateDatabase(Object keyValue, String tableSize) {
 		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
 		long size = Long.parseLong(String.valueOf(tableSize));
-		return (SqlBoxContext) ctx.getMasters()[(int) (shardKeyValue / size)];
+		return (int) (shardKeyValue / size);
 	}
 
-	private static SqlBoxContext[] calculateDatabases(SqlBoxContext ctx, Object firstKey, Object secondKey,
-			String tableSize) {
+	private static Integer[] calculateDatabases(Object firstKey, Object secondKey, String tableSize) {
 		long from = Long.parseLong(String.valueOf(firstKey));
 		long last = Long.parseLong(String.valueOf(secondKey));
 		long size = Long.parseLong(String.valueOf(tableSize));
 		int firstTable = (int) (from / size);
 		int lastTable = (int) (last / size);
 		if (lastTable < firstTable)
-			return new SqlBoxContext[] {};
-		SqlBoxContext[] result = new SqlBoxContext[lastTable - firstTable + 1];
+			return new Integer[] {};
+		Integer[] result = new Integer[lastTable - firstTable + 1];
 		for (int i = firstTable; i <= lastTable; i++)
-			result[i - firstTable] = (SqlBoxContext) ctx.getMasters()[i];
+			result[i - firstTable] = i;
 		return result;
 	}
 

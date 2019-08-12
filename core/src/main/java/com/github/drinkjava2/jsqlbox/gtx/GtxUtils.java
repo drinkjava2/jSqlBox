@@ -19,6 +19,10 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jtransactions.TransactionsException;
+import com.mysql.jdbc.Connection;
 
 /**
  * Gtx public static methods
@@ -26,58 +30,102 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GtxUtils {
+public abstract class GtxUtils {// NOSONAR
 	public static final String GTX_LOG_ID = "gtx_log_id";// log number, this is the P-Key of this log table
 	public static final String GTX_ID = "gtx_id";
 	public static final String GTX_TYPE = "gtx_type";// tx log type, can be update/exist/existStrict/insert/delete
 
-	protected static final Map<Class<?>, TableModel> globalGtxTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
-
+	//protected static final Map<Class<?>, TableModel> globalGtxTableModelCache = new ConcurrentHashMap<Class<?>, TableModel>();
+	//TODO: use normal editable 
+	
 	public static void logInsert(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("insert", entity));
-		addLock(ctx, entity);
+		addLockInGtxInfo(ctx, entity);
 	}
 
 	public static void logExist(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("exist", entity));
-		addLock(ctx, entity);
+		addLockInGtxInfo(ctx, entity);
 	}
 
 	public static void logExistStrict(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("existStrict", entity));
-		addLock(ctx, entity);
+		addLockInGtxInfo(ctx, entity);
 	}
 
 	public static void logDelete(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("delete", entity));
-		addLock(ctx, entity);
+		addLockInGtxInfo(ctx, entity);
 	}
 
 	public static void logUpdate(SqlBoxContext ctx, Object entity) {
 		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("update", entity));
-		addLock(ctx, entity);
+		addLockInGtxInfo(ctx, entity);
 	}
 
-	public static void addLock(SqlBoxContext ctx, Object entity) {
+	/**
+	 * According entity's sharding setting, create lock record in GtxInfo
+	 */
+	public static void addLockInGtxInfo(SqlBoxContext ctx, Object entity) {
 		List<GtxLock> locks = ctx.getGtxInfo().getGtxLockList();
-		boolean found = false;
-		String db = ctx.getName();
-		
-		
-		
-		String table = "";
-		Object id = "";
-		
-		
-		for (GtxLock lk : locks)
-			if (lk.getDb().equals(db) || lk.getTable().equals(table) || lk.getId().equals(id)) {
-				found = true;
+		TableModel model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
+
+		// calculate sharded Db Code if have
+		Integer dbCode = SqlBoxContextUtils.getShardedDBCode(ctx, model, entity.getClass());
+		if (dbCode == null)
+			dbCode = -1;
+
+		// calculate sharded table name if have
+		Integer tbCode = SqlBoxContextUtils.getShardedTBCode(ctx, model, entity.getClass());
+		String table = model.getTableName();
+		if (tbCode != null)
+			table += "_" + tbCode;
+
+		// calculate id value
+		StringBuilder idSB = new StringBuilder();
+		for (ColumnModel col : model.getPKeyColsSortByColumnName()) {
+			idSB.append(SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity));
+			if (idSB.length() > 0)
+				idSB.append("|");
+		}
+		String id = idSB.toString();
+
+		boolean lockExisted = false;
+		for (GtxLock lk : locks) // add locks in memory, if already have then do not add again
+			if (lk.getDbCode().equals(dbCode) && lk.getTbName().equalsIgnoreCase(table)
+					&& lk.getEntityId().equalsIgnoreCase(id)) {
+				lockExisted = true;
 				break;
 			}
-		if (!found) {
+		if (!lockExisted) {
 			GtxLock lock = new GtxLock();
-			lock.setDb(ctx.getName());
-			lock.setTable(""); 
+			lock.setDbCode(dbCode);
+			lock.setTbName(table);
+			lock.setEntityId(id);
+			locks.add(lock);
+		}
+	}
+
+	public static void saveGtxInfo(SqlBoxContext gtxCtx, GtxInfo gtxInfo) {
+		gtxCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
+		try {
+			SqlBoxException.assureNotEmpty(gtxInfo.getGtxId(), "GtxId not set");
+			gtxCtx.eInsert(new GtxId(gtxInfo.getGtxId()));
+			Long logId = 1L;
+			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
+				Object entity = gtxLog.getEntity();
+				TableModel md = GtxUtils.entity2GtxLogModel(entity.getClass());
+				md.getColumnByColName(GtxUtils.GTX_ID).setValue(gtxInfo.getGtxId());
+				md.getColumnByColName(GtxUtils.GTX_LOG_ID).setValue(logId++);
+				md.getColumnByColName(GtxUtils.GTX_TYPE).setValue(gtxLog.getLogType());
+				gtxCtx.eInsert(entity, md);
+			}
+			for (GtxLock lock : gtxInfo.getGtxLockList())
+				gtxCtx.eInsert(lock);
+			gtxCtx.getConnectionManager().commit();
+		} catch (Exception e) {
+			gtxCtx.getConnectionManager().rollback();
+			throw new TransactionsException(e);
 		}
 
 	}
@@ -86,7 +134,7 @@ public class GtxUtils {
 	 * Convert an entity class to gtxLog entity class, i.e., add some columns for it
 	 */
 	public static TableModel entity2GtxLogModel(Class<?> entityClass) {
-		TableModel model = globalGtxTableModelCache.get(entityClass);
+		TableModel model = globalGtxTableModelCache.get(entityClass);//TODO use cached editable model
 		if (model != null)
 			return model;
 		TableModel t = TableModelUtils.entity2Model(entityClass);
@@ -102,9 +150,9 @@ public class GtxUtils {
 			col.setShardDatabase(null);
 			col.setShardTable(null);
 		}
-		t.column(GTX_ID).VARCHAR(32);
-		t.column(GTX_TYPE).VARCHAR(14);
-		t.column(GTX_LOG_ID).LONG().id(); // ID is assigned by outside
+		t.column(GTX_ID).VARCHAR(32).setValue(null);
+		t.column(GTX_TYPE).VARCHAR(16).setValue(null);
+		t.column(GTX_LOG_ID).LONG().id().setValue(null); // ID is assigned by outside
 		globalGtxTableModelCache.put(entityClass, t);
 		return t;
 	}

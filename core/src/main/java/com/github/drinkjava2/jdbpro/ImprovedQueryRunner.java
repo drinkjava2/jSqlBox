@@ -820,7 +820,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * DataSource or ThreadLocal or from Spring or JTA or some container...
 	 */
 	public Connection getConnection() throws SQLException {
-		return this.getConnectionManager().getConnection(this.getDataSource());
+		return this.getConnectionManager().getConnection(this);
 	}
 
 	/**
@@ -829,7 +829,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * container...
 	 */
 	public void releaseConnection(Connection conn) throws SQLException {
-		this.getConnectionManager().releaseConnection(conn, this.getDataSource());
+		this.getConnectionManager().releaseConnection(conn, this);
 	}
 
 	/** Commit the transaction, */

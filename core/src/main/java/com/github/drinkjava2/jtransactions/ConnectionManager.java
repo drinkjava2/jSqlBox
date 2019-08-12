@@ -34,16 +34,16 @@ public interface ConnectionManager {
 
 	/**
 	 * A ConnectionManager implementation determine how to get connection from
-	 * DataSource or ThreadLocal or from Spring or JTA or some container...
+	 * DataSource or DataSourceHolder or ThreadLocal or from Spring or JTA or some
+	 * container...
 	 */
-	public Connection getConnection(Object dataSourceOrOwner) throws SQLException;
+	public Connection getConnection(Object dsOrHolder) throws SQLException;
 
 	/**
 	 * A ConnectionManager implementation determine how to close connection or
-	 * return connection to ThreadLocal or return to Spring or JTA or some
-	 * container...
+	 * return to ThreadLocal or return to Spring or JTA or some container...
 	 */
-	public void releaseConnection(Connection conn, Object dataSourceOrOwner) throws SQLException;
+	public void releaseConnection(Connection conn, Object dsOrHolder) throws SQLException;
 
 	/** Commit the transaction, */
 	public void commit();

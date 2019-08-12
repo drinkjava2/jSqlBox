@@ -19,14 +19,14 @@ package com.github.drinkjava2.jsqlbox.gtx;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jdialects.id.UUID32Generator;
+import com.github.drinkjava2.jdialects.id.UUID25Generator;
 import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
@@ -40,18 +40,18 @@ import com.github.drinkjava2.jtransactions.TxInfo;
  */
 public class GtxConnectionManager extends ThreadConnectionManager {
 
-	private SqlBoxContext lockCtx;
+	private SqlBoxContext gtxCtx;
 
 	public SqlBoxContext getLockCtx() {
-		return lockCtx;
+		return gtxCtx;
 	}
 
 	public void setLockCtx(SqlBoxContext lockCtx) {
-		this.lockCtx = lockCtx;
+		this.gtxCtx = lockCtx;
 	}
 
 	public GtxConnectionManager(SqlBoxContext lockCtx) {
-		this.lockCtx = lockCtx;
+		this.gtxCtx = lockCtx;
 	}
 
 	@Override
@@ -67,17 +67,18 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public Connection getConnection(Object dsOwner) throws SQLException {
-		DataSource ds = ((DataSourceHolder) dsOwner).getDataSource();
-		TransactionsException.assureNotNull(ds, "DataSource can not be null");
+	public Connection getConnection(Object dsHolder) throws SQLException {
+		SqlBoxContext ctx = (SqlBoxContext) dsHolder;
+		DataSource ds = ctx.getDataSource();
+		TransactionsException.assureNotNull(dsHolder, "DataSource can not be null");
 		if (isInTransaction()) {
 			TxInfo tx = getThreadTxInfo();
-			Connection conn = tx.getConnectionCache().get(ds);
+			Connection conn = tx.getConnectionCache().get(ctx);
 			if (conn == null) {
 				conn = ds.getConnection(); // NOSONAR
 				conn.setAutoCommit(false);
 				conn.setTransactionIsolation(tx.getTxIsolationLevel());
-				tx.getConnectionCache().put(ds, conn);
+				tx.getConnectionCache().put(ctx, conn);
 			}
 			return conn;
 		} else
@@ -91,25 +92,25 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
 		if (StrUtils.isEmpty(gtxInfo.getGtxId()))
 			gtxInfo.setGtxId(
-					UUID32Generator.getUUID32() + UUIDAnyGenerator.getAnyLengthRadix36UUID(8));
-		lockCtx.eInsert(gtxInfo);
-		//GtxInfo gtxInfo2 = lockCtx.eLoad(gtxInfo); 
+					"G" + UUID25Generator.get25LettersRadix36UUID() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6));
+		GtxUtils.saveGtxInfo(gtxCtx, gtxInfo); // store lock infos on gtx server
 
 		SQLException lastExp = null;
-		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
-		for (Connection con : conns) {
-			try {
-				con.commit();
-			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
+		try {
+			for (Entry<Object, Connection> entry : gtxInfo.getConnectionCache().entrySet()) {
+				SqlBoxContext ctx = (SqlBoxContext) entry.getKey();
+				ctx.eInsert(new GtxId(gtxInfo.getGtxId()));// use a Tag to confirm tx committed on DB
+				Connection conn = entry.getValue();
+				conn.commit();
 			}
+		} catch (SQLException e) {
+			lastExp = e;
 		}
+
 		if (lastExp != null)
-			throw new TransactionsException(lastExp);
+			throw new TransactionsException(lastExp); // if any mistake, throw e
 		else
-			endTransaction(null);
+			endTransaction(null); // if no any mistake, close transaction
 	}
 
 	@Override

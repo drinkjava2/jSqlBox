@@ -622,6 +622,7 @@ public class ColumnModel {
 
 	public ColumnModel setValue(Object value) {
 		this.value = value;
+		this.valueExist = true;
 		return this;
 	}
 
