@@ -119,16 +119,9 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		if (!isInTransaction())
 			throw new TransactionsException("Gtx transaction already closed, can not rollback");
 		SQLException lastExp = null;
-		Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
-		for (Connection con : conns) {
-			try {
-				con.rollback();
-			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
-			}
-		}
+		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
+		setThreadTxInfo(null); // Immediately close GTX transaction
+		
 		endTransaction(lastExp);
 	}
 
@@ -137,8 +130,6 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			return;
 		Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 		setThreadTxInfo(null);
-		if (conns.isEmpty())
-			return; // no actual transaction open
 		SQLException lastExp = ex;
 		for (Connection con : conns) {
 			if (con == null)

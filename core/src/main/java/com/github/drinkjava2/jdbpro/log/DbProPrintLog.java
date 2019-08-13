@@ -15,6 +15,9 @@
  */
 package com.github.drinkjava2.jdbpro.log;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * DbProPrintLog is the default logger of jDbPro and jSqlBox project
  * 
@@ -28,20 +31,45 @@ public class DbProPrintLog implements DbProLog {
 		this.clazz = clazz;
 	}
 
+	@Override
 	public void info(String msg) {
 		System.out.println(msg);// NOSONAR
 	}
 
+	@Override
 	public void warn(String msg) {
 		System.out.println(msg);// NOSONAR
 	}
 
+	@Override
+	public void warn(String msg, Throwable t) {
+		System.out.println(msg + getStackTrace(t));
+	}
+
+	@Override
 	public void error(String msg) {
 		System.out.println(msg);// NOSONAR
 	}
 
+	@Override
+	public void error(String msg, Throwable t) {
+		System.out.println(msg + getStackTrace(t));
+	}
+
+	@Override
 	public void debug(String msg) {
 		System.out.println(msg);// NOSONAR
+	}
+
+	public static String getStackTrace(Throwable t) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		try {
+			t.printStackTrace(pw);
+			return sw.toString();
+		} finally {
+			pw.close();
+		}
 	}
 
 }

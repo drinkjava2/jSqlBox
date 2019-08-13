@@ -90,9 +90,9 @@ public abstract class GtxUtils {// NOSONAR
 		// calculate id value
 		StringBuilder idSB = new StringBuilder();
 		for (ColumnModel col : model.getPKeyColsSortByColumnName()) {
-			idSB.append(SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity));
 			if (idSB.length() > 0)
 				idSB.append("|");
+			idSB.append(SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity));
 		}
 		String id = idSB.toString();
 
@@ -147,7 +147,7 @@ public abstract class GtxUtils {// NOSONAR
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
 				TableModel md = GtxUtils.entity2GtxLogModel(entity.getClass());
-				md.getColumnByColName(GtxUtils.GTX_ID).setValue(gtxInfo.getGtxId());
+				md.getColumnByColName(GtxUtils.GTX_ID).setValue(gtxInfo.getGtxId().getId());
 				md.getColumnByColName(GtxUtils.GTX_LOG_ID).setValue(logId++);
 				md.getColumnByColName(GtxUtils.GTX_TYPE).setValue(gtxLog.getLogType());
 				gtxCtx.eDelete(entity, md);
@@ -181,7 +181,7 @@ public abstract class GtxUtils {// NOSONAR
 		t.column(GTX_ID).VARCHAR(32).id().setValue(null);
 		t.column(GTX_LOG_ID).LONG().id().setValue(null); // ID is assigned by outside
 		t.column(GTX_TYPE).VARCHAR(16).setValue(null);
-		 
+
 		return t;
 	}
 }

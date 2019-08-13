@@ -16,6 +16,7 @@
 package com.github.drinkjava2.jdbpro.log;
 
 import java.lang.reflect.Method;
+
 import com.github.drinkjava2.jdbpro.DbProException;
 
 /**
@@ -31,9 +32,9 @@ import com.github.drinkjava2.jdbpro.DbProException;
 public class DbProSLF4JLog implements DbProLog {
 	private Object logger;
 	private Method info;
-	private Method warn;
 	private Method debug;
-	private Method error;
+	private Method warn, warnExp;
+	private Method error, errorExp;
 
 	public DbProSLF4JLog(Class<?> targetClass) {
 		try {
@@ -44,6 +45,8 @@ public class DbProSLF4JLog implements DbProLog {
 			info = logger.getClass().getMethod("info", String.class);
 			warn = logger.getClass().getMethod("warn", String.class);
 			error = logger.getClass().getMethod("error", String.class);
+			warnExp = logger.getClass().getMethod("warn", String.class, Throwable.class);
+			errorExp = logger.getClass().getMethod("error", String.class, Throwable.class);
 		} catch (Exception e) {
 			throw new DbProException(e);
 		}
@@ -73,8 +76,26 @@ public class DbProSLF4JLog implements DbProLog {
 	}
 
 	@Override
+	public void warn(String msg, Throwable t) {
+		try {
+			warnExp.invoke(logger, msg, t);
+		} catch (Exception e) {
+			// do nothing
+		}
+	}
+
+	@Override
 	public void error(String msg) {
 		call(error, msg);
+	}
+
+	@Override
+	public void error(String msg, Throwable t) {
+		try {
+			errorExp.invoke(logger, msg, t);
+		} catch (Exception e) {
+			// do nothing
+		}
 	}
 
 }

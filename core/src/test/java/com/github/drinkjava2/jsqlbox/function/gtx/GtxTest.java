@@ -61,8 +61,8 @@ public class GtxTest {
 
 	@Test
 	public void commitTest() { // test group commit
-		ctx1.startTrans();
 		try {
+			ctx1.startTrans();
 			new Usr().putField("id", "UserA").insert(ctx1);
 			new Usr().putField("id", "UserB").insert(ctx2);
 			new Usr().putField("id", "UserC").insert(ctx2);
@@ -92,7 +92,7 @@ public class GtxTest {
 		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx2.eCountAll(Usr.class));
 	}
-	
+
 	@Test
 	public void rollbackFailTest() {
 		ctx1.startTrans();
@@ -102,12 +102,13 @@ public class GtxTest {
 			new Usr().putField("id", "UserC").insert(ctx2);
 			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-			((HikariDataSource)ctx2.getDataSource()).close();
+			((HikariDataSource) ctx2.getDataSource()).close();
 			ctx1.commitTrans();
 		} catch (Exception e) {
+			e.printStackTrace();
 			ctx1.rollbackTrans();
 		}
-		Assert.assertEquals(0, ctx1.eCountAll(Usr.class)); 
+		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
 	}
 
 }

@@ -30,12 +30,16 @@ package com.github.drinkjava2.jdbpro.log;
  */
 public interface DbProLog {
 
-	public abstract void info(String msg);
+	public void info(String msg);
 
-	public abstract void warn(String msg);
+	public void warn(String msg);
 
-	public abstract void error(String msg);
+	public void warn(String msg, Throwable t);
 
-	public abstract void debug(String msg);
+	public void error(String msg);
+
+	public void error(String msg, Throwable t);
+
+	public void debug(String msg);
 
 }
