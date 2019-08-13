@@ -19,11 +19,11 @@ package com.github.drinkjava2.jsqlbox.gtx;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdbpro.log.DbProLog;
+import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jdialects.id.UUID25Generator;
 import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -39,6 +39,7 @@ import com.github.drinkjava2.jtransactions.TxInfo;
  * @since 1.0.0
  */
 public class GtxConnectionManager extends ThreadConnectionManager {
+	protected static final DbProLog logger = DbProLogFactory.getLog(GtxConnectionManager.class);
 
 	private SqlBoxContext gtxCtx;
 
@@ -55,15 +56,18 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void startTransaction() {
-		setThreadTxInfo(new GtxInfo());
+	public void startTransaction() {// default is TRANSACTION_READ_COMMITTED
+		GtxInfo gtxInfo = new GtxInfo();
+		gtxInfo.setGtxId(new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6)));
+		setThreadTxInfo(gtxInfo);
 	}
 
 	@Override
 	public void startTransaction(int txIsolationLevel) {
-		GtxInfo txInfo = new GtxInfo();
-		txInfo.setTxIsolationLevel(txIsolationLevel);
-		setThreadTxInfo(txInfo);
+		GtxInfo gtxInfo = new GtxInfo();
+		gtxInfo.setGtxId(new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6)));
+		gtxInfo.setTxIsolationLevel(txIsolationLevel);
+		setThreadTxInfo(gtxInfo);
 	}
 
 	@Override
@@ -86,37 +90,34 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void commit() {
+	public void commitTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
-		if (StrUtils.isEmpty(gtxInfo.getGtxId()))
-			gtxInfo.setGtxId(
-					"G" + UUID25Generator.get25LettersRadix36UUID() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6));
+		for (Object ctx : gtxInfo.getConnectionCache().keySet())
+			((SqlBoxContext) ctx).eInsert(gtxInfo.getGtxId());// use a Tag to confirm tx committed on DB
 		GtxUtils.saveGtxInfo(gtxCtx, gtxInfo); // store lock infos on gtx server
-
 		SQLException lastExp = null;
 		try {
-			for (Entry<Object, Connection> entry : gtxInfo.getConnectionCache().entrySet()) {
-				SqlBoxContext ctx = (SqlBoxContext) entry.getKey();
-				ctx.eInsert(new GtxId(gtxInfo.getGtxId()));// use a Tag to confirm tx committed on DB
-				Connection conn = entry.getValue();
+			for (Connection conn : gtxInfo.getConnectionCache().values())
 				conn.commit();
-			}
 		} catch (SQLException e) {
 			lastExp = e;
 		}
-
 		if (lastExp != null)
 			throw new TransactionsException(lastExp); // if any mistake, throw e
-		else
+		else {
+			GtxUtils.deleteGtxInfo(gtxCtx, gtxInfo); // delete locks
+			for (Object ctx : gtxInfo.getConnectionCache().keySet())
+				((SqlBoxContext) ctx).eDelete(gtxInfo.getGtxId());// delete tags
 			endTransaction(null); // if no any mistake, close transaction
+		}
 	}
 
 	@Override
-	public void rollback() {
+	public void rollbackTransaction() {
 		if (!isInTransaction())
-			throw new TransactionsException("Transaction not opened, can not rollback");
+			throw new TransactionsException("Gtx transaction already closed, can not rollback");
 		SQLException lastExp = null;
 		Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 		for (Connection con : conns) {
@@ -131,13 +132,14 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		endTransaction(lastExp);
 	}
 
-	private void endTransaction(SQLException lastExp) {// NOSONAR
+	private void endTransaction(SQLException ex) {// NOSONAR
 		if (!isInTransaction())
 			return;
 		Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 		setThreadTxInfo(null);
 		if (conns.isEmpty())
 			return; // no actual transaction open
+		SQLException lastExp = ex;
 		for (Connection con : conns) {
 			if (con == null)
 				continue;
@@ -158,6 +160,8 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			}
 		}
 		conns.clear();
+		if (lastExp != null)
+			throw new TransactionsException(lastExp);
 	}
 
 }

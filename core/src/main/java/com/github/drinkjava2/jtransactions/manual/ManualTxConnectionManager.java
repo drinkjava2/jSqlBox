@@ -85,7 +85,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 	}
 
 	/** Commit the transaction, */
-	public void commit() {
+	public void commitTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		try {
@@ -104,7 +104,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 	}
 
 	/** roll back the transaction, close connection */
-	public void rollback() {
+	public void rollbackTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		try {

@@ -806,7 +806,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	}
 
 	/** Start a transaction */
-	public void startTransaction() {
+	public void startTrans() {
 		this.getConnectionManager().startTransaction();
 	}
 
@@ -833,13 +833,13 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	}
 
 	/** Commit the transaction, */
-	public void commit() {
-		this.getConnectionManager().commit();
+	public void commitTrans() {
+		this.getConnectionManager().commitTransaction();
 	}
 
 	/** Roll back the transaction */
-	public void rollback() {
-		this.getConnectionManager().rollback();
+	public void rollbackTrans() {
+		this.getConnectionManager().rollbackTransaction();
 	}
 
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR

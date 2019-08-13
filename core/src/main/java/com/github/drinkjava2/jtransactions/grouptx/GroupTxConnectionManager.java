@@ -71,7 +71,7 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void commit() {
+	public void commitTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		SQLException lastExp = null;
@@ -92,7 +92,7 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void rollback() {
+	public void rollbackTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		SQLException lastExp = null;

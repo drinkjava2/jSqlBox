@@ -70,7 +70,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void commit() {
+	public void commitTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		try {
@@ -91,7 +91,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void rollback() {
+	public void rollbackTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		try {

@@ -44,29 +44,29 @@ public class ManualTxTest {
 	public void DemoTest() {
 		ctx.setConnectionManager(new ManualTxConnectionManager());
 		for (int i = 0; i < 1000; i++) {
-			ctx.startTransaction();
+			ctx.startTrans();
 			try {
 				Assert.assertEquals(100, ctx.eCountAll(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx);
 				Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
 				System.out.println(1 / 0);
 				new Usr().putField("firstName", "Bar").insert(ctx);
-				ctx.commit();
+				ctx.commitTrans();
 			} catch (Exception e) {
-				ctx.rollback();
+				ctx.rollbackTrans();
 			}
 			Assert.assertEquals(100, ctx.eCountAll(Tail.class, tail("users")));
 		}
 
-		ctx.startTransaction();
+		ctx.startTrans();
 		try {
 			Assert.assertEquals(100, ctx.eCountAll(Usr.class));
 			new Usr().putField("firstName", "Foo").insert(ctx);
 			Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
 			new Usr().putField("firstName", "Bar").insert(ctx);
-			ctx.commit();
+			ctx.commitTrans();
 		} catch (Exception e) {
-			ctx.rollback();
+			ctx.rollbackTrans();
 		}
 		Assert.assertEquals(102, ctx.eCountAll(Tail.class, tail("users")));
 

@@ -117,13 +117,13 @@ public class JFinalTxManager implements ConnectionManager {
 	}
 
 	@Override
-	public void commit() {
+	public void commitTransaction() {
 		throw new TransactionsException(
 				"commit method not implemented by current version, please use JFinal's method directly");
 	}
 
 	@Override
-	public void rollback() {
+	public void rollbackTransaction() {
 		throw new TransactionsException(
 				"rollback method not implemented by current version, please use JFinal's method directly");
 	}

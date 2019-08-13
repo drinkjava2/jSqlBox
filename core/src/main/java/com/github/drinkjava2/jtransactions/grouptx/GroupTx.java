@@ -55,9 +55,9 @@ public class GroupTx implements MethodInterceptor {
 			try {
 				cm.startTransaction(transactionIsolation);
 				invokeResult = caller.proceed();
-				cm.commit();
+				cm.commitTransaction();
 			} catch (Throwable t) {
-				cm.rollback();
+				cm.rollbackTransaction();
 				throw new TransactionsException("GroupTx found a runtime Exception, transaction rollbacked.", t);
 			}
 			return invokeResult;

@@ -68,7 +68,7 @@ public class GroupTxTest {
 	@Test
 	public void groupRollbackTest() { // test group roll back
 		for (int i = 0; i < 100; i++) {
-			ctx1.startTransaction();
+			ctx1.startTrans();
 			try {
 				Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx1);
@@ -78,9 +78,9 @@ public class GroupTxTest {
 				new Usr().putField("firstName", "Foo").insert(ctx2);
 				Assert.assertEquals(101, ctx2.eCountAll(Tail.class, tail("users")));
 				System.out.println(1 / 0); // Div 0!
-				ctx1.commit();
+				ctx1.commitTrans();
 			} catch (Exception e) {
-				ctx1.rollback();
+				ctx1.rollbackTrans();
 			}
 			Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
 			Assert.assertEquals(100, ctx2.eCountAll(Tail.class, tail("users")));
@@ -90,14 +90,14 @@ public class GroupTxTest {
 	@Test
 	public void groupCommitTest() { // test group commit
 		for (int i = 0; i < 100; i++) {
-			ctx1.startTransaction();
+			ctx1.startTrans();
 			try {
 				new Usr().putField("firstName", "Foo").insert(ctx1);
 				ctx1.eInsert(new Usr().setFirstName("Foo"), ctx2);
 				new Usr().putField("firstName", "Bar").insert(ctx2);
-				ctx1.commit();
+				ctx1.commitTrans();
 			} catch (Exception e) {
-				ctx1.rollback();
+				ctx1.rollbackTrans();
 			}
 		}
 		Assert.assertEquals(200, ctx1.eCountAll(Tail.class, tail("users")));
@@ -111,15 +111,15 @@ public class GroupTxTest {
 	@Test
 	public void groupPartialCommitTest() { // simulate partial commit test
 		Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
-		ctx1.startTransaction();
+		ctx1.startTrans();
 		try {
 			new Usr().putField("firstName", "Foo").insert(ctx1);
 			new Usr().putField("firstName", "Foo").insert(ctx2);
 			ds2.close();
-			ctx1.commit();
+			ctx1.commitTrans();
 		} catch (Exception e) {
 			try {
-				ctx1.rollback();
+				ctx1.rollbackTrans();
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}

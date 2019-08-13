@@ -46,8 +46,8 @@ public interface ConnectionManager {
 	public void releaseConnection(Connection conn, Object dsOrHolder) throws SQLException;
 
 	/** Commit the transaction, */
-	public void commit();
+	public void commitTransaction();
 
 	/** Roll back soft transaction */
-	public void rollback();
+	public void rollbackTransaction();
 }

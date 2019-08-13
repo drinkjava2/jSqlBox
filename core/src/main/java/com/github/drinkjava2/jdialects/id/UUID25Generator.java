@@ -42,7 +42,7 @@ public class UUID25Generator implements IdGenerator {
 
 	@Override
 	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		return get25LettersRadix36UUID();
+		return getUUID25();
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class UUID25Generator implements IdGenerator {
 		return INSTANCE;
 	}
 
-	public static String get25LettersRadix36UUID() {
+	public static String getUUID25() {
 		String uuidHex = UUID.randomUUID().toString().replaceAll("-", "");
 		BigInteger b = new BigInteger(uuidHex, 16);
 		String s = b.toString(36);

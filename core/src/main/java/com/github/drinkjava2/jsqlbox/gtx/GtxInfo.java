@@ -17,14 +17,14 @@ import java.util.List;
 import com.github.drinkjava2.jtransactions.TxInfo;
 
 /**
- * This class store gtxId, gtx log and gtx lock, will be saved to 3 tables in
+ * This class store id, gtx log and gtx lock, will be saved to 3 tables in
  * GTX server
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
 public class GtxInfo extends TxInfo {
-	protected String gtxId;
+	protected GtxId gtxId;
 
 	protected List<GtxLog> gtxLogList = null;
 
@@ -32,7 +32,7 @@ public class GtxInfo extends TxInfo {
 
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("gtxId=" + gtxId).append("\r");
+		sb.append("id=" + gtxId).append("\r");
 		sb.append("gtxLockList=" + gtxLockList).append("\r");
 		sb.append("gtxLogList=" + gtxLogList).append("\r");
 		return sb.toString();
@@ -51,11 +51,11 @@ public class GtxInfo extends TxInfo {
 	}
 
 	// getter & setter=========
-	public String getGtxId() {
+	public GtxId getGtxId() {
 		return gtxId;
 	}
 
-	public void setGtxId(String gtxId) {
+	public void setGtxId(GtxId gtxId) {
 		this.gtxId = gtxId;
 	}
 
