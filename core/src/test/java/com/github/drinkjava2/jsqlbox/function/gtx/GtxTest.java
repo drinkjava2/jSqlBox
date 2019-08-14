@@ -86,7 +86,8 @@ public class GtxTest {
 			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
 			System.out.println(1 / 0);
 			ctx1.commitTrans();
-		} catch (Exception e) {
+		} catch (Exception e) { 
+			e.printStackTrace();
 			ctx1.rollbackTrans();
 		}
 		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));

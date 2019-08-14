@@ -98,12 +98,21 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			((SqlBoxContext) ctx).eInsert(gtxInfo.getGtxId());// use a Tag to confirm tx committed on DB
 		GtxUtils.saveGtxInfo(gtxCtx, gtxInfo); // store lock infos on gtx server
 		SQLException lastExp = null;
-		try {
-			for (Connection conn : gtxInfo.getConnectionCache().values())
+		for (Connection conn : gtxInfo.getConnectionCache().values())
+			try {
 				conn.commit();
-		} catch (SQLException e) {
-			lastExp = e;
-		}
+			} catch (SQLException e) {
+				if (lastExp != null)
+					e.setNextException(lastExp);
+				lastExp = e;
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					if (lastExp != null)
+						e.setNextException(lastExp);
+					lastExp = e;
+				}
+			}
 		if (lastExp != null)
 			throw new TransactionsException(lastExp); // if any mistake, throw e
 		else {
@@ -121,7 +130,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		SQLException lastExp = null;
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
 		setThreadTxInfo(null); // Immediately close GTX transaction
-		
+
 		endTransaction(lastExp);
 	}
 
