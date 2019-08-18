@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * SpringTxConnectionManager is the implementation of ConnectionManager, get
@@ -113,13 +114,13 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	}
 
 	@Override
-	public void commitTransaction() {
+	public TxResult commitTransaction() throws Exception {
 		throw new TransactionsException(
 				"commit method not implemented by current version, please use Spring's method directly");
 	}
 
 	@Override
-	public void rollbackTransaction() {
+	public TxResult rollbackTransaction() {
 		throw new TransactionsException(
 				"rollback method not implemented by current version, please use Spring's method directly");
 	}

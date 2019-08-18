@@ -21,6 +21,7 @@ import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * TinyTxConnectionManager is the implementation of ConnectionManager, get
@@ -70,34 +71,33 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void commitTransaction() {
+	public TxResult commitTransaction() throws Exception {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		try {
 			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 			if (conns.isEmpty())
-				return; // no actual transaction open
+				return TxResult.TX_SUCESS; // no actual transaction open
 			if (conns.size() > 1)
 				throw new TransactionsException("TinyTx can only support one dataSource in one thread, can not commit");
 			Connection con = conns.iterator().next();
 			if (con.getAutoCommit())
 				throw new TransactionsException("Connection is auto commit status, can not commit");
 			con.commit();
-		} catch (SQLException e) {
-			throw new TransactionsException(e);
 		} finally {
 			endTransaction();
 		}
+		return TxResult.TX_SUCESS;
 	}
 
 	@Override
-	public void rollbackTransaction() {
+	public TxResult rollbackTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		try {
 			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 			if (conns.isEmpty())
-				return; // no actual transaction open
+				return TxResult.TX_FAIL; // no actual transaction open
 			Connection con = conns.iterator().next();
 			if (con.getAutoCommit())
 				throw new TransactionsException("Connection is auto commit status, can not rollback");
@@ -108,6 +108,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 		} finally {
 			endTransaction();
 		}
+		return TxResult.TX_FAIL;
 	}
 
 	private void endTransaction() {

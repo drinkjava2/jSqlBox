@@ -20,6 +20,7 @@ import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * ManualTxConnectionManager is a simple implementation of ConnectionManager,
@@ -84,33 +85,32 @@ public class ManualTxConnectionManager implements ConnectionManager {
 			conn.close();
 	}
 
-	/** Commit the transaction, */
-	public void commitTransaction() {
+	/** Commit the transaction */
+	public TxResult commitTransaction() throws Exception {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		try {
 			Connection con = txInfo.getConnection();
 			if (con == null)
-				return; // no actual transaction open
+				return TxResult.TX_SUCESS; // no actual transaction open
 			if (!con.getAutoCommit())
 				con.commit();
 			else
 				throw new TransactionsException("Connection is auto commit status, can not commit");
-		} catch (SQLException e) {
-			throw new TransactionsException(e);
 		} finally {
 			endTransaction();
 		}
+		return TxResult.TX_SUCESS;
 	}
 
 	/** roll back the transaction, close connection */
-	public void rollbackTransaction() {
+	public TxResult rollbackTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		try {
 			Connection con = txInfo.getConnection();
 			if (con == null)
-				return; // no actual transaction open
+				return TxResult.TX_FAIL; // no actual transaction open
 			if (!con.getAutoCommit())
 				con.rollback();
 			else
@@ -120,6 +120,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 		} finally {
 			endTransaction();
 		}
+		return TxResult.TX_FAIL;
 	}
 
 	/**

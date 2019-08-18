@@ -19,7 +19,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.mysql.jdbc.Connection;
 
 /**
@@ -113,11 +112,13 @@ public abstract class GtxUtils {// NOSONAR
 		}
 	}
 
-	/** Save GTX info */
-	public static void saveGtxInfo(SqlBoxContext gtxCtx, GtxInfo gtxInfo) {
+	/**
+	 * Save GTX lock and log
+	 */
+	public static void saveLockAndLog(SqlBoxContext gtxCtx, GtxInfo gtxInfo) throws Exception {
+		SqlBoxException.assureNotNull(gtxInfo.getGtxId(), "GtxId not set");
 		gtxCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
-			SqlBoxException.assureNotNull(gtxInfo.getGtxId(), "GtxId not set");
 			gtxCtx.eInsert(gtxInfo.getGtxId());
 			Long logId = 1L;
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
@@ -134,12 +135,12 @@ public abstract class GtxUtils {// NOSONAR
 			gtxCtx.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			gtxCtx.getConnectionManager().rollbackTransaction();
-			throw new TransactionsException(e);
+			throw e;
 		}
 	}
 
-	/** Delete GTX info */
-	public static void deleteGtxInfo(SqlBoxContext gtxCtx, GtxInfo gtxInfo) {
+	/** Delete GTX lock and log */
+	public static void deleteLockAndLog(SqlBoxContext gtxCtx, GtxInfo gtxInfo) throws Exception {
 		gtxCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
 			gtxCtx.eDelete(gtxInfo.getGtxId());
@@ -157,7 +158,7 @@ public abstract class GtxUtils {// NOSONAR
 			gtxCtx.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			gtxCtx.getConnectionManager().rollbackTransaction();
-			throw new TransactionsException(e);
+			throw e;
 		}
 	}
 

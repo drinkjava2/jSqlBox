@@ -12,6 +12,7 @@ import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
+import com.github.drinkjava2.jtransactions.TxResult;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -24,6 +25,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class GtxTest {
 	SqlBoxContext ctx1;
 	SqlBoxContext ctx2;
+	SqlBoxContext ctx3;
 
 	private static DataSource newTestDataSource() {
 		HikariDataSource ds = new HikariDataSource();
@@ -37,6 +39,7 @@ public class GtxTest {
 
 	@Before
 	public void init() {
+		SqlBoxContext.resetGlobalVariants();
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		SqlBoxContext gtxCtx = new SqlBoxContext(newTestDataSource());
 		gtxCtx.setName("gtxCtx");
@@ -57,6 +60,12 @@ public class GtxTest {
 		ctx2.setConnectionManager(gtx);
 		ctx2.executeDDL(ctx2.toCreateDDL(GtxId.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
+
+		ctx3 = new SqlBoxContext(newTestDataSource());
+		ctx3.setName("ctx3");
+		ctx3.setConnectionManager(gtx);
+		ctx3.executeDDL(ctx3.toCreateDDL(GtxId.class));
+		ctx3.executeDDL(ctx3.toCreateDDL(Usr.class));
 	}
 
 	@Test
@@ -66,6 +75,7 @@ public class GtxTest {
 			new Usr().putField("id", "UserA").insert(ctx1);
 			new Usr().putField("id", "UserB").insert(ctx2);
 			new Usr().putField("id", "UserC").insert(ctx2);
+			new Usr().putField("id", "Userd").insert(ctx3);
 			ctx1.commitTrans();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -73,43 +83,68 @@ public class GtxTest {
 		}
 		Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(1, ctx3.eCountAll(Usr.class));
 	}
 
 	@Test
-	public void rollbackOkTest() {
+	public void rollbackCauseByDiv0Test() {
 		ctx1.startTrans();
 		try {
 			new Usr().putField("id", "UserA").insert(ctx1);
 			new Usr().putField("id", "UserB").insert(ctx2);
 			new Usr().putField("id", "UserC").insert(ctx2);
+			new Usr().putField("id", "Userd").insert(ctx3);
 			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
 			System.out.println(1 / 0);
 			ctx1.commitTrans();
-		} catch (Exception e) { 
-			e.printStackTrace();
+		} catch (Exception e) {
 			ctx1.rollbackTrans();
 		}
 		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx3.eCountAll(Usr.class));
 	}
 
 	@Test
-	public void rollbackFailTest() {
+	public void rollbackFailCauseByDsLostTest() {
 		ctx1.startTrans();
 		try {
 			new Usr().putField("id", "UserA").insert(ctx1);
 			new Usr().putField("id", "UserB").insert(ctx2);
 			new Usr().putField("id", "UserC").insert(ctx2);
+			new Usr().putField("id", "Userd").insert(ctx3);
 			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-			((HikariDataSource) ctx2.getDataSource()).close();
-			ctx1.commitTrans();
+			((HikariDataSource) ctx2.getDataSource()).close();// Ds2 lost!
 		} catch (Exception e) {
-			e.printStackTrace();
 			ctx1.rollbackTrans();
 		}
 		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx3.eCountAll(Usr.class));
+	}
+
+	@Test
+	public void rollbackCausePartialCommitTest() {
+		ctx1.startTrans();
+		TxResult result;
+		try {
+			new Usr().putField("id", "UserA").insert(ctx1);
+			new Usr().putField("id", "UserB").insert(ctx2);
+			new Usr().putField("id", "UserC").insert(ctx2);
+			new Usr().putField("id", "Userd").insert(ctx3);
+			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
+			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
+			ctx2.setForceCommitFail(); // force ctx2 commit fail
+			result = ctx1.commitTrans();
+		} catch (Exception e) {
+			result = ctx1.rollbackTrans();
+		}
+		System.out.println(result.getDetailedInfo());
+		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx3.eCountAll(Usr.class));
+
 	}
 
 }

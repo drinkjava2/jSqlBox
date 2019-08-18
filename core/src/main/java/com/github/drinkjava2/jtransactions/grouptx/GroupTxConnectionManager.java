@@ -26,6 +26,7 @@ import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * GroupTxConnectionManager determine how to get or release connection from a
@@ -71,7 +72,7 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void commitTransaction() {
+	public TxResult commitTransaction() throws Exception {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
 		SQLException lastExp = null;
@@ -89,10 +90,11 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 			throw new TransactionsException(lastExp);
 		else
 			endTransaction(null);
+		return TxResult.TX_SUCESS;
 	}
 
 	@Override
-	public void rollbackTransaction() {
+	public TxResult rollbackTransaction() {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not rollback");
 		SQLException lastExp = null;
@@ -107,6 +109,7 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 			}
 		}
 		endTransaction(lastExp);
+		return TxResult.TX_FAIL;
 	}
 
 	private void endTransaction(SQLException lastExp) {// NOSONAR

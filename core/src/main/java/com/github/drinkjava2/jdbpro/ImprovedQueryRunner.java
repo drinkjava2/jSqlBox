@@ -37,6 +37,7 @@ import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.DataSourceHolder;
+import com.github.drinkjava2.jtransactions.TxResult;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
@@ -79,6 +80,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
+
+	/** A ThreadLocal instance, if >0, will cause commit fail, for unit test only */
+	protected ThreadLocal<Integer> threadLocalForceCommitFail = new ThreadLocal<Integer>() {
+		@Override
+		protected Integer initialValue() {
+			return 0;
+		}
+	};
 
 	/**
 	 * A ThreadLocal type tag to indicate current all SQL operations should be
@@ -168,8 +177,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 */
 	protected String formatParametersForLoggerOutput(Object... params) {
 		if (name != null)
-			return new StringBuilder(name).append(" PAR: ").append(Arrays.deepToString(params))
-					.toString();
+			return new StringBuilder(name).append(" PAR: ").append(Arrays.deepToString(params)).toString();
 		return "PAR: " + Arrays.deepToString(params);
 	}
 
@@ -794,6 +802,20 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		threadLocalSqlHandlers.set(handlers);
 	}
 
+	public Integer getForceCommitFail() {
+		return threadLocalForceCommitFail.get();
+	}
+
+	/** Force current runner commit fail forever */
+	public void setForceCommitFail() {
+		threadLocalForceCommitFail.set(-1);
+	}
+
+	/** Force current runner commit fail failCount times */
+	public void setForceCommitFail(Integer failCount) {
+		threadLocalForceCommitFail.set(failCount);
+	}
+
 	protected void connectionManagerWrapMethods_____________________() {// NOSONAR
 	}
 
@@ -832,14 +854,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		this.getConnectionManager().releaseConnection(conn, this);
 	}
 
-	/** Commit the transaction, */
-	public void commitTrans() {
-		this.getConnectionManager().commitTransaction();
+	/** Commit the transaction */
+	public TxResult commitTrans() throws Exception {
+		return this.getConnectionManager().commitTransaction();
 	}
 
 	/** Roll back the transaction */
-	public void rollbackTrans() {
-		this.getConnectionManager().rollbackTransaction();
+	public TxResult rollbackTrans() {
+		return this.getConnectionManager().rollbackTransaction();
 	}
 
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR

@@ -17,6 +17,7 @@ import java.sql.Connection;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * JFinalTxManager is the implementation of ConnectionManager, get connection
@@ -117,13 +118,13 @@ public class JFinalTxManager implements ConnectionManager {
 	}
 
 	@Override
-	public void commitTransaction() {
+	public TxResult commitTransaction() throws Exception {
 		throw new TransactionsException(
 				"commit method not implemented by current version, please use JFinal's method directly");
 	}
 
 	@Override
-	public void rollbackTransaction() {
+	public TxResult rollbackTransaction() {
 		throw new TransactionsException(
 				"rollback method not implemented by current version, please use JFinal's method directly");
 	}

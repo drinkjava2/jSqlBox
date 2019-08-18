@@ -19,17 +19,17 @@ package com.github.drinkjava2.jsqlbox.gtx;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.log.DbProLog;
 import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
-import com.github.drinkjava2.jdialects.id.UUID25Generator;
-import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * GTX means Global Transaction, this is a distribute transaction
@@ -57,17 +57,14 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 	@Override
 	public void startTransaction() {// default is TRANSACTION_READ_COMMITTED
-		GtxInfo gtxInfo = new GtxInfo();
-		gtxInfo.setGtxId(new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6)));
-		setThreadTxInfo(gtxInfo);
+		setThreadTxInfo(new GtxInfo());// start soft GTX
 	}
 
 	@Override
 	public void startTransaction(int txIsolationLevel) {
 		GtxInfo gtxInfo = new GtxInfo();
-		gtxInfo.setGtxId(new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6)));
 		gtxInfo.setTxIsolationLevel(txIsolationLevel);
-		setThreadTxInfo(gtxInfo);
+		setThreadTxInfo(gtxInfo);// start soft GTX
 	}
 
 	@Override
@@ -90,56 +87,125 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 	}
 
 	@Override
-	public void commitTransaction() {
-		if (!isInTransaction())
-			throw new TransactionsException("Transaction not opened, can not commit");
+	public TxResult commitTransaction() throws Exception {
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
+		if (gtxInfo == null)
+			throw new TransactionsException("GTX not started, can not commit");
+
+		// Save GtxId tags into DBs
 		for (Object ctx : gtxInfo.getConnectionCache().keySet())
 			((SqlBoxContext) ctx).eInsert(gtxInfo.getGtxId());// use a Tag to confirm tx committed on DB
-		GtxUtils.saveGtxInfo(gtxCtx, gtxInfo); // store lock infos on gtx server
-		SQLException lastExp = null;
-		for (Connection conn : gtxInfo.getConnectionCache().values())
-			try {
-				conn.commit();
-			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					if (lastExp != null)
-						e.setNextException(lastExp);
-					lastExp = e;
-				}
-			}
-		if (lastExp != null)
-			throw new TransactionsException(lastExp); // if any mistake, throw e
-		else {
-			GtxUtils.deleteGtxInfo(gtxCtx, gtxInfo); // delete locks
-			for (Object ctx : gtxInfo.getConnectionCache().keySet())
-				((SqlBoxContext) ctx).eDelete(gtxInfo.getGtxId());// delete tags
-			endTransaction(null); // if no any mistake, close transaction
+
+		// Save lock and log
+		try {
+			GtxUtils.saveLockAndLog(gtxCtx, gtxInfo); // store gtxId,undo log, locks into gtx server
+		} catch (Exception e) {
+			gtxInfo.setGtxStep(GtxInfo.LOCK_FAIL);
+			gtxInfo.getTxResult().addCommitEx(e);
+			throw e;
 		}
+
+		// Here commit all DBs
+		int commitIndex = 0;
+		try {
+			for (Entry<Object, Connection> entry : gtxInfo.getConnectionCache().entrySet()) {
+				SqlBoxContext ctx = (SqlBoxContext) entry.getKey();
+				System.out.println("debug, name="+ctx.getName());
+				int forceCommitFail = ctx.getForceCommitFail();
+				if (forceCommitFail > 0 || forceCommitFail < 0) {
+					if (forceCommitFail > 0)
+						ctx.setForceCommitFail(forceCommitFail - 1);
+					throw new IllegalArgumentException("ForceCommitFail=" + forceCommitFail + " in Ctx '"
+							+ ctx.getName() + "', a non 0 value will force a commit fail usually used for unit test.");
+				}
+				Connection conn = entry.getValue();
+				conn.commit();
+				commitIndex++;
+			}
+		} catch (Exception e) {
+			if (commitIndex < gtxInfo.getConnectionCache().size() - 1) {
+				gtxInfo.setGtxStep(GtxInfo.PARTIAL_COMMIT_FAIL);// partial commit is 100% fail
+				gtxInfo.setPartialCommitQty(commitIndex);
+			} else
+				gtxInfo.setGtxStep(GtxInfo.LAST_COMMIT_FAIL);// last commit fail may not fail
+			gtxInfo.getTxResult().addCommitEx(e);
+			throw e;
+		}
+
+		// Now GTX is success committed, left jobs are unlock and cleanup
+
+		// Delete lock and log
+		try {
+			GtxUtils.deleteLockAndLog(gtxCtx, gtxInfo);
+		} catch (Exception e) {
+			gtxInfo.setGtxStep(GtxInfo.UNLOCK_FAIL);
+			gtxInfo.getTxResult().addCommitEx(e);
+			throw e;
+		}
+
+		// Delete gtxId tags
+		for (Object key : gtxInfo.getConnectionCache().keySet()) {
+			SqlBoxContext ctx = (SqlBoxContext) key;
+			try {
+				ctx.eDelete(gtxInfo.getGtxId());// delete tags, work on autoCommit mode
+			} catch (Exception e) {
+				gtxInfo.setGtxStep(GtxInfo.CLEANUP_FAIL);
+				gtxInfo.getTxResult().addCommitEx(e);
+			}
+		}
+		setThreadTxInfo(null);// close soft GTX
+		cleanupConnections(gtxInfo);
+		return gtxInfo.getTxResult().setResult(TxResult.SUCESS);
 	}
 
 	@Override
-	public void rollbackTransaction() {
+	public TxResult rollbackTransaction() {
 		if (!isInTransaction())
-			throw new TransactionsException("Gtx transaction already closed, can not rollback");
-		SQLException lastExp = null;
+			throw new TransactionsException("Gtx transaction not started, can not rollback");
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
-		setThreadTxInfo(null); // Immediately close GTX transaction
+		setThreadTxInfo(null);// close soft GTX
+		String step = gtxInfo.getGtxStep();
 
-		endTransaction(lastExp);
+		if (GtxInfo.START.equals(step) || GtxInfo.LOCK_FAIL.equals(step) || GtxInfo.PARTIAL_COMMIT_FAIL.equals(step)) {
+			gtxInfo.getTxResult().setResult(TxResult.FAIL);
+			rollbackConnections(gtxInfo);
+		} else if (GtxInfo.LAST_COMMIT_FAIL.equals(step)) {
+			gtxInfo.getTxResult().setResult(TxResult.UNKNOW);
+		} else if (GtxInfo.UNLOCK_FAIL.equals(step)) {
+			gtxInfo.getTxResult().setResult(TxResult.UNKNOW);
+		} else
+			throw new TransactionsException("I'm a teapot");// unreachable
+		return gtxInfo.getTxResult();
 	}
 
-	private void endTransaction(SQLException ex) {// NOSONAR
-		if (!isInTransaction())
-			return;
-		Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
-		setThreadTxInfo(null);
-		SQLException lastExp = ex;
+	private void rollbackConnections(GtxInfo gtxInfo) {// NOSONAR
+		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
+		for (Connection con : conns) {
+			if (con == null)
+				continue;
+			try {
+				con.rollback();
+			} catch (SQLException e) {
+				gtxInfo.getTxResult().addRollbackEx(e);
+			}
+			try {
+				if (!con.getAutoCommit())
+					con.setAutoCommit(true);
+			} catch (SQLException e) {
+				gtxInfo.getTxResult().addRollbackEx(e);
+			}
+			try {
+				if (!con.isClosed())
+					con.close();
+			} catch (SQLException e) {
+				gtxInfo.getTxResult().addRollbackEx(e);
+			}
+		}
+		conns.clear(); // free memory
+	}
+
+	private void cleanupConnections(GtxInfo gtxInfo) {// NOSONAR
+		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
 		for (Connection con : conns) {
 			if (con == null)
 				continue;
@@ -147,21 +213,16 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 				if (!con.getAutoCommit())
 					con.setAutoCommit(true);
 			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
+				gtxInfo.getTxResult().addCleanupEx(e);
 			}
 			try {
-				con.close();
+				if (!con.isClosed())
+					con.close();
 			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
+				gtxInfo.getTxResult().addCleanupEx(e);
 			}
 		}
-		conns.clear();
-		if (lastExp != null)
-			throw new TransactionsException(lastExp);
+		conns.clear(); // free memory
 	}
 
 }

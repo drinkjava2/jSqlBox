@@ -12,8 +12,8 @@
 package com.github.drinkjava2.jtransactions;
 
 import java.sql.Connection;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
 
@@ -22,6 +22,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
  * transaction started.
  */
 public class TxInfo {
+
 	@Transient
 	private Integer txIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
 
@@ -49,7 +50,7 @@ public class TxInfo {
 
 	public Map<Object, Connection> getConnectionCache() {
 		if (connectionCache == null)
-			connectionCache = new ConcurrentHashMap<Object, Connection>();
+			connectionCache = new LinkedHashMap<Object, Connection>();
 		return connectionCache;
 	}
 
