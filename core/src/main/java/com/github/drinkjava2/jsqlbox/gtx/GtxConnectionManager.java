@@ -115,7 +115,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 				if (forceCommitFail > 0 || forceCommitFail < 0) {
 					if (forceCommitFail > 0)
 						ctx.setForceCommitFail(forceCommitFail - 1);
-					throw new IllegalArgumentException("ForceCommitFail=" + forceCommitFail + " in Ctx '"
+					throw new IllegalArgumentException("ForceCommitFail=" + forceCommitFail + " in ctx '"
 							+ ctx.getName() + "', a non 0 value will force a commit fail usually used for unit test.");
 				}
 				Connection conn = entry.getValue();
