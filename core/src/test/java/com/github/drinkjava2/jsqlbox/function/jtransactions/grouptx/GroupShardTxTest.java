@@ -111,7 +111,7 @@ public class GroupShardTxTest {
 		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
 		new ShardUser().setId(401).setName("Bar").insert();
 		Assert.assertEquals(51, ctx2.eCountAll(ShardUser.class));
-		((HikariDataSource) ctx2.getDataSource()).close();// DS2 is closed, this will cause ctx2 fail
+		((HikariDataSource) ctx2.getDataSource()).close();// DS2 is closed, this will cause ctx1 fail
 	}
 
 	@Test

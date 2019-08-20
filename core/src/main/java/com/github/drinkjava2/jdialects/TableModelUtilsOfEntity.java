@@ -449,7 +449,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 	 */
 	private static TableModel entity2ModelWithConfig(Class<?> entityClass) {
 		TableModel model;
-		model = entity2ModelIgnoreConfigMethod(entityClass);
+		model = entity2ModelIgnoreConfigMethod(entityClass); 
 		Method method = null;
 		try {
 			method = entityClass.getMethod("config", TableModel.class);
@@ -463,6 +463,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			}
 		if (model == null)
 			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
+		TableModel.sortColumns(model.getColumns());
 		return model;
 	}
 

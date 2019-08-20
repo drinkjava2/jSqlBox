@@ -576,7 +576,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	@SuppressWarnings("unused")
-	private static void coreMethods___________________________________() {
+	private static void coreMethods___________________________________() {//NOSONAR
 	}
 
 	public static int entityInsertTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
@@ -588,7 +588,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 		int result = doEntityInsertTry(ctx, entityBean, optionItems);
 		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId)) // if in GTX transaction?
-			GtxUtils.logInsert(ctx, entityBean);
+			GtxUtils.reg(ctx, entityBean, GtxUtils.INSERT);
 		return result;
 	}
 
@@ -732,8 +732,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			oldEntity = doEntityLoadByIdTry(ctx, entityBean.getClass(), entityBean, optionItems);
 		int result = doEntityUpdateTry(ctx, entityBean, optionItems);
 		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId)) {
-			GtxUtils.logExistStrict(ctx, oldEntity);
-			GtxUtils.logUpdate(ctx, entityBean);
+			GtxUtils.reg(ctx, oldEntity, GtxUtils.EXISTSTRICT);
+			GtxUtils.reg(ctx, entityBean, GtxUtils.UPDATE);
 		}
 		return result;
 	}
@@ -855,7 +855,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			oldEntity = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
 		int result = doEntityDeleteByIdTry(ctx, entityClass, id, optionItems);
 		if (result == 1 && ctx.isGtxOpen() && !(id instanceof GtxId))
-			GtxUtils.logDelete(ctx, oldEntity);
+			GtxUtils.reg(ctx, oldEntity, GtxUtils.DELETE);
 		return result;
 	}
 
@@ -947,7 +947,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 		int result = doEntityLoadTry(ctx, entityBean, optionItems);
 		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId))
-			GtxUtils.logExistStrict(ctx, entityBean);
+			GtxUtils.reg(ctx, entityBean, GtxUtils.EXISTSTRICT);
 		return result;
 	}
 
@@ -1034,7 +1034,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 		T result = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
 		if (result != null && ctx.isGtxOpen() && !(id instanceof GtxId))
-			GtxUtils.logExistStrict(ctx, result);
+			GtxUtils.reg(ctx, result, GtxUtils.EXISTSTRICT);
 		return result;
 	}
 
@@ -1100,7 +1100,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		boolean result = doEntityExistById(ctx, entityClass, id, optionItems);
 		if (result && ctx.isGtxOpen() && !(id instanceof GtxId)) {
 			Object oldEntity = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
-			GtxUtils.logExist(ctx, oldEntity);
+			GtxUtils.reg(ctx, oldEntity, GtxUtils.EXIST);
 		}
 		return result;
 	}
@@ -1286,7 +1286,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	@SuppressWarnings("unused")
-	private static void ormQueryMethods___________________________________() {
+	private static void ormQueryMethods___________________________________() {//NOSONAR
 	}
 
 	public static EntityNet entityAutoNet(SqlBoxContext ctx, Class<?>... entityClasses) {

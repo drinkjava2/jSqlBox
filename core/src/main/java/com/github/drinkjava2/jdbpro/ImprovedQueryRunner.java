@@ -863,7 +863,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	public TxResult rollbackTrans() {
 		return this.getConnectionManager().rollbackTransaction();
 	}
-
+ 
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR
 	}
 

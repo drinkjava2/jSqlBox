@@ -23,9 +23,9 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 2.0.7
  */
 public class GtxTest {
+	SqlBoxContext ctx0;
 	SqlBoxContext ctx1;
 	SqlBoxContext ctx2;
-	SqlBoxContext ctx3;
 
 	private static DataSource newTestDataSource() {
 		HikariDataSource ds = new HikariDataSource();
@@ -49,130 +49,107 @@ public class GtxTest {
 		gtxCtx.executeDDL(gtxCtx.toCreateDDL(GtxLock.class));
 		gtxCtx.executeDDL(gtxCtx.toCreateGtxLogDDL(Usr.class));
 
+		ctx0 = new SqlBoxContext(newTestDataSource());
+		ctx0.setName("ctx_0");
+		ctx0.setConnectionManager(gtx);
+		ctx0.executeDDL(ctx0.toCreateDDL(GtxId.class));
+		ctx0.executeDDL(ctx0.toCreateDDL(Usr.class));
+
 		ctx1 = new SqlBoxContext(newTestDataSource());
-		ctx1.setName("ctx1");
+		ctx1.setName("ctx_1");
 		ctx1.setConnectionManager(gtx);
 		ctx1.executeDDL(ctx1.toCreateDDL(GtxId.class));
 		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 
 		ctx2 = new SqlBoxContext(newTestDataSource());
-		ctx2.setName("ctx2");
+		ctx2.setName("ctx_2");
 		ctx2.setConnectionManager(gtx);
 		ctx2.executeDDL(ctx2.toCreateDDL(GtxId.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
-
-		ctx3 = new SqlBoxContext(newTestDataSource());
-		ctx3.setName("ctx3");
-		ctx3.setConnectionManager(gtx);
-		ctx3.executeDDL(ctx3.toCreateDDL(GtxId.class));
-		ctx3.executeDDL(ctx3.toCreateDDL(Usr.class));
 	}
 
 	@Test
 	public void commitTest() { // test group commit
 		try {
-			ctx1.startTrans();
-			new Usr().putField("id", "UserA").insert(ctx1);
-			new Usr().putField("id", "UserB").insert(ctx2);
-			new Usr().putField("id", "UserC").insert(ctx2);
-			new Usr().putField("id", "UserD").insert(ctx3);
-			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
-			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-			Assert.assertEquals(1, ctx3.eCountAll(Usr.class));
-			ctx1.commitTrans();
+			ctx0.startTrans();
+			new Usr().putField("id", "UserA").insert(ctx0);
+			new Usr().putField("id", "UserB").insert(ctx1);
+			new Usr().putField("id", "UserC").insert(ctx1);
+			new Usr().putField("id", "UserD").insert(ctx2);
+			Assert.assertEquals(1, ctx0.eCountAll(Usr.class));
+			Assert.assertEquals(2, ctx1.eCountAll(Usr.class));
+			Assert.assertEquals(1, ctx2.eCountAll(Usr.class));
+			ctx0.commitTrans();
 		} catch (Exception e) {
 			e.printStackTrace();
-			ctx1.rollbackTrans();
+			ctx0.rollbackTrans();
 		}
-		Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-		Assert.assertEquals(1, ctx3.eCountAll(Usr.class));
+		Assert.assertEquals(1, ctx0.eCountAll(Usr.class));
+		Assert.assertEquals(2, ctx1.eCountAll(Usr.class));
+		Assert.assertEquals(1, ctx2.eCountAll(Usr.class));
 	}
 
 	@Test
 	public void rollbackCausedByDiv0Test() {
-		ctx1.startTrans();
+		ctx0.startTrans();
 		try {
-			new Usr().putField("id", "UserA").insert(ctx1);
-			new Usr().putField("id", "UserB").insert(ctx2);
-			new Usr().putField("id", "UserC").insert(ctx2);
-			new Usr().putField("id", "UserD").insert(ctx3);
-			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
-			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-			Assert.assertEquals(1, ctx3.eCountAll(Usr.class));
+			new Usr().putField("id", "UserA").insert(ctx0);
+			new Usr().putField("id", "UserB").insert(ctx1);
+			new Usr().putField("id", "UserC").insert(ctx1);
+			new Usr().putField("id", "UserD").insert(ctx2);
+			Assert.assertEquals(1, ctx0.eCountAll(Usr.class));
+			Assert.assertEquals(2, ctx1.eCountAll(Usr.class));
+			Assert.assertEquals(1, ctx2.eCountAll(Usr.class));
 			System.out.println(1 / 0);
-			ctx1.commitTrans();
+			ctx0.commitTrans();
 		} catch (Exception e) {
-			ctx1.rollbackTrans();
+			ctx0.rollbackTrans();
 		}
+		Assert.assertEquals(0, ctx0.eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx2.eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx3.eCountAll(Usr.class));
 	}
 
 	@Test
 	public void rollbackFailCausedByDsLostTest() {
-		ctx1.startTrans();
+		ctx0.startTrans();
 		try {
-			new Usr().putField("id", "UserA").insert(ctx1);
-			new Usr().putField("id", "UserB").insert(ctx2);
-			new Usr().putField("id", "UserC").insert(ctx2);
-			new Usr().putField("id", "UserD").insert(ctx3);
-			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
-			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-			Assert.assertEquals(1, ctx3.eCountAll(Usr.class));
-			((HikariDataSource) ctx2.getDataSource()).close();// Ds2 lost!
+			new Usr().putField("id", "UserA").insert(ctx0);
+			new Usr().putField("id", "UserB").insert(ctx1);
+			new Usr().putField("id", "UserC").insert(ctx1);
+			new Usr().putField("id", "UserD").insert(ctx2);
+			Assert.assertEquals(1, ctx0.eCountAll(Usr.class));
+			Assert.assertEquals(2, ctx1.eCountAll(Usr.class));
+			Assert.assertEquals(1, ctx2.eCountAll(Usr.class));
+			((HikariDataSource) ctx1.getDataSource()).close();// Ds2 lost!
 		} catch (Exception e) {
-			ctx1.rollbackTrans();
+			ctx0.rollbackTrans();
 		}
-		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx3.eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx0.eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx2.eCountAll(Usr.class));
 	}
 
 	@Test
-	public void rollbackCausedByPartialCommitTest() {
-		ctx1.startTrans();
+	public void rollbackCausedByCommitTest() {
+		ctx0.startTrans();
 		TxResult result;
 		try {
-			new Usr().putField("id", "UserA").insert(ctx1);
-			new Usr().putField("id", "UserB").insert(ctx2);
-			new Usr().putField("id", "UserC").insert(ctx2);
-			new Usr().putField("id", "UserD").insert(ctx3);
-			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
-			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-			Assert.assertEquals(1, ctx3.eCountAll(Usr.class));
-			ctx2.setForceCommitFail(); // force ctx2 commit fail
-			result = ctx1.commitTrans();
+			new Usr().putField("id", "UserA").insert(ctx0);
+			new Usr().putField("id", "UserB").insert(ctx1);
+			new Usr().putField("id", "UserC").insert(ctx1);
+			new Usr().putField("id", "UserD").insert(ctx2);
+			Assert.assertEquals(1, ctx0.eCountAll(Usr.class));
+			Assert.assertEquals(2, ctx1.eCountAll(Usr.class));
+			Assert.assertEquals(1, ctx2.eCountAll(Usr.class));
+			ctx1.setForceCommitFail(); // force ctx1 commit fail
+			result = ctx0.commitTrans();
 		} catch (Exception e) {
-			result = ctx1.rollbackTrans();
+			result = ctx0.rollbackTrans();
 		}
 		System.out.println(result.getDetailedInfo());
+		Assert.assertEquals(0, ctx0.eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx2.eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx3.eCountAll(Usr.class));
-	}
-
-	@Test
-	public void rollbackCausedByLastCommitTest() {
-		ctx1.startTrans();
-		TxResult result;
-		try {
-			new Usr().putField("id", "UserA").insert(ctx1);
-			new Usr().putField("id", "UserB").insert(ctx2);
-			new Usr().putField("id", "UserC").insert(ctx2);
-			new Usr().putField("id", "UserD").insert(ctx3);
-			Assert.assertEquals(1, ctx1.eCountAll(Usr.class));
-			Assert.assertEquals(2, ctx2.eCountAll(Usr.class));
-			Assert.assertEquals(1, ctx3.eCountAll(Usr.class));
-			ctx3.setForceCommitFail(); // force ctx2 commit fail
-			result = ctx1.commitTrans();
-		} catch (Exception e) {
-			result = ctx1.rollbackTrans();
-		}
-		System.out.println(result.getDetailedInfo());
-		Assert.assertEquals(0, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx2.eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx3.eCountAll(Usr.class));
 	}
 
 }

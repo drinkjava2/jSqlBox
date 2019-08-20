@@ -207,6 +207,18 @@ public class TableModel {
 		return this;
 	}
 
+	public static void sortColumns(List<ColumnModel> lst) {// 按能量多少给青蛙排序
+		if (lst == null || lst.isEmpty())
+			return;
+		Collections.sort(lst, new Comparator<ColumnModel>() {
+			public int compare(ColumnModel a, ColumnModel b) {
+				if (a == null || b == null || a.getColumnName() == null)
+					return -1;
+				return a.getColumnName().compareTo(b.getColumnName());
+			}
+		});
+	}
+
 	/**
 	 * Remove a ColumnModel by given columnName
 	 */

@@ -16,6 +16,8 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -106,28 +108,24 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		}
 
 		// Here commit all DBs
-		int commitIndex = 0;
+		int committed = 0;
 		try {
 			for (Entry<Object, Connection> entry : gtxInfo.getConnectionCache().entrySet()) {
 				SqlBoxContext ctx = (SqlBoxContext) entry.getKey();
-				System.out.println("debug, name="+ctx.getName());
 				int forceCommitFail = ctx.getForceCommitFail();
 				if (forceCommitFail > 0 || forceCommitFail < 0) {
 					if (forceCommitFail > 0)
 						ctx.setForceCommitFail(forceCommitFail - 1);
 					throw new IllegalArgumentException("ForceCommitFail=" + forceCommitFail + " in ctx '"
-							+ ctx.getName() + "', a non 0 value will force a commit fail usually used for unit test.");
+							+ ctx.getName() + "', a non 0 value will force a commit fail, usually used for unit test.");
 				}
 				Connection conn = entry.getValue();
 				conn.commit();
-				commitIndex++;
+				committed++;
 			}
 		} catch (Exception e) {
-			if (commitIndex < gtxInfo.getConnectionCache().size() - 1) {
-				gtxInfo.setGtxStep(GtxInfo.PARTIAL_COMMIT_FAIL);// partial commit is 100% fail
-				gtxInfo.setPartialCommitQty(commitIndex);
-			} else
-				gtxInfo.setGtxStep(GtxInfo.LAST_COMMIT_FAIL);// last commit fail may not fail
+			gtxInfo.setCommitted(committed);
+			gtxInfo.setGtxStep(GtxInfo.COMMIT_FAIL);// last commit fail may not fail
 			gtxInfo.getTxResult().addCommitEx(e);
 			throw e;
 		}
@@ -163,28 +161,22 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		if (!isInTransaction())
 			throw new TransactionsException("Gtx transaction not started, can not rollback");
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
+		gtxInfo.getTxResult().setResult(TxResult.FAIL);
 		setThreadTxInfo(null);// close soft GTX
-		String step = gtxInfo.getGtxStep();
-
-		if (GtxInfo.START.equals(step) || GtxInfo.LOCK_FAIL.equals(step) || GtxInfo.PARTIAL_COMMIT_FAIL.equals(step)) {
-			gtxInfo.getTxResult().setResult(TxResult.FAIL);
-			rollbackConnections(gtxInfo);
-		} else if (GtxInfo.LAST_COMMIT_FAIL.equals(step)) {
-			gtxInfo.getTxResult().setResult(TxResult.UNKNOW);
-		} else if (GtxInfo.UNLOCK_FAIL.equals(step)) {
-			gtxInfo.getTxResult().setResult(TxResult.UNKNOW);
-		} else
-			throw new TransactionsException("I'm a teapot");// unreachable
+		rollbackConnections(gtxInfo);
 		return gtxInfo.getTxResult();
 	}
 
 	private void rollbackConnections(GtxInfo gtxInfo) {// NOSONAR
 		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
+		int committed = gtxInfo.getCommitted();
+		int index = 0;
 		for (Connection con : conns) {
 			if (con == null)
 				continue;
 			try {
-				con.rollback();
+				if (index >= committed)
+					con.rollback();
 			} catch (SQLException e) {
 				gtxInfo.getTxResult().addRollbackEx(e);
 			}
@@ -200,6 +192,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			} catch (SQLException e) {
 				gtxInfo.getTxResult().addRollbackEx(e);
 			}
+			index++;
 		}
 		conns.clear(); // free memory
 	}
@@ -223,6 +216,11 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			}
 		}
 		conns.clear(); // free memory
+	}
+
+	public static boolean cleanupGtx(String gtxId, SqlBoxContext gctx, SqlBoxContext dbCtx) {
+		gctx.eFindAll(GtxId.class, " where id=?", param(gtxId));
+		return true;
 	}
 
 }

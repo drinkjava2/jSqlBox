@@ -21,8 +21,8 @@ public class TxResult {
 	public static final String SUCESS = "SUCESS";
 	public static final String FAIL = "FAIL";
 	public static final String UNKNOW = "UNKNOW";
-	public static TxResult TX_SUCESS = new TxResult(SUCESS);
-	public static TxResult TX_FAIL = new TxResult(FAIL);
+	public static final TxResult TX_SUCESS = new TxResult(SUCESS);
+	public static final TxResult TX_FAIL = new TxResult(FAIL);
 
 	private String result; // SUCESS, FAIL, UNKNOW
 	private String message; // optional, message
@@ -59,20 +59,20 @@ public class TxResult {
 		int i = 0;
 		if (commitEx != null)
 			for (Exception e : commitEx) {
-				sb.append("Commit Exception ").append(i++).append(": ").append(detail ? getStackTrace(e) : e.getMessage())
-						.append("\r");
+				sb.append("Commit Exception ").append(i++).append(": ")
+						.append(detail ? getStackTrace(e) : e.getMessage()).append("\r");
 			}
 		i = 0;
 		if (rollbackEx != null)
 			for (Exception e : rollbackEx) {
-				sb.append("Rollback Exception ").append(i++).append(": ").append(detail ? getStackTrace(e) : e.getMessage())
-						.append("\r");
+				sb.append("Rollback Exception ").append(i++).append(": ")
+						.append(detail ? getStackTrace(e) : e.getMessage()).append("\r");
 			}
 		i = 0;
 		if (cleanupEx != null)
 			for (Exception e : cleanupEx) {
-				sb.append("Cleanup Exception ").append(i++).append(": ").append(detail ? getStackTrace(e) : e.getMessage())
-						.append("\r");
+				sb.append("Cleanup Exception ").append(i++).append(": ")
+						.append(detail ? getStackTrace(e) : e.getMessage()).append("\r");
 			}
 		return sb.toString();
 	}

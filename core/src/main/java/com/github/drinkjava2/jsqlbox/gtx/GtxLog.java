@@ -12,19 +12,20 @@
 package com.github.drinkjava2.jsqlbox.gtx;
 
 /**
- * This class store gtx undo log
+ * Store undo log in memory
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
 public class GtxLog {
-
 	private String logType;
 	private Object entity;
-	
+	private Integer gtxDB;
+	private String gtxTB;
+
 	public GtxLog(String logType, Object entity) {
-		this.logType=logType;
-		this.entity=entity;
+		this.logType = logType;
+		this.entity = entity;
 	}
 
 	public String getLogType() {
@@ -41,6 +42,22 @@ public class GtxLog {
 
 	public void setEntity(Object entity) {
 		this.entity = entity;
+	}
+
+	public Integer getGtxDB() {
+		return gtxDB;
+	}
+
+	public void setGtxDB(Integer gtxDB) {
+		this.gtxDB = gtxDB;
+	}
+
+	public String getGtxTB() {
+		return gtxTB;
+	}
+
+	public void setGtxTB(String gtxTB) {
+		this.gtxTB = gtxTB;
 	}
 
 }

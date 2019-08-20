@@ -11,7 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
@@ -28,49 +30,26 @@ import com.mysql.jdbc.Connection;
  * @since 2.0.7
  */
 public abstract class GtxUtils {// NOSONAR
-	public static final String GTX_LOG_ID = "gtx_log_id";// log number, this is the P-Key of this log table
-	public static final String GTX_ID = "gtx_id";
-	public static final String GTX_TYPE = "gtx_type";// tx log type, can be update/exist/existStrict/insert/delete
+	public static final String GTX_ID = "gtxid"; // gtx_id + gtx_logno is a compound PKEY
+	public static final String GTX_LOGNO = "gtxno";
+	public static final String GTX_TYP = "gtxtp";// Operate type, can be update/exist/existStrict/insert/delete
+	public static final String GTX_DB = "gtxdb";// DB code No.
+	public static final String GTX_TB = "gtxtb";// Table name
 
-	public static void logInsert(SqlBoxContext ctx, Object entity) {
-		if (entity instanceof GtxId)
-			return;
-		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("insert", entity));
-		addLockInGtxInfo(ctx, entity);
-	}
-
-	public static void logExist(SqlBoxContext ctx, Object entity) {
-		if (entity instanceof GtxId)
-			return;
-		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("exist", entity));
-		addLockInGtxInfo(ctx, entity);
-	}
-
-	public static void logExistStrict(SqlBoxContext ctx, Object entity) {
-		if (entity instanceof GtxId)
-			return;
-		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("existStrict", entity));
-		addLockInGtxInfo(ctx, entity);
-	}
-
-	public static void logDelete(SqlBoxContext ctx, Object entity) {
-		if (entity instanceof GtxId)
-			return;
-		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("delete", entity));
-		addLockInGtxInfo(ctx, entity);
-	}
-
-	public static void logUpdate(SqlBoxContext ctx, Object entity) {
-		if (entity instanceof GtxId)
-			return;
-		ctx.getGtxInfo().getGtxLogList().add(new GtxLog("update", entity));
-		addLockInGtxInfo(ctx, entity);
-	}
+	public static final String INSERT = "INSERT";
+	public static final String EXIST = "EXIST";
+	public static final String EXISTSTRICT = "STRICT";
+	public static final String DELETE = "DELETE";
+	public static final String UPDATE = "UPDATE";
 
 	/**
 	 * According entity's sharding setting, create lock record in GtxInfo
 	 */
-	public static void addLockInGtxInfo(SqlBoxContext ctx, Object entity) {
+	public static void reg(SqlBoxContext ctx, Object entity, String operType) {
+		if (entity instanceof GtxId)
+			return;
+		GtxLog log = new GtxLog(operType, entity);
+		ctx.getGtxInfo().getGtxLogList().add(log);
 		GtxInfo gtxInfo = ctx.getGtxInfo();
 		List<GtxLock> locks = gtxInfo.getGtxLockList();
 		TableModel model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
@@ -79,12 +58,14 @@ public abstract class GtxUtils {// NOSONAR
 		Integer dbCode = SqlBoxContextUtils.getShardedDBCode(ctx, model, entity.getClass());
 		if (dbCode == null)
 			dbCode = -1;
+		log.setGtxDB(dbCode);
 
 		// calculate sharded table name if have
 		Integer tbCode = SqlBoxContextUtils.getShardedTBCode(ctx, model, entity.getClass());
 		String table = model.getTableName();
 		if (tbCode != null)
 			table += "_" + tbCode;
+		log.setGtxTB(table);
 
 		// calculate id value
 		StringBuilder idSB = new StringBuilder();
@@ -97,15 +78,15 @@ public abstract class GtxUtils {// NOSONAR
 
 		boolean lockExisted = false;
 		for (GtxLock lk : locks) // add locks in memory, if already have then do not add again
-			if (lk.getDbCode().equals(dbCode) && lk.getTbName().equalsIgnoreCase(table)
+			if (lk.getDb().equals(dbCode) && lk.getTb().equalsIgnoreCase(table)
 					&& lk.getEntityId().equalsIgnoreCase(id)) {
 				lockExisted = true;
 				break;
 			}
 		if (!lockExisted) {
 			GtxLock lock = new GtxLock();
-			lock.setDbCode(dbCode);
-			lock.setTbName(table);
+			lock.setDb(dbCode);
+			lock.setTb(table);
 			lock.setEntityId(id);
 			lock.setGtxId(gtxInfo.getGtxId().getId());
 			locks.add(lock);
@@ -120,13 +101,15 @@ public abstract class GtxUtils {// NOSONAR
 		gtxCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
 			gtxCtx.eInsert(gtxInfo.getGtxId());
-			Long logId = 1L;
+			Long logNo = 1L;
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
 				TableModel md = GtxUtils.entity2GtxLogModel(entity.getClass());
 				md.getColumnByColName(GtxUtils.GTX_ID).setValue(gtxInfo.getGtxId().getId());
-				md.getColumnByColName(GtxUtils.GTX_LOG_ID).setValue(logId++);
-				md.getColumnByColName(GtxUtils.GTX_TYPE).setValue(gtxLog.getLogType());
+				md.getColumnByColName(GtxUtils.GTX_LOGNO).setValue(logNo++);
+				md.getColumnByColName(GtxUtils.GTX_TYP).setValue(gtxLog.getLogType());
+				md.getColumnByColName(GtxUtils.GTX_DB).setValue(gtxLog.getGtxDB());
+				md.getColumnByColName(GtxUtils.GTX_TB).setValue(gtxLog.getGtxTB());
 				gtxCtx.eInsert(entity, md);
 			}
 
@@ -143,18 +126,17 @@ public abstract class GtxUtils {// NOSONAR
 	public static void deleteLockAndLog(SqlBoxContext gtxCtx, GtxInfo gtxInfo) throws Exception {
 		gtxCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
-			gtxCtx.eDelete(gtxInfo.getGtxId());
-			Long logId = 1L;
+			String gid = gtxInfo.getGtxId().getId();
+			gtxCtx.nExecute("delete from gtxid where id=?", gid);
+			gtxCtx.nExecute("delete from gtxlock where gtxid=?", gid);
+			Set<String> tableSet = new HashSet<String>();
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
-				TableModel md = GtxUtils.entity2GtxLogModel(entity.getClass());
-				md.getColumnByColName(GtxUtils.GTX_ID).setValue(gtxInfo.getGtxId().getId());
-				md.getColumnByColName(GtxUtils.GTX_LOG_ID).setValue(logId++);
-				md.getColumnByColName(GtxUtils.GTX_TYPE).setValue(gtxLog.getLogType());
-				gtxCtx.eDelete(entity, md);
+				TableModel md = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
+				tableSet.add(md.getTableName().toLowerCase());
 			}
-			for (GtxLock lock : gtxInfo.getGtxLockList())
-				gtxCtx.eDelete(lock);
+			for (String table : tableSet)
+				gtxCtx.nExecute("delete from " + table + " where gtxid=?", gid);
 			gtxCtx.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			gtxCtx.getConnectionManager().rollbackTransaction();
@@ -179,10 +161,12 @@ public abstract class GtxUtils {// NOSONAR
 			col.setShardDatabase(null);
 			col.setShardTable(null);
 		}
-		t.column(GTX_ID).VARCHAR(32).id().setValue(null);
-		t.column(GTX_LOG_ID).LONG().id().setValue(null); // ID is assigned by outside
-		t.column(GTX_TYPE).VARCHAR(16).setValue(null);
-
+		t.column(GTX_ID).CHAR(32).id().setValue(null); // gtx_id + gtx_logno is a compound PKEY
+		t.column(GTX_LOGNO).LONG().id().setValue(null);
+		t.column(GTX_TYP).CHAR(6).setValue(null);
+		t.column(GTX_DB).INTEGER().setValue(null);
+		t.column(GTX_TB).VARCHAR(50).setValue(null);
+		TableModel.sortColumns(t.getColumns());
 		return t;
 	}
 }

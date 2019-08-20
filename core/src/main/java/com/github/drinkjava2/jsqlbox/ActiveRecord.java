@@ -62,8 +62,8 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
  *    
  *    or 
  *    
- *    SqlBoxContext ctx1=new SqlBoxContext(dataSource);
- *    ctx2.insert(entity, ctx1);
+ *    SqlBoxContext ctx0=new SqlBoxContext(dataSource);
+ *    ctx1.insert(entity, ctx0);
  * 
  * </pre>
  * 
@@ -213,7 +213,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public int loadTry(Object... items) {return ctx().eLoadTry(this, items);}
 	public T loadById(Object id, Object... items) {return (T) ctx().eLoadById(this.getClass(), id, items);}
 	public T loadByIdTry(Object id, Object... items) {return (T) ctx().eLoadByIdTry(this.getClass(), id, items);}
-	public T loadBySQL(Object... items) {return (T) ctx().eLoadBySQL(items);}
+	public T loadBySQL(Object... items) {return  ctx().eLoadBySQL(items);}
 	
 	
 	public List<T> findAll(Object... items) {return (List<T>) ctx().eFindAll(this.getClass(), items);}
