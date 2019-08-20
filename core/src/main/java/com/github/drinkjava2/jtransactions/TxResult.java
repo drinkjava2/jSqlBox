@@ -24,8 +24,15 @@ public class TxResult {
 	public static final TxResult TX_SUCESS = new TxResult(SUCESS);
 	public static final TxResult TX_FAIL = new TxResult(FAIL);
 
+	public static final String START = "START";
+	public static final String LOCK_FAIL = "LOCK_FAIL";
+	public static final String COMMIT_FAIL = "COMMIT_FAIL";
+	public static final String UNLOCK_FAIL = "UNLOCK_FAIL";
+	public static final String CLEANUP_FAIL = "CLEANUP_FAIL";
+
 	private String result; // SUCESS, FAIL, UNKNOW
-	private String message; // optional, message
+	private String stage; // optional, stage of tx
+	private int committed; // optional, how many DB committed
 	private String txId;// optional, tx id
 	private Exception[] commitEx;// optional, exception caught at commit stage
 	private Exception[] rollbackEx;// optional, exception caught at rollback stage
@@ -55,7 +62,7 @@ public class TxResult {
 		StringBuilder sb = new StringBuilder();
 		sb.append("TxResult:").append(result).append("\r");
 		sb.append("TxId:").append(txId).append("\r");
-		sb.append("TxMessage:").append(message).append("\r");
+		sb.append("TxMessage:").append(stage).append("\r");
 		int i = 0;
 		if (commitEx != null)
 			for (Exception e : commitEx) {
@@ -132,12 +139,12 @@ public class TxResult {
 		return this;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getStage() {
+		return stage;
 	}
 
-	public TxResult setMessage(String message) {
-		this.message = message;
+	public TxResult setStage(String stage) {
+		this.stage = stage;
 		return this;
 	}
 
@@ -172,6 +179,14 @@ public class TxResult {
 
 	public void setCleanupEx(Exception[] cleanupEx) {
 		this.cleanupEx = cleanupEx;
+	}
+
+	public int getCommitted() {
+		return committed;
+	}
+
+	public void setCommitted(int committed) {
+		this.committed = committed;
 	}
 
 }

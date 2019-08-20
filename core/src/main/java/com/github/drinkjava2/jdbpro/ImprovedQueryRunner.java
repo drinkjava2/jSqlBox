@@ -77,6 +77,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
 	protected String name;
+	protected Integer db; // no used for sharding, to identify different ctx
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
@@ -863,7 +864,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	public TxResult rollbackTrans() {
 		return this.getConnectionManager().rollbackTransaction();
 	}
- 
+
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR
 	}
 

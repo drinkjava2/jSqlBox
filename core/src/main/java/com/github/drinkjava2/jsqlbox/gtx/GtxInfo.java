@@ -27,16 +27,9 @@ import com.github.drinkjava2.jtransactions.TxResult;
  * @since 2.0.7
  */
 public class GtxInfo extends TxInfo {
-	public static final String START = "START";
-	public static final String LOCK_FAIL = "LOCK_FAIL";
-	public static final String COMMIT_FAIL = "COMMIT_FAIL";
-	public static final String UNLOCK_FAIL = "UNLOCK_FAIL";
-	public static final String CLEANUP_FAIL = "CLEANUP_FAIL";
 
 	private GtxId gtxId = new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6));
-	private String gtxStep = START;// current GTX step
 	private TxResult txResult = new TxResult().setTxId(gtxId.getId()); // tx result will return to user
-	private int committed = 0; // how many Db is partial committed
 
 	private List<GtxLog> gtxLogList = null;
 
@@ -79,28 +72,12 @@ public class GtxInfo extends TxInfo {
 		this.gtxLockList = gtxLockList;
 	}
 
-	public String getGtxStep() {
-		return gtxStep;
-	}
-
-	public void setGtxStep(String gtxStep) {
-		this.gtxStep = gtxStep;
-	}
-
 	public TxResult getTxResult() {
 		return txResult;
 	}
 
 	public void setTxResult(TxResult txResult) {
 		this.txResult = txResult;
-	}
-
-	public int getCommitted() {
-		return committed;
-	}
-
-	public void setCommitted(int committed) {
-		this.committed = committed;
 	}
 
 }

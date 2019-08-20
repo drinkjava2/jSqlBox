@@ -17,6 +17,9 @@
 package com.github.drinkjava2.jsqlbox.gtx;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jtransactions.TxResult.CLEANUP_FAIL;
+import static com.github.drinkjava2.jtransactions.TxResult.*;
+import static com.github.drinkjava2.jtransactions.TxResult.LOCK_FAIL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -93,7 +96,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
 		if (gtxInfo == null)
 			throw new TransactionsException("GTX not started, can not commit");
-
+		TxResult result = gtxInfo.getTxResult().setStage("start");
 		// Save GtxId tags into DBs
 		for (Object ctx : gtxInfo.getConnectionCache().keySet())
 			((SqlBoxContext) ctx).eInsert(gtxInfo.getGtxId());// use a Tag to confirm tx committed on DB
@@ -102,8 +105,8 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		try {
 			GtxUtils.saveLockAndLog(gtxCtx, gtxInfo); // store gtxId,undo log, locks into gtx server
 		} catch (Exception e) {
-			gtxInfo.setGtxStep(GtxInfo.LOCK_FAIL);
-			gtxInfo.getTxResult().addCommitEx(e);
+			result.setStage(LOCK_FAIL);
+			result.addCommitEx(e);
 			throw e;
 		}
 
@@ -124,9 +127,9 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 				committed++;
 			}
 		} catch (Exception e) {
-			gtxInfo.setCommitted(committed);
-			gtxInfo.setGtxStep(GtxInfo.COMMIT_FAIL);// last commit fail may not fail
-			gtxInfo.getTxResult().addCommitEx(e);
+			result.setCommitted(committed);
+			result.setStage(COMMIT_FAIL);// last commit fail may not fail
+			result.addCommitEx(e);
 			throw e;
 		}
 
@@ -135,9 +138,9 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		// Delete lock and log
 		try {
 			GtxUtils.deleteLockAndLog(gtxCtx, gtxInfo);
-		} catch (Exception e) {
-			gtxInfo.setGtxStep(GtxInfo.UNLOCK_FAIL);
-			gtxInfo.getTxResult().addCommitEx(e);
+		} catch (Exception e) { 
+			result.setStage(UNLOCK_FAIL);
+			result.addCommitEx(e);
 			throw e;
 		}
 
@@ -147,13 +150,13 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			try {
 				ctx.eDelete(gtxInfo.getGtxId());// delete tags, work on autoCommit mode
 			} catch (Exception e) {
-				gtxInfo.setGtxStep(GtxInfo.CLEANUP_FAIL);
-				gtxInfo.getTxResult().addCommitEx(e);
+				result.setStage(CLEANUP_FAIL);
+				result.addCommitEx(e);
 			}
 		}
 		setThreadTxInfo(null);// close soft GTX
 		cleanupConnections(gtxInfo);
-		return gtxInfo.getTxResult().setResult(TxResult.SUCESS);
+		return result.setResult(TxResult.SUCESS);
 	}
 
 	@Override
@@ -169,28 +172,28 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 	private void rollbackConnections(GtxInfo gtxInfo) {// NOSONAR
 		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
-		int committed = gtxInfo.getCommitted();
+		TxResult result=gtxInfo.getTxResult(); 
 		int index = 0;
 		for (Connection con : conns) {
 			if (con == null)
 				continue;
 			try {
-				if (index >= committed)
+				if (index >= result.getCommitted())
 					con.rollback();
 			} catch (SQLException e) {
-				gtxInfo.getTxResult().addRollbackEx(e);
+				result.addRollbackEx(e);
 			}
 			try {
 				if (!con.getAutoCommit())
 					con.setAutoCommit(true);
 			} catch (SQLException e) {
-				gtxInfo.getTxResult().addRollbackEx(e);
+				result.addRollbackEx(e);
 			}
 			try {
 				if (!con.isClosed())
 					con.close();
 			} catch (SQLException e) {
-				gtxInfo.getTxResult().addRollbackEx(e);
+				result.addRollbackEx(e);
 			}
 			index++;
 		}
