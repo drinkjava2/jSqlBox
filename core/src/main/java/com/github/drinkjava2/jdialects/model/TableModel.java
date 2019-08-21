@@ -512,17 +512,11 @@ public class TableModel {
 	}
 
 	/** Get pkey columns sorted by column name */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public List<ColumnModel> getPKeyColsSortByColumnName() {
+	public List<ColumnModel> getPKeyColumns() {
 		List<ColumnModel> pkeyCols = new ArrayList<ColumnModel>();
 		for (ColumnModel col : columns)
 			if (col.getPkey() && !col.getTransientable())
 				pkeyCols.add(col);
-		Collections.sort(pkeyCols, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((ColumnModel) o1).getColumnName().compareTo(((ColumnModel) o1).getColumnName());
-			}
-		});
 		return pkeyCols;
 	}
 

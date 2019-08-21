@@ -21,6 +21,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.mysql.jdbc.Connection;
 
 /**
@@ -55,21 +56,17 @@ public abstract class GtxUtils {// NOSONAR
 		TableModel model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
 
 		// calculate sharded Db Code if have
-		Integer dbCode = SqlBoxContextUtils.getShardedDBCode(ctx, model, entity.getClass());
-		if (dbCode == null)
-			dbCode = -1;
+		Integer dbCode = SqlBoxContextUtils.getShardedDbCodeByBean(ctx, entity);
+		TransactionsException.assureNotNull(dbCode, "dbCode can not determine for entity: " + entity);
 		log.setGtxDB(dbCode);
 
 		// calculate sharded table name if have
-		Integer tbCode = SqlBoxContextUtils.getShardedTBCode(ctx, model, entity.getClass());
-		String table = model.getTableName();
-		if (tbCode != null)
-			table += "_" + tbCode;
+		String  table = SqlBoxContextUtils.getShardedTbByBean(ctx, entity);
 		log.setGtxTB(table);
 
 		// calculate id value
 		StringBuilder idSB = new StringBuilder();
-		for (ColumnModel col : model.getPKeyColsSortByColumnName()) {
+		for (ColumnModel col : model.getPKeyColumns()) {
 			if (idSB.length() > 0)
 				idSB.append("|");
 			idSB.append(SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity));

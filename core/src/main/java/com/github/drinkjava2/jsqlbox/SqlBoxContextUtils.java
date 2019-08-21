@@ -104,6 +104,35 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
+	 * Calculate a entityBean's sharded dBCode, if no, return given ctx's dbCode
+	 */
+	public static Integer getShardedDbCodeByBean(SqlBoxContext ctx, Object entity) {
+		ColumnModel col = TableModelUtils.entity2ReadOnlyModel(entity.getClass()).getShardDatabaseColumn();
+		if (col == null)
+			return ctx.getDbCode();
+		Object value = readValueFromBeanFieldOrTail(col, entity);
+		SqlBoxException.assureNotNull(value, "Entity bean's shardDatabase field value can not be null.");
+		Integer dbCode = getShardedDBCode(ctx, entity.getClass(), value);
+		SqlBoxException.assureNotNull(dbCode, "Entity bean's shardDatabase value can not map to a dbCode.");
+		return dbCode;
+	}
+
+	/**
+	 * Calculate a entityBean's sharded tableName, if no, return default tableName
+	 */
+	public static String getShardedTbByBean(SqlBoxContext ctx, Object entity) {
+		TableModel model=TableModelUtils.entity2ReadOnlyModel(entity.getClass());
+		ColumnModel col = model.getShardTableColumn();
+		if (col == null)
+			return model.getTableName();
+		Object value = readValueFromBeanFieldOrTail(col, entity);
+		SqlBoxException.assureNotNull(value, "Entity bean's shardTable field value can not be null.");
+		Integer tbCode = getShardedTBCode(ctx, entity.getClass(), value);
+		SqlBoxException.assureNotNull(tbCode, "Entity bean's shardTable value can not map to a table code");
+		return new StringBuilder(model.getTableName()).append("_").append(tbCode).toString();
+	}
+	
+	/**
 	 * Use current SqlBoxContext's shardingTools to calculate the shardedDBCode
 	 */
 	public static Integer getShardedDBCode(SqlBoxContext ctx, Object entityOrClass, Object... shardKey) {
@@ -576,7 +605,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	@SuppressWarnings("unused")
-	private static void coreMethods___________________________________() {//NOSONAR
+	private static void coreMethods___________________________________() {// NOSONAR
 	}
 
 	public static int entityInsertTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
@@ -1286,7 +1315,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	@SuppressWarnings("unused")
-	private static void ormQueryMethods___________________________________() {//NOSONAR
+	private static void ormQueryMethods___________________________________() {// NOSONAR
 	}
 
 	public static EntityNet entityAutoNet(SqlBoxContext ctx, Class<?>... entityClasses) {

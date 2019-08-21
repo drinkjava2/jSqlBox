@@ -63,7 +63,7 @@ public abstract class EntityIdUtils {// NOSONAR
 
 		if (pkeyCount == 1)
 			return firstPKeyValue;
-		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
+		List<ColumnModel> l = model.getPKeyColumns();
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
@@ -93,7 +93,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			return null;// Single or Compound Pkey not found in entity
 		if (pkeyCount == 1)
 			return firstPKeyValue;
-		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
+		List<ColumnModel> l = model.getPKeyColumns();
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
@@ -117,7 +117,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			return null;// Single or Compound Pkey not found in oneRow
 		if (pkeyCount == 1)
 			return firstPKeyValue;
-		List<ColumnModel> l = model.getPKeyColsSortByColumnName();
+		List<ColumnModel> l = model.getPKeyColumns();
 		StringBuilder sb = new StringBuilder();
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)

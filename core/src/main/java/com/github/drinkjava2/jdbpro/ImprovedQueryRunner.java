@@ -77,7 +77,6 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
 	protected String name;
-	protected Integer db; // no used for sharding, to identify different ctx
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();

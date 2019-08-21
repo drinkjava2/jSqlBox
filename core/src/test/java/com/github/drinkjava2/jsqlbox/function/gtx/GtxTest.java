@@ -51,18 +51,21 @@ public class GtxTest {
 
 		ctx0 = new SqlBoxContext(newTestDataSource());
 		ctx0.setName("ctx_0");
+		ctx0.setDbCode(0);
 		ctx0.setConnectionManager(gtx);
 		ctx0.executeDDL(ctx0.toCreateDDL(GtxId.class));
 		ctx0.executeDDL(ctx0.toCreateDDL(Usr.class));
 
 		ctx1 = new SqlBoxContext(newTestDataSource());
 		ctx1.setName("ctx_1");
+		ctx1.setDbCode(1);
 		ctx1.setConnectionManager(gtx);
 		ctx1.executeDDL(ctx1.toCreateDDL(GtxId.class));
 		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 
 		ctx2 = new SqlBoxContext(newTestDataSource());
 		ctx2.setName("ctx_2");
+		ctx2.setDbCode(2);
 		ctx2.setConnectionManager(gtx);
 		ctx2.executeDDL(ctx2.toCreateDDL(GtxId.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));

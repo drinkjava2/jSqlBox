@@ -71,6 +71,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 	protected ShardingTool[] shardingTools = globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 	protected TableModel[] tailModels; // TableModels loaded from DB, only used for tail mode
+	protected Integer dbCode=0; // A unique database code used for sharding to identify database
 
 	public SqlBoxContext() {
 		super();
@@ -588,6 +589,14 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 
 	public void setTailModels(TableModel[] tailModels) {
 		this.tailModels = tailModels;
+	}
+
+	public Integer getDbCode() {
+		return dbCode;
+	}
+
+	public void setDbCode(Integer dbCode) {
+		this.dbCode = dbCode;
 	}
 
 }
