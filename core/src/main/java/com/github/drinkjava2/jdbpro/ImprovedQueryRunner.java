@@ -76,7 +76,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
-	protected String name;
+	protected String name; // A name for current runner
+	protected Integer dbCode = 0; // A unique code used to identify database
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
@@ -166,9 +167,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
-		if (name != null)
-			return new StringBuilder(name).append(" SQL: ").append(sql).toString();
-		return "SQL: " + sql;
+		return new StringBuilder(name == null ? "" : name).append(dbCode == null ? "" : dbCode).append(" SQL: ")
+				.append(sql).toString();
 	}
 
 	/**
@@ -176,9 +176,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * customise parameters format
 	 */
 	protected String formatParametersForLoggerOutput(Object... params) {
-		if (name != null)
-			return new StringBuilder(name).append(" PAR: ").append(Arrays.deepToString(params)).toString();
-		return "PAR: " + Arrays.deepToString(params);
+		return new StringBuilder(name == null ? "" : name).append(dbCode == null ? "" : dbCode).append(" PAR: ")
+				.append(Arrays.deepToString(params)).toString();
 	}
 
 	// ===override execute/insert/update methods to support batch and explainSql
@@ -1008,6 +1007,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	public ThreadLocal<ArrayList<PreparedSQL>> getSqlBatchCache() {
 		return sqlBatchCache;
+	}
+
+	public Integer getDbCode() {
+		return dbCode;
+	}
+
+	public void setDbCode(Integer dbCode) {
+		this.dbCode = dbCode;
 	}
 
 }

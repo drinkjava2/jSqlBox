@@ -16,10 +16,10 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jtransactions.TxResult.CLEANUP_FAIL;
-import static com.github.drinkjava2.jtransactions.TxResult.*;
+import static com.github.drinkjava2.jtransactions.TxResult.COMMIT_FAIL;
 import static com.github.drinkjava2.jtransactions.TxResult.LOCK_FAIL;
+import static com.github.drinkjava2.jtransactions.TxResult.UNLOCK_FAIL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -138,7 +138,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		// Delete lock and log
 		try {
 			GtxUtils.deleteLockAndLog(gtxCtx, gtxInfo);
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			result.setStage(UNLOCK_FAIL);
 			result.addCommitEx(e);
 			throw e;
@@ -172,7 +172,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 	private void rollbackConnections(GtxInfo gtxInfo) {// NOSONAR
 		Collection<Connection> conns = gtxInfo.getConnectionCache().values();
-		TxResult result=gtxInfo.getTxResult(); 
+		TxResult result = gtxInfo.getTxResult();
 		int index = 0;
 		for (Connection con : conns) {
 			if (con == null)
@@ -219,11 +219,6 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			}
 		}
 		conns.clear(); // free memory
-	}
-
-	public static boolean cleanupGtx(String gtxId, SqlBoxContext gctx, SqlBoxContext dbCtx) {
-		gctx.eFindAll(GtxId.class, " where id=?", param(gtxId));
-		return true;
 	}
 
 }
