@@ -33,7 +33,7 @@ public class TxResult {
 	private String result; // SUCESS, FAIL, UNKNOW
 	private String stage; // optional, stage of tx
 	private int committed; // optional, how many DB committed
-	private String txId;// optional, tx gid
+	private String txId;// optional, tx id
 	private Exception[] commitEx;// optional, exception caught at commit stage
 	private Exception[] rollbackEx;// optional, exception caught at rollback stage
 	private Exception[] cleanupEx;// optional, exception caught at cleanup stage

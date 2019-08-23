@@ -84,7 +84,7 @@ public class ConverterTest extends TestBase {
 		v.insert();
 		v.setFoo(new FooDemo(2));
 		v.update();
-		ConverterDemo v2 = new ConverterDemo().putField("gid", v.getId()).load();
+		ConverterDemo v2 = new ConverterDemo().putField("id", v.getId()).load();
 		Assert.assertEquals(2, v2.getFoo().id);
 		v2.delete();
 	}

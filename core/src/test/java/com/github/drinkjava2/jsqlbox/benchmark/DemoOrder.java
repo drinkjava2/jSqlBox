@@ -16,7 +16,7 @@ public class DemoOrder extends ActiveRecord<DemoOrder> {
 	private String name;
 
 	@Column(name = "cust_id")
-	@SingleFKey(refs = { "sys_customer", "gid" })
+	@SingleFKey(refs = { "sys_customer", "id" })
 	private Integer custId;
 
 	DemoCustomer demoCustomer;

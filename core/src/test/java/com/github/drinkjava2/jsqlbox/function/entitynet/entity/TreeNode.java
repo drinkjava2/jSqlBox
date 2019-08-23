@@ -12,7 +12,7 @@ public class TreeNode extends ActiveRecord<TreeNode> {
 	@Id
 	String id;
 
-	@SingleFKey(ddl = false, refs = { "treenodetb", "gid" })
+	@SingleFKey(ddl = false, refs = { "treenodetb", "id" })
 	String pid;
 	
 	TreeNode parent;

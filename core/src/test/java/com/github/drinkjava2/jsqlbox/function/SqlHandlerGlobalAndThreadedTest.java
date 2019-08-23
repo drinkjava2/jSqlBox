@@ -43,7 +43,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 		super.init();
 		createAndRegTables(DemoUser.class);
 		for (int i = 1; i <= 100; i++)
-			new DemoUser().putField("gid", "" + i).putField("userName", "user" + i).putField("age", i).insert();
+			new DemoUser().putField("id", "" + i).putField("userName", "user" + i).putField("age", i).insert();
 
 	}
 

@@ -38,14 +38,14 @@ import java.lang.annotation.Target;
  *     &#064;Id
  *     &#064;GeneratedValue(strategy=SEQUENCE, generator="CUST_SEQ")
  *     &#064;Column(name="CUST_ID")
- *     public Long getId() { return gid; }
+ *     public Long getId() { return id; }
  *
  *     Example 2:
  *
  *     &#064;Id
  *     &#064;GeneratedValue(strategy=TABLE, generator="CUST_GEN")
  *     &#064;Column(name="CUST_ID")
- *     Long gid;
+ *     Long id;
  * </pre>
  *
  * @see Id
@@ -70,7 +70,7 @@ public @interface GeneratedValue {
      * (Optional) The name of the primary key generator
      * to use as specified in the {@link SequenceGenerator} 
      * or {@link TableGenerator} annotation.
-     * <p> Defaults to the gid generator supplied by persistence provider.
+     * <p> Defaults to the id generator supplied by persistence provider.
      */
     String generator() default "";
 }

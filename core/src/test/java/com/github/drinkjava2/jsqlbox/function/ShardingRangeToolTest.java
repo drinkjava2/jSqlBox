@@ -118,7 +118,7 @@ public class ShardingRangeToolTest {
 	@Test
 	public void testInsertSQLs() {
 		masters[2].iExecute(TheUser.class, "insert into ", shardTB(tbID), shardDB(dbID),
-				" (gid, name, databaseId) values(?,?,?)", param(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
+				" (id, name, databaseId) values(?,?,?)", param(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[0].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(tbID),
 				shardDB(dbID), USE_SLAVE, new PrintSqlHandler()));
 		Assert.assertEquals(1,
@@ -129,7 +129,7 @@ public class ShardingRangeToolTest {
 	public void testActiveRecord() {// issue: XA or TCC transaction needed
 		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
 		TheUser u1 = new TheUser();
-		u1.putField("gid", tbID, "databaseId", dbID, "name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
+		u1.putField("id", tbID, "databaseId", dbID, "name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals("Master2", u1.shardDB().getName());
 		Assert.assertEquals("TheUser_3", u1.shardTB());
 

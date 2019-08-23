@@ -101,13 +101,13 @@ public class CrudTest extends TestBase {
 		Assert.assertEquals(1, u4.loadTry());
 		Assert.assertEquals("NewAddress4", u4.getAddress());
 
-		// =======load by gid (gid is basic value)
+		// =======load by id (id is basic value)
 		Assert.assertEquals("NewAddress1", ctx.eLoadById(CrudUser.class, "Name1").getAddress());
 		Assert.assertEquals("NewAddress2", u2.loadById("Name2").getAddress());
 		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(CrudUser.class, "Name3").getAddress());
 		Assert.assertEquals("NewAddress4", u4.loadByIdTry("Name4").getAddress());
 
-		// =======load by gid (gid is map)
+		// =======load by id (id is map)
 		Map<String, Object> mp = new HashMap<String, Object>();
 		mp.put("name", "Name1");
 		Assert.assertEquals("NewAddress1", ctx.eLoadById(CrudUser.class, mp).getAddress());
@@ -118,7 +118,7 @@ public class CrudTest extends TestBase {
 		mp.put("name", "Name4");
 		Assert.assertEquals("NewAddress4", u4.loadByIdTry(mp).getAddress());
 
-		// =======load by gid (gid is Tail)
+		// =======load by id (id is Tail)
 		CrudUser tail = new CrudUser().putTail("name", "Name1");
 		Assert.assertEquals("NewAddress1", ctx.eLoadById(CrudUser.class, tail, TAIL).getAddress());
 		tail.putTail("name", "Name2");
@@ -128,7 +128,7 @@ public class CrudTest extends TestBase {
 		tail.putTail("name", "Name4");
 		Assert.assertEquals("NewAddress4", u4.loadByIdTry(tail, TAIL).getAddress());
 
-		// =======load by gid (gid is Entity bean)
+		// =======load by id (id is Entity bean)
 		Assert.assertEquals("NewAddress1", ctx.eLoadById(CrudUser.class, u1).getAddress());
 		Assert.assertEquals("NewAddress2", u1.loadById(u2).getAddress());
 		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(CrudUser.class, u3).getAddress());
@@ -175,11 +175,11 @@ public class CrudTest extends TestBase {
 		u1.setAge(1000);
 		Assert.assertFalse(u1.existStrict());
 
-		// =======existById (gid is basic value)
+		// =======existById (id is basic value)
 		Assert.assertEquals(true, ctx.eExistById(CrudUser.class, "Name1"));
 		Assert.assertEquals(true, u1.existById("Name2"));
 
-		// =======existById (gid is Map)
+		// =======existById (id is Map)
 		Map<String, Object> m1 = new HashMap<String, Object>();
 		m1.put("name", "Name1");
 		Map<String, Object> m2 = new HashMap<String, Object>();
@@ -187,13 +187,13 @@ public class CrudTest extends TestBase {
 		Assert.assertEquals(true, ctx.eExistById(CrudUser.class, m1));
 		Assert.assertEquals(true, u1.existById(m2));
 
-		// =======existById (gid is tail)
+		// =======existById (id is tail)
 		CrudUser t1 = new CrudUser().putTail("name", "Name1");
 		CrudUser t2 = new CrudUser().putTail("name", "Name2");
 		Assert.assertEquals(true, ctx.eExistById(CrudUser.class, t1, TAIL));
 		Assert.assertEquals(true, u1.existById(t2, TAIL));
 
-		// =======existById (gid is entity bean)
+		// =======existById (id is entity bean)
 		Assert.assertEquals(true, ctx.eExistById(CrudUser.class, u1));
 		Assert.assertEquals(true, u1.existById(u2));
 
@@ -206,7 +206,7 @@ public class CrudTest extends TestBase {
 		Assert.assertEquals(0, u4.deleteTry());
 		Assert.assertEquals(0, u1.countAll());
 
-		// =======delete by gid (gid is basic value)
+		// =======delete by id (id is basic value)
 		new CrudUser("Name1", "Address1").insert();
 		new CrudUser("Name2", "Address2").insert();
 		new CrudUser("Name3", "Address3").insert();
@@ -219,7 +219,7 @@ public class CrudTest extends TestBase {
 		Assert.assertEquals(0, u1.deleteByIdTry("Name4"));
 		Assert.assertEquals(0, u1.countAll());
 
-		// =======delete by gid (gid is Map)
+		// =======delete by id (id is Map)
 		new CrudUser("Name1", "Address1").insert();
 		new CrudUser("Name2", "Address2").insert();
 		new CrudUser("Name3", "Address3").insert();
@@ -237,7 +237,7 @@ public class CrudTest extends TestBase {
 		Assert.assertEquals(0, u1.deleteByIdTry(m));
 		Assert.assertEquals(0, u1.countAll());
 
-		// =======delete by gid (gid is Entity bean)
+		// =======delete by id (id is Entity bean)
 		u1 = new CrudUser("Name1", "Address1").insert();
 		u2 = new CrudUser("Name2", "Address2").insert();
 		u3 = new CrudUser("Name3", "Address3").insert();

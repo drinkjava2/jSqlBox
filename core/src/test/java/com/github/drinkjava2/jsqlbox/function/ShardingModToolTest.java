@@ -118,7 +118,7 @@ public class ShardingModToolTest {
 	@Test
 	public void testInsertSQLs() {
 		masters[2].iExecute(TheUser.class, "insert into ", shardTB(10), shardDB(3),
-				" (gid, name, databaseId) values(?,?,?)", param(10, "u1", 3), USE_BOTH, new PrintSqlHandler());
+				" (id, name, databaseId) values(?,?,?)", param(10, "u1", 3), USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(10),
 				shardDB(3), USE_SLAVE, new PrintSqlHandler()));
 		Assert.assertEquals(1,

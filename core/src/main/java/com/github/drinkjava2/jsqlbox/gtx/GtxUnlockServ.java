@@ -63,13 +63,23 @@ public abstract class GtxUnlockServ {// NOSONAR
 			for (GtxId gtxId : gtxIdList) {
 				String id = gtxId.getGid();
 				if (gtxIdCache.containsKey(id)) {
-					if ("Cached".equals(gtxIdCache.get(id))) {
-						gtxIdCache.put(id, "Tried"); // only try once
-						if (doUnlockOne(id)) // second time unlock it
-							gtxIdCache.remove(id);
+					if ("LOADED".equals(gtxIdCache.get(id))) {
+						gtxIdCache.put(id, "TRY UNLOCK"); // only try once
+						try {
+							if (doUnlock(id)) {// second time unlock it
+								gtxIdCache.remove(id);
+								logger.info("Unlocked success for gtxid:" + id);
+							} else {
+								gtxIdCache.put(id, "UNLOCK FAIL"); // only try once
+								logger.info("Unlock fail for gtxid:" + id);
+							}
+						} catch (Exception e) {
+							gtxIdCache.put(id, "UNLOCK FAIL"); // only try once
+							logger.warn("Unlock fail exception, for gtxid:" + id, e);
+						}
 					}
 				} else
-					gtxIdCache.put(id, "Cached"); // first time cache the gtxId
+					gtxIdCache.put(id, "LOADED"); // first time cache the gtxId
 			}
 			Thread.sleep(intervalSecond * 1000);
 		} while (true);
@@ -81,14 +91,13 @@ public abstract class GtxUnlockServ {// NOSONAR
 	 */
 	public static boolean forceUnlock(String gtxId, SqlBoxContext ctx) {
 		initContext(ctx);
-		doUnlockOne(gtxId);
-		return true;
+		return doUnlock(gtxId);
 	}
 
-	private static boolean doUnlockOne(String gtxId) {
+	private static boolean doUnlock(String gtxId) {
 		GtxId gid = lockCtx.eLoadByIdTry(GtxId.class, gtxId);
 		if (gid == null) {
-			logger.warn("Try to unlock an un-exist gtxId");
+			logger.warn("Try to unlock an un-exist gtxId:" + gtxId);
 			return true;
 		}
 		System.out.println(gid);

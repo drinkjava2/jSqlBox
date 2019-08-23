@@ -70,7 +70,7 @@ public class DynamicConfigTest extends TestBase {
 		u.setUserName("Sam");
 
 		// A Fake PKey dynamically created
-		model.column("gid").pkey();
+		model.column("id").pkey();
 		ctx.eInsert(u, model);
 
 		u.setUserName("Tom");
@@ -82,7 +82,7 @@ public class DynamicConfigTest extends TestBase {
 	@Test
 	public void testDynamicConfig() {
 		TableModel model = TableModelUtils.entity2Model(UserDemo.class);
-		model.column("gid").pkey();
+		model.column("id").pkey();
 		createAndRegTables(model);
 
 		UserDemo u1 = new UserDemo();
@@ -101,10 +101,10 @@ public class DynamicConfigTest extends TestBase {
 	@Test
 	public void doQueryTest() {
 		createAndRegTables(UserDemo.class);
-		UserDemo u = new UserDemo().putField("gid", "u1", "userName", "Tom").insert();
+		UserDemo u = new UserDemo().putField("id", "u1", "userName", "Tom").insert();
 
 		TableModel t = TableModelUtils.entity2Model(UserDemo.class);
-		t.getColumnByFieldName("gid").pkey();// Fake Pkey
+		t.getColumnByFieldName("id").pkey();// Fake Pkey
 		u.setId("u1");
 		u.setUserName(null);
 		u.load(t);

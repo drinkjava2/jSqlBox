@@ -283,7 +283,7 @@ public class DDLTest extends JdialectsTestBase {
 	@Test
 	public void testFKEY() {// FKEY
 		TableModel t1 = new TableModel("master1");
-		t1.column("gid").INTEGER().pkey();
+		t1.column("id").INTEGER().pkey();
 
 		TableModel t2 = new TableModel("master2");
 		t2.column("name").VARCHAR(20).pkey();
@@ -291,22 +291,22 @@ public class DDLTest extends JdialectsTestBase {
 		t2.column("fid").INTEGER().singleFKey("master1");
 
 		TableModel t3 = new TableModel("child");
-		t3.column("gid").INTEGER().pkey();
-		t3.column("masterid1").INTEGER().singleFKey("master1", "gid").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE")
+		t3.column("id").INTEGER().pkey();
+		t3.column("masterid1").INTEGER().singleFKey("master1", "id").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE")
 				.fkeyName("fknm");
 		t3.column("myname").VARCHAR(20).singleFKey("master2", "name").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE");
 		t3.column("myaddress").VARCHAR(20).singleFKey("master2", "address");
-		t3.fkey().columns("masterid1").refs("master1", "gid").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE");
+		t3.fkey().columns("masterid1").refs("master1", "id").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE");
 		;
 		t3.fkey("FKNAME1").columns("myname", "myaddress").refs("master2", "name", "address");
 		t3.fkey("FKNAME2").columns("myname", "myaddress").refs("master2");
 
 		TableModel t4 = new TableModel("child2");
-		t4.column("gid").INTEGER().pkey();
+		t4.column("id").INTEGER().pkey();
 		t4.column("masterid2").INTEGER();
 		t4.column("myname2").VARCHAR(20);
 		t4.column("myaddress2").VARCHAR(20);
-		t4.fkey().columns("masterid2").refs("master1", "gid");
+		t4.fkey().columns("masterid2").refs("master1", "id");
 		t4.fkey().columns("myname2", "myaddress2").refs("master2", "name", "address");
 		printAllDialectsDDLs(t1, t2, t3);
 		printOneDialectsDDLs(Dialect.MySQL5InnoDBDialect, t1, t2, t3, t4);
@@ -333,7 +333,7 @@ public class DDLTest extends JdialectsTestBase {
 	public void testEngineTailAndColumnTail() {// engineTail and column Tail
 		TableModel t = new TableModel("tailsTestTable");
 		t.engineTail(" DEFAULT CHARSET=utf8");
-		t.column("gid").STRING(20).pkey();
+		t.column("id").STRING(20).pkey();
 		t.column("name").STRING(20).tail(" default 'hahaha'");
 		printOneDialectsDDLs(Dialect.Oracle10gDialect, t);
 		printOneDialectsDDLs(Dialect.H2Dialect, t);
@@ -369,7 +369,7 @@ public class DDLTest extends JdialectsTestBase {
 		t1.index("idx3").columns("address", "phoneNumber").unique();
 
 		TableModel t2 = new TableModel("orders").comment("order comment");
-		t2.column("gid").LONG().autoId().pkey();
+		t2.column("id").LONG().autoId().pkey();
 		t2.column("name").STRING(20);
 		t2.column("email").STRING(20);
 		t2.column("name2").STRING(20).pkey().tail(" default 'Sam'");
@@ -379,7 +379,7 @@ public class DDLTest extends JdialectsTestBase {
 		t2.unique("uk1").columns("name2", "email2");
 
 		TableModel t3 = new TableModel("sampletable");
-		t3.column("gid").LONG().identityId().pkey();
+		t3.column("id").LONG().identityId().pkey();
 		t3.tableGenerator("table_gen1", "tb1", "pkcol2", "valcol", "pkval", 1, 10);
 		t3.column("id1").INTEGER().idGenerator("table_gen1");
 		t3.sequenceGenerator("seq1", "seq_1", 1, 1);

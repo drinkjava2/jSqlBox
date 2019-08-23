@@ -68,7 +68,7 @@ public class AnnotationTxDemoTest {
 
 	@TX
 	public void txInsert() {
-		ctx.nExecute("insert into user_tb (gid) values('123')");
+		ctx.nExecute("insert into user_tb (id) values('123')");
 		Systemout.println(1 / 0); // DIV 0!
 	}
 
@@ -76,7 +76,7 @@ public class AnnotationTxDemoTest {
 	public void doTest() {
 		AnnotationTxDemoTest tester = BeanBox.getBean(AnnotationTxDemoTest.class);
 		ctx.quiteExecute("drop table user_tb");
-		String ddl = "create table user_tb (gid varchar(40))";
+		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
 		ctx.nExecute(ddl);

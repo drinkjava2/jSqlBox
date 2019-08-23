@@ -146,10 +146,10 @@ public class IdGeneratorTest extends TestBase {
 	@Test
 	public void testAutoIdGenerator() {
 		TableModel table = new TableModel("testAutoIdGenerator");
-		table.column("gid").STRING(30).pkey().autoId();
+		table.column("id").STRING(30).pkey().autoId();
 		createAndRegTables(table);
 
-		IdGenerator gen = table.getColumnByColName("gid").getIdGenerator();
+		IdGenerator gen = table.getColumnByColName("id").getIdGenerator();
 		for (int i = 0; i < 5; i++) {
 			Assert.assertNotNull(gen.getNextID(ctx, dialect, null));
 			Systemout.println(gen.getNextID(ctx, dialect, null));
@@ -168,7 +168,7 @@ public class IdGeneratorTest extends TestBase {
 		TableModel table = new TableModel("testSortedUUIDGenerator");
 		table.sortedUUIDGenerator("sorteduuid", 8, 8);
 		table.addGenerator(new SortedUUIDGenerator("sorteduuid2", 10, 10));
-		table.column("gid").STRING(30).pkey().idGenerator("sorteduuid");
+		table.column("id").STRING(30).pkey().idGenerator("sorteduuid");
 		table.column("id2").STRING(30).pkey().idGenerator("sorteduuid2");
 		createAndRegTables(table);
 
@@ -193,12 +193,12 @@ public class IdGeneratorTest extends TestBase {
 			return;
 		TableModel table1 = new TableModel("testTableIdGenerator");
 		table1.sequenceGenerator("seq1", "seq1", 1, 10);
-		table1.column("gid").STRING(30).pkey().idGenerator("seq1");
+		table1.column("id").STRING(30).pkey().idGenerator("seq1");
 		table1.column("id2").STRING(30).pkey().sequenceGenerator("seq2", "seq2", 1, 20);
 
 		TableModel table2 = new TableModel("testTableIdGenerator2");
 		table2.sequenceGenerator("seq3", "seq3", 1, 10);
-		table2.column("gid").STRING(30).pkey().idGenerator("seq3");
+		table2.column("id").STRING(30).pkey().idGenerator("seq3");
 		table2.column("id2").STRING(30).pkey().sequenceGenerator("seq2", "seq2", 1, 20);
 
 		createAndRegTables(table1, table2);
@@ -223,13 +223,13 @@ public class IdGeneratorTest extends TestBase {
 	public void testTableIdGenerator() {
 		TableModel table1 = new TableModel("testTableIdGenerator");
 		table1.tableGenerator("tab1", "tb1", "pkCol", "valueColname", "pkColVal", 1, 10);
-		table1.column("gid").STRING(30).pkey().idGenerator("tab1");
+		table1.column("id").STRING(30).pkey().idGenerator("tab1");
 		table1.column("id2").STRING(30).pkey().tableGenerator("tab2", "tb1", "pkCol", "valueColname", "pkColVal", 1,
 				10);
 
 		TableModel table2 = new TableModel("testTableIdGenerator2");
 		table2.tableGenerator("tab3", "tb1", "pkCol", "valueColname", "pkColVal", 1, 10);
-		table2.column("gid").STRING(30).pkey().idGenerator("tab3");
+		table2.column("id").STRING(30).pkey().idGenerator("tab3");
 		table2.column("id2").STRING(30).pkey().tableGenerator("tab2", "tb1", "pkCol", "valueColname", "pkColVal", 1,
 				10);
 
@@ -254,7 +254,7 @@ public class IdGeneratorTest extends TestBase {
 	@Test
 	public void testIdentityGenerator() {
 		TableModel table = new TableModel("testIdentity");
-		table.column("gid").INTEGER().identityId().id();
+		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);
 		createAndRegTables(table);
 
@@ -263,7 +263,7 @@ public class IdGeneratorTest extends TestBase {
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
 		Systemout.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
 
-		idGen = table.getColumnByColName("gid").getIdGenerator();
+		idGen = table.getColumnByColName("id").getIdGenerator();
 		Systemout.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
 		dropTables(table);
 	}

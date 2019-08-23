@@ -25,9 +25,9 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class DialectTest {
 
-	private static final String sql1 = "select distinct a.id, a.userName, a.userName as u2 from usertemp a where gid>1 order by gid, a.username";
+	private static final String sql1 = "select distinct a.id, a.userName, a.userName as u2 from usertemp a where id>1 order by id, a.username";
 	private static final String sql2 = "select * from users";
-	private static final String sql3 = "select a.id, a.userName, a.userName as u2, b.c1 from usertemp a where gid>? group by b.b1 order by gid, a.username";
+	private static final String sql3 = "select a.id, a.userName, a.userName as u2, b.c1 from usertemp a where id>? group by b.b1 order by id, a.username";
 	private static final String sql4 = "select distinct top(?) * from users";
 
 	@Test

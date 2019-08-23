@@ -130,7 +130,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		return sb.toString();
 	}
 
-	/** Build Node gid from unknown entityIdOrIdMap */
+	/** Build Node id from unknown entityIdOrIdMap */
 	@SuppressWarnings("all")
 	public static Object buildEntityIdFromUnknow(Object entityId, TableModel model) {
 		SqlBoxException.assureNotNull(entityId, "entityId can not be null.");
@@ -154,7 +154,7 @@ public abstract class EntityIdUtils {// NOSONAR
 	}
 
 	/**
-	 * Put one gid value into a entity bean, or put values according a
+	 * Put one id value into a entity bean, or put values according a
 	 * map<String,Object>
 	 */
 	public static <T> T setEntityIdValues(T bean, Object entityId, Collection<ColumnModel> cols) {

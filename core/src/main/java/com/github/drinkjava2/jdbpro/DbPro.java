@@ -97,7 +97,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 * pXxxx style only allow first appeared String as SQL, left unknown items will
 	 * be treated as SQL parameters, for example:
 	 * 
-	 * ctx.pQuery(MapListHandler.class, "select * from users where age>? and gid=?",
+	 * ctx.pQuery(MapListHandler.class, "select * from users where age>? and id=?",
 	 * 20 , "001" , connection, new PaginHandler(2,5), sql(" and name=?"), "Tom" );
 	 * 
 	 * In above examples connection and sqlHandlers are optional items, these

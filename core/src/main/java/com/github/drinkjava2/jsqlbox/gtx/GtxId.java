@@ -19,7 +19,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
  */
 public class GtxId {
 	@Id
-	protected String gid;
+	private String gid;
 
 	public GtxId() {// default constructor
 	}

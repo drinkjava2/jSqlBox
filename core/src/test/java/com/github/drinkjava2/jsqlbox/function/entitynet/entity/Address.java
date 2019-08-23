@@ -11,7 +11,7 @@ public class Address extends ActiveRecord<Address> {
 	String id;
 	String addressName;
 
-	@SingleFKey(refs = { "usertb", "gid" })
+	@SingleFKey(refs = { "usertb", "id" })
 	String userId;
 
 	User user;

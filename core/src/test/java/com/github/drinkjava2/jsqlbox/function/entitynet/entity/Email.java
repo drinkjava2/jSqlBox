@@ -11,7 +11,7 @@ public class Email extends ActiveRecord<Email> {
 	String id;
 	String emailName;
 
-	@SingleFKey(refs = { "usertb", "gid" })
+	@SingleFKey(refs = { "usertb", "id" })
 	String userId;
 
 	public String getId() {

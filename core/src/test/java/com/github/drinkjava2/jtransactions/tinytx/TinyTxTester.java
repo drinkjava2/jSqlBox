@@ -39,12 +39,12 @@ public class TinyTxTester {
 
 	@TX
 	public void tx_Insert1() {
-		tiny.executeSql("insert into users (gid) values('123')");
+		tiny.executeSql("insert into users (id) values('123')");
 	}
 
 	@TX
 	public void tx_Insert2() {
-		tiny.executeSql("insert into users (gid) values('456')");
+		tiny.executeSql("insert into users (id) values('456')");
 		Assert.assertEquals(2L, tiny.queryForObject("select count(*) from users"));
 		Systemout.println("Now have 2 records in users table, but will roll back to 1");
 		Systemout.println(1 / 0);
@@ -59,7 +59,7 @@ public class TinyTxTester {
 			tiny.executeSql("drop table users");
 		} catch (Exception e) {
 		}
-		tiny.executeSql("create table users (gid varchar(40))engine=InnoDB");
+		tiny.executeSql("create table users (id varchar(40))engine=InnoDB");
 
 		Assert.assertEquals(0L, tiny.queryForObject("select count(*) from users"));
 

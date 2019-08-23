@@ -27,7 +27,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  *    &#064;Entity
  *    public class Employee {
- *        &#064;Id int gid;
+ *        &#064;Id int id;
  *        &#064;Transient User currentUser;
  *        ...
  *    }

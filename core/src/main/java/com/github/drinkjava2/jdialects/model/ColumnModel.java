@@ -247,7 +247,7 @@ public class ColumnModel {
 		return this.tableModel.fkey().columns(this.columnName).refs(refTableAndColumns);
 	}
 
-	// ===========gid generator methods=======================
+	// ===========id generator methods=======================
 	public IdGenerator getIdGenerator() {
 		makeSureTableModelExist();
 		return this.tableModel.getIdGenerator(idGenerationType, idGeneratorName);
