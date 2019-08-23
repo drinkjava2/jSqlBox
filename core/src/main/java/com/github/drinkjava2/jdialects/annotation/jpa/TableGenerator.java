@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
  *            allocationSize=1)
  *        &#064;Id
  *        &#064;GeneratedValue(strategy=TABLE, generator="empGen")
- *        int id;
+ *        int gid;
  *        ...
  *    }
  *    
@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
  *            pkColumnValue="ADDR_ID")
  *        &#064;Id
  *        &#064;GeneratedValue(strategy=TABLE, generator="addressGen")
- *        int id;
+ *        int gid;
  *        ...
  *    }
  * </pre>
@@ -71,12 +71,12 @@ public @interface TableGenerator {
 
     /** 
      * (Required) A unique generator name that can be referenced 
-     * by one or more classes to be the generator for id values.
+     * by one or more classes to be the generator for gid values.
      */
     String name();
 
     /** 
-     * (Optional) Name of table that stores the generated id values. 
+     * (Optional) Name of table that stores the generated gid values. 
      * <p> Defaults to a name chosen by persistence provider.
      */
     String table() default "";
@@ -119,7 +119,7 @@ public @interface TableGenerator {
     int initialValue() default 0;
 
     /**
-     * (Optional) The amount to increment by when allocating id 
+     * (Optional) The amount to increment by when allocating gid 
      * numbers from the generator.
      */
     int allocationSize() default 50;

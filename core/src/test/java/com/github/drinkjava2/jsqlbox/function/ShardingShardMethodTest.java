@@ -39,7 +39,7 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Test shard() method, if ShardTable and ShardDatabase be put on same id field,
+ * Test shard() method, if ShardTable and ShardDatabase be put on same gid field,
  * can use shard() in SQL instead of use shardDB() +shardTB() method
  * 
  * @author Yong Zhu
@@ -115,7 +115,7 @@ public class ShardingShardMethodTest {
 	@Test
 	public void testInsertSQLs() {
 		Systemout.println("=========================================================");
-		masters[2].iExecute(TheUser.class, "insert into ", shard(3), " (id, name) values(?,?)", param(10, "u1"),
+		masters[2].iExecute(TheUser.class, "insert into ", shard(3), " (gid, name) values(?,?)", param(10, "u1"),
 				USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shard(3),
 				USE_SLAVE, new PrintSqlHandler())); 

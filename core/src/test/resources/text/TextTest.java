@@ -32,7 +32,7 @@ public class TextTest extends TestBase {
 	public static class InsertDemoSQL extends Text {
 		/*-  
 		insert into demo
-		(id, name)
+		(gid, name)
 		values(?, ?)
 		*/
 	}
@@ -41,14 +41,14 @@ public class TextTest extends TestBase {
 		/*-  
 		 update demo 
 		 set name=#{d.name}
-		 where id=:d.id
+		 where gid=:d.gid
 		*/
 	}
 
 	public static class SelectNameByIdSQL extends Text {
 		/*-  
 		select name from demo 
-		     where id=?
+		     where gid=?
 		*/
 	}
 
@@ -56,7 +56,7 @@ public class TextTest extends TestBase {
 	public void test() {
 		pExecute(new InsertDemoSQL(), "1", "Foo");
 
-		Demo d = new Demo().putField("id", "1", "name", "Bar");
+		Demo d = new Demo().putField("gid", "1", "name", "Bar");
 		tExecute(UpdateDemoSQL.class, bind("d", d));
 
 		Assert.assertEquals("Bar", pQueryForString(SelectNameByIdSQL.class, "1"));

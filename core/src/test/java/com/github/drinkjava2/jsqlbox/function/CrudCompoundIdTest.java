@@ -114,7 +114,7 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(1, u4.loadTry());
 		Assert.assertEquals("NewAddress4", u4.getAddress()); 
 
-		// =======load by id (id is map)
+		// =======load by gid (gid is map)
 		Map<String, Object> mp = new HashMap<String, Object>();
 		mp.put("sex", true);
 		mp.put("name", "Name1");
@@ -126,7 +126,7 @@ public class CrudCompoundIdTest extends TestBase {
 		mp.put("name", "Name4");
 		Assert.assertEquals("NewAddress4", u4.loadByIdTry(mp).getAddress());
 
-		// =======load by id (id is Entity bean)
+		// =======load by gid (gid is Entity bean)
 		Assert.assertEquals("NewAddress1", ctx.eLoadById(CpdUser.class, u1).getAddress());
 		Assert.assertEquals("NewAddress2", u1.loadById(u2).getAddress());
 		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(CpdUser.class, u3).getAddress());
@@ -153,7 +153,7 @@ public class CrudCompoundIdTest extends TestBase {
 		u1.setAge(1000);
 		Assert.assertFalse(u1.existStrict());
 
-		// =======existById (id is Map)
+		// =======existById (gid is Map)
 		Map<String, Object> m1 = new HashMap<String, Object>();
 		m1.put("sex", true);
 		m1.put("name", "Name1");
@@ -163,13 +163,13 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(true, ctx.eExistById(CpdUser.class, m1));
 		Assert.assertEquals(false, u1.existById(m2));
 
-		// =======existById (id is Tail)
+		// =======existById (gid is Tail)
 		CpdUser t1 = new CpdUser().putTail("name", "Name1", "sex", true);
 		CpdUser t2 = new CpdUser().putTail("name", "Name2", "sex", true);
 		Assert.assertEquals(true, ctx.eExistById(CpdUser.class, t1, TAIL));
 		Assert.assertEquals(true, u1.existById(t2, TAIL));
 
-		// =======existById (id is entity bean)
+		// =======existById (gid is entity bean)
 		Assert.assertEquals(true, ctx.eExistById(CpdUser.class, u1));
 		Assert.assertEquals(true, u1.existById(u2));
 
@@ -182,7 +182,7 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(0, u4.deleteTry());
 		Assert.assertEquals(0, u1.countAll());
 
-		// =======delete by id (id is Map)
+		// =======delete by gid (gid is Map)
 		new CpdUser("Name1", true, "Address1").insert();
 		new CpdUser("Name2", true, "Address2").insert();
 		new CpdUser("Name3", true, "Address3").insert();
@@ -201,7 +201,7 @@ public class CrudCompoundIdTest extends TestBase {
 		Assert.assertEquals(0, u1.deleteByIdTry(m));
 		Assert.assertEquals(0, u1.countAll());
 
-		// =======delete by id (id is Entity bean)
+		// =======delete by gid (gid is Entity bean)
 		u1 = new CpdUser("Name1", true, "Address1").insert();
 		u2 = new CpdUser("Name2", true, "Address2").insert();
 		u3 = new CpdUser("Name3", true, "Address3").insert();

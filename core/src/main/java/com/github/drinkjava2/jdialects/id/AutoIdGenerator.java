@@ -17,7 +17,7 @@ import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 
 /**
- * AutoGenerator will depends database's id generator mechanism like MySql's
+ * AutoGenerator will depends database's gid generator mechanism like MySql's
  * Identity, Oracle's Sequence...
  * 
  * @author Yong Zhu

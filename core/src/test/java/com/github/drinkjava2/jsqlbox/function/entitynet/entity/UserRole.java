@@ -12,10 +12,10 @@ public class UserRole extends ActiveRecord<UserRole> {
 	@UUID25
 	String id;
 
-	@SingleFKey(refs = { "usertb", "id" })
+	@SingleFKey(refs = { "usertb", "gid" })
 	String userId;
 
-	@SingleFKey(refs = { "roletb", "id" })
+	@SingleFKey(refs = { "roletb", "gid" })
 	String rid;
 
 	public String getId() {

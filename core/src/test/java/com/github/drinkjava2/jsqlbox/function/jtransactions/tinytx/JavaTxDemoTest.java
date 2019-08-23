@@ -46,7 +46,7 @@ public class JavaTxDemoTest {
 	}
 
 	public void txInsert() {
-		ctx.nExecute("insert into user_tb (id) values('abc')");
+		ctx.nExecute("insert into user_tb (gid) values('abc')");
 		Systemout.println(1 / 0); // DIV 0!
 	}
 
@@ -54,7 +54,7 @@ public class JavaTxDemoTest {
 	public void doTest() throws Exception {
 		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(new TinyTx(), "tx*");
 		JavaTxDemoTest tester = BeanBox.getBean(JavaTxDemoTest.class);
-		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
+		ctx.nExecute("create table user_tb (gid varchar(40))engine=InnoDB");
 		try {
 			tester.txInsert();// this one did not insert, rolled back
 		} catch (Exception e) {

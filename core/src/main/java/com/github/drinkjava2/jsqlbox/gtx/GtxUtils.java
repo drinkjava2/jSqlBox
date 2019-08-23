@@ -31,9 +31,9 @@ import com.mysql.jdbc.Connection;
  * @since 2.0.7
  */
 public abstract class GtxUtils {// NOSONAR
-	public static final String GTX_ID = "gtxid"; // gtx_id + gtx_logno is a compound PKEY
-	public static final String GTX_LOGNO = "gtxno";
-	public static final String GTX_TYP = "gtxtp";// Operate type, can be update/exist/existStrict/insert/delete
+	public static final String GTX_GID = "gtxgid"; // gtx_id + gtx_logno is a compound PKEY
+	public static final String GTX_LOGNO = "gtxlogno";
+	public static final String GTX_TYP = "gtxtyp";// Operate type, can be update/exist/existStrict/insert/delete
 	public static final String GTX_DB = "gtxdb";// DB code No.
 	public static final String GTX_TB = "gtxtb";// Table name
 
@@ -64,7 +64,7 @@ public abstract class GtxUtils {// NOSONAR
 		String  table = SqlBoxContextUtils.getShardedTbByBean(ctx, entity);
 		log.setGtxTB(table);
 
-		// calculate id value
+		// calculate gid value
 		StringBuilder idSB = new StringBuilder();
 		for (ColumnModel col : model.getPKeyColumns()) {
 			if (idSB.length() > 0)
@@ -85,7 +85,7 @@ public abstract class GtxUtils {// NOSONAR
 			lock.setDb(dbCode);
 			lock.setTb(table);
 			lock.setEntityId(id);
-			lock.setGtxId(gtxInfo.getGtxId().getId());
+			lock.setGid(gtxInfo.getGtxId().getGid());
 			locks.add(lock);
 		}
 	}
@@ -102,7 +102,7 @@ public abstract class GtxUtils {// NOSONAR
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
 				TableModel md = GtxUtils.entity2GtxLogModel(entity.getClass());
-				md.getColumnByColName(GtxUtils.GTX_ID).setValue(gtxInfo.getGtxId().getId());
+				md.getColumnByColName(GtxUtils.GTX_GID).setValue(gtxInfo.getGtxId().getGid());
 				md.getColumnByColName(GtxUtils.GTX_LOGNO).setValue(logNo++);
 				md.getColumnByColName(GtxUtils.GTX_TYP).setValue(gtxLog.getLogType());
 				md.getColumnByColName(GtxUtils.GTX_DB).setValue(gtxLog.getGtxDB());
@@ -123,8 +123,8 @@ public abstract class GtxUtils {// NOSONAR
 	public static void deleteLockAndLog(SqlBoxContext gtxCtx, GtxInfo gtxInfo) throws Exception {
 		gtxCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
-			String gid = gtxInfo.getGtxId().getId();
-			gtxCtx.nExecute("delete from gtxid where id=?", gid);
+			String gid = gtxInfo.getGtxId().getGid();
+			gtxCtx.nExecute("delete from gtxid where gid=?", gid);
 			gtxCtx.nExecute("delete from gtxlock where gtxid=?", gid);
 			Set<String> tableSet = new HashSet<String>();
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
@@ -158,7 +158,7 @@ public abstract class GtxUtils {// NOSONAR
 			col.setShardDatabase(null);
 			col.setShardTable(null);
 		}
-		t.column(GTX_ID).CHAR(32).id().setValue(null); // gtx_id + gtx_logno is a compound PKEY
+		t.column(GTX_GID).CHAR(32).id().setValue(null); // gtx_id + gtx_logno is a compound PKEY
 		t.column(GTX_LOGNO).LONG().id().setValue(null);
 		t.column(GTX_TYP).CHAR(6).setValue(null);
 		t.column(GTX_DB).INTEGER().setValue(null);

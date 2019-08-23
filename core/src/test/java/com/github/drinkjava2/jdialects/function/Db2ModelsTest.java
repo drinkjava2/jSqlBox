@@ -25,7 +25,7 @@ public class Db2ModelsTest extends JdialectsTestBase {
 	@Test
 	public void testDb2Model() {
 		TableModel t = new TableModel("testTable");
-		t.column("id").LONG().pkey();
+		t.column("gid").LONG().pkey();
 		t.column("b1").BOOLEAN();
 		t.column("d2").DOUBLE();
 		t.column("f3").FLOAT(5);

@@ -18,7 +18,7 @@ public class EntityNetTreeTest extends TestBase {
 		super.init();
 		createAndRegTables(TreeNode.class);
 		TreeNode t = new TreeNode();
-		t.forFields("id", "comments", "pid", "line", "lvl");
+		t.forFields("gid", "comments", "pid", "line", "lvl");
 		t.putValues("A", "found a bug", null, 1, 1).insert();
 		t.putValues("B", "is a worm?", "A", 2, 2).insert();
 		t.putValues("E", "no", "B", 3, 3).insert();

@@ -742,7 +742,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		int result = ctx.iUpdate(sqlBody.toArray());
 		if (ctx.isBatchEnabled())
 			return 1; // in batch mode, direct return 1
-		if (identityCol != null) {// write identity id to Bean field
+		if (identityCol != null) {// write identity gid to Bean field
 			Object identityId = IdentityIdGenerator.INSTANCE.getNextID(ctx, ctx.getDialect(), identityType);
 			writeValueToBeanFieldOrTail(identityCol, entityBean, identityId);
 		}
@@ -967,7 +967,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return rowAffected;
 	}
 
-	/** Load entity according entity's id fields, return row affected */
+	/** Load entity according entity's gid fields, return row affected */
 	public static int entityLoadTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
@@ -980,7 +980,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return result;
 	}
 
-	/** Load entity according entity's id fields, return row affected */
+	/** Load entity according entity's gid fields, return row affected */
 	private static int doEntityLoadTry(SqlBoxContext ctx, Object entityBean, Object... optionItems) {// NOSONAR
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
@@ -1096,7 +1096,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Check if entityBean exist in database by its id and all other effect fields
+	 * Check if entityBean exist in database by its gid and all other effect fields
 	 */
 	public static boolean entityExistStrict(SqlBoxContext ctx, Object entityBean, Object... optionItems) {
 		Object entityBean2 = entityLoadByIdTry(ctx, entityBean.getClass(), entityBean, optionItems);
@@ -1111,14 +1111,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 
 	/**
 	 * Equal to entityExistById method, Check if entityBean exist in database by its
-	 * id
+	 * gid
 	 */
 	public static boolean entityExist(SqlBoxContext ctx, Object entityBean, Object... optionItems) {
 		return entityExistById(ctx, entityBean.getClass(), entityBean, optionItems);
 	}
 
 	/**
-	 * Check if entityBean exist in database by its id
+	 * Check if entityBean exist in database by its gid
 	 */
 	public static boolean entityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id, Object... optionItems) {// NOSONAR
 		SqlBoxContext paramCtx = extractCtx(optionItems);

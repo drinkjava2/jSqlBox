@@ -12,7 +12,7 @@ import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
-import com.github.drinkjava2.jsqlbox.gtx.UnlockUtils;
+import com.github.drinkjava2.jsqlbox.gtx.GtxUnlockServ;
 import com.github.drinkjava2.jtransactions.TxResult;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -63,17 +63,17 @@ public class GtxTest {
 	public void commitTest() { // test group commit
 		ctx[0].startTrans();
 		try {
-			new Usr().putField("id", "UserA").insert(ctx[0]);
-			new Usr().putField("id", "UserB").insert(ctx[1]);
-			new Usr().putField("id", "UserC").insert(ctx[1]);
-			new Usr().putField("id", "UserD").insert(ctx[2]);
+			new Usr().putField("gid", "UserA").insert(ctx[0]);
+			new Usr().putField("gid", "UserB").insert(ctx[1]);
+			new Usr().putField("gid", "UserC").insert(ctx[1]);
+			new Usr().putField("gid", "UserD").insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			e.printStackTrace();
-			ctx[0].rollbackTrans();
+			TxResult result = ctx[0].rollbackTrans();
+			GtxUnlockServ.forceUnlock(result.getTxId(), ctx[0]);
 		}
 		Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
@@ -84,18 +84,19 @@ public class GtxTest {
 	public void rollbackCausedByDiv0Test() {
 		ctx[0].startTrans();
 		try {
-			new Usr().putField("id", "UserA").insert(ctx[0]);
-			new Usr().putField("id", "UserB").insert(ctx[1]);
-			new Usr().putField("id", "UserC").insert(ctx[1]);
-			new Usr().putField("id", "UserD").insert(ctx[2]);
+			new Usr().putField("gid", "UserA").insert(ctx[0]);
+			new Usr().putField("gid", "UserB").insert(ctx[1]);
+			new Usr().putField("gid", "UserC").insert(ctx[1]);
+			new Usr().putField("gid", "UserD").insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
 			System.out.println(1 / 0);
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			ctx[0].rollbackTrans();
-		}
+			TxResult result = ctx[0].rollbackTrans();
+			GtxUnlockServ.forceUnlock(result.getTxId(), ctx[0]);
+		} 
 		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx[1].eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx[2].eCountAll(Usr.class));
@@ -105,18 +106,18 @@ public class GtxTest {
 	public void rollbackFailCausedByDsLostTest() {
 		ctx[0].startTrans();
 		try {
-			new Usr().putField("id", "UserA").insert(ctx[0]);
-			new Usr().putField("id", "UserB").insert(ctx[1]);
-			new Usr().putField("id", "UserC").insert(ctx[1]);
-			new Usr().putField("id", "UserD").insert(ctx[2]);
+			new Usr().putField("gid", "UserA").insert(ctx[0]);
+			new Usr().putField("gid", "UserB").insert(ctx[1]);
+			new Usr().putField("gid", "UserC").insert(ctx[1]);
+			new Usr().putField("gid", "UserD").insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
 			((HikariDataSource) ctx[1].getDataSource()).close();// One DS lost!
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			e.printStackTrace();
-			ctx[0].rollbackTrans();
+			TxResult result = ctx[0].rollbackTrans();
+			GtxUnlockServ.forceUnlock(result.getTxId(), ctx[0]);
 		}
 		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx[2].eCountAll(Usr.class));
@@ -126,10 +127,10 @@ public class GtxTest {
 	public void rollbackCausedByCommitTest() {
 		try {
 			ctx[0].startTrans();
-			new Usr().putField("id", "UserA").insert(ctx[0]);
-			new Usr().putField("id", "UserB").insert(ctx[1]);
-			new Usr().putField("id", "UserC").insert(ctx[1]);
-			new Usr().putField("id", "UserD").insert(ctx[2]);
+			new Usr().putField("gid", "UserA").insert(ctx[0]);
+			new Usr().putField("gid", "UserB").insert(ctx[1]);
+			new Usr().putField("gid", "UserC").insert(ctx[1]);
+			new Usr().putField("gid", "UserD").insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
@@ -137,7 +138,7 @@ public class GtxTest {
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
 			TxResult result = ctx[0].rollbackTrans();
-			UnlockUtils.forceUnlock(result.getTxId(), ctx[0]);
+			GtxUnlockServ.forceUnlock(result.getTxId(), ctx[0]);
 		}
 		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx[2].eCountAll(Usr.class));

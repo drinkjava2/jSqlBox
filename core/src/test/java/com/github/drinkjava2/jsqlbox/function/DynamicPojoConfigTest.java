@@ -54,7 +54,7 @@ public class DynamicPojoConfigTest extends TestBase {
 	@Test
 	public void doPojoConfigTest() {
 		TableModel model = TableModelUtils.entity2Model(PojoDemo.class);
-		model.column("id").pkey().uuid32();
+		model.column("gid").pkey().uuid32();
 		TableModelUtils.bindGlobalModel(PojoDemo.class, model);
 
 		PojoDemo pojo = new PojoDemo();

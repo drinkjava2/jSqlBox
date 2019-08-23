@@ -20,7 +20,7 @@ import com.github.drinkjava2.jtransactions.TxInfo;
 import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
- * This class store id, gtx log and gtx lock, will be saved to 3 tables in GTX
+ * This class store gid, gtx log and gtx lock, will be saved to 3 tables in GTX
  * server
  * 
  * @author Yong Zhu
@@ -29,7 +29,7 @@ import com.github.drinkjava2.jtransactions.TxResult;
 public class GtxInfo extends TxInfo {
 
 	private GtxId gtxId = new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6));
-	private TxResult txResult = new TxResult().setTxId(gtxId.getId()); // tx result will return to user
+	private TxResult txResult = new TxResult().setTxId(gtxId.getGid()); // tx result will return to user
 
 	private List<GtxLog> gtxLogList = null;
 
@@ -37,7 +37,7 @@ public class GtxInfo extends TxInfo {
 
 	public String getDebugInfo() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("id=" + gtxId).append("\r");
+		sb.append("gid=" + gtxId.getGid()).append("\r");
 		sb.append("gtxLockList=" + gtxLockList).append("\r");
 		sb.append("gtxLogList=" + gtxLogList).append("\r");
 		return sb.toString();

@@ -334,28 +334,28 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityDeleteTry(this, entity, optionItems);
 	}
 
-	/** Delete entity by given id, if not 1 row deleted, throw SqlBoxException */
+	/** Delete entity by given gid, if not 1 row deleted, throw SqlBoxException */
 	public void eDeleteById(Class<?> entityClass, Object id, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityDeleteByIdTry(this, entityClass, id, optionItems);
 		checkOnlyOneRowAffected(result, "deleteById");
 	}
 
-	/** Delete entity by given id, return how many rows deleted */
+	/** Delete entity by given gid, return how many rows deleted */
 	public int eDeleteByIdTry(Class<?> entityClass, Object id, Object... optionItems) {
 		return SqlBoxContextUtils.entityDeleteByIdTry(this, entityClass, id, optionItems);
 	}
 
-	/** Check if entity exist by its id */
+	/** Check if entity exist by its gid */
 	public boolean eExistStrict(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityExistStrict(this, entity, optionItems);
 	}
 
-	/** Check if entity exist by its id */
+	/** Check if entity exist by its gid */
 	public boolean eExist(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityExist(this, entity, optionItems);
 	}
 
-	/** Check if entity exist by given id */
+	/** Check if entity exist by given gid */
 	public boolean eExistById(Class<?> entityClass, Object id, Object... optionItems) {
 		return SqlBoxContextUtils.entityExistById(this, entityClass, id, optionItems);
 	}
@@ -365,19 +365,19 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityCountAll(this, entityClass, optionItems);
 	}
 
-	/** Load entity according its id, if not 1 row round, throw SqlBoxException */
+	/** Load entity according its gid, if not 1 row round, throw SqlBoxException */
 	public <T> T eLoad(T entity, Object... optionItems) {
 		int result = SqlBoxContextUtils.entityLoadTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "load");
 		return entity;
 	}
 
-	/** Load entity according its id, return how many rows found */
+	/** Load entity according its gid, return how many rows found */
 	public int eLoadTry(Object entity, Object... optionItems) {
 		return SqlBoxContextUtils.entityLoadTry(this, entity, optionItems);
 	}
 
-	/** Load entity by given id, if not 1 row found, throw SqlBoxException */
+	/** Load entity by given gid, if not 1 row found, throw SqlBoxException */
 	public <T> T eLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
 		T entity = SqlBoxContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
 		if (entity == null)
@@ -395,7 +395,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return entities.get(0);
 	}
 
-	/** Load entity by given id, if not found, return null */
+	/** Load entity by given gid, if not found, return null */
 	public <T> T eLoadByIdTry(Class<T> entityClass, Object entityId, Object... optionItems) {
 		return SqlBoxContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
 	}

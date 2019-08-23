@@ -31,11 +31,11 @@ public class JavaTxTest {
 	}
 
 	public void tx_Insert1() {
-		ctx.nExecute("insert into user_tb (id) values('123')");
+		ctx.nExecute("insert into user_tb (gid) values('123')");
 	}
 
 	public void tx_Insert2() {
-		ctx.nExecute("insert into user_tb (id) values('456')");
+		ctx.nExecute("insert into user_tb (gid) values('456')");
 		Assert.assertEquals(2, ctx.nQueryForLongValue("select count(*) from user_tb "));
 		Systemout.println("Now have 2 records in user_tb, but will roll back to 1");
 		Systemout.println(1 / 0);
@@ -45,7 +45,7 @@ public class JavaTxTest {
 	public void doTest() throws Exception {
 		JBEANBOX.getBeanBox(JavaTxTest.class).addBeanAop(new TinyTx(), "tx_*");
 		JavaTxTest tester = BeanBox.getBean(JavaTxTest.class);
-		String ddl = "create table user_tb (id varchar(40))";
+		String ddl = "create table user_tb (gid varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
 		ctx.nExecute(ddl);

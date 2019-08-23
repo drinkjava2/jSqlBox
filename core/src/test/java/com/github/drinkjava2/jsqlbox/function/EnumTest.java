@@ -85,7 +85,7 @@ public class EnumTest extends TestBase {
 		v.setEnum1(EnumDemo.CONTRACT);
 		v.setEnum2(EnumDemo.CONTRACT);
 		v.update();
-		EnumDemoBean v2 = new EnumDemoBean().putField("id", v.getId()).load();
+		EnumDemoBean v2 = new EnumDemoBean().putField("gid", v.getId()).load();
 		Assert.assertEquals(EnumDemo.CONTRACT, v2.getEnum1());
 		Assert.assertEquals(EnumDemo.CONTRACT, v2.getEnum2());
 		v2.delete();

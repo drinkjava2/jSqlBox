@@ -101,7 +101,7 @@ public class SqlHandlersTest extends TestBase {
 		super.init();
 		createAndRegTables(DemoUser.class);
 		for (int i = 0; i < 100; i++)
-			new DemoUser().putField("id", "" + i).putField("userName", "user" + i).putField("age", i).insert();
+			new DemoUser().putField("gid", "" + i).putField("userName", "user" + i).putField("age", i).insert();
 	}
 
 	@Test

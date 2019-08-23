@@ -26,11 +26,11 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 	@Before
 	public void init() {
 		super.init();
-		new DemoCustomer().forFields("id", "code", "name");
+		new DemoCustomer().forFields("gid", "code", "name");
 		new DemoCustomer().putValues(1, "a", "Customer1").insert();
 		new DemoCustomer().putValues(2, "b", "Customer2").insert();
 		new DemoCustomer().putValues(3, "c", "Customer3").insert();
-		new DemoOrder().forFields("id", "name", "custId");
+		new DemoOrder().forFields("gid", "name", "custId");
 		new DemoOrder().putValues(1, "a", 1).insert();
 		new DemoOrder().putValues(2, "b", 1).insert();
 		new DemoOrder().putValues(3, "c", 2).insert();
@@ -83,7 +83,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testUnique() {
-		DemoUser d = new DemoUser().putField("id", 1).load();// included unique check
+		DemoUser d = new DemoUser().putField("gid", 1).load();// included unique check
 		if (d.getCode() == null)
 			throw new RuntimeException("testUnique error");
 		// or gctx().entityExistById(DemoUser.class, 1);
@@ -91,7 +91,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testUpdateById() {
-		new DemoUser().putField("id", 1, "code", "abc").update();
+		new DemoUser().putField("gid", 1, "code", "abc").update();
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 
 	@Override
 	public void testExampleQuery() {
-		List<DemoUser> result = gctx().eFindBySample(new DemoUser().putField("id", 1, "code", "abc"), " or code=?",
+		List<DemoUser> result = gctx().eFindBySample(new DemoUser().putField("gid", 1, "code", "abc"), " or code=?",
 				param("efg"));
 		if (result.get(0) == null)
 			throw new RuntimeException("Example query error");

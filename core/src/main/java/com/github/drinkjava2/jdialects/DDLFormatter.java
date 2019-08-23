@@ -61,7 +61,7 @@ public class DDLFormatter {
 
 	public static void main(String[] args) {
 		String ddl = "create table users("
-				+ "id int(5), name varchar(10), \t \n age int, price float(10,3), address char)engine=innodb charset=utf8";
+				+ "gid int(5), name varchar(10), \t \n age int, price float(10,3), address char)engine=innodb charset=utf8";
 		System.out.println(format(ddl));
 	}
 }

@@ -12,10 +12,10 @@ public class RolePrivilege extends ActiveRecord<RolePrivilege> {
 	@UUID25
 	String id;
 
-	@SingleFKey(refs = { "roletb", "id" })
+	@SingleFKey(refs = { "roletb", "gid" })
 	String rid;
 
-	@SingleFKey(refs = { "privilegetb", "id" })
+	@SingleFKey(refs = { "privilegetb", "gid" })
 	String pid;
 
 	public String getId() {

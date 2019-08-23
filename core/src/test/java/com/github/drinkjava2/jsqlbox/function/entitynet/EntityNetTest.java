@@ -34,33 +34,33 @@ public class EntityNetTest extends TestBase {
 	}
 
 	protected void insertDemoData() {
-		new User().putField("id", "u1").putField("userName", "user1").insert();
-		new User().putField("id", "u2").putField("userName", "user2").insert();
-		new User().putField("id", "u3").putField("userName", "user3").insert();
-		new User().putField("id", "u4").putField("userName", "user4").insert();
-		new User().putField("id", "u5").putField("userName", "user5").insert();
+		new User().putField("gid", "u1").putField("userName", "user1").insert();
+		new User().putField("gid", "u2").putField("userName", "user2").insert();
+		new User().putField("gid", "u3").putField("userName", "user3").insert();
+		new User().putField("gid", "u4").putField("userName", "user4").insert();
+		new User().putField("gid", "u5").putField("userName", "user5").insert();
 
-		new Address().putField("id", "a1", "addressName", "address1", "userId", "u1").insert();
-		new Address().putField("id", "a2", "addressName", "address2", "userId", "u2").insert();
-		new Address().putField("id", "a3", "addressName", "address3", "userId", "u3").insert();
-		new Address().putField("id", "a4", "addressName", "address4", "userId", "u4").insert();
-		new Address().putField("id", "a5", "addressName", "address5", "userId", "u5").insert();
+		new Address().putField("gid", "a1", "addressName", "address1", "userId", "u1").insert();
+		new Address().putField("gid", "a2", "addressName", "address2", "userId", "u2").insert();
+		new Address().putField("gid", "a3", "addressName", "address3", "userId", "u3").insert();
+		new Address().putField("gid", "a4", "addressName", "address4", "userId", "u4").insert();
+		new Address().putField("gid", "a5", "addressName", "address5", "userId", "u5").insert();
 
-		new Email().forFields("id", "emailName", "userId");
+		new Email().forFields("gid", "emailName", "userId");
 		new Email().putValues("e1", "email1", "u1").insert();
 		new Email().putValues("e2", "email2", "u1").insert();
 		new Email().putValues("e3", "email3", "u2").insert();
 		new Email().putValues("e4", "email4", "u2").insert();
 		new Email().putValues("e5", "email5", "u3").insert();
 
-		new Role().forFields("id", "roleName");
+		new Role().forFields("gid", "roleName");
 		new Role().putValues("r1", "role1").insert();
 		new Role().putValues("r2", "role2").insert();
 		new Role().putValues("r3", "role3").insert();
 		new Role().putValues("r4", "role4").insert();
 		new Role().putValues("r5", "role5").insert();
 
-		new Privilege().forFields("id", "privilegeName");
+		new Privilege().forFields("gid", "privilegeName");
 		new Privilege().putValues("p1", "privilege1").insert();
 		new Privilege().putValues("p2", "privilege2").insert();
 		new Privilege().putValues("p3", "privilege3").insert();
@@ -138,13 +138,13 @@ public class EntityNetTest extends TestBase {
 
 		Systemout.println("===========pick one entity by bean ================");
 		Role temp = new Role();
-		temp.putField("id", "r4");
+		temp.putField("gid", "r4");
 		Role r4 = net.pickOneEntity(Role.class, temp);
 		Assert.assertEquals("r4", r4.getId());
 
 		Systemout.println("===========pick one entity by map ================");
 		Map<String, Object> mp = new HashMap<String, Object>();
-		mp.put("id", "r2");
+		mp.put("gid", "r2");
 		Role r2 = net.pickOneEntity(Role.class, mp);
 		Assert.assertEquals("r2", r2.getId());
 	}
@@ -351,7 +351,7 @@ public class EntityNetTest extends TestBase {
 			List<Role> roles = u.getRoleList();
 			if (roles != null)
 				for (Role r : roles)
-					Systemout.println("  Role id:" + r.getId() + ", id2:" + r.getTail("id2"));
+					Systemout.println("  Role gid:" + r.getId() + ", id2:" + r.getTail("id2"));
 		}
 	}
 

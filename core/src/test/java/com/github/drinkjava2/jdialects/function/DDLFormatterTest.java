@@ -21,9 +21,9 @@ public class DDLFormatterTest {
 	@Test
 	public void testDDLFormatter() {
 		Systemout.println(DDLFormatter.format(
-				"create column table customertable (id varchar(32) not null, customer_name varchar(30), primary key (id))"));
+				"create column table customertable (gid varchar(32) not null, customer_name varchar(30), primary key (gid))"));
 		Systemout.println(DDLFormatter.format(
-				"create table customertable (id varchar(32) not null, customer_name varchar(30), primary key (id)) engine=InnoDB"));
+				"create table customertable (gid varchar(32) not null, customer_name varchar(30), primary key (gid)) engine=InnoDB"));
 	}
 
 }

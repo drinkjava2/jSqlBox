@@ -24,8 +24,8 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
 public class TableModelUtilsOfJavaSrcTest {
 
 	@Table(name = "entity1")
-	@FKey(name = "fkey1", ddl = false, columns = { "id", "name" }, refs = { "entity2", "field1", "field2" })
-	@FKey1(columns = { "id", "name" }, refs = { "entity3", "field1", "field2" })
+	@FKey(name = "fkey1", ddl = false, columns = { "gid", "name" }, refs = { "entity2", "field1", "field2" })
+	@FKey1(columns = { "gid", "name" }, refs = { "entity3", "field1", "field2" })
 	public class Entity1 extends ActiveRecord<Entity1> {
 		@Id
 		private Integer id;
@@ -35,7 +35,7 @@ public class TableModelUtilsOfJavaSrcTest {
 		private String name;
 
 		@Column(name = "cust_id")
-		@SingleFKey(refs = { "table2", "id" })
+		@SingleFKey(refs = { "table2", "gid" })
 		private Integer custId;
 
 		Entity1 demoEntity;

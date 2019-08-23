@@ -66,10 +66,10 @@ public class IdgeneratorTest extends JdialectsTestBase {
 	@Test
 	public void testAutoIdGenerator() {
 		TableModel table = new TableModel("testAutoIdGenerator");
-		table.column("id").STRING(30).pkey().autoId();
+		table.column("gid").STRING(30).pkey().autoId();
 		reBuildDB(table);
 
-		IdGenerator gen = table.getColumn("id").getIdGenerator();
+		IdGenerator gen = table.getColumn("gid").getIdGenerator();
 		for (int i = 0; i < 5; i++)
 			Systemout.println(gen.getNextID(dbPro, guessedDialect, null));
 
@@ -84,7 +84,7 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		TableModel table = new TableModel("testSortedUUIDGenerator");
 		table.sortedUUIDGenerator("sorteduuid", 8, 8);
 		table.addGenerator(new SortedUUIDGenerator("sorteduuid2", 10, 10));
-		table.column("id").STRING(30).pkey().idGenerator("sorteduuid");
+		table.column("gid").STRING(30).pkey().idGenerator("sorteduuid");
 		table.column("id2").STRING(30).pkey().idGenerator("sorteduuid2");
 		reBuildDB(table);
 
@@ -104,12 +104,12 @@ public class IdgeneratorTest extends JdialectsTestBase {
 			return;
 		TableModel table1 = new TableModel("testTableIdGenerator");
 		table1.sequenceGenerator("seq1", "seq1", 1, 10);
-		table1.column("id").STRING(30).pkey().idGenerator("seq1");
+		table1.column("gid").STRING(30).pkey().idGenerator("seq1");
 		table1.column("id2").STRING(30).pkey().sequenceGenerator("seq2", "seq2", 1, 20);
 
 		TableModel table2 = new TableModel("testTableIdGenerator2");
 		table2.sequenceGenerator("seq3", "seq3", 1, 10);
-		table2.column("id").STRING(30).pkey().idGenerator("seq3");
+		table2.column("gid").STRING(30).pkey().idGenerator("seq3");
 		table2.column("id2").STRING(30).pkey().sequenceGenerator("seq2", "seq2", 1, 20);
 
 		reBuildDB(table1, table2);
@@ -134,13 +134,13 @@ public class IdgeneratorTest extends JdialectsTestBase {
 	public void testTableIdGenerator() {
 		TableModel table1 = new TableModel("testTableIdGenerator");
 		table1.tableGenerator("tab1", "tb1", "pkCol", "valueColname", "pkColVal", 1, 10);
-		table1.column("id").STRING(30).pkey().idGenerator("tab1");
+		table1.column("gid").STRING(30).pkey().idGenerator("tab1");
 		table1.column("id2").STRING(30).pkey().tableGenerator("tab2", "tb1", "pkCol", "valueColname", "pkColVal", 1,
 				10);
 
 		TableModel table2 = new TableModel("testTableIdGenerator2");
 		table2.tableGenerator("tab3", "tb1", "pkCol", "valueColname", "pkColVal", 1, 10);
-		table2.column("id").STRING(30).pkey().idGenerator("tab3");
+		table2.column("gid").STRING(30).pkey().idGenerator("tab3");
 		table2.column("id2").STRING(30).pkey().tableGenerator("tab2", "tb1", "pkCol", "valueColname", "pkColVal", 1,
 				10);
 
@@ -165,7 +165,7 @@ public class IdgeneratorTest extends JdialectsTestBase {
 	@Test
 	public void testIdentityGenerator() {
 		TableModel table = new TableModel("testIdentity");
-		table.column("id").INTEGER().identityId();
+		table.column("gid").INTEGER().identityId();
 		table.column("name").STRING(30);
 		reBuildDB(table);
 
@@ -174,7 +174,7 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
 		Systemout.println(idGen.getNextID(dbPro, guessedDialect, Type.INTEGER));
 
-		idGen = table.getColumn("id").getIdGenerator();
+		idGen = table.getColumn("gid").getIdGenerator();
 		Systemout.println(idGen.getNextID(dbPro, guessedDialect, Type.INTEGER));
 		dropDB(table);
 	}

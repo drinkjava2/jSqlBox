@@ -26,7 +26,7 @@ public class TableIdGenerator implements IdGenerator {
 
 	/**
 	 * A unique generator name that can be referenced by one or more classes to be
-	 * the generator for id values.
+	 * the generator for gid values.
 	 */
 	private String name;
 
@@ -52,12 +52,12 @@ public class TableIdGenerator implements IdGenerator {
 	private String pkColumnValue = "";
 
 	/**
-	 * The initial value to be used when allocating id numbers from the generator.
+	 * The initial value to be used when allocating gid numbers from the generator.
 	 */
 	private Integer initialValue = 0;
 
 	/**
-	 * The amount to increment by when allocating id numbers from the generator.
+	 * The amount to increment by when allocating gid numbers from the generator.
 	 */
 	private Integer allocationSize = 50;
 

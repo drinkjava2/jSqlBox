@@ -19,21 +19,21 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
  */
 public class GtxId {
 	@Id
-	protected String id;
+	protected String gid;
 
 	public GtxId() {// default constructor
 	}
 
-	public GtxId(String id) {// default constructor
-		this.id = id;
+	public GtxId(String gid) {// default constructor
+		this.gid = gid;
 	}
 
-	public String getId() {
-		return id;
+	public String getGid() {
+		return gid;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setGid(String gid) {
+		this.gid = gid;
 	}
 
 }

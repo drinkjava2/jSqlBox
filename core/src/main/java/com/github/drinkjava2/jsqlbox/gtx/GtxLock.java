@@ -29,7 +29,7 @@ public class GtxLock {
 	@Id
 	private String entityId; // entity entityId value
 
-	private String gtxId;
+	private String gid; // GTX Id
 
 	public Integer getDb() {
 		return db;
@@ -55,12 +55,12 @@ public class GtxLock {
 		this.entityId = entityId;
 	}
 
-	public String getGtxId() {
-		return gtxId;
+	public String getGid() {
+		return gid;
 	}
 
-	public void setGtxId(String gtxId) {
-		this.gtxId = gtxId;
+	public void setGid(String gid) {
+		this.gid = gid;
 	}
 
 }
