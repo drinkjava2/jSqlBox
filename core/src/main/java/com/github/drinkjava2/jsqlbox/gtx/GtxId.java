@@ -21,6 +21,8 @@ public class GtxId {
 	@Id
 	private String gid;
 
+	private Integer unlockTry = 0; // unlockTry times
+
 	public GtxId() {// default constructor
 	}
 
@@ -32,8 +34,18 @@ public class GtxId {
 		return gid;
 	}
 
-	public void setGid(String gid) {
+	public GtxId setGid(String gid) {
 		this.gid = gid;
+		return this;
+	}
+
+	public Integer getUnlockTry() {
+		return unlockTry;
+	}
+
+	public GtxId setUnlockTry(Integer unlockTry) {
+		this.unlockTry = unlockTry;
+		return this;
 	}
 
 }

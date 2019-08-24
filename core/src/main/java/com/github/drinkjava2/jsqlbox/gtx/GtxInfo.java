@@ -29,7 +29,7 @@ import com.github.drinkjava2.jtransactions.TxResult;
 public class GtxInfo extends TxInfo {
 
 	private GtxId gtxId = new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6));
-	private TxResult txResult = new TxResult().setTxId(gtxId.getGid()); // tx result will return to user
+	private TxResult txResult = new TxResult().setGid(gtxId.getGid()); // tx result will return to user
 
 	private List<GtxLog> gtxLogList = null;
 

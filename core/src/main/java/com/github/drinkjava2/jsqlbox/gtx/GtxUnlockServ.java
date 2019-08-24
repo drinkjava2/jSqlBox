@@ -16,13 +16,19 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
+
 import com.github.drinkjava2.jdbpro.log.DbProLog;
 import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jtransactions.TransactionsException;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * GtxUnlockServ used to unlock GTX
@@ -49,6 +55,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 			ctxArr[i].setAllowShowSQL(userCtxArr.getAllowShowSQL());
 			ctxArr[i].setMasters(ctxArr);
 		}
+		gtxIdCache.clear();
 	}
 
 	/**
@@ -56,7 +63,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 	 * 
 	 * @throws InterruptedException
 	 */
-	public static void unlock(SqlBoxContext ctx, long intervalSecond) throws InterruptedException {
+	public static void start(SqlBoxContext ctx, long intervalSecond) throws InterruptedException {// NOSONAR
 		initContext(ctx);
 		do {
 			List<GtxId> gtxIdList = lockCtx.eFindAll(GtxId.class);
@@ -86,22 +93,66 @@ public abstract class GtxUnlockServ {// NOSONAR
 	}
 
 	/**
-	 * Force unlock a given gtxId, usually used on unit test, return true if
+	 * Force unlock a given gtxId, usually used on unit test only, return true if
 	 * success, otherwise return false means require manually unlock
 	 */
-	public static boolean forceUnlock(String gtxId, SqlBoxContext ctx) {
+	public static boolean forceUnlock(SqlBoxContext ctx, String gtxId) {
 		initContext(ctx);
 		return doUnlock(gtxId);
 	}
 
-	private static boolean doUnlock(String gtxId) {
-		GtxId gid = lockCtx.eLoadByIdTry(GtxId.class, gtxId);
-		if (gid == null) {
-			logger.warn("Try to unlock an un-exist gtxId:" + gtxId);
-			return true;
+	/**
+	 * Force unlock a given TxResult, usually used on unit test only, return true if
+	 * success, otherwise return false means require manually unlock
+	 */
+	public static boolean forceUnlock(SqlBoxContext ctx, TxResult txResult) {
+		initContext(ctx);
+		return doUnlock(txResult.getGid());
+	}
+
+	private static boolean doUnlock(String gid) {
+		GtxId lockGid = null; // First check and read if gtxId exist on Lock Server
+		List<Integer> dbs;
+		try {
+			lockGid = lockCtx.eLoadByIdTry(GtxId.class, gid);
+		} catch (Exception e) {
+			logger.error("Can not access lock server", e);
+			return false;
 		}
-		System.out.println(gid);
+		if (lockGid == null) {
+			logger.warn("Try to unlock an un-exist gid:" + lockGid);
+			return true;
+		} else {
+			lockCtx.eUpdate(lockGid.setUnlockTry(lockGid.getUnlockTry() + 1));
+			List<List<Integer>> result = lockCtx.iExecute("select distinct(db) from gtxlock where gid=?", param(gid),
+					new ColumnListHandler<Integer>());
+			dbs = result.get(0);
+		}
+
+		try {
+			for (int i = 0; i < dbs.size(); i++) {
+				executeUndo(dbs.get(i), gid);
+			}
+		} catch (Exception e) {
+			logger.error("Can not execute undo operate", e);
+			return false;
+		}
+		// So far, all databases are OK
 		return true;
+	}
+
+	private static void executeUndo(int dbCode, String gid) {
+		SqlBoxContext ctx = ctxArr[dbCode];
+		//List<Object> entityLog=lockCtx.eFindAll(entityClass, optionItems)
+		ctx.startTrans();
+		try {
+			
+			ctx.commitTrans();
+		} catch (Exception e) {
+			ctx.rollbackTrans();
+			throw new TransactionsException(e);
+		}
+
 	}
 
 }

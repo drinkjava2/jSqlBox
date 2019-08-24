@@ -16,7 +16,7 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
-import static com.github.drinkjava2.jtransactions.TxResult.CLEANUP_FAIL;
+import static com.github.drinkjava2.jtransactions.TxResult.*;
 import static com.github.drinkjava2.jtransactions.TxResult.COMMIT_FAIL;
 import static com.github.drinkjava2.jtransactions.TxResult.LOCK_FAIL;
 import static com.github.drinkjava2.jtransactions.TxResult.UNLOCK_FAIL;
@@ -96,19 +96,21 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		GtxInfo gtxInfo = (GtxInfo) getThreadTxInfo();
 		if (gtxInfo == null)
 			throw new TransactionsException("GTX not started, can not commit");
-		TxResult result = gtxInfo.getTxResult().setStage("start");
+		TxResult result = gtxInfo.getTxResult().setStage(START);
+
 		// Save GtxId tags into DBs
 		for (Object ctx : gtxInfo.getConnectionCache().keySet())
 			((SqlBoxContext) ctx).eInsert(gtxInfo.getGtxId());// use a Tag to confirm tx committed on DB
 
 		// Save lock and log
 		try {
-			GtxUtils.saveLockAndLog(gtxCtx, gtxInfo); // store gtxId,undo log, locks into gtx server
+			GtxUtils.saveLockAndLog(gtxCtx, gtxInfo); // store gtxId,undo log, locks into gtx server 
 		} catch (Exception e) {
 			result.setStage(LOCK_FAIL);
 			result.addCommitEx(e);
 			throw e;
 		}
+		 
 
 		// Here commit all DBs
 		int committed = 0;

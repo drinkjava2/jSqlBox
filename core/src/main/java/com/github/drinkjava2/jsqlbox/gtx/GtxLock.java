@@ -24,10 +24,12 @@ public class GtxLock {
 	private Integer db; // DB sharding code, 0, 1,2 ..., -1 means no sharding
 
 	@Id
-	private String tb; // table name
+	private String entityClass; // entity className
 
 	@Id
 	private String entityId; // entity entityId value
+
+	private String tb; // table name
 
 	private String gid; // GTX Id
 
@@ -61,6 +63,14 @@ public class GtxLock {
 
 	public void setGid(String gid) {
 		this.gid = gid;
+	}
+
+	public String getEntityClass() {
+		return entityClass;
+	}
+
+	public void setEntityClass(String entityClass) {
+		this.entityClass = entityClass;
 	}
 
 }

@@ -21,10 +21,12 @@ public class TxResult {
 	public static final String SUCESS = "SUCESS";
 	public static final String FAIL = "FAIL";
 	public static final String UNKNOW = "UNKNOW";
+
 	public static final TxResult TX_SUCESS = new TxResult(SUCESS);
 	public static final TxResult TX_FAIL = new TxResult(FAIL);
 
 	public static final String START = "START";
+	public static final String LOCKED = "LOCKED";
 	public static final String LOCK_FAIL = "LOCK_FAIL";
 	public static final String COMMIT_FAIL = "COMMIT_FAIL";
 	public static final String UNLOCK_FAIL = "UNLOCK_FAIL";
@@ -33,7 +35,7 @@ public class TxResult {
 	private String result; // SUCESS, FAIL, UNKNOW
 	private String stage; // optional, stage of tx
 	private int committed; // optional, how many DB committed
-	private String txId;// optional, tx id
+	private String gid;// optional, GTX id
 	private Exception[] commitEx;// optional, exception caught at commit stage
 	private Exception[] rollbackEx;// optional, exception caught at rollback stage
 	private Exception[] cleanupEx;// optional, exception caught at cleanup stage
@@ -61,7 +63,7 @@ public class TxResult {
 	private String getInfoByRequire(boolean detail) {// NOSONAR
 		StringBuilder sb = new StringBuilder();
 		sb.append("TxResult:").append(result).append("\r");
-		sb.append("TxId:").append(txId).append("\r");
+		sb.append("TxId:").append(gid).append("\r");
 		sb.append("TxMessage:").append(stage).append("\r");
 		int i = 0;
 		if (commitEx != null)
@@ -128,6 +130,14 @@ public class TxResult {
 		cleanupEx[cleanupEx.length - 1] = e;
 	}
 
+	public boolean isSuccess() {
+		return SUCESS.equals(result);
+	}
+
+	public boolean isFail() {
+		return FAIL.equals(result);
+	}
+
 	// ==========getter & setters=======
 
 	public String getResult() {
@@ -148,12 +158,12 @@ public class TxResult {
 		return this;
 	}
 
-	public String getTxId() {
-		return txId;
+	public String getGid() {
+		return gid;
 	}
 
-	public TxResult setTxId(String txId) {
-		this.txId = txId;
+	public TxResult setGid(String gid) {
+		this.gid = gid;
 		return this;
 	}
 
