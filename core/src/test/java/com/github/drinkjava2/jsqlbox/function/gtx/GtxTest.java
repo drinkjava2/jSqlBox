@@ -129,8 +129,15 @@ public class GtxTest {
 
 	@Test
 	public void commitFailTest() {
+		ctx[0].startTrans();
 		try {
-			ctx[0].startTrans();
+			Usr u = new Usr().insert(ctx[0]);
+			Usr u2 = new Usr().loadById(u.getId(), ctx[0]);
+			u2.exist(ctx[0]);
+			u2.existStrict(ctx[0]);
+			u2.setAge(10).update(ctx[0]);
+			u2.delete(ctx[0]);
+
 			new Usr().insert(ctx[0]);
 			new Usr().insert(ctx[1]);
 			new Usr().insert(ctx[1]);
@@ -141,7 +148,7 @@ public class GtxTest {
 			ctx[1].setForceCommitFail(); // force ctx[1] commit fail
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 			TxResult result = ctx[0].rollbackTrans();
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
 		}

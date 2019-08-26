@@ -29,7 +29,7 @@ public class GtxLock {
 	@Id
 	private String entityId; // entity entityId value
 
-	private String entityTb; // Unsharded entity table name
+	private String entityTb; // Unsharded origin entity table name
 
 	private String gid; // GTX Id
 

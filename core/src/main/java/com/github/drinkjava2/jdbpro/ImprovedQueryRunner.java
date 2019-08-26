@@ -822,7 +822,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * Check if a connection already be get from given dataSource and be cached as
 	 * it started a Transaction
 	 */
-	public boolean isInTransaction() {
+	public boolean isIntrans() {
 		return this.getConnectionManager().isInTransaction();
 	}
 
@@ -832,7 +832,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	}
 
 	/** Start a transaction with given connection isolation level */
-	public void startTransaction(int txIsolationLevel) {
+	public void startTrans(int txIsolationLevel) {
 		this.getConnectionManager().startTransaction(txIsolationLevel);
 	}
 

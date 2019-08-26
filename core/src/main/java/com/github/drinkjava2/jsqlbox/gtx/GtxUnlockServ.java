@@ -23,14 +23,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
+
 import com.github.drinkjava2.jdbpro.log.DbProLog;
 import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
-import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxResult;
-import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
 
 /**
  * GtxUnlockServ used to unlock GTX
@@ -41,22 +43,21 @@ public abstract class GtxUnlockServ {// NOSONAR
 	protected static final DbProLog logger = DbProLogFactory.getLog(GtxUnlockServ.class);
 	private static final Map<String, String> gtxIdCache = new HashMap<String, String>();
 	private static SqlBoxContext lockCtx;
-	private static SqlBoxContext[] ctxArr;
+	private static SqlBoxContext[] ctxs;
 
 	private static void initContext(SqlBoxContext userCtx) {
 		GtxConnectionManager lockCM = (GtxConnectionManager) userCtx.getConnectionManager();
 		lockCtx = lockCM.getLockCtx();
-		ctxArr = new SqlBoxContext[userCtx.getMasters().length];
+		ctxs = new SqlBoxContext[userCtx.getMasters().length];
 		for (int i = 0; i < userCtx.getMasters().length; i++) {
 			SqlBoxContext userCtxArr = (SqlBoxContext) userCtx.getMasters()[i];
-			ctxArr[i] = new SqlBoxContext(userCtxArr.getDataSource());
-			ctxArr[i].setName(userCtxArr.getName());
-			ctxArr[i].setConnectionManager(GroupTxConnectionManager.instance());
-			ctxArr[i].setDbCode(userCtxArr.getDbCode());
-			ctxArr[i].setDialect(userCtxArr.getDialect());
-			ctxArr[i].setShardingTools(userCtxArr.getShardingTools());
-			ctxArr[i].setAllowShowSQL(userCtxArr.getAllowShowSQL());
-			ctxArr[i].setMasters(ctxArr);
+			ctxs[i] = new SqlBoxContext(userCtxArr.getDataSource());
+			ctxs[i].setName(userCtxArr.getName());
+			ctxs[i].setDbCode(userCtxArr.getDbCode());
+			ctxs[i].setDialect(userCtxArr.getDialect());
+			ctxs[i].setShardingTools(userCtxArr.getShardingTools());
+			ctxs[i].setAllowShowSQL(userCtxArr.getAllowShowSQL());
+			ctxs[i].setMasters(ctxs);
 		}
 		gtxIdCache.clear();
 	}
@@ -110,7 +111,12 @@ public abstract class GtxUnlockServ {// NOSONAR
 	 */
 	public static boolean forceUnlock(SqlBoxContext ctx, TxResult txResult) {
 		initContext(ctx);
-		return unlockOne(txResult.getGid());
+		try {
+			return unlockOne(txResult.getGid());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	private static boolean unlockOne(String gid) {
@@ -120,42 +126,48 @@ public abstract class GtxUnlockServ {// NOSONAR
 			logger.error("Can not access lock server");
 			return false;
 		}
-		List<GtxLock> locks = lockCtx.eFindBySQL(GtxLock.class, "select entityTb from GtxLock where gid=?", param(gid),
-				" group by entityTb");
+		List<List<Integer>> DbLstLst = lockCtx.iExecute("select distinct(db) from gtxlock where gid=?", param(gid),
+				new ColumnListHandler<Integer>());
+		List<Integer> dbList = DbLstLst.get(0);
 
-		if (locks.size() > 0)
-			executeUndo(locks, gid);
+		for (Integer db : dbList) {
+			executeUndo(db, gid);
+		}
 
 		lockCtx.eDeleteById(GtxId.class, gid); // if no error, means all unlocked, can remove gid
 
 		return true;// So far, all databases are OK
 	}
 
-	private static TxResult executeUndo(List<GtxLock> locks, String gid) {
-		List<Object> entities = new ArrayList<Object>();
-		for (GtxLock l : locks) {
-			List<Object> entityLst = (List<Object>) lockCtx.eFindBySQL(Tail.class, "select * from ", l.getEntityTb(),
-					" where gtxid=?", param(gid));
-			entities.addAll(entityLst);
-		}
-		System.out.println(entities.size());
-		for (Object obj : entities) {
-			System.out.println("Debug obj=:" + obj);
-			System.out.println(((Tail) obj).getTail("gtxid"));
-			System.out.println(((ActiveRecord) obj).tails());
-		}
-
-		SqlBoxContext ctx = ctxArr[0];
-		ctx.startTrans();
-		TxResult result = null;
+	private static void executeUndo(Integer db, String gid) {
+		String _gid = ctxs[db].pQueryForString("select gid from gtxid where gid=?", gid);
+		if (!gid.equals(_gid))
+			return;// no undo log or undo log already executed
+		List<List<String>> tmp = lockCtx.iExecute("select distinct(entityTb) from gtxlock where gid=?", param(gid),
+				" and db=?", param(db), new ColumnListHandler<String>());
+		List<String> tbList = tmp.get(0);
+		ctxs[db].startTrans();
 		try {
-
-			result = ctx.commitTrans();
+			for (String tb : tbList) {
+				List<Tail> oneRecord = lockCtx.eFindBySQL(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
+						" and gtxid=?", param(gid)," order by GTXLOGNO desc");
+				for (Tail tail : oneRecord) {
+					undo(db, tb, tail);
+				}
+			}
+			ctxs[db].commitTrans();
 		} catch (Exception e) {
-			result = ctx.rollbackTrans();
+			ctxs[db].rollbackTrans();
 			throw new TransactionsException(e);
-		}
-		return result;
+		} 
+	}
+	
+	private static void undo(Integer db, String tb, Tail tail) throws ClassNotFoundException {
+		String gtxtyp=tail.getTail("GTXTYP");
+		String entityClassName=tail.getTail("GTXENTITY");
+		Class<?> entityClass=Class.forName(entityClassName);
+		TableModel model=TableModelUtils.entity2ReadOnlyModel(entityClass);
+		if(GtxUtils.INSERT.equals(gtxtyp)) {}
 	}
 
 }
