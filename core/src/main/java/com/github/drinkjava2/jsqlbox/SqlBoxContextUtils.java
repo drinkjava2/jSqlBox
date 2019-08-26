@@ -118,10 +118,11 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Calculate a entityBean's sharded tableName, if no, return default tableName
+	 * Calculate a entityBean's sharded tableName, format tablename_code, if no,
+	 * return default tableName
 	 */
 	public static String getShardedTbByBean(SqlBoxContext ctx, Object entity) {
-		TableModel model=TableModelUtils.entity2ReadOnlyModel(entity.getClass());
+		TableModel model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null)
 			return model.getTableName();
@@ -131,7 +132,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		SqlBoxException.assureNotNull(tbCode, "Entity bean's shardTable value can not map to a table code");
 		return new StringBuilder(model.getTableName()).append("_").append(tbCode).toString();
 	}
-	
+
 	/**
 	 * Use current SqlBoxContext's shardingTools to calculate the shardedDBCode
 	 */
@@ -360,7 +361,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 * user ->u <br/>
 	 * user_role -> UR
 	 */
-	public static void createLastAutoAliasName(PreparedSQL ps) {
+	public static void createLastAutoAliasName(PreparedSQL ps) {// NOSONAR
 		if (ps.getModels() == null || ps.getModels().length == 0)
 			throw new SqlBoxException("No tableModel found");
 		TableModel model = (TableModel) ps.getModels()[ps.getModels().length - 1];
@@ -584,7 +585,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			}
 	}
 
-	/** Return true if 2 bean's all fields equal */
+	/** Return "" if 2 bean's all fields equal, otherwise return field name */
 	public static String entityCompare(Object entityBean1, Object entityBean2, TableModel... optionModel) {
 		TableModel model;
 		if (optionModel.length > 0)
@@ -888,8 +889,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		return result;
 	}
 
-	protected static int doEntityDeleteByIdTry(SqlBoxContext ctx, Class<?> entityClass, Object id,
-			Object... optionItems) {// NOSONAR
+	protected static int doEntityDeleteByIdTry(SqlBoxContext ctx, Class<?> entityClass, Object id, // NOSONAR
+			Object... optionItems) {
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
 			Object[] newParams = cleanUpParam(optionItems);
@@ -1073,6 +1074,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 	 */
 	private static <T> T doEntityLoadByIdTry(SqlBoxContext ctx, Class<T> entityClass, Object id,
 			Object... optionItems) {// NOSONAR
+		T bean = buildBeanById(ctx, entityClass, id, optionItems);
+		int result = doEntityLoadTry(ctx, bean, optionItems);
+		if (result != 1)
+			return null;
+		else
+			return bean;
+	}
+
+	private static <T> T buildBeanById(SqlBoxContext ctx, Class<T> entityClass, Object id, Object... optionItems) {
 		TableModel optionModel = SqlBoxContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
 		if (model == null)
@@ -1085,14 +1095,9 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			for (ColumnModel col : tailModel.getColumns())
 				if (col != null)
 					cols.put(col.getColumnName().toLowerCase(), col);
-
 		T bean = SqlBoxContextUtils.entityOrClassToBean(entityClass);
 		bean = EntityIdUtils.setEntityIdValues(bean, id, cols.values());
-		int result = doEntityLoadTry(ctx, bean, optionItems);
-		if (result != 1)
-			return null;
-		else
-			return bean;
+		return bean;
 	}
 
 	/**
@@ -1126,16 +1131,15 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			Object[] newParams = cleanUpParam(optionItems);
 			return entityExistById(paramCtx, entityClass, id, newParams);
 		}
-		boolean result = doEntityExistById(ctx, entityClass, id, optionItems);
-		if (result && ctx.isGtxOpen() && !(id instanceof GtxId)) {
-			Object oldEntity = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
-			GtxUtils.reg(ctx, oldEntity, GtxUtils.EXIST);
-		}
+		Object bean = buildBeanById(ctx, entityClass, id, optionItems);
+		boolean result = doEntityExistById(ctx, entityClass, bean, optionItems);
+		if (result && ctx.isGtxOpen() && !(id instanceof GtxId))
+			GtxUtils.reg(ctx, bean, GtxUtils.EXISTID);
 		return result;
 	}
 
-	private static boolean doEntityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id,
-			Object... optionItems) {// NOSONAR
+	private static boolean doEntityExistById(SqlBoxContext ctx, Class<?> entityClass, Object id, // NOSONAR
+			Object... optionItems) {
 		SqlBoxContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
 			Object[] newParams = cleanUpParam(optionItems);

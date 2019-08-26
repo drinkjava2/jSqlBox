@@ -408,7 +408,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityFindAll(this, entityClass, optionItems);
 	}
 
-	/** Find entity according SQL, if not found, return empty list */
+	/** Find entity according SQL, entityClass usually is first param, if not found, return empty list */
 	public <T> List<T> eFindBySQL(Object... optionItems) {
 		return iQueryForEntityList(optionItems);
 	}

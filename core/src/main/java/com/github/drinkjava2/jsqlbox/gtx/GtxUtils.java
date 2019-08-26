@@ -36,10 +36,11 @@ public abstract class GtxUtils {// NOSONAR
 	public static final String GTX_LOGNO = "gtxlogno";
 	public static final String GTX_TYP = "gtxtyp";// Operate type, can be update/exist/existStrict/insert/delete
 	public static final String GTX_DB = "gtxdb";// DB code No.
-	public static final String GTX_TB = "gtxtb";// Table name
+	public static final String GTX_TB = "gtxtb";// table name or sharded table name.
+	public static final String GTX_ENTITY = "gtxentity";// entity class full name
 
 	public static final String INSERT = "INSERT";
-	public static final String EXIST = "EXIST";
+	public static final String EXISTID = "EXISTID";
 	public static final String EXISTSTRICT = "STRICT";
 	public static final String DELETE = "DELETE";
 	public static final String UPDATE = "UPDATE";
@@ -62,8 +63,8 @@ public abstract class GtxUtils {// NOSONAR
 		log.setGtxDB(dbCode);
 
 		// calculate sharded table name if have
-		String table = SqlBoxContextUtils.getShardedTbByBean(ctx, entity);
-		log.setGtxTB(table);
+		String shardedTB = SqlBoxContextUtils.getShardedTbByBean(ctx, entity);
+		log.setGtxTB(shardedTB);
 
 		// calculate id value
 		StringBuilder idSB = new StringBuilder();
@@ -76,7 +77,7 @@ public abstract class GtxUtils {// NOSONAR
 
 		boolean lockExisted = false;
 		for (GtxLock lk : locks) // add locks in memory, if already have then do not add again
-			if (lk.getDb().equals(dbCode) && lk.getTb().equalsIgnoreCase(table)
+			if (lk.getDb().equals(dbCode) && lk.getTb().equalsIgnoreCase(shardedTB)
 					&& lk.getEntityId().equalsIgnoreCase(id)) {
 				lockExisted = true;
 				break;
@@ -84,8 +85,9 @@ public abstract class GtxUtils {// NOSONAR
 		if (!lockExisted) {
 			GtxLock lock = new GtxLock();
 			lock.setDb(dbCode);
-			lock.setTb(table);
+			lock.setTb(shardedTB);
 			lock.setEntityId(id);
+			lock.setEntityTb(model.getTableName());
 			lock.setGid(gtxInfo.getGtxId().getGid());
 			locks.add(lock);
 		}
@@ -108,6 +110,7 @@ public abstract class GtxUtils {// NOSONAR
 				md.getColumnByColName(GtxUtils.GTX_TYP).setValue(gtxLog.getLogType());
 				md.getColumnByColName(GtxUtils.GTX_DB).setValue(gtxLog.getGtxDB());
 				md.getColumnByColName(GtxUtils.GTX_TB).setValue(gtxLog.getGtxTB());
+				md.getColumnByColName(GtxUtils.GTX_ENTITY).setValue(entity.getClass().getName());
 				gtxCtx.eInsert(entity, md);
 			}
 
@@ -159,11 +162,12 @@ public abstract class GtxUtils {// NOSONAR
 			col.setShardDatabase(null);
 			col.setShardTable(null);
 		}
-		t.column(GTX_ID).CHAR(32).id().setValue(null); // gtx_id + gtx_logno is a compound PKEY
+		t.column(GTX_ID).CHAR(32).id().setValue(null); // gtxid + gtxlogno is compound PKEY
 		t.column(GTX_LOGNO).LONG().id().setValue(null);
-		t.column(GTX_TYP).CHAR(6).setValue(null);
+		t.column(GTX_TYP).CHAR(7).setValue(null);
 		t.column(GTX_DB).INTEGER().setValue(null);
-		t.column(GTX_TB).VARCHAR(50).setValue(null);
+		t.column(GTX_TB).VARCHAR(64).setValue(null);// oracle limit is 30
+		t.column(GTX_ENTITY).VARCHAR(250).setValue(null);// oracle limit is 30 
 		TableModel.sortColumns(t.getColumns());
 		return t;
 	}

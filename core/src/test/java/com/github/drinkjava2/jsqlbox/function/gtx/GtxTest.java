@@ -63,15 +63,22 @@ public class GtxTest {
 	public void commitTest() {
 		ctx[0].startTrans();
 		try {
-			new Usr().setId("UserA").insert(ctx[0]);
-			new Usr().setId("UserB").insert(ctx[1]);
-			new Usr().setId("UserC").insert(ctx[1]);
-			new Usr().setId("UserD").insert(ctx[2]);
+			Usr u = new Usr().insert(ctx[0]);
+			Usr u2 = new Usr().loadById(u.getId(), ctx[0]);
+			u2.exist(ctx[0]);
+			u2.existStrict(ctx[0]);
+			u2.setAge(10).update(ctx[0]);
+			u2.delete(ctx[0]);
+			new Usr().insert(ctx[0]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
 			ctx[0].commitTrans();
 		} catch (Exception e) {
+			e.printStackTrace();
 			ctx[0].rollbackTrans();
 		}
 		Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
@@ -83,10 +90,10 @@ public class GtxTest {
 	public void Div0Test() {
 		ctx[0].startTrans();
 		try {
-			new Usr().setId("UserA").insert(ctx[0]);
-			new Usr().setId("UserB").insert(ctx[1]);
-			new Usr().setId("UserC").insert(ctx[1]);
-			new Usr().setId("UserD").insert(ctx[2]);
+			new Usr().insert(ctx[0]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
@@ -104,10 +111,10 @@ public class GtxTest {
 	public void datasourceLostTest() {
 		ctx[0].startTrans();
 		try {
-			new Usr().setId("UserA").insert(ctx[0]);
-			new Usr().setId("UserB").insert(ctx[1]);
-			new Usr().setId("UserC").insert(ctx[1]);
-			new Usr().setId("UserD").insert(ctx[2]);
+			new Usr().insert(ctx[0]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
@@ -124,16 +131,17 @@ public class GtxTest {
 	public void commitFailTest() {
 		try {
 			ctx[0].startTrans();
-			new Usr().setId("UserA").insert(ctx[0]);
-			new Usr().setId("UserB").insert(ctx[1]);
-			new Usr().setId("UserC").insert(ctx[1]);
-			new Usr().setId("UserD").insert(ctx[2]);
+			new Usr().insert(ctx[0]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[1]);
+			new Usr().insert(ctx[2]);
 			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
 			ctx[1].setForceCommitFail(); // force ctx[1] commit fail
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
+			//e.printStackTrace();
 			TxResult result = ctx[0].rollbackTrans();
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
 		}

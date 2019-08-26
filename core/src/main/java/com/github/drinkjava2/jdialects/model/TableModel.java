@@ -207,7 +207,7 @@ public class TableModel {
 		return this;
 	}
 
-	public static void sortColumns(List<ColumnModel> lst) {// 按能量多少给青蛙排序
+	public static void sortColumns(List<ColumnModel> lst) {
 		if (lst == null || lst.isEmpty())
 			return;
 		Collections.sort(lst, new Comparator<ColumnModel>() {

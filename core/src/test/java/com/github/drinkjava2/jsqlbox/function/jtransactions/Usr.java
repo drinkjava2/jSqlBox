@@ -7,8 +7,8 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "users")
 public class Usr extends ActiveRecord<Usr> {
-	@Id
 	@UUID32
+	@Id
 	String id;
 	String firstName;
 	String lastName;
