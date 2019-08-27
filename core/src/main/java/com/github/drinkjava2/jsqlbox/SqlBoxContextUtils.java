@@ -546,12 +546,16 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				throw new DialectException("Can not read tail value from instance which is not TailSupport");
 		} else {
 			Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
-			SqlBoxException.assureNotNull(readMethod, "No read method for '" + fieldName + "'");
-			try {
-				return readMethod.invoke(entityBean);
-			} catch (Exception e) {
-				throw new DialectException(e);
-			}
+			if (readMethod != null)
+				try {
+					return readMethod.invoke(entityBean);
+				} catch (Exception e) {
+					throw new DialectException(e);
+				}
+			else if (entityBean instanceof TailType) { 
+				return ((TailType) entityBean).tails().get(fieldName);
+			} else
+				throw new SqlBoxException("No read method for '" + fieldName + "'");
 		}
 	}
 
@@ -664,7 +668,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 				converter.handleSQL(SqlOption.INSERT, ctx, col, entityBean, sqlBody, null);
 				continue;
 			}
-			if (col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
+			Object value = readValueFromBeanFieldOrTail(col, entityBean);
+			if (value==null && col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
 				if (col.getIdGenerator() == null)
 					throw new SqlBoxException("No IdGenerator found for column '" + col.getColumnName() + "'");
 				IdGenerator idGen = col.getIdGenerator();
@@ -694,7 +699,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				}
 			} else {
-				Object value = readValueFromBeanFieldOrTail(col, entityBean);
+				 
 				if (value == null && ignoreNull == null) {
 					for (Object itemObject : optionItems)
 						if (SqlOption.IGNORE_NULL.equals(itemObject)) {
@@ -762,8 +767,8 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			oldEntity = doEntityLoadByIdTry(ctx, entityBean.getClass(), entityBean, optionItems);
 		int result = doEntityUpdateTry(ctx, entityBean, optionItems);
 		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId)) {
-			GtxUtils.reg(ctx, oldEntity, GtxUtils.EXISTSTRICT);
-			GtxUtils.reg(ctx, entityBean, GtxUtils.UPDATE);
+			GtxUtils.reg(ctx, oldEntity, GtxUtils.BEFORE);
+			GtxUtils.reg(ctx, entityBean, GtxUtils.AFTER);
 		}
 		return result;
 	}
@@ -977,7 +982,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 		int result = doEntityLoadTry(ctx, entityBean, optionItems);
 		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId))
-			GtxUtils.reg(ctx, entityBean, GtxUtils.EXISTSTRICT);
+			GtxUtils.reg(ctx, entityBean, GtxUtils.BEFORE);
 		return result;
 	}
 

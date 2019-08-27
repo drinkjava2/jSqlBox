@@ -41,9 +41,10 @@ public abstract class GtxUtils {// NOSONAR
 
 	public static final String INSERT = "INSERT";
 	public static final String EXISTID = "EXISTID";
-	public static final String EXISTSTRICT = "STRICT";
+	public static final String EXISTSTRICT = "EXSTRICT";
+	public static final String BEFORE = "BEFORE";
 	public static final String DELETE = "DELETE";
-	public static final String UPDATE = "UPDATE";
+	public static final String AFTER = "AFTER";
 
 	/**
 	 * According entity's sharding setting, create lock record in GtxInfo
@@ -164,10 +165,10 @@ public abstract class GtxUtils {// NOSONAR
 		}
 		t.column(GTX_ID).CHAR(32).id().setValue(null); // gtxid + gtxlogno is compound PKEY
 		t.column(GTX_LOGNO).LONG().id().setValue(null);
-		t.column(GTX_TYP).CHAR(7).setValue(null);
+		t.column(GTX_TYP).CHAR(8).setValue(null);
 		t.column(GTX_DB).INTEGER().setValue(null);
 		t.column(GTX_TB).VARCHAR(64).setValue(null);// oracle limit is 30
-		t.column(GTX_ENTITY).VARCHAR(250).setValue(null);// oracle limit is 30 
+		t.column(GTX_ENTITY).VARCHAR(250).setValue(null);// oracle limit is 30
 		TableModel.sortColumns(t.getColumns());
 		return t;
 	}

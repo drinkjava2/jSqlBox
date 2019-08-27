@@ -18,7 +18,7 @@ package com.github.drinkjava2.jsqlbox.gtx;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
-import java.util.ArrayList;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +27,15 @@ import org.apache.commons.dbutils.handlers.ColumnListHandler;
 
 import com.github.drinkjava2.jdbpro.log.DbProLog;
 import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxResult;
+import com.github.drinkjava2.jtransactions.manual.ManualTxConnectionManager;
 
 /**
  * GtxUnlockServ used to unlock GTX
@@ -53,6 +56,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 			SqlBoxContext userCtxArr = (SqlBoxContext) userCtx.getMasters()[i];
 			ctxs[i] = new SqlBoxContext(userCtxArr.getDataSource());
 			ctxs[i].setName(userCtxArr.getName());
+			ctxs[i].setConnectionManager(new ManualTxConnectionManager());
 			ctxs[i].setDbCode(userCtxArr.getDbCode());
 			ctxs[i].setDialect(userCtxArr.getDialect());
 			ctxs[i].setShardingTools(userCtxArr.getShardingTools());
@@ -65,10 +69,16 @@ public abstract class GtxUnlockServ {// NOSONAR
 	/**
 	 * Unlock lock servers very intervalSecond
 	 * 
-	 * @throws InterruptedException
+	 * @param ctx
+	 *            one DB SqlBoxContext
+	 * @param intervalSecond
+	 *            interval seconds to check and unlock
+	 * @param maxLoopTimes
+	 *            max loop times, if is 0 will never stop
 	 */
-	public static void start(SqlBoxContext ctx, long intervalSecond) throws InterruptedException {// NOSONAR
+	public static void start(SqlBoxContext ctx, long intervalSecond, long maxLoopTimes) {// NOSONAR
 		initContext(ctx);
+		long loop = 0;
 		do {
 			List<GtxId> gtxIdList = lockCtx.eFindAll(GtxId.class);
 			for (GtxId gtxId : gtxIdList) {
@@ -92,8 +102,15 @@ public abstract class GtxUnlockServ {// NOSONAR
 				} else
 					gtxIdCache.put(id, "LOADED"); // first time cache the gtxId
 			}
-			Thread.sleep(intervalSecond * 1000);
-		} while (true);
+			try {
+				Thread.sleep(intervalSecond * 1000);
+			} catch (InterruptedException e) {// NOSONAR
+				throw new TransactionsException(e);
+			}
+			loop++;
+			if (loop > Long.MAX_VALUE)
+				loop = 0;
+		} while (maxLoopTimes <= 0 || loop < maxLoopTimes);
 	}
 
 	/**
@@ -150,7 +167,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 		try {
 			for (String tb : tbList) {
 				List<Tail> oneRecord = lockCtx.eFindBySQL(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
-						" and gtxid=?", param(gid)," order by GTXLOGNO desc");
+						" and gtxid=?", param(gid), " order by GTXLOGNO desc");
 				for (Tail tail : oneRecord) {
 					undo(db, tb, tail);
 				}
@@ -159,15 +176,44 @@ public abstract class GtxUnlockServ {// NOSONAR
 		} catch (Exception e) {
 			ctxs[db].rollbackTrans();
 			throw new TransactionsException(e);
-		} 
-	}
-	
-	private static void undo(Integer db, String tb, Tail tail) throws ClassNotFoundException {
-		String gtxtyp=tail.getTail("GTXTYP");
-		String entityClassName=tail.getTail("GTXENTITY");
-		Class<?> entityClass=Class.forName(entityClassName);
-		TableModel model=TableModelUtils.entity2ReadOnlyModel(entityClass);
-		if(GtxUtils.INSERT.equals(gtxtyp)) {}
+		}
 	}
 
+	private static void undo(Integer db, String tb, Tail tail)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		String gtxtyp = tail.getTail(GtxUtils.GTX_TYP);
+		String entityClassName = tail.getTail(GtxUtils.GTX_ENTITY);
+		Class<?> entityClass = Class.forName(entityClassName);
+		Object entity = tailToEntityBean(tail, entityClass);
+
+		if (GtxUtils.INSERT.equals(gtxtyp))
+			ctxs[db].eDelete(entity);
+		else if (GtxUtils.DELETE.equals(gtxtyp))
+			ctxs[db].eInsert(entity);
+		else if (GtxUtils.AFTER.equals(gtxtyp))
+			ctxs[db].eExistStrict(entity);
+		else if (GtxUtils.BEFORE.equals(gtxtyp))
+			ctxs[db].eUpdate(entity);
+		else if (GtxUtils.EXISTID.equals(gtxtyp))
+			ctxs[db].eExist(entity);
+		else if (GtxUtils.EXISTSTRICT.equals(gtxtyp))
+			ctxs[db].eExistStrict(entity);
+	}
+
+	private static Object tailToEntityBean(Tail tail, Class<?> entityClass)
+			throws InstantiationException, IllegalAccessException {
+		Object entity = entityClass.newInstance();
+		TableModel model = TableModelUtils.entity2ReadOnlyModel(entityClass);
+		for (ColumnModel col : model.getColumns()) {
+			String fieldName = col.getEntityField();
+			if (tail.tails().containsKey(fieldName))
+				try {
+					Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityClass, fieldName);
+					writeMethod.invoke(entity, tail.tails().get(fieldName));
+				} catch (Exception e) {
+					throw new TransactionsException("FieldName '" + fieldName + "' can not write.", e);
+				}
+		}
+		return entity;
+	}
 }
