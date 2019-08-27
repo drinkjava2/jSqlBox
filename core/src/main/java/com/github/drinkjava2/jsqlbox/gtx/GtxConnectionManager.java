@@ -16,9 +16,10 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
-import static com.github.drinkjava2.jtransactions.TxResult.*;
+import static com.github.drinkjava2.jtransactions.TxResult.CLEANUP_FAIL;
 import static com.github.drinkjava2.jtransactions.TxResult.COMMIT_FAIL;
 import static com.github.drinkjava2.jtransactions.TxResult.LOCK_FAIL;
+import static com.github.drinkjava2.jtransactions.TxResult.START;
 import static com.github.drinkjava2.jtransactions.TxResult.UNLOCK_FAIL;
 
 import java.sql.Connection;
@@ -104,13 +105,12 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 		// Save lock and log
 		try {
-			GtxUtils.saveLockAndLog(gtxCtx, gtxInfo); // store gtxId,undo log, locks into gtx server 
+			GtxUtils.saveLockAndLog(gtxCtx, gtxInfo); // store gtxId,undo log, locks into gtx server
 		} catch (Exception e) {
 			result.setStage(LOCK_FAIL);
 			result.addCommitEx(e);
 			throw e;
 		}
-		 
 
 		// Here commit all DBs
 		int committed = 0;

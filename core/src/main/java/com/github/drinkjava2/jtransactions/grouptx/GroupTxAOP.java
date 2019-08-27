@@ -27,23 +27,21 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  * A Group Transaction AOP MethodInterceptor
  * 
  * @author Yong Zhu
- * @since 2.0.7
- * @deprecated use GroupTxAOP replace
+ * @since 1.0.0
  */
-@Deprecated
-public class GroupTx implements MethodInterceptor {
+public class GroupTxAOP implements MethodInterceptor {
 	private GroupTxConnectionManager cm = GroupTxConnectionManager.instance();
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
-	public GroupTx() {
+	public GroupTxAOP() {
 	}
 
-	public GroupTx(Integer transactionIsolation) {
+	public GroupTxAOP(Integer transactionIsolation) {
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	public GroupTx(GroupTxConnectionManager cm, Integer transactionIsolation) {
+	public GroupTxAOP(GroupTxConnectionManager cm, Integer transactionIsolation) {
 		this.cm = cm;
 		this.transactionIsolation = transactionIsolation;
 	}

@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jtransactions.grouptx;
+package com.github.drinkjava2.jtransactions.tinytx;
 
 import java.sql.Connection;
 
@@ -24,26 +24,24 @@ import org.aopalliance.intercept.MethodInvocation;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 
 /**
- * A Group Transaction AOP MethodInterceptor
+ * The TinyTx AOP MethodInterceptor
  * 
  * @author Yong Zhu
- * @since 2.0.7
- * @deprecated use GroupTxAOP replace
+ * @since 1.0.0
  */
-@Deprecated
-public class GroupTx implements MethodInterceptor {
-	private GroupTxConnectionManager cm = GroupTxConnectionManager.instance();
+public class TinyTxAOP implements MethodInterceptor {
+	private TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
-	public GroupTx() {
+	public TinyTxAOP() {
 	}
 
-	public GroupTx(Integer transactionIsolation) {
+	public TinyTxAOP(Integer transactionIsolation) {
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	public GroupTx(GroupTxConnectionManager cm, Integer transactionIsolation) {
+	public TinyTxAOP(TinyTxConnectionManager cm, Integer transactionIsolation) {
 		this.cm = cm;
 		this.transactionIsolation = transactionIsolation;
 	}
@@ -60,7 +58,7 @@ public class GroupTx implements MethodInterceptor {
 				cm.commitTransaction();
 			} catch (Throwable t) {
 				cm.rollbackTransaction();
-				throw new TransactionsException("GroupTx found a runtime Exception, transaction rollbacked.", t);
+				throw new TransactionsException("TinyTx found a runtime Exception, transaction rollbacked.", t);
 			}
 			return invokeResult;
 		}

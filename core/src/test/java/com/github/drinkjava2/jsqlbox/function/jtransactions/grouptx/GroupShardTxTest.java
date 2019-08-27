@@ -20,7 +20,7 @@ import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.grouptx.GroupTx;
+import com.github.drinkjava2.jtransactions.grouptx.GroupTxAOP;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -164,7 +164,7 @@ public class GroupShardTxTest {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface GrpTX {
-		public Class<?> value() default GroupTx.class;
+		public Class<?> value() default GroupTxAOP.class;
 	}
 
 	public static void a(String f, Object... ss) {

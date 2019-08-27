@@ -58,7 +58,7 @@ public class GtxUnlockServTest {
 
 	}
 
-	public void commitFailNoLockTest() {
+	public void commitFail() {
 		ctx[0].startTrans();
 		try {
 			new Usr().insert(ctx[0]);
@@ -77,7 +77,7 @@ public class GtxUnlockServTest {
 	public void gtxUnlockServTest() {
 		GtxUnlockServTest t = new GtxUnlockServTest();
 		t.init();
-		t.commitFailNoLockTest();
+		t.commitFail();
 		Assert.assertEquals(1, t.ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(2, t.ctx[1].eCountAll(Usr.class));
 		Assert.assertEquals(0, t.ctx[2].eCountAll(Usr.class));

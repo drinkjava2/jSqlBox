@@ -75,21 +75,10 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 	public TxResult commitTransaction() throws Exception {
 		if (!isInTransaction())
 			throw new TransactionsException("Transaction not opened, can not commit");
-		SQLException lastExp = null;
 		Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
-		for (Connection con : conns) {
-			try {
-				con.commit();
-			} catch (SQLException e) {
-				if (lastExp != null)
-					e.setNextException(lastExp);
-				lastExp = e;
-			}
-		}
-		if (lastExp != null)
-			throw new TransactionsException(lastExp);
-		else
-			endTransaction(null);
+		for (Connection con : conns)
+			con.commit();
+		endTransaction(null);
 		return TxResult.TX_SUCESS;
 	}
 

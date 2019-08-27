@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jtransactions.grouptx;
+package com.github.drinkjava2.jsqlbox.gtx;
 
 import java.sql.Connection;
 
@@ -27,23 +27,21 @@ import com.github.drinkjava2.jtransactions.TransactionsException;
  * A Group Transaction AOP MethodInterceptor
  * 
  * @author Yong Zhu
- * @since 2.0.7
- * @deprecated use GroupTxAOP replace
+ * @since 1.0.0
  */
-@Deprecated
-public class GroupTx implements MethodInterceptor {
-	private GroupTxConnectionManager cm = GroupTxConnectionManager.instance();
+public class GtxAOP implements MethodInterceptor {
+	private GtxConnectionManager cm;
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
-	public GroupTx() {
+	public GtxAOP() {
 	}
 
-	public GroupTx(Integer transactionIsolation) {
-		this.transactionIsolation = transactionIsolation;
+	public GtxAOP(GtxConnectionManager cm) {
+		this.cm = cm;
 	}
 
-	public GroupTx(GroupTxConnectionManager cm, Integer transactionIsolation) {
+	public GtxAOP(GtxConnectionManager cm, Integer transactionIsolation) {
 		this.cm = cm;
 		this.transactionIsolation = transactionIsolation;
 	}

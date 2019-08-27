@@ -24,12 +24,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 
 /**
- * A transaction MethodInterceptor
+ * The TinyTx AOP MethodInterceptor
  * 
  * @author Yong Zhu
  * @since 1.0.0
+ * @deprecated use TinyTxAOP class replace
  */
-public class TinyTx implements MethodInterceptor {
+@Deprecated
+public class TinyTx implements MethodInterceptor {// NOSONAR
 	private TinyTxConnectionManager cm = TinyTxConnectionManager.instance();
 
 	private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
@@ -45,7 +47,7 @@ public class TinyTx implements MethodInterceptor {
 		this.cm = cm;
 		this.transactionIsolation = transactionIsolation;
 	}
- 
+
 	@Override
 	public Object invoke(MethodInvocation caller) throws Throwable {// NOSONAR
 		if (cm.isInTransaction()) {
