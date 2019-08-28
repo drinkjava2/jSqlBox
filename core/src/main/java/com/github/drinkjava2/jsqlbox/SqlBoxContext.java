@@ -228,7 +228,7 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		Object[] params = item.getParameters();
 		SqlBoxContext ctx = null;
 		if (predSQL.getModels() == null || predSQL.getModels().length == 0)
-			throw new SqlBoxException("ShardTable not found model setting");
+			return this;
 		TableModel model = (TableModel) predSQL.getModels()[0];
 		if (params.length == 1)
 			ctx = SqlBoxContextUtils.getShardedDB(this, model, params[0]);

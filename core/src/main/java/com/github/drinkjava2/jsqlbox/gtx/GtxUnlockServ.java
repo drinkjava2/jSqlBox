@@ -181,8 +181,8 @@ public abstract class GtxUnlockServ {// NOSONAR
 
 	private static void undo(Integer db, String tb, Tail tail)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		String gtxtyp = tail.getTail(GtxUtils.GTX_TYP);
-		String entityClassName = tail.getTail(GtxUtils.GTX_ENTITY);
+		String gtxtyp = tail.getTail(GtxUtils.GTXTYPE);
+		String entityClassName = tail.getTail(GtxUtils.GTXENTITY);
 		Class<?> entityClass = Class.forName(entityClassName);
 		Object entity = tailToEntityBean(tail, entityClass);
 

@@ -47,18 +47,18 @@ import com.github.drinkjava2.jtransactions.TxResult;
 public class GtxConnectionManager extends ThreadConnectionManager {
 	protected static final DbProLog logger = DbProLogFactory.getLog(GtxConnectionManager.class);
 
-	private SqlBoxContext gtxCtx;
+	private SqlBoxContext lockCtx;
 
 	public SqlBoxContext getLockCtx() {
-		return gtxCtx;
+		return lockCtx;
 	}
 
 	public void setLockCtx(SqlBoxContext lockCtx) {
-		this.gtxCtx = lockCtx;
+		this.lockCtx = lockCtx;
 	}
 
 	public GtxConnectionManager(SqlBoxContext lockCtx) {
-		this.gtxCtx = lockCtx;
+		this.lockCtx = lockCtx;
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 		// Save lock and log
 		try {
-			GtxUtils.saveLockAndLog(gtxCtx, gtxInfo); // store gtxId,undo log, locks into gtx server
+			GtxUtils.saveLockAndLog(lockCtx, gtxInfo); // store gtxId,undo log, locks into gtx server
 		} catch (Exception e) {
 			result.setStage(LOCK_FAIL);
 			result.addCommitEx(e);
@@ -139,7 +139,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 		// Delete lock and log
 		try {
-			GtxUtils.deleteLockAndLog(gtxCtx, gtxInfo);
+			GtxUtils.deleteLockAndLog(lockCtx, gtxInfo);
 		} catch (Exception e) {
 			result.setStage(UNLOCK_FAIL);
 			result.addCommitEx(e);

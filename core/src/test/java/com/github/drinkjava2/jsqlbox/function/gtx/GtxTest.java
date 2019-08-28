@@ -124,6 +124,12 @@ public class GtxTest {
 	public void commitFailTest() {
 		ctx[0].startTrans();
 		try {
+			Usr u = new Usr().insert(ctx[0]);
+			Usr u2 = new Usr().loadById(u.getId(), ctx[0]);
+			u2.existId(ctx[0]);
+			u2.existStrict(ctx[0]);
+			u2.setAge(10).update(ctx[0]);
+			u2.delete(ctx[0]);
 			new Usr().insert(ctx[0]);
 			new Usr().insert(ctx[1]);
 			new Usr().insert(ctx[1]);
