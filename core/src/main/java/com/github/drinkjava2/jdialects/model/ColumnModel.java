@@ -56,7 +56,7 @@ public class ColumnModel {
 	/** Comment of this column */
 	private String comment;
 
-	/** length, precision, scale all share use lengths array */
+	/** if set length then no need set length, precision, scale */
 	private Integer[] lengths = new Integer[] {};
 
 	// =======================================================================
@@ -73,16 +73,16 @@ public class ColumnModel {
 	 */
 	private Object converterClassOrName;
 
-	/** Map to a Java entity field, for ORM tool use only */
+	/** Map to a Java entity field, for DDL and ORM tool use */
 	private String entityField;
 
-	/** The column length, for ORM tool use only */
+	/** The column length, for DDL and ORM tool use */
 	private Integer length = 255;
 
-	/** The numeric precision, for ORM tool use only */
+	/** The numeric precision, for DDL and ORM tool use */
 	private Integer precision = 0;
 
-	/** The numeric scale, for ORM tool use only */
+	/** The numeric scale, for DDL and ORM tool use */
 	private Integer scale = 0;
 
 	/** If insert-able or not, for ORM tool use only */

@@ -11,11 +11,13 @@
  */
 package com.github.drinkjava2.jsqlbox.helloworld;
 
+import java.math.BigDecimal;
+
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 
-import com.github.drinkjava2.common.Systemout;
+import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.JSQLBOX;
@@ -31,18 +33,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 public class HelloWorld extends ActiveRecord<HelloWorld> {
 	@Id
 	private String name;
-	
-	Float flfield=1.0f;
-	
-	 
 
-	public Float getFlfield() {
-		return flfield;
-	}
-
-	public void setFlfield(Float flfield) {
-		this.flfield = flfield;
-	}
 	public String getName() {
 		return name;
 	}
@@ -50,19 +41,31 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	@Column(length=20,precision=5)
+	private BigDecimal bgdec;
+ 
+
+	public BigDecimal getBgdec() {
+		return bgdec;
+	}
+
+	public void setBgdec(BigDecimal bgdec) {
+		this.bgdec = bgdec;
+	}
 
 	public static void main(String[] args) {
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		DataSource ds = JdbcConnectionPool
 				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 		SqlBoxContext ctx = new SqlBoxContext(ds);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);		 
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);
 		for (String ddl : ctx.toCreateDDL(HelloWorld.class))
 			ctx.nExecute(ddl);
 
-		HelloWorld w=new HelloWorld().putField("name", "Hello jSqlBox").insert();
-		w.load();
-		System.out.println(w.getFlfield());
-		Systemout.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
+		new HelloWorld().putField("name", "Hello jSqlBox","bgdec",new BigDecimal(23.1)).    insert();
+		HelloWorld w2=new HelloWorld().loadById("Hello jSqlBox");
+		System.out.println(w2.getBgdec());
+		System.out.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
 	}
 }

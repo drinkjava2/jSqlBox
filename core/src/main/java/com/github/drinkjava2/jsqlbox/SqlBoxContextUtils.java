@@ -34,7 +34,6 @@ import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
@@ -543,14 +542,14 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			if (entityBean instanceof TailType) {
 				return ((TailType) entityBean).tails().get(columnModel.getColumnName());
 			} else
-				throw new DialectException("Can not read tail value from instance which is not TailSupport");
+				throw new SqlBoxException("Can not read tail value from instance which is not TailSupport");
 		} else {
 			Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
 			if (readMethod != null)
 				try {
 					return readMethod.invoke(entityBean);
 				} catch (Exception e) {
-					throw new DialectException(e);
+					throw new SqlBoxException(e);
 				}
 			else if (entityBean instanceof TailType) { 
 				return ((TailType) entityBean).tails().get(fieldName);
@@ -579,13 +578,13 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			if (entityBean instanceof TailType) {
 				((TailType) entityBean).tails().put(columnModel.getColumnName(), value);
 			} else
-				throw new DialectException("Can not write tail value for entity which is not TailSupport");
+				throw new SqlBoxException("Can not write tail value for entity which is not TailSupport");
 		} else
 			try {
 				Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
 				writeMethod.invoke(entityBean, value);
 			} catch (Exception e) {
-				throw new DialectException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);
+				throw new SqlBoxException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);
 			}
 	}
 

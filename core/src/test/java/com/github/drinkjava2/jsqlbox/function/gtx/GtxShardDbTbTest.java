@@ -119,18 +119,6 @@ public class GtxShardDbTbTest {
 		@ShardTable({ "RANGE", "10" })
 		Integer age;
 
-		Float flfield=1.0f;
-		
-		 
-
-		public Float getFlfield() {
-			return flfield;
-		}
-
-		public void setFlfield(Float flfield) {
-			this.flfield = flfield;
-		}
-
 		public Integer getId() {
 			return id;
 		}
