@@ -40,7 +40,7 @@ public class ShardingRangeTool implements ShardingTool {
 			return null;
 		if (!"RANGE".equalsIgnoreCase(col.getShardTable()[0]))
 			return null;// NOSONAR
-		String tableSize = col.getShardTable()[1];
+		String rangeSize = col.getShardTable()[1];
 
 		Object shardKey1 = null;
 		Object shardkey2 = null;
@@ -56,24 +56,7 @@ public class ShardingRangeTool implements ShardingTool {
 		}
 		if (shardKey1 == null)
 			throw new SqlBoxException("ShardTable key value can not be null");
-
-		if (shardkey2 != null) {
-			return calculateTableNames(shardKey1, shardkey2, tableSize);
-		} else {
-			Set<Integer> set = new HashSet<Integer>();
-			if (shardKey1 instanceof Collection<?>) {
-				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateTableName(key, tableSize));
-				return set.toArray(new Integer[set.size()]);
-			} else if (shardKey1.getClass().isArray()) {
-				for (Object key : (Object[]) shardKey1)
-					set.add(calculateTableName(key, tableSize));
-				return set.toArray(new Integer[set.size()]);
-			} else {
-				set.add(calculateTableName(shardKey1, tableSize));
-				return set.toArray(new Integer[set.size()]);
-			}
-		}
+		return doCalculate(rangeSize, shardKey1, shardkey2);
 	}
 
 	@Override
@@ -83,7 +66,7 @@ public class ShardingRangeTool implements ShardingTool {
 			return null;
 		if (!"RANGE".equalsIgnoreCase(col.getShardDatabase()[0]))
 			return null;// NOSONAR
-		String tableSize = col.getShardDatabase()[1];
+		String rangeSize = col.getShardDatabase()[1];
 
 		Object shardKey1 = null;
 		Object shardkey2 = null;
@@ -99,42 +82,35 @@ public class ShardingRangeTool implements ShardingTool {
 		}
 		if (shardKey1 == null)
 			throw new SqlBoxException("ShardDatabase key value can not be null");
+		return doCalculate(rangeSize, shardKey1, shardkey2);
+	}
 
+	private Integer[] doCalculate(String rangeSizz, Object shardKey1, Object shardkey2) {
 		if (shardkey2 != null) {
-			return calculateDatabases(shardKey1, shardkey2, tableSize);
+			return calculateRanges(shardKey1, shardkey2, rangeSizz);
 		} else {
 			Set<Integer> set = new HashSet<Integer>();
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
-					set.add(calculateDatabase(key, tableSize));
+					set.add(calcuteByOneValue(key, rangeSizz));
 				return set.toArray(new Integer[set.size()]);
 			} else if (shardKey1.getClass().isArray()) {
 				for (Object key : (Object[]) shardKey1)
-					set.add(calculateDatabase(key, tableSize));
+					set.add(calcuteByOneValue(key, rangeSizz));
 				return set.toArray(new Integer[set.size()]);
 			} else
-				return new Integer[] { calculateDatabase(shardKey1, tableSize) };
+				return new Integer[] { calcuteByOneValue(shardKey1, rangeSizz) };
 		}
-
 	}
 
 	/**
-	 * Give tableName, keyValue, tableSize, calculate a tableName_x String
-	 */
-	private static Integer calculateTableName(Object keyValue, String tableSize) {
-		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
-		long size = Long.parseLong(tableSize);
-		return (int) (shardKeyValue / size);
-	}
-
-	/**
-	 * Give tableName, firstKey, secondKey, tableSize, return a tableName_x String
+	 * Give rangeSize, firstKey, secondKey, tableSize, return a tableName_x String
 	 * Array
 	 */
-	private static Integer[] calculateTableNames(Object firstKey, Object secondKey, String tableSize) {
+	private static Integer[] calculateRanges(Object firstKey, Object secondKey, String rangeSize) {
 		long from = Long.parseLong(String.valueOf(firstKey));
 		long last = Long.parseLong(String.valueOf(secondKey));
-		long size = Long.parseLong(String.valueOf(tableSize));
+		long size = Long.parseLong(String.valueOf(rangeSize));
 		int firstTable = (int) (from / size);
 		int lastTable = (int) (last / size);
 		if (lastTable < firstTable)
@@ -145,24 +121,10 @@ public class ShardingRangeTool implements ShardingTool {
 		return result;
 	}
 
-	private static Integer calculateDatabase(Object keyValue, String tableSize) {
+	private static Integer calcuteByOneValue(Object keyValue, String rangeSize) {
 		long shardKeyValue = Long.parseLong(String.valueOf(keyValue));
-		long size = Long.parseLong(String.valueOf(tableSize));
+		long size = Long.parseLong(String.valueOf(rangeSize));
 		return (int) (shardKeyValue / size);
-	}
-
-	private static Integer[] calculateDatabases(Object firstKey, Object secondKey, String tableSize) {
-		long from = Long.parseLong(String.valueOf(firstKey));
-		long last = Long.parseLong(String.valueOf(secondKey));
-		long size = Long.parseLong(String.valueOf(tableSize));
-		int firstTable = (int) (from / size);
-		int lastTable = (int) (last / size);
-		if (lastTable < firstTable)
-			return new Integer[] {};
-		Integer[] result = new Integer[lastTable - firstTable + 1];
-		for (int i = firstTable; i <= lastTable; i++)
-			result[i - firstTable] = i;
-		return result;
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function.gtx;
 
+import java.util.Random;
+
 import javax.sql.DataSource;
 
 import org.junit.Assert;
@@ -10,7 +12,6 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jdialects.id.UUID25Generator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
@@ -31,10 +32,10 @@ public class GtxShardTbTest {
 	private static int DB_SHARD_QTY = 5;
 	SqlBoxContext[] ctx = new SqlBoxContext[3];
 
-	private static DataSource newTestDataSource(String dbName) {
+	private static DataSource newTestDataSource() {
 		HikariDataSource ds = new HikariDataSource();
 		ds.setDriverClassName("org.h2.Driver");
-		ds.setJdbcUrl("jdbc:h2:mem:" + UUID25Generator.getUUID25()
+		ds.setJdbcUrl("jdbc:h2:mem:" + new Random().nextLong() // random h2 ds name
 				+ ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		ds.setUsername("sa");
 		ds.setPassword("");
@@ -46,7 +47,7 @@ public class GtxShardTbTest {
 		SqlBoxContext.resetGlobalVariants();
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 
-		SqlBoxContext lock = new SqlBoxContext(newTestDataSource("GtxShardTbTest_locker"));
+		SqlBoxContext lock = new SqlBoxContext(newTestDataSource());
 		lock.setName("lock");
 		lock.executeDDL(lock.toCreateDDL(GtxId.class));
 		lock.executeDDL(lock.toCreateDDL(GtxLock.class));
@@ -54,7 +55,7 @@ public class GtxShardTbTest {
 
 		GtxConnectionManager lockCM = new GtxConnectionManager(lock);
 		for (int i = 0; i < 3; i++) {
-			ctx[i] = new SqlBoxContext(newTestDataSource("GtxShardTbTest_Db" + i));
+			ctx[i] = new SqlBoxContext(newTestDataSource());
 			ctx[i].setName("db");
 			ctx[i].setDbCode(i);
 			ctx[i].setConnectionManager(lockCM);

@@ -18,7 +18,6 @@ package com.github.drinkjava2.jsqlbox.gtx;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +26,11 @@ import org.apache.commons.dbutils.handlers.ColumnListHandler;
 
 import com.github.drinkjava2.jdbpro.log.DbProLog;
 import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
-import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxResult;
@@ -207,12 +206,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 		for (ColumnModel col : model.getColumns()) {
 			String fieldName = col.getEntityField();
 			if (tail.tails().containsKey(fieldName))
-				try {
-					Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityClass, fieldName);
-					writeMethod.invoke(entity, tail.tails().get(fieldName));
-				} catch (Exception e) {
-					throw new TransactionsException("FieldName '" + fieldName + "' can not write.", e);
-				}
+				SqlBoxContextUtils.writeValueToBeanFieldOrTail(col, entity, tail.getTail(fieldName));
 		}
 		return entity;
 	}

@@ -8,8 +8,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
+import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
@@ -25,7 +28,8 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GtxShardDbTest {
+public class GtxShardDbTbTest {
+	private static int DB_SHARD_QTY = 5;
 	SqlBoxContext[] ctx = new SqlBoxContext[3];
 
 	private static DataSource newTestDataSource() {
@@ -57,7 +61,11 @@ public class GtxShardDbTest {
 			ctx[i].setConnectionManager(lockCM);
 			ctx[i].setMasters(ctx);
 			ctx[i].executeDDL(ctx[i].toCreateDDL(GtxId.class));
-			ctx[i].executeDDL(ctx[i].toCreateDDL(DemoUsr.class));
+			TableModel model = TableModelUtils.entity2Model(DemoUsr.class);
+			for (int j = 0; j < DB_SHARD_QTY; j++) {
+				model.setTableName("DemoUsr_" + j);
+				ctx[i].executeDDL(ctx[i].toCreateDDL(model));
+			}
 		}
 		SqlBoxContext.setGlobalSqlBoxContext(ctx[0]);// the default ctx
 	}
@@ -66,47 +74,62 @@ public class GtxShardDbTest {
 	public void commitTest() {
 		ctx[0].startTrans();
 		try {
-			new DemoUsr().setId(0).insert(); // db0
-			new DemoUsr().setId(1).insert(); // db1
-			new DemoUsr().setId(4).insert(); // db1
-			new DemoUsr().setId(2).insert(); // db2
-			Assert.assertEquals(1, ctx[0].eCountAll(DemoUsr.class));
-			Assert.assertEquals(2, ctx[1].eCountAll(DemoUsr.class));
-			Assert.assertEquals(1, ctx[2].eCountAll(DemoUsr.class));
+			new DemoUsr().setId(0).setAge(0).insert(); // db0, tb0
+			new DemoUsr().setId(1).setAge(10).insert(); // db1, tb1
+			new DemoUsr().setId(4).setAge(11).insert(); // db1, tb1
+			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
 			ctx[0].commitTrans();
 		} catch (Exception e) {
 			e.printStackTrace();
 			ctx[0].rollbackTrans();
 		}
-		Assert.assertEquals(1, ctx[0].eCountAll(DemoUsr.class));
-		Assert.assertEquals(2, ctx[1].eCountAll(DemoUsr.class));
-		Assert.assertEquals(1, ctx[2].eCountAll(DemoUsr.class));
+		Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
+		Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
+		Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	@Test
 	public void commitFailTest() {
 		ctx[0].startTrans();
 		try {
-			new DemoUsr().setId(0).insert(); // db0
-			new DemoUsr().setId(1).insert(); // db1
-			new DemoUsr().setId(4).insert(); // db1
-			new DemoUsr().setId(2).insert(); // db2
+			new DemoUsr().setId(0).setAge(0).insert(); // db0, tb0
+			new DemoUsr().setId(1).setAge(10).insert(); // db1, tb1
+			new DemoUsr().setId(4).setAge(11).insert(); // db1, tb1
+			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
+			Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
+			Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
+			Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 			ctx[2].setForceCommitFail(); // force db2 commit fail
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
+			e.printStackTrace();
 			TxResult result = ctx[0].rollbackTrans();
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
 		}
-		Assert.assertEquals(0, ctx[0].eCountAll(DemoUsr.class));
-		Assert.assertEquals(0, ctx[1].eCountAll(DemoUsr.class));
-		Assert.assertEquals(0, ctx[2].eCountAll(DemoUsr.class));
+		Assert.assertEquals(0, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
+		Assert.assertEquals(0, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
+		Assert.assertEquals(0, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	public static class DemoUsr extends ActiveRecord<DemoUsr> {
 		@Id
 		@ShardDatabase({ "MOD", "3" })
 		Integer id;
-		String name;
+
+		@ShardTable({ "RANGE", "10" })
+		Integer age;
+
+		Float flfield=1.0f;
+		
+		 
+
+		public Float getFlfield() {
+			return flfield;
+		}
+
+		public void setFlfield(Float flfield) {
+			this.flfield = flfield;
+		}
 
 		public Integer getId() {
 			return id;
@@ -117,12 +140,12 @@ public class GtxShardDbTest {
 			return this;
 		}
 
-		public String getName() {
-			return name;
+		public Integer getAge() {
+			return age;
 		}
 
-		public DemoUsr setName(String name) {
-			this.name = name;
+		public DemoUsr setAge(Integer age) {
+			this.age = age;
 			return this;
 		}
 
