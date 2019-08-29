@@ -20,7 +20,7 @@ import com.github.drinkjava2.jtransactions.TxResult;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Global TX Test
+ * Global TX Test for shard DB(database)
  * 
  * @author Yong Zhu
  * @since 2.0.7

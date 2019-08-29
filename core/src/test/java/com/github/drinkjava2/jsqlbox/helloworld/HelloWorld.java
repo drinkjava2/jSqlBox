@@ -11,13 +11,10 @@
  */
 package com.github.drinkjava2.jsqlbox.helloworld;
 
-import java.math.BigDecimal;
-
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 
-import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.JSQLBOX;
@@ -38,20 +35,9 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 		return name;
 	}
 
-	public void setName(String name) {
+	public HelloWorld setName(String name) {
 		this.name = name;
-	}
-	
-	@Column(length=20,precision=5)
-	private BigDecimal bgdec;
- 
-
-	public BigDecimal getBgdec() {
-		return bgdec;
-	}
-
-	public void setBgdec(BigDecimal bgdec) {
-		this.bgdec = bgdec;
+		return this;
 	}
 
 	public static void main(String[] args) {
@@ -63,9 +49,7 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 		for (String ddl : ctx.toCreateDDL(HelloWorld.class))
 			ctx.nExecute(ddl);
 
-		new HelloWorld().putField("name", "Hello jSqlBox","bgdec",new BigDecimal(23.1)).    insert();
-		HelloWorld w2=new HelloWorld().loadById("Hello jSqlBox");
-		System.out.println(w2.getBgdec());
+		new HelloWorld().setName("Hellow jSqlBox") .insert();
 		System.out.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
 	}
 }

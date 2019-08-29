@@ -7,7 +7,7 @@ package com.github.drinkjava2.common;
  * @since 2.0.5
  */
 public class Systemout {
-	private static final boolean allowPrint = false;
+	private static final boolean allowPrint = true;
 
 	public static void print(Object obj) {
 		if (allowPrint)

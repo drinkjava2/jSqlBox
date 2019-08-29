@@ -46,10 +46,6 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("idGeneratorName=" + c.getIdGeneratorName()).append(", ");
 		sb.append("idGenerator=" + c.getIdGenerator()).append(", ");
 		sb.append("converterClassOrName=" + c.getConverterClassOrName()).append(", ");
-		sb.append("lengths=");
-		if (c.getLengths() != null)
-			sb.append(Arrays.deepToString(c.getLengths()));
-		sb.append(", ");
 		sb.append("entityField=" + c.getEntityField()).append(", ");
 		sb.append("length=" + c.getLength()).append(", ");
 		sb.append("precisio=" + c.getPrecision()).append(", ");

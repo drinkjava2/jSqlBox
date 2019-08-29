@@ -23,7 +23,7 @@ import com.github.drinkjava2.jtransactions.TxResult;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Global TX Test
+ * Global TX Test for shard DB, TB
  * 
  * @author Yong Zhu
  * @since 2.0.7
@@ -80,7 +80,6 @@ public class GtxShardDbTbTest {
 			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			e.printStackTrace();
 			ctx[0].rollbackTrans();
 		}
 		Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));

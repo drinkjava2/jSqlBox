@@ -125,10 +125,9 @@ public abstract class JDBPRO {
 	/**
 	 * Cache parameters and return a "?" String
 	 */
-	public static SqlItem ques(Object... parameters) {//NOSONAR
+	public static SqlItem ques(Object... parameters) {// NOSONAR
 		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
 	}
-	
 
 	/**
 	 * Cache parameters and return a "?" String
@@ -136,16 +135,30 @@ public abstract class JDBPRO {
 	public static SqlItem question(Object... parameters) {
 		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
 	}
-	  
+
 	/**
-	 * If last param is not null, then add all items in SQL
-	 * 
-	 * @param param
-	 *            The param
-	 * @return a SqlItem instance will be used by iPrepare method
+	 * If last param is not null, then add all items in SQL<br/>
+	 * Example: query("select * from a where 1=1",notNull(" and name=?",name));
 	 */
 	public static SqlItem notNull(Object... items) {
 		return new SqlItem(SqlOption.NOT_NULL, items);
+	}
+
+	/**
+	 * If no any param is null, then add all items in SQL<br/>
+	 * Example: query("select * from a where 1=1",noNull("and name like
+	 * ?","%",name,"%"));
+	 */
+	public static SqlItem noNull(Object... args) {
+		if (args.length <= 2)
+			return notNull(args);
+		for (int i = 1; i <= args.length - 1; i++)
+			if (args[i] == null)
+				return notNull(null, null);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 1; i <= args.length - 1; i++)
+			sb.append(args[i]);
+		return notNull(args[0], sb.toString());
 	}
 
 	/**

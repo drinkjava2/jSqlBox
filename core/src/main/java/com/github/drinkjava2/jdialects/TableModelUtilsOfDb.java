@@ -65,8 +65,8 @@ public abstract class TableModelUtilsOfDb {
 			// Build Columns
 			for (TableModel model : tableModels) {
 				String tableName = model.getTableName();
-				rs = meta.getColumns(null, null, tableName, null);
-				while (rs.next()) {// NOSONAR
+				rs = meta.getColumns(null, null, tableName, null); //detail see meta.getC alt + /
+				while (rs.next()) {// NOSONAR 
 					String colName = rs.getString("COLUMN_NAME");
 					ColumnModel col = new ColumnModel(colName);
 					model.addColumn(col);
@@ -80,8 +80,8 @@ public abstract class TableModelUtilsOfDb {
 					}
 					col.setLength(rs.getInt("COLUMN_SIZE"));
 					col.setNullable(rs.getInt("NULLABLE") > 0);
-					col.setPrecision(rs.getInt("DECIMAL_DIGITS"));
-					col.setLengths(new Integer[] { col.getLength(), col.getPrecision(), col.getPrecision() });
+					col.setPrecision(rs.getInt("DECIMAL_DIGITS")); 
+					col.setScale(rs.getInt("NUM_PREC_RADIX")); 
 
 					try {
 						if (((Boolean) (true)).equals(rs.getBoolean("IS_AUTOINCREMENT")))

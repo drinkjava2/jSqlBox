@@ -292,7 +292,6 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					|| (convertClassOrName == null && !TypeUtils.canMapToSqlType(propertyClass))) {
 				ColumnModel col = new ColumnModel(entityfieldName);
 				col.setColumnType(TypeUtils.toType(propertyClass));
-				col.setLengths(new Integer[] { 255, 0, 0 });
 				col.setTransientable(true);
 				col.setEntityField(entityfieldName);
 				col.setTableModel(model);
@@ -335,8 +334,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 						col.setColumnName((String) colMap.get("name"));
 					col.setLength((Integer) colMap.get("length"));
 					col.setPrecision((Integer) colMap.get("precision"));
-					col.setScale((Integer) colMap.get("scale"));
-					col.setLengths(new Integer[] { col.getLength(), col.getPrecision(), col.getScale() });
+					col.setScale((Integer) colMap.get("scale"));//TODO check
 					if (!StrUtils.isEmpty(colMap.get("columnDefinition")))
 						col.setColumnType(TypeUtils.toType((String) colMap.get("columnDefinition")));
 					else
@@ -344,8 +342,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setInsertable((Boolean) colMap.get("insertable"));
 					col.setUpdatable((Boolean) colMap.get("updatable"));
 				} else {
-					col.setColumnType(TypeUtils.toType(propertyClass));
-					col.setLengths(new Integer[] { 255, 0, 0 });
+					col.setColumnType(TypeUtils.toType(propertyClass));//TODO check
 				}
 				if ("EnumType.ORDINAL".equals(col.getConverterClassOrName()))
 					col.setColumnType(Type.INTEGER);

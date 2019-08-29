@@ -56,9 +56,6 @@ public class ColumnModel {
 	/** Comment of this column */
 	private String comment;
 
-	/** if set length then no need set length, precision, scale */
-	private Integer[] lengths = new Integer[] {};
-
 	// =======================================================================
 	private GenerationType idGenerationType;
 
@@ -77,7 +74,7 @@ public class ColumnModel {
 	private String entityField;
 
 	/** The column length, for DDL and ORM tool use */
-	private Integer length = 255;
+	private Integer length = 250;
 
 	/** The numeric precision, for DDL and ORM tool use */
 	private Integer precision = 0;
@@ -133,7 +130,6 @@ public class ColumnModel {
 		col.defaultValue = defaultValue;
 		col.tail = tail;
 		col.comment = comment;
-		col.lengths = lengths;
 		col.entityField = entityField;
 		col.length = length;
 		col.precision = precision;
@@ -407,36 +403,60 @@ public class ColumnModel {
 	public ColumnModel LONG() {this.columnType=Type.BIGINT;return this;} 
 	public ColumnModel BOOLEAN() {this.columnType=Type.BOOLEAN;return this;} 
 	public ColumnModel DOUBLE() {this.columnType=Type.DOUBLE;return this;} 
-	public ColumnModel FLOAT(Integer... lengths) {this.columnType=Type.FLOAT;this.lengths=lengths;return this;} 
 	public ColumnModel INTEGER() {this.columnType=Type.INTEGER;return this;} 
 	public ColumnModel SHORT() {this.columnType=Type.SMALLINT;return this;} 
-	public ColumnModel BIGDECIMAL(Integer precision, Integer scale) {this.columnType=Type.NUMERIC; this.lengths= new Integer[]{precision,scale}; return this;} 
-	public ColumnModel STRING(Integer length) {this.columnType=Type.VARCHAR;this.lengths=new Integer[]{length}; return this;} 
-	
 	public ColumnModel DATE() {this.columnType=Type.DATE;return this;} 
 	public ColumnModel TIME() {this.columnType=Type.TIME;return this;} 
 	public ColumnModel TIMESTAMP() {this.columnType=Type.TIMESTAMP;return this;} 
 	public ColumnModel BIGINT() {this.columnType=Type.BIGINT;return this;} 
-	public ColumnModel BINARY(Integer... lengths) {this.columnType=Type.BINARY;this.lengths=lengths; return this;} 
-	public ColumnModel BIT() {this.columnType=Type.BIT;return this;} 
-	public ColumnModel BLOB(Integer... lengths) {this.columnType=Type.BLOB;this.lengths=lengths;return this;} 
-	public ColumnModel CHAR(Integer... lengths) {this.columnType=Type.CHAR;this.lengths=lengths;return this;} 
-	public ColumnModel CLOB(Integer... lengths) {this.columnType=Type.CLOB;this.lengths=lengths;return this;} 
-	public ColumnModel DECIMAL(Integer... lengths) {this.columnType=Type.DECIMAL;this.lengths=lengths;return this;} 
-	public ColumnModel JAVA_OBJECT() {this.columnType=Type.JAVA_OBJECT;return this;} 
-	public ColumnModel LONGNVARCHAR(Integer length) {this.columnType=Type.LONGNVARCHAR;this.lengths=new Integer[]{length};return this;} 
-	public ColumnModel LONGVARBINARY(Integer... lengths) {this.columnType=Type.LONGVARBINARY;this.lengths=lengths;return this;} 
-	public ColumnModel LONGVARCHAR(Integer... lengths) {this.columnType=Type.LONGVARCHAR;this.lengths=lengths;return this;} 
-	public ColumnModel NCHAR(Integer length) {this.columnType=Type.NCHAR;this.lengths=new Integer[]{length};return this;} 
-	public ColumnModel NCLOB() {this.columnType=Type.NCLOB;return this;} 
-	public ColumnModel NUMERIC(Integer... lengths) {this.columnType=Type.NUMERIC;this.lengths=lengths;return this;} 
-	public ColumnModel NVARCHAR(Integer length) {this.columnType=Type.NVARCHAR;   this.lengths=new Integer[]{length};return this;} 
-	public ColumnModel OTHER(Integer... lengths) {this.columnType=Type.UNKNOW;this.lengths=lengths;return this;} 
-	public ColumnModel REAL() {this.columnType=Type.REAL;return this;} 
+ 	public ColumnModel BIT() {this.columnType=Type.BIT;return this;} 
+ 	public ColumnModel JAVA_OBJECT() {this.columnType=Type.JAVA_OBJECT;return this;} 
+ 	public ColumnModel NCLOB() {this.columnType=Type.NCLOB;return this;} 
+ 	public ColumnModel REAL() {this.columnType=Type.REAL;return this;} 
 	public ColumnModel SMALLINT() {this.columnType=Type.SMALLINT;return this;} 
-	public ColumnModel TINYINT() {this.columnType=Type.TINYINT;return this;} 
-	public ColumnModel VARBINARY(Integer... lengths) {this.columnType=Type.VARBINARY;this.lengths=lengths;return this;} 
-	public ColumnModel VARCHAR(Integer length) {this.columnType=Type.VARCHAR;this.lengths=new Integer[]{length};return this;}
+	public ColumnModel TINYINT() {this.columnType=Type.TINYINT;return this;}  
+ 
+	public ColumnModel LONGNVARCHAR(Integer length) {this.columnType=Type.LONGNVARCHAR;this.length=length;return this;} 
+	public ColumnModel NCHAR(Integer length) {this.columnType=Type.NCHAR;this.length=length;return this;} 
+	public ColumnModel NVARCHAR(Integer length) {this.columnType=Type.NVARCHAR;   this.length=length;return this;}	
+	public ColumnModel STRING(Integer length) {this.columnType=Type.VARCHAR;this.length=length; return this;} 
+	public ColumnModel VARCHAR(Integer length) {this.columnType=Type.VARCHAR;this.length=length;return this;}
+	
+	public ColumnModel FLOAT() {this.columnType=Type.FLOAT;return this;} 
+	public ColumnModel FLOAT(Integer precision) {this.columnType=Type.FLOAT;this.precision=precision;return this;} 
+	
+	public ColumnModel BIGDECIMAL() {this.columnType=Type.NUMERIC;  return this;} 
+	public ColumnModel BIGDECIMAL(Integer digiLength) {this.columnType=Type.NUMERIC; this.length=digiLength ; return this;} 
+	public ColumnModel BIGDECIMAL(Integer precision, Integer scale) {this.columnType=Type.NUMERIC; this.precision=precision;this.scale=scale; return this;} 
+	 
+	public ColumnModel DECIMAL() {this.columnType=Type.DECIMAL;return this;} 
+	public ColumnModel DECIMAL(Integer precision, Integer scale) {this.columnType=Type.DECIMAL;this.precision=precision;this.scale=scale;  return this;} 
+	 
+	public ColumnModel BINARY() {this.columnType=Type.BINARY;return this;} 
+	public ColumnModel BINARY(Integer length) {this.columnType=Type.BINARY;this.length=length; return this;} 
+	
+	public ColumnModel BLOB() {this.columnType=Type.BLOB;return this;}
+	public ColumnModel BLOB(Integer length) {this.columnType=Type.BLOB;this.length=length; return this;}
+	
+	public ColumnModel CHAR() {this.columnType=Type.CHAR;return this;} 
+	public ColumnModel CHAR(Integer length) {this.columnType=Type.CHAR;this.length=length;return this;} 	
+	
+	public ColumnModel CLOB( ) {this.columnType=Type.CLOB; return this;} 	
+	public ColumnModel CLOB(Integer length) {this.columnType=Type.CLOB;this.length=length;return this;}  
+	
+	public ColumnModel LONGVARBINARY() {this.columnType=Type.LONGVARBINARY; return this;}
+	public ColumnModel LONGVARBINARY(Integer length) {this.columnType=Type.LONGVARBINARY;this.length=length;return this;} 
+	
+	public ColumnModel LONGVARCHAR() {this.columnType=Type.LONGVARCHAR;return this;}
+	public ColumnModel LONGVARCHAR(Integer length) {this.columnType=Type.LONGVARCHAR;this.length=length;return this;}
+ 
+	public ColumnModel NUMERIC() {this.columnType=Type.NUMERIC;  return this;} 
+	public ColumnModel NUMERIC(Integer digiLength) {this.columnType=Type.NUMERIC; this.length=digiLength ; return this;} 
+	public ColumnModel NUMERIC(Integer precision, Integer scale) {this.columnType=Type.NUMERIC; this.precision=precision;this.scale=scale; return this;} 
+  
+	public ColumnModel VARBINARY( ) {this.columnType=Type.VARBINARY; return this;} 
+	public ColumnModel VARBINARY(Integer length) {this.columnType=Type.VARBINARY;this.length=length;return this;}  
+	
 	//@formatter:on
 
 	// getter & setters==============
@@ -526,15 +546,7 @@ public class ColumnModel {
 
 	public void setComment(String comment) {
 		this.comment = comment;
-	}
-
-	public Integer[] getLengths() {
-		return lengths;
-	}
-
-	public void setLengths(Integer[] lengths) {
-		this.lengths = lengths;
-	}
+	} 
 
 	public String getEntityField() {
 		return entityField;

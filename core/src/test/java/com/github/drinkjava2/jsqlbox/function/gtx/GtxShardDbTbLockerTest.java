@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
-import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -23,12 +23,12 @@ import com.github.drinkjava2.jtransactions.TxResult;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Global TX Test for shard TB(table)
+ * Global TX Test for shard DB, TB, and locker server
  * 
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GtxShardTbTest {
+public class GtxShardDbTbLockerTest {
 	private static int DB_SHARD_QTY = 5;
 	SqlBoxContext[] ctx = new SqlBoxContext[3];
 
@@ -74,59 +74,57 @@ public class GtxShardTbTest {
 	public void commitTest() {
 		ctx[0].startTrans();
 		try {
-			new DemoUsr().setAge(0).insert(); // db0, tb0
-			new DemoUsr().setAge(10).insert(ctx[1]); // db1, tb1
-			new DemoUsr().setAge(11).insert(ctx[1]); // db1, tb1
-			new DemoUsr().setAge(20).insert(ctx[2]); // db2, tb2
-			Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
-			Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-			Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_2"));
+			new DemoUsr().setId(0).setAge(0).insert(); // db0, tb0
+			new DemoUsr().setId(1).setAge(10).insert(); // db1, tb1
+			new DemoUsr().setId(4).setAge(11).insert(); // db1, tb1
+			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			e.printStackTrace();
 			ctx[0].rollbackTrans();
 		}
 		Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
 		Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-		Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_2"));
+		Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	@Test
 	public void commitFailTest() {
 		ctx[0].startTrans();
 		try {
-			new DemoUsr().setAge(0).insert(); // db0, tb0
-			new DemoUsr().setAge(10).insert(ctx[1]); // db1, tb1
-			new DemoUsr().setAge(11).insert(ctx[1]); // db1, tb1
-			new DemoUsr().setAge(20).insert(ctx[2]); // db2, tb2
+			new DemoUsr().setId(0).setAge(0).insert(); // db0, tb0
+			new DemoUsr().setId(1).setAge(10).insert(); // db1, tb1
+			new DemoUsr().setId(4).setAge(11).insert(); // db1, tb1
+			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
 			Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
 			Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-			Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_2"));
+			Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 			ctx[2].setForceCommitFail(); // force db2 commit fail
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
+			e.printStackTrace();
 			TxResult result = ctx[0].rollbackTrans();
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
 		}
 		Assert.assertEquals(0, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
 		Assert.assertEquals(0, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-		Assert.assertEquals(0, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_2"));
+		Assert.assertEquals(0, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	public static class DemoUsr extends ActiveRecord<DemoUsr> {
 		@Id
-		@UUID32
-		String id;
+		@ShardDatabase({ "MOD", "3" })
+		Integer id;
 
 		@ShardTable({ "RANGE", "10" })
 		Integer age;
 
-		public String getId() {
+		public Integer getId() {
 			return id;
 		}
 
-		public void setId(String id) {
+		public DemoUsr setId(Integer id) {
 			this.id = id;
+			return this;
 		}
 
 		public Integer getAge() {

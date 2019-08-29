@@ -18,7 +18,7 @@ import com.github.drinkjava2.jtransactions.TxResult;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Global TX Test
+ * Global TX Test for normal environment without any sharding
  * 
  * @author Yong Zhu
  * @since 2.0.7
