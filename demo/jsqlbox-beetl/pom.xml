@@ -2,12 +2,12 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
- <artifactId>jsqlbox-beetlsql</artifactId>
+ <artifactId>jsqlbox-beetl</artifactId>
  <packaging>jar</packaging>
- <version>1.0</version>
+ <version>3.0.0</version>
  
- <name>jsqlbox-beetlsql</name>
- <description>This is a demo project to show use beetlsql as SQL template engine in jSqlBox</description> 
+ <name>jsqlbox-beetl</name>
+ <description>This is a demo project to show use beetl as SQL template engine in jSqlBox</description> 
    
  <licenses>
    <license>
@@ -49,21 +49,15 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox-java8</artifactId>
-      <version>2.0.6</version><!--Or newest jSqlBox -->
+      <version>3.0.0</version><!--Or newest jSqlBox -->
     </dependency> 
 
-    <dependency>
-        <groupId>com.ibeetl</groupId>
-        <artifactId>beetl</artifactId>
-        <version>2.7.26</version>
-    </dependency>    
-    
-    <dependency>
-        <groupId>com.ibeetl</groupId>
-        <artifactId>beetlsql</artifactId>
-        <version>2.10.11</version>
-    </dependency>
- 
+	<dependency>
+		<groupId>com.ibeetl</groupId>
+		<artifactId>beetl</artifactId>
+		<version>3.0.11.RELEASE</version>
+	</dependency>
+   
    <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
    <dependency>
      <groupId>commons-lang</groupId>
@@ -105,8 +99,53 @@
 
  </dependencies>
  
+      
+      
+      
+      
     <build>
       <plugins>  
+	  
+	   
+		   <!-- Multiple string support for Text.java class -->
+		   <plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.12</version>
+				<executions> 
+				 
+				  <execution>
+					<id>add-source</id>
+					<phase>generate-sources</phase>
+					<goals>
+					  <goal>add-source</goal>
+					</goals>
+					<configuration>
+					  <sources>
+						<source>src/main/resources</source>
+					  </sources>
+					</configuration>
+				  </execution>  
+					
+					<execution>
+					  <id>add-test-source</id>
+					  <phase>generate-sources</phase>
+					  <goals>
+						<goal>add-test-source</goal>
+					  </goals>
+					  <configuration>
+						<sources>
+							<source>src/test/resources</source>
+					  </sources>
+					  </configuration>
+					</execution> 
+			
+				</executions>
+			  </plugin> 
+	  
+	  
+	  
+	  
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

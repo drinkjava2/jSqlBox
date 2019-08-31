@@ -334,7 +334,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 						col.setColumnName((String) colMap.get("name"));
 					col.setLength((Integer) colMap.get("length"));
 					col.setPrecision((Integer) colMap.get("precision"));
-					col.setScale((Integer) colMap.get("scale"));//TODO check
+					col.setScale((Integer) colMap.get("scale"));
 					if (!StrUtils.isEmpty(colMap.get("columnDefinition")))
 						col.setColumnType(TypeUtils.toType((String) colMap.get("columnDefinition")));
 					else
@@ -342,7 +342,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setInsertable((Boolean) colMap.get("insertable"));
 					col.setUpdatable((Boolean) colMap.get("updatable"));
 				} else {
-					col.setColumnType(TypeUtils.toType(propertyClass));//TODO check
+					col.setColumnType(TypeUtils.toType(propertyClass));// TODO check
 				}
 				if ("EnumType.ORDINAL".equals(col.getConverterClassOrName()))
 					col.setColumnType(Type.INTEGER);
@@ -446,7 +446,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 	 */
 	private static TableModel entity2ModelWithConfig(Class<?> entityClass) {
 		TableModel model;
-		model = entity2ModelIgnoreConfigMethod(entityClass); 
+		model = entity2ModelIgnoreConfigMethod(entityClass);
 		Method method = null;
 		try {
 			method = entityClass.getMethod("config", TableModel.class);

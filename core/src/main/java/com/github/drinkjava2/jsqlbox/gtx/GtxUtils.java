@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import java.sql.Connection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,8 +23,7 @@ import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jtransactions.TransactionsException;
-import com.mysql.jdbc.Connection;
+import com.github.drinkjava2.jtransactions.TransactionsException; 
 
 /**
  * Gtx public static methods
