@@ -55,7 +55,12 @@ public class AliasProxyUtil {
 				throws Throwable {
 			aliasItemInfo.remove();
 			if (method != null && tableModel != null) {
-				String fieldName = method.getName().substring(3);
+				String fieldName;
+				String methodNm = method.getName();
+				if (methodNm.startsWith("get"))
+					fieldName = methodNm.substring(3);
+				else
+					fieldName = methodNm.substring(2);
 				String columnName = null;
 				for (ColumnModel col : tableModel.getColumns())
 					if (col.getEntityField().equalsIgnoreCase(fieldName))

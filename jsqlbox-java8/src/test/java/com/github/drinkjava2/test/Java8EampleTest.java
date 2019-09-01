@@ -1,6 +1,7 @@
 package com.github.drinkjava2.test;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.JAVA8.*;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
 import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
@@ -55,7 +56,7 @@ public class Java8EampleTest {
 		List<User> totalUsers = iQuery(new EntityListHandler(), User.class, "select * from usertb");
 		Assert.assertEquals(100, totalUsers.size());
 
-		User u = createAliasProxy(User.class);
+		User u = proxy(User.class);
 		List<?> list1 = iQueryForMapList( //
 				"select "//
 				, (ALIAS) u::getId//
@@ -67,11 +68,39 @@ public class Java8EampleTest {
 		);
 		Assert.assertEquals(10, list1.size());
 
-		u = createAliasProxy(User.class, "u");
+		u = proxy(User.class, "u");
 		List<User> list2 = iQuery(new EntityListHandler(), User.class //
 				, "select * from ", table(u), " where "//
 				, (COL) u::getName, ">=?", param("Foo90") //
 				, " and ", (COL) u::getAge, ">?", param(1) //
+		);
+		Assert.assertEquals(10, list2.size());
+	}
+
+	@Test
+	public void lambdaTest2() {
+		Assert.assertEquals(100, iQueryForLongValue("select count(*) from usertb"));
+
+		List<User> totalUsers = iQuery(new EntityListHandler(), User.class, "select * from usertb");
+		Assert.assertEquals(100, totalUsers.size());
+
+		User u = proxy(User.class);
+		List<?> list1 = iQueryForMapList( //
+				"select "//
+				, $(u::getId)//
+				, c$(u::getAddress) //
+				, c$(u::getName) //
+				, " from ", table(u), " where "//
+				, $(u::getName), ">=?", param("Foo90") //
+				, " and ", $(u::getAge), ">?", param(1) //
+		);
+		Assert.assertEquals(10, list1.size());
+
+		u = createAliasProxy(User.class, "u");
+		List<User> list2 = iQuery(new EntityListHandler(), User.class //
+				, "select * from ", table(u), " where "//
+				, $(u::getName), ">=?", param("Foo90") //
+				, " and ", $(u::getAge), ">?", param(1) //
 		);
 		Assert.assertEquals(10, list2.size());
 	}

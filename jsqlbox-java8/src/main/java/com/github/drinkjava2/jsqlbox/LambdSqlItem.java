@@ -57,4 +57,5 @@ public interface LambdSqlItem extends CustomizedSqlItem {
 		} else
 			throw new SqlBoxException("Unsupported CustomizedSqlItem found.");
 	}
+
 }
