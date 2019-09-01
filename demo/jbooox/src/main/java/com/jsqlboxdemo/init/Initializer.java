@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.sql.DataSource;
 
 import org.junit.Assert;
 
@@ -15,7 +14,7 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -48,15 +47,9 @@ public class Initializer implements ServletContextListener {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface TX {
-		public Class<?> value() default TxBox.class;
+		public Class<?> value() default TinyTxAOP.class;
 	}
-
-	public static class TxBox extends BeanBox {
-		{
-			this.injectConstruct(TinyTx.class, DataSource.class, DataSourceBox.class);
-		}
-	}
-
+  
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
 		SqlBoxContext ctx = new SqlBoxContext(BeanBox.getBean(DataSourceBox.class));

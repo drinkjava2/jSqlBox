@@ -18,7 +18,7 @@ import org.osgl.util.IntRange;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -82,11 +82,11 @@ public class TransactionDemo {
 
 	public static class TinyTxBox extends BeanBox {
 		{
-			this.injectConstruct(TinyTx.class, DataSource.class, dataSource);
+			this.injectConstruct(TinyTxAOP.class);
 		}
 	}
 
-	private static final Injector INJECTOR = Guice.createInjector(binder -> binder
-			.bindInterceptor(subclassesOf(Account.class), annotatedWith(MyTX.class), new TinyTx(dataSource)));
+	private static final Injector INJECTOR = Guice.createInjector(
+			binder -> binder.bindInterceptor(subclassesOf(Account.class), annotatedWith(MyTX.class), new TinyTxAOP()));
 
 }

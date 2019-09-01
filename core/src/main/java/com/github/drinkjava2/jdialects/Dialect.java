@@ -37,10 +37,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  */
 @SuppressWarnings("all")
 public enum Dialect implements CommonDialect {
-	// Below dialects found on Internet
-	SQLiteDialect, AccessDialect, ExcelDialect, TextDialect, ParadoxDialect, CobolDialect, XMLDialect, DbfDialect, // NOSONAR
-
-	// Below dialects found in Hibernate 5.2.9.final
 	/** Use Derby instead */
 	@Deprecated
 	DerbyDialect,
@@ -53,10 +49,92 @@ public enum Dialect implements CommonDialect {
 	@Deprecated
 	Oracle9Dialect, //
 
-	Cache71Dialect, CUBRIDDialect, DerbyTenFiveDialect, DataDirectOracle9Dialect, DB2Dialect, DB2390Dialect, DB2400Dialect, DerbyTenSevenDialect, DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect, HANARowStoreDialect, HSQLDialect, InformixDialect, Informix10Dialect, IngresDialect, Ingres10Dialect, Ingres9Dialect, InterbaseDialect, JDataStoreDialect, MariaDBDialect, MariaDB53Dialect, MckoiDialect, MimerSQLDialect, MySQLDialect, MySQL5Dialect, MySQL55Dialect, MySQL57Dialect, MySQL57InnoDBDialect, MySQL5InnoDBDialect, MySQLInnoDBDialect, MySQLMyISAMDialect, Oracle8iDialect, Oracle9iDialect, Oracle10gDialect, Oracle12cDialect, PointbaseDialect, PostgresPlusDialect, PostgreSQLDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL9Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect, PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServerDialect, SQLServer2005Dialect, SQLServer2008Dialect, SQLServer2012Dialect, SybaseDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE15Dialect, SybaseASE157Dialect, TeradataDialect, Teradata14Dialect, TimesTenDialect,
+	//below added by hand
+	DamengDialect,// equal to InformixDialect
+	GBaseDialect,// equal to Oracle8iDialect
+	
+	// Below dialects found on Internet
+	AccessDialect, //
+	CobolDialect, //
+	DbfDialect, //
+	ExcelDialect, //
+	ParadoxDialect, //
+	SQLiteDialect, //
+	TextDialect, //
+	XMLDialect, //
 
-	// Below dialects imported from Hibernate 5.3.6.final
-	DB2390V8Dialect, DB297Dialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect, MySQL8Dialect;
+	// Below dialects imported from Hibernate
+	Cache71Dialect,//
+	CUBRIDDialect,//
+	DataDirectOracle9Dialect,//
+	DB2390Dialect,//
+	DB2390V8Dialect,//
+	DB2400Dialect,//
+	DB297Dialect,//
+	DB2Dialect,//
+	DerbyTenFiveDialect,//
+	DerbyTenSevenDialect,//
+	DerbyTenSixDialect,//
+	FirebirdDialect,//
+	FrontBaseDialect,//
+	H2Dialect,//
+	HANAColumnStoreDialect,//
+	HANARowStoreDialect,//
+	HSQLDialect,//
+	Informix10Dialect,//
+	InformixDialect,//
+	Ingres10Dialect,//
+	Ingres9Dialect,//
+	IngresDialect,//
+	InterbaseDialect,//
+	JDataStoreDialect,//
+	MariaDB102Dialect,//
+	MariaDB103Dialect,//
+	MariaDB10Dialect,//
+	MariaDB53Dialect,//
+	MariaDBDialect,//
+	MckoiDialect,//
+	MimerSQLDialect,//
+	MySQL55Dialect,//
+	MySQL57Dialect,//
+	MySQL57InnoDBDialect,//
+	MySQL5Dialect,//
+	MySQL5InnoDBDialect,//
+	MySQL8Dialect,//
+	MySQLDialect,//
+	MySQLInnoDBDialect,//
+	MySQLMyISAMDialect,//
+	Oracle10gDialect,//
+	Oracle12cDialect,//
+	Oracle8iDialect,//
+	Oracle9iDialect,//
+	PointbaseDialect,//
+	PostgresPlusDialect,//
+	PostgreSQL81Dialect,//
+	PostgreSQL82Dialect,//
+	PostgreSQL91Dialect,//
+	PostgreSQL92Dialect,//
+	PostgreSQL93Dialect,//
+	PostgreSQL94Dialect,//
+	PostgreSQL95Dialect,//
+	PostgreSQL9Dialect,//
+	PostgreSQLDialect,//
+	ProgressDialect,//
+	RDMSOS2200Dialect,//
+	SAPDBDialect,//
+	SQLServer2005Dialect,//
+	SQLServer2008Dialect,//
+	SQLServer2012Dialect,//
+	SQLServerDialect,//
+	Sybase11Dialect,//
+	SybaseAnywhereDialect,//
+	SybaseASE157Dialect,//
+	SybaseASE15Dialect,//
+	SybaseDialect,//
+	Teradata14Dialect,//
+	TeradataDialect,//
+	TimesTenDialect;//
+
 
 	/** If set true will allow use reserved words in DDL, default value is false */
 	private static Boolean globalAllowReservedWords = false;

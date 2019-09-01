@@ -26,13 +26,13 @@ import com.github.drinkjava2.jtransactions.TxResult;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class JFinalTxManager implements ConnectionManager {
+public class JFinalTxConnectionManager implements ConnectionManager {
 	protected final Method getConfigMethod;
 	protected final Method getConnectionMethod;
 	protected final Method releaseConnectionMethod;
 	protected final Method isInTransactionMethod;
 
-	public JFinalTxManager() {
+	public JFinalTxConnectionManager() {
 		Class<?> dbKitClass;
 		Class<?> configClass;
 		try {
@@ -61,11 +61,11 @@ public class JFinalTxManager implements ConnectionManager {
 	}
 
 	private static class JFinalTxConnectionManagerSingleton {// NOSONAR
-		private static final JFinalTxManager INSTANCE = new JFinalTxManager();
+		private static final JFinalTxConnectionManager INSTANCE = new JFinalTxConnectionManager();
 	}
 
 	/** @return A singleton */
-	public static final JFinalTxManager instance() {
+	public static final JFinalTxConnectionManager instance() {
 		return JFinalTxConnectionManagerSingleton.INSTANCE;
 	}
 
@@ -98,7 +98,7 @@ public class JFinalTxManager implements ConnectionManager {
 	}
 
 	@Override
-	public Connection getConnection(Object dataSource) {
+	public Connection getConnection(Object dsOrHolder) {
 		try {
 			Object config = getConfig();
 			return (Connection) getConnectionMethod.invoke(config);
@@ -108,7 +108,7 @@ public class JFinalTxManager implements ConnectionManager {
 	}
 
 	@Override
-	public void releaseConnection(Connection conn, Object dataSource) {
+	public void releaseConnection(Connection conn, Object dsOrHolder) {
 		try {
 			Object config = getConfig();
 			releaseConnectionMethod.invoke(config, conn);

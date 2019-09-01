@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox-beetl</artifactId>
  <packaging>jar</packaging>
- <version>3.0.0</version>
+ <version>1.0</version>
  
  <name>jsqlbox-beetl</name>
  <description>This is a demo project to show use beetl as SQL template engine in jSqlBox</description> 

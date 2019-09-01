@@ -266,6 +266,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.TINYINT, "smallint");
 		mp.put(Type.VARBINARY, "byte");
 		mp.put(Type.VARCHAR, "varchar($l)<255|lvarchar($l)<32739|varchar($l)");
+		copyTo(mp, Dialect.DamengDialect);
 		copyTo(mp, Dialect.InformixDialect);
 		copyTo(mp, Dialect.Informix10Dialect);
 		mp.put(Type.BIGINT, "bigint");
@@ -447,6 +448,7 @@ public class DialectTypeMappingTemplate {
 		mp.put(Type.NVARCHAR, "nvarchar($l)");
 		mp.put(Type.TIMESTAMP, "date");
 		mp.put(Type.VARCHAR, "varchar2($l)<4000|long");
+		copyTo(mp, Dialect.GBaseDialect);
 		copyTo(mp, Dialect.Oracle8iDialect);
 		mp.put(Type.BINARY, "N/A");
 		mp.put(Type.BOOLEAN, "boolean");

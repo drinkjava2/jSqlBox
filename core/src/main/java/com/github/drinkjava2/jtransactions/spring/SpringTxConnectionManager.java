@@ -17,6 +17,7 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jtransactions.ConnectionManager;
+import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxResult;
 
@@ -68,15 +69,6 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	}
 
 	@Override
-	public boolean isInTransaction() {
-		try {
-			return null != isActualTransactionActive.invoke(null);
-		} catch (Exception e) {
-			throw new TransactionsException("Error: SpringTxConnectionManager fail to get transaction status.", e);
-		}
-	}
-
-	@Override
 	public void startTransaction() {
 		throw new TransactionsException(
 				"startTransaction method not implemented by current version, please use Spring's method directly or submit a pull request");
@@ -92,9 +84,14 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	 * Equal to Spring's DataSourceUtils.getConnection()
 	 */
 	@Override
-	public Connection getConnection(Object dataSource) {
+	public Connection getConnection(Object dsOrHolder) {
+		DataSource ds;
+		if (dsOrHolder instanceof DataSource)
+			ds = (DataSource) dsOrHolder;
+		else
+			ds = ((DataSourceHolder) dsOrHolder).getDataSource();
 		try {
-			return (Connection) getConnectionMethod.invoke(null, dataSource);
+			return (Connection) getConnectionMethod.invoke(null, ds);
 		} catch (Exception e) {
 			throw new TransactionsException("Error: SpringTxConnectionManager fail to get connection from dataSource.",
 					e);
@@ -105,11 +102,25 @@ public class SpringTxConnectionManager implements ConnectionManager {
 	 * Equal to Spring's DataSourceUtils.releaseConnection()
 	 */
 	@Override
-	public void releaseConnection(Connection conn, Object dataSource) {
+	public void releaseConnection(Connection conn, Object dsOrHolder) {
+		DataSource ds;
+		if (dsOrHolder instanceof DataSource)
+			ds = (DataSource) dsOrHolder;
+		else
+			ds = ((DataSourceHolder) dsOrHolder).getDataSource();
 		try {
-			releaseConnectionMethod.invoke(null, conn, dataSource);
+			releaseConnectionMethod.invoke(null, conn, ds);
 		} catch (Exception e) {
 			throw new TransactionsException("Error: SpringTxConnectionManager fail to release connection.", e);
+		}
+	}
+
+	@Override
+	public boolean isInTransaction() {
+		try {
+			return null != isActualTransactionActive.invoke(null);
+		} catch (Exception e) {
+			throw new TransactionsException("Error: SpringTxConnectionManager fail to get transaction status.", e);
 		}
 	}
 

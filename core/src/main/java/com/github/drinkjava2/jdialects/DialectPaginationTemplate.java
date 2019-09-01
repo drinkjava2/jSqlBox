@@ -30,6 +30,7 @@ public class DialectPaginationTemplate {
 		case DB2390Dialect:
 		case DB2390V8Dialect:
 		case FrontBaseDialect:
+		case DamengDialect:	
 		case InformixDialect:
 		case IngresDialect:
 		case JDataStoreDialect:
@@ -107,6 +108,7 @@ public class DialectPaginationTemplate {
 		case DB297Dialect:
 		case DB2Dialect:
 			return "select * from ( select inner2_.*, rownumber() over(order by order of inner2_) as rownumber_ from ( select $BODY fetch first $total_rows rows only ) as inner2_ ) as inner1_ where rownumber_ > $skip_rows order by rownumber_";
+		case GBaseDialect:
 		case Oracle8iDialect:
 		case OracleDialect:
 			return "select * from ( select row_.*, rownum rownum_ from ( select $BODY ) row_ ) where rownum_ <= $TOTAL_ROWS and rownum_ > $SKIP_ROWS";
@@ -212,6 +214,7 @@ public class DialectPaginationTemplate {
 		case DataDirectOracle9Dialect:
 		case Oracle10gDialect:
 		case Oracle12cDialect:
+		case GBaseDialect:
 		case Oracle8iDialect:
 		case Oracle9Dialect:
 		case Oracle9iDialect:
@@ -220,6 +223,7 @@ public class DialectPaginationTemplate {
 		case FirebirdDialect:
 			return "select first $PAGESIZE $BODY";
 		case Informix10Dialect:
+		case DamengDialect:
 		case InformixDialect:
 		case IngresDialect:
 		case TimesTenDialect:

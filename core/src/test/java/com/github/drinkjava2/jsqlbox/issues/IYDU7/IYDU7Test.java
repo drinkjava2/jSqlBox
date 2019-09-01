@@ -10,6 +10,12 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
+/**
+ * This is a demo to how to use ORM query
+ * 
+ * @author Yong Zhu
+ * @since 1.7.0
+ */
 public class IYDU7Test extends TestBase {
 	{
 		regTables(Ademo.class, Bdemo.class, Cdemo.class);

@@ -4,6 +4,8 @@ This is a demo project to show use jSqlBox with Atomikos
 这是一个演示项目，演示jSqlBox进行分库操作时，利用atomikos来实现分布式事务以保证多个数据库之间的数据一致性。
 用到以下工具： H2(Database) + jBeanBox(IOC/AOP) + jSqlBox(ORM/Sharding) + Spring XA(XA support for Atomikos) + Atomikos(XA Transaction)
 
+备注：利用XA协议实现分布式事务有它的问题，因为XA协议效率低、理论上也不能保证100%的数据完整性。自jSqlBox3.0.0起，已经自带了支持分库分表分布式事务的GtxConnectionManager，推荐试用。
+
 运行方式： maven test
 
 本示例参考了网上以下文章：   

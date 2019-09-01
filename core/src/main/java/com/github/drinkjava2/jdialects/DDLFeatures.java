@@ -694,6 +694,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
+		case DamengDialect:
 		case InformixDialect: {
 			ddl.addFKeyRefPkeyString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE constraint _FKEYNAME";
 			ddl.addForeignKeyConstraintString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2) constraint _FKEYNAME";
@@ -1214,6 +1215,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
+		case GBaseDialect:
 		case Oracle8iDialect: {
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start with 11 increment by  33";
 			ddl.currentSchemaCommand = "SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL";

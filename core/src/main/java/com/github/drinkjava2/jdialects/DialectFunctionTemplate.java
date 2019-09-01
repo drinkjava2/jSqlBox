@@ -673,6 +673,7 @@ public class DialectFunctionTemplate {
 		mp.put("month", "1=extract(month from $P1)");
 		mp.put("nullif", "*");
 		copyTo(mp, Dialect.InformixDialect);
+		copyTo(mp, Dialect.DamengDialect);
 		copyTo(mp, Dialect.Informix10Dialect);
 		mp.remove("nvl");
 		mp.remove("substr");
@@ -1091,6 +1092,7 @@ public class DialectFunctionTemplate {
 		copyTo(mp, Dialect.OracleDialect);
 		copyTo(mp, Dialect.Oracle10gDialect);
 		copyTo(mp, Dialect.Oracle12cDialect);
+		copyTo(mp, Dialect.GBaseDialect);
 		copyTo(mp, Dialect.Oracle8iDialect);
 		copyTo(mp, Dialect.Oracle9Dialect);
 		copyTo(mp, Dialect.Oracle9iDialect);

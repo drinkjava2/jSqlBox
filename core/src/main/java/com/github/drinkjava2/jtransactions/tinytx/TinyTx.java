@@ -18,6 +18,8 @@ package com.github.drinkjava2.jtransactions.tinytx;
 
 import java.sql.Connection;
 
+import javax.sql.DataSource;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -47,6 +49,14 @@ public class TinyTx implements MethodInterceptor {// NOSONAR
 		this.cm = cm;
 		this.transactionIsolation = transactionIsolation;
 	}
+	
+	public TinyTx(DataSource ds) { 
+	}
+
+	public TinyTx(DataSource ds, Integer transactionIsolation) { 
+		this.transactionIsolation = transactionIsolation;
+	}
+
 
 	@Override
 	public Object invoke(MethodInvocation caller) throws Throwable {// NOSONAR
