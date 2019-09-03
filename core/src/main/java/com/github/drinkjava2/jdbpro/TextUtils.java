@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.StrUtils;
-
 /**
  * TextUtils is used to read Java source file from sources folder, usage: String
  * src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this function
@@ -63,8 +61,8 @@ public abstract class TextUtils {// NOSONAR
 			return null;
 		if (javaFileCache.containsKey(clazz.getName()))
 			return javaFileCache.get(clazz.getName());
-		String classPathName = StrUtils.substringBefore(clazz.getName(), "$");// aa.bb.Cc
-		classPathName = "/" + StrUtils.replace(classPathName, ".", "/");// /aa/bb/Cc
+		String classPathName = substringBefore(clazz.getName(), "$");// aa.bb.Cc
+		classPathName = "/" + replace(classPathName, ".", "/");// /aa/bb/Cc
 		String fileName = classPathName + ".java";// /aa/bb/Cc.java
 		InputStream inputStream = null;
 		try {
@@ -72,8 +70,8 @@ public abstract class TextUtils {// NOSONAR
 			if (inputStream == null) {// Not found, it means in eclipse
 				File file = new File(clazz.getResource(classPathName + ".class").getFile());
 				String absPath = file.getAbsolutePath();
-				absPath = StrUtils.replace(absPath, "\\", "/");
-				String projectFolder = StrUtils.substringBefore(absPath, "/target/");
+				absPath = replace(absPath, "\\", "/");
+				String projectFolder = substringBefore(absPath, "/target/");
 				String realFile = projectFolder + "/src/main/resources" + classPathName + ".java";
 				file = new File(realFile);
 				if (!file.exists()) {
@@ -106,4 +104,74 @@ public abstract class TextUtils {// NOSONAR
 		}
 	}
 
+	/**
+	 * Check whether the given String is empty.
+	 */
+	static boolean isEmpty(Object str) {
+		return str == null || "".equals(str);
+	}
+
+	static String substringBetween(String str, String open, String close) {
+		if (str == null || open == null || close == null) {
+			return null;
+		}
+		int start = str.indexOf(open);
+		if (start != -1) {
+			int end = str.indexOf(close, start + open.length());
+			if (end != -1) {
+				return str.substring(start + open.length(), end);
+			}
+		}
+		return null;
+	}
+
+	static String substringAfter(final String str, final String separator) {
+		if (isEmpty(str)) {
+			return str;
+		}
+		if (separator == null) {
+			return "";
+		}
+		final int pos = str.indexOf(separator);
+		if (pos == -1) {
+			return "";
+		}
+		return str.substring(pos + separator.length());
+	}
+
+	static String substringBefore(final String str, final String separator) {
+		if (isEmpty(str) || separator == null) {
+			return str;
+		}
+		if (separator.isEmpty()) {
+			return "";
+		}
+		final int pos = str.indexOf(separator);
+		if (pos == -1) {
+			return str;
+		}
+		return str.substring(0, pos);
+	}
+
+	static String replace(String originString, String oldPattern, String newPattern) {
+		if (!hasLength(originString) || !hasLength(oldPattern) || newPattern == null) {
+			return originString;
+		}
+		StringBuilder sb = new StringBuilder();
+		int pos = 0;
+		int index = originString.indexOf(oldPattern);
+		int patLen = oldPattern.length();
+		while (index >= 0) {
+			sb.append(originString.substring(pos, index));
+			sb.append(newPattern);
+			pos = index + patLen;
+			index = originString.indexOf(oldPattern, pos);
+		}
+		sb.append(originString.substring(pos));
+		return sb.toString();
+	}
+
+	static boolean hasLength(CharSequence str) {
+		return str != null && str.length() > 0;
+	}
 }

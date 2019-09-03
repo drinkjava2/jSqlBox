@@ -18,8 +18,6 @@ package com.github.drinkjava2.jdbpro;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jdialects.StrUtils;
-
 /**
  * Child class extended from Text support multiple line String. the toString
  * method will return the comments between / * - and * / , To use this function
@@ -42,12 +40,12 @@ public class Text {
 			return textCache.get(clazz);
 		String thisPublicStaticClassName = clazz.getSimpleName();
 		String javaSourceCode = TextUtils.getJavaSourceCode(clazz, "UTF-8");
-		String classText = StrUtils.substringBetween(javaSourceCode, "public static class " + thisPublicStaticClassName,
+		String classText = TextUtils.substringBetween(javaSourceCode, "public static class " + thisPublicStaticClassName,
 				"*/");
-		if (StrUtils.isEmpty(classText))
+		if (TextUtils.isEmpty(classText))
 			throw new RuntimeException("Can not find text between \"public static class " + thisPublicStaticClassName
 					+ " and end tag \"*/\"");
-		String s = StrUtils.substringAfter(classText, "/*-");
+		String s = TextUtils.substringAfter(classText, "/*-");
 		textCache.put(clazz, s);
 		return s;
 	}

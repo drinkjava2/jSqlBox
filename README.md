@@ -56,7 +56,7 @@ jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久�
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId> <!--用于Java6、7环境-->
-   <version>2.0.6</version> <!--或最新版-->
+   <version>3.0.0</version> <!--或最新版-->
 </dependency> 
 ```
 或

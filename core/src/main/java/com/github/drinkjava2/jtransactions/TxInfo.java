@@ -15,15 +15,12 @@ import java.sql.Connection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.github.drinkjava2.jdialects.annotation.jpa.Transient;
-
 /**
  * If a TxInfo existed in current thread's threadlocal variant, it means a
  * transaction started.
  */
 public class TxInfo {
 
-	@Transient
 	private Integer txIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
 
 	// This is designed for bind connection on ds
