@@ -12,6 +12,7 @@ import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
+import com.github.drinkjava2.jsqlbox.gtx.GtxTag;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUnlockServ;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -52,7 +53,7 @@ public class GtxUnlockServTest {
 			ctx[i].setDbCode(i);
 			ctx[i].setConnectionManager(lockCM);
 			ctx[i].setMasters(ctx);
-			ctx[i].executeDDL(ctx[i].toCreateDDL(GtxId.class));
+			ctx[i].executeDDL(ctx[i].toCreateDDL(GtxTag.class));
 			ctx[i].executeDDL(ctx[i].toCreateDDL(Usr.class));
 		}
 
@@ -68,6 +69,7 @@ public class GtxUnlockServTest {
 			ctx[2].setForceCommitFail(); // force ctx[1] commit fail
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
+			e.printStackTrace();
 			ctx[0].rollbackTrans();
 		}
 

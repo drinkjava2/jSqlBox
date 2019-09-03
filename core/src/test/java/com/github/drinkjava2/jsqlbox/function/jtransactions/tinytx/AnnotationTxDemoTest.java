@@ -1,7 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jtransactions.tinytx;
 
-import static com.github.drinkjava2.jbeanbox.JBEANBOX.inject;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -17,7 +15,7 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -51,13 +49,7 @@ public class AnnotationTxDemoTest {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface TX { // This is a customized AOP annotation
-		public Class<?> value() default TheTxBox.class;
-	}
-
-	public static class TheTxBox extends BeanBox {
-		{
-			this.injectConstruct(TinyTx.class, DataSource.class, inject(DataSourceBox.class));
-		}
+		public Class<?> value() default TinyTxAOP.class;
 	}
 
 	SqlBoxContext ctx;

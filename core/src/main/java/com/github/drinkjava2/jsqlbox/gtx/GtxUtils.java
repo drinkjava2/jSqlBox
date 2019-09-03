@@ -23,7 +23,7 @@ import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 import com.github.drinkjava2.jsqlbox.SqlBoxException;
-import com.github.drinkjava2.jtransactions.TransactionsException; 
+import com.github.drinkjava2.jtransactions.TransactionsException;
 
 /**
  * Gtx public static methods
@@ -38,6 +38,7 @@ public abstract class GtxUtils {// NOSONAR
 	public static final String GTXDB = "gtxdb";// DB code No.
 	public static final String GTXTB = "gtxtb";// table name or sharded table name.
 	public static final String GTXENTITY = "gtxentity";// entity class full name
+	public static final String GTXTOPIC = "gtxtopic";// gtx topic used for lock server sharding
 
 	// Below are possible GTXTYPE values
 	public static final String INSERT = "INSERT";
@@ -46,6 +47,8 @@ public abstract class GtxUtils {// NOSONAR
 	public static final String BEFORE = "BEFORE";
 	public static final String DELETE = "DELETE";
 	public static final String AFTER = "AFTER";
+
+	private static String[] topicShardingParam = null;
 
 	/**
 	 * According entity's sharding setting, create lock record in GtxInfo
@@ -100,9 +103,14 @@ public abstract class GtxUtils {// NOSONAR
 	 */
 	public static void saveLockAndLog(SqlBoxContext lockCtx, GtxInfo gtxInfo) throws Exception {
 		SqlBoxException.assureNotNull(gtxInfo.getGtxId(), "GtxId not set");
-		lockCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
+
+		SqlBoxContext locker = lockCtx;
+		if (gtxInfo.getLockDb() != null)
+			locker = (SqlBoxContext) lockCtx.getMasters()[gtxInfo.getLockDb()];
+
+		locker.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
-			lockCtx.eInsert(gtxInfo.getGtxId());
+			locker.eInsert(gtxInfo.getGtxId());
 			Long logNo = 1L;
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
@@ -113,25 +121,27 @@ public abstract class GtxUtils {// NOSONAR
 				md.getColumnByColName(GtxUtils.GTXDB).setValue(gtxLog.getGtxDB());
 				md.getColumnByColName(GtxUtils.GTXTB).setValue(gtxLog.getGtxTB());
 				md.getColumnByColName(GtxUtils.GTXENTITY).setValue(entity.getClass().getName());
-				lockCtx.eInsert(entity, md);
+				locker.eInsert(entity, md);
 			}
-
 			for (GtxLock lock : gtxInfo.getGtxLockList())
-				lockCtx.eInsert(lock);
-			lockCtx.getConnectionManager().commitTransaction();
+				locker.eInsert(lock);
+			locker.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
-			lockCtx.getConnectionManager().rollbackTransaction();
+			locker.getConnectionManager().rollbackTransaction();
 			throw e;
 		}
 	}
 
 	/** Delete GTX lock and log */
 	public static void deleteLockAndLog(SqlBoxContext lockCtx, GtxInfo gtxInfo) throws Exception {
-		lockCtx.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
+		SqlBoxContext locker = lockCtx;
+		if (gtxInfo.getLockDb() != null)
+			locker = (SqlBoxContext) lockCtx.getMasters()[gtxInfo.getLockDb()];
+		locker.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
 			String gid = gtxInfo.getGtxId().getGid();
-			lockCtx.eDelete(gtxInfo.getGtxId());// delete GtxID! here will auto sharding 
-			lockCtx.pExecute("delete from gtxlock where gid=?", gid, JSQLBOX.shardDB(gid));
+			locker.eDelete(gtxInfo.getGtxId());// delete GtxID! here will auto sharding
+			locker.pExecute("delete from gtxlock where gid=?", gid, JSQLBOX.shardDB(gid));
 			Set<String> tableSet = new HashSet<String>();
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
@@ -139,11 +149,11 @@ public abstract class GtxUtils {// NOSONAR
 				tableSet.add(md.getTableName().toLowerCase());
 			}
 			for (String table : tableSet)
-				lockCtx.iExecute("delete from ", table, " where ", GTXID, "=?", JSQLBOX.param(gid),
+				locker.iExecute("delete from ", table, " where ", GTXID, "=?", JSQLBOX.param(gid),
 						JSQLBOX.shardDB(gid));
-			lockCtx.getConnectionManager().commitTransaction();
+			locker.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
-			lockCtx.getConnectionManager().rollbackTransaction();
+			locker.getConnectionManager().rollbackTransaction();
 			throw e;
 		}
 	}
@@ -165,12 +175,15 @@ public abstract class GtxUtils {// NOSONAR
 			col.setShardDatabase(null);
 			col.setShardTable(null);
 		}
-		t.column(GTXID).CHAR(32).id().setValue(null); // gtxid + gtxlogno is compound PKEY
-		t.column(GTXLOGNO).LONG().id().setValue(null);
-		t.column(GTXTYPE).CHAR(8).setValue(null);
-		t.column(GTXDB).INTEGER().setValue(null);
-		t.column(GTXTB).VARCHAR(64).setValue(null);// oracle limit is 30
-		t.column(GTXENTITY).VARCHAR(250).setValue(null);// oracle limit is 30
+		t.column(GTXID).CHAR(32).id().setValueExist(true); // gtxid + gtxlogno is compound PKEY
+		t.column(GTXLOGNO).LONG().id().setValueExist(true);
+		t.column(GTXTYPE).CHAR(8).setValueExist(true);
+		t.column(GTXDB).INTEGER().setValueExist(true);
+		t.column(GTXTB).VARCHAR(64).setValueExist(true);// oracle limit is 30
+		t.column(GTXENTITY).VARCHAR(250).setValueExist(true);
+		ColumnModel topicCol = t.column(GTXTOPIC).VARCHAR(50).setValueExist(true);
+		if (topicShardingParam != null)
+			topicCol.setShardDatabase(topicShardingParam);
 		TableModel.sortColumns(t.getColumns());
 		return t;
 	}

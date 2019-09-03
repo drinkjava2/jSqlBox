@@ -57,7 +57,7 @@
  
 
  <dependencies>
-    <!-- jSqlBox is a ORM tool based on Apache-DbUtils and jDialects-->
+    <!-- jSqlBox is a ORM tool based on Apache-DbUtils -->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>

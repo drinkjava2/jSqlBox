@@ -99,9 +99,9 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			throw new TransactionsException("GTX not started, can not commit");
 		TxResult result = gtxInfo.getTxResult().setStage(START);
 
-		// Save GtxId tags into DBs
+		// Save GtxTag into DBs, use a Tag to confirm tx committed
 		for (Object ctx : gtxInfo.getConnectionCache().keySet())
-			((SqlBoxContext) ctx).eInsert(gtxInfo.getGtxId());// use a Tag to confirm tx committed on DB
+			((SqlBoxContext) ctx).eInsert(new GtxTag(gtxInfo.getGtxId().getGid()));
 
 		// Save lock and log
 		try {
@@ -146,11 +146,11 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 			throw e;
 		}
 
-		// Delete gtxId tags
+		// Delete gtxTags
 		for (Object key : gtxInfo.getConnectionCache().keySet()) {
 			SqlBoxContext ctx = (SqlBoxContext) key;
 			try {
-				ctx.eDelete(gtxInfo.getGtxId());// delete tags, work on autoCommit mode
+				ctx.eDelete(new GtxTag(gtxInfo.getGtxId().getGid()));// In autoCommit mode delete tags
 			} catch (Exception e) {
 				result.setStage(CLEANUP_FAIL);
 				result.addCommitEx(e);

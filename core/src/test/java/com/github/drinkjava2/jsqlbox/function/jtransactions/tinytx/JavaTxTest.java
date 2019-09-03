@@ -10,7 +10,7 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 
 /**
  * TinyTx is a tiny and clean declarative transaction tool, in this unit test
@@ -43,7 +43,7 @@ public class JavaTxTest {
 
 	@Test
 	public void doTest() throws Exception {
-		JBEANBOX.getBeanBox(JavaTxTest.class).addBeanAop(new TinyTx(), "tx_*");
+		JBEANBOX.getBeanBox(JavaTxTest.class).addBeanAop(new TinyTxAOP(), "tx_*");
 		JavaTxTest tester = BeanBox.getBean(JavaTxTest.class);
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())

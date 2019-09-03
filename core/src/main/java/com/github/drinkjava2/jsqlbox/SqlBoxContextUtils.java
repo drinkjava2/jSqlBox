@@ -48,7 +48,7 @@ import com.github.drinkjava2.jsqlbox.converter.FieldConverter;
 import com.github.drinkjava2.jsqlbox.converter.FieldConverterUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
-import com.github.drinkjava2.jsqlbox.gtx.GtxId;
+import com.github.drinkjava2.jsqlbox.gtx.GtxTag;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUtils;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
@@ -620,7 +620,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 
 		int result = doEntityInsertTry(ctx, entityBean, optionItems);
-		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId)) // if in GTX transaction?
+		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxTag)) // if in GTX transaction?
 			GtxUtils.reg(ctx, entityBean, GtxUtils.INSERT);
 		return result;
 	}
@@ -762,10 +762,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return entityUpdateTry(paramCtx, entityBean, newParams);
 		}
 		Object oldEntity = null;
-		if (ctx.isGtxOpen() && !(entityBean instanceof GtxId))// if in GTX transaction?
+		if (ctx.isGtxOpen() && !(entityBean instanceof GtxTag))// if in GTX transaction?
 			oldEntity = doEntityLoadByIdTry(ctx, entityBean.getClass(), entityBean, optionItems);
 		int result = doEntityUpdateTry(ctx, entityBean, optionItems);
-		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId)) {
+		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxTag)) {
 			GtxUtils.reg(ctx, oldEntity, GtxUtils.BEFORE);
 			GtxUtils.reg(ctx, entityBean, GtxUtils.AFTER);
 		}
@@ -885,10 +885,10 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return entityDeleteByIdTry(paramCtx, entityClass, id, newParams);
 		}
 		Object oldEntity = null;
-		if (ctx.isGtxOpen() && !(id instanceof GtxId))// if in GTX transaction?
+		if (ctx.isGtxOpen() && !(id instanceof GtxTag))// if in GTX transaction?
 			oldEntity = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
 		int result = doEntityDeleteByIdTry(ctx, entityClass, id, optionItems);
-		if (result == 1 && ctx.isGtxOpen() && !(id instanceof GtxId))
+		if (result == 1 && ctx.isGtxOpen() && !(id instanceof GtxTag))
 			GtxUtils.reg(ctx, oldEntity, GtxUtils.DELETE);
 		return result;
 	}
@@ -980,7 +980,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return entityLoadTry(paramCtx, entityBean, newParams);
 		}
 		int result = doEntityLoadTry(ctx, entityBean, optionItems);
-		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxId))
+		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxTag))
 			GtxUtils.reg(ctx, entityBean, GtxUtils.BEFORE);
 		return result;
 	}
@@ -1067,7 +1067,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 			return entityLoadByIdTry(paramCtx, entityClass, id, newParams);
 		}
 		T result = doEntityLoadByIdTry(ctx, entityClass, id, optionItems);
-		if (result != null && ctx.isGtxOpen() && !(id instanceof GtxId))
+		if (result != null && ctx.isGtxOpen() && !(id instanceof GtxTag))
 			GtxUtils.reg(ctx, result, GtxUtils.EXISTSTRICT);
 		return result;
 	}
@@ -1137,7 +1137,7 @@ public abstract class SqlBoxContextUtils {// NOSONAR
 		}
 		Object bean = buildBeanById(ctx, entityClass, id, optionItems);
 		boolean result = doEntityExistById(ctx, entityClass, bean, optionItems);
-		if (result && ctx.isGtxOpen() && !(id instanceof GtxId))
+		if (result && ctx.isGtxOpen() && !(id instanceof GtxTag))
 			GtxUtils.reg(ctx, bean, GtxUtils.EXISTID);
 		return result;
 	}

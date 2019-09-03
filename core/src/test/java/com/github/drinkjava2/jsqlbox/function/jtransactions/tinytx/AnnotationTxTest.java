@@ -16,7 +16,7 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 
 /**
  * TinyTx is a tiny and clean declarative transaction tool, in this unit test
@@ -82,7 +82,7 @@ public class AnnotationTxTest {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface TX {
-		public Class<?> value() default TinyTx.class;
+		public Class<?> value() default TinyTxAOP.class;
 	}
 
 }

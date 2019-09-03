@@ -278,6 +278,14 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		reloadTailModels();
 	}
 
+	/** Start a transaction on a given locker server */
+	public void startTransOnLockDb(int lockDb) {
+		this.getConnectionManager().startTransaction();
+		GtxConnectionManager gcm = (GtxConnectionManager) this.getConnectionManager();
+		GtxInfo gtxInfo = (GtxInfo) gcm.getThreadTxInfo();
+		gtxInfo.setLockDb(lockDb);
+	}
+
 	/**
 	 * Manually call this method to reload tail TableModels when database structure
 	 * be changed by DDL command
@@ -408,7 +416,10 @@ public class SqlBoxContext extends DbPro {// NOSONAR
 		return SqlBoxContextUtils.entityFindAll(this, entityClass, optionItems);
 	}
 
-	/** Find entity according SQL, entityClass usually is first param, if not found, return empty list */
+	/**
+	 * Find entity according SQL, entityClass usually is first param, if not found,
+	 * return empty list
+	 */
 	public <T> List<T> eFindBySQL(Object... optionItems) {
 		return iQueryForEntityList(optionItems);
 	}

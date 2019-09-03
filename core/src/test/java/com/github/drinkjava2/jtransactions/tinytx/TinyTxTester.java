@@ -28,13 +28,14 @@ import com.github.drinkjava2.jtransactions.config.JTransTinyJdbc;
  * @since 1.0.0
  */
 public class TinyTxTester {
-	JTransTinyJdbc tiny = new JTransTinyJdbc((DataSource) getBean(DataSourceBox.class), TinyTxConnectionManager.instance());
+	JTransTinyJdbc tiny = new JTransTinyJdbc((DataSource) getBean(DataSourceBox.class),
+			TinyTxConnectionManager.instance());
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface TX {
-		public Class<?> value() default TinyTx.class;
+		public Class<?> value() default TinyTxAOP.class;
 	}
 
 	@TX

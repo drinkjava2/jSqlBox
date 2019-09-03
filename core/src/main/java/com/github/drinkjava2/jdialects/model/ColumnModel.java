@@ -142,6 +142,8 @@ public class ColumnModel {
 		col.shardTable = shardTable;
 		col.shardDatabase = shardDatabase;
 		col.converterClassOrName = converterClassOrName;
+		col.value = value;
+		col.valueExist = valueExist;
 		return col;
 	}
 
@@ -546,7 +548,7 @@ public class ColumnModel {
 
 	public void setComment(String comment) {
 		this.comment = comment;
-	} 
+	}
 
 	public String getEntityField() {
 		return entityField;

@@ -8,7 +8,7 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -52,7 +52,7 @@ public class JavaTxDemoTest {
 
 	@Test
 	public void doTest() throws Exception {
-		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(new TinyTx(), "tx*");
+		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(new TinyTxAOP(), "tx*");
 		JavaTxDemoTest tester = BeanBox.getBean(JavaTxDemoTest.class);
 		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
 		try {

@@ -18,7 +18,7 @@ import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
-import com.github.drinkjava2.jtransactions.grouptx.GroupTx;
+import com.github.drinkjava2.jtransactions.grouptx.GroupTxAOP;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -33,7 +33,7 @@ public class AnnotationGroupTxTest {
 	SqlBoxContext ctx2 = JBEANBOX.getBean(SqlBoxContextBox2.class);
 
 	@Before
-	public void init() {  
+	public void init() {
 		ctx1.executeDDL(ctx1.toCreateDDL(Usr.class));
 		ctx2.executeDDL(ctx2.toCreateDDL(Usr.class));
 		for (int i = 1; i <= 100; i++) {
@@ -76,7 +76,7 @@ public class AnnotationGroupTxTest {
 		try {
 			t.groupRollback();
 		} catch (Exception e) {
-			e.printStackTrace(); 
+			e.printStackTrace();
 		}
 		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
@@ -132,7 +132,7 @@ public class AnnotationGroupTxTest {
 	@Target({ ElementType.METHOD })
 	@AOP
 	public static @interface GTransaction {
-		public Class<?> value() default GroupTx.class;
-	} 
+		public Class<?> value() default GroupTxAOP.class;
+	}
 
 }

@@ -50,6 +50,9 @@ public abstract class GtxUnlockServ {// NOSONAR
 	private static void initContext(SqlBoxContext userCtx) {
 		GtxConnectionManager lockCM = (GtxConnectionManager) userCtx.getConnectionManager();
 		lockCtx = lockCM.getLockCtx();
+
+		System.out.println("lcokCtx.master:" + lockCtx.getMasters());
+
 		ctxs = new SqlBoxContext[userCtx.getMasters().length];
 		for (int i = 0; i < userCtx.getMasters().length; i++) {
 			SqlBoxContext userCtxArr = (SqlBoxContext) userCtx.getMasters()[i];
@@ -78,15 +81,26 @@ public abstract class GtxUnlockServ {// NOSONAR
 	public static void start(SqlBoxContext ctx, long intervalSecond, long maxLoopTimes) {// NOSONAR
 		initContext(ctx);
 		long loop = 0;
+		Integer lockDb = null; // if locker sharded, use lockDb to assing the locker server
 		do {
-			List<GtxId> gtxIdList = lockCtx.eFindAll(GtxId.class);
+			SqlBoxContext locker = lockCtx;
+			if (lockCtx.getMasters() != null) {
+				if (lockDb == null)
+					lockDb = 0;
+				locker = (SqlBoxContext) lockCtx.getMasters()[lockDb];
+				lockDb++;
+				if (lockDb >= lockCtx.getMasters().length)
+					lockDb = 0;
+			}
+
+			List<GtxId> gtxIdList = locker.eFindAll(GtxId.class);
 			for (GtxId gtxId : gtxIdList) {
 				String id = gtxId.getGid();
 				if (gtxIdCache.containsKey(id)) {
 					if ("LOADED".equals(gtxIdCache.get(id))) {
 						gtxIdCache.put(id, "TRY UNLOCK"); // only try once
 						try {
-							if (unlockOne(id)) {// second time unlock it
+							if (unlockOne(lockDb, id)) {// second time unlock it
 								gtxIdCache.remove(id);
 								logger.info("Unlocked success for gtxid:" + id);
 							} else {
@@ -112,65 +126,100 @@ public abstract class GtxUnlockServ {// NOSONAR
 		} while (maxLoopTimes <= 0 || loop < maxLoopTimes);
 	}
 
+	/** Equal to forceUnlock(null, ctx, gtxId); */
+	public static boolean forceUnlock(SqlBoxContext ctx, String gtxId) {
+		return forceUnlock(null, ctx, gtxId);
+	}
+
 	/**
 	 * Force unlock a given gtxId, usually used on unit test only, return true if
 	 * success, otherwise return false means require manually unlock
+	 * 
+	 * @param locker,
+	 *            the locker , if not sharded, set to null to use default lockCtx
+	 * @param ctx
+	 *            the SqlBoxContext belong to one bussiness Db
+	 * @param gtxId
+	 *            the gtxId
+	 * @return true if unlocked
 	 */
-	public static boolean forceUnlock(SqlBoxContext ctx, String gtxId) {
+	public static boolean forceUnlock(Integer locker, SqlBoxContext ctx, String gtxId) {
 		initContext(ctx);
-		return unlockOne(gtxId);
+		return unlockOne(locker, gtxId);
+	}
+
+	/** Equal to forceUnlock(null, ctx, txResult); */
+	public static boolean forceUnlock(SqlBoxContext ctx, TxResult txResult) {
+		return forceUnlock(null, ctx, txResult);
 	}
 
 	/**
 	 * Force unlock a given TxResult, usually used on unit test only, return true if
 	 * success, otherwise return false means require manually unlock
+	 * 
+	 * @param locker,
+	 *            the locker , if not sharded, set to null to use default lockCtx
+	 * @param ctx
+	 *            the SqlBoxContext belong to one bussiness Db
+	 * @param txResult
+	 *            the TxResult
+	 * @return true if unlocked
 	 */
-	public static boolean forceUnlock(SqlBoxContext ctx, TxResult txResult) {
+	public static boolean forceUnlock(Integer locker, SqlBoxContext ctx, TxResult txResult) {
 		initContext(ctx);
 		try {
-			return unlockOne(txResult.getGid());
+			return unlockOne(locker, txResult.getGid());
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("forceUnlock fail, ",e);
 			return false;
 		}
 	}
 
-	private static boolean unlockOne(String gid) {
+	private static boolean unlockOne(Integer lockNo, String gid) {
+		SqlBoxContext locker = lockCtx;
+		if (lockNo != null)
+			locker = (SqlBoxContext) lockCtx.getMasters()[lockNo];
+
 		GtxId lockGid = null; // First check and read if gtxId exist on Lock Server
-		lockGid = lockCtx.eLoadByIdTry(GtxId.class, gid);
+		lockGid = locker.eLoadByIdTry(GtxId.class, gid);
 		if (lockGid == null) {
-			logger.error("Can not access lock server");
+			logger.error("Can not access lock server:" + lockNo);
 			return false;
 		}
-		List<List<Integer>> DbLstLst = lockCtx.iExecute("select distinct(db) from gtxlock where gid=?", param(gid),
+		List<List<Integer>> dbLstLst = locker.iExecute("select distinct(db) from gtxlock where gid=?", param(gid),
 				new ColumnListHandler<Integer>());
-		List<Integer> dbList = DbLstLst.get(0);
+		List<Integer> dbList = dbLstLst.get(0);
 
 		for (Integer db : dbList) {
-			executeUndo(db, gid);
+			executeUndo(lockNo, db, gid);
 		}
 
-		lockCtx.eDeleteById(GtxId.class, gid); // if no error, means all unlocked, can remove gid
+		locker.eDeleteById(GtxId.class, gid); // if no error, means all unlocked, can remove gid
 
 		return true;// So far, all databases are OK
 	}
 
-	private static void executeUndo(Integer db, String gid) {
-		String _gid = ctxs[db].pQueryForString("select gid from gtxid where gid=?", gid);
+	private static void executeUndo(Integer lockNo, Integer db, String gid) {
+		SqlBoxContext locker = lockCtx;
+		if (lockNo != null)
+			locker = (SqlBoxContext) lockCtx.getMasters()[lockNo];
+
+		String _gid = ctxs[db].nQueryForString("select gid from gtxtag where gid=?", gid);
 		if (!gid.equals(_gid))
 			return;// no undo log or undo log already executed
-		List<List<String>> tmp = lockCtx.iExecute("select distinct(entityTb) from gtxlock where gid=?", param(gid),
+		List<List<String>> tmp = locker.iExecute("select distinct(entityTb) from gtxlock where gid=?", param(gid),
 				" and db=?", param(db), new ColumnListHandler<String>());
 		List<String> tbList = tmp.get(0);
 		ctxs[db].startTrans();
 		try {
 			for (String tb : tbList) {
-				List<Tail> oneRecord = lockCtx.eFindBySQL(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
+				List<Tail> oneRecord = locker.eFindBySQL(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
 						" and gtxid=?", param(gid), " order by GTXLOGNO desc");
 				for (Tail tail : oneRecord) {
 					undo(db, tb, tail);
 				}
 			}
+			ctxs[db].eDelete(new GtxTag(gid));
 			ctxs[db].commitTrans();
 		} catch (Exception e) {
 			ctxs[db].rollbackTrans();

@@ -18,6 +18,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
+import com.github.drinkjava2.jsqlbox.gtx.GtxTag;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUnlockServ;
 import com.github.drinkjava2.jtransactions.TxResult;
 import com.zaxxer.hikari.HikariDataSource;
@@ -28,9 +29,11 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Yong Zhu
  * @since 2.0.7
  */
-public class GtxShardDbTbLockerTest {
-	private static int DB_SHARD_QTY = 5;
-	SqlBoxContext[] ctx = new SqlBoxContext[3];
+public class GtxShardDbTbLockDbTest {
+	private static final int DB_SHARD_QTY = 5;
+
+	SqlBoxContext[] ctxs = new SqlBoxContext[3];
+	SqlBoxContext[] lockCtxs = new SqlBoxContext[3];
 
 	private static DataSource newTestDataSource() {
 		HikariDataSource ds = new HikariDataSource();
@@ -47,67 +50,72 @@ public class GtxShardDbTbLockerTest {
 		SqlBoxContext.resetGlobalVariants();
 		SqlBoxContext.setGlobalNextAllowShowSql(true);
 
-		SqlBoxContext lock = new SqlBoxContext(newTestDataSource());
-		lock.setName("lock");
-		lock.executeDDL(lock.toCreateDDL(GtxId.class));
-		lock.executeDDL(lock.toCreateDDL(GtxLock.class));
-		lock.executeDDL(lock.toCreateGtxLogDDL(DemoUsr.class));
-
-		GtxConnectionManager lockCM = new GtxConnectionManager(lock);
 		for (int i = 0; i < 3; i++) {
-			ctx[i] = new SqlBoxContext(newTestDataSource());
-			ctx[i].setName("db");
-			ctx[i].setDbCode(i);
-			ctx[i].setConnectionManager(lockCM);
-			ctx[i].setMasters(ctx);
-			ctx[i].executeDDL(ctx[i].toCreateDDL(GtxId.class));
+			lockCtxs[i] = new SqlBoxContext(newTestDataSource());
+			lockCtxs[i].setName("lock");
+			lockCtxs[i].setDbCode(i);
+			lockCtxs[i].executeDDL(lockCtxs[i].toCreateDDL(GtxId.class));
+			lockCtxs[i].executeDDL(lockCtxs[i].toCreateDDL(GtxLock.class));
+			lockCtxs[i].executeDDL(lockCtxs[i].toCreateGtxLogDDL(DemoUsr.class));
+			lockCtxs[i].setMasters(lockCtxs);
+		}
+
+		GtxConnectionManager lockCM = new GtxConnectionManager(lockCtxs[0]);// random choose 1
+		for (int i = 0; i < 3; i++) {
+			ctxs[i] = new SqlBoxContext(newTestDataSource());
+			ctxs[i].setName("db");
+			ctxs[i].setDbCode(i);
+			ctxs[i].setConnectionManager(lockCM);
+			ctxs[i].setMasters(ctxs);
+			ctxs[i].executeDDL(ctxs[i].toCreateDDL(GtxTag.class));
 			TableModel model = TableModelUtils.entity2Model(DemoUsr.class);
 			for (int j = 0; j < DB_SHARD_QTY; j++) {
 				model.setTableName("DemoUsr_" + j);
-				ctx[i].executeDDL(ctx[i].toCreateDDL(model));
+				ctxs[i].executeDDL(ctxs[i].toCreateDDL(model));
 			}
 		}
-		SqlBoxContext.setGlobalSqlBoxContext(ctx[0]);// the default ctx
+		SqlBoxContext.setGlobalSqlBoxContext(ctxs[0]);// the default ctx
 	}
 
 	@Test
 	public void commitTest() {
-		ctx[0].startTrans();
+		ctxs[0].startTransOnLockDb(1);
 		try {
 			new DemoUsr().setId(0).setAge(0).insert(); // db0, tb0
 			new DemoUsr().setId(1).setAge(10).insert(); // db1, tb1
 			new DemoUsr().setId(4).setAge(11).insert(); // db1, tb1
 			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
-			ctx[0].commitTrans();
+			ctxs[0].commitTrans();
 		} catch (Exception e) {
-			ctx[0].rollbackTrans();
+			e.printStackTrace();
+			ctxs[0].rollbackTrans();
 		}
-		Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
-		Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-		Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
+		Assert.assertEquals(1, ctxs[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
+		Assert.assertEquals(2, ctxs[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
+		Assert.assertEquals(1, ctxs[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	@Test
 	public void commitFailTest() {
-		ctx[0].startTrans();
+		ctxs[0].startTransOnLockDb(1);
 		try {
-			new DemoUsr().setId(0).setAge(0).insert(); // db0, tb0
-			new DemoUsr().setId(1).setAge(10).insert(); // db1, tb1
-			new DemoUsr().setId(4).setAge(11).insert(); // db1, tb1
-			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
-			Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
-			Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-			Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
-			ctx[2].setForceCommitFail(); // force db2 commit fail
-			ctx[0].commitTrans(); // exception will throw
+			new DemoUsr().setId(0).setAge(0).insert(); // locker1, db0, tb0
+			new DemoUsr().setId(1).setAge(10).insert(); // locker1, db1, tb1
+			new DemoUsr().setId(4).setAge(11).insert(); // locker1, db1, tb1
+			new DemoUsr().setId(2).setAge(40).insert(); // locker1, db2, tb4
+			Assert.assertEquals(1, ctxs[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
+			Assert.assertEquals(2, ctxs[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
+			Assert.assertEquals(1, ctxs[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
+			ctxs[2].setForceCommitFail(); // force db2 commit fail
+			ctxs[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
 			e.printStackTrace();
-			TxResult result = ctx[0].rollbackTrans();
-			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
+			TxResult result = ctxs[0].rollbackTrans();
+			GtxUnlockServ.forceUnlock(1, ctxs[0], result);// Force unlock for unit test only
 		}
-		Assert.assertEquals(0, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
-		Assert.assertEquals(0, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-		Assert.assertEquals(0, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
+		Assert.assertEquals(0, ctxs[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
+		Assert.assertEquals(0, ctxs[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
+		Assert.assertEquals(0, ctxs[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	public static class DemoUsr extends ActiveRecord<DemoUsr> {

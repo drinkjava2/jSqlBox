@@ -13,6 +13,7 @@ import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxId;
 import com.github.drinkjava2.jsqlbox.gtx.GtxLock;
+import com.github.drinkjava2.jsqlbox.gtx.GtxTag;
 import com.github.drinkjava2.jsqlbox.gtx.GtxUnlockServ;
 import com.github.drinkjava2.jtransactions.TxResult;
 import com.zaxxer.hikari.HikariDataSource;
@@ -54,7 +55,7 @@ public class GtxTest {
 			ctx[i].setDbCode(i);
 			ctx[i].setConnectionManager(lockCM);
 			ctx[i].setMasters(ctx);
-			ctx[i].executeDDL(ctx[i].toCreateDDL(GtxId.class));
+			ctx[i].executeDDL(ctx[i].toCreateDDL(GtxTag.class));
 			ctx[i].executeDDL(ctx[i].toCreateDDL(Usr.class));
 		}
 	}

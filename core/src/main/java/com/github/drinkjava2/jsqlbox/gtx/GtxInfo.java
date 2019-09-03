@@ -31,6 +31,8 @@ public class GtxInfo extends TxInfo {
 	private GtxId gtxId = new GtxId("G" + UUID25Generator.getUUID25() + UUIDAnyGenerator.getAnyLengthRadix36UUID(6));
 	private TxResult txResult = new TxResult().setGid(gtxId.getGid()); // tx result will return to user
 
+	private Integer lockDb; // optional, manually assign the tx on a locker server
+
 	private List<GtxLog> gtxLogList = null;
 
 	private List<GtxLock> gtxLockList = null;
@@ -78,6 +80,14 @@ public class GtxInfo extends TxInfo {
 
 	public void setTxResult(TxResult txResult) {
 		this.txResult = txResult;
+	}
+
+	public Integer getLockDb() {
+		return lockDb;
+	}
+
+	public void setLockDb(Integer lockDb) {
+		this.lockDb = lockDb;
 	}
 
 }

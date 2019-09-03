@@ -11,24 +11,19 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
-import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 
 /**
- * GtxId used for databases to store a GtxId to tag a global transactions is
- * committed on this database
+ * GtxIdTag used for save a gtxid tag in DBs
  */
-public class GtxId {
-	@Column(length = 32)
+public class GtxTag {
 	@Id
-	private String gid;
+	private String gid; // the gtxId
 
-	private Integer unlockTry = 0; // unlockTry times
-
-	public GtxId() {// default constructor
+	public GtxTag() {// default constructor
 	}
 
-	public GtxId(String gid) {// default constructor
+	public GtxTag(String gid) {
 		this.gid = gid;
 	}
 
@@ -36,17 +31,8 @@ public class GtxId {
 		return gid;
 	}
 
-	public GtxId setGid(String gid) {
+	public GtxTag setGid(String gid) {
 		this.gid = gid;
-		return this;
-	}
-
-	public Integer getUnlockTry() {
-		return unlockTry;
-	}
-
-	public GtxId setUnlockTry(Integer unlockTry) {
-		this.unlockTry = unlockTry;
 		return this;
 	}
 

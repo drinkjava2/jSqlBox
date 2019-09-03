@@ -32,6 +32,7 @@ public class GtxLock {
 	private String entityTb; // Unsharded origin entity table name
 
 	private String gid; // GTX Id
+	private String topic; // topic is used for sharding
 
 	public Integer getDb() {
 		return db;
@@ -71,6 +72,14 @@ public class GtxLock {
 
 	public void setEntityTb(String entityTb) {
 		this.entityTb = entityTb;
+	}
+
+	public String getTopic() {
+		return topic;
+	}
+
+	public void setTopic(String topic) {
+		this.topic = topic;
 	}
 
 }

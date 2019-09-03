@@ -106,7 +106,7 @@ public class ShardingModTool implements ShardingTool {
 			shardkey2 = shardkey[1];
 		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("ShardDatabase key value can not be null");
+			throw new SqlBoxException("ShardDatabase key value can not be null, on table:"+col.getTableModel().getTableName()+", column:"+col.getColumnName());
 
 		Set<Integer> set = new HashSet<Integer>();
 
