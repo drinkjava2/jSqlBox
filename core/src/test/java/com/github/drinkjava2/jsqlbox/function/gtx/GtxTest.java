@@ -98,7 +98,8 @@ public class GtxTest {
 			System.out.println(1 / 0);
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			ctx[0].rollbackTrans();
+			TxResult result=ctx[0].rollbackTrans();
+			GtxUnlockServ.forceUnlock(ctx[0], result);
 		}
 		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx[1].eCountAll(Usr.class));

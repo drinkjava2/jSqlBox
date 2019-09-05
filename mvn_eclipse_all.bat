@@ -12,7 +12,7 @@ cd jbooox
 call mvn eclipse:eclipse
 cd..
 
-cd jsqlbox-beetlsql
+cd jsqlbox-beetl
 call mvn eclipse:eclipse
 cd..
 

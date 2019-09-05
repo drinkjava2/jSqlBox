@@ -64,30 +64,32 @@ jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久�
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox-java8</artifactId> <!--用于Java8及以上环境-->
-   <version>2.0.6/version> <!--或最新版-->
+   <version>3.0.0/version> <!--或最新版-->
 </dependency> 
 ```
 
 ## 入门 | First Example
 以下示例演示了jSqlBox的基本配置和使用:
 ```
-public class HelloWorld implements ActiveEntity<HelloWorld> {
-    private String name;
-    public String getName() {return name; }
-    public void setName(String name) {this.name = name; }
+public class HelloWorld extends ActiveRecord<HelloWorld> {
+	@Id
+	@Column(length = 20)
+	private String name;
+	
+	public String getName() { return name;}
+	
+	public HelloWorld setName(String name) { this.name = name;return this;}
 
-    public static void main(String[] args) {
-        DataSource ds = JdbcConnectionPool
-                .create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-        SqlBoxContext ctx = new SqlBoxContext(ds);
-        SqlBoxContext.setGlobalSqlBoxContext(ctx);
-        String[] ddls = ctx.toCreateDDL(HelloWorld.class);
-        for (String ddl : ddls)
-               ctx.nExecute(ddl);
-
-        new HelloWorld().putField("name", "Hello jSqlBox").insert();
-        System.out.println(ctx.iQueryForString("select name from HelloWorld"));
-    }
+	public static void main(String[] args) throws SQLException {
+		DataSource ds = JdbcConnectionPool
+		.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+		SqlBoxContext ctx = new SqlBoxContext(ds);
+		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		for (String ddl : ctx.toDropAndCreateDDL(HelloWorld.class))
+			ctx.nExecute(ddl);
+		new HelloWorld().setName("Hellow jSqlBox").insert();
+		System.out.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
+	}
 }
 ```
 
@@ -100,16 +102,15 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 * [jsqlbox-in-springboot](../../tree/master/demo/jsqlbox-in-springboot) 演示jSqlBox在SpringBoot环境下的配置和使用。  
 * [jsqlbox-in-springboot-mybatis](../../tree/master/demo/jsqlbox-in-springboot-mybatis) 演示在SpringBoot环境下jSqlBox和MyBatis的混合使用。
 * [jsqlbox-java8-demo](../../tree/master/demo/jsqlbox-java8-demo) 主要演示jSqlBox-Java8版的两个特点：实体类只需要声明接口、利用Lambda来写SQL。
-* [jsqlbox-xa-atomikos](../../tree/master/demo/jsqlbox-xa-atomikos) 一个jSqlBox在分布式事务环境下分库分表操作的演示。  
-* [jsqlbox-beetlsql](../../tree/master/demo/jsqlbox-beetlsql) 演示如何在jSqlBox中开发和使用其它模板引擎如BeetlSQL。
+* [jsqlbox-xa-atomikos](../../tree/master/demo/jsqlbox-xa-atomikos) 一个jSqlBox利用Atomikos使用XA分布式事务的演示。  
+* [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetl) 演示如何在jSqlBox中开发和使用其它模板引擎如BeetlSQL。
  
  
-## 作者其它开源项目 | Other Projects
+## 相关开源项目 | Related Projects
 
 - [数据库方言工具 jDialects](https://gitee.com/drinkjava2/jdialects)
 - [独立的声明式事务工具 jTransactions](https://gitee.com/drinkjava2/jTransactions)
 - [微型IOC/AOP工具 jBeanBox](https://gitee.com/drinkjava2/jBeanBox)
-- [服务端布局工具 jWebBox](https://gitee.com/drinkjava2/jWebBox)
 - [前端写SQL和Java工具 GoSqlGo](https://gitee.com/drinkjava2/gosqlgo)
 
 ## 期望 | Futures

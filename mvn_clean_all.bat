@@ -15,7 +15,7 @@ call mvn clean
 call mvn eclipse:clean
 cd..
 
-cd jsqlbox-beetlsql
+cd jsqlbox-beetl
 call mvn clean
 call mvn eclipse:clean
 cd.. 
