@@ -21,13 +21,13 @@ import com.github.drinkjava2.jdialects.id.AutoIdGenerator;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.SequenceIdGenerator;
 import com.github.drinkjava2.jdialects.id.TableIdGenerator;
-import com.github.drinkjava2.jdialects.log.DialectLog;
-import com.github.drinkjava2.jdialects.log.DialectLogFactory;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.IndexModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.model.UniqueModel;
+import com.github.drinkjava2.jlogs.Log;
+import com.github.drinkjava2.jlogs.LogFactory;
 
 /**
  * To transfer platform-independent model to create DDL String array
@@ -35,8 +35,9 @@ import com.github.drinkjava2.jdialects.model.UniqueModel;
  * @author Yong Zhu
  * @since 1.0.2
  */
+@SuppressWarnings("all")
 public class DDLCreateUtils {// NOSONAR
-	private static final DialectLog logger = DialectLogFactory.getLog(DDLCreateUtils.class);
+	private static final Log logger = LogFactory.getLog(DDLCreateUtils.class);
 
 	/**
 	 * Transfer tables to DDL by given dialect and without format it, if want get a

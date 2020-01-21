@@ -20,10 +20,10 @@ import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.NormalJdbcTool;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
-import com.github.drinkjava2.jdialects.log.DialectLog;
-import com.github.drinkjava2.jdialects.log.DialectLogFactory;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jlogs.Log;
+import com.github.drinkjava2.jlogs.LogFactory;
 
 /**
  * jDialects is a small Java tool collect all databases' dialect, most data are
@@ -139,7 +139,7 @@ public enum Dialect implements CommonDialect {
 	/** If set true will allow use reserved words in DDL, default value is false */
 	private static Boolean globalAllowReservedWords = false;
 
-	private static final DialectLog logger = DialectLogFactory.getLog(Dialect.class);
+	private static final Log logger = LogFactory.getLog(Dialect.class);
 
 	/**
 	 * If set true will output log for each paginate, translate, paginAndTranslate,

@@ -8,7 +8,6 @@ package com.github.drinkjava2.jdialects.function;
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
-import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;

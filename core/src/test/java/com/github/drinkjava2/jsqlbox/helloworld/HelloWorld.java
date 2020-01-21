@@ -15,8 +15,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.h2.jdbcx.JdbcConnectionPool;
-
 import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;

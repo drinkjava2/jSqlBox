@@ -19,7 +19,7 @@ import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * DebugUtils only for debug, will delete it
+ * DebugUtils only for debug, may delete it in future
  * 
  * @author Yong Zhu
  * @since 1.0.0

@@ -24,6 +24,7 @@ import java.io.StringWriter;
  * @author Yong Zhu
  * @since 1.7.0
  */
+@SuppressWarnings("all")
 public class ConsoleLog implements Log {
 	Class<?> clazz;
 
@@ -33,32 +34,32 @@ public class ConsoleLog implements Log {
 
 	@Override
 	public void info(String msg) {
-		System.out.println(msg);
+		System.out.println(clazz.getSimpleName() + ": " + msg);
 	}
 
 	@Override
 	public void warn(String msg) {
-		System.out.println(msg);
+		System.out.println(clazz.getSimpleName() + ": " + msg);
 	}
 
 	@Override
 	public void warn(String msg, Throwable t) {
-		System.out.println(msg + getStackTrace(t));
+		System.out.println(clazz.getSimpleName() + ": " + msg + getStackTrace(t));
 	}
 
 	@Override
 	public void error(String msg) {
-		System.out.println(msg);
+		System.out.println(clazz.getSimpleName() + ": " + msg);
 	}
 
 	@Override
 	public void error(String msg, Throwable t) {
-		System.out.println(msg + getStackTrace(t));
+		System.out.println(clazz.getSimpleName() + ": " + msg + getStackTrace(t));
 	}
 
 	@Override
 	public void debug(String msg) {
-		System.out.println(msg);
+		System.out.println(clazz.getSimpleName() + ": " + msg);
 	}
 
 	public static String getStackTrace(Throwable t) {

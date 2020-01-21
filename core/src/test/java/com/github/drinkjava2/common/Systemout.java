@@ -8,7 +8,7 @@ package com.github.drinkjava2.common;
  */
 @SuppressWarnings("all")
 public class Systemout {
-	private static boolean allowPrint = false;
+	public static boolean allowPrint = false;
 
 	public static boolean isAllowPrint() {
 		return allowPrint;
