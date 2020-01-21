@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.common.DataSourceConfig.HikariCPBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
@@ -19,7 +20,7 @@ import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxAOP;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
@@ -31,8 +32,8 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 2.0
  */
 public class GroupShardTxTest {
-	SqlBoxContext ctx1 = JBEANBOX.getBean(SqlBoxContextBox1.class);
-	SqlBoxContext ctx2 = JBEANBOX.getBean(SqlBoxContextBox2.class);
+	DbContext ctx1 = JBEANBOX.getBean(DbContextBox1.class);
+	DbContext ctx2 = JBEANBOX.getBean(DbContextBox2.class);
 
 	public static class ShardUser extends ActiveRecord<ShardUser> {
 		@Id
@@ -55,8 +56,8 @@ public class GroupShardTxTest {
 			ctx1.nExecute(ddl);
 			ctx2.nExecute(ddl);
 		}
-		SqlBoxContext[] masters = new SqlBoxContext[] { ctx1, ctx2 };
-		SqlBoxContext.getGlobalSqlBoxContext().setMasters(masters);
+		DbContext[] masters = new DbContext[] { ctx1, ctx2 };
+		DbContext.getGlobalDbContext().setMasters(masters);
 
 		for (int i = 1; i <= 100; i++)
 			new ShardUser().setId(i).setName("Foo" + i).insert(); // Sharded!
@@ -90,7 +91,7 @@ public class GroupShardTxTest {
 		new ShardUser().setId(301).setName("Bar").insert();
 		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
 		Assert.assertEquals(51, ctx2.eCountAll(ShardUser.class));
-		System.out.println(1 / 0); // div 0!
+		Systemout.println(1 / 0); // div 0!
 	}
 
 	@Test
@@ -99,7 +100,7 @@ public class GroupShardTxTest {
 		try {
 			t.groupRollbackTest();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			Systemout.println(e.getMessage());
 		}
 		Assert.assertEquals(50, ctx1.eCountAll(ShardUser.class));
 		Assert.assertEquals(50, ctx2.eCountAll(ShardUser.class));
@@ -121,7 +122,7 @@ public class GroupShardTxTest {
 			t.groupPartialCommitTest();
 		} catch (Exception e) {
 			// e.printStackTrace();
-			System.out.println(e.getMessage());
+			Systemout.println(e.getMessage());
 		}
 		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
 	}
@@ -143,17 +144,17 @@ public class GroupShardTxTest {
 		}
 	}
 
-	public static class SqlBoxContextBox1 extends BeanBox {
+	public static class DbContextBox1 extends BeanBox {
 		public Object create() {
-			SqlBoxContext ctx = new SqlBoxContext((DataSource) JBEANBOX.getBean(Ds1.class));
+			DbContext ctx = new DbContext((DataSource) JBEANBOX.getBean(Ds1.class));
 			ctx.setConnectionManager(GroupTxConnectionManager.instance());
 			return ctx;
 		}
 	}
 
-	public static class SqlBoxContextBox2 extends BeanBox {
+	public static class DbContextBox2 extends BeanBox {
 		public Object create() {
-			SqlBoxContext ctx = new SqlBoxContext((DataSource) JBEANBOX.getBean(Ds2.class));
+			DbContext ctx = new DbContext((DataSource) JBEANBOX.getBean(Ds2.class));
 			ctx.setConnectionManager(GroupTxConnectionManager.instance());
 			return ctx;
 		}
@@ -170,7 +171,7 @@ public class GroupShardTxTest {
 	public static void a(String f, Object... ss) {
 
 		for (Object s : ss) {
-			System.out.println(s);
+			Systemout.println(s);
 		}
 	}
 }

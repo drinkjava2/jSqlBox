@@ -19,10 +19,10 @@ import java.util.Set;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.JSQLBOX;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DB;
+import com.github.drinkjava2.jsqlbox.DbContext;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 
 /**
@@ -53,7 +53,7 @@ public abstract class GtxUtils {// NOSONAR
 	/**
 	 * According entity's sharding setting, create lock record in GtxInfo
 	 */
-	public static void reg(SqlBoxContext dbCtx, Object entity, String operType) {
+	public static void reg(DbContext dbCtx, Object entity, String operType) {
 		if (entity instanceof GtxId)
 			return;
 		GtxLog log = new GtxLog(operType, entity);
@@ -63,12 +63,12 @@ public abstract class GtxUtils {// NOSONAR
 		TableModel model = TableModelUtils.entity2ReadOnlyModel(entity.getClass());
 
 		// calculate sharded Db Code if have
-		Integer dbCode = SqlBoxContextUtils.getShardedDbCodeByBean(dbCtx, entity);
+		Integer dbCode = DbContextUtils.getShardedDbCodeByBean(dbCtx, entity);
 		TransactionsException.assureNotNull(dbCode, "dbCode can not determine for entity: " + entity);
 		log.setGtxDB(dbCode);
 
 		// calculate sharded table name if have
-		String shardedTB = SqlBoxContextUtils.getShardedTbByBean(dbCtx, entity);
+		String shardedTB = DbContextUtils.getShardedTbByBean(dbCtx, entity);
 		log.setGtxTB(shardedTB);
 
 		// calculate id value
@@ -76,7 +76,7 @@ public abstract class GtxUtils {// NOSONAR
 		for (ColumnModel col : model.getPKeyColumns()) {
 			if (idSB.length() > 0)
 				idSB.append("|");
-			idSB.append(SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity));
+			idSB.append(DbContextUtils.readValueFromBeanFieldOrTail(col, entity));
 		}
 		String id = idSB.toString();
 
@@ -101,12 +101,12 @@ public abstract class GtxUtils {// NOSONAR
 	/**
 	 * Save GTX lock and log
 	 */
-	public static void saveLockAndLog(SqlBoxContext lockCtx, GtxInfo gtxInfo) throws Exception {
-		SqlBoxException.assureNotNull(gtxInfo.getGtxId(), "GtxId not set");
+	public static void saveLockAndLog(DbContext lockCtx, GtxInfo gtxInfo) throws Exception {
+		DbException.assureNotNull(gtxInfo.getGtxId(), "GtxId not set");
 
-		SqlBoxContext locker = lockCtx;
+		DbContext locker = lockCtx;
 		if (gtxInfo.getLockDb() != null)
-			locker = (SqlBoxContext) lockCtx.getMasters()[gtxInfo.getLockDb()];
+			locker = (DbContext) lockCtx.getMasters()[gtxInfo.getLockDb()];
 
 		locker.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
@@ -133,15 +133,15 @@ public abstract class GtxUtils {// NOSONAR
 	}
 
 	/** Delete GTX lock and log */
-	public static void deleteLockAndLog(SqlBoxContext lockCtx, GtxInfo gtxInfo) throws Exception {
-		SqlBoxContext locker = lockCtx;
+	public static void deleteLockAndLog(DbContext lockCtx, GtxInfo gtxInfo) throws Exception {
+		DbContext locker = lockCtx;
 		if (gtxInfo.getLockDb() != null)
-			locker = (SqlBoxContext) lockCtx.getMasters()[gtxInfo.getLockDb()];
+			locker = (DbContext) lockCtx.getMasters()[gtxInfo.getLockDb()];
 		locker.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
 			String gid = gtxInfo.getGtxId().getGid();
 			locker.eDelete(gtxInfo.getGtxId());// delete GtxID! here will auto sharding
-			locker.pExecute("delete from gtxlock where gid=?", gid, JSQLBOX.shardDB(gid));
+			locker.pExecute("delete from gtxlock where gid=?", gid, DB.shardDB(gid));
 			Set<String> tableSet = new HashSet<String>();
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
@@ -149,8 +149,8 @@ public abstract class GtxUtils {// NOSONAR
 				tableSet.add(md.getTableName().toLowerCase());
 			}
 			for (String table : tableSet)
-				locker.iExecute("delete from ", table, " where ", GTXID, "=?", JSQLBOX.param(gid),
-						JSQLBOX.shardDB(gid));
+				locker.iExecute("delete from ", table, " where ", GTXID, "=?", DB.param(gid),
+						DB.shardDB(gid));
 			locker.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			locker.getConnectionManager().rollbackTransaction();

@@ -13,11 +13,10 @@ import org.junit.Test;
 
 import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.common.Systemout;
-import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
  * This is Batch operation function test<br/>
@@ -30,17 +29,16 @@ public class BatchTest {
 	int BUFFER_SIZE = 300;
 	int INSERT_AMOUNT = BUFFER_SIZE * 1; // Change 1 to 1000 try
 
-	SqlBoxContext ctx = null;
+	DbContext ctx = null;
 
 	{
-		SqlBoxContext.resetGlobalVariants();
-		// SqlBoxContext.setGlobalAllowShowSql(true); 
+		DbContext.resetGlobalVariants();
 
 		// Change to MySqlDataSourceBox to Test!
-		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class));// !MySQL
-		SqlBoxContext.setGlobalNextBatchSize(BUFFER_SIZE);
+		ctx = new DbContext((DataSource) JBEANBOX.getBean(DataSourceBox.class));// !MySQL
+		DbContext.setGlobalNextBatchSize(BUFFER_SIZE);
 		
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		DbContext.setGlobalDbContext(ctx);
 	}
 
 	@Before

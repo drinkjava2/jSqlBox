@@ -22,8 +22,8 @@ import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * This Sample is a CustomizedSqlItem, used to build a " where field1=? and
@@ -104,7 +104,7 @@ public class SampleItem implements CustomizedSqlItem {
 			ColumnModel col = model.getColumn(fieldName);
 			if (col.getTransientable())
 				continue;
-			Object fieldValue = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entityBean);
+			Object fieldValue = DbContextUtils.readValueFromBeanFieldOrTail(col, entityBean);
 			if (fieldValue != null && (nullFieldsOnly == null || !nullFieldsOnly)) {
 				if (!isfirst)
 					ps.addSql(" and ");
@@ -125,8 +125,8 @@ public class SampleItem implements CustomizedSqlItem {
 	@Override
 	public void doPrepare(PreparedSQL ps) {
 		if (model == null)
-			model = SqlBoxContextUtils.findEntityOrClassTableModel(entityBean);
-		SqlBoxException.assureNotNull(model.getEntityClass());
+			model = DbContextUtils.findEntityOrClassTableModel(entityBean);
+		DbException.assureNotNull(model.getEntityClass());
 		if (!sqlItems.isEmpty())
 			for (Object piece : sqlItems) { // NOSONAR
 				if ("#NOTNULL_Fields".equals(piece)) {
@@ -157,7 +157,7 @@ public class SampleItem implements CustomizedSqlItem {
 									break;
 							}
 							String fieldName = fieldNameSb.toString();
-							SqlBoxException.assureNotEmpty(fieldName);
+							DbException.assureNotEmpty(fieldName);
 							String fieldValue = String
 									.valueOf(ClassCacheUtils.readValueFromBeanField(entityBean, fieldName));
 							realParam = StrUtils.replaceFirst(s, ":" + fieldName, fieldValue);

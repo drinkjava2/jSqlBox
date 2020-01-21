@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/drinkjava2/jSqlBox">
+  <a href="https://github.com/drinkjava2/jsqlbox">
    <img alt="jsqlbox-logo" src="jsqlbox-logo.png">
   </a>
 </p>
@@ -28,7 +28,7 @@
 jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久层工具，在架构、功能、易用性等方面都不输于其它持久层工具。  
 
 ## 与其它持久层工具对比
-请见[与其它DAO工具对比](https://gitee.com/drinkjava2/jSqlBox/wikis/pages?title=%E9%99%84%E5%BD%952%EF%BC%9ADAO%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94&parent=%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C), 可以对jSqlBox的功能与特点有一个大概的了解。  
+请见[与其它DAO工具对比](https://gitee.com/drinkjava2/jsqlbox/wikis/pages?title=%E9%99%84%E5%BD%952%EF%BC%9ADAO%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94&parent=%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C), 可以对jSqlBox的功能与特点有一个大概的了解。  
 
 ## 架构 | Architecture  
 ![image](arch.png)  
@@ -48,7 +48,7 @@ jSqlBox是一个基于DbUtils内核开发的全功能开源Java数据库持久�
 
 ## 文档 | Documentation
 
-[中文](https://gitee.com/drinkjava2/jSqlBox/wikis/pages)  |  [English](https://github.com/drinkjava2/jSqlBox/wiki) | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
+[中文](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)  |  [English](https://github.com/drinkjava2/jsqlbox/wiki) | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
 
 ## 配置 | Configuration
 在pom.xml中加入：  

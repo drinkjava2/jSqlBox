@@ -12,11 +12,11 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * This demo show jSqlBox's ActiveRecord and jDialects' DDL, pagination and
+ * This demo show DbUtil-Plus's ActiveRecord and jDialects' DDL, pagination and
  * translate feature.
  */
 public class ActiveRecordDemoTest {
@@ -94,8 +94,8 @@ public class ActiveRecordDemoTest {
 		// ds.setUsername("root");
 		// ds.setPassword("root888");
 
-		SqlBoxContext ctx = new SqlBoxContext(ds);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		DbContext ctx = new DbContext(ds);
+		DbContext.setGlobalDbContext(ctx);
 
 		String[] ddlArray = ctx.getDialect().toDropAndCreateDDL(UserEntity.class);
 		for (String ddl : ddlArray)

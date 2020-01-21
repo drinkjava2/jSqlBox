@@ -1,7 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.IGNORE_NULL;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.TAIL;
+import static com.github.drinkjava2.jsqlbox.DB.IGNORE_NULL;
+import static com.github.drinkjava2.jsqlbox.DB.TAIL;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -18,11 +18,11 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbException;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 /**
- * ActiveRecordDemoTest of jSqlBox configurations
+ * ActiveRecordDemoTest of DbUtil-Plus configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -122,7 +122,7 @@ public class DynamicConfigTest extends TestBase {
 		Assert.assertEquals(null, u3.getUserName());
 	}
 
-	@Test(expected = SqlBoxException.class)
+	@Test(expected = DbException.class)
 	public void doExceptionTest() {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().putField("userName", "Tom").insert();

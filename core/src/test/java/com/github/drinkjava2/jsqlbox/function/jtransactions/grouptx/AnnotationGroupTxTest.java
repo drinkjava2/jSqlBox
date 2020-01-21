@@ -12,11 +12,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.common.DataSourceConfig.HikariCPBox;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxAOP;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
@@ -29,8 +30,8 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 2.0
  */
 public class AnnotationGroupTxTest {
-	SqlBoxContext ctx1 = JBEANBOX.getBean(SqlBoxContextBox1.class);
-	SqlBoxContext ctx2 = JBEANBOX.getBean(SqlBoxContextBox2.class);
+	DbContext ctx1 = JBEANBOX.getBean(DbContextBox1.class);
+	DbContext ctx2 = JBEANBOX.getBean(DbContextBox2.class);
 
 	@Before
 	public void init() {
@@ -54,7 +55,7 @@ public class AnnotationGroupTxTest {
 	public void groupRollback() { // test group roll back
 		new Usr().setFirstName("Foo").insert(ctx1);
 		new Usr().setFirstName("Bar").insert(ctx2);
-		System.out.println(1 / 0); // div 0!
+		Systemout.println(1 / 0); // div 0!
 	}
 
 	@GTransaction
@@ -76,7 +77,7 @@ public class AnnotationGroupTxTest {
 		try {
 			t.groupRollback();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
@@ -88,7 +89,7 @@ public class AnnotationGroupTxTest {
 		try {
 			t.groupPartialCommit();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			Systemout.println(e.getMessage());
 		}
 		Assert.assertEquals(102, ctx1.eCountAll(Usr.class));
 
@@ -111,17 +112,17 @@ public class AnnotationGroupTxTest {
 		}
 	}
 
-	public static class SqlBoxContextBox1 extends BeanBox {
+	public static class DbContextBox1 extends BeanBox {
 		public Object create() {
-			SqlBoxContext ctx = new SqlBoxContext((DataSource) JBEANBOX.getBean(Ds1.class));
+			DbContext ctx = new DbContext((DataSource) JBEANBOX.getBean(Ds1.class));
 			ctx.setConnectionManager(GroupTxConnectionManager.instance());
 			return ctx;
 		}
 	}
 
-	public static class SqlBoxContextBox2 extends BeanBox {
+	public static class DbContextBox2 extends BeanBox {
 		public Object create() {
-			SqlBoxContext ctx = new SqlBoxContext((DataSource) JBEANBOX.getBean(Ds2.class));
+			DbContext ctx = new DbContext((DataSource) JBEANBOX.getBean(Ds2.class));
 			ctx.setConnectionManager(GroupTxConnectionManager.instance());
 			return ctx;
 		}

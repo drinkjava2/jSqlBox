@@ -342,7 +342,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setInsertable((Boolean) colMap.get("insertable"));
 					col.setUpdatable((Boolean) colMap.get("updatable"));
 				} else {
-					col.setColumnType(TypeUtils.toType(propertyClass));// TODO check
+					col.setColumnType(TypeUtils.toType(propertyClass));// TODO_ check
 				}
 				if ("EnumType.ORDINAL".equals(col.getConverterClassOrName()))
 					col.setColumnType(Type.INTEGER);

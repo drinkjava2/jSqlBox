@@ -16,8 +16,8 @@
 package com.github.drinkjava2.jsqlbox.sharding;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.DbContext;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
 
 /**
  * Here put public static methods related to sharding
@@ -36,9 +36,9 @@ public abstract class ShardingUtils {// NOSONAR
 	 * @param entity
 	 * @return Integer[] stored DB's order and Table's order
 	 */
-	public static Integer[] getShardDbTbResult(SqlBoxContext ctx, TableModel model, Object entity) {
-		Integer shardedDBCode = SqlBoxContextUtils.getShardedDBCode(ctx, model, entity.getClass());
-		Integer shardedTBCode = SqlBoxContextUtils.getShardedTBCode(ctx, model, entity.getClass());
+	public static Integer[] getShardDbTbResult(DbContext ctx, TableModel model, Object entity) {
+		Integer shardedDBCode = DbContextUtils.getShardedDBCode(ctx, model, entity.getClass());
+		Integer shardedTBCode = DbContextUtils.getShardedTBCode(ctx, model, entity.getClass());
 		return new Integer[] { shardedDBCode, shardedTBCode };
 	}
 }

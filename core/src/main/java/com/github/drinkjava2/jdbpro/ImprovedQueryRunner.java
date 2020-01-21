@@ -31,10 +31,10 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.github.drinkjava2.jdbpro.log.DbProLog;
-import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
+import com.github.drinkjava2.jlogs.Log;
+import com.github.drinkjava2.jlogs.LogFactory;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.TxResult;
@@ -57,7 +57,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
  */
 @SuppressWarnings({ "all" })
 public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder {
-	protected static final DbProLog logger = DbProLogFactory.getLog(ImprovedQueryRunner.class);
+	protected static final Log logger = LogFactory.getLog(ImprovedQueryRunner.class);
 
 	protected static Boolean globalNextAllowShowSql = false;
 	protected static SqlOption globalNextMasterSlaveOption = SqlOption.USE_AUTO;

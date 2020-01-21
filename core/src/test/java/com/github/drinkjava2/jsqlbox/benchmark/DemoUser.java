@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox.benchmark;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.noPagin;
+import static com.github.drinkjava2.jsqlbox.DB.noPagin;
 
 import java.util.List;
 

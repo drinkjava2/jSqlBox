@@ -16,11 +16,11 @@
 package com.github.drinkjava2.jsqlbox.function;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.eFindAll;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pQuery;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
+import static com.github.drinkjava2.jsqlbox.DB.alias;
+import static com.github.drinkjava2.jsqlbox.DB.eFindAll;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.pQuery;
+import static com.github.drinkjava2.jsqlbox.DB.pagin;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -43,7 +43,7 @@ import com.github.drinkjava2.jdbpro.handler.SimpleCacheHandler;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
@@ -181,11 +181,11 @@ public class SqlHandlersTest extends TestBase {
 		List<DemoUser> users3 = eFindAll(DemoUser.class, " where age>?", param(0), pagin(2, 5));
 		Assert.assertTrue(users3.size() == 5);
 
-		SqlBoxContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));
+		DbContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));
 		List<DemoUser> users4 = pQuery(new EntityListHandler(), DemoUser.class,
 				"select u.* from DemoUser u where u.age>?", 0);
 		Assert.assertTrue(users4.size() == 5);
-		SqlBoxContext.setThreadLocalSqlHandlers(null);
+		DbContext.setThreadLocalSqlHandlers(null);
 	}
 
 	@Test

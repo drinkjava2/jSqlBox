@@ -15,8 +15,8 @@ import java.lang.reflect.Method;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * TailType has a tails() method return a map instance stored tail values
@@ -28,7 +28,7 @@ public class EnumOrdinalFieldConverter extends BaseFieldConverter {
 
 	@Override
 	public Object entityFieldToDbValue(ColumnModel col, Object entity) {
-		Object value = SqlBoxContextUtils.doReadFromFieldOrTail(col, entity);
+		Object value = DbContextUtils.doReadFromFieldOrTail(col, entity);
 		return ((Enum<?>) value).ordinal();
 	}
 
@@ -40,7 +40,7 @@ public class EnumOrdinalFieldConverter extends BaseFieldConverter {
 			Object[] enu = (Object[]) method.invoke(null);
 			writeMethod.invoke(entityBean, enu[(Integer) value]);
 		} catch (Exception e) {
-			throw new SqlBoxException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'",
+			throw new DbException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'",
 					e);
 		}
 	}

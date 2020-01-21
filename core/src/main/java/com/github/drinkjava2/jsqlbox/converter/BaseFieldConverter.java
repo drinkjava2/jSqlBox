@@ -16,8 +16,8 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.DbContext;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
 
 /**
  * TailType has a tails() method return a map instance stored tail values
@@ -28,16 +28,16 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
 public class BaseFieldConverter implements FieldConverter {
 
 	@Override
-	public void handleSQL(SqlOption sqlOption, SqlBoxContext ctx, ColumnModel col, Object entity,
+	public void handleSQL(SqlOption sqlOption, DbContext ctx, ColumnModel col, Object entity,
 			LinkArrayList<Object> sqlBody, LinkArrayList<Object> sqlWhere) {
 		if (SqlOption.UPDATE.equals(sqlOption)) {
-			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
+			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
 			sqlBody.append(col.getColumnName()).append("=?").append(param(value));
 		} else if (SqlOption.DELETE.equals(sqlOption)) {
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
-			Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
+			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity);
 			sqlBody.append(col.getColumnName());
 			sqlBody.append(param(value)).append(",");
 		}
@@ -45,12 +45,12 @@ public class BaseFieldConverter implements FieldConverter {
 
 	@Override
 	public Object entityFieldToDbValue(ColumnModel col, Object entity) {
-		return SqlBoxContextUtils.doReadFromFieldOrTail(col, entity);
+		return DbContextUtils.doReadFromFieldOrTail(col, entity);
 	}
 
 	@Override
 	public void writeDbValueToEntityField(Object entityBean, ColumnModel col, Object value) {
-		SqlBoxContextUtils.doWriteToFieldOrTail(col, entityBean, value);
+		DbContextUtils.doWriteToFieldOrTail(col, entityBean, value);
 	}
 
 }

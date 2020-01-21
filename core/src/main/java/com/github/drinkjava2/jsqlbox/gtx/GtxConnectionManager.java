@@ -29,9 +29,9 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.jdbpro.log.DbProLog;
-import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jlogs.Log;
+import com.github.drinkjava2.jlogs.LogFactory;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.ThreadConnectionManager;
 import com.github.drinkjava2.jtransactions.TransactionsException;
 import com.github.drinkjava2.jtransactions.TxInfo;
@@ -45,19 +45,19 @@ import com.github.drinkjava2.jtransactions.TxResult;
  * @since 1.0.0
  */
 public class GtxConnectionManager extends ThreadConnectionManager {
-	protected static final DbProLog logger = DbProLogFactory.getLog(GtxConnectionManager.class);
+	protected static final Log logger = LogFactory.getLog(GtxConnectionManager.class);
 
-	private SqlBoxContext lockCtx;
+	private DbContext lockCtx;
 
-	public SqlBoxContext getLockCtx() {
+	public DbContext getLockCtx() {
 		return lockCtx;
 	}
 
-	public void setLockCtx(SqlBoxContext lockCtx) {
+	public void setLockCtx(DbContext lockCtx) {
 		this.lockCtx = lockCtx;
 	}
 
-	public GtxConnectionManager(SqlBoxContext lockCtx) {
+	public GtxConnectionManager(DbContext lockCtx) {
 		this.lockCtx = lockCtx;
 	}
 
@@ -75,7 +75,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 	@Override
 	public Connection getConnection(Object dsHolder) throws SQLException {
-		SqlBoxContext ctx = (SqlBoxContext) dsHolder;
+		DbContext ctx = (DbContext) dsHolder;
 		DataSource ds = ctx.getDataSource();
 		TransactionsException.assureNotNull(dsHolder, "DataSource can not be null");
 		if (isInTransaction()) {
@@ -101,7 +101,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 		// Save GtxTag into DBs, use a Tag to confirm tx committed
 		for (Object ctx : gtxInfo.getConnectionCache().keySet())
-			((SqlBoxContext) ctx).eInsert(new GtxTag(gtxInfo.getGtxId().getGid()));
+			((DbContext) ctx).eInsert(new GtxTag(gtxInfo.getGtxId().getGid()));
 
 		// Save lock and log
 		try {
@@ -116,7 +116,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		int committed = 0;
 		try {
 			for (Entry<Object, Connection> entry : gtxInfo.getConnectionCache().entrySet()) {
-				SqlBoxContext ctx = (SqlBoxContext) entry.getKey();
+				DbContext ctx = (DbContext) entry.getKey();
 				int forceCommitFail = ctx.getForceCommitFail();
 				if (forceCommitFail > 0 || forceCommitFail < 0) {
 					if (forceCommitFail > 0)
@@ -148,7 +148,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 		// Delete gtxTags
 		for (Object key : gtxInfo.getConnectionCache().keySet()) {
-			SqlBoxContext ctx = (SqlBoxContext) key;
+			DbContext ctx = (DbContext) key;
 			try {
 				ctx.eDelete(new GtxTag(gtxInfo.getGtxId().getGid()));// In autoCommit mode delete tags
 			} catch (Exception e) {

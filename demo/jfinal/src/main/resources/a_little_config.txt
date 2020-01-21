@@ -1,0 +1,4 @@
+jdbcUrl = jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0
+user = sa
+password = 
+devMode = false

@@ -40,7 +40,7 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 # Demo
 
 * [jBooox](https://gitee.com/drinkjava2/jBooox) A micro mvc web demo based on jBeanBox+jSqlBox+jWebBox.
-* [jsqlbox-beetlsql](../../tree/master/demo/jsqlbox-beetlsql) A demo shows how to develop a SqlTemplateEngine.
+* [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetlsql) A demo shows how to use Beetl as SqlTemplateEngine.
 * [jsqlbox-in-actframework](../../tree/master/demo/jsqlbox-in-actframework) Shows how to use jSqlBox in ActFramework，and use TinyTx+Guice's AOP to achieve declarative transaction.
 * [jsqlbox-in-jfinal](../../tree/master/demo/jsqlbox-in-jfinal) Shows use jSqlBox in jFinal.
 * [jSqlBox-in-Spring](../../tree/master/demo/jsqlbox-in-spring) Shows use jSqlBox in Spring+Tomcat.
@@ -57,7 +57,7 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>
-   <version>2.0.6</version> <!--Or latest version-->
+   <version>3.0.0</version> <!--Or latest version-->
 </dependency> 
 ```
 

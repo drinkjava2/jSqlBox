@@ -1,10 +1,10 @@
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.TAIL;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.eLoadBySQL;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.tail;
+import static com.github.drinkjava2.jsqlbox.DB.TAIL;
+import static com.github.drinkjava2.jsqlbox.DB.eLoadBySQL;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.iExecute;
+import static com.github.drinkjava2.jsqlbox.DB.tail;
 
 import java.util.Date;
 
@@ -130,7 +130,7 @@ public class TailTest extends TestBase {
 
 		Tail t2 = tail.loadById("Foo", tail("tail_demo")).putTail("age", 100).update(tail("tail_demo"))
 				.load(tail("tail_demo"));
-		Assert.assertEquals(100, t2.getTail("age"));
+		Assert.assertEquals(100, (int)t2.getTail("age"));
 
 	}
 

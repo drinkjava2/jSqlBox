@@ -1,7 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForEntityList;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
+import static com.github.drinkjava2.jsqlbox.DB.iQueryForEntityList;
+import static com.github.drinkjava2.jsqlbox.DB.pagin;
 
 import java.util.List;
 

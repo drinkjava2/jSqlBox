@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox.converter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * The FieldConverter Utils, works like a small ioc tool, cache singleton
@@ -46,7 +46,7 @@ public abstract class FieldConverterUtils {
 				converter = (FieldConverter) ((Class<?>) key).newInstance();
 				converterCache.put(key, converter);
 			} catch (Exception e) {
-				throw new SqlBoxException(
+				throw new DbException(
 						"Fail to use newInstance() method to build a singleTon instance for '" + key + "'", e);
 			}
 		}

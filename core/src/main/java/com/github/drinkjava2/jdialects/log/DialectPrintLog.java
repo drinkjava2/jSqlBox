@@ -22,26 +22,40 @@ package com.github.drinkjava2.jdialects.log;
  * @since 1.7.0
  */
 public class DialectPrintLog implements DialectLog {
+	private static boolean allowPrint = false;
+
 	Class<?> clazz;
+
+	public static boolean isAllowPrint() {
+		return allowPrint;
+	}
+
+	public static void setAllowPrint(boolean allowPrint) {
+		DialectPrintLog.allowPrint = allowPrint;
+	}
 
 	public DialectPrintLog(Class<?> clazz) {
 		this.clazz = clazz;
 	}
 
 	public void info(String msg) {
-		System.out.println(msg);// NOSONAR
+		if (allowPrint)
+			System.out.println(msg);// NOSONAR
 	}
 
 	public void warn(String msg) {
-		System.out.println(msg);// NOSONAR
+		if (allowPrint)
+			System.out.println(msg);// NOSONAR
 	}
 
 	public void error(String msg) {
-		System.out.println(msg);// NOSONAR
+		if (allowPrint)
+			System.out.println(msg);// NOSONAR
 	}
 
 	public void debug(String msg) {
-		System.out.println(msg);// NOSONAR
+		if (allowPrint)
+			System.out.println(msg);// NOSONAR
 	}
 
 }

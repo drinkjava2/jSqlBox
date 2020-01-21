@@ -1,13 +1,14 @@
 package com.github.drinkjava2.jsqlbox.function.jtransactions.tinytx;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.tail;
+import static com.github.drinkjava2.jsqlbox.DB.tail;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.common.Systemout;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jsqlbox.function.jtransactions.Usr;
 import com.zaxxer.hikari.HikariDataSource;
@@ -15,7 +16,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class TinyTxTest {
 
 	HikariDataSource dataSource;
-	SqlBoxContext ctx;
+	DbContext ctx;
 
 	@Before
 	public void init() {
@@ -26,7 +27,7 @@ public class TinyTxTest {
 		dataSource.setUsername("sa");
 		dataSource.setPassword("");
 
-		ctx = new SqlBoxContext(dataSource);
+		ctx = new DbContext(dataSource);
 		String[] ddlArray = ctx.toDropAndCreateDDL(Usr.class);
 		for (String ddl : ddlArray)
 			ctx.quiteExecute(ddl);
@@ -47,7 +48,7 @@ public class TinyTxTest {
 				Assert.assertEquals(100, ctx.eCountAll(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx);
 				Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
-				System.out.println(1 / 0);
+				Systemout.println(1 / 0);
 				new Usr().putField("firstName", "Bar").insert(ctx);
 				ctx.commitTrans();
 			} catch (Exception e) {

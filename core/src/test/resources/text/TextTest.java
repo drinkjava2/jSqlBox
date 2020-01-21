@@ -1,9 +1,9 @@
 package text;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pExecute;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pQueryForString;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.tExecute;
+import static com.github.drinkjava2.jsqlbox.DB.pExecute;
+import static com.github.drinkjava2.jsqlbox.DB.pQueryForString;
+import static com.github.drinkjava2.jsqlbox.DB.tExecute;
 
 import org.junit.Assert;
 import org.junit.Test;

@@ -7,16 +7,15 @@ import org.junit.Test;
 
 import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.common.Systemout;
-import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 
 /**
  * TinyTx is a tiny and clean declarative transaction tool, in this unit test
  * use jBeanBox's pure Java configuration.
  * 
- * To make jSqlBox core unit test clean, I put Spring TX demos in jSqlBox's demo
+ * To make DbUtil-Plus core unit test clean, I put Spring TX demos in DbUtil-Plus's demo
  * folder.
  *
  * @author Yong Zhu
@@ -24,10 +23,10 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
  */
 public class JavaTxTest {
 
-	SqlBoxContext ctx;
+	DbContext ctx;
 	{
-		SqlBoxContext.resetGlobalVariants();
-		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class));
+		DbContext.resetGlobalVariants();
+		ctx = new DbContext((DataSource) JBEANBOX.getBean(DataSourceBox.class));
 	}
 
 	public void tx_Insert1() {
@@ -44,7 +43,7 @@ public class JavaTxTest {
 	@Test
 	public void doTest() throws Exception {
 		JBEANBOX.getBeanBox(JavaTxTest.class).addBeanAop(new TinyTxAOP(), "tx_*");
-		JavaTxTest tester = BeanBox.getBean(JavaTxTest.class);
+		JavaTxTest tester = JBEANBOX.getBean(JavaTxTest.class);
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
@@ -58,7 +57,7 @@ public class JavaTxTest {
 			tester.tx_Insert2();// this one did not insert, roll back
 		} catch (Exception e) {
 			Systemout.println("Exception found: ");
-			e.printStackTrace();
+			//e.printStackTrace();
 			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
 			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}

@@ -26,14 +26,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
-import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.JSQLBOX;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DB;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.zaxxer.hikari.HikariDataSource;
@@ -47,7 +47,7 @@ USE_SLAVE  (write: All Slaves!         read: Random 1 Slave )
 */
 
 /**
- * MasterSlaveTest of jSqlBox
+ * MasterSlaveTest of DbUtil-Plus
  * 
  * 
  * @author Yong Zhu
@@ -58,7 +58,7 @@ public class MasterSlaveTest {
 	final static int SLAVE_DATABASE_QTY = 20;
 	final static int SLAVE_RECORD_ROWS = 5;
 	final static int MASTER_RECORD_ROWS = 10;
-	SqlBoxContext master;
+	DbContext master;
 
 	public static class TheUser extends ActiveRecord<TheUser> {
 		@Id
@@ -85,10 +85,10 @@ public class MasterSlaveTest {
 
 	@Before
 	public void init() {
-		SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
+		DbContext[] slaves = new DbContext[SLAVE_DATABASE_QTY];
 		for (int i = 0; i < SLAVE_DATABASE_QTY; i++)
-			slaves[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i));
-		master = new SqlBoxContext(TestBase.createH2_HikariDataSource("MasterDb"));
+			slaves[i] = new DbContext(TestBase.createH2_HikariDataSource("SlaveDB" + i));
+		master = new DbContext(TestBase.createH2_HikariDataSource("MasterDb"));
 		master.setSlaves(slaves);
 		String[] ddls = master.toCreateDDL(TheUser.class);
 		for (String ddl : ddls)
@@ -114,7 +114,7 @@ public class MasterSlaveTest {
 	public void testCreateTables() {
 		Assert.assertEquals(10L, master.iQueryForLongValue("select count(*) from TheUser", USE_MASTER));
 		Assert.assertEquals(5L, master.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
-		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", JSQLBOX.param("Tom"), USE_MASTER,
+		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", DB.param("Tom"), USE_MASTER,
 				new PrintSqlHandler());
 		Systemout.println(u.getName());
 	}
@@ -156,19 +156,19 @@ public class MasterSlaveTest {
 	@Test
 	public void testMasterSlaveQueryInTransaction() {
 		Systemout.println("============Test testMasterSlaveInTransaction==============");
-		SqlBoxContext.resetGlobalVariants();
+		DbContext.resetGlobalVariants();
 		txDataSource = TestBase.createH2_HikariDataSource("MasterDb");
 		// Build another master but run in Transaction mode
-		SqlBoxContext masterWithTx = new SqlBoxContext(txDataSource);
+		DbContext masterWithTx = new DbContext(txDataSource);
 
 		masterWithTx.setSlaves(master.getSlaves());
-		MasterSlaveTest tester = BeanBox.getBean(MasterSlaveTest.class); // Proxy
+		MasterSlaveTest tester = JBEANBOX.getBean(MasterSlaveTest.class); // Proxy
 		tester.queryInTransaction(masterWithTx);
 		txDataSource.close();// don't forget close DataSource pool
 	}
 
 	@TX
-	public void queryInTransaction(SqlBoxContext ctx) {
+	public void queryInTransaction(DbContext ctx) {
 		// AutoChoose, in Transaction, should use master
 		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
 		TheUser u1 = ctx.eLoadById(TheUser.class, 1L);

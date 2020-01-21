@@ -7,14 +7,14 @@ import org.junit.Test;
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * This is jSqlBox Transaction Demo by using Java Configuration
+ * This is DbUtil-Plus Transaction Demo by using Java Configuration
  * 
- * To make jSqlBox core unit test clean, I put Spring TX demos in jSqlBox's demo
+ * To make DbUtil-Plus core unit test clean, I put Spring TX demos in DbUtil-Plus's demo
  * folder.
  *
  * @author Yong Zhu
@@ -39,10 +39,10 @@ public class JavaTxDemoTest {
 		}
 	}
 
-	SqlBoxContext ctx;
+	DbContext ctx;
 	{
-		SqlBoxContext.resetGlobalVariants();
-		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceCfg.class));
+		DbContext.resetGlobalVariants();
+		ctx = new DbContext((DataSource) JBEANBOX.getBean(DataSourceCfg.class));
 	}
 
 	public void txInsert() {
@@ -53,7 +53,7 @@ public class JavaTxDemoTest {
 	@Test
 	public void doTest() throws Exception {
 		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(new TinyTxAOP(), "tx*");
-		JavaTxDemoTest tester = BeanBox.getBean(JavaTxDemoTest.class);
+		JavaTxDemoTest tester = JBEANBOX.getBean(JavaTxDemoTest.class);
 		ctx.nExecute("create table user_tb (id varchar(40))engine=InnoDB");
 		try {
 			tester.txInsert();// this one did not insert, rolled back

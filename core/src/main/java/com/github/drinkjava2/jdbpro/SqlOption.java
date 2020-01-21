@@ -55,7 +55,7 @@ public enum SqlOption {
 	// ----------Special Items ------------
 	/**
 	 * Mark a ENABLE_HANDLERS SqlOption, switch to another DbPro or subClass
-	 * (SqlBoxContext) to execute SQL
+	 * (DbContext) to execute SQL
 	 */
 	SWITCHTO,
 
@@ -91,7 +91,7 @@ public enum SqlOption {
 	OTHER,
 
 	// =================================
-	// Below items designed for jSqlBox
+	// Below items designed for DbUtil-Plus
 	// =================================
 
 	// ------Master_Slave Options-------

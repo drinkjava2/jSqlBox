@@ -15,9 +15,9 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardDB;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.shardTB;
+import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.shardDB;
+import static com.github.drinkjava2.jsqlbox.DB.shardTB;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -31,7 +31,7 @@ import com.github.drinkjava2.jdialects.annotation.jdia.ShardTable;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -48,7 +48,7 @@ public class ShardingRangeToolTest {
 	final static int SLAVE_DATABASE_QTY = 7; // each master has 7 slaves
 	final static int TABLE_QTY = 8; // each table has 8 sharding
 
-	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
+	DbContext[] masters = new DbContext[MASTER_DATABASE_QTY];
 
 	public static class TheUser extends ActiveRecord<TheUser> {
 		// 0~99 store in TheUser_0, 100~199 store in TheUser_1...
@@ -76,13 +76,13 @@ public class ShardingRangeToolTest {
 	@Before
 	public void init() {
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
-			SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
-			masters[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("masters" + i));
+			DbContext[] slaves = new DbContext[SLAVE_DATABASE_QTY];
+			masters[i] = new DbContext(TestBase.createH2_HikariDataSource("masters" + i));
 			masters[i].setMasters(masters);
 			masters[i].setSlaves(slaves);
 			masters[i].setName("Master" + i);
 			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
-				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
+				slaves[j] = new DbContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}
 
 		TableModel model = TableModelUtils.entity2Model(TheUser.class);
@@ -127,7 +127,7 @@ public class ShardingRangeToolTest {
 
 	@Test
 	public void testActiveRecord() {// issue: XA or TCC transaction needed
-		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
+		DbContext.setGlobalDbContext(masters[4]);// random select one
 		TheUser u1 = new TheUser();
 		u1.putField("id", tbID, "databaseId", dbID, "name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals("Master2", u1.shardDB().getName());

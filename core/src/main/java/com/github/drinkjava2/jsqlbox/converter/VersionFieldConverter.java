@@ -17,9 +17,9 @@ import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContext;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * TailType has a tails() method return a map instance stored tail values
@@ -42,7 +42,7 @@ public class VersionFieldConverter extends BaseFieldConverter {
 		} else if (Type.BIGINT.equals(col.getColumnType())) {
 			return 0l;
 		} else
-			throw new SqlBoxException(
+			throw new DbException(
 					"Can not use " + col.getColumnType() + " as version field for '" + col.getEntityField() + "'");
 	}
 
@@ -55,19 +55,19 @@ public class VersionFieldConverter extends BaseFieldConverter {
 		} else if (Type.BIGINT.equals(col.getColumnType())) {
 			nextVersion = (Long) version + 1;
 		} else
-			throw new SqlBoxException(
+			throw new DbException(
 					"Can not use " + col.getColumnType() + " as version field for '" + col.getEntityField() + "'");
 		return nextVersion;
 	}
 
 	@Override
-	public void handleSQL(SqlOption sqlOption, SqlBoxContext ctx, ColumnModel col, Object entity,
+	public void handleSQL(SqlOption sqlOption, DbContext ctx, ColumnModel col, Object entity,
 			LinkArrayList<Object> sqlBody, LinkArrayList<Object> sqlWhere) {
-		Object oldVersion = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
+		Object oldVersion = DbContextUtils.readValueFromBeanFieldOrTail(col, entity);
 		Object firstOrOldVersion = getFirstVersion(col, oldVersion);
 		Object nextVersion = getNextVersion(col, firstOrOldVersion);
 		if (SqlOption.UPDATE.equals(sqlOption)) {
-			SqlBoxContextUtils.writeValueToBeanFieldOrTail(col, entity, nextVersion);
+			DbContextUtils.writeValueToBeanFieldOrTail(col, entity, nextVersion);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
 			sqlBody.append(col.getColumnName()).append("=?").append(param(nextVersion));
@@ -82,7 +82,7 @@ public class VersionFieldConverter extends BaseFieldConverter {
 			sqlWhere.append(param(firstOrOldVersion));
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
 			if (oldVersion != firstOrOldVersion)
-				SqlBoxContextUtils.writeValueToBeanFieldOrTail(col, entity, firstOrOldVersion);
+				DbContextUtils.writeValueToBeanFieldOrTail(col, entity, firstOrOldVersion);
 			sqlBody.append(col.getColumnName());
 			sqlBody.append(param(firstOrOldVersion)).append(",");
 		}

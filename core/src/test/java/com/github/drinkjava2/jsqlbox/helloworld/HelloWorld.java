@@ -17,14 +17,16 @@ import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 
+import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.JSQLBOX;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DB;
+import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
- * ActiveRecordDemoTest of jSqlBox configurations
+ * ActiveRecordDemoTest of DbUtil-Plus configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -45,15 +47,15 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 	}
 
 	public static void main(String[] args) throws SQLException {
-		DataSource ds = JdbcConnectionPool
-				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-
-		SqlBoxContext ctx = new SqlBoxContext(ds);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+//		DataSource ds = JdbcConnectionPool
+//				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+		DataSource ds =JBEANBOX.getBean(DataSourceBox.class);
+		DbContext ctx = new DbContext(ds);
+		DbContext.setGlobalDbContext(ctx);
 		for (String ddl : ctx.toDropAndCreateDDL(HelloWorld.class))
 			ctx.nExecute(ddl);
 
-		new HelloWorld().setName("Hellow jSqlBox").insert();
-		System.out.println(JSQLBOX.iQueryForString("select name from HelloWorld"));
+		new HelloWorld().setName("Hellow DbUtil-Plus").insert();
+		System.out.println(DB.iQueryForString("select name from HelloWorld"));
 	}
 }

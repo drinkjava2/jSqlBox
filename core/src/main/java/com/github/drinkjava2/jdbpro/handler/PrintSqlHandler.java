@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
-import com.github.drinkjava2.jdbpro.PreparedSQL; 
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 
 /**
  * PaginHandler is the AroundSqlHandler used to translate SQL to paginated SQL
@@ -25,6 +25,15 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
  */
 @SuppressWarnings("all")
 public class PrintSqlHandler extends DefaultOrderSqlHandler {
+	private static boolean allowPrint = false;
+
+	public static boolean isAllowPrint() {
+		return allowPrint;
+	}
+
+	public static void setAllowPrint(boolean allowPrint) {
+		PrintSqlHandler.allowPrint = allowPrint;
+	}
 
 	@Override
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
@@ -50,10 +59,11 @@ public class PrintSqlHandler extends DefaultOrderSqlHandler {
 		}
 
 		sb.append("| Time use:  " + (end - start) + "ms\n");
-		if (runner.getName()!=null && runner.getName().length()>0) 
-			 sb.append("| DB:        "+runner.getName()).append("\n");
+		if (runner.getName() != null && runner.getName().length() > 0)
+			sb.append("| DB:        " + runner.getName()).append("\n");
 		sb.append("==============================");
-		System.out.println(sb.toString());
+		if (allowPrint)
+			System.out.println(sb.toString());
 		return obj;
 	}
 

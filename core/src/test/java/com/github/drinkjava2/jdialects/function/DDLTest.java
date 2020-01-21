@@ -342,7 +342,6 @@ public class DDLTest extends JdialectsTestBase {
 		testOnCurrentRealDatabase(t);
 	}
 
- 
 	@Test
 	public void singleXxxMethodTest() {// Test singleXxx methods
 		TableModel t1 = new TableModel("customers");
@@ -382,7 +381,8 @@ public class DDLTest extends JdialectsTestBase {
 		t3.column("id").LONG().identityId().pkey();
 		t3.tableGenerator("table_gen1", "tb1", "pkcol2", "valcol", "pkval", 1, 10);
 		t3.column("id1").INTEGER().idGenerator("table_gen1");
-		t3.sequenceGenerator("seq1", "seq_1", 1, 1);
+		if (guessedDialect.getDdlFeatures().supportBasicOrPooledSequence())
+			t3.sequenceGenerator("seq1", "seq_1", 1, 1);
 		t3.column("id2").INTEGER().idGenerator("seq1");
 		t3.engineTail(" DEFAULT CHARSET=utf8");
 

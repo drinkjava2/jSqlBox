@@ -21,7 +21,7 @@ import java.util.Set;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * An simple implementation of ShardingTool to deal "RANGE" type sharding
@@ -45,9 +45,9 @@ public class ShardingRangeTool implements ShardingTool {
 		Object shardKey1 = null;
 		Object shardkey2 = null;
 		Class<?> entityOrClass = model.getEntityClass();
-		SqlBoxException.assureNotNull(entityOrClass);
+		DbException.assureNotNull(entityOrClass);
 		if (shardkey == null || shardkey.length == 0)
-			throw new SqlBoxException("ShardTable key parameter needed");
+			throw new DbException("ShardTable key parameter needed");
 		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
@@ -55,7 +55,7 @@ public class ShardingRangeTool implements ShardingTool {
 			shardkey2 = shardkey[1];
 		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("ShardTable key value can not be null");
+			throw new DbException("ShardTable key value can not be null");
 		return doCalculate(rangeSize, shardKey1, shardkey2);
 	}
 
@@ -71,9 +71,9 @@ public class ShardingRangeTool implements ShardingTool {
 		Object shardKey1 = null;
 		Object shardkey2 = null;
 		Class<?> entityOrClass = model.getEntityClass();
-		SqlBoxException.assureNotNull(entityOrClass);
+		DbException.assureNotNull(entityOrClass);
 		if (shardkey == null || shardkey.length == 0)
-			throw new SqlBoxException("ShardDatabase key parameter needed");
+			throw new DbException("ShardDatabase key parameter needed");
 		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
@@ -81,7 +81,7 @@ public class ShardingRangeTool implements ShardingTool {
 			shardkey2 = shardkey[1];
 		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("ShardDatabase key value can not be null");
+			throw new DbException("ShardDatabase key value can not be null");
 		return doCalculate(rangeSize, shardKey1, shardkey2);
 	}
 

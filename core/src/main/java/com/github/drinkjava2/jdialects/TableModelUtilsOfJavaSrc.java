@@ -84,7 +84,7 @@ public abstract class TableModelUtilsOfJavaSrc {
 	 *            if true, create linked style setter, otherwise create normal
 	 *            setter
 	 * @param activeRecord
-	 *            if true, build a jSqlBox ActiveRecord Entity class, otherwise
+	 *            if true, build a DbUtil-Plus ActiveRecord Entity class, otherwise
 	 *            build a POJO class
 	 * @param packageName
 	 *            Optional, the package name of this entity class

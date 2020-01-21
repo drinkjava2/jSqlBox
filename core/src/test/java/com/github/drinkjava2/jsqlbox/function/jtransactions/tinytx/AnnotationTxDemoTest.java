@@ -14,14 +14,14 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * This is jSqlBox Transaction Demo by using Annotation
+ * This is DbUtil-Plus Transaction Demo by using Annotation
  * 
- * To make jSqlBox core unit test clean, I put Spring TX demos in jSqlBox's demo
+ * To make DbUtil-Plus core unit test clean, I put Spring TX demos in DbUtil-Plus's demo
  * folder.
  * 
  * @author Yong Zhu
@@ -52,10 +52,10 @@ public class AnnotationTxDemoTest {
 		public Class<?> value() default TinyTxAOP.class;
 	}
 
-	SqlBoxContext ctx;
+	DbContext ctx;
 	{
-		SqlBoxContext.resetGlobalVariants();
-		ctx = new SqlBoxContext((DataSource) BeanBox.getBean(DataSourceBox.class));
+		DbContext.resetGlobalVariants();
+		ctx = new DbContext((DataSource) JBEANBOX.getBean(DataSourceBox.class));
 	}
 
 	@TX
@@ -65,8 +65,8 @@ public class AnnotationTxDemoTest {
 	}
 
 	@Test
-	public void doTest() {
-		AnnotationTxDemoTest tester = BeanBox.getBean(AnnotationTxDemoTest.class);
+	public void doTest() { 
+		AnnotationTxDemoTest tester = JBEANBOX.getBean(AnnotationTxDemoTest.class);
 		ctx.quiteExecute("drop table user_tb");
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())

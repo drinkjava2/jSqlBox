@@ -16,12 +16,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
-import com.github.drinkjava2.jdbpro.log.DbProLog;
-import com.github.drinkjava2.jdbpro.log.DbProLogFactory;
-import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.log.DialectLog;
-import com.github.drinkjava2.jdialects.log.DialectLogFactory;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jlogs.Log;
+import com.github.drinkjava2.jlogs.LogFactory;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -31,17 +28,16 @@ import com.zaxxer.hikari.HikariDataSource;
  * @since 1.0.2
  */
 public class DbProLogTest {
-	DialectLog dialectLog = DialectLogFactory.getLog(DbProLogTest.class);
-	DbProLog log = DbProLogFactory.getLog(DbProLogTest.class);
+	Log log = LogFactory.getLog(DbProLogTest.class);
 
 	@Before
 	public void init() {
-		SqlBoxContext.resetGlobalVariants();
+		DbContext.resetGlobalVariants();
 	}
 
 	@After
 	public void cleanUp() {
-		SqlBoxContext.resetGlobalVariants();
+		DbContext.resetGlobalVariants();
 	}
 
 	private String name;
@@ -55,34 +51,20 @@ public class DbProLogTest {
 	}
 
 	@Test
-	public void doDialectLoggerTest() {
-		Dialect.setGlobalAllowShowSql(true);
-		Dialect.MySQL55Dialect.paginAndTrans(10, 10, "select * from sometable");
-		dialectLog.info("Logger test message1 output ok");
-		Systemout.println("Logger test message2 output ok");
-		Systemout.println(dialectLog);
-		Dialect.setGlobalAllowShowSql(false);
-		Systemout.println("======================================");
-	}
-
-	@Test
 	public void doSqlBoxLoggerTest() {
 		HikariDataSource dataSource = new HikariDataSource();
 		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
 		dataSource.setPassword("");
-		SqlBoxContext.setGlobalNextAllowShowSql(true);
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(DbProLogTest.class))
 			ctx.quiteExecute(ddl);
 		DbProLogTest t = new DbProLogTest();
 		t.setName("Tom");
 		ctx.eInsert(t);
-		log.info("Logger test message3 output ok");
-		log.info("Logger test message4 output ok");
+		log.info("Logger test ok");
 		Systemout.println(log);
-		SqlBoxContext.setGlobalNextAllowShowSql(false);
 	}
 
 }

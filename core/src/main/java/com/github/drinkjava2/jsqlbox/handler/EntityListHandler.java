@@ -20,8 +20,8 @@ import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * EntityListHandler is the SqlHandler used explain the Entity query SQL (For
@@ -37,16 +37,16 @@ public class EntityListHandler extends DefaultOrderSqlHandler {
 	public Object handle(ImprovedQueryRunner runner, PreparedSQL ps) {
 		Object[] tableModels = ps.getModels();
 		if (tableModels == null || tableModels.length == 0)
-			throw new SqlBoxException("TableModel setting needed for EntityListHandler");
+			throw new DbException("TableModel setting needed for EntityListHandler");
 		if (tableModels.length > 1)
-			throw new SqlBoxException("TableModel setting should only have 1 for EntityListHandler");
+			throw new DbException("TableModel setting should only have 1 for EntityListHandler");
 		TableModel model = (TableModel) tableModels[0];
 
 		ps.setResultSetHandler(SingleTonHandlers.mapListHandler);
 		List<Map<String, Object>> maps = (List<Map<String, Object>>) runner.runPreparedSQL(ps);
 		List<Object> entityList = new ArrayList<Object>();
 		for (Map<String, Object> row : maps) {
-			Object entity = SqlBoxContextUtils.mapToEntityBean( model, row);
+			Object entity = DbContextUtils.mapToEntityBean( model, row);
 			entityList.add(entity);
 		}
 		return entityList;

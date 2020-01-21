@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Child class extended from Text support multiple line String. the toString
  * method will return the comments between / * - and * / , To use this function
  * need copy java file in resources folder, or move java file in resources
- * folder and set a plugin in pom.xml, detail see jSqlBox wiki
+ * folder and set a plugin in pom.xml, detail see DbUtil-Plus wiki
  * 
  * @author Yong Zhu
  * @since 2.0.4

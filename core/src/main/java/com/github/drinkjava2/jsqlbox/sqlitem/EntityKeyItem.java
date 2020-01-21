@@ -15,8 +15,8 @@ import com.github.drinkjava2.jdbpro.CustomizedSqlItem;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * This EntityKeyItem is used to build a " alias.id1=? and alias.id2=? ..." SQL
@@ -43,8 +43,8 @@ public class EntityKeyItem implements CustomizedSqlItem {
 				alias = ps.getAliases()[i];
 			}
 		}
-		SqlBoxException.assureNotNull(model);// found the model of entity
-		SqlBoxException.assureNotEmpty(alias); // found the alias
+		DbException.assureNotNull(model);// found the model of entity
+		DbException.assureNotEmpty(alias); // found the alias
 		doAppendEntityKeyParameters(ps, alias, model);
 	}
 
@@ -56,7 +56,7 @@ public class EntityKeyItem implements CustomizedSqlItem {
 					if (i > 0)
 						ps.addSql(" and ");
 					ps.addSql(alias).append(".").append(col.getColumnName()).append("=? ");
-					Object value = SqlBoxContextUtils.readValueFromBeanFieldOrTail(col, entity);
+					Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity);
 					ps.addParam(value);
 					i++;
 				}

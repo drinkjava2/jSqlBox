@@ -1,11 +1,12 @@
 package com.github.drinkjava2.jsqlbox.issues.IYDU7;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
+import static com.github.drinkjava2.jsqlbox.DB.give;
 
 import java.util.List;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
@@ -40,21 +41,21 @@ public class IYDU7Test extends TestBase {
 
 	@Test
 	public void testQuery1() {
-		System.out.println("\ntest testQuery1");
+		Systemout.println("\ntest testQuery1");
 		insertDemoData();
 		EntityNet net = ctx.iQuery(new EntityNetHandler(), Ademo.class, Bdemo.class, give("b", "a"),
 				"select a.**, b.** from Ademo a, Bdemo b where a.bid=b.bid order by a.aid");
 		List<Ademo> aList = net.pickEntityList("a");
 		for (Ademo a : aList) {
-			System.out.println("Aid:" + a.getAid());
-			System.out.println("bid:" + a.getBdemo().getBid());
+			Systemout.println("Aid:" + a.getAid());
+			Systemout.println("bid:" + a.getBdemo().getBid());
 		}
 
 	}
 
 	@Test
 	public void testQuery2() {
-		System.out.println("\ntest testQuery2");
+		Systemout.println("\ntest testQuery2");
 		insertDemoData();
 		EntityNet net = ctx.iQuery(new EntityNetHandler(), Ademo.class, Bdemo.class, Cdemo.class, give("b", "a"),
 				give("c", "a", "cdemoList"), "select a.**, b.**, c.** from Ademo a", //
@@ -63,9 +64,9 @@ public class IYDU7Test extends TestBase {
 				" order by a.aid, a.bid, c.cid");
 		List<Ademo> aList = net.pickEntityList("a");
 		for (Ademo a : aList) {
-			System.out.println("Aid:" + a.getAid());
-			System.out.println("bid:" + a.getBdemo().getBid());
-			System.out.println("cid:" + a.getCdemoList());
+			Systemout.println("Aid:" + a.getAid());
+			Systemout.println("bid:" + a.getBdemo().getBid());
+			Systemout.println("cid:" + a.getCdemoList());
 		}
 
 	}

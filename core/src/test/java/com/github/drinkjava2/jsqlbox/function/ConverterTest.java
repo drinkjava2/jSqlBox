@@ -12,7 +12,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Convert;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.converter.BaseFieldConverter;
 
@@ -38,13 +38,13 @@ public class ConverterTest extends TestBase {
 	public static class FooConverter extends BaseFieldConverter {
 		@Override
 		public Object entityFieldToDbValue(ColumnModel col, Object entity) {
-			Object value = SqlBoxContextUtils.doReadFromFieldOrTail(col, entity);
+			Object value = DbContextUtils.doReadFromFieldOrTail(col, entity);
 			return ((FooDemo) value).id;
 		}
 
 		@Override
 		public void writeDbValueToEntityField(Object entityBean, ColumnModel col, Object value) {
-			SqlBoxContextUtils.doWriteToFieldOrTail(col, entityBean, new FooDemo((Integer) value));
+			DbContextUtils.doWriteToFieldOrTail(col, entityBean, new FooDemo((Integer) value));
 		}
 	}
 

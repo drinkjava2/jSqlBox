@@ -15,9 +15,9 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.shard;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.shard;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -34,7 +34,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -52,7 +52,7 @@ public class ShardingShardMethodTest {
 	final static int SLAVE_DATABASE_QTY = 5; // each master has 5 slaves
 	final static int TABLE_QTY = 5; // each table has 5 sharding
 
-	SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
+	DbContext[] masters = new DbContext[MASTER_DATABASE_QTY];
 
 	public static class TheUser extends ActiveRecord<TheUser> {
 		@ShardTable({ "MOD", "3" })
@@ -73,16 +73,15 @@ public class ShardingShardMethodTest {
 
 	@Before
 	public void init() {
-		SqlBoxContext.setGlobalNextAllowShowSql(true);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
-			SqlBoxContext[] slaves = new SqlBoxContext[SLAVE_DATABASE_QTY];
-			masters[i] = new SqlBoxContext(TestBase.createH2_HikariDataSource("masters" + i));
+			DbContext[] slaves = new DbContext[SLAVE_DATABASE_QTY];
+			masters[i] = new DbContext(TestBase.createH2_HikariDataSource("masters" + i));
 			masters[i].setMasters(masters);
 			masters[i].setSlaves(slaves);
 			masters[i].setSnowflakeCreator(new SnowflakeCreator(5, 5, 0, i));
 			masters[i].setName("Master" + i);
 			for (int j = 0; j < SLAVE_DATABASE_QTY; j++)
-				slaves[j] = new SqlBoxContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
+				slaves[j] = new DbContext(TestBase.createH2_HikariDataSource("SlaveDB" + i + "_" + j));
 		}
 
 		TableModel model = TableModelUtils.entity2Model(TheUser.class);
@@ -118,16 +117,16 @@ public class ShardingShardMethodTest {
 		masters[2].iExecute(TheUser.class, "insert into ", shard(3), " (id, name) values(?,?)", param(10, "u1"),
 				USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shard(3),
-				USE_SLAVE, new PrintSqlHandler())); 
+				USE_SLAVE, new PrintSqlHandler()));
 	}
 
 	@Test
 	public void testActiveRecord() {// issue XA or TCC transaction needed
-		SqlBoxContext.setGlobalSqlBoxContext(masters[4]);// random select one
+		DbContext.setGlobalDbContext(masters[4]);// random select one
 
 		// Don't know saved to where, becuase Snowflake is random number
 		TheUser u1 = new TheUser().putField("name", "Tom").insert(USE_BOTH, new PrintSqlHandler());
-		Assert.assertEquals(u1.shardDB(), gctx().getShardedDB(TheUser.class, u1.getId())); 
+		Assert.assertEquals(u1.shardDB(), gctx().getShardedDB(TheUser.class, u1.getId()));
 
 		u1.setName("Sam");
 		u1.update(USE_BOTH, new PrintSqlHandler());
@@ -138,11 +137,11 @@ public class ShardingShardMethodTest {
 		Assert.assertEquals("Sam", u2.getName());
 
 		u2.delete(new PrintSqlHandler());// only deleted master
-		//Old style
+		// Old style
 		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
-		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist 
-		
-		//new style
+		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist
+
+		// new style
 		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shard(), USE_MASTER));
 		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shard()));// slave exist
 	}

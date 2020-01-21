@@ -18,7 +18,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 /**
- * ActiveRecordDemoTest of jSqlBox configurations
+ * ActiveRecordDemoTest of DbUtil-Plus configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0

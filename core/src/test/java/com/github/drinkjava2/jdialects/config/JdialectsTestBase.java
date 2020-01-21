@@ -12,7 +12,6 @@ import org.junit.Before;
 
 import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.common.Systemout;
-import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -26,7 +25,7 @@ import com.github.drinkjava2.jdialects.utils.TinyJdbc;
  *
  */
 public class JdialectsTestBase {
-	protected DataSource ds = BeanBox.getBean(DataSourceBox.class);
+	protected DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
 	protected TinyJdbc dbPro = new TinyJdbc(ds);
 	protected Dialect guessedDialect = Dialect.guessDialect(ds);
 

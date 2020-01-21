@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox.converter;
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
  * For one field with @Convert annotation, define how it customize SQL, read and
@@ -31,7 +31,7 @@ public interface FieldConverter {
 	 * @param sqlOption
 	 *            can be INSERT/UPDATE/DELETE/LOAD
 	 * @param ctx
-	 *            the SqlBoxContext instance
+	 *            the DbContext instance
 	 * @param col
 	 *            the ColumnModel
 	 * @param sqlBody
@@ -39,7 +39,7 @@ public interface FieldConverter {
 	 * @param sqlWhere
 	 *            the Sql "where" part, this is a LinkStyleArrayList
 	 */
-	public void handleSQL(SqlOption sqlOption, SqlBoxContext ctx, ColumnModel col, Object entity,
+	public void handleSQL(SqlOption sqlOption, DbContext ctx, ColumnModel col, Object entity,
 			LinkArrayList<Object> sqlBody, LinkArrayList<Object> sqlWhere);
 
 	/**

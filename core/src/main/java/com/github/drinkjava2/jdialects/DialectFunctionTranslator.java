@@ -29,7 +29,7 @@ import com.github.drinkjava2.jdialects.log.DialectLogFactory;
  */
 public class DialectFunctionTranslator {
 
-	private static final DialectLog logger = DialectLogFactory.getLog(DialectFunctionTranslator.class);
+	//private static final DialectLog logger = DialectLogFactory.getLog(DialectFunctionTranslator.class);
 
 	public static final DialectFunctionTranslator instance = new DialectFunctionTranslator();
 	private Map<String, Integer> functionMap = new HashMap<String, Integer>();

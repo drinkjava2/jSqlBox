@@ -19,7 +19,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 public class FunctionTranslateTest {
 
 	{
-		//Dialect.setAllowShowDialectLog(true);
+		// Dialect.setAllowShowDialectLog(true);
 	}
 
 	public static void main(String[] args) {
@@ -34,15 +34,13 @@ public class FunctionTranslateTest {
 				Dialect.MySQL55Dialect.pagin(3, 10, "select concat('a','b','c'), current_time() from user_tb"));
 		Systemout.println(
 				Dialect.Oracle12cDialect.pagin(3, 10, "select concat('a','b','c'), current_time() from user_tb"));
-		Systemout.println(Dialect.SQLServer2005Dialect.pagin(1, 10,
-				"select concat('a','b','c'), current_time() from user_tb"));
+		Systemout.println(
+				Dialect.SQLServer2005Dialect.pagin(1, 10, "select concat('a','b','c'), current_time() from user_tb"));
 
 		Systemout.println("============================================");
 
-		System.out
-				.println(Dialect.MySQL55Dialect.trans("select concat('a','b','c'), current_time()   from user_tb"));
-		Systemout.println(
-				Dialect.Oracle12cDialect.trans("select concat('a','b','c'), current_time()  from user_tb"));
+		Systemout.println(Dialect.MySQL55Dialect.trans("select concat('a','b','c'), current_time()   from user_tb"));
+		Systemout.println(Dialect.Oracle12cDialect.trans("select concat('a','b','c'), current_time()  from user_tb"));
 		Systemout.println(
 				Dialect.SQLServer2008Dialect.trans("select concat('a','b','c'), current_time()  from user_tb"));
 

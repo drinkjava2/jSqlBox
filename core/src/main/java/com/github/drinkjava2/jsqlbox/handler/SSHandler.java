@@ -18,8 +18,8 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContext;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * SSHandler is used to explain alias.** to real columns in SQL, transient
@@ -40,10 +40,10 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	public void beforeExecute(ImprovedQueryRunner runner, PreparedSQL ps) {
 		Object[] tableModels = ps.getModels();
 		if (tableModels == null || tableModels.length == 0)
-			throw new SqlBoxException("TableModel items needed for SSHandler");
+			throw new DbException("TableModel items needed for SSHandler");
 		String[] aliases = ps.getAliases();
 		if (aliases == null || aliases.length != tableModels.length)
-			throw new SqlBoxException("Alias qty not same as TableModel qty.");
+			throw new DbException("Alias qty not same as TableModel qty.");
 		String sql = explainNetQuery(ps);
 		ps.setSql(sql);
 	}
@@ -59,7 +59,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	 */
 	private String explainNetQuery(PreparedSQL ps) {// NOSONAR
 		String sql = StrUtils.formatSQL(ps.getSql());
-		SqlBoxException.assureNotEmpty(ps.getSql(), "Sql can not be empty");
+		DbException.assureNotEmpty(ps.getSql(), "Sql can not be empty");
 		int pos = sql.indexOf(".**");
 		if (pos < 0)
 			pos = sql.indexOf(".##");
@@ -72,7 +72,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 					break;
 			}
 			if (aliasSB.length() == 0)
-				throw new SqlBoxException(".** can not put at front");
+				throw new DbException(".** can not put at front");
 			String alias = aliasSB.toString();
 			sql += " ";// NOSONAR
 
@@ -89,7 +89,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 			if (posAlias == -1)
 				posAlias = StrUtils.indexOfIgnoreCase(sql, " " + alias + ")");
 			if (posAlias == -1)
-				throw new SqlBoxException("Alias '" + alias + "' not found");
+				throw new DbException("Alias '" + alias + "' not found");
 
 			StringBuilder tableNameSb = new StringBuilder();
 			for (int i = posAlias - 1; i >= 0; i--) {
@@ -100,7 +100,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 					break;
 			}
 			if (tableNameSb.length() == 0)
-				throw new SqlBoxException("Alias '" + alias + "' not found tablename in SQL");
+				throw new DbException("Alias '" + alias + "' not found tablename in SQL");
 			String tbStr = tableNameSb.toString();
 
 			sql = replaceStarStarToColumn(sql, alias, tbStr, ps);
@@ -128,7 +128,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 				TableModel tb = (TableModel) ps.getModels()[i];
 				if (tableName.equalsIgnoreCase(tb.getTableName())) {
 					if (!alias.equalsIgnoreCase(ps.getAliases()[i]))
-						throw new SqlBoxException(
+						throw new DbException(
 								"Alias '" + alias + "' not same as tableModel's alias '" + ps.getAliases()[i] + "'");
 					for (ColumnModel col : tb.getColumns()) {
 						if (!col.getTransientable())
@@ -139,7 +139,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 				}
 			}
 			if (sb.length() == 0)
-				throw new SqlBoxException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
+				throw new DbException("In SQL '" + sql + "', Can not find columns in table '" + tableName + "'");
 			sb.setLength(sb.length() - 2);
 			result = StrUtils.replaceFirst(sql, alias + ".**", sb.toString());
 			return result;
@@ -151,7 +151,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 				TableModel tb = (TableModel) ps.getModels()[i];
 				if (tableName.equalsIgnoreCase(tb.getTableName())) {
 					if (!alias.equalsIgnoreCase(ps.getAliases()[i]))
-						throw new SqlBoxException("Alias '" + alias + "' not same as tableModel's alias");
+						throw new DbException("Alias '" + alias + "' not same as tableModel's alias");
 					for (ColumnModel col : tb.getColumns()) {
 						boolean found = false;
 						if (!col.getTransientable()) {
@@ -174,7 +174,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 				}
 			}
 			if (sb.length() == 0)
-				throw new SqlBoxException(
+				throw new DbException(
 						"In SQL '" + sql + "', Can not find key columns in table '" + tableName + "'");
 			sb.setLength(sb.length() - 2);
 			result = StrUtils.replaceFirst(result, alias + ".##", sb.toString());

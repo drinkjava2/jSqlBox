@@ -28,9 +28,9 @@ import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContext;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 import com.github.drinkjava2.jsqlbox.TailType;
 
 /**
@@ -64,7 +64,7 @@ public class EntityNet {
 
 	/** Config, parameters can be entity or entity class or TableModel */
 	public EntityNet configFromPreparedSQL(PreparedSQL ps) {
-		SqlBoxException.assureNotNull(ps.getModels(), "No tableModel setting found.");
+		DbException.assureNotNull(ps.getModels(), "No tableModel setting found.");
 		for (int i = 0; i < ps.getModels().length; i++)
 			models.put(ps.getAliases()[i], (TableModel) ps.getModels()[i]);
 		addGivesList(ps.getGivesList());
@@ -81,13 +81,13 @@ public class EntityNet {
 	/** Give a's value to b's aField */
 	public EntityNet give(String a, String b) {
 		TableModel aModel = models.get(a);
-		SqlBoxException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
-		SqlBoxException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
+		DbException.assureNotNull(aModel, "Not found config for alias '" + a + "'");
+		DbException.assureNotNull(aModel.getEntityClass(), "'entityClass' property not set for model " + aModel);
 		String fieldName = StrUtils.toLowerCaseFirstOne(aModel.getEntityClass().getSimpleName());
 
 		TableModel bModel = models.get(b);
-		SqlBoxException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
-		SqlBoxException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
+		DbException.assureNotNull(bModel, "Not found config for alias '" + a + "'");
+		DbException.assureNotNull(bModel.getEntityClass(), "'entityClass' property not set for model " + bModel);
 
 		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(bModel.getEntityClass(), fieldName);
 		if (readMethod != null)
@@ -109,7 +109,7 @@ public class EntityNet {
 
 	/** Give a's value to b's someField */
 	public EntityNet give(String a, String b, String someField) {
-		SqlBoxException.assureNotEmpty(someField, "give field parameter can not be empty for '" + b + "'");
+		DbException.assureNotEmpty(someField, "give field parameter can not be empty for '" + b + "'");
 		givesList.add(new String[] { a, b, someField });
 		return this;
 	}
@@ -179,7 +179,7 @@ public class EntityNet {
 		}
 		Object realEntityId = EntityIdUtils.buildEntityIdFromUnknow(entityId, model);
 		if (realEntityId == null)
-			throw new SqlBoxException("Can not build entityId for '" + entityId + "'");
+			throw new DbException("Can not build entityId for '" + entityId + "'");
 		Map<Object, Object> map = body.get(claz);
 		if (map == null)
 			return null;
@@ -197,7 +197,7 @@ public class EntityNet {
 			Object entityId = EntityIdUtils.buildEntityIdFromOneRow(titles, oneRow, model, alias);
 			if (entityId == null)
 				continue;// not found entity ID columns
-			SqlBoxException.assureNotNull(model.getEntityClass());
+			DbException.assureNotNull(model.getEntityClass());
 			Object entity = getOneEntity(model.getEntityClass(), entityId);
 			// create new Entity
 			if (entity == null) {
@@ -232,7 +232,7 @@ public class EntityNet {
 				if (entity instanceof TailType)
 					((TailType) entity).tails().put(colName, oneRow[i]);
 			} else
-				SqlBoxContextUtils.writeValueToBeanFieldOrTail(col, entity, oneRow[i]);
+				DbContextUtils.writeValueToBeanFieldOrTail(col, entity, oneRow[i]);
 		}
 		return entity;
 	}
@@ -246,7 +246,7 @@ public class EntityNet {
 			Object from = oneRow.get(fromAlias);
 			Object to = oneRow.get(toAlias);
 			String tofield = gives[2];
-			SqlBoxException.assureNotEmpty(tofield);
+			DbException.assureNotEmpty(tofield);
 			if (from != null && to != null) {
 				TableModel toModel = models.get(toAlias);
 				ColumnModel col = toModel.getColumnByFieldName(tofield);
@@ -276,7 +276,7 @@ public class EntityNet {
 						ClassCacheUtils.writeValueToBeanField(to, tofield, map);
 					}
 					Object entityId = oneRow.get("#" + fromAlias);
-					SqlBoxException.assureNotNull(entityId, "Can not find entityId for '" + fromAlias + "'");
+					DbException.assureNotNull(entityId, "Can not find entityId for '" + fromAlias + "'");
 					if (!map.containsKey(entityId))
 						map.put(entityId, from);
 				} else {// No matter what type, give "from" value to "to"
@@ -324,24 +324,24 @@ public class EntityNet {
 	}
 
 	/** Search related entity list inside of current EntityNet */
-	public <E> List<E> findRelatedList(SqlBoxContext ctx, Object entity, Object... sqlItems) {
+	public <E> List<E> findRelatedList(DbContext ctx, Object entity, Object... sqlItems) {
 		Set<E> resultSet = findRelatedSet(ctx, entity, sqlItems);
 		return new ArrayList<E>(resultSet);
 	}
 
 	/** Search related entity set inside of current EntityNet */
 	@SuppressWarnings("unchecked")
-	public <E> Set<E> findRelatedSet(SqlBoxContext ctx, Object entity, Object... sqlItems) {
-		TableModel[] tbModels = SqlBoxContextUtils.findAllModels(sqlItems);
+	public <E> Set<E> findRelatedSet(DbContext ctx, Object entity, Object... sqlItems) {
+		TableModel[] tbModels = DbContextUtils.findAllModels(sqlItems);
 		// first model is entity self, last is target model
-		SqlBoxException.assureTrue(tbModels.length > 1);
-		SqlBoxException.assureTrue(entity.getClass().equals(tbModels[0].getEntityClass()));
+		DbException.assureTrue(tbModels.length > 1);
+		DbException.assureTrue(entity.getClass().equals(tbModels[0].getEntityClass()));
 		return (Set<E>) doFindRelatedSet(0, entity, tbModels);
 	}
 
 	/** Inside of current EntityNet, search related entity Map */
-	public <E> Map<Object, E> findRelatedMap(SqlBoxContext ctx, Object entity, Object... sqlItems) {
-		TableModel[] tbModels = SqlBoxContextUtils.findAllModels(sqlItems);
+	public <E> Map<Object, E> findRelatedMap(DbContext ctx, Object entity, Object... sqlItems) {
+		TableModel[] tbModels = DbContextUtils.findAllModels(sqlItems);
 		Set<E> resultSet = findRelatedSet(ctx, entity, sqlItems);
 		Map<Object, E> resultMap = new HashMap<Object, E>();
 		for (E ent : resultSet) {
@@ -366,7 +366,7 @@ public class EntityNet {
 				return realDoRelationCheck(e2, e1, m2, m1, fkey);
 			}
 		}
-		throw new SqlBoxException("Not found relationship(foreign key) setting between '" + m1.getEntityClass()
+		throw new DbException("Not found relationship(foreign key) setting between '" + m1.getEntityClass()
 				+ "' and '" + m2.getEntityClass() + "'");
 	}
 
@@ -431,7 +431,7 @@ public class EntityNet {
 			return this;
 		for (String[] strings : givesList) {
 			if (strings == null || strings.length < 2 || strings.length > 3)
-				throw new SqlBoxException("gives should have 2 or 3 parameters");
+				throw new DbException("gives should have 2 or 3 parameters");
 			if (strings.length == 2)
 				give(strings[0], strings[1]);
 			else

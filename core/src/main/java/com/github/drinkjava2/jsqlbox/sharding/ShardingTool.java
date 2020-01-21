@@ -26,8 +26,8 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 
 public interface ShardingTool {// NOSONAR
 	/**
-	 * Dealing a shardKey array based on current SqlBoxContext and TableModel,
-	 * return table name array, in this jSqlBox version, only support return 1 table
+	 * Dealing a shardKey array based on current DbContext and TableModel,
+	 * return table name array, in this DbUtil-Plus version, only support return 1 table
 	 * name
 	 * 
 	 * @param tableModel
@@ -40,15 +40,15 @@ public interface ShardingTool {// NOSONAR
 	public Integer[] handleShardTable(TableModel tableModel, Object... shardKey);
 
 	/**
-	 * Dealing a shardKey array based on current SqlBoxContext and TableModel,
-	 * return SqlBoxContext array, in this jSqlBox version, only support return 1
-	 * SqlBoxContext
+	 * Dealing a shardKey array based on current DbContext and TableModel,
+	 * return DbContext array, in this DbUtil-Plus version, only support return 1
+	 * DbContext
 	 * 
 	 * @param tableModel
 	 *            The tableModel of an entity need do sharding
 	 * @param shardKey
 	 *            The shard key or keys
-	 * @return A Integer[] stored SqlBoxContext name order, start from 0, or null if the
+	 * @return A Integer[] stored DbContext name order, start from 0, or null if the
 	 *         sharding strategy is not fit for current implementation
 	 */
 	public Integer[] handleShardDatabase(TableModel tableModel, Object... shardKey);

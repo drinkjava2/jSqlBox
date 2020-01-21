@@ -21,7 +21,7 @@ import java.util.Set;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * An simple implementation of ShardingTool to deal "MOD" type sharding strategy
@@ -38,7 +38,7 @@ public class ShardingModTool implements ShardingTool {
 		if (col == null)
 			return null;
 		if (col.getShardTable() == null || col.getShardTable().length == 0)
-			throw new SqlBoxException("Not found ShardTable setting for table '" + model.getTableName() + "'");
+			throw new DbException("Not found ShardTable setting for table '" + model.getTableName() + "'");
 
 		// return null if is not "MOD" shardTable strategy
 		if (!"MOD".equalsIgnoreCase(col.getShardTable()[0]))
@@ -48,10 +48,10 @@ public class ShardingModTool implements ShardingTool {
 		Object shardKey1 = null;
 		Object shardkey2 = null;
 		Class<?> entityOrClass = model.getEntityClass();
-		SqlBoxException.assureNotNull(entityOrClass);
+		DbException.assureNotNull(entityOrClass);
 
 		if (shardkey == null || shardkey.length == 0)
-			throw new SqlBoxException("ShardTable key parameter needed");
+			throw new DbException("ShardTable key parameter needed");
 		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
@@ -59,12 +59,12 @@ public class ShardingModTool implements ShardingTool {
 			shardkey2 = shardkey[1];
 		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("ShardTable key value can not be null");
+			throw new DbException("ShardTable key value can not be null");
 
 		Set<Integer> set = new HashSet<Integer>();
 
 		if (shardkey2 != null) {
-			throw new SqlBoxException("ShardingModTool does not support shardBetween type method");
+			throw new DbException("ShardingModTool does not support shardBetween type method");
 		} else {
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)
@@ -86,7 +86,7 @@ public class ShardingModTool implements ShardingTool {
 		if (col == null)
 			return null;
 		if (col.getShardDatabase() == null || col.getShardDatabase().length == 0)
-			throw new SqlBoxException("Not found ShardDatabase setting for table '" + model.getTableName() + "'");
+			throw new DbException("Not found ShardDatabase setting for table '" + model.getTableName() + "'");
 
 		// return null if is not "MOD" shardTable strategy
 		if (!"MOD".equalsIgnoreCase(col.getShardDatabase()[0]))
@@ -96,9 +96,9 @@ public class ShardingModTool implements ShardingTool {
 		Object shardKey1 = null;
 		Object shardkey2 = null;
 		Class<?> entityOrClass = model.getEntityClass();
-		SqlBoxException.assureNotNull(entityOrClass);
+		DbException.assureNotNull(entityOrClass);
 		if (shardkey == null || shardkey.length == 0)
-			throw new SqlBoxException("ShardDatabase key parameter needed");
+			throw new DbException("ShardDatabase key parameter needed");
 		else if (shardkey.length == 1) {
 			shardKey1 = shardkey[0];
 		} else {
@@ -106,12 +106,12 @@ public class ShardingModTool implements ShardingTool {
 			shardkey2 = shardkey[1];
 		}
 		if (shardKey1 == null)
-			throw new SqlBoxException("ShardDatabase key value can not be null, on table:"+col.getTableModel().getTableName()+", column:"+col.getColumnName());
+			throw new DbException("ShardDatabase key value can not be null, on table:"+col.getTableModel().getTableName()+", column:"+col.getColumnName());
 
 		Set<Integer> set = new HashSet<Integer>();
 
 		if (shardkey2 != null)
-			throw new SqlBoxException("ShardingModTool does not support shardBetween type method");
+			throw new DbException("ShardingModTool does not support shardBetween type method");
 		else {
 			if (shardKey1 instanceof Collection<?>) {
 				for (Object key : (Collection<?>) shardKey1)

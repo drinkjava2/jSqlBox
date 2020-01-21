@@ -25,7 +25,7 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.function.SqlHandlersTest.DemoUser;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
@@ -79,15 +79,15 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 				"select u.* from DemoUser u where u.age>?", 10);
 		Assert.assertEquals(90l, result.size());
 
-		SqlBoxContext.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(),
+		DbContext.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(),
 				new FirstPrintHandler(), new PaginHandler(2, 5));
-		SqlBoxContext.setThreadLocalSqlHandlers(new EntityListHandler());
+		DbContext.setThreadLocalSqlHandlers(new EntityListHandler());
 		try {
-			SqlBoxContext newCtx = new SqlBoxContext(ctx.getDataSource());
+			DbContext newCtx = new DbContext(ctx.getDataSource());
 			List<DemoUser> result2 = newCtx.pQuery("select u.* from DemoUser u where u.age>?", 10, DemoUser.class);
 			Assert.assertEquals(5l, result2.size());
 		} finally {
-			SqlBoxContext.resetGlobalVariants();
+			DbContext.resetGlobalVariants();
 		}
 	}
 

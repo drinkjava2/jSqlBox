@@ -1,7 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function.entitynet;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.alias;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.give;
+import static com.github.drinkjava2.jsqlbox.DB.alias;
+import static com.github.drinkjava2.jsqlbox.DB.give;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
 public class EntityNetTreeTest extends TestBase {
 	@Before
-	public void init() {// See "orm.png" in jSqlBox project's root folder
+	public void init() {// See "orm.png" in DbUtil-Plus project's root folder
 		super.init();
 		createAndRegTables(TreeNode.class);
 		TreeNode t = new TreeNode();

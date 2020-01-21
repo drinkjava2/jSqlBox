@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * TextUtils is used to read Java source file from sources folder, usage: String
  * src=TextUtils.getJavaSourceCode(Foo.class, "UTF-8"); To use this function
  * need copy java src file into resources folder or set a plug-in in pom.xml,
- * detail see jSqlBox's documents
+ * detail see DbUtil-Plus's documents
  * 
  * @author Yong Zhu
  */

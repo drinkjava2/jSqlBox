@@ -15,8 +15,8 @@ import java.lang.reflect.Method;
 
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
-import com.github.drinkjava2.jsqlbox.SqlBoxContextUtils;
-import com.github.drinkjava2.jsqlbox.SqlBoxException;
+import com.github.drinkjava2.jsqlbox.DbContextUtils;
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * EnumStringFieldConverter translate the entity Enum type field to database
@@ -29,7 +29,7 @@ public class EnumStringFieldConverter extends BaseFieldConverter {
 
 	@Override
 	public Object entityFieldToDbValue(ColumnModel col, Object entity) {
-		Object value = SqlBoxContextUtils.doReadFromFieldOrTail(col, entity);
+		Object value = DbContextUtils.doReadFromFieldOrTail(col, entity);
 		return value.toString();
 	}
 
@@ -42,7 +42,7 @@ public class EnumStringFieldConverter extends BaseFieldConverter {
 			Enum enu = Enum.valueOf((Class<? extends Enum>) writeMethod.getParameterTypes()[0], (String) value);
 			writeMethod.invoke(entityBean, enu);
 		} catch (Exception e) {
-			throw new SqlBoxException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'",
+			throw new DbException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'",
 					e);
 		}
 	}

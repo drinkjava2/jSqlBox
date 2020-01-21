@@ -16,6 +16,7 @@ import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
+import com.github.drinkjava2.jdialects.log.DialectPrintLog;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
@@ -27,16 +28,18 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
  */
 public class TableModelUtilsOfDbTest extends TestBase {
 	{
+		Dialect.setGlobalAllowShowSql(true);
+		DialectPrintLog.setAllowPrint(true);
 		regTables(studentSample.class, DbSample.class);
 	}
 
 	@Table(name = "student_sample")
 	public static class studentSample {
 		@Id
-		String stName;
+		String stAddr;
 
 		@Id
-		String stAddr;
+		String stName;
 
 		public String getStName() {
 			return stName;
@@ -56,7 +59,7 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 	}
 
-	@FKey(name = "fkey1", ddl = true, columns = { "name", "address" }, refs = { "student_sample", "stName", "stAddr" })
+	@FKey(name = "fkey1", ddl = true, columns = { "address", "name" }, refs = { "student_sample", "stAddr", "stName" })
 	public static class DbSample {
 		@Id
 		@UUID25

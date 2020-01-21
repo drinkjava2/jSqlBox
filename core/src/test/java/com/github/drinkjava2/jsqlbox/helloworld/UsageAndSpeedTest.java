@@ -35,7 +35,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -56,10 +56,9 @@ public class UsageAndSpeedTest {
 		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
 		dataSource.setDriverClassName("org.h2.Driver");
 		dataSource.setUsername("sa");// change to your user & password
-		dataSource.setPassword("");
-		// SqlBoxContext.setGlobalAllowShowSql(true);
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.resetGlobalVariants();
+		dataSource.setPassword(""); 
+		DbContext ctx = new DbContext(dataSource);
+		DbContext.resetGlobalVariants();
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
 			try {
 				ctx.nExecute(ddl);
@@ -244,7 +243,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void xxxxStyleWithConnection() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			Connection conn = null;
 			try {
@@ -268,7 +267,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void xxxxStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			try {
 				ctx.execute("insert into users (name,address) values(?,?)", "Sam", "Canada");
@@ -315,7 +314,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void nXxxStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
 			ctx.nExecute("update users set name=?, address=?", "Tom", "China");
@@ -327,7 +326,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void iXxxStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.iExecute("insert into users (", //
 					notNull(" name ,", "Sam"), //
@@ -343,7 +342,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void pXxxStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.pExecute("insert into users (name,address,age) ", "Sam", "Canada", 10, valuesQuestions());
 			ctx.pExecute("update users set name=?", "Tom", sql(", address=?"), "China", sql(", age=?"), null);
@@ -355,7 +354,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void tXxxStyle() {
-		SqlBoxContext ctx2 = new SqlBoxContext(dataSource);
+		DbContext ctx2 = new DbContext(dataSource);
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			UserAR sam = new UserAR("Sam", "Canada");
@@ -375,7 +374,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void dataMapperStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
@@ -390,7 +389,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void activeRecordStyle() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		UserAR user = new UserAR(); 
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.setName("Sam");
@@ -405,8 +404,8 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void activeRecordDefaultContext() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// use global default context
+		DbContext ctx = new DbContext(dataSource);
+		DbContext.setGlobalDbContext(ctx);// use global default context
 		UserAR user = new UserAR();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			user.setName("Sam");
@@ -425,7 +424,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void tXxxUseAnotherSqlTemplateEngine() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		ctx.setSqlTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
 
 		UserAR user = new UserAR("Sam", "Canada");
@@ -441,7 +440,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void tXxxDynamicChangeTemplateEngine() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		SqlTemplateEngine engine = new BasicSqlTemplate("[", "]", true, true);
 		UserAR user = new UserAR("Sam", "Canada");
 		UserAR tom = new UserAR("Tom", "China");
@@ -457,7 +456,7 @@ public class UsageAndSpeedTest {
 	/** Use const String can make SQL support Java Bean field refactoring */
 	@Test
 	public void iXxxxSupportRefactor() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		ctx.iExecute("insert into ", UserAR.TABLE, " ( ", //
 				UserAR.NAME, ",", param("Sam"), //
 				UserAR.ADDRESS, " ", param("Canada"), //
@@ -470,9 +469,9 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void activeRecordLoadByIdMap() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		UserAR user = new UserAR();
-		user.useContext(ctx); // Use ctx as SqlBoxContext
+		user.useContext(ctx); // Use ctx as DbContext
 		user.setName("Sam");
 		user.setAddress("Canada");
 		user.insert();
@@ -486,9 +485,9 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void activeRecordLoadByQuery() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		UserAR user = new UserAR();
-		user.useContext(ctx); // Use ctx as SqlBoxContext
+		user.useContext(ctx); // Use ctx as DbContext
 		user.setName("Sam");
 		user.setAddress("Canada");
 		user.insert();
@@ -498,7 +497,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void dataMapperCrudTest() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		// ctx.setAllowShowSQL(true);
 		UserAR user = new UserAR();
 		for (int i = 1; i <= 10; i++) {
@@ -526,7 +525,7 @@ public class UsageAndSpeedTest {
 
 	@Test
 	public void conditionsQuery() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		final String name = "Tom";
 		final String age = null;
 		final String address = "China";
