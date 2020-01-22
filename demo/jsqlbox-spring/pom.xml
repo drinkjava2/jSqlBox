@@ -25,12 +25,12 @@
      4)Add build-helper-maven-plugin plugin to allow jSqlBox support multiple line Strings.
  -->
   
-    <!-- jSqlBox is a ORM tool depends on Apache Common DbUtils -->
+    <!-- jSqlBox is a Dao tool  -->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>3.0.0</version><!--Or newest jSqlBox -->
-    </dependency>  
+      <version>4.0</version><!--Or newest jSqlBox -->
+    </dependency>
 
     <!-- H2Database memory database used for this demo -->
     <dependency>

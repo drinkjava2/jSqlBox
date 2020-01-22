@@ -41,13 +41,13 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 
 * [jBooox](https://gitee.com/drinkjava2/jBooox) A micro mvc web demo based on jBeanBox+jSqlBox+jWebBox.
 * [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetlsql) A demo shows how to use Beetl as SqlTemplateEngine.
-* [jsqlbox-in-actframework](../../tree/master/demo/jsqlbox-in-actframework) Shows how to use jSqlBox in ActFramework，and use TinyTx+Guice's AOP to achieve declarative transaction.
-* [jsqlbox-in-jfinal](../../tree/master/demo/jsqlbox-in-jfinal) Shows use jSqlBox in jFinal.
-* [jSqlBox-in-Spring](../../tree/master/demo/jsqlbox-in-spring) Shows use jSqlBox in Spring+Tomcat.
-* [jsqlbox-in-springboot](../../tree/master/demo/jsqlbox-in-springboot) Shows use jSqlBox in SpringBoot.
-* [jsqlbox-in-springboot-mybatis](../../tree/master/demo/jsqlbox-in-springboot-mybatis) Shows mixed use jSqlBox and MyBatis in SpringBoot.
-* [jsqlbox-java8-demo](../../tree/master/demo/jsqlbox-java8-demo) Shows jSqlBox-Java8 version usage and use Lambda to write SQL。
-* [jsqlbox-xa-atomikos](../../tree/master/demo/jsqlbox-xa-atomikos) Shows sharding feature in jSqlBox when use XA transaction be implemented by Atomikos 。
+* [jsqlbox-actframework](../../tree/master/demo/jsqlbox-actframework) Shows how to use jSqlBox in ActFramework，and use TinyTx+Guice's AOP to achieve declarative transaction.
+* [jsqlbox-jfinal](../../tree/master/demo/jsqlbox-jfinal) Shows use jSqlBox in jFinal.
+* [jSqlBox-Spring](../../tree/master/demo/jsqlbox-spring) Shows use jSqlBox in Spring+Tomcat.
+* [jsqlbox-springboot](../../tree/master/demo/jsqlbox-springboot) Shows use jSqlBox in SpringBoot.
+* [jsqlbox-springboot-mybatis](../../tree/master/demo/jsqlbox-springboot-mybatis) Shows mixed use jSqlBox and MyBatis in SpringBoot.
+* [jsqlbox-java](../../tree/master/demo/jsqlbox-java8) Shows jSqlBox-Java8 version usage and use Lambda to write SQL。
+* [jsqlbox-atomikos](../../tree/master/demo/jsqlbox-atomikos) Shows sharding feature in jSqlBox when use XA transaction be implemented by Atomikos 。
 
 # Download
 

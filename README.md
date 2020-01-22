@@ -95,16 +95,16 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 
 ## 范例 | Demo
 
-* [jBooox](https://gitee.com/drinkjava2/jBooox) 这是一个微型MVC Web演示项目，基于三个开源软件jBeanBox、jSqlBox、jWebBox的整合。
-* [jsqlbox-in-actframework](../../tree/master/demo/jsqlbox-in-actframework) 演示jSqlBox与ActFramework框架的整合，分别展示利用jBeanBox和Guice来实现声明式事务。
-* [jsqlbox-in-jfinal](../../tree/master/demo/jsqlbox-in-jfinal) 演示jSqlBox与jFinal的整合，用jSqlBox替换掉jFinal自带的DAO工具。
-* [jSqlBox-in-Spring](../../tree/master/demo/jsqlbox-in-spring) 这是一个MVC Web项目，演示jSqlBox在Spring+Tomcat环境下的配置和使用, IOC、AOP和声明式事务均使用Spring的。
-* [jsqlbox-in-springboot](../../tree/master/demo/jsqlbox-in-springboot) 演示jSqlBox在SpringBoot环境下的配置和使用。  
-* [jsqlbox-in-springboot-mybatis](../../tree/master/demo/jsqlbox-in-springboot-mybatis) 演示在SpringBoot环境下jSqlBox和MyBatis的混合使用。
-* [jsqlbox-java8-demo](../../tree/master/demo/jsqlbox-java8-demo) 主要演示jSqlBox-Java8版的两个特点：实体类只需要声明接口、利用Lambda来写SQL。
-* [jsqlbox-xa-atomikos](../../tree/master/demo/jsqlbox-xa-atomikos) 一个jSqlBox利用Atomikos使用XA分布式事务的演示。  
-* [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetl) 演示如何在jSqlBox中开发和使用其它模板引擎如BeetlSQL。
- 
+* [jBooox](../../tree/master/demo/jbooox) 这是一个微型Web演示项目，基于三个开源项目jBeanBox、jSqlBox、jWebBox的整合。
+* [jsqlbox-actframework](../../tree/master/demo/jsqlbox-actframework) 演示jSqlBox与ActFramework框架的整合，分别展示利用jBeanBox和Guice来实现声明式事务。
+* [jsqlbox-jfinal](../../tree/master/demo/jsqlbox-jfinal) 演示jSqlBox与jFinal的整合，用jSqlBox替换掉jFinal自带的DAO工具。
+* [jSqlBox-Spring](../../tree/master/demo/jsqlbox-spring) 演示jSqlBox在Spring+Tomcat环境下的配置和使用
+* [jsqlbox-springboot](../../tree/master/demo/jsqlbox-springboot) 演示jSqlBox在SpringBoot环境下的配置和使用。  
+* [jsqlbox-mybatis](../../tree/master/demo/jsqlbox-mybatis) 演示在SpringBoot环境下jSqlBox和MyBatis的混合使用。
+* [jsqlbox-java8](../../tree/master/demo/jsqlbox-java8) 主要演示jSqlBox在Java8下使用的两个特点：实体类只需要声明接口、利用Lambda写出支持重构的SQL。
+* [jsqlbox-atomikos](../../tree/master/demo/jsqlbox-atomikos) 演示jSqlBox利用Atomikos使用XA分布式事务的演示。  
+* [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetl) 演示如何在jSqlBox中自定义SQL模板引擎，此演示使用了Beetl作为SQL模板。
+
  
 ## 相关开源项目 | Related Projects
 
@@ -115,12 +115,12 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 
 ## 期望 | Futures
 
-欢迎发issue提出更好的意见或提交PR，帮助完善jSqlBox
+欢迎发issue提出更好的意见或提交PR，帮助完善项目
 
 ## 版权 | License
 
 [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## 关注我 | About Me
-[Github](https://github.com/drinkjava2)  
 [码云](https://gitee.com/drinkjava2)  
+[Github](https://github.com/drinkjava2)  
