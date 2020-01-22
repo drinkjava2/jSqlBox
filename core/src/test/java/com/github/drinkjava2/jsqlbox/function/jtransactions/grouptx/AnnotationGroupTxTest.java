@@ -12,8 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.common.DataSourceConfig.HikariCPBox;
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
@@ -77,7 +77,7 @@ public class AnnotationGroupTxTest {
 		try {
 			t.groupRollback();
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
 		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));

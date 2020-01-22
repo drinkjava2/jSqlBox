@@ -64,12 +64,14 @@ public abstract class LogFactory {// NOSONAR
 		}
 
 		Properties prop = new Properties();
+		String className = "";
 		try {
 			prop.load(is);
-			String className = prop.getProperty("log");
+			className = prop.getProperty("log");
 			dbProLogClass = Class.forName(className);
 			return getLog(clazz);
 		} catch (Exception e) {
+			System.err.println("Not found or wrong log class in jlog.properties: " + className);
 			dbProLogClass = void.class;
 			return new ConsoleLog(clazz);
 		} finally {
