@@ -28,7 +28,7 @@ import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
 /**
  * Entity class extended from ActiveRecord will have CRUD methods, see below
- * difference in DbUtil-Plus to save ActiveRecord entity and normal entity(POJO)
+ * difference in jSqlBox to save ActiveRecord entity and normal entity(POJO)
  * into database:
  * 
  * <pre>

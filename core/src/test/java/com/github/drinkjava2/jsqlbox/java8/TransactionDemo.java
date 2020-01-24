@@ -30,7 +30,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * ActiveRecordDemoTest of DbUtil-Plus configurations
+ * ActiveRecordDemoTest of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0

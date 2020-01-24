@@ -47,7 +47,7 @@ USE_SLAVE  (write: All Slaves!         read: Random 1 Slave )
 */
 
 /**
- * MasterSlaveTest of DbUtil-Plus
+ * MasterSlaveTest of jSqlBox
  * 
  * 
  * @author Yong Zhu

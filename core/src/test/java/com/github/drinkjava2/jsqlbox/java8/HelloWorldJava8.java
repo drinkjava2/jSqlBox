@@ -20,7 +20,7 @@ import com.github.drinkjava2.jsqlbox.ActiveEntity;
 import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
- * ActiveRecordDemoTest of DbUtil-Plus configurations
+ * ActiveRecordDemoTest of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -46,7 +46,7 @@ public class HelloWorldJava8 implements ActiveEntity<HelloWorldJava8> {
 		for (String ddl : ddls)
 			ctx.nExecute(ddl);
 
-		new HelloWorldJava8().putField("name", "Hello DbUtil-Plus").insert();
+		new HelloWorldJava8().putField("name", "Hello jSqlBox").insert();
 		Systemout.println(ctx.pQueryForString("select name from HelloWorldJava8"));
 	}
 }

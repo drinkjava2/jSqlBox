@@ -2,11 +2,11 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
- <artifactId>dbutil-plus-jfinal</artifactId>
+ <artifactId>jsqlbox-jfinal</artifactId>
  <packaging>war</packaging>
  <version>1.0</version>
  
- <name>dbutil-plus-jfinal</name>
+ <name>jsqlbox-jfinal</name>
  <description>This is a demo project to show use jSqlBox in jFinal</description> 
    
  <licenses>

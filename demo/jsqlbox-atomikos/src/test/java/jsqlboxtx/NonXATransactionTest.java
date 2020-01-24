@@ -11,7 +11,7 @@
  */
 package jsqlboxtx;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
@@ -27,7 +26,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
-import com.github.drinkjava2.jtransactions.tinytx.TinyTx;
+import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
@@ -71,8 +70,8 @@ public class NonXATransactionTest {
 
 	@Test
 	public void doTest() {
-		JBEANBOX.bctx().addContextAop(new TinyTx(masters[1].getDataSource()), NonXATransactionTest.class, "insert*");
-		NonXATransactionTest tester = BeanBox.getBean(NonXATransactionTest.class);
+		JBEANBOX.ctx().addContextAop(new TinyTxAOP(), NonXATransactionTest.class, "insert*");
+		NonXATransactionTest tester = JBEANBOX.getBean(NonXATransactionTest.class);
 		try {
 			tester.insertAccount();
 		} catch (Exception e) {

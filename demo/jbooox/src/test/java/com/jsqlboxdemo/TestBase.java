@@ -16,7 +16,7 @@ import javax.sql.DataSource;
 import org.junit.After;
 import org.junit.Before;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.jsqlboxdemo.init.Initializer;
@@ -39,7 +39,7 @@ public class TestBase {
 	public void init() {
 		initializer = new Initializer();
 		initializer.contextInitialized(null);
-		teamServices = BeanBox.getBean(TeamService.class);
+		teamServices = JBEANBOX.getBean(TeamService.class);
 	}
 
 	@After

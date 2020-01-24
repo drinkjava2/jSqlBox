@@ -19,7 +19,7 @@ public class DataSourceConfig {
 	 * "MySqlDataSourceBox" to test on MySql <br/>
 	 * ================================================================<br/>
 	 */
-	public static class DataSourceBox extends OracleDataSourceBox {
+	public static class DataSourceBox extends H2DataSourceBox {
 	}
 
 	// H2Database memory database connection URL

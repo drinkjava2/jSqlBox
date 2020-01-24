@@ -52,7 +52,7 @@ public class Initializer implements ServletContextListener {
   
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
-		SqlBoxContext ctx = new SqlBoxContext(BeanBox.getBean(DataSourceBox.class));
+		SqlBoxContext ctx = new SqlBoxContext(JBEANBOX.getBean(DataSourceBox.class));
 		ctx.setConnectionManager(TinyTxConnectionManager.instance());
 		SqlBoxContext.setGlobalSqlBoxContext(ctx); // 全局上下文
 

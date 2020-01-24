@@ -16,7 +16,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.jsqlboxdemo.TestBase;
 import com.jsqlboxdemo.controller.team.team_add_post;
 import com.jsqlboxdemo.controller.team.team_list_all;
@@ -39,7 +39,7 @@ public class TeamControllerTest extends TestBase {
 		MockPageContext mockPC = new MockPageContext();
 		mockPC.setRequestAttribute("name", "Tom");
 		mockPC.setRequestAttribute("rating", "123");
-		team_add_post box = BeanBox.getPrototypeBean(team_add_post.class);
+		team_add_post box = JBEANBOX.getPrototypeBean(team_add_post.class);
 		box.setPageContext(mockPC);
 		box.execute();
 		Assert.assertEquals("Team was successfully added.", (String) mockPC.getRequestAttribute("message"));
@@ -50,7 +50,7 @@ public class TeamControllerTest extends TestBase {
 	public void test_team_listBigger() {
 		MockPageContext mockPC = new MockPageContext();
 		mockPC.setPathParams("10");
-		team_list_bigger box = BeanBox.getPrototypeBean(team_list_bigger.class);
+		team_list_bigger box = JBEANBOX.getPrototypeBean(team_list_bigger.class);
 		box.show(mockPC);
 		Assert.assertEquals(3, ((List<Team>) mockPC.getRequestAttribute("teams")).size());
 		Assert.assertEquals(box.getPage(), "/WEB-INF/pages/team_list.jsp");

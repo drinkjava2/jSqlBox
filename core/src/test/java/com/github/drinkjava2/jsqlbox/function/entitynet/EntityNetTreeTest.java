@@ -14,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 
 public class EntityNetTreeTest extends TestBase {
 	@Before
-	public void init() {// See "orm.png" in DbUtil-Plus project's root folder
+	public void init() {// See "orm.png" in jSqlBox project's root folder
 		super.init();
 		createAndRegTables(TreeNode.class);
 		TreeNode t = new TreeNode();

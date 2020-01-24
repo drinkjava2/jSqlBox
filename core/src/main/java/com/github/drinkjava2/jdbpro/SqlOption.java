@@ -91,7 +91,7 @@ public enum SqlOption {
 	OTHER,
 
 	// =================================
-	// Below items designed for DbUtil-Plus
+	// Below items designed for jSqlBox
 	// =================================
 
 	// ------Master_Slave Options-------

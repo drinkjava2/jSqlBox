@@ -10,7 +10,7 @@ cd..
 
 cd jsqlbox-actframework
 call mvn clean
-call mvn eclipse:clean 
+call mvn eclipse:eclipse
 cd..
 
 cd jsqlbox-jfinal

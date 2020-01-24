@@ -27,7 +27,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 public interface ShardingTool {// NOSONAR
 	/**
 	 * Dealing a shardKey array based on current DbContext and TableModel,
-	 * return table name array, in this DbUtil-Plus version, only support return 1 table
+	 * return table name array, in this jSqlBox version, only support return 1 table
 	 * name
 	 * 
 	 * @param tableModel
@@ -41,7 +41,7 @@ public interface ShardingTool {// NOSONAR
 
 	/**
 	 * Dealing a shardKey array based on current DbContext and TableModel,
-	 * return DbContext array, in this DbUtil-Plus version, only support return 1
+	 * return DbContext array, in this jSqlBox version, only support return 1
 	 * DbContext
 	 * 
 	 * @param tableModel

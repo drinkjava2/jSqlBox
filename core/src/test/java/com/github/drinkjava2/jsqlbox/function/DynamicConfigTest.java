@@ -22,7 +22,7 @@ import com.github.drinkjava2.jsqlbox.DbException;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 /**
- * ActiveRecordDemoTest of DbUtil-Plus configurations
+ * ActiveRecordDemoTest of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0

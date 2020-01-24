@@ -11,7 +11,7 @@
  */
 package jsqlboxtx;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
 
 import java.util.Properties;
 
@@ -53,12 +53,16 @@ public class XATransactionTest {
 	static UserTransactionManager um;
 
 	public static class SpringTxIBox extends BeanBox {
-		public TransactionInterceptor create() throws SystemException {
+		public TransactionInterceptor create() {
 			JtaTransactionManager springJM = new JtaTransactionManager();
 			springJM.setUserTransaction(new UserTransactionImp());
 			um = new UserTransactionManager();
 			um.setForceShutdown(true);
-			um.init();
+			try {
+				um.init();
+			} catch (SystemException e) {
+				e.printStackTrace();
+			}
 			springJM.setTransactionManager(um);
 			springJM.setAllowCustomIsolationLevels(true);
 			Properties props = new Properties();
@@ -69,8 +73,8 @@ public class XATransactionTest {
 
 	@Before
 	public void init() {
-		JBEANBOX.bctx().addContextAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
-		BeanBox.getBean(SpringTxIBox.class);// Force initialize
+		JBEANBOX.ctx().addContextAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
+		JBEANBOX.getBean(SpringTxIBox.class);// Force initialize
 
 		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < DATABASE_QTY; i++) {
@@ -122,7 +126,7 @@ public class XATransactionTest {
 
 	@Test
 	public void testXATransaction() {
-		XATransactionTest tester = BeanBox.getBean(XATransactionTest.class);
+		XATransactionTest tester = JBEANBOX.getBean(XATransactionTest.class);
 		try {
 			tester.insertAccountsBad();
 		} catch (Exception e) {

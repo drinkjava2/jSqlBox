@@ -16,7 +16,7 @@ import com.github.drinkjava2.jsqlbox.DbContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * This demo show DbUtil-Plus's ActiveRecord and jDialects' DDL, pagination and
+ * This demo show jSqlBox's ActiveRecord and jDialects' DDL, pagination and
  * translate feature.
  */
 public class ActiveRecordDemoTest {

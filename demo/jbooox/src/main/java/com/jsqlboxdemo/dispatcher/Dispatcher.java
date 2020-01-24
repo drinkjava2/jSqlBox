@@ -16,7 +16,7 @@ import javax.servlet.jsp.PageContext;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jwebbox.WebBox;
 
 /**
@@ -63,7 +63,7 @@ public class Dispatcher {
 		WebBox box;
 		try {
 			Class boxClass = Class.forName(controller.toString());
-			box = BeanBox.getPrototypeBean(boxClass);
+			box = JBEANBOX.getPrototypeBean(boxClass);
 		} catch (Exception e) {
 			throw new ClassNotFoundException("There is no WebBox classs '" + controller + "' found.");
 		}

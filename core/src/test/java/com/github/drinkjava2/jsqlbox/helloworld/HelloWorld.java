@@ -24,7 +24,7 @@ import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
- * ActiveRecordDemoTest of DbUtil-Plus configurations
+ * ActiveRecordDemoTest of jSqlBox configurations
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -53,7 +53,7 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 		for (String ddl : ctx.toDropAndCreateDDL(HelloWorld.class))
 			ctx.nExecute(ddl);
 
-		new HelloWorld().setName("Hellow DbUtil-Plus").insert();
+		new HelloWorld().setName("Hellow jSqlBox").insert();
 		System.out.println(DB.iQueryForString("select name from HelloWorld"));
 	}
 }

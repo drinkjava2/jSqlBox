@@ -22,11 +22,11 @@ import java.util.Properties;
 
 /**
  * This LogFactory is designed for get a jLog implement used inside of
- * DbUtil-Plus project.
+ * jSqlBox project.
  * 
  * Usage: Log log= LogFactory.getLog(Xxx.class);
  * 
- * JLog used for inside of DbUtil-Plus project, if a "jlogs.properties" file if
+ * JLog used for inside of jSqlBox project, if a "jlogs.properties" file if
  * found on class root folder (main/resources), will try load the designated
  * JLog implementation, otherwise use default EmptyLog<br/>
  * 

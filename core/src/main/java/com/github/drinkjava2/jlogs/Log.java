@@ -16,7 +16,7 @@
 package com.github.drinkjava2.jlogs;
 
 /**
- * JLog used for inside of DbUtil-Plus project, if a "JLog.properties" file if
+ * JLog used for inside of jSqlBox project, if a "JLog.properties" file if
  * found on class root folder (main/resources), will try load the designated
  * JLog implementation, otherwise use default EmptyLog<br/>
  * 

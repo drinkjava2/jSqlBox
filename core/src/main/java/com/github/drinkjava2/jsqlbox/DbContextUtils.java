@@ -147,7 +147,7 @@ public abstract class DbContextUtils {// NOSONAR
 				if (result.length > 1)
 					throw new DbException("Found more than 1 DbContext tables for target '"
 							+ model.getEntityClass()
-							+ "', DbUtil-Plus current version do not support auto-join, to solve this issue you need adjust your ShardDatabase search condition.");
+							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardDatabase search condition.");
 				return result[0];
 			}
 		}
@@ -179,7 +179,7 @@ public abstract class DbContextUtils {// NOSONAR
 			if (result != null) {
 				if (result.length > 1)
 					throw new DbException("Found more than 1 sharding tables for target '" + model.getEntityClass()
-							+ "', DbUtil-Plus current version do not support auto-join, to solve this issue you need adjust your ShardTable search condition");
+							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardTable search condition");
 				return result[0];
 			}
 		}

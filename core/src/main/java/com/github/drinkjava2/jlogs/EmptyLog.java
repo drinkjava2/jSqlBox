@@ -16,7 +16,7 @@
 package com.github.drinkjava2.jlogs;
 
 /**
- * EmptyLog is the default logger of DbUtil-Plus project
+ * EmptyLog is the default logger of jSqlBox project
  * 
  * @author Yong Zhu
  * @since 1.7.0

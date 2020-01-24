@@ -27,7 +27,7 @@ import com.github.drinkjava2.jdbpro.DbProException;
  * And of cause, if use this SLF4JLog Logger, related SLF4J dependencies need
  * added in pom.xml
  * 
- * Please note: this SLF4JLog is only used inside of DbUtil-Plus for debugging
+ * Please note: this SLF4JLog is only used inside of jSqlBox for debugging
  * purpose, not recommended to use in application.
  * 
  * @author Yong Zhu

@@ -11,7 +11,7 @@
  */
 package com.jsqlboxdemo.controller;
 
-import com.github.drinkjava2.jbeanbox.BeanBox;
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jwebbox.WebBox;
 import com.jsqlboxdemo.service.TeamService;
 
@@ -25,7 +25,7 @@ import com.jsqlboxdemo.service.TeamService;
 @SuppressWarnings("all")
 public class BaseBox extends WebBox {
 
-	TeamService teamService = BeanBox.getBean(TeamService.class);// singleton
+	TeamService teamService = JBEANBOX.getBean(TeamService.class);// singleton
 
 	public void redirect(Object target) {
 		if (target instanceof String) {
@@ -35,7 +35,7 @@ public class BaseBox extends WebBox {
 			else
 				setPage("/WEB-INF/pages/" + targetPage);
 		} else if (target instanceof Class)
-			setPage(BeanBox.getPrototypeBean((Class) target));// non-singleton
+			setPage(JBEANBOX.getPrototypeBean((Class) target));// non-singleton
 	}
 
 	public Integer getObjectAsInt(String key) {
