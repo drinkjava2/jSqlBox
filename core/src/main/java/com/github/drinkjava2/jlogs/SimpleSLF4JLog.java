@@ -20,20 +20,22 @@ import java.lang.reflect.Method;
 import com.github.drinkjava2.jdbpro.DbProException;
 
 /**
- * SLF4JLog use SLF4J Log output, to use it, need put a file “jlogs.properties”
- * in main/resources or test/resources folder with below line:
+ * SimpleSLF4JLog use SLF4J Logger, to use it, need put a file
+ * “jlogs.properties” in main/resources or test/resources folder with below
+ * line:<br/>
  * log=com.github.drinkjava2.jlogs.SLF4JLog
  * 
- * And of cause, if use this SLF4JLog Logger, related SLF4J dependencies need
- * added in pom.xml
+ * And of cause, related SLF4J dependencies or logback-classic dependency which
+ * depends on SLF4J need added in pom.xml
  * 
- * Please note: this SLF4JLog is only used inside of jSqlBox for debugging
- * purpose, not recommended to use in application.
+ * Note: this SimpleSLF4JLog is based on method reflection, not recommended to
+ * use in envirements which effectiveness is critical, for that a non-reflection
+ * logger needed, please see the example SLF4JLog.java in jsqlbox-jbooox project
  * 
  * @author Yong Zhu
  * @since 2.0.5
  */
-public class SLF4JLog implements Log {
+public class SimpleSLF4JLog implements Log {
 	private Object logger;
 	private Method info;
 	private Method debug;
@@ -42,7 +44,7 @@ public class SLF4JLog implements Log {
 	private Method error;
 	private Method errorExp;
 
-	public SLF4JLog(Class<?> targetClass) {
+	public SimpleSLF4JLog(Class<?> targetClass) {
 		try {
 			Class<?> logFactoryClass = Class.forName("org.slf4j.LoggerFactory");
 			Method method = logFactoryClass.getMethod("getLogger", Class.class);

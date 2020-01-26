@@ -26,6 +26,7 @@ import java.io.StringWriter;
  */
 @SuppressWarnings("all")
 public class ConsoleLog implements Log {
+
 	public static final int DEBUG = 4;
 	public static final int ERROR = 3;
 	public static final int WARNING = 2;
@@ -34,6 +35,7 @@ public class ConsoleLog implements Log {
 
 	Class<?> clazz;
 	public static int logLevel = INFO;
+	public static boolean outputlogHead = true;
 
 	public ConsoleLog(Class<?> clazz) {
 		this.clazz = clazz;
@@ -47,40 +49,46 @@ public class ConsoleLog implements Log {
 		ConsoleLog.logLevel = logLevel;
 	}
 
+	private String loghead(String method) {
+		return outputlogHead
+				? new StringBuilder(clazz.getSimpleName()).append(" ").append(method).append(": ").toString()
+				: "";
+	}
+
 	@Override
 	public void info(String msg) {
 		if (logLevel <= INFO)
-			System.out.println(clazz.getSimpleName() + " info: " + msg);
+			System.out.println(loghead("info") + msg);
 	}
 
 	@Override
 	public void warn(String msg) {
 		if (logLevel <= WARNING)
-			System.out.println(clazz.getSimpleName() + " warning: " + msg);
+			System.out.println(loghead("warn") + msg);
 	}
 
 	@Override
 	public void warn(String msg, Throwable t) {
 		if (logLevel <= WARNING)
-			System.out.println(clazz.getSimpleName() + " warning: " + msg + getStackTrace(t));
+			System.out.println(loghead("warn") + msg + getStackTrace(t));
 	}
 
 	@Override
 	public void error(String msg) {
-		if (logLevel<= ERROR)
-			System.out.println(clazz.getSimpleName() + " error: " + msg);
+		if (logLevel <= ERROR)
+			System.out.println(loghead("error") + msg);
 	}
 
 	@Override
 	public void error(String msg, Throwable t) {
 		if (logLevel <= WARNING)
-			System.out.println(clazz.getSimpleName() + " error: " + msg + getStackTrace(t));
+			System.out.println(loghead("error") + msg + getStackTrace(t));
 	}
 
 	@Override
 	public void debug(String msg) {
 		if (logLevel <= DEBUG)
-			System.out.println(clazz.getSimpleName() + " debug: " + msg);
+			System.out.println(loghead("info") + msg);
 	}
 
 	public static String getStackTrace(Throwable t) {

@@ -2,12 +2,12 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
- <artifactId>jsqlbox-java8-demo</artifactId>
+ <artifactId>jsqlbox-java8</artifactId>
  <packaging>jar</packaging>
  <version>1.0</version>
  
- <name>jsqlbox-java8-demo</name>
- <description>This is the demo of jsqlbox-java8 </description> 
+ <name>jsqlbox-java8</name>
+ <description>This is the demo of jsqlbox java8 features </description> 
    
  <licenses>
    <license>

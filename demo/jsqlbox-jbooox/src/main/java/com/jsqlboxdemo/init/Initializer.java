@@ -13,7 +13,7 @@ import org.junit.Assert;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
@@ -52,9 +52,10 @@ public class Initializer implements ServletContextListener {
   
 	@Override
 	public void contextInitialized(ServletContextEvent context) {
-		SqlBoxContext ctx = new SqlBoxContext(JBEANBOX.getBean(DataSourceBox.class));
+		DbContext.setGlobalNextAllowShowSql(true);
+		DbContext ctx = new DbContext(JBEANBOX.getBean(DataSourceBox.class)); 
 		ctx.setConnectionManager(TinyTxConnectionManager.instance());
-		SqlBoxContext.setGlobalSqlBoxContext(ctx); // 全局上下文
+		DbContext.setGlobalDbContext(ctx); // 全局上下文
 
 		// Initialize database
 		String[] ddls = ctx.toDropAndCreateDDL(Team.class);
@@ -69,7 +70,7 @@ public class Initializer implements ServletContextListener {
 
 	@Override
 	public void contextDestroyed(ServletContextEvent context) {
-		SqlBoxContext.setGlobalSqlBoxContext(null);
+		DbContext.setGlobalDbContext(null);
 		JBEANBOX.close();// close the dataSource
 		System.out.println("========== com.jsqlboxdemo.init.Initializer destroyed=====");
 

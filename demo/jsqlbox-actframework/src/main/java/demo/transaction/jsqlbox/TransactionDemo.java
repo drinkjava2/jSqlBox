@@ -2,7 +2,7 @@ package demo.transaction.jsqlbox;
 
 import static act.controller.Controller.Util.redirect;
 import static act.controller.Controller.Util.render;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.subclassesOf;
 
@@ -17,7 +17,7 @@ import org.osgl.util.IntRange;
 
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 import com.google.inject.Guice;
@@ -43,9 +43,9 @@ public class TransactionDemo {
 
 	@OnAppStart
 	public void onStart() {
-		SqlBoxContext ctx = new SqlBoxContext(dataSource);
+		DbContext ctx = new DbContext(dataSource);
 		ctx.setConnectionManager(TinyTxConnectionManager.instance());// 这一行是与TinyTx配对的，必须
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);// 全局缺省上下文
+		DbContext.setGlobalDbContext(ctx);// 全局缺省上下文
 
 		for (String ddl : ctx.toCreateDDL(Account.class))// 第一次要建表
 			gctx().nExecute(ddl);

@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
  * ActiveEntity is a interface has default methods only supported for Java8+, so
@@ -45,9 +45,9 @@ public class ActiveEntityTest implements ActiveEntity<ActiveEntityTest> {
 
 	@Before
 	public void init() {
-		SqlBoxContext ctx = new SqlBoxContext(JdbcConnectionPool
+		DbContext ctx = new DbContext(JdbcConnectionPool
 				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""));
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		DbContext.setGlobalDbContext(ctx);
 		for (String ddl : ctx.toCreateDDL(ActiveEntityTest.class))
 			iExecute(ddl);
 		for (int i = 0; i < 100; i++)

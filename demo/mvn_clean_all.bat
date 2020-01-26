@@ -1,4 +1,4 @@
-cd jbooox
+cd jsqlbox-jbooox
 call mvn clean
 call mvn eclipse:clean
 cd..

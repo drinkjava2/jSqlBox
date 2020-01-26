@@ -56,7 +56,8 @@
  
  
 
- <dependencies>  
+ <dependencies>   
+   <!-- ===== test dependencies=====  -->
    <dependency>
      <groupId>commons-lang</groupId>
      <artifactId>commons-lang</artifactId>
@@ -92,10 +93,10 @@
         <scope>test</scope>
     </dependency>
     
-    <!-- Ugly Oracle JDBC jar need manually add into maven, ojdbc6.jar for Oracle11.2 can find in Oracle install folder, 
-       then copy to C:\ and use below command to install to maven:
+    <!-- Ugly Oracle JDBC jar need manually add into maven, ojdbc6.jar can found in Oracle 
+       install folder, then copy to C:\ and use below command to install to maven:
      mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0 -Dpackaging=jar -Dfile=C:\ojdbc6.jar
-    see https://blog.csdn.net/DH2442897094/article/details/79861055 -->
+     see https://blog.csdn.net/DH2442897094/article/details/79861055 -->
     <dependency>
 		<groupId>com.oracle</groupId>
 		<artifactId>ojdbc6</artifactId>

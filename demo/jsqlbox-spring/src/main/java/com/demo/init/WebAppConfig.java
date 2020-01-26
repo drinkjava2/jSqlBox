@@ -12,7 +12,6 @@ import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 import com.github.drinkjava2.jsqlbox.DbContext;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jtransactions.spring.SpringTxConnectionManager;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -57,12 +56,12 @@ public class WebAppConfig {
 	}
 
 	@Bean
-	public SqlBoxContext createDefaultSqlBoxContext() {
+	public DbContext createDefaultDbContext() {
 		if (dataSource() != dataSource())
 			throw new AssertionError("I found Spring weird");
-		SqlBoxContext ctx = new SqlBoxContext(dataSource());
+		DbContext ctx = new DbContext(dataSource());
 		ctx.setConnectionManager(SpringTxConnectionManager.instance());
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		DbContext.setGlobalDbContext(ctx);
 		return ctx;
 	}
 

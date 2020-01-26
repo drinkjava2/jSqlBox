@@ -2,12 +2,12 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
- <artifactId>jbooox</artifactId>
+ <artifactId>jsqlbox-jbooox</artifactId>
  <packaging>war</packaging>
  <version>1.0</version>
  
- <name>jbooox</name>
- <description>This is a demo project to show use jSqlBox and TinyTx</description> 
+ <name>jsqlbox-jbooox</name>
+ <description>This is a demo project to show use jSqlBox + jWebBox + jBeanBox </description> 
    
  <licenses>
    <license>
@@ -45,7 +45,7 @@
  
 
  <dependencies>
-    <!-- jSqlBox is a Dao tool  -->
+    <!-- jSqlBox is a Dao tool, from v4.0 it included jBeanBox ioc/aop tool  -->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
@@ -58,6 +58,19 @@
       <artifactId>jwebbox</artifactId>
       <version>2.1.1</version>
     </dependency>  
+    
+    <!-- This logger dependency will import below libs:
+    logback-classic.x.x.x.jar
+    logback-core.x.x.x.jar
+    slf4j-api-x.x.x.jar
+     -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+
+
     
   <!-- Servlet & JSP libs, provided by servlet server -->
    <dependency>

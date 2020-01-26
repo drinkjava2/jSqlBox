@@ -18,7 +18,7 @@ import org.junit.Before;
 
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.jsqlboxdemo.init.Initializer;
 import com.jsqlboxdemo.service.TeamService;
 
@@ -32,7 +32,7 @@ public class TestBase {
 	protected TeamService teamServices;
 	protected DataSource dataSource;
 	protected Dialect dialect;
-	protected SqlBoxContext ctx;
+	protected DbContext ctx;
 	private Initializer initializer;
 
 	@Before

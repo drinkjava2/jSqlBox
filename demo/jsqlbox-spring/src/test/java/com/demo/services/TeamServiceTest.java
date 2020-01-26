@@ -16,8 +16,8 @@ import com.demo.init.BaseTestConfig;
 import com.demo.model.Team;
 import com.demo.service.TeamService;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.JSQLBOX;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 /**
  * This is unit test for services
@@ -33,13 +33,13 @@ public class TeamServiceTest {
 	public TeamService teamService;
 
 	@Autowired
-	public SqlBoxContext sbCtx;
+	public DbContext ctx;
 
 	@Before
 	public void createDB() {
-		String[] ddls = sbCtx.toCreateDDL(Team.class);
+		String[] ddls = ctx.toCreateDDL(Team.class);
 		for (String ddl : ddls)
-			sbCtx.nExecute(ddl);
+			ctx.nExecute(ddl);
 		for (int i = 0; i < 5; i++)
 			new Team().putField("name", "Team" + i, "rating", i * 10).insert(new PrintSqlHandler());
 		System.out.println("========== TeamServiceTest initialized=====");
@@ -54,7 +54,7 @@ public class TeamServiceTest {
 	}
 
 	@Test
-	public void listAllTest() { 
+	public void listAllTest() {
 		List<Team> teams = teamService.getTeams();
 		Assert.assertEquals(5, teams.size());
 	}

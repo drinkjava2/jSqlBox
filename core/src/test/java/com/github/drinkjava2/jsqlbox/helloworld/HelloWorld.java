@@ -11,8 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox.helloworld;
 
-import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
@@ -44,16 +42,19 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 		return this;
 	}
 
-	public static void main(String[] args) throws SQLException {
-//		DataSource ds = JdbcConnectionPool
-//				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-		DataSource ds =JBEANBOX.getBean(DataSourceBox.class);
+	public static void main(String[] args) {
+		// DataSource ds = JdbcConnectionPool
+		// .create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0",
+		// "sa", "");
+		DbContext.setGlobalNextAllowShowSql(true);
+		DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
 		DbContext ctx = new DbContext(ds);
 		DbContext.setGlobalDbContext(ctx);
-		for (String ddl : ctx.toDropAndCreateDDL(HelloWorld.class))
-			ctx.nExecute(ddl);
+		ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class));
+		System.out.println(ctx.getDialect().getDdlFeatures().getDropTableString());
 
 		new HelloWorld().setName("Hellow jSqlBox").insert();
 		System.out.println(DB.iQueryForString("select name from HelloWorld"));
+		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
 	}
 }

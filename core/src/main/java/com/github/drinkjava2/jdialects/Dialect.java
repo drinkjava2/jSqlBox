@@ -36,8 +36,8 @@ import com.github.drinkjava2.jlogs.LogFactory;
  * @since 1.7.0
  */
 @SuppressWarnings("all")
-public enum Dialect implements CommonDialect {
-	/** Use Derby instead */
+public enum Dialect {
+	/** Use Derby other dialects instead */
 	@Deprecated
 	DerbyDialect,
 
@@ -307,16 +307,14 @@ public enum Dialect implements CommonDialect {
 	public String paginAndTrans(int pageNumber, int pageSize, String... sql) {
 		return pagin(pageNumber, pageSize, trans(sql));
 	}
-
-	@Override
+ 
 	public String trans(String... sql) {
 		StringBuilder sb = new StringBuilder();
 		for (String str : sql)
 			sb.append(str);
 		return DialectFunctionTranslator.instance.doTranslate(this, sb.toString());
 	}
-
-	@Override
+ 
 	public String pagin(int pageNumber, int pageSize, String sql) {// NOSONAR
 		String result = null;
 		DialectException.assureNotNull(sql, "sql string can not be null");
@@ -568,4 +566,7 @@ public enum Dialect implements CommonDialect {
 		Dialect.globalSqlFunctionPrefix = sqlFunctionPrefix;
 	}
 
+	public static void main(String[] args) {
+		System.out.println(OracleDialect.ddlFeatures.getDropTableString());
+	}
 }

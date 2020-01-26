@@ -37,7 +37,7 @@ import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
  * Atomikos Transaction test, H2 + jBeanBox + jSqlBox + Spring XA + Atomikos
@@ -48,7 +48,7 @@ import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 
 public class XATransactionTest {
 	static int DATABASE_QTY = 3;
-	static SqlBoxContext[] masters = new SqlBoxContext[DATABASE_QTY];
+	static DbContext[] masters = new DbContext[DATABASE_QTY];
 	static AtomikosDataSourceBean[] xaDataSources = new AtomikosDataSourceBean[DATABASE_QTY];
 	static UserTransactionManager um;
 
@@ -76,7 +76,7 @@ public class XATransactionTest {
 		JBEANBOX.ctx().addContextAop(SpringTxIBox.class, XATransactionTest.class, "insert*");
 		JBEANBOX.getBean(SpringTxIBox.class);// Force initialize
 
-		SqlBoxContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
+		DbContext.setGlobalNextDialect(Dialect.MySQL57Dialect);
 		for (int i = 0; i < DATABASE_QTY; i++) {
 			JdbcDataSource ds = new JdbcDataSource();
 			ds.setUrl("jdbc:h2:mem:H2DB" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
@@ -91,11 +91,12 @@ public class XATransactionTest {
 			} catch (AtomikosSQLException e) {
 				e.printStackTrace();
 			}
-			masters[i] = new SqlBoxContext(xaDataSources[i]);
+			masters[i] = new DbContext(xaDataSources[i]);
 			masters[i].setMasters(masters);
+			masters[i].setConnectionManager(null);
 
 		}
-		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);// random choose 1
+		DbContext.setGlobalDbContext(masters[0]);// random choose 1
 		TableModel model = TableModelUtils.entity2Model(Bank.class);
 		for (int i = 0; i < DATABASE_QTY; i++)
 			for (String ddl : masters[i].toCreateDDL(model))

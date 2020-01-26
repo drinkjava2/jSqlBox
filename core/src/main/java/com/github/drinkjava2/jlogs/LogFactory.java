@@ -21,8 +21,8 @@ import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 /**
- * This LogFactory is designed for get a jLog implement used inside of
- * jSqlBox project.
+ * This LogFactory is designed for get a jLog implement used inside of jSqlBox
+ * project.
  * 
  * Usage: Log log= LogFactory.getLog(Xxx.class);
  * 
@@ -38,6 +38,7 @@ import java.util.Properties;
  */
 public abstract class LogFactory {// NOSONAR
 
+	private static boolean printed = false;
 	private static Class<?> dbProLogClass = null;
 
 	/**
@@ -53,12 +54,17 @@ public abstract class LogFactory {// NOSONAR
 				Constructor<?> constr = dbProLogClass.getConstructor(Class.class);
 				return (Log) constr.newInstance(clazz);
 			} catch (Exception e) {
+				if (!printed())
+					System.err.println("Can not load log class: " + dbProLogClass
+							+ ", will use ConsoleLog JLog logger. \r\n" + e.getMessage());
 				dbProLogClass = void.class;
 				return new ConsoleLog(clazz);
 			}
 
 		InputStream is = Log.class.getClassLoader().getResourceAsStream("jlogs.properties");
 		if (is == null) {
+			if (!printed())
+				System.out.println("Not found jlogs.properties,  will use ConsoleLog as JLog logger.");
 			dbProLogClass = void.class;
 			return new ConsoleLog(clazz);
 		}
@@ -69,9 +75,13 @@ public abstract class LogFactory {// NOSONAR
 			prop.load(is);
 			className = prop.getProperty("log");
 			dbProLogClass = Class.forName(className);
+			if (!printed())
+				System.out.print("jlog.properties found, will use " + className + " as JLog logger.");
 			return getLog(clazz);
 		} catch (Exception e) {
-			System.err.println("Not found or wrong log class in jlog.properties: " + className);
+			if (!printed())
+				System.err.println("No or wrong jlog.properties file: " + className
+						+ ", will use ConsoleLog as JLog logger. \r\n" + e.getMessage());
 			dbProLogClass = void.class;
 			return new ConsoleLog(clazz);
 		} finally {
@@ -83,4 +93,14 @@ public abstract class LogFactory {// NOSONAR
 		}
 	}
 
+	private static boolean printed() {
+		boolean old = printed;
+		printed = true;
+		return old;
+	}
+
+	public static void main(String[] args) {
+		Log log = LogFactory.getLog(LogFactory.class);
+		log.info("log test");
+	}
 }

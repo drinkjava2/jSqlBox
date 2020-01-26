@@ -3,7 +3,7 @@ package com.demo.common;
 import com.demo.blog.BlogController;
 import com.demo.index.IndexController;
 //import com.github.drinkjava2.jdbpro.DbProConfig;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.jfinal.JFinalTxConnectionManager;
 import com.jfinal.config.Constants;
 import com.jfinal.config.Handlers;
@@ -47,9 +47,9 @@ public class DemoConfig extends JFinalConfig {
 	 */
 	@Override
 	public void afterJFinalStart() {  
-		SqlBoxContext ctx = new SqlBoxContext(DbKit.getConfig().getDataSource());
+		DbContext ctx = new DbContext(DbKit.getConfig().getDataSource());
 		ctx.setConnectionManager(JFinalTxConnectionManager.instance());
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		DbContext.setGlobalDbContext(ctx);
 
 		// 第一次运行，手工建一个H2数据库表
 		String[] ddls = ctx.toCreateDDL(Blog.class);

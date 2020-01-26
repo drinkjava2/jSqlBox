@@ -25,7 +25,7 @@ import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
@@ -39,17 +39,19 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 public class NonXATransactionTest {
 
 	final static int MASTER_DATABASE_QTY = 2; // total 2 databases
-	final static SqlBoxContext[] masters = new SqlBoxContext[MASTER_DATABASE_QTY];
+	final static DbContext[] masters = new DbContext[MASTER_DATABASE_QTY];
 
 	@Before
 	public void init() {
-		SqlBoxContext.setGlobalNextConnectionManager(TinyTxConnectionManager.instance());
+		DbContext.setGlobalNextAllowShowSql(true);
+		DbContext.setGlobalNextConnectionManager(TinyTxConnectionManager.instance());
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
-			masters[i] = new SqlBoxContext(JdbcConnectionPool.create(
+			masters[i] = new DbContext(JdbcConnectionPool.create(
 					"jdbc:h2:mem:Database" + i + ";MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""));
 			masters[i].setMasters(masters);
+			masters[i].setConnectionManager(null);
 		}
-		SqlBoxContext.setGlobalSqlBoxContext(masters[0]);// random choose 1
+		DbContext.setGlobalDbContext(masters[0]);// random choose 1
 		TableModel model = TableModelUtils.entity2Model(Bank.class);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++)
 			for (String ddl : masters[i].toCreateDDL(model))
@@ -58,7 +60,7 @@ public class NonXATransactionTest {
 
 	@After
 	public void cleanup() {
-		for (SqlBoxContext ctx : masters)
+		for (DbContext ctx : masters)
 			((JdbcConnectionPool) ctx.getDataSource()).dispose();
 		JBEANBOX.close();
 	}
@@ -76,11 +78,11 @@ public class NonXATransactionTest {
 			tester.insertAccount();
 		} catch (Exception e) {
 			System.out.println("Note:" + e.getMessage());
+			e.printStackTrace();
 			System.out.println("Div 0 RuntimeException happened, but 1 database did not rollback ");
 		}
 		Assert.assertEquals(1L, iQueryForLongValue("select count(*) from bank", masters[0]));
 		Assert.assertEquals(0L, iQueryForLongValue("select count(*) from bank", masters[1]));
-
 	}
 
 	public static class Bank extends ActiveRecord<Bank> {

@@ -4,12 +4,12 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.gctx;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iExecute;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQuery;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForLongValue;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.iQueryForMapList;
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.pagin;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.iExecute;
+import static com.github.drinkjava2.jsqlbox.DB.iQuery;
+import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.iQueryForMapList;
+import static com.github.drinkjava2.jsqlbox.DB.pagin;
 
 import java.util.List;
 
@@ -19,10 +19,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.ALIAS;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.COL;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.C_ALIAS;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
 /**
@@ -34,9 +34,9 @@ public class Java8EampleTest {
 
 	@Before
 	public void init() {
-		SqlBoxContext ctx = new SqlBoxContext(JdbcConnectionPool
+		DbContext ctx = new DbContext(JdbcConnectionPool
 				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""));
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		DbContext.setGlobalDbContext(ctx);
 		for (String ddl : ctx.toCreateDDL(User.class))
 			iExecute(ddl);
 		for (int i = 0; i < 100; i++)

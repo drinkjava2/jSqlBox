@@ -13,7 +13,7 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -33,10 +33,10 @@ public class BeetlSqlTemplateDemo {
 		ds.setUsername("sa");
 		ds.setPassword("");
 
-		SqlBoxContext ctx = new SqlBoxContext(ds);
+		DbContext ctx = new DbContext(ds);
 		ctx.setSqlTemplateEngine(new BeetlSqlTempalte());// Customized beetl SQL template!
 		ctx.setAllowShowSQL(true); // Allow show SQL log
-		SqlBoxContext.setGlobalSqlBoxContext(ctx);
+		DbContext.setGlobalDbContext(ctx);
 
 		String[] ddlArray = ctx.toDropAndCreateDDL(User.class);
 		for (String ddl : ddlArray)

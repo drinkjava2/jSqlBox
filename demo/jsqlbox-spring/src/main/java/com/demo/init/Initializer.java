@@ -10,7 +10,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 
 import com.demo.model.Team;
-import com.github.drinkjava2.jsqlbox.SqlBoxContext;
+import com.github.drinkjava2.jsqlbox.DbContext;
 
 public class Initializer implements WebApplicationInitializer {
 
@@ -28,7 +28,7 @@ public class Initializer implements WebApplicationInitializer {
 
 		springCtx.refresh();// force refresh
 
-		SqlBoxContext sbCtx = springCtx.getBean(SqlBoxContext.class);
+		DbContext sbCtx = springCtx.getBean(DbContext.class);
 
 		String[] ddls = sbCtx.toCreateDDL(Team.class);
 		for (String ddl : ddls)
