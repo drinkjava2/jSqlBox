@@ -99,7 +99,7 @@ public abstract class LogFactory {// NOSONAR
 		return old;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) { 
 		Log log = LogFactory.getLog(LogFactory.class);
 		log.info("log test");
 	}

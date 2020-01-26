@@ -23,7 +23,7 @@ import sql.SQLs.SelectUsers2;
 /**
  * This demo shows use Beetl3.0 as SQL Template engine
  */
-public class BeetlSqlTemplateDemo {
+public class BeetlSqlTemplateDemoTest {
 
 	@Test
 	public void doTest() throws IOException {
