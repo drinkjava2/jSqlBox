@@ -224,7 +224,7 @@ public class DDLTest extends JdialectsTestBase {
 	@Test
 	public void testSequence() {
 		printAllDialectsDDLs(SequenceModel());
-		if (guessedDialect.getDdlFeatures().supportBasicOrPooledSequence())
+		if (guessedDialect.ddlFeatures.supportBasicOrPooledSequence())
 			testOnCurrentRealDatabase(SequenceModel());
 	}
 
@@ -381,7 +381,7 @@ public class DDLTest extends JdialectsTestBase {
 		t3.column("id").LONG().identityId().pkey();
 		t3.tableGenerator("table_gen1", "tb1", "pkcol2", "valcol", "pkval", 1, 10);
 		t3.column("id1").INTEGER().idGenerator("table_gen1");
-		if (guessedDialect.getDdlFeatures().supportBasicOrPooledSequence())
+		if (guessedDialect.ddlFeatures.supportBasicOrPooledSequence())
 			t3.sequenceGenerator("seq1", "seq_1", 1, 1);
 		t3.column("id2").INTEGER().idGenerator("seq1");
 		t3.engineTail(" DEFAULT CHARSET=utf8");

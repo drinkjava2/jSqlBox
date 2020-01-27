@@ -59,7 +59,7 @@ public class AutoIdGenerator implements IdGenerator {
 
 	@Override
 	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		if (dialect.getDdlFeatures().supportBasicOrPooledSequence())
+		if (dialect.ddlFeatures.supportBasicOrPooledSequence())
 			return SEQ_AUTOID_INSTANCE.getNextID(jdbc, dialect, dataType);
 		else
 			return TABLE_AUTOID_INSTANCE.getNextID(jdbc, dialect, dataType);
@@ -70,7 +70,7 @@ public class AutoIdGenerator implements IdGenerator {
 	 * TableIdGenerator
 	 */
 	public IdGenerator getSequenceOrTableIdGenerator(Dialect dialect) {
-		if (dialect.getDdlFeatures().supportBasicOrPooledSequence())
+		if (dialect.ddlFeatures.supportBasicOrPooledSequence())
 			return SEQ_AUTOID_INSTANCE;
 		else
 			return TABLE_AUTOID_INSTANCE;

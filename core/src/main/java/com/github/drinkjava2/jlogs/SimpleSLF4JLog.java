@@ -17,8 +17,6 @@ package com.github.drinkjava2.jlogs;
 
 import java.lang.reflect.Method;
 
-import com.github.drinkjava2.jdbpro.DbProException;
-
 /**
  * SimpleSLF4JLog use SLF4J Logger, to use it, need put a file
  * “jlogs.properties” in main/resources or test/resources folder with below
@@ -56,7 +54,7 @@ public class SimpleSLF4JLog implements Log {
 			warnExp = logger.getClass().getMethod("warn", String.class, Throwable.class);
 			errorExp = logger.getClass().getMethod("error", String.class, Throwable.class);
 		} catch (Exception e) {
-			throw new DbProException(e);
+			throw new RuntimeException(e);
 		}
 	}
 

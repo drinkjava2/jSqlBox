@@ -100,7 +100,7 @@ public class IdgeneratorTest extends JdialectsTestBase {
 
 	@Test
 	public void testSequenceIdGenerator() {
-		if (!guessedDialect.getDdlFeatures().supportBasicOrPooledSequence())
+		if (!guessedDialect.ddlFeatures.supportBasicOrPooledSequence())
 			return;
 		TableModel table1 = new TableModel("testTableIdGenerator");
 		table1.sequenceGenerator("seq1", "seq1", 1, 10);

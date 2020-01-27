@@ -30,7 +30,7 @@ public class DialectTypeMappingTemplate {
 		target.putAll(lastMap);
 	}
 
-	protected static void initTypeMappings() {
+	protected static void initTypeMappings(Dialect dia) {
 		Map<Type, String> mp = new HashMap<Type, String>();
 		mp.put(Type.BIGINT, "bigint");
 		mp.put(Type.BINARY, "blob");

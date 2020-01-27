@@ -189,7 +189,7 @@ public class IdGeneratorTest extends TestBase {
 	@Test
 	public void testSequenceIdGenerator() {
 		Systemout.println(dialect);
-		if (!dialect.getDdlFeatures().supportBasicOrPooledSequence())
+		if (!dialect.ddlFeatures.supportBasicOrPooledSequence())
 			return;
 		TableModel table1 = new TableModel("testTableIdGenerator");
 		table1.sequenceGenerator("seq1", "seq1", 1, 10);

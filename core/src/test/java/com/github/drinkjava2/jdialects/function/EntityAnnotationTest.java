@@ -33,11 +33,11 @@ public class EntityAnnotationTest extends JdialectsTestBase {
 		for (String ddl : dropAndCreateDDL)
 			Systemout.println(ddl);
 
-		if (guessedDialect.getDdlFeatures().supportBasicOrPooledSequence()) {
+		if (guessedDialect.ddlFeatures.supportBasicOrPooledSequence()) {
 			testCreateAndDropDatabase(TableModelUtils.entity2Models(EntityForAll.class, EntityForOracle.class));
 			//Systemout.println(DebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(EntityForOracle.class)));
 		}
-		if (!guessedDialect.getDdlFeatures().supportBasicOrPooledSequence()) {
+		if (!guessedDialect.ddlFeatures.supportBasicOrPooledSequence()) {
 			testCreateAndDropDatabase(TableModelUtils.entity2Models(EntityForAll.class, EntityForMySql.class));
 			//Systemout.println(DebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(EntityForMySql.class)));
 		}

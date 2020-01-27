@@ -50,6 +50,7 @@ public class DialectTest {
 			} catch (DialectException e) {
 				Systemout.println("Error:" + e.getMessage());
 			}
+			System.out.println(result);
 			Assert.assertFalse(result.contains("$"));
 			try {
 				result = dialect.pagin(1, 10, sql2);

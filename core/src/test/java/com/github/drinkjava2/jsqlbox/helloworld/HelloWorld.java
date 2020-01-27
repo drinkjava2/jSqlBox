@@ -51,7 +51,7 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 		DbContext ctx = new DbContext(ds);
 		DbContext.setGlobalDbContext(ctx);
 		ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class));
-		System.out.println(ctx.getDialect().getDdlFeatures().getDropTableString());
+		System.out.println(ctx.getDialect().ddlFeatures.getDropTableString());
 
 		new HelloWorld().setName("Hellow jSqlBox").insert();
 		System.out.println(DB.iQueryForString("select name from HelloWorld"));

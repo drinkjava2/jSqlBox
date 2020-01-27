@@ -48,13 +48,13 @@ public class IdentityIdGenerator implements IdGenerator {
 
 	@Override
 	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		if (!dialect.getDdlFeatures().getSupportsIdentityColumns())
+		if (!dialect.ddlFeatures.getSupportsIdentityColumns())
 			throw new DialectException("Dialect '" + dialect + "' does not support identity type");
 		String sql = null;
 		if (Type.BIGINT.equals(dataType))
-			sql = dialect.getDdlFeatures().getIdentitySelectStringBigINT();
+			sql = dialect.ddlFeatures.getIdentitySelectStringBigINT();
 		else
-			sql = dialect.getDdlFeatures().getIdentitySelectString();
+			sql = dialect.ddlFeatures.getIdentitySelectString();
 		if (StrUtils.isEmpty(sql) || DDLFeatures.NOT_SUPPORT.equals(sql))
 			throw new DialectException("Dialect '" + dialect + "' does not support identity type");
 		return jdbc.nQueryForObject(sql);
