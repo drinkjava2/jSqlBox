@@ -155,23 +155,23 @@ public class Dialect {
 	private static final String PAGESIZE = "$PAGESIZE";
 	private static final String TOTAL_ROWS = "$TOTAL_ROWS";
 	private static final String DISTINCT_TAG = "($DISTINCT)";
-	public final String sqlTemplate;
-	public final String topLimitTemplate;
-	public final String name;
-	public final Map<Type, String> typeMappings = new EnumMap<Type, String>(Type.class);
-	public final Map<String, String> functions = new HashMap<String, String>();
-	public final DDLFeatures ddlFeatures = new DDLFeatures();// NOSONAR
+	public String sqlTemplate;
+	public String topLimitTemplate;
+	public String name;
+	public Map<Type, String> typeMappings = new EnumMap<Type, String>(Type.class);
+	public Map<String, String> functions = new HashMap<String, String>();
+	public DDLFeatures ddlFeatures = new DDLFeatures();// NOSONAR
 
-	static { 
-		//DialectFunctionTemplate.initFunctionTemplates();
+	static {
+		DialectTypeMappingTemplate.initTypeMappings();
+		DialectFunctionTemplate.initFunctionTemplates();
 	}
 
 	public Dialect(String name) {
 		this.name = name;
 		this.sqlTemplate = DialectPaginationTemplate.initializePaginSQLTemplate(this);
 		this.topLimitTemplate = DialectPaginationTemplate.initializeTopLimitSqlTemplate(this);
-		DialectTypeMappingTemplate.initTypeMappings(this);
-		DDLFeatures.initDDLFeatures(this, ddlFeatures);
+		DDLFeatures.initDDLFeatures(this);
 	}
 
 	public static Dialect[] values() {
@@ -400,6 +400,11 @@ public class Dialect {
 		return name;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		return name.equals(((Dialect) obj).name);
+	}
+
 	/**
 	 * @return true if is MySql family
 	 */
@@ -549,7 +554,14 @@ public class Dialect {
 	}
 
 	// getter & setter====
-	@Deprecated
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public DDLFeatures getDdlFeatures() {
 		return ddlFeatures;
 	}
