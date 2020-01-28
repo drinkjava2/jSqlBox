@@ -150,6 +150,9 @@ public class Dialect {
 	/** The SQL function prefix String, default value is null */
 	private static String globalSqlFunctionPrefix = null;
 
+	/** If disable, will use same SqlTemplate for first page pagination query */
+	private static Boolean globalEnableTopLimitPagin = true;
+
 	public static final String NOT_SUPPORT = "NOT_SUPPORT";
 	private static final String SKIP_ROWS = "$SKIP_ROWS";
 	private static final String PAGESIZE = "$PAGESIZE";
@@ -351,7 +354,7 @@ public class Dialect {
 		int totalRows = pageNumber * pageSize;
 		int totalRowsPlus1 = totalRows + 1;
 		String useTemplate;
-		if (skipRows == 0) {
+		if (globalEnableTopLimitPagin && skipRows == 0) {
 			useTemplate = topLimitTemplate;
 			if (SQLServer2012Dialect.equals(this) && !StrUtils.containsIgnoreCase(trimedSql, "order by "))
 				useTemplate = SQLServer2005Dialect.topLimitTemplate;
@@ -591,6 +594,15 @@ public class Dialect {
 	/** Note! this is a global method to set globalSqlFunctionPrefix */
 	public static void setGlobalSqlFunctionPrefix(String sqlFunctionPrefix) {
 		Dialect.globalSqlFunctionPrefix = sqlFunctionPrefix;
+	}
+
+	public static Boolean getGlobalEnableTopLimitPagin() {
+		return globalEnableTopLimitPagin;
+	}
+
+	/** Note! this is a global method to set globalEnableTopLimitPagin */
+	public static void setGlobalEnableTopLimitPagin(Boolean globalEnableTopLimitPagin) {
+		Dialect.globalEnableTopLimitPagin = globalEnableTopLimitPagin;
 	}
 
 }
