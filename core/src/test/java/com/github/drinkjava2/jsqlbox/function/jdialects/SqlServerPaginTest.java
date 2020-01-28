@@ -36,6 +36,8 @@ public class SqlServerPaginTest extends TestBase {
 
 	@Test
 	public void sqlServerPaginTest() {
+		if (!ctx.getDialect().isSQLServerFamily())
+			return;
 		Systemout.println("========================sqlServerPaginTest===========");
 		// ctx.setDialect(Dialect.SQLServerDialect);
 		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
@@ -46,6 +48,8 @@ public class SqlServerPaginTest extends TestBase {
 
 	@Test
 	public void sqlServer20052008PaginTest() {
+		if (!ctx.getDialect().isSQLServerFamily())
+			return;
 		Systemout.println("========================sqlServer2012PaginTest===========");
 		// ctx.setDialect(Dialect.SQLServer2005Dialect);
 		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
@@ -66,6 +70,8 @@ public class SqlServerPaginTest extends TestBase {
 
 	@Test
 	public void sqlServer2012PaginTest() {
+		if (!ctx.getDialect().isSQLServerFamily())
+			return;
 		Systemout.println("========================sqlServer2012PaginTest===========");
 		// ctx.setDialect(Dialect.SQLServer2012Dialect);
 		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());

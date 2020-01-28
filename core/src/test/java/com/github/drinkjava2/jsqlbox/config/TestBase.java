@@ -75,6 +75,7 @@ public class TestBase {
 	@Before
 	public void init() {
 		DbContext.resetGlobalVariants(); 
+		DbContext.setGlobalNextAllowShowSql(true);
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);

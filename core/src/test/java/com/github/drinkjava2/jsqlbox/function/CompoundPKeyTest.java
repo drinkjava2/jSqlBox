@@ -18,6 +18,7 @@ package com.github.drinkjava2.jsqlbox.function;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.DB.alias;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +134,7 @@ public class CompoundPKeyTest extends TestBase {
 	@Test
 	public void testActiveRecord() {
 		CmpEntity entity3 = new CmpEntity();
-		entity3.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", 7).load();
+		entity3.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", new BigDecimal(9)).load();
 		Assert.assertEquals("China", entity3.getAddress());
 
 		CmpEntity entity4 = new CmpEntity();

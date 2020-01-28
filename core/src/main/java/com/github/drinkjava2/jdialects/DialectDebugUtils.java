@@ -20,12 +20,13 @@ import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * DebugUtils only for debug, may delete it in future
+ * DialectDebugUtils only for debug purpose, to print detail info of dialects,
+ * may delete it in future version
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public abstract class DebugUtils {//// NOSONAR
+public abstract class DialectDebugUtils {//// NOSONAR
 
 	public static String getColumnModelDebugInfo(ColumnModel c) {
 		StringBuilder sb = new StringBuilder();
@@ -146,7 +147,4 @@ public abstract class DebugUtils {//// NOSONAR
 		return s;
 	}
 
-	public static void main(String[] args) {
-		System.out.println(getDialectFullInfo(Dialect.OracleDialect));
-	}
 }

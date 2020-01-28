@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import com.github.drinkjava2.jdialects.DebugUtils;
+import com.github.drinkjava2.jdialects.DialectDebugUtils;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
@@ -521,7 +521,7 @@ public class TableModel {
 	}
 
 	public String getDebugInfo() {
-		return DebugUtils.getTableModelDebugInfo(this);
+		return DialectDebugUtils.getTableModelDebugInfo(this);
 	}
 
 	private void checkReadOnly() {
