@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
-import com.github.drinkjava2.jdialects.DialectDebugUtils;
+import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
@@ -77,7 +77,7 @@ public class ConverterTest extends TestBase {
 
 	@Test
 	public void testConvert() {
-		Systemout.println(DialectDebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(ConverterDemo.class)));
+		Systemout.println(DebugUtils.getTableModelDebugInfo(TableModelUtils.entity2Model(ConverterDemo.class)));
 
 		ConverterDemo v = new ConverterDemo();
 		v.setFoo(new FooDemo(1));

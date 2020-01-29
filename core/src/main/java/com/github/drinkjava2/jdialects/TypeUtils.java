@@ -13,8 +13,11 @@ package com.github.drinkjava2.jdialects;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
  * SQL Type definitions
@@ -92,7 +95,7 @@ public abstract class TypeUtils {// NOSONAR
 		TYPE_TO_JAVA_MAP.put(Type.VARCHAR, String.class);
 
 	}
- 
+
 	/** Check if a class type can map to a SQL type */
 	public static boolean canMapToSqlType(Class<?> clazz) {// NOSONAR
 		if (clazz == null)
@@ -100,14 +103,12 @@ public abstract class TypeUtils {// NOSONAR
 		return JAVA_TO_TYPE_MAP.containsKey(clazz);
 	}
 
-
 	public static Class<?> dialectTypeToJavaType(Type type) {// NOSONAR
 		if (type == null)
 			return null;
 		return TYPE_TO_JAVA_MAP.get(type);
 	}
 
-	
 	/** Convert a Class type to Dialect's Type */
 	public static Type toType(Class<?> clazz) {
 		Type t = JAVA_TO_TYPE_MAP.get(clazz);
@@ -180,6 +181,132 @@ public abstract class TypeUtils {// NOSONAR
 			return Type.VARCHAR;
 		// @formatter:on
 		throw new DialectException("'" + columnDef + "' is not a legal SQL column definition name");
+	}
+
+	/** Convert value to target Java type */
+	public static Object convertValueToJavaType(Object value, Class<?> type) {// NOSONAR
+		if (value == null)
+			return null;
+		if (type == String.class)
+			return value.toString();
+		Class<?> vType = value.getClass();
+		if (vType == BigDecimal.class) {
+			if (type == Integer.class || type == int.class)
+				return ((BigDecimal) value).intValue();
+			if (type == Long.class || type == long.class)
+				return ((BigDecimal) value).longValue();
+			if (type == Byte.class || type == byte.class)
+				return ((BigDecimal) value).byteValue();
+			if (type == Double.class || type == double.class)
+				return ((BigDecimal) value).doubleValue();
+			if (type == Float.class || type == float.class)
+				return ((BigDecimal) value).floatValue();
+			if (type == Short.class || type == short.class)
+				return ((BigDecimal) value).shortValue();
+		}
+		if (vType == Integer.class) {
+			if (type == Integer.class || type == int.class)
+				return ((Integer) value).intValue();
+			if (type == Long.class || type == long.class)
+				return ((Integer) value).longValue();
+			if (type == Byte.class || type == byte.class)
+				return ((Integer) value).byteValue();
+			if (type == Double.class || type == double.class)
+				return ((Integer) value).doubleValue();
+			if (type == Float.class || type == float.class)
+				return ((Integer) value).floatValue();
+			if (type == Short.class || type == short.class)
+				return ((Integer) value).shortValue();
+		}
+		if (vType == Long.class) {
+			if (type == Integer.class || type == int.class)
+				return ((Long) value).intValue();
+			if (type == Long.class || type == long.class)
+				return ((Long) value).longValue();
+			if (type == Byte.class || type == byte.class)
+				return ((Long) value).byteValue();
+			if (type == Double.class || type == double.class)
+				return ((Long) value).doubleValue();
+			if (type == Float.class || type == float.class)
+				return ((Long) value).floatValue();
+			if (type == Short.class || type == short.class)
+				return ((Long) value).shortValue();
+		}
+		if (vType == Double.class) {
+			if (type == Integer.class || type == int.class)
+				return ((Double) value).intValue();
+			if (type == Long.class || type == long.class)
+				return ((Double) value).longValue();
+			if (type == Byte.class || type == byte.class)
+				return ((Double) value).byteValue();
+			if (type == Double.class || type == double.class)
+				return ((Double) value).doubleValue();
+			if (type == Float.class || type == float.class)
+				return ((Double) value).floatValue();
+			if (type == Short.class || type == short.class)
+				return ((Double) value).shortValue();
+		}
+		if (vType == Float.class) {
+			if (type == Integer.class || type == int.class)
+				return ((Float) value).intValue();
+			if (type == Long.class || type == long.class)
+				return ((Float) value).longValue();
+			if (type == Byte.class || type == byte.class)
+				return ((Float) value).byteValue();
+			if (type == Double.class || type == double.class)
+				return ((Float) value).doubleValue();
+			if (type == Float.class || type == float.class)
+				return ((Float) value).floatValue();
+			if (type == Short.class || type == short.class)
+				return ((Float) value).shortValue();
+		}
+		if (vType == Short.class) {
+			if (type == Integer.class || type == int.class)
+				return ((Short) value).intValue();
+			if (type == Long.class || type == long.class)
+				return ((Short) value).longValue();
+			if (type == Byte.class || type == byte.class)
+				return ((Short) value).byteValue();
+			if (type == Double.class || type == double.class)
+				return ((Short) value).doubleValue();
+			if (type == Float.class || type == float.class)
+				return ((Short) value).floatValue();
+			if (type == Short.class || type == short.class)
+				return ((Short) value).shortValue();
+		}
+		if (vType == Byte.class) {
+			if (type == Integer.class || type == int.class)
+				return ((Byte) value).intValue();
+			if (type == Long.class || type == long.class)
+				return ((Byte) value).longValue();
+			if (type == Byte.class || type == byte.class)
+				return ((Byte) value).byteValue();
+			if (type == Double.class || type == double.class)
+				return ((Byte) value).doubleValue();
+			if (type == Float.class || type == float.class)
+				return ((Byte) value).floatValue();
+			if (type == Short.class || type == short.class)
+				return ((Byte) value).shortValue();
+		}
+		if (vType == java.sql.Date.class) {
+			if (type == java.util.Date.class)
+				return new java.util.Date(((java.sql.Date) value).getTime());
+			if (type == Timestamp.class)
+				return new Timestamp(((java.sql.Date) value).getTime());
+		}
+		if (vType == Timestamp.class) {
+			if (type == java.util.Date.class)
+				return new java.util.Date(((Timestamp) value).getTime());
+			if (type == java.sql.Date.class)
+				return new java.sql.Date(((Timestamp) value).getTime());
+		}
+		if (vType == java.util.Date.class) {
+			if (type == java.sql.Date.class)
+				return new java.util.Date(((java.util.Date) value).getTime());
+			if (type == Timestamp.class)
+				return new Timestamp(((java.util.Date) value).getTime());
+		}
+		return new DbException("Can not convert " + value.getClass() + " type value '" + value + "' to type:" + type);
 	}
 
 	// @formatter:off shut off eclipse's formatter

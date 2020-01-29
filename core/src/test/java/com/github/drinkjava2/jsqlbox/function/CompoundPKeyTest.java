@@ -134,7 +134,7 @@ public class CompoundPKeyTest extends TestBase {
 	@Test
 	public void testActiveRecord() {
 		CmpEntity entity3 = new CmpEntity();
-		entity3.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", new BigDecimal(9)).load();
+		entity3.putField("firstName", "Sam", "middleName", "Y", "lastName", "Zhu", "age", new Integer(9)).load();
 		Assert.assertEquals("China", entity3.getAddress());
 
 		CmpEntity entity4 = new CmpEntity();

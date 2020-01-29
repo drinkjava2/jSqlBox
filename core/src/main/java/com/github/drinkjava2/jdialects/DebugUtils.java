@@ -26,7 +26,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.0
  */
-public abstract class DialectDebugUtils {//// NOSONAR
+public abstract class DebugUtils {//// NOSONAR
 
 	public static String getColumnModelDebugInfo(ColumnModel c) {
 		StringBuilder sb = new StringBuilder();

@@ -37,6 +37,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
+import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
@@ -91,8 +92,7 @@ public abstract class DbContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Use current DbContext's shardingTools to calculate the master
-	 * DbContext
+	 * Use current DbContext's shardingTools to calculate the master DbContext
 	 */
 	public static DbContext getShardedDB(DbContext currentCtx, Object entityOrClass, Object... shardKey) {
 		Integer shardDBCode = getShardedDBCode(currentCtx, entityOrClass, shardKey);
@@ -145,8 +145,7 @@ public abstract class DbContextUtils {// NOSONAR
 			Integer[] result = sh.handleShardDatabase(model, shardKey);
 			if (result != null) {
 				if (result.length > 1)
-					throw new DbException("Found more than 1 DbContext tables for target '"
-							+ model.getEntityClass()
+					throw new DbException("Found more than 1 DbContext tables for target '" + model.getEntityClass()
 							+ "', jSqlBox current version do not support auto-join, to solve this issue you need adjust your ShardDatabase search condition.");
 				return result[0];
 			}
@@ -155,8 +154,7 @@ public abstract class DbContextUtils {// NOSONAR
 	}
 
 	/**
-	 * Use current DbContext's shardingTools to calculate the real shardTable
-	 * name
+	 * Use current DbContext's shardingTools to calculate the real shardTable name
 	 */
 	public static String getShardedTB(DbContext ctx, Object entityOrClass, Object... shardKey) {
 		Integer shardedTBCode = getShardedTBCode(ctx, entityOrClass, shardKey);
@@ -505,8 +503,8 @@ public abstract class DbContextUtils {// NOSONAR
 				return;
 			}
 		}
-		throw new DbException("Not found relationship(foreign key) setting between '" + m1.getEntityClass()
-				+ "' and '" + m2.getEntityClass() + "'");
+		throw new DbException("Not found relationship(foreign key) setting between '" + m1.getEntityClass() + "' and '"
+				+ m2.getEntityClass() + "'");
 	}
 
 	/** Build a.bid1=b.id1 and a.bid2=b.id2 SQL piece */
@@ -551,7 +549,7 @@ public abstract class DbContextUtils {// NOSONAR
 				} catch (Exception e) {
 					throw new DbException(e);
 				}
-			else if (entityBean instanceof TailType) { 
+			else if (entityBean instanceof TailType) {
 				return ((TailType) entityBean).tails().get(fieldName);
 			} else
 				throw new DbException("No read method for '" + fieldName + "'");
@@ -582,7 +580,8 @@ public abstract class DbContextUtils {// NOSONAR
 		} else
 			try {
 				Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
-				System.out.println(writeMethod.getParameterTypes()[0]);
+				if (value != null && value.getClass() != writeMethod.getParameterTypes()[0])
+					value = TypeUtils.convertValueToJavaType(value, writeMethod.getParameterTypes()[0]);
 				writeMethod.invoke(entityBean, value);
 			} catch (Exception e) {
 				throw new DbException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);
@@ -669,7 +668,7 @@ public abstract class DbContextUtils {// NOSONAR
 				continue;
 			}
 			Object value = readValueFromBeanFieldOrTail(col, entityBean);
-			if (value==null && col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
+			if (value == null && col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
 				if (col.getIdGenerator() == null)
 					throw new DbException("No IdGenerator found for column '" + col.getColumnName() + "'");
 				IdGenerator idGen = col.getIdGenerator();
@@ -699,7 +698,7 @@ public abstract class DbContextUtils {// NOSONAR
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				}
 			} else {
-				 
+
 				if (value == null && ignoreNull == null) {
 					for (Object itemObject : optionItems)
 						if (SqlOption.IGNORE_NULL.equals(itemObject)) {
@@ -1077,8 +1076,7 @@ public abstract class DbContextUtils {// NOSONAR
 	 * Create a new Entity, load from DB according given ID, return null if entity
 	 * does not exist in DB
 	 */
-	private static <T> T doEntityLoadByIdTry(DbContext ctx, Class<T> entityClass, Object id,
-			Object... optionItems) {// NOSONAR
+	private static <T> T doEntityLoadByIdTry(DbContext ctx, Class<T> entityClass, Object id, Object... optionItems) {// NOSONAR
 		T bean = buildBeanById(ctx, entityClass, id, optionItems);
 		int result = doEntityLoadTry(ctx, bean, optionItems);
 		if (result != 1)
@@ -1215,8 +1213,7 @@ public abstract class DbContextUtils {// NOSONAR
 		else if (result == 0)
 			return false;
 		else
-			throw new DbException(
-					"Fail to check entity exist because found " + result + " rows record in database");
+			throw new DbException("Fail to check entity exist because found " + result + " rows record in database");
 	}
 
 	/** Count quantity of all entity, this method does not support sharding */

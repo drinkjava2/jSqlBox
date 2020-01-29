@@ -151,6 +151,11 @@ public class TestBase {
 		executeDDLs(ddls);
 	}
 
+	public void quietDropTables(Class<?>... classes) {
+		String[] ddls = ctx.toDropDDL(classes);
+		quietExecuteDDLs(ddls);
+	}
+	
 	public void dropTables(Class<?>... classes) {
 		String[] ddls = ctx.toDropDDL(classes);
 		executeDDLs(ddls);

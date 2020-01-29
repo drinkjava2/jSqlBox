@@ -14,7 +14,7 @@ package com.github.drinkjava2.jdialects.model;
 import java.util.Iterator;
 import java.util.List;
 
-import com.github.drinkjava2.jdialects.DialectDebugUtils;
+import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
@@ -392,7 +392,7 @@ public class ColumnModel {
 	}
 
 	public String getDebugInfo() {
-		return DialectDebugUtils.getColumnModelDebugInfo(this);
+		return DebugUtils.getColumnModelDebugInfo(this);
 	}
 
 	public void checkReadOnly() {
