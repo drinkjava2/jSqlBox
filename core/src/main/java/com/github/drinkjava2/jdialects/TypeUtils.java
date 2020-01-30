@@ -63,12 +63,24 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(Boolean.class, Type.BOOLEAN);
 		JAVA_TO_TYPE_MAP.put(Byte.class, Type.TINYINT);
 		JAVA_TO_TYPE_MAP.put(Character.class, Type.CHAR);
+		
+		
 		JAVA_TO_TYPE_MAP.put(java.util.Date.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.sql.Date.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.sql.Time.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.sql.Timestamp.class, Type.TIMESTAMP);
 		JAVA_TO_TYPE_MAP.put(java.sql.Clob.class, Type.CLOB);
 		JAVA_TO_TYPE_MAP.put(java.sql.Blob.class, Type.BLOB);
+		
+		//Java 8 date time types
+		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);
+		JAVA_TO_TYPE_MAP.put(java.time.LocalTime.class, Type.TIME);
+		JAVA_TO_TYPE_MAP.put(java.time.OffsetTime.class, Type.TIME);
+		JAVA_TO_TYPE_MAP.put(java.time.Instant.class, Type.TIMESTAMP);
+		JAVA_TO_TYPE_MAP.put(java.time.LocalDateTime.class, Type.TIMESTAMP);
+		JAVA_TO_TYPE_MAP.put(java.time.OffsetDateTime.class, Type.TIMESTAMP);
+		JAVA_TO_TYPE_MAP.put(java.time.ZonedDateTime.class, Type.TIMESTAMP);  
+		
 		JAVA_TO_TYPE_MAP.put(Double.class, Type.DOUBLE);
 		JAVA_TO_TYPE_MAP.put(Float.class, Type.FLOAT);
 		JAVA_TO_TYPE_MAP.put(Integer.class, Type.INTEGER);
@@ -204,7 +216,7 @@ public abstract class TypeUtils {// NOSONAR
 			if (type == Short.class || type == short.class)
 				return ((BigDecimal) value).shortValue();
 			if (type == Boolean.class || type == boolean.class)
-				return ((BigDecimal) value).byteValue()!=0;
+				return ((BigDecimal) value).byteValue() != 0;
 		}
 		if (vType == Integer.class) {
 			if (type == Integer.class || type == int.class)
@@ -389,4 +401,5 @@ public abstract class TypeUtils {// NOSONAR
 			throw new DialectException("Not supported java.sql.Types value:" + javaSqlType);
 		}
 	}
+	 
 }

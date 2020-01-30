@@ -35,6 +35,8 @@ public class TypeMappingTest extends TestBase {
 		double d2;
 		Float f1;
 		float f2;
+		Boolean bl1;
+		boolean bl2;
 
 		public String getId() {
 			return id;
@@ -140,9 +142,25 @@ public class TypeMappingTest extends TestBase {
 			this.f2 = f2;
 		}
 
+		public Boolean getBl1() {
+			return bl1;
+		}
+
+		public void setBl1(Boolean bl1) {
+			this.bl1 = bl1;
+		}
+
+		public boolean isBl2() {
+			return bl2;
+		}
+
+		public void setBl2(boolean bl2) {
+			this.bl2 = bl2;
+		}
+
 	}
 
-//	@Test
+	// @Test
 	public void testNumberDemo() {
 		quietDropTables(NumberDemo.class);
 		createTables(NumberDemo.class);
@@ -159,12 +177,27 @@ public class TypeMappingTest extends TestBase {
 		w.setD2(8.0);
 		w.setF1(9.0f);
 		w.setF2(10.0f);
+		w.setBl1(true);
+		w.setBl2(true);
 		w.insert();
 
 		NumberDemo r = new NumberDemo();
 		r.setId(w.getId());
 		r.load();
 		Assert.assertNotNull(r.i1);
+		Assert.assertNotNull(r.i2);
+		Assert.assertNotNull(r.b1);
+		Assert.assertNotNull(r.b2);
+		Assert.assertNotNull(r.s1);
+		Assert.assertNotNull(r.s2);
+		Assert.assertNotNull(r.l1);
+		Assert.assertNotNull(r.l2);
+		Assert.assertNotNull(r.d1);
+		Assert.assertNotNull(r.d2);
+		Assert.assertNotNull(r.f1);
+		Assert.assertNotNull(r.f2);
+		Assert.assertNotNull(r.bl1);
+		Assert.assertNotNull(r.bl2);
 		dropTables(NumberDemo.class);
 	}
 
@@ -192,11 +225,10 @@ public class TypeMappingTest extends TestBase {
 		}
 	}
 
-	 @Test
+	@Test
 	public void testTypeMapping() {
-		System.out.println(DebugUtils.getDialectFullInfo(  Dialect.Oracle9iDialect)); 
-		 
-		 
+		System.out.println(DebugUtils.getDialectFullInfo(Dialect.Oracle9iDialect));
+
 		quietDropTables(DateDemo.class);
 		createTables(DateDemo.class);
 		DateDemo w = new DateDemo();
