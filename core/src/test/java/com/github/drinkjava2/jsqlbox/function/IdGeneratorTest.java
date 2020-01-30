@@ -140,7 +140,6 @@ public class IdGeneratorTest extends TestBase {
 			Assert.assertTrue(("" + id3).length() == 36);
 			ctx.iExecute("insert into testNextIdTable (id1,id2,id3) ", param(id1, id2, id3), valuesQuestions());
 		}
-		dropTables(table);
 	}
 
 	@Test
@@ -160,7 +159,6 @@ public class IdGeneratorTest extends TestBase {
 			Assert.assertNotNull(gen.getNextID(ctx, dialect, null));
 			Systemout.println(gen.getNextID(ctx, dialect, null));
 		}
-		dropTables(table);
 	}
 
 	@Test
@@ -183,7 +181,6 @@ public class IdGeneratorTest extends TestBase {
 			Assert.assertNotNull(gen2.getNextID(ctx, dialect, null));
 			Systemout.println(gen2.getNextID(ctx, dialect, null));
 		}
-		dropTables(table);
 	}
 
 	@Test
@@ -216,7 +213,6 @@ public class IdGeneratorTest extends TestBase {
 			Systemout.println(gen3.getNextID(ctx, dialect, null));
 			Systemout.println(gen4.getNextID(ctx, dialect, null));
 		}
-		dropTables(table1, table2);
 	}
 
 	@Test
@@ -248,11 +244,12 @@ public class IdGeneratorTest extends TestBase {
 			Systemout.println(gen3.getNextID(ctx, dialect, null));
 			Systemout.println(gen4.getNextID(ctx, dialect, null));
 		}
-		dropTables(table1, table2);
 	}
 
 	@Test
 	public void testIdentityGenerator() {
+		if (!dialect.ddlFeatures.getSupportsIdentityColumns())
+			return;
 		TableModel table = new TableModel("testIdentity");
 		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);
@@ -265,7 +262,6 @@ public class IdGeneratorTest extends TestBase {
 
 		idGen = table.getColumnByColName("id").getIdGenerator();
 		Systemout.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
-		dropTables(table);
 	}
 
 }

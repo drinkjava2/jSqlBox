@@ -194,7 +194,7 @@ public class TypeMappingTest extends TestBase {
 
 	 @Test
 	public void testTypeMapping() {
-		//System.out.println(DebugUtils.getDialectFullInfo(  Dialect.Oracle9iDialect)); 
+		System.out.println(DebugUtils.getDialectFullInfo(  Dialect.Oracle9iDialect)); 
 		 
 		 
 		quietDropTables(DateDemo.class);

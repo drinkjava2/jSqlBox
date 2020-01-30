@@ -12,7 +12,6 @@ import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.FKey;
-import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
@@ -26,9 +25,6 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
  * @since 1.7.0
  */
 public class TableModelUtilsOfDbTest extends TestBase {
-	{
-		regTables(studentSample.class, DbSample.class);
-	}
 
 	@Table(name = "student_sample")
 	public static class studentSample {
@@ -69,7 +65,7 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 		String email;
 
-		@SingleFKey(refs = { "student_sample", "stAddr" })
+		//@SingleFKey(name = "singlefkey1", refs = { "student_sample", "stAddr" })
 		String address2;
 
 		public String getId() {
@@ -136,8 +132,11 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 	@Test
 	public void doDbToJavaSrcFiles() {
-		DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
-		TableModelUtils.db2JavaSrcFiles(ds, Dialect.MySQLDialect, true, true, "temp", "c:/temp");
+		createTables(studentSample.class);
+		createTables(DbSample.class);
+		TableModelUtils.db2JavaSrcFiles(ctx.getDataSource(), ctx.getDialect(), true, true, "temp", "c:/temp");
+		dropTables(DbSample.class);
+		dropTables(studentSample.class);
 	}
 
 }

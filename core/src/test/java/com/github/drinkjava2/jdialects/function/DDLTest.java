@@ -178,12 +178,16 @@ public class DDLTest extends JdialectsTestBase {
 
 	@Test
 	public void testIdentity() {
+		if (!guessedDialect.ddlFeatures.getSupportsIdentityColumns())
+			return;
 		printAllDialectsDDLs(IdentityModel());
 		testOnCurrentRealDatabase(IdentityModel());
 	}
 
 	@Test
 	public void testIdentity2() {
+		if (!guessedDialect.ddlFeatures.getSupportsIdentityColumns())
+			return;
 		printOneDialectsDDLs(Dialect.SybaseASE15Dialect, IdentityModel());
 		printOneDialectsDDLs(Dialect.MySQL55Dialect, IdentityModel());
 		printOneDialectsDDLs(Dialect.InformixDialect, IdentityModel());
@@ -191,7 +195,7 @@ public class DDLTest extends JdialectsTestBase {
 
 	private static TableModel CommentModel() {// Comment
 		TableModel t = new TableModel("testTable").comment("table_comment");
-		t.column("s1").INTEGER().notNull().identityId().pkey();
+		t.column("s1").INTEGER().notNull().pkey();
 		t.column("s2").LONG().comment("column_comment1");
 		t.column("s3").BIGINT().comment("column_comment2");
 		return t;
@@ -378,7 +382,9 @@ public class DDLTest extends JdialectsTestBase {
 		t2.unique("uk1").columns("name2", "email2");
 
 		TableModel t3 = new TableModel("sampletable");
-		t3.column("id").LONG().identityId().pkey();
+		t3.column("id").LONG().pkey();
+		if (guessedDialect.ddlFeatures.getSupportsIdentityColumns())
+			t3.column("id").identityId();
 		t3.tableGenerator("table_gen1", "tb1", "pkcol2", "valcol", "pkval", 1, 10);
 		t3.column("id1").INTEGER().idGenerator("table_gen1");
 		if (guessedDialect.ddlFeatures.supportBasicOrPooledSequence())

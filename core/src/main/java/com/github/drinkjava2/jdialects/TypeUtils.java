@@ -203,6 +203,8 @@ public abstract class TypeUtils {// NOSONAR
 				return ((BigDecimal) value).floatValue();
 			if (type == Short.class || type == short.class)
 				return ((BigDecimal) value).shortValue();
+			if (type == Boolean.class || type == boolean.class)
+				return ((BigDecimal) value).byteValue()!=0;
 		}
 		if (vType == Integer.class) {
 			if (type == Integer.class || type == int.class)

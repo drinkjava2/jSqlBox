@@ -164,6 +164,8 @@ public class IdgeneratorTest extends JdialectsTestBase {
 
 	@Test
 	public void testIdentityGenerator() {
+		if (!guessedDialect.ddlFeatures.getSupportsIdentityColumns())
+			return;
 		TableModel table = new TableModel("testIdentity");
 		table.column("id").INTEGER().identityId();
 		table.column("name").STRING(30);

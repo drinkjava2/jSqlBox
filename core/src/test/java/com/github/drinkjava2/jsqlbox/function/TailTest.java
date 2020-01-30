@@ -40,7 +40,7 @@ public class TailTest extends TestBase {
 
 		@Column(name = "birth_day")
 		Date birthDay;
-
+		
 		public String getUserName() {
 			return userName;
 		}
@@ -72,10 +72,11 @@ public class TailTest extends TestBase {
 	@Test
 	public void mixTailTest() {
 		new TailDemo().setUserName("Tom").putTail("age", 10).insert(TAIL);
-		TailDemo t = eLoadBySQL(TailDemo.class, "select *, 'China' as address from tail_demo");
+		TailDemo t = eLoadBySQL(TailDemo.class, "select 'China' as address, tail_demo.* from tail_demo");
 		Assert.assertEquals("China", t.getTail("address"));
 		Assert.assertEquals("Tom", t.getUserName());
 		t.putField("birthDay", new Date());
+		t.putField("age", 10);
 		t.update();
 
 		iExecute("alter table tail_demo add address varchar(10)");
