@@ -113,10 +113,12 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	public ImprovedQueryRunner() {
 		super();
+		pmdKnownBroken=true; //MSSql Server newest JDBC driver doesnot support pmd
 	}
 
 	public ImprovedQueryRunner(DataSource ds) {
 		super(ds);
+		pmdKnownBroken=true; //MSSql Server newest JDBC driver doesnot support pmd
 	}
 
 	@Override

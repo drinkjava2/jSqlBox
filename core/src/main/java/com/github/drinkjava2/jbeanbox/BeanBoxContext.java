@@ -54,11 +54,11 @@ public class BeanBoxContext {
 	protected boolean allowSpringJsrAnnotation = true;
 	protected ValueTranslator valueTranslator = new DefaultValueTranslator();
 
-	protected Map<Object, Object> bindCache = new ConcurrentHashMap<>();// bind cache
-	protected Map<Class<?>, BeanBox> beanBoxCache = new ConcurrentHashMap<>(); // default BeanBox cache
-	protected Map<Object, Object> singletonCache = new ConcurrentHashMap<>(); // class or BeanBox as key
-	protected Set<Class<?>> componentCache = new HashSet<>(); // component cache
-	protected Map<String, BeanBox> componentSearchCache = new ConcurrentHashMap<>();// as title
+	protected Map<Object, Object> bindCache = new ConcurrentHashMap<Object, Object>();// bind cache
+	protected Map<Class<?>, BeanBox> beanBoxCache = new ConcurrentHashMap<Class<?>, BeanBox>(); // default BeanBox cache
+	protected Map<Object, Object> singletonCache = new ConcurrentHashMap<Object, Object>(); // class or BeanBox as key
+	protected Set<Class<?>> componentCache = new HashSet<Class<?>>(); // component cache
+	protected Map<String, BeanBox> componentSearchCache = new ConcurrentHashMap<String, BeanBox>();// as title
 
 	protected static BeanBoxContext globalBeanBoxContext = new BeanBoxContext();// Global Bean context
 

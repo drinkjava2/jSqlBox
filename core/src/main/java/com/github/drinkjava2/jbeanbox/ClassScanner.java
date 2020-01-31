@@ -49,7 +49,7 @@ public enum ClassScanner {
 	 * @return
 	 */
 	public static List<Class> scanPackages(String... scanBasePackages) {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 		if (scanBasePackages.length == 0) {
 			return classList;
 		}
@@ -97,7 +97,7 @@ public enum ClassScanner {
 	 * @return Class
 	 */
 	private static List<Class> scanOnePackage(String pkg) {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 		try {
 			// 包名转化为路径名
 			String pathName = package2Path(pkg);
@@ -121,7 +121,7 @@ public enum ClassScanner {
 	 * @throws IOException
 	 */
 	private static List<Class> scanUrls(String pkg, Enumeration<URL> urls) throws IOException {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
 			// 获取协议
@@ -165,7 +165,7 @@ public enum ClassScanner {
 	 * @return Class列表
 	 */
 	private static List<Class> recursiveScan4Path(String pkg, String filePath) {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 
 		File file = new File(filePath);
 		if (!file.exists() || !file.isDirectory()) {
@@ -206,7 +206,7 @@ public enum ClassScanner {
 	 * @throws IOException
 	 */
 	private static List<Class> recursiveScan4Jar(String pkg, String jarPath) throws IOException {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 
 		JarInputStream jin = new JarInputStream(new FileInputStream(jarPath));
 		JarEntry entry = jin.getNextJarEntry();

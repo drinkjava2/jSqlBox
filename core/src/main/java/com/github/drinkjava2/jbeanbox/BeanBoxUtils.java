@@ -92,7 +92,7 @@ public class BeanBoxUtils {// NOSONAR
 
 	/** This used for unknown Annotation, change values to a Map */
 	public static Map<String, Object> changeAnnotationValuesToMap(Annotation annotation) {
-		Map<String, Object> result = new HashMap<>();
+		Map<String, Object> result = new HashMap<String, Object>();
 		for (Method method : annotation.annotationType().getDeclaredMethods())
 			try {
 				result.put(method.getName(), method.invoke(annotation, (Object[]) null));

@@ -44,7 +44,7 @@ public abstract class AbstractQueryRunner {
      * Is {@link ParameterMetaData#getParameterType(int)} broken (have we tried
      * it yet)?
      */
-    private volatile boolean pmdKnownBroken = false;
+    protected volatile boolean pmdKnownBroken = false;
 
     /**
      * The DataSource to retrieve connections from.

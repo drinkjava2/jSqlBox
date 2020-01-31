@@ -4,6 +4,8 @@ import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
+ * jSqlBox need pass unit tested on H2, MySql, MSSQL, Oracle
+ * 
  * This is jBeanBox configuration classes, equal to XML in Spring <br/>
  * About jBeanBox project can google it, it's a small IOC/AOP tool, here used
  * only for prepare dataSource singleton.

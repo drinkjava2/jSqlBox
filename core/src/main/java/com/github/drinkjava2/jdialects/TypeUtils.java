@@ -72,7 +72,7 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(java.sql.Clob.class, Type.CLOB);
 		JAVA_TO_TYPE_MAP.put(java.sql.Blob.class, Type.BLOB);
 		
-		//Java 8 date time types
+		//Java 8 datetime types, Note: for Java6 releasing, need comment below lines manually:
 		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.time.LocalTime.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.time.OffsetTime.class, Type.TIME);

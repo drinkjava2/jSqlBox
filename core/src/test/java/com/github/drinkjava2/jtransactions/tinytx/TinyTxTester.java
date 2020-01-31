@@ -16,6 +16,7 @@ import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jbeanbox.annotation.AOP;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jtransactions.config.JTransTinyJdbc;
 
 /**
@@ -29,6 +30,7 @@ import com.github.drinkjava2.jtransactions.config.JTransTinyJdbc;
 public class TinyTxTester {
 	JTransTinyJdbc tiny = new JTransTinyJdbc((DataSource) getBean(DataSourceBox.class),
 			TinyTxConnectionManager.instance());
+	Dialect dialect = Dialect.guessDialect((DataSource) getBean(DataSourceBox.class));
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD })
@@ -45,7 +47,7 @@ public class TinyTxTester {
 	@TX
 	public void tx_Insert2() {
 		tiny.executeSql("insert into users (id) values('456')");
-		Assert.assertEquals(2L, (long)tiny.queryForObject("select count(*) from users"));
+		Assert.assertEquals(2L, (long) tiny.queryForObject("select count(*) from users"));
 		Systemout.println("Now have 2 records in users table, but will roll back to 1");
 		Systemout.println(1 / 0);
 	}
@@ -59,9 +61,12 @@ public class TinyTxTester {
 			tiny.executeSql("drop table users");
 		} catch (Exception e) {
 		}
-		tiny.executeSql("create table users (id varchar(40))engine=InnoDB");
+		String ddl = "create table users (id varchar(40))";
+		if (dialect.isMySqlFamily())
+			ddl += "engine=InnoDB";
+		tiny.executeSql(ddl);
 
-		Assert.assertEquals(0L, (long)tiny.queryForObject("select count(*) from users"));
+		Assert.assertEquals("0", "" + tiny.queryForObject("select count(*) from users"));
 
 		try {
 			tester.tx_Insert1();// this one inserted 1 record
@@ -69,7 +74,7 @@ public class TinyTxTester {
 		} catch (Exception e) {
 			Systemout.println("div/0 exception should happen, tx_Insert2 should roll back.\r" + e.getMessage());
 		}
-		Assert.assertEquals(1L, (long)tiny.queryForObject("select count(*) from users"));
+		Assert.assertEquals("1", "" + tiny.queryForObject("select count(*) from users"));
 		JBEANBOX.close();// Release DataSource Pool
 	}
 
