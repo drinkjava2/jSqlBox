@@ -334,11 +334,11 @@ public class BeanBox {
 		return null;
 	}
 
-	public Object create(BeanBoxContext context) {// for child class override
+	public Object create(BeanBoxContext context) {//NOSONAR  for child class override
 		return null;
 	}
 
-	public Object create(BeanBoxContext context, Set<Object> history) {// for child class override
+	public Object create(BeanBoxContext context, Set<Object> history) {//NOSONAR for child class override
 		return null;
 	}
 

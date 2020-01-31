@@ -42,7 +42,7 @@ public class AopUtils {// NOSONAR
 			for (int i = 0; i < boxes.length; i++) {
 				argsTypes[i] = boxes[i].getType();
 				Object realValue = ctx.getBean(boxes[i]);
-				if (realValue != null && realValue instanceof String)
+				if (realValue instanceof String)
 					realValue = ctx.getValueTranslator().translate((String) realValue, boxes[i].getType());
 				realArgsValue[i] = realValue;
 			}

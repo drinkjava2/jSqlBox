@@ -23,7 +23,7 @@ import com.github.drinkjava2.jdialects.Dialect;
  * @Deprecated From V4.0 Suggest use DbContext
  */
 @Deprecated
-public class SqlBoxContext extends DbContext {
+public class SqlBoxContext extends DbContext {//NOSONAR
 	public SqlBoxContext() {
 		super();
 	}

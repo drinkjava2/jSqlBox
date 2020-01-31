@@ -106,7 +106,7 @@ public class BeanBoxUtils {// NOSONAR
 	 * set as purevalue, otherwise direct return it (class or BeanBox)
 	 */
 	public static Object checkAOP(Object aop) {
-		if (aop != null && aop instanceof MethodInterceptor)
+		if (aop instanceof MethodInterceptor)
 			return new BeanBox().setTarget(aop).setPureValue(true);
 		else
 			return aop;

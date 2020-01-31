@@ -93,7 +93,7 @@ public class DbContext extends DbPro {// NOSONAR
 	// ==========================Global Transaction about================
 	/** If current GlobalTxCM opened global Transaction */
 	public boolean isGtxOpen() {
-		return connectionManager != null && connectionManager instanceof GtxConnectionManager
+		return connectionManager instanceof GtxConnectionManager
 				&& getGtxManager().isInTransaction();
 	}
 
