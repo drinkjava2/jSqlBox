@@ -55,9 +55,9 @@ USE_SLAVE  (write: All Slaves!         read: Random 1 Slave )
  */
 
 public class MasterSlaveTest {
-	final static int SLAVE_DATABASE_QTY = 20;
-	final static int SLAVE_RECORD_ROWS = 5;
-	final static int MASTER_RECORD_ROWS = 10;
+	static final int SLAVE_DATABASE_QTY = 20;
+	static final int SLAVE_RECORD_ROWS = 5;
+	static final int MASTER_RECORD_ROWS = 10;
 	DbContext master;
 
 	public static class TheUser extends ActiveRecord<TheUser> {

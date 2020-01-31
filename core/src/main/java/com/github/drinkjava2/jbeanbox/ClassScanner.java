@@ -10,19 +10,19 @@
 package com.github.drinkjava2.jbeanbox;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * A util class used to scan all classes in some packages, include all child
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * @email: 292462859@qq.com
  * @date: 2019/1/8.
  * 
- * @author: Yong(modify)
+ * @author: Yong(shrink & downgrade to Java7)
  * @since 2.5.0
  */
 @SuppressWarnings("all")
@@ -49,12 +49,14 @@ public enum ClassScanner {
 	 * @return
 	 */
 	public static List<Class> scanPackages(String... scanBasePackages) {
-		List<Class> classList = new LinkedList<Class>();
+		List<Class> classList = new LinkedList<>();
 		if (scanBasePackages.length == 0) {
 			return classList;
 		}
-		Arrays.asList(scanBasePackages).stream().filter(pkg -> pkg != null && pkg.length() != 0)
-				.forEach(pkg -> classList.addAll(ClassScanner.scanOnePackage(pkg)));
+		for (String pkg : scanBasePackages) {
+			if (pkg != null && pkg.length() != 0)
+				classList.addAll(ClassScanner.scanOnePackage(pkg));
+		}
 		return classList;
 	}
 
@@ -67,12 +69,13 @@ public enum ClassScanner {
 	 */
 	public static List<Class> scanByAnno(Class<? extends Annotation> anno, String... scanBasePackages) {
 		List<Class> classList = scanPackages(scanBasePackages);
-		return classList.parallelStream().filter(clz -> {
+		List<Class> result = new ArrayList<Class>();
+		for (Class clz : classList) {
 			Annotation clzAnno = clz.getAnnotation(anno);
-			if (clzAnno == null)
-				return false;
-			return true;
-		}).collect(Collectors.toList());
+			if (clzAnno != null)
+				result.add(clz);
+		}
+		return result;
 	}
 
 	/**
@@ -85,9 +88,11 @@ public enum ClassScanner {
 	 */
 	public static List<Class> scanByName(String nameSimpleReg, String... scanBasePackages) {
 		List<Class> classList = scanPackages(scanBasePackages);
-		return classList.parallelStream().filter(clz -> {
-			return NameMatchUtil.nameMatch(nameSimpleReg, clz.getName());
-		}).collect(Collectors.toList());
+		List<Class> result = new ArrayList<>();
+		for (Class clz : classList)
+			if (NameMatchUtil.nameMatch(nameSimpleReg, clz.getName()))
+				result.add(clz);
+		return result;
 	}
 
 	/**
@@ -97,7 +102,7 @@ public enum ClassScanner {
 	 * @return Class
 	 */
 	private static List<Class> scanOnePackage(String pkg) {
-		List<Class> classList = new LinkedList<Class>();
+		List<Class> classList = new LinkedList<>();
 		try {
 			// 包名转化为路径名
 			String pathName = package2Path(pkg);
@@ -121,7 +126,7 @@ public enum ClassScanner {
 	 * @throws IOException
 	 */
 	private static List<Class> scanUrls(String pkg, Enumeration<URL> urls) throws IOException {
-		List<Class> classList = new LinkedList<Class>();
+		List<Class> classList = new LinkedList<>();
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
 			// 获取协议
@@ -165,7 +170,7 @@ public enum ClassScanner {
 	 * @return Class列表
 	 */
 	private static List<Class> recursiveScan4Path(String pkg, String filePath) {
-		List<Class> classList = new LinkedList<Class>();
+		List<Class> classList = new LinkedList<>();
 
 		File file = new File(filePath);
 		if (!file.exists() || !file.isDirectory()) {
@@ -173,26 +178,35 @@ public enum ClassScanner {
 		}
 
 		// 处理类文件
-		File[] classes = file.listFiles(child -> isClass(child.getName()));
-		Arrays.asList(classes).forEach(child -> {
+		File[] classes = file.listFiles(new FileFilter() {
+			public boolean accept(File child) {
+				return isClass(child.getName());
+			}
+		});
+		for (File child : classes) {
 			String className = classFile2SimpleClass(
 					new StringBuilder().append(pkg).append(".").append(child.getName()).toString());
-
 			try {
 				Class clz = Thread.currentThread().getContextClassLoader().loadClass(className);
 				classList.add(clz);
 			} catch (ClassNotFoundException | LinkageError e) {
 				System.err.println("Warning: Can not load class:" + className);
 			}
-		});
+		}
 
 		// 处理目录
-		File[] dirs = file.listFiles(child -> child.isDirectory());
-		Arrays.asList(dirs).forEach(child -> {
+
+		File[] dirs = file.listFiles(new FileFilter() {
+			public boolean accept(File f) {
+				return f.isDirectory();
+			}
+		});
+
+		for (File child : dirs) {
 			String childPackageName = new StringBuilder().append(pkg).append(".").append(child.getName()).toString();
 			String childPath = new StringBuilder().append(filePath).append("/").append(child.getName()).toString();
 			classList.addAll(recursiveScan4Path(childPackageName, childPath));
-		});
+		}
 
 		return classList;
 	}
@@ -206,7 +220,7 @@ public enum ClassScanner {
 	 * @throws IOException
 	 */
 	private static List<Class> recursiveScan4Jar(String pkg, String jarPath) throws IOException {
-		List<Class> classList = new LinkedList<Class>();
+		List<Class> classList = new LinkedList<>();
 
 		JarInputStream jin = new JarInputStream(new FileInputStream(jarPath));
 		JarEntry entry = jin.getNextJarEntry();

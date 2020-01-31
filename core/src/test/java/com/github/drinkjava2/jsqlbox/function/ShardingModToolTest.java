@@ -46,9 +46,9 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class ShardingModToolTest {
 
-	final static int MASTER_DATABASE_QTY = 7;
-	final static int SLAVE_DATABASE_QTY = 7; // each master has 7 slaves
-	final static int TABLE_QTY = 8; // each table has 8 sharding
+	static final int MASTER_DATABASE_QTY = 7;
+	static final int SLAVE_DATABASE_QTY = 7; // each master has 7 slaves
+	static final int TABLE_QTY = 8; // each table has 8 sharding
 
 	DbContext[] masters = new DbContext[MASTER_DATABASE_QTY];
 

@@ -102,7 +102,7 @@ public class SampleItem implements CustomizedSqlItem {
 		Map<String, Method> writeMethods = ClassCacheUtils.getClassWriteMethods(entityBean.getClass());
 		for (String fieldName : writeMethods.keySet()) {
 			ColumnModel col = model.getColumn(fieldName);
-			if (col.getTransientable())
+			if (Boolean.TRUE.equals(col.getTransientable()))
 				continue;
 			Object fieldValue = DbContextUtils.readValueFromBeanFieldOrTail(col, entityBean);
 			if (fieldValue != null && (nullFieldsOnly == null || !nullFieldsOnly)) {
