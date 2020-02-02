@@ -17,7 +17,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class AliasProxyUtil {
+public class AliasProxyUtil {//NOSONAR
 	public static ThreadLocal<AliasItemInfo> aliasItemInfo = new ThreadLocal<AliasItemInfo>();// NOSONAR
 
 	static class AliasItemInfo {

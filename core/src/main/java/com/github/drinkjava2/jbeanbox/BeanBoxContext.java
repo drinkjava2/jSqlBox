@@ -459,7 +459,7 @@ public class BeanBoxContext {
 					} catch (Exception e) {
 						return BeanBoxException.throwEX(e);
 					}
-			} else if (box.getBeanClass() != null) { // is normal bean
+			} else if (box.getBeanClass() != null) { // NOSONAR is normal bean
 				if (EMPTY.class == box.getBeanClass() || box.getBeanClass().isInterface())
 					return notfoundOrException(box.getBeanClass(), required, box);
 				try {

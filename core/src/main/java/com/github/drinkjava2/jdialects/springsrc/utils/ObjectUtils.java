@@ -39,7 +39,7 @@ import java.util.Map;
  * @see CollectionUtils
  * @see StringUtils
  */
-public abstract class ObjectUtils {
+public abstract class ObjectUtils {//NOSONAR
 
 	private static final int INITIAL_HASH = 7;
 	private static final int MULTIPLIER = 31;

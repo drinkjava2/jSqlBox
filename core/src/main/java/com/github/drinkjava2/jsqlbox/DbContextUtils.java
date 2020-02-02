@@ -581,7 +581,7 @@ public abstract class DbContextUtils {// NOSONAR
 			try {
 				Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
 				if (value != null && value.getClass() != writeMethod.getParameterTypes()[0])
-					value = TypeUtils.convertValueToJavaType(value, writeMethod.getParameterTypes()[0]);
+					value = TypeUtils.jdbcValue2JavaValue(value, writeMethod.getParameterTypes()[0]);
 				writeMethod.invoke(entityBean, value);
 			} catch (Exception e) {
 				throw new DbException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);

@@ -40,10 +40,10 @@ public class Text {
 			return textCache.get(clazz);
 		String thisPublicStaticClassName = clazz.getSimpleName();
 		String javaSourceCode = TextUtils.getJavaSourceCode(clazz, "UTF-8");
-		String classText = TextUtils.substringBetween(javaSourceCode, "public static class " + thisPublicStaticClassName,
-				"*/");
+		String classText = TextUtils.substringBetween(javaSourceCode,
+				"public static class " + thisPublicStaticClassName, "*/");
 		if (TextUtils.isEmpty(classText))
-			throw new RuntimeException("Can not find text between \"public static class " + thisPublicStaticClassName
+			throw new RuntimeException("Can not find text between \"public static class " + thisPublicStaticClassName // NOSONAR
 					+ " and end tag \"*/\"");
 		String s = TextUtils.substringAfter(classText, "/*-");
 		textCache.put(clazz, s);

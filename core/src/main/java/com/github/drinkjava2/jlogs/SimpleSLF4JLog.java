@@ -54,7 +54,7 @@ public class SimpleSLF4JLog implements Log {
 			warnExp = logger.getClass().getMethod("warn", String.class, Throwable.class);
 			errorExp = logger.getClass().getMethod("error", String.class, Throwable.class);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(e);//NOSONAR
 		}
 	}
 

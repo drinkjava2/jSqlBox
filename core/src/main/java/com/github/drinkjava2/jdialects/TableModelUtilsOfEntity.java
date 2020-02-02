@@ -289,9 +289,9 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			}
 
 			if (!getFirstEntityAnno(field, "Transient").isEmpty()
-					|| (convertClassOrName == null && !TypeUtils.canMapToSqlType(propertyClass))) {
+					|| (convertClassOrName == null && !TypeUtils.canMapToDialectType(propertyClass))) {
 				ColumnModel col = new ColumnModel(entityfieldName);
-				col.setColumnType(TypeUtils.toType(propertyClass));
+				col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));
 				col.setTransientable(true);
 				col.setEntityField(entityfieldName);
 				col.setTableModel(model);
@@ -336,13 +336,13 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setPrecision((Integer) colMap.get("precision"));
 					col.setScale((Integer) colMap.get("scale"));
 					if (!StrUtils.isEmpty(colMap.get("columnDefinition")))
-						col.setColumnType(TypeUtils.toType((String) colMap.get("columnDefinition")));
+						col.setColumnType(TypeUtils.colDef2DialectType((String) colMap.get("columnDefinition")));
 					else
-						col.setColumnType(TypeUtils.toType(propertyClass));
+						col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));
 					col.setInsertable((Boolean) colMap.get("insertable"));
 					col.setUpdatable((Boolean) colMap.get("updatable"));
 				} else {
-					col.setColumnType(TypeUtils.toType(propertyClass));// TODO_ check
+					col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));// TODO_ check
 				}
 				if ("EnumType.ORDINAL".equals(col.getConverterClassOrName()))
 					col.setColumnType(Type.INTEGER);

@@ -45,7 +45,7 @@ public class UUID32Generator implements IdGenerator {
 	}
 
 	public static String getUUID32() {
-		return UUID.randomUUID().toString().replaceAll("-", "");
+		return UUID.randomUUID().toString().replace("-", "");
 	}
 
 	@Override

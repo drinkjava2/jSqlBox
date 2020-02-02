@@ -35,7 +35,7 @@ public class BaseFieldConverter implements FieldConverter {
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
 			sqlBody.append(col.getColumnName()).append("=?").append(param(value));
-		} else if (SqlOption.DELETE.equals(sqlOption)) {
+		} else if (SqlOption.DELETE.equals(sqlOption)) {// NOSONAR
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
 			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity);
 			sqlBody.append(col.getColumnName());

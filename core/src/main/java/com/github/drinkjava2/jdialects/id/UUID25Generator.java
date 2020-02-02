@@ -56,7 +56,7 @@ public class UUID25Generator implements IdGenerator {
 	}
 
 	public static String getUUID25() {
-		String uuidHex = UUID.randomUUID().toString().replaceAll("-", "");
+		String uuidHex = UUID.randomUUID().toString().replace("-", "");
 		BigInteger b = new BigInteger(uuidHex, 16);
 		String s = b.toString(36);
 		while (s.length() < 25)

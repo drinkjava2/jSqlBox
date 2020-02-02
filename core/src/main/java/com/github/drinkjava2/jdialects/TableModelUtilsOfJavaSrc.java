@@ -21,7 +21,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 2.0.4
  */
-public abstract class TableModelUtilsOfJavaSrc {
+public abstract class TableModelUtilsOfJavaSrc {//NOSONAR
 
 	/**
 	 * Map DB column name to entity field name, example: <br/>

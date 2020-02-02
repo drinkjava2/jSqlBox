@@ -138,7 +138,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			Map<String, Object> mp = (Map<String, Object>) entityId;
 			return buildEntityIdFromMap(mp, model);
 		} else {
-			if (TypeUtils.canMapToSqlType(entityId.getClass()))
+			if (TypeUtils.canMapToDialectType(entityId.getClass()))
 				return entityId;
 
 			if (entityId instanceof EntityType)// ActiveRecord or ActiveEntity
@@ -167,7 +167,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			return bean;
 		}
 
-		if (TypeUtils.canMapToSqlType(entityId.getClass())) {
+		if (TypeUtils.canMapToDialectType(entityId.getClass())) {
 			for (ColumnModel col : cols) {
 				if (!col.getTransientable() && col.getPkey()) {
 					DbContextUtils.writeValueToBeanFieldOrTail(col, bean, entityId);
@@ -205,7 +205,7 @@ public abstract class EntityIdUtils {// NOSONAR
 				return idMap.get(col.getColumnName());
 		}
 
-		if (TypeUtils.canMapToSqlType(entityId.getClass()))
+		if (TypeUtils.canMapToDialectType(entityId.getClass()))
 			return entityId;
 		else
 			return DbContextUtils.readValueFromBeanFieldOrTail(col, entityId);

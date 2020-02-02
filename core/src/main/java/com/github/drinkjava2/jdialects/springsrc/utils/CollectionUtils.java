@@ -34,7 +34,7 @@ import java.util.Properties;
  * @author Arjen Poutsma
  * @since 1.1.3
  */
-public abstract class CollectionUtils {
+public abstract class CollectionUtils {//NOSONAR
 
 	/**
 	 * Return {@code true} if the supplied Collection is {@code null} or empty.

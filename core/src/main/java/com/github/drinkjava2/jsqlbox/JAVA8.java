@@ -6,7 +6,7 @@ import com.github.drinkjava2.jsqlbox.AliasProxyUtil.AliasItemInfo;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.ALIAS;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.COL;
 
-public class JAVA8 {
+public class JAVA8 {//NOSONAR
 
 	/** Create a proxy bean to help build refactable SQL */
 	public static <T> T proxy(Class<T> claz) {

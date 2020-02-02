@@ -63,78 +63,98 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(Boolean.class, Type.BOOLEAN);
 		JAVA_TO_TYPE_MAP.put(Byte.class, Type.TINYINT);
 		JAVA_TO_TYPE_MAP.put(Character.class, Type.CHAR);
-		
-		
-		JAVA_TO_TYPE_MAP.put(java.util.Date.class, Type.DATE);
-		JAVA_TO_TYPE_MAP.put(java.sql.Date.class, Type.DATE);
-		JAVA_TO_TYPE_MAP.put(java.sql.Time.class, Type.TIME);
-		JAVA_TO_TYPE_MAP.put(java.sql.Timestamp.class, Type.TIMESTAMP);
-		JAVA_TO_TYPE_MAP.put(java.sql.Clob.class, Type.CLOB);
-		JAVA_TO_TYPE_MAP.put(java.sql.Blob.class, Type.BLOB);
-		
-		//Java 8 datetime types, Note: for Java6 releasing, need comment below lines manually:
-		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);
-		JAVA_TO_TYPE_MAP.put(java.time.LocalTime.class, Type.TIME);
-		JAVA_TO_TYPE_MAP.put(java.time.OffsetTime.class, Type.TIME);
-		JAVA_TO_TYPE_MAP.put(java.time.Instant.class, Type.TIMESTAMP);
-		JAVA_TO_TYPE_MAP.put(java.time.LocalDateTime.class, Type.TIMESTAMP);
-		JAVA_TO_TYPE_MAP.put(java.time.OffsetDateTime.class, Type.TIMESTAMP);
-		JAVA_TO_TYPE_MAP.put(java.time.ZonedDateTime.class, Type.TIMESTAMP);  
-		
 		JAVA_TO_TYPE_MAP.put(Double.class, Type.DOUBLE);
 		JAVA_TO_TYPE_MAP.put(Float.class, Type.FLOAT);
 		JAVA_TO_TYPE_MAP.put(Integer.class, Type.INTEGER);
 		JAVA_TO_TYPE_MAP.put(Long.class, Type.BIGINT);
 		JAVA_TO_TYPE_MAP.put(Short.class, Type.SMALLINT);
 		JAVA_TO_TYPE_MAP.put(String.class, Type.VARCHAR);
+		JAVA_TO_TYPE_MAP.put(java.sql.Clob.class, Type.CLOB);
+		JAVA_TO_TYPE_MAP.put(java.sql.Blob.class, Type.BLOB);
+		JAVA_TO_TYPE_MAP.put(java.util.Date.class, Type.DATE);
+		JAVA_TO_TYPE_MAP.put(java.sql.Date.class, Type.DATE);
+		JAVA_TO_TYPE_MAP.put(java.sql.Time.class, Type.TIME);
+		JAVA_TO_TYPE_MAP.put(java.sql.Timestamp.class, Type.TIMESTAMP);
+		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);// On Java7 releasing, need delete below 7 lines
+		JAVA_TO_TYPE_MAP.put(java.time.LocalTime.class, Type.TIME);
+		JAVA_TO_TYPE_MAP.put(java.time.OffsetTime.class, Type.TIME);
+		JAVA_TO_TYPE_MAP.put(java.time.Instant.class, Type.TIMESTAMP);
+		JAVA_TO_TYPE_MAP.put(java.time.LocalDateTime.class, Type.TIMESTAMP);
+		JAVA_TO_TYPE_MAP.put(java.time.OffsetDateTime.class, Type.TIMESTAMP);
+		JAVA_TO_TYPE_MAP.put(java.time.ZonedDateTime.class, Type.TIMESTAMP);
 
 		TYPE_TO_JAVA_MAP.put(Type.NUMERIC, BigDecimal.class);
 		TYPE_TO_JAVA_MAP.put(Type.BIGINT, BigInteger.class);
 		TYPE_TO_JAVA_MAP.put(Type.BOOLEAN, Boolean.class);
 		TYPE_TO_JAVA_MAP.put(Type.TINYINT, Byte.class);
-		TYPE_TO_JAVA_MAP.put(Type.CHAR, Character.class);
-		TYPE_TO_JAVA_MAP.put(Type.DATE, java.util.Date.class);
-		TYPE_TO_JAVA_MAP.put(Type.DATE, java.sql.Date.class);
 		TYPE_TO_JAVA_MAP.put(Type.TIME, java.sql.Time.class);
 		TYPE_TO_JAVA_MAP.put(Type.TIMESTAMP, java.sql.Timestamp.class);
-		TYPE_TO_JAVA_MAP.put(Type.CLOB, java.sql.Clob.class);
+		TYPE_TO_JAVA_MAP.put(Type.SMALLINT, Short.class);
+		TYPE_TO_JAVA_MAP.put(Type.VARCHAR, String.class);
+		TYPE_TO_JAVA_MAP.put(Type.BIGINT, Long.class);
+		TYPE_TO_JAVA_MAP.put(Type.BINARY, java.sql.Blob.class);
+		TYPE_TO_JAVA_MAP.put(Type.BIT, Boolean.class);
 		TYPE_TO_JAVA_MAP.put(Type.BLOB, java.sql.Blob.class);
+		TYPE_TO_JAVA_MAP.put(Type.BOOLEAN, Boolean.class);
+		TYPE_TO_JAVA_MAP.put(Type.CHAR, Character.class);
+		TYPE_TO_JAVA_MAP.put(Type.CLOB, java.sql.Clob.class);
+		TYPE_TO_JAVA_MAP.put(Type.DECIMAL, BigDecimal.class);
 		TYPE_TO_JAVA_MAP.put(Type.DOUBLE, Double.class);
 		TYPE_TO_JAVA_MAP.put(Type.FLOAT, Float.class);
 		TYPE_TO_JAVA_MAP.put(Type.INTEGER, Integer.class);
-		TYPE_TO_JAVA_MAP.put(Type.BIGINT, Long.class);
+		TYPE_TO_JAVA_MAP.put(Type.JAVA_OBJECT, Object.class);
+		TYPE_TO_JAVA_MAP.put(Type.LONGNVARCHAR, String.class);
+		TYPE_TO_JAVA_MAP.put(Type.LONGVARBINARY, String.class);
+		TYPE_TO_JAVA_MAP.put(Type.LONGVARCHAR, String.class);
+		TYPE_TO_JAVA_MAP.put(Type.NCHAR, String.class);
+		TYPE_TO_JAVA_MAP.put(Type.NCLOB, java.sql.Clob.class);
+		TYPE_TO_JAVA_MAP.put(Type.NUMERIC, BigDecimal.class);
+		TYPE_TO_JAVA_MAP.put(Type.NVARCHAR, String.class);
+		TYPE_TO_JAVA_MAP.put(Type.UNKNOW, Object.class);
+		TYPE_TO_JAVA_MAP.put(Type.REAL, Float.class);
 		TYPE_TO_JAVA_MAP.put(Type.SMALLINT, Short.class);
+		TYPE_TO_JAVA_MAP.put(Type.VARBINARY, java.sql.Blob.class);
 		TYPE_TO_JAVA_MAP.put(Type.VARCHAR, String.class);
-
+		TYPE_TO_JAVA_MAP.put(Type.TINYINT, Byte.class);
+		TYPE_TO_JAVA_MAP.put(Type.DATE, java.util.Date.class);
+		TYPE_TO_JAVA_MAP.put(Type.TIME, java.sql.Time.class);
+		TYPE_TO_JAVA_MAP.put(Type.TIMESTAMP, java.sql.Timestamp.class);
 	}
 
-	/** Check if a class type can map to a SQL type */
-	public static boolean canMapToSqlType(Class<?> clazz) {// NOSONAR
-		if (clazz == null)
-			return false;
+	@Deprecated
+	public static boolean canMapToSqlType(Class<?> clazz) {
+		return canMapToDialectType(clazz);
+	}
+
+	/** Check if a Java class type can map to a Dialect type */
+	public static boolean canMapToDialectType(Class<?> clazz) {// NOSONAR
 		return JAVA_TO_TYPE_MAP.containsKey(clazz);
 	}
 
 	public static Class<?> dialectTypeToJavaType(Type type) {// NOSONAR
-		if (type == null)
-			return null;
 		return TYPE_TO_JAVA_MAP.get(type);
 	}
 
-	/** Convert a Class type to Dialect's Type */
+	@Deprecated
 	public static Type toType(Class<?> clazz) {
-		Type t = JAVA_TO_TYPE_MAP.get(clazz);
-		if (t == null)
-			return Type.UNKNOW;
-		else
-			return t;
+		return javaType2DialectType(clazz);
+	}
+
+	/** Convert a Class type to Dialect's Type */
+	public static Type javaType2DialectType(Class<?> clazz) {
+		return JAVA_TO_TYPE_MAP.get(clazz);
+	}
+
+	@Deprecated
+	public static Type toType(String columnDef) {
+		return colDef2DialectType(columnDef);
 	}
 
 	// @formatter:off shut off eclipse's formatter
 	/**
 	 * Convert column definition String to Dialect's Type
 	 */
-	public static Type toType(String columnDef) {
+	public static Type colDef2DialectType(String columnDef) {
 		if (BIGINT.equalsIgnoreCase(columnDef))
 			return Type.BIGINT;
 		if (BINARY.equalsIgnoreCase(columnDef))
@@ -195,132 +215,133 @@ public abstract class TypeUtils {// NOSONAR
 		throw new DialectException("'" + columnDef + "' is not a legal SQL column definition name");
 	}
 
-	/** Convert value to target Java type */
-	public static Object convertValueToJavaType(Object value, Class<?> type) {// NOSONAR
+	/** Convert a JDBC value to Java type value */
+	public static Object jdbcValue2JavaValue(Object value, Class<?> javaType) {// NOSONAR
 		if (value == null)
 			return null;
-		if (type == String.class)
+		if (javaType == String.class)
 			return value.toString();
 		Class<?> vType = value.getClass();
 		if (vType == BigDecimal.class) {
-			if (type == Integer.class || type == int.class)
+			if (javaType == Integer.class || javaType == int.class)
 				return ((BigDecimal) value).intValue();
-			if (type == Long.class || type == long.class)
+			if (javaType == Long.class || javaType == long.class)
 				return ((BigDecimal) value).longValue();
-			if (type == Byte.class || type == byte.class)
+			if (javaType == Byte.class || javaType == byte.class)
 				return ((BigDecimal) value).byteValue();
-			if (type == Double.class || type == double.class)
+			if (javaType == Double.class || javaType == double.class)
 				return ((BigDecimal) value).doubleValue();
-			if (type == Float.class || type == float.class)
+			if (javaType == Float.class || javaType == float.class)
 				return ((BigDecimal) value).floatValue();
-			if (type == Short.class || type == short.class)
+			if (javaType == Short.class || javaType == short.class)
 				return ((BigDecimal) value).shortValue();
-			if (type == Boolean.class || type == boolean.class)
+			if (javaType == Boolean.class || javaType == boolean.class)
 				return ((BigDecimal) value).byteValue() != 0;
 		}
 		if (vType == Integer.class) {
-			if (type == Integer.class || type == int.class)
+			if (javaType == Integer.class || javaType == int.class)
 				return ((Integer) value).intValue();
-			if (type == Long.class || type == long.class)
+			if (javaType == Long.class || javaType == long.class)
 				return ((Integer) value).longValue();
-			if (type == Byte.class || type == byte.class)
+			if (javaType == Byte.class || javaType == byte.class)
 				return ((Integer) value).byteValue();
-			if (type == Double.class || type == double.class)
+			if (javaType == Double.class || javaType == double.class)
 				return ((Integer) value).doubleValue();
-			if (type == Float.class || type == float.class)
+			if (javaType == Float.class || javaType == float.class)
 				return ((Integer) value).floatValue();
-			if (type == Short.class || type == short.class)
+			if (javaType == Short.class || javaType == short.class)
 				return ((Integer) value).shortValue();
 		}
 		if (vType == Long.class) {
-			if (type == Integer.class || type == int.class)
+			if (javaType == Integer.class || javaType == int.class)
 				return ((Long) value).intValue();
-			if (type == Long.class || type == long.class)
+			if (javaType == Long.class || javaType == long.class)
 				return ((Long) value).longValue();
-			if (type == Byte.class || type == byte.class)
+			if (javaType == Byte.class || javaType == byte.class)
 				return ((Long) value).byteValue();
-			if (type == Double.class || type == double.class)
+			if (javaType == Double.class || javaType == double.class)
 				return ((Long) value).doubleValue();
-			if (type == Float.class || type == float.class)
+			if (javaType == Float.class || javaType == float.class)
 				return ((Long) value).floatValue();
-			if (type == Short.class || type == short.class)
+			if (javaType == Short.class || javaType == short.class)
 				return ((Long) value).shortValue();
 		}
 		if (vType == Double.class) {
-			if (type == Integer.class || type == int.class)
+			if (javaType == Integer.class || javaType == int.class)
 				return ((Double) value).intValue();
-			if (type == Long.class || type == long.class)
+			if (javaType == Long.class || javaType == long.class)
 				return ((Double) value).longValue();
-			if (type == Byte.class || type == byte.class)
+			if (javaType == Byte.class || javaType == byte.class)
 				return ((Double) value).byteValue();
-			if (type == Double.class || type == double.class)
+			if (javaType == Double.class || javaType == double.class)
 				return ((Double) value).doubleValue();
-			if (type == Float.class || type == float.class)
+			if (javaType == Float.class || javaType == float.class)
 				return ((Double) value).floatValue();
-			if (type == Short.class || type == short.class)
+			if (javaType == Short.class || javaType == short.class)
 				return ((Double) value).shortValue();
 		}
 		if (vType == Float.class) {
-			if (type == Integer.class || type == int.class)
+			if (javaType == Integer.class || javaType == int.class)
 				return ((Float) value).intValue();
-			if (type == Long.class || type == long.class)
+			if (javaType == Long.class || javaType == long.class)
 				return ((Float) value).longValue();
-			if (type == Byte.class || type == byte.class)
+			if (javaType == Byte.class || javaType == byte.class)
 				return ((Float) value).byteValue();
-			if (type == Double.class || type == double.class)
+			if (javaType == Double.class || javaType == double.class)
 				return ((Float) value).doubleValue();
-			if (type == Float.class || type == float.class)
+			if (javaType == Float.class || javaType == float.class)
 				return ((Float) value).floatValue();
-			if (type == Short.class || type == short.class)
+			if (javaType == Short.class || javaType == short.class)
 				return ((Float) value).shortValue();
 		}
 		if (vType == Short.class) {
-			if (type == Integer.class || type == int.class)
+			if (javaType == Integer.class || javaType == int.class)
 				return ((Short) value).intValue();
-			if (type == Long.class || type == long.class)
+			if (javaType == Long.class || javaType == long.class)
 				return ((Short) value).longValue();
-			if (type == Byte.class || type == byte.class)
+			if (javaType == Byte.class || javaType == byte.class)
 				return ((Short) value).byteValue();
-			if (type == Double.class || type == double.class)
+			if (javaType == Double.class || javaType == double.class)
 				return ((Short) value).doubleValue();
-			if (type == Float.class || type == float.class)
+			if (javaType == Float.class || javaType == float.class)
 				return ((Short) value).floatValue();
-			if (type == Short.class || type == short.class)
+			if (javaType == Short.class || javaType == short.class)
 				return ((Short) value).shortValue();
 		}
 		if (vType == Byte.class) {
-			if (type == Integer.class || type == int.class)
+			if (javaType == Integer.class || javaType == int.class)
 				return ((Byte) value).intValue();
-			if (type == Long.class || type == long.class)
+			if (javaType == Long.class || javaType == long.class)
 				return ((Byte) value).longValue();
-			if (type == Byte.class || type == byte.class)
+			if (javaType == Byte.class || javaType == byte.class)
 				return ((Byte) value).byteValue();
-			if (type == Double.class || type == double.class)
+			if (javaType == Double.class || javaType == double.class)
 				return ((Byte) value).doubleValue();
-			if (type == Float.class || type == float.class)
+			if (javaType == Float.class || javaType == float.class)
 				return ((Byte) value).floatValue();
-			if (type == Short.class || type == short.class)
+			if (javaType == Short.class || javaType == short.class)
 				return ((Byte) value).shortValue();
 		}
 		if (vType == java.sql.Date.class) {
-			if (type == java.util.Date.class)
+			if (javaType == java.util.Date.class)
 				return new java.util.Date(((java.sql.Date) value).getTime());
-			if (type == Timestamp.class)
+			if (javaType == Timestamp.class)
 				return new Timestamp(((java.sql.Date) value).getTime());
 		}
 		if (vType == Timestamp.class) {
-			if (type == java.util.Date.class)
+			if (javaType == java.util.Date.class)
 				return new java.util.Date(((Timestamp) value).getTime());
-			if (type == java.sql.Date.class)
+			if (javaType == java.sql.Date.class)
 				return new java.sql.Date(((Timestamp) value).getTime());
 		}
 		if (vType == java.util.Date.class) {
-			if (type == java.sql.Date.class)
+			if (javaType == java.sql.Date.class)
 				return new java.util.Date(((java.util.Date) value).getTime());
-			if (type == Timestamp.class)
+			if (javaType == Timestamp.class)
 				return new Timestamp(((java.util.Date) value).getTime());
 		}
-		return new DbException("Can not convert " + value.getClass() + " type value '" + value + "' to type:" + type);
+		return new DbException("Can not convert jdbc type: '" + value.getClass() + "' with value '" + value
+				+ "' to jave type:" + javaType);
 	}
 
 	// @formatter:off shut off eclipse's formatter
@@ -400,6 +421,5 @@ public abstract class TypeUtils {// NOSONAR
 		default:
 			throw new DialectException("Not supported java.sql.Types value:" + javaSqlType);
 		}
-	}
-	 
+	}   
 }

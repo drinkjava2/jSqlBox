@@ -29,7 +29,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.6
  */
-public abstract class TableModelUtilsOfDb {
+public abstract class TableModelUtilsOfDb {//NOSONAR
 	private static final String TABLE_NAME = "TABLE_NAME";
 
 	/**
