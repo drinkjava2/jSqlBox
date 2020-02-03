@@ -265,8 +265,8 @@ public class Dialect {
 	}
 
 	/**
-	 * Transfer com.github.drinkjava2.jdialects.Type to a real dialect's type
-	 * definition DDL String, lengths is optional for some types
+	 * Transfer columnModel to a real dialect's DDL definition String, lengths is
+	 * optional for some types
 	 */
 	public String translateToDDLType(ColumnModel col) {// NOSONAR
 		Type type = col.getColumnType();

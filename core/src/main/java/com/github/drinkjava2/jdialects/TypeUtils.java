@@ -87,15 +87,12 @@ public abstract class TypeUtils {// NOSONAR
 		TYPE_TO_JAVA_MAP.put(Type.BIGINT, BigInteger.class);
 		TYPE_TO_JAVA_MAP.put(Type.BOOLEAN, Boolean.class);
 		TYPE_TO_JAVA_MAP.put(Type.TINYINT, Byte.class);
-		TYPE_TO_JAVA_MAP.put(Type.TIME, java.sql.Time.class);
-		TYPE_TO_JAVA_MAP.put(Type.TIMESTAMP, java.sql.Timestamp.class);
 		TYPE_TO_JAVA_MAP.put(Type.SMALLINT, Short.class);
 		TYPE_TO_JAVA_MAP.put(Type.VARCHAR, String.class);
 		TYPE_TO_JAVA_MAP.put(Type.BIGINT, Long.class);
 		TYPE_TO_JAVA_MAP.put(Type.BINARY, java.sql.Blob.class);
 		TYPE_TO_JAVA_MAP.put(Type.BIT, Boolean.class);
 		TYPE_TO_JAVA_MAP.put(Type.BLOB, java.sql.Blob.class);
-		TYPE_TO_JAVA_MAP.put(Type.BOOLEAN, Boolean.class);
 		TYPE_TO_JAVA_MAP.put(Type.CHAR, Character.class);
 		TYPE_TO_JAVA_MAP.put(Type.CLOB, java.sql.Clob.class);
 		TYPE_TO_JAVA_MAP.put(Type.DECIMAL, BigDecimal.class);
@@ -108,19 +105,16 @@ public abstract class TypeUtils {// NOSONAR
 		TYPE_TO_JAVA_MAP.put(Type.LONGVARCHAR, String.class);
 		TYPE_TO_JAVA_MAP.put(Type.NCHAR, String.class);
 		TYPE_TO_JAVA_MAP.put(Type.NCLOB, java.sql.Clob.class);
-		TYPE_TO_JAVA_MAP.put(Type.NUMERIC, BigDecimal.class);
 		TYPE_TO_JAVA_MAP.put(Type.NVARCHAR, String.class);
 		TYPE_TO_JAVA_MAP.put(Type.UNKNOW, Object.class);
 		TYPE_TO_JAVA_MAP.put(Type.REAL, Float.class);
-		TYPE_TO_JAVA_MAP.put(Type.SMALLINT, Short.class);
 		TYPE_TO_JAVA_MAP.put(Type.VARBINARY, java.sql.Blob.class);
-		TYPE_TO_JAVA_MAP.put(Type.VARCHAR, String.class);
-		TYPE_TO_JAVA_MAP.put(Type.TINYINT, Byte.class);
 		TYPE_TO_JAVA_MAP.put(Type.DATE, java.util.Date.class);
 		TYPE_TO_JAVA_MAP.put(Type.TIME, java.sql.Time.class);
 		TYPE_TO_JAVA_MAP.put(Type.TIMESTAMP, java.sql.Timestamp.class);
 	}
 
+	/** @deprecated use canMapToDialectType */
 	@Deprecated
 	public static boolean canMapToSqlType(Class<?> clazz) {
 		return canMapToDialectType(clazz);
@@ -135,6 +129,7 @@ public abstract class TypeUtils {// NOSONAR
 		return TYPE_TO_JAVA_MAP.get(type);
 	}
 
+	/** @deprecated use javaType2DialectType */
 	@Deprecated
 	public static Type toType(Class<?> clazz) {
 		return javaType2DialectType(clazz);
@@ -145,6 +140,7 @@ public abstract class TypeUtils {// NOSONAR
 		return JAVA_TO_TYPE_MAP.get(clazz);
 	}
 
+	/** @deprecated use colDef2DialectType */
 	@Deprecated
 	public static Type toType(String columnDef) {
 		return colDef2DialectType(columnDef);
@@ -422,4 +418,10 @@ public abstract class TypeUtils {// NOSONAR
 			throw new DialectException("Not supported java.sql.Types value:" + javaSqlType);
 		}
 	}   
+	
+	public static void main(String[] args) {
+		int i=1;
+		Object ii=i;
+		System.out.println(ii.getClass());
+	}
 }

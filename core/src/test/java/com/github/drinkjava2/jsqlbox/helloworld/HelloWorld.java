@@ -50,8 +50,7 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 		DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
 		DbContext ctx = new DbContext(ds);
 		DbContext.setGlobalDbContext(ctx);
-		ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class));
-
+		ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class)); 
 		new HelloWorld().setName("Hellow jSqlBox").insert();
 		System.out.println(DB.iQueryForString("select name from HelloWorld"));
 		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));

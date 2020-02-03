@@ -1,5 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects;
 
+import java.sql.Timestamp;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,9 +30,14 @@ public class DateTimeTest extends TestBase {
 		@Column(columnDefinition = "TIMESTAMP")
 		java.util.Date d1;
 
+		@Column(columnDefinition = "TIMESTAMP")
 		java.util.Date d2;
 
+		@Column(columnDefinition = "TIMESTAMP")
 		java.sql.Date d3;
+		
+		@Column(columnDefinition = "TIMESTAMP")
+		Timestamp d4;
 
 		public String getId() {
 			return id;
@@ -63,14 +70,23 @@ public class DateTimeTest extends TestBase {
 		public void setD3(java.sql.Date d3) {
 			this.d3 = d3;
 		}
+
+		public Timestamp getD4() {
+			return d4;
+		}
+
+		public void setD4(Timestamp d4) {
+			this.d4 = d4;
+		}
 	}
 
 	@Test
-	public void testDateTime() {
+	public void testDateTime() {    
 		DateDemo d = new DateDemo();
 		d.setD1(new java.util.Date());
-		d.setD2(new java.util.Date());
-		d.setD3(new java.sql.Date(0L));
+//		d.setD2(new java.util.Date());
+//		d.setD3(new java.sql.Date(0L));
+		d.setD4(new Timestamp(new java.util.Date().getTime() ));
 		d.insert();
 
 		DateDemo d2 = new DateDemo();
@@ -78,8 +94,7 @@ public class DateTimeTest extends TestBase {
 		d2.load();
 		Assert.assertNotNull(d2.getD1());
 		Assert.assertNotNull(d2.getD2());
-		Assert.assertNotNull(d2.getD3());
-
+		Assert.assertNotNull(d2.getD3()); 
 	}
 
 }
