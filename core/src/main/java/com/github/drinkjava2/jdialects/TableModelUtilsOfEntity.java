@@ -335,8 +335,17 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setLength((Integer) colMap.get("length"));
 					col.setPrecision((Integer) colMap.get("precision"));
 					col.setScale((Integer) colMap.get("scale"));
-					if (!StrUtils.isEmpty(colMap.get("columnDefinition")))
-						col.setColumnType(TypeUtils.colDef2DialectType((String) colMap.get("columnDefinition")));
+					if (!StrUtils.isEmpty(colMap.get("columnDefinition"))) {
+						String colDEF=(String) colMap.get("columnDefinition");
+						colDEF=colDEF.trim();
+						String colTail=null;
+						if(colDEF.contains(" ")) {
+							colTail=StrUtils.substringAfter(colDEF, " ");
+							colDEF=StrUtils.substringBefore(colDEF, " ");
+						}  
+						col.setColumnType(TypeUtils.colDef2DialectType(colDEF ));
+						col.setTail(colTail);
+					}
 					else
 						col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));
 					col.setInsertable((Boolean) colMap.get("insertable"));

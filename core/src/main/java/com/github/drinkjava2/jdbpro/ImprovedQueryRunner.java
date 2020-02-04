@@ -77,7 +77,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
 	protected String name; // A name for current runner
-	protected Integer dbCode = 0; // A unique code used to identify database
+	protected Integer dbCode = -1; // A unique code used to identify database
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
@@ -113,12 +113,12 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	public ImprovedQueryRunner() {
 		super();
-		pmdKnownBroken=true; //MSSql Server newest JDBC driver doesnot support pmd
+		pmdKnownBroken = true; // MSSql Server newest JDBC driver doesnot support pmd
 	}
 
 	public ImprovedQueryRunner(DataSource ds) {
 		super(ds);
-		pmdKnownBroken=true; //MSSql Server newest JDBC driver doesnot support pmd
+		pmdKnownBroken = true; // MSSql Server newest JDBC driver doesnot support pmd
 	}
 
 	@Override
@@ -169,7 +169,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
-		return new StringBuilder(name == null ? "" : name).append(dbCode == null ? "" : dbCode).append(" SQL: ")
+		return new StringBuilder(name == null ? "" : name).append(dbCode < 0 ? "" : dbCode + " ").append("SQL: ")
 				.append(sql).toString();
 	}
 
@@ -178,7 +178,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * customise parameters format
 	 */
 	protected String formatParametersForLoggerOutput(Object... params) {
-		return new StringBuilder(name == null ? "" : name).append(dbCode == null ? "" : dbCode).append(" PAR: ")
+		return new StringBuilder(name == null ? "" : name).append(dbCode < 0 ? "" : dbCode + " ").append("PAR: ")
 				.append(Arrays.deepToString(params)).toString();
 	}
 
