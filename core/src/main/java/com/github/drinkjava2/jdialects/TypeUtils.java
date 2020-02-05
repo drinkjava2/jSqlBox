@@ -17,6 +17,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
@@ -146,7 +147,6 @@ public abstract class TypeUtils {// NOSONAR
 		return colDef2DialectType(columnDef);
 	}
 
-	// @formatter:off shut off eclipse's formatter
 	/**
 	 * Convert column definition String to Dialect's Type
 	 */
@@ -218,6 +218,8 @@ public abstract class TypeUtils {// NOSONAR
 		if (javaType == String.class)
 			return value.toString();
 		Class<?> vType = value.getClass();
+		if (javaType.isAssignableFrom(vType))
+			return value;
 		if (vType == BigDecimal.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((BigDecimal) value).intValue();
@@ -235,7 +237,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((BigDecimal) value).byteValue() != 0;
 		}
 		if (vType == Integer.class) {
-			if (javaType == Integer.class || javaType == int.class)
+			if (javaType == int.class)
 				return ((Integer) value).intValue();
 			if (javaType == Long.class || javaType == long.class)
 				return ((Integer) value).longValue();
@@ -251,7 +253,7 @@ public abstract class TypeUtils {// NOSONAR
 		if (vType == Long.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((Long) value).intValue();
-			if (javaType == Long.class || javaType == long.class)
+			if (javaType == long.class)
 				return ((Long) value).longValue();
 			if (javaType == Byte.class || javaType == byte.class)
 				return ((Long) value).byteValue();
@@ -269,7 +271,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Double) value).longValue();
 			if (javaType == Byte.class || javaType == byte.class)
 				return ((Double) value).byteValue();
-			if (javaType == Double.class || javaType == double.class)
+			if (javaType == double.class)
 				return ((Double) value).doubleValue();
 			if (javaType == Float.class || javaType == float.class)
 				return ((Double) value).floatValue();
@@ -285,7 +287,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Float) value).byteValue();
 			if (javaType == Double.class || javaType == double.class)
 				return ((Float) value).doubleValue();
-			if (javaType == Float.class || javaType == float.class)
+			if (javaType == float.class)
 				return ((Float) value).floatValue();
 			if (javaType == Short.class || javaType == short.class)
 				return ((Float) value).shortValue();
@@ -301,7 +303,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Short) value).doubleValue();
 			if (javaType == Float.class || javaType == float.class)
 				return ((Short) value).floatValue();
-			if (javaType == Short.class || javaType == short.class)
+			if (javaType == short.class)
 				return ((Short) value).shortValue();
 		}
 		if (vType == Byte.class) {
@@ -309,7 +311,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Byte) value).intValue();
 			if (javaType == Long.class || javaType == long.class)
 				return ((Byte) value).longValue();
-			if (javaType == Byte.class || javaType == byte.class)
+			if (javaType == byte.class)
 				return ((Byte) value).byteValue();
 			if (javaType == Double.class || javaType == double.class)
 				return ((Byte) value).doubleValue();
@@ -318,26 +320,39 @@ public abstract class TypeUtils {// NOSONAR
 			if (javaType == Short.class || javaType == short.class)
 				return ((Byte) value).shortValue();
 		}
-		if (vType == java.sql.Date.class) {
-			if (javaType == java.util.Date.class)
-				return new java.util.Date(((java.sql.Date) value).getTime());
+		if (vType == java.sql.Date.class) { // no need convert java.util.Date
+			if (javaType == Timestamp.class)
+				return new Timestamp(((java.sql.Date) value).getTime());
+			if (javaType == java.sql.Time.class)
+				return new java.sql.Time(((java.sql.Date) value).getTime());
+		}
+		if (vType == java.sql.Time.class) {
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.sql.Date) value).getTime());
 		}
 		if (vType == Timestamp.class) {
-			if (javaType == java.util.Date.class)
-				return new java.util.Date(((Timestamp) value).getTime());
 			if (javaType == java.sql.Date.class)
 				return new java.sql.Date(((Timestamp) value).getTime());
+			if (javaType == java.sql.Time.class)
+				return new java.sql.Time(((Timestamp) value).getTime());
 		}
 		if (vType == java.util.Date.class) {
-			if (javaType == java.sql.Date.class)
-				return new java.util.Date(((java.util.Date) value).getTime());
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.util.Date) value).getTime());
+			if (javaType == java.sql.Date.class)
+				return new java.util.Date(((java.util.Date) value).getTime());
+			if (javaType == java.sql.Time.class)
+				return new java.sql.Time(((java.util.Date) value).getTime()); 
 		}
 		return new DbException("Can not convert jdbc type: '" + value.getClass() + "' with value '" + value
 				+ "' to jave type:" + javaType);
+	}
+
+	/**
+	 * Convert java value to JDBC value according Dialect and ColumnModel setting
+	 */
+	public static String columnToJdbcValue(Dialect dia, ColumnModel col, Object value) {// NOSONAR
+		return null;
 	}
 
 	// @formatter:off shut off eclipse's formatter
@@ -417,11 +432,5 @@ public abstract class TypeUtils {// NOSONAR
 		default:
 			throw new DialectException("Not supported java.sql.Types value:" + javaSqlType);
 		}
-	}   
-	
-	public static void main(String[] args) {
-		int i=1;
-		Object ii=i;
-		System.out.println(ii.getClass());
-	}
+	}    
 }

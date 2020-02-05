@@ -293,10 +293,7 @@ public class Dialect {
 		else
 			return value;
 	}
-
-	// @formatter:off shut off eclipse's formatter
-
-	// @formatter:on
+ 
 
 	/**
 	 * inside function

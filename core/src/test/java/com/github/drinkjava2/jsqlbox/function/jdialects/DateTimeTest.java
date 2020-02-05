@@ -22,7 +22,7 @@ public class DateTimeTest extends TestBase {
 
 	private void useField(int x) {// Use jDialect's dynamic configuration to disable other fields
 		TableModel model = TableModelUtils.entity2Model(DT.class);
-		for (int i = 1; i <= 8; i++)
+		for (int i = 1; i <= 16; i++)
 			model.column("d" + i).setTransientable(true);
 		model.column("d" + x).setTransientable(false);
 		TableModelUtils.bindGlobalModel(DT.class, model);
@@ -35,7 +35,7 @@ public class DateTimeTest extends TestBase {
 		DT in = new DT();
 		in.setD1(new java.util.Date(0L));
 		in.insert();
-		DT out = new DT().setId(in.getId()).load();
+		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD1());
 		Systemout.println(out.getD1());
 	}
@@ -46,7 +46,7 @@ public class DateTimeTest extends TestBase {
 		DT in = new DT();
 		in.setD2(new java.sql.Date(0L));
 		in.insert();
-		DT out = new DT().setId(in.getId()).load();
+		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD2());
 		Systemout.println(out.getD2());
 	}
@@ -57,7 +57,7 @@ public class DateTimeTest extends TestBase {
 		DT in = new DT();
 		in.setD3(new java.sql.Time(0L));
 		in.insert();
-		DT out = new DT().setId(in.getId()).load();
+		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD3());
 		Systemout.println(out.getD3());
 	}
@@ -68,9 +68,97 @@ public class DateTimeTest extends TestBase {
 		DT in = new DT();
 		in.setD4(new java.sql.Timestamp(0L));
 		in.insert();
-		DT out = new DT().setId(in.getId()).load();
+		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD4());
 		Systemout.println(out.getD4());
+	}
+
+	@Test
+	public void testD5() {
+		useField(5);
+		DT in = new DT();
+		in.setD5(new java.util.Date());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD5());
+		Systemout.println(out.getD5());
+	}
+
+	@Test
+	public void testD6() {
+		useField(6);
+		DT in = new DT();
+		in.setD6(new java.sql.Date(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD6());
+		Systemout.println(out.getD6());
+	}
+
+	@Test
+	public void testD7() {
+		useField(7);
+		DT in = new DT();
+		in.setD7(new java.sql.Time(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD7());
+		Systemout.println(out.getD7());
+	}
+
+	@Test
+	public void testD8() {
+		useField(8);
+		DT in = new DT();
+		in.setD8(new java.sql.Timestamp(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD8());
+		Systemout.println(out.getD8());
+	}
+	
+	@Test
+	public void testD9() {
+		useField(9);
+		DT in = new DT();
+		in.setD9(new java.util.Date());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD9());
+		Systemout.println(out.getD9());
+	}
+
+	@Test
+	public void testD10() {
+		useField(10);
+		DT in = new DT();
+		in.setD10(new java.sql.Date(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD10());
+		Systemout.println(out.getD10());
+	}
+
+	@Test
+	public void testD11() {
+		useField(11);
+		DT in = new DT();
+		in.setD11(new java.sql.Time(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD11());
+		Systemout.println(out.getD11());
+	}
+
+	@Test
+	public void testD12() {
+		useField(12);
+		DT in = new DT();
+		in.setD12(new java.sql.Timestamp(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD12());
+		Systemout.println(out.getD12());
 	}
 
 	public static class DT extends ActiveRecord<DT> {
@@ -90,17 +178,48 @@ public class DateTimeTest extends TestBase {
 		@Column
 		java.sql.Timestamp d4;
 
-		@Column
+		@Column(columnDefinition = "timestamp")
 		java.util.Date d5;
 
-		@Column
+		@Column(columnDefinition = "timestamp")
 		java.sql.Date d6;
 
-		@Column
+		@Column(columnDefinition = "timestamp")
 		java.sql.Time d7;
 
-		@Column
+		@Column(columnDefinition = "timestamp")
 		java.sql.Timestamp d8;
+
+		@Column(columnDefinition = "date")
+		java.util.Date d9;
+
+		@Column(columnDefinition = "date")
+		java.sql.Date d10;
+
+		@Column(columnDefinition = "date")
+		java.sql.Time d11;
+
+		@Column(columnDefinition = "date")
+		java.sql.Timestamp d12;
+
+		@Column(columnDefinition = "time")
+		java.util.Date d13;
+
+		@Column(columnDefinition = "time")
+		java.sql.Date d14;
+
+		@Column(columnDefinition = "time")
+		java.sql.Time d15;
+
+		@Column(columnDefinition = "time")
+		java.sql.Timestamp d16;
+
+		public DT() {
+		}
+
+		public DT(String id) {
+			this.id = id;
+		}
 
 		public String getId() {
 			return id;
@@ -173,6 +292,70 @@ public class DateTimeTest extends TestBase {
 
 		public void setD8(java.sql.Timestamp d8) {
 			this.d8 = d8;
+		}
+
+		public java.util.Date getD9() {
+			return d9;
+		}
+
+		public void setD9(java.util.Date d9) {
+			this.d9 = d9;
+		}
+
+		public java.sql.Date getD10() {
+			return d10;
+		}
+
+		public void setD10(java.sql.Date d10) {
+			this.d10 = d10;
+		}
+
+		public java.sql.Time getD11() {
+			return d11;
+		}
+
+		public void setD11(java.sql.Time d11) {
+			this.d11 = d11;
+		}
+
+		public java.sql.Timestamp getD12() {
+			return d12;
+		}
+
+		public void setD12(java.sql.Timestamp d12) {
+			this.d12 = d12;
+		}
+
+		public java.util.Date getD13() {
+			return d13;
+		}
+
+		public void setD13(java.util.Date d13) {
+			this.d13 = d13;
+		}
+
+		public java.sql.Date getD14() {
+			return d14;
+		}
+
+		public void setD14(java.sql.Date d14) {
+			this.d14 = d14;
+		}
+
+		public java.sql.Time getD15() {
+			return d15;
+		}
+
+		public void setD15(java.sql.Time d15) {
+			this.d15 = d15;
+		}
+
+		public java.sql.Timestamp getD16() {
+			return d16;
+		}
+
+		public void setD16(java.sql.Timestamp d16) {
+			this.d16 = d16;
 		}
 
 	}
