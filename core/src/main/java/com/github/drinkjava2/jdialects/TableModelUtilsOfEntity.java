@@ -340,7 +340,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 						colDEF=colDEF.trim();
 						String colTail=null;
 						if(colDEF.contains(" ")) {
-							colTail=StrUtils.substringAfter(colDEF, " ");
+							colTail=" "+StrUtils.substringAfter(colDEF, " ");
 							colDEF=StrUtils.substringBefore(colDEF, " ");
 						}  
 						col.setColumnType(TypeUtils.colDef2DialectType(colDEF ));
@@ -471,6 +471,5 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
 		TableModel.sortColumns(model.getColumns());
 		return model;
-	}
-
+	} 
 }

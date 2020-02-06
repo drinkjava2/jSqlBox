@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlbox.function.jdialects;
+package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -116,7 +116,7 @@ public class DateTimeTest extends TestBase {
 		Assert.assertNotNull(out.getD8());
 		Systemout.println(out.getD8());
 	}
-	
+
 	@Test
 	public void testD9() {
 		useField(9);
@@ -161,6 +161,50 @@ public class DateTimeTest extends TestBase {
 		Systemout.println(out.getD12());
 	}
 
+	@Test
+	public void test13() {
+		useField(13);
+		DT in = new DT();
+		in.setD13(new java.util.Date());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD13());
+		Systemout.println(out.getD13());
+	}
+
+	@Test
+	public void testD14() {
+		useField(14);
+		DT in = new DT();
+		in.setD14(new java.sql.Date(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD14());
+		Systemout.println(out.getD14());
+	}
+
+	@Test
+	public void testD15() {
+		useField(15);
+		DT in = new DT();
+		in.setD15(new java.sql.Time(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD15());
+		Systemout.println(out.getD15());
+	}
+
+	@Test
+	public void testD16() {
+		useField(16);
+		DT in = new DT();
+		in.setD16(new java.sql.Timestamp(0L));
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD16());
+		Systemout.println(out.getD16());
+	}
+
 	public static class DT extends ActiveRecord<DT> {
 		@Id
 		@UUID25
@@ -181,7 +225,7 @@ public class DateTimeTest extends TestBase {
 		@Column(columnDefinition = "timestamp")
 		java.util.Date d5;
 
-		@Column(columnDefinition = "timestamp")
+		@Column(columnDefinition = "timestamp not null") // JPA allow add extra string in columnDefinition
 		java.sql.Date d6;
 
 		@Column(columnDefinition = "timestamp")

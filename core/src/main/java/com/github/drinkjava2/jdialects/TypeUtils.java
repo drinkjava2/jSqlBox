@@ -17,7 +17,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jsqlbox.DbException;
 
 /**
@@ -328,7 +327,9 @@ public abstract class TypeUtils {// NOSONAR
 		}
 		if (vType == java.sql.Time.class) {
 			if (javaType == Timestamp.class)
-				return new Timestamp(((java.sql.Date) value).getTime());
+				return new Timestamp(((java.sql.Time) value).getTime());
+			if (javaType == java.sql.Date.class)
+				return new java.sql.Date(((java.sql.Time) value).getTime());
 		}
 		if (vType == Timestamp.class) {
 			if (javaType == java.sql.Date.class)
@@ -342,23 +343,24 @@ public abstract class TypeUtils {// NOSONAR
 			if (javaType == java.sql.Date.class)
 				return new java.util.Date(((java.util.Date) value).getTime());
 			if (javaType == java.sql.Time.class)
-				return new java.sql.Time(((java.util.Date) value).getTime()); 
+				return new java.sql.Time(((java.util.Date) value).getTime());
 		}
-		return new DbException("Can not convert jdbc type: '" + value.getClass() + "' with value '" + value
-				+ "' to jave type:" + javaType);
+		String oracleTip = "oracle.sql.TIMESTAMP".equals(vType.getName())
+				? "\nBelow setting may solve this Oracle JDBC compliant issue:\n"
+						+ "System.getProperties().setProperty(\"oracle.jdbc.J2EE13Compliant\", \"true\");"
+				: "";
+		throw new DbException("Can not convert jdbc type: '" + value.getClass() + "' with value '" + value
+				+ "' to jave type:" + javaType + oracleTip);
 	}
 
 	/**
 	 * Convert java value to JDBC value according Dialect and ColumnModel setting
 	 */
-	public static String columnToJdbcValue(Dialect dia, ColumnModel col, Object value) {// NOSONAR
+	public static String javaValue2JdbcValue(Object value, Dialect dia, Type type) {// NOSONAR
 		return null;
 	}
 
-	// @formatter:off shut off eclipse's formatter
-	/**
-	 * Convert java.sql.Types.xxx type to Dialect's Type
-	 */
+	/** Convert java.sql.Types.xxx type to Dialect's Type */
 	public static Type javaSqlTypeToDialectType(int javaSqlType) {
 		switch (javaSqlType) {
 		case java.sql.Types.BIT:
@@ -399,20 +401,16 @@ public abstract class TypeUtils {// NOSONAR
 			return Type.VARBINARY;
 		case java.sql.Types.LONGVARBINARY:
 			return Type.LONGVARBINARY;
-
 		case java.sql.Types.OTHER:
 			return Type.UNKNOW;
 		case java.sql.Types.JAVA_OBJECT:
 			return Type.JAVA_OBJECT;
-
 		case java.sql.Types.BLOB:
 			return Type.BLOB;
 		case java.sql.Types.CLOB:
 			return Type.CLOB;
-
 		case java.sql.Types.BOOLEAN:
 			return Type.BOOLEAN;
-
 		case java.sql.Types.NCHAR:
 			return Type.NCHAR;
 		case java.sql.Types.NVARCHAR:
@@ -421,16 +419,8 @@ public abstract class TypeUtils {// NOSONAR
 			return Type.LONGNVARCHAR;
 		case java.sql.Types.NCLOB:
 			return Type.NCLOB;
-		// case java.sql.Types.SQLXML:return Type.UNSUPPORT;
-		// case java.sql.Types.NULL:return Type.UNSUPPORT;
-		// case java.sql.Types.ROWID:return Type.UNSUPPORT;
-		// case java.sql.Types.DISTINCT:return Type.UNSUPPORT;
-		// case java.sql.Types.STRUCT:return Type.UNSUPPORT;
-		// case java.sql.Types.ARRAY:return Type.UNSUPPORT;
-		// case java.sql.Types.REF:return Type.UNSUPPORT;
-		// case java.sql.Types.DATALINK:return Type.UNSUPPORT;
 		default:
-			throw new DialectException("Not supported java.sql.Types value:" + javaSqlType);
+			throw new DialectException("Unsupported java.sql.Types:" + javaSqlType);
 		}
-	}    
+	}
 }

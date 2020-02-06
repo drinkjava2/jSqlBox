@@ -74,13 +74,13 @@ public class TestBase {
 
 	@Before
 	public void init() {
-		DbContext.resetGlobalVariants(); 
+		System.getProperties().setProperty("oracle.jdbc.J2EE13Compliant", "true");
+		DbContext.resetGlobalVariants();
 		DbContext.setGlobalNextAllowShowSql(true);
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
 
-		 
 		ctx = new DbContext(dataSource);
 		DbContext.setGlobalDbContext(ctx);
 		if (tablesForTest != null)
@@ -95,11 +95,6 @@ public class TestBase {
 		tablesForTest = null;
 		JBEANBOX.close(); // IOC tool will close dataSource
 		DbContext.resetGlobalVariants();
-	}
-
-	public void executeDDLs(String[] ddls) {
-		for (String sql : ddls)
-			ctx.nExecute(sql);
 	}
 
 	public void quietExecuteDDLs(String[] ddls) {
@@ -138,27 +133,27 @@ public class TestBase {
 
 	public void createTables(TableModel... tableModels) {
 		String[] ddls = ctx.toCreateDDL(tableModels);
-		executeDDLs(ddls);
+		ctx.executeDDL(ddls);
 	}
 
 	public void createTables(Class<?>... classes) {
 		String[] ddls = ctx.toCreateDDL(classes);
-		executeDDLs(ddls);
+		ctx.executeDDL(ddls);
 	}
 
 	public void dropTables(TableModel... tableModels) {
 		String[] ddls = ctx.toDropDDL(tableModels);
-		executeDDLs(ddls);
+		ctx.executeDDL(ddls);
 	}
 
 	public void quietDropTables(Class<?>... classes) {
 		String[] ddls = ctx.toDropDDL(classes);
 		quietExecuteDDLs(ddls);
 	}
-	
+
 	public void dropTables(Class<?>... classes) {
 		String[] ddls = ctx.toDropDDL(classes);
-		executeDDLs(ddls);
+		ctx.executeDDL(ddls);
 	}
 
 	public static void printTimeUsed(long startTimeMillis, String msg) {

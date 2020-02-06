@@ -1,10 +1,8 @@
-package com.github.drinkjava2.jsqlbox.function.jdialects;
+package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.DebugUtils;
-import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -227,8 +225,6 @@ public class TypeMappingTest extends TestBase {
 
 	@Test
 	public void testTypeMapping() {
-		System.out.println(DebugUtils.getDialectFullInfo(Dialect.Oracle9iDialect));
-
 		quietDropTables(DateDemo.class);
 		createTables(DateDemo.class);
 		DateDemo w = new DateDemo();
