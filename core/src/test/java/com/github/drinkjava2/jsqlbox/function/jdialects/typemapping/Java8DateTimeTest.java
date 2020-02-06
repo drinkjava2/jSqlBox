@@ -34,12 +34,68 @@ public class Java8DateTimeTest extends TestBase {
 		useField(1);
 		DT in = new DT();
 		in.setD1(java.time.LocalDate.now());
-		in.insert();
+		in.insert(); 
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD1());
 		Systemout.println(out.getD1());
 	}
+	
+	@Test
+	public void testD2() {
+		useField(2);
+		DT in = new DT();
+		in.setD2(java.time.OffsetTime.now());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD2());
+		Systemout.println(out.getD2());
+	}
+	
+	@Test
+	public void testD3() {
+		useField(3);
+		DT in = new DT();
+		in.setD3(java.time.Instant.now());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD3());
+		Systemout.println(out.getD3());
+	}
 
+	@Test
+	public void testD4() {
+		useField(4);
+		DT in = new DT();
+		in.setD4(java.time.LocalDateTime.now());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD4());
+		Systemout.println(out.getD4());
+	}
+	
+	@Test
+	public void testD5() {
+		useField(5);
+		DT in = new DT();
+		in.setD5(java.time.OffsetDateTime.now());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD5());
+		Systemout.println(out.getD5());
+	}
+	
+	@Test
+	public void testD6() {
+		useField(6);
+		DT in = new DT();
+		in.setD6(java.time.ZonedDateTime.now());
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD6());
+		Systemout.println(out.getD6());
+	}
+	
+	
 	public static class DT extends ActiveRecord<DT> {
 		@Id
 		@UUID25

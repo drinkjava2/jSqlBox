@@ -75,7 +75,7 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(java.sql.Date.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.sql.Time.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.sql.Timestamp.class, Type.TIMESTAMP);
-		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);// On Java7 releasing, need delete below 7 lines
+		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);// Below 7 lines For Java8 & above
 		JAVA_TO_TYPE_MAP.put(java.time.LocalTime.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.time.OffsetTime.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.time.Instant.class, Type.TIMESTAMP);
@@ -234,8 +234,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((BigDecimal) value).shortValue();
 			if (javaType == Boolean.class || javaType == boolean.class)
 				return ((BigDecimal) value).byteValue() != 0;
-		}
-		if (vType == Integer.class) {
+		} else if (vType == Integer.class) {
 			if (javaType == int.class)
 				return ((Integer) value).intValue();
 			if (javaType == Long.class || javaType == long.class)
@@ -248,8 +247,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Integer) value).floatValue();
 			if (javaType == Short.class || javaType == short.class)
 				return ((Integer) value).shortValue();
-		}
-		if (vType == Long.class) {
+		} else if (vType == Long.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((Long) value).intValue();
 			if (javaType == long.class)
@@ -262,8 +260,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Long) value).floatValue();
 			if (javaType == Short.class || javaType == short.class)
 				return ((Long) value).shortValue();
-		}
-		if (vType == Double.class) {
+		} else if (vType == Double.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((Double) value).intValue();
 			if (javaType == Long.class || javaType == long.class)
@@ -276,8 +273,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Double) value).floatValue();
 			if (javaType == Short.class || javaType == short.class)
 				return ((Double) value).shortValue();
-		}
-		if (vType == Float.class) {
+		} else if (vType == Float.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((Float) value).intValue();
 			if (javaType == Long.class || javaType == long.class)
@@ -290,8 +286,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Float) value).floatValue();
 			if (javaType == Short.class || javaType == short.class)
 				return ((Float) value).shortValue();
-		}
-		if (vType == Short.class) {
+		} else if (vType == Short.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((Short) value).intValue();
 			if (javaType == Long.class || javaType == long.class)
@@ -304,8 +299,7 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Short) value).floatValue();
 			if (javaType == short.class)
 				return ((Short) value).shortValue();
-		}
-		if (vType == Byte.class) {
+		} else if (vType == Byte.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((Byte) value).intValue();
 			if (javaType == Long.class || javaType == long.class)
@@ -318,26 +312,30 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Byte) value).floatValue();
 			if (javaType == Short.class || javaType == short.class)
 				return ((Byte) value).shortValue();
-		}
-		if (vType == java.sql.Date.class) { // no need convert java.util.Date
+		} else if (vType == java.sql.Date.class) { // no need convert java.util.Date
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.sql.Date) value).getTime());
 			if (javaType == java.sql.Time.class)
 				return new java.sql.Time(((java.sql.Date) value).getTime());
-		}
-		if (vType == java.sql.Time.class) {
+			if (javaType == java.time.LocalDate.class) // For Java8
+				return Java8DateUtils.date2LocalDate((java.sql.Date) value);
+			if (javaType == java.time.LocalDateTime.class) // For Java8
+				return Java8DateUtils.date2LocalDateTime((java.sql.Date) value);
+		} else if (vType == java.sql.Time.class) {
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.sql.Time) value).getTime());
 			if (javaType == java.sql.Date.class)
 				return new java.sql.Date(((java.sql.Time) value).getTime());
-		}
-		if (vType == Timestamp.class) {
+		} else if (vType == Timestamp.class) {
 			if (javaType == java.sql.Date.class)
 				return new java.sql.Date(((Timestamp) value).getTime());
 			if (javaType == java.sql.Time.class)
 				return new java.sql.Time(((Timestamp) value).getTime());
-		}
-		if (vType == java.util.Date.class) {
+			if (javaType == java.time.LocalDate.class) // For Java8
+				return Java8DateUtils.timeStamp2LocalDate((Timestamp) value);
+			if (javaType == java.time.LocalDateTime.class) // For Java8
+				return Java8DateUtils.timeStamp2LocalDateTime((Timestamp) value);
+		} else if (vType == java.util.Date.class) {
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.util.Date) value).getTime());
 			if (javaType == java.sql.Date.class)
