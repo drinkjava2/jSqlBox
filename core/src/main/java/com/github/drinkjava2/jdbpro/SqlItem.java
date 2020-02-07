@@ -15,6 +15,8 @@
  */
 package com.github.drinkjava2.jdbpro;
 
+import java.util.Date;
+
 /**
  * SqlItem store SQL SqlItemType type and value array
  * 
@@ -32,9 +34,16 @@ public class SqlItem {
 		this.parameters = new Object[] { sqlPiece };
 	}
 
-	public SqlItem(SqlOption type, Object... parameters) {
+	public SqlItem(SqlOption type, Object... params) {
 		this.type = type;
-		this.parameters = parameters;
+		this.parameters = params;
+		if (SqlOption.PARAM.equals(type))
+			for (int i = 0; i < parameters.length; i++) {
+				if (parameters[i] != null && Date.class == parameters[i].getClass()) {
+					Date d = (Date) parameters[i];
+					parameters[i] = new java.sql.Date(d.getTime());
+				}
+			}
 	}
 
 	public String getName() {
