@@ -14,6 +14,7 @@ package com.github.drinkjava2.jdialects;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -343,7 +344,7 @@ public abstract class TypeUtils {// NOSONAR
 			if (javaType == java.sql.Time.class)
 				return new java.sql.Time(((java.util.Date) value).getTime());
 		}
-		String oracleTip = "oracle.sql.TIMESTAMP".equals(vType.getName())
+		String oracleTip = "oracle.sql.TIMESTAMP".equals(vType.getName()) // NOSONAR
 				? "\nBelow setting may solve this Oracle JDBC compliant issue:\n"
 						+ "System.getProperties().setProperty(\"oracle.jdbc.J2EE13Compliant\", \"true\");"
 				: "";
@@ -352,10 +353,16 @@ public abstract class TypeUtils {// NOSONAR
 	}
 
 	/**
-	 * Convert java value to JDBC value according Dialect and ColumnModel setting
+	 * Convert java value to JDBC Sql parameter value according Dialect,
+	 * optionalType is optional target dialect type, if not set, result is
+	 * determined by dialect
 	 */
-	public static String javaValue2JdbcValue(Object value, Dialect dia, Type type) {// NOSONAR
-		return null;
+	public static Object javaParam2JdbcSqlParam(Dialect dia, Object value, Type optionalType) {// NOSONAR
+		if (dia == null || value == null || dia.isOracleFamily())
+			return value;
+		if (java.util.Date.class == value.getClass())
+			return new java.sql.Date(((Date) value).getTime());
+		return value;
 	}
 
 	/** Convert java.sql.Types.xxx type to Dialect's Type */

@@ -55,7 +55,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 @SuppressWarnings("unchecked")
 public class DbContext extends DbPro {// NOSONAR
 
-	protected static Dialect globalNextDialect = null;
+ 
 	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { new ShardingModTool(),
 			new ShardingRangeTool() };
 	protected static SnowflakeCreator globalNextSnowflakeCreator = null;
@@ -65,29 +65,22 @@ public class DbContext extends DbPro {// NOSONAR
 
 	protected static DbContext globalDbContext = new DbContext(); // this is a empty ctx
 
-	/** Dialect of current DbContext, optional */
-	protected Dialect dialect = globalNextDialect;
+ 
 
 	protected ShardingTool[] shardingTools = globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 	protected TableModel[] tailModels; // TableModels loaded from DB, only used for tail mode
 
 	public DbContext() {
-		super();
-		this.dialect = globalNextDialect;
+		super(); 
 	}
 
 	public DbContext(DataSource ds) {
-		super(ds);
-		if (globalNextDialect != null)
-			dialect = globalNextDialect;
-		else
-			dialect = Dialect.guessDialect(ds);
+		super(ds); 
 	}
 
 	public DbContext(DataSource ds, Dialect dialect) {
-		super(ds);
-		this.dialect = dialect;
+		super(ds, dialect);
 	}
 
 	// ==========================Global Transaction about================
@@ -536,13 +529,7 @@ public class DbContext extends DbPro {// NOSONAR
 	protected void staticGlobalNextMethods______________________() {// NOSONAR
 	}
 
-	public static Dialect getGlobalNextDialect() {
-		return globalNextDialect;
-	}
-
-	public static void setGlobalNextDialect(Dialect dialect) {
-		globalNextDialect = dialect;
-	}
+ 
 
 	public static ShardingTool[] getGlobalNextShardingTools() {
 		return globalNextShardingTools;
@@ -561,15 +548,7 @@ public class DbContext extends DbPro {// NOSONAR
 	}
 
 	// =========getter & setter =======
-
-	public Dialect getDialect() {
-		return dialect;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setDialect(Dialect dialect) {// NOSONAR
-		this.dialect = dialect;
-	}
+ 
 
 	public ShardingTool[] getShardingTools() {
 		return shardingTools;

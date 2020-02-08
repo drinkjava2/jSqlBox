@@ -33,6 +33,7 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jlogs.Log;
 import com.github.drinkjava2.jlogs.LogFactory;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -59,6 +60,7 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder {
 	protected static final Log logger = LogFactory.getLog(ImprovedQueryRunner.class);
 
+	protected static Dialect globalNextDialect = null;
 	protected static Boolean globalNextAllowShowSql = false;
 	protected static SqlOption globalNextMasterSlaveOption = SqlOption.USE_AUTO;
 	protected static ConnectionManager globalNextConnectionManager = TinyTxConnectionManager.instance();
@@ -73,6 +75,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected SqlOption masterSlaveOption = globalNextMasterSlaveOption;
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
+	protected Dialect dialect = globalNextDialect;
 
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
@@ -113,11 +116,22 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	public ImprovedQueryRunner() {
 		super();
+		this.dialect = globalNextDialect;
 		pmdKnownBroken = true; // MSSql Server newest JDBC driver doesnot support pmd
 	}
 
 	public ImprovedQueryRunner(DataSource ds) {
 		super(ds);
+		if (globalNextDialect != null)
+			dialect = globalNextDialect;
+		else
+			dialect = Dialect.guessDialect(ds);
+		pmdKnownBroken = true; // MSSql Server newest JDBC driver doesnot support pmd
+	}
+
+	public ImprovedQueryRunner(DataSource ds, Dialect dialect) {
+		super(ds);
+		this.dialect = dialect;
 		pmdKnownBroken = true; // MSSql Server newest JDBC driver doesnot support pmd
 	}
 
@@ -868,6 +882,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected void staticGlobalNextMethods_____________________() {// NOSONAR
 	}
 
+	public static Dialect getGlobalNextDialect() {
+		return globalNextDialect;
+	}
+
+	public static void setGlobalNextDialect(Dialect dialect) {
+		globalNextDialect = dialect;
+	}
+
 	public static Integer getGlobalNextBatchSize() {
 		return globalNextBatchSize;
 	}
@@ -918,6 +940,16 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	private void normalGetterSetters_____________________() {// NOSONAR
 	}
+
+	public Dialect getDialect() {
+		return dialect;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setDialect(Dialect dialect) {// NOSONAR
+		this.dialect = dialect;
+	}
+	
 
 	public Boolean getAllowShowSQL() {
 		return allowShowSQL;
