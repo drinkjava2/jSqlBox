@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package com.github.drinkjava2.cglib.transform.impl;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })
 public interface FieldProvider {
     
     String[] getFieldNames();

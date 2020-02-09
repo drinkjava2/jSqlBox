@@ -15,14 +15,21 @@
  */
 package com.github.drinkjava2.cglib.transform.impl;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.github.drinkjava2.asm.Attribute;
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-import com.github.drinkjava2.cglib.transform.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.CodeGenerationException;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.ObjectSwitchCallback;
+import com.github.drinkjava2.cglib.core.ProcessSwitchCallback;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+import com.github.drinkjava2.cglib.transform.ClassEmitterTransformer;
+@SuppressWarnings({"rawtypes","unchecked" })
 public class FieldProviderTransformer extends ClassEmitterTransformer {
     
     private static final String FIELD_NAMES = "CGLIB$FIELD_NAMES";

@@ -16,12 +16,17 @@
 package com.github.drinkjava2.cglib.proxy;
 
 import java.security.ProtectionDomain;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.ClassVisitor;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassesKey;
+import com.github.drinkjava2.cglib.core.KeyFactory;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
 
 
 
@@ -33,7 +38,7 @@ import com.github.drinkjava2.cglib.core.*;
  * @author Chris Nokleberg
  * @version $Id: Mixin.java,v 1.7 2005/09/27 11:42:27 baliuka Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })  
 abstract public class Mixin {
     private static final MixinKey KEY_FACTORY =
       (MixinKey)KeyFactory.create(MixinKey.class, KeyFactory.CLASS_BY_NAME);

@@ -7,6 +7,7 @@ package com.github.drinkjava2.jdialects.function;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.SqlFormatter;
 
 /**
@@ -19,7 +20,7 @@ public class SqlFormatterTest {
 
 	@Test
 	public void testDDLFormatter() {
-		System.out.println(
+		Systemout.println(
 				SqlFormatter.format("select  \t     * from users \t  \n  where '1 =  1 '   or       '  or 2=2'\r\n"
 						+ "or    3=3 order by    id"));
 	}

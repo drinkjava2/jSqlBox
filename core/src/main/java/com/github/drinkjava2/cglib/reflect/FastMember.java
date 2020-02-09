@@ -16,7 +16,7 @@
 package com.github.drinkjava2.cglib.reflect;
 
 import java.lang.reflect.Member;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })  
 abstract public class FastMember
 {
     protected FastClass fc;

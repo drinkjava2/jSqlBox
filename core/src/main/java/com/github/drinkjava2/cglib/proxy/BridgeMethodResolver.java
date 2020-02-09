@@ -17,7 +17,6 @@
 package com.github.drinkjava2.cglib.proxy;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,28 +26,21 @@ import com.github.drinkjava2.asm.ClassReader;
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.MethodVisitor;
 import com.github.drinkjava2.asm.Opcodes;
-import com.github.drinkjava2.cglib.core.Constants;
 import com.github.drinkjava2.cglib.core.Signature;
 
 /**
- * Uses bytecode reflection to figure out the targets of all bridge methods that use invokespecial
- * and invokeinterface, so that we can later rewrite them to use invokevirtual.
- *
- * <p>For interface bridges, using invokesuper will fail since the method being bridged to is in a
- * superinterface, not a superclass. Starting in Java 8, javac emits default bridge methods in
- * interfaces, which use invokeinterface to bridge to the target method.
- *
+ * Uses bytecode reflection to figure out the targets of all bridge methods
+ * that use invokespecial, so that we can later rewrite them to use invokevirtual.
+ * 
  * @author sberlin@gmail.com (Sam Berlin)
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes"})  
 class BridgeMethodResolver {
 
     private final Map/* <Class, Set<Signature> */declToBridge;
-    private final ClassLoader classLoader;
 
-    public BridgeMethodResolver(Map declToBridge, ClassLoader classLoader) {
+    public BridgeMethodResolver(Map declToBridge) {
         this.declToBridge = declToBridge;
-        this.classLoader = classLoader;
     }
 
     /**
@@ -58,36 +50,28 @@ class BridgeMethodResolver {
     public Map/*<Signature, Signature>*/resolveAll() {
         Map resolved = new HashMap();
         for (Iterator entryIter = declToBridge.entrySet().iterator(); entryIter.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) entryIter.next();
-            Class owner = (Class) entry.getKey();
-            Set bridges = (Set) entry.getValue();
+            Map.Entry entry = (Map.Entry)entryIter.next();
+            Class owner = (Class)entry.getKey();
+            Set bridges = (Set)entry.getValue();
             try {
-                InputStream is = classLoader.getResourceAsStream(owner.getName().replace('.', '/') + ".class");
-                if (is == null) {
-                    return resolved;
-                }
-                try {
-                    new ClassReader(is)
-                            .accept(new BridgedFinder(bridges, resolved),
-                                    ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-                } finally {
-                    is.close();
-                }
-            } catch (IOException ignored) {}
+                new ClassReader(owner.getName())
+                  .accept(new BridgedFinder(bridges, resolved),
+                          ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            } catch(IOException ignored) {}
         }
         return resolved;
     }
 
     private static class BridgedFinder extends ClassVisitor {
         private Map/*<Signature, Signature>*/ resolved;
-        private Set/*<Signature>*/ eligibleMethods;
+        private Set/*<Signature>*/ eligableMethods;
         
         private Signature currentMethod = null;
 
-        BridgedFinder(Set eligibleMethods, Map resolved) {
-            super(Constants.ASM_API);
+        BridgedFinder(Set eligableMethods, Map resolved) {
+            super(Opcodes.ASM5);
             this.resolved = resolved;
-            this.eligibleMethods = eligibleMethods;
+            this.eligableMethods = eligableMethods;
         }
 
         public void visit(int version, int access, String name,
@@ -97,14 +81,12 @@ class BridgeMethodResolver {
         public MethodVisitor visitMethod(int access, String name, String desc,
                 String signature, String[] exceptions) {
             Signature sig = new Signature(name, desc);
-            if (eligibleMethods.remove(sig)) {
+            if (eligableMethods.remove(sig)) {
                 currentMethod = sig;
-                return new MethodVisitor(Constants.ASM_API) {
-                    public void visitMethodInsn(
-                            int opcode, String owner, String name, String desc, boolean itf) {
-                        if ((opcode == Opcodes.INVOKESPECIAL
-                                        || (itf && opcode == Opcodes.INVOKEINTERFACE))
-                                && currentMethod != null) {
+                return new MethodVisitor(Opcodes.ASM5) {
+                    public void visitMethodInsn(int opcode, String owner, String name,
+                                                String desc, boolean itf) {
+                        if (opcode == Opcodes.INVOKESPECIAL && currentMethod != null) {
                             Signature target = new Signature(name, desc);
                             // If the target signature is the same as the current,
                             // we shouldn't change our bridge becaues invokespecial

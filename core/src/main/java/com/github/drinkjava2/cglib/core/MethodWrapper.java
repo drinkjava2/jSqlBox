@@ -17,7 +17,7 @@ package com.github.drinkjava2.cglib.core;
 
 import java.lang.reflect.Method;
 import java.util.*;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })
 public class MethodWrapper {
     private static final MethodWrapperKey KEY_FACTORY =
       (MethodWrapperKey)KeyFactory.create(MethodWrapperKey.class);

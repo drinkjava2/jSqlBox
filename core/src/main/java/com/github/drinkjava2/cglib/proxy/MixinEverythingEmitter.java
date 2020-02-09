@@ -28,7 +28,7 @@ import com.github.drinkjava2.cglib.core.RejectModifierPredicate;
  * @author Chris Nokleberg
  * @version $Id: MixinEverythingEmitter.java,v 1.3 2004/06/24 21:15:19 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })  
 class MixinEverythingEmitter extends MixinEmitter {
 
     public MixinEverythingEmitter(ClassVisitor v, String className, Class[] classes) {

@@ -18,7 +18,7 @@ package com.github.drinkjava2.cglib.core;
 import java.util.*;
 
 import com.github.drinkjava2.asm.Type;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })  
 public class TypeUtils {
     private static final Map transforms = new HashMap();
     private static final Map rtransforms = new HashMap();

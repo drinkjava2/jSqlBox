@@ -27,15 +27,15 @@ import java.io.StringWriter;
 @SuppressWarnings("all")
 public class ConsoleLog implements Log {
 
-	public static final int DEBUG = 4;
-	public static final int ERROR = 3;
-	public static final int WARNING = 2;
-	public static final int INFO = 1;
-	public static final int OFF = 0;
+	public static final int OFF = 5;
+	public static final int ERROR = 4;
+	public static final int WARNING = 3;
+	public static final int INFO = 2;
+	public static final int DEBUG = 1;
 
 	Class<?> clazz;
-	public static int logLevel = INFO;
-	public static boolean outputlogHead = false;
+	private static int logLevel = INFO;
+	private static boolean logHead = true;
 
 	public ConsoleLog(Class<?> clazz) {
 		this.clazz = clazz;
@@ -49,46 +49,53 @@ public class ConsoleLog implements Log {
 		ConsoleLog.logLevel = logLevel;
 	}
 
-	private String loghead(String method) {
-		return outputlogHead
-				? new StringBuilder(clazz.getSimpleName()).append(" ").append(method).append(": ").toString()
+	public static boolean isLogHead() {
+		return logHead;
+	}
+
+	public static void setLogHead(boolean logHead) {
+		ConsoleLog.logHead = logHead;
+	}
+
+	private String logheadStr(String method) {
+		return logHead ? new StringBuilder(clazz.getSimpleName()).append(" ").append(method).append(": ").toString()
 				: "";
 	}
 
 	@Override
 	public void info(String msg) {
 		if (logLevel <= INFO)
-			System.out.println(loghead("info") + msg);
+			System.out.println(logheadStr("info") + msg);
 	}
 
 	@Override
 	public void warn(String msg) {
 		if (logLevel <= WARNING)
-			System.out.println(loghead("warn") + msg);
+			System.out.println(logheadStr("warn") + msg);
 	}
 
 	@Override
 	public void warn(String msg, Throwable t) {
 		if (logLevel <= WARNING)
-			System.out.println(loghead("warn") + msg + getStackTrace(t));
+			System.out.println(logheadStr("warn") + msg + getStackTrace(t));
 	}
 
 	@Override
 	public void error(String msg) {
 		if (logLevel <= ERROR)
-			System.out.println(loghead("error") + msg);
+			System.out.println(logheadStr("error") + msg);
 	}
 
 	@Override
 	public void error(String msg, Throwable t) {
 		if (logLevel <= WARNING)
-			System.out.println(loghead("error") + msg + getStackTrace(t));
+			System.out.println(logheadStr("error") + msg + getStackTrace(t));
 	}
 
 	@Override
 	public void debug(String msg) {
 		if (logLevel <= DEBUG)
-			System.out.println(loghead("info") + msg);
+			System.out.println(logheadStr("info") + msg);
 	}
 
 	public static String getStackTrace(Throwable t) {

@@ -17,12 +17,15 @@ package com.github.drinkjava2.cglib.transform.impl;
 
 import java.lang.reflect.Constructor;
 
-import com.github.drinkjava2.asm.Attribute;
-import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-import com.github.drinkjava2.cglib.transform.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.Block;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+import com.github.drinkjava2.cglib.transform.ClassEmitterTransformer;
+@SuppressWarnings({"rawtypes" })
 public class UndeclaredThrowableTransformer extends ClassEmitterTransformer {
     private Type wrapper;
 

@@ -47,7 +47,7 @@ public class TinyTxTester {
 	@TX
 	public void tx_Insert2() {
 		tiny.executeSql("insert into users (id) values('456')");
-		Assert.assertEquals(2L, (long) tiny.queryForObject("select count(*) from users"));
+		Assert.assertEquals("2", ""+tiny.queryForObject("select count(*) from users"));
 		Systemout.println("Now have 2 records in users table, but will roll back to 1");
 		Systemout.println(1 / 0);
 	}

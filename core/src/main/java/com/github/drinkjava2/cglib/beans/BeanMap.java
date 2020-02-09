@@ -16,307 +16,324 @@
 package com.github.drinkjava2.cglib.beans;
 
 import java.security.ProtectionDomain;
-import java.beans.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.github.drinkjava2.asm.ClassVisitor;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.KeyFactory;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
 
 /**
- * A <code>Map</code>-based view of a JavaBean.  The default set of keys is the
- * union of all property names (getters or setters). An attempt to set
- * a read-only property will be ignored, and write-only properties will
- * be returned as <code>null</code>. Removal of objects is not a
- * supported (the key set is fixed).
+ * A <code>Map</code>-based view of a JavaBean. The default set of keys is the union of all property names (getters or
+ * setters). An attempt to set a read-only property will be ignored, and write-only properties will be returned as
+ * <code>null</code>. Removal of objects is not a supported (the key set is fixed).
+ * 
  * @author Chris Nokleberg
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({ "rawtypes", "unchecked" })
 abstract public class BeanMap implements Map {
-    /**
-     * Limit the properties reflected in the key set of the map
-     * to readable properties.
-     * @see BeanMap.Generator#setRequire
-     */
-    public static final int REQUIRE_GETTER = 1;
+	/**
+	 * Limit the properties reflected in the key set of the map to readable properties.
+	 * 
+	 * @see BeanMap.Generator#setRequire
+	 */
+	public static final int REQUIRE_GETTER = 1;
 
-    /**
-     * Limit the properties reflected in the key set of the map
-     * to writable properties.
-     * @see BeanMap.Generator#setRequire
-     */
-    public static final int REQUIRE_SETTER = 2;
-    
-    /**
-     * Helper method to create a new <code>BeanMap</code>.  For finer
-     * control over the generated instance, use a new instance of
-     * <code>BeanMap.Generator</code> instead of this static method.
-     * @param bean the JavaBean underlying the map
-     * @return a new <code>BeanMap</code> instance
-     */
-    public static BeanMap create(Object bean) {
-        Generator gen = new Generator();
-        gen.setBean(bean);
-        return gen.create();
-    }
+	/**
+	 * Limit the properties reflected in the key set of the map to writable properties.
+	 * 
+	 * @see BeanMap.Generator#setRequire
+	 */
+	public static final int REQUIRE_SETTER = 2;
 
-    public static class Generator extends AbstractClassGenerator {
-        private static final Source SOURCE = new Source(BeanMap.class.getName());
+	/**
+	 * Helper method to create a new <code>BeanMap</code>. For finer control over the generated instance, use a new
+	 * instance of <code>BeanMap.Generator</code> instead of this static method.
+	 * 
+	 * @param bean
+	 *            the JavaBean underlying the map
+	 * @return a new <code>BeanMap</code> instance
+	 */
+	public static BeanMap create(Object bean) {
+		Generator gen = new Generator();
+		gen.setBean(bean);
+		return gen.create();
+	}
 
-        private static final BeanMapKey KEY_FACTORY =
-          (BeanMapKey)KeyFactory.create(BeanMapKey.class, KeyFactory.CLASS_BY_NAME);
+	public static class Generator extends AbstractClassGenerator {
+		private static final Source SOURCE = new Source(BeanMap.class.getName());
 
-        interface BeanMapKey {
-            public Object newInstance(Class type, int require);
-        }
-        
-        private Object bean;
-        private Class beanClass;
-        private int require;
-        
-        public Generator() {
-            super(SOURCE);
-        }
+		private static final BeanMapKey KEY_FACTORY = (BeanMapKey) KeyFactory.create(BeanMapKey.class,
+				KeyFactory.CLASS_BY_NAME);
 
-        /**
-         * Set the bean that the generated map should reflect. The bean may be swapped
-         * out for another bean of the same type using {@link #setBean}.
-         * Calling this method overrides any value previously set using {@link #setBeanClass}.
-         * You must call either this method or {@link #setBeanClass} before {@link #create}.
-         * @param bean the initial bean
-         */
-        public void setBean(Object bean) {
-            this.bean = bean;
-            if (bean != null)
-                beanClass = bean.getClass();
-        }
+		interface BeanMapKey {
+			public Object newInstance(Class type, int require);
+		}
 
-        /**
-         * Set the class of the bean that the generated map should support.
-         * You must call either this method or {@link #setBeanClass} before {@link #create}.
-         * @param beanClass the class of the bean
-         */
-        public void setBeanClass(Class beanClass) {
-            this.beanClass = beanClass;
-        }
+		private Object bean;
+		private Class beanClass;
+		private int require;
 
-        /**
-         * Limit the properties reflected by the generated map.
-         * @param require any combination of {@link #REQUIRE_GETTER} and
-         * {@link #REQUIRE_SETTER}; default is zero (any property allowed)
-         */
-        public void setRequire(int require) {
-            this.require = require;
-        }
+		public Generator() {
+			super(SOURCE);
+		}
 
-        protected ClassLoader getDefaultClassLoader() {
-            return beanClass.getClassLoader();
-        }
+		/**
+		 * Set the bean that the generated map should reflect. The bean may be swapped out for another bean of the same
+		 * type using {@link #setBean}. Calling this method overrides any value previously set using
+		 * {@link #setBeanClass}. You must call either this method or {@link #setBeanClass} before {@link #create}.
+		 * 
+		 * @param bean
+		 *            the initial bean
+		 */
+		public void setBean(Object bean) {
+			this.bean = bean;
+			if (bean != null)
+				beanClass = bean.getClass();
+		}
 
-        protected ProtectionDomain getProtectionDomain() {
-        	return ReflectUtils.getProtectionDomain(beanClass);
-        }
+		/**
+		 * Set the class of the bean that the generated map should support. You must call either this method or
+		 * {@link #setBeanClass} before {@link #create}.
+		 * 
+		 * @param beanClass
+		 *            the class of the bean
+		 */
+		public void setBeanClass(Class beanClass) {
+			this.beanClass = beanClass;
+		}
 
-        /**
-         * Create a new instance of the <code>BeanMap</code>. An existing
-         * generated class will be reused if possible.
-         */
-        public BeanMap create() {
-            if (beanClass == null)
-                throw new IllegalArgumentException("Class of bean unknown");
-            setNamePrefix(beanClass.getName());
-            return (BeanMap)super.create(KEY_FACTORY.newInstance(beanClass, require));
-        }
+		/**
+		 * Limit the properties reflected by the generated map.
+		 * 
+		 * @param require
+		 *            any combination of {@link #REQUIRE_GETTER} and {@link #REQUIRE_SETTER}; default is zero (any
+		 *            property allowed)
+		 */
+		public void setRequire(int require) {
+			this.require = require;
+		}
 
-        public void generateClass(ClassVisitor v) throws Exception {
-            new BeanMapEmitter(v, getClassName(), beanClass, require);
-        }
+		protected ClassLoader getDefaultClassLoader() {
+			return beanClass.getClassLoader();
+		}
 
-        protected Object firstInstance(Class type) {
-            return ((BeanMap)ReflectUtils.newInstance(type)).newInstance(bean);
-        }
+		protected ProtectionDomain getProtectionDomain() {
+			return ReflectUtils.getProtectionDomain(beanClass);
+		}
 
-        protected Object nextInstance(Object instance) {
-            return ((BeanMap)instance).newInstance(bean);
-        }
-    }
+		/**
+		 * Create a new instance of the <code>BeanMap</code>. An existing generated class will be reused if possible.
+		 */
+		public BeanMap create() {
+			if (beanClass == null)
+				throw new IllegalArgumentException("Class of bean unknown");
+			setNamePrefix(beanClass.getName());
+			return (BeanMap) super.create(KEY_FACTORY.newInstance(beanClass, require));
+		}
 
-    /**
-     * Create a new <code>BeanMap</code> instance using the specified bean.
-     * This is faster than using the {@link #create} static method.
-     * @param bean the JavaBean underlying the map
-     * @return a new <code>BeanMap</code> instance
-     */
-    abstract public BeanMap newInstance(Object bean);
+		public void generateClass(ClassVisitor v) throws Exception {
+			new BeanMapEmitter(v, getClassName(), beanClass, require);
+		}
 
-    /**
-     * Get the type of a property.
-     * @param name the name of the JavaBean property
-     * @return the type of the property, or null if the property does not exist
-     */
-    abstract public Class getPropertyType(String name);
+		protected Object firstInstance(Class type) {
+			return ((BeanMap) ReflectUtils.newInstance(type)).newInstance(bean);
+		}
 
-    protected Object bean;
+		protected Object nextInstance(Object instance) {
+			return ((BeanMap) instance).newInstance(bean);
+		}
+	}
 
-    protected BeanMap() {
-    }
+	/**
+	 * Create a new <code>BeanMap</code> instance using the specified bean. This is faster than using the
+	 * {@link #create} static method.
+	 * 
+	 * @param bean
+	 *            the JavaBean underlying the map
+	 * @return a new <code>BeanMap</code> instance
+	 */
+	abstract public BeanMap newInstance(Object bean);
 
-    protected BeanMap(Object bean) {
-        setBean(bean);
-    }
+	/**
+	 * Get the type of a property.
+	 * 
+	 * @param name
+	 *            the name of the JavaBean property
+	 * @return the type of the property, or null if the property does not exist
+	 */
+	abstract public Class getPropertyType(String name);
 
-    public Object get(Object key) {
-        return get(bean, key);
-    }
+	protected Object bean;
 
-    public Object put(Object key, Object value) {
-        return put(bean, key, value);
-    }
+	protected BeanMap() {
+	}
 
-    /**
-     * Get the property of a bean. This allows a <code>BeanMap</code>
-     * to be used statically for multiple beans--the bean instance tied to the
-     * map is ignored and the bean passed to this method is used instead.
-     * @param bean the bean to query; must be compatible with the type of
-     * this <code>BeanMap</code>
-     * @param key must be a String
-     * @return the current value, or null if there is no matching property
-     */
-    abstract public Object get(Object bean, Object key);
+	protected BeanMap(Object bean) {
+		setBean(bean);
+	}
 
-    /**
-     * Set the property of a bean. This allows a <code>BeanMap</code>
-     * to be used statically for multiple beans--the bean instance tied to the
-     * map is ignored and the bean passed to this method is used instead.
-     * @param key must be a String
-     * @return the old value, if there was one, or null
-     */
-    abstract public Object put(Object bean, Object key, Object value);
+	public Object get(Object key) {
+		return get(bean, key);
+	}
 
-    /**
-     * Change the underlying bean this map should use.
-     * @param bean the new JavaBean
-     * @see #getBean
-     */
-    public void setBean(Object bean) {
-        this.bean = bean;
-    }
+	public Object put(Object key, Object value) {
+		return put(bean, key, value);
+	}
 
-    /**
-     * Return the bean currently in use by this map.
-     * @return the current JavaBean
-     * @see #setBean
-     */
-    public Object getBean() {
-        return bean;
-    }
+	/**
+	 * Get the property of a bean. This allows a <code>BeanMap</code> to be used statically for multiple beans--the bean
+	 * instance tied to the map is ignored and the bean passed to this method is used instead.
+	 * 
+	 * @param bean
+	 *            the bean to query; must be compatible with the type of this <code>BeanMap</code>
+	 * @param key
+	 *            must be a String
+	 * @return the current value, or null if there is no matching property
+	 */
+	abstract public Object get(Object bean, Object key);
 
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * Set the property of a bean. This allows a <code>BeanMap</code> to be used statically for multiple beans--the bean
+	 * instance tied to the map is ignored and the bean passed to this method is used instead.
+	 * 
+	 * @param key
+	 *            must be a String
+	 * @return the old value, if there was one, or null
+	 */
+	abstract public Object put(Object bean, Object key, Object value);
 
-    public boolean containsKey(Object key) {
-        return keySet().contains(key);
-    }
+	/**
+	 * Change the underlying bean this map should use.
+	 * 
+	 * @param bean
+	 *            the new JavaBean
+	 * @see #getBean
+	 */
+	public void setBean(Object bean) {
+		this.bean = bean;
+	}
 
-    public boolean containsValue(Object value) {
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object v = get(it.next());
-            if (((value == null) && (v == null)) || (value != null && value.equals(v)))
-                return true;
-        }
-        return false;
-    }
+	/**
+	 * Return the bean currently in use by this map.
+	 * 
+	 * @return the current JavaBean
+	 * @see #setBean
+	 */
+	public Object getBean() {
+		return bean;
+	}
 
-    public int size() {
-        return keySet().size();
-    }
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
 
-    public boolean isEmpty() {
-        return size() == 0;
-    }
+	public boolean containsKey(Object key) {
+		return keySet().contains(key);
+	}
 
-    public Object remove(Object key) {
-        throw new UnsupportedOperationException();
-    }
+	public boolean containsValue(Object value) {
+		for (Iterator it = keySet().iterator(); it.hasNext();) {
+			Object v = get(it.next());
+			if (((value == null) && (v == null)) || value.equals(v))
+				return true;
+		}
+		return false;
+	}
 
-    public void putAll(Map t) {
-        for (Iterator it = t.keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
-            put(key, t.get(key));
-        }
-    }
+	public int size() {
+		return keySet().size();
+	}
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof Map)) {
-            return false;
-        }
-        Map other = (Map)o;
-        if (size() != other.size()) {
-            return false;
-        }
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
-            if (!other.containsKey(key)) {
-                return false;
-            }
-            Object v1 = get(key);
-            Object v2 = other.get(key);
-            if (!((v1 == null) ? v2 == null : v1.equals(v2))) {
-                return false;
-            }
-        }
-        return true;
-    }
+	public boolean isEmpty() {
+		return size() == 0;
+	}
 
-    public int hashCode() {
-        int code = 0;
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
-            Object value = get(key);
-            code += ((key == null) ? 0 : key.hashCode()) ^
-                ((value == null) ? 0 : value.hashCode());
-        }
-        return code;
-    }
+	public Object remove(Object key) {
+		throw new UnsupportedOperationException();
+	}
 
-    // TODO: optimize
-    public Set entrySet() {
-        HashMap copy = new HashMap();
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
-            copy.put(key, get(key));
-        }
-        return Collections.unmodifiableMap(copy).entrySet();
-    }
+	public void putAll(Map t) {
+		for (Iterator it = t.keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			put(key, t.get(key));
+		}
+	}
 
-    public Collection values() {
-        Set keys = keySet();
-        List values = new ArrayList(keys.size());
-        for (Iterator it = keys.iterator(); it.hasNext();) {
-            values.add(get(it.next()));
-        }
-        return Collections.unmodifiableCollection(values);
-    }
+	public boolean equals(Object o) {
+		if (o == null || !(o instanceof Map)) {
+			return false;
+		}
+		Map other = (Map) o;
+		if (size() != other.size()) {
+			return false;
+		}
+		for (Iterator it = keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			if (!other.containsKey(key)) {
+				return false;
+			}
+			Object v1 = get(key);
+			Object v2 = other.get(key);
+			if (!((v1 == null) ? v2 == null : v1.equals(v2))) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-    /*
-     * @see java.util.AbstractMap#toString
-     */
-    public String toString()
-    {
-        StringBuffer sb = new StringBuffer();
-        sb.append('{');
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
-            sb.append(key);
-            sb.append('=');
-            sb.append(get(key));
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append('}');
-        return sb.toString();
-    }
+	public int hashCode() {
+		int code = 0;
+		for (Iterator it = keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			Object value = get(key);
+			code += ((key == null) ? 0 : key.hashCode()) ^ ((value == null) ? 0 : value.hashCode());
+		}
+		return code;
+	}
+
+	// TODO: optimize
+	public Set entrySet() {
+		HashMap copy = new HashMap();
+		for (Iterator it = keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			copy.put(key, get(key));
+		}
+		return Collections.unmodifiableMap(copy).entrySet();
+	}
+
+	public Collection values() {
+		Set keys = keySet();
+		List values = new ArrayList(keys.size());
+		for (Iterator it = keys.iterator(); it.hasNext();) {
+			values.add(get(it.next()));
+		}
+		return Collections.unmodifiableCollection(values);
+	}
+
+	/*
+	 * @see java.util.AbstractMap#toString
+	 */
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append('{');
+		for (Iterator it = keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			sb.append(key);
+			sb.append('=');
+			sb.append(get(key));
+			if (it.hasNext()) {
+				sb.append(", ");
+			}
+		}
+		sb.append('}');
+		return sb.toString();
+	}
 }

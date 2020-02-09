@@ -16,12 +16,14 @@
 package com.github.drinkjava2.cglib.beans;
 
 import java.util.*;
-@SuppressWarnings("all") // Yong
+
+@SuppressWarnings({"rawtypes","unchecked"})     
 public /* need it for class loading  */ class FixedKeySet extends AbstractSet {
     private Set set;
     private int size;
 
-    public FixedKeySet(String[] keys) {
+
+	public FixedKeySet(String[] keys) {
         size = keys.length;
         set = Collections.unmodifiableSet(new HashSet(Arrays.asList(keys)));
     }

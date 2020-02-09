@@ -17,8 +17,7 @@ package com.github.drinkjava2.cglib.transform;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.cglib.core.ClassGenerator;
-import com.github.drinkjava2.cglib.core.Transformer;
-@SuppressWarnings("all") // Yong
+
 public class TransformingClassGenerator implements ClassGenerator {
     private ClassGenerator gen;
     private ClassTransformer t;

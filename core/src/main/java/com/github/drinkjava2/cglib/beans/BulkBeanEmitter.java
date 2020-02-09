@@ -15,16 +15,23 @@
  */
 package com.github.drinkjava2.cglib.beans;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.Block;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.Local;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
     
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes"})  
 class BulkBeanEmitter extends ClassEmitter {
     private static final Signature GET_PROPERTY_VALUES =
       TypeUtils.parseSignature("void getPropertyValues(Object, Object[])");
@@ -49,7 +56,7 @@ class BulkBeanEmitter extends ClassEmitter {
         Method[] setters = new Method[setterNames.length];
         validate(target, getterNames, setterNames, types, getters, setters);
 
-        begin_class(Constants.V1_8, Constants.ACC_PUBLIC, className, BULK_BEAN, null, Constants.SOURCE_FILE);
+        begin_class(Constants.V1_2, Constants.ACC_PUBLIC, className, BULK_BEAN, null, Constants.SOURCE_FILE);
         EmitUtils.null_constructor(this);
         generateGet(target, getters);
         generateSet(target, setters);
@@ -58,7 +65,7 @@ class BulkBeanEmitter extends ClassEmitter {
 
     private void generateGet(final Class target, final Method[] getters) {
         CodeEmitter e = begin_method(Constants.ACC_PUBLIC, GET_PROPERTY_VALUES, null);
-        if (getters.length > 0) {
+        if (getters.length >= 0) {
             e.load_arg(0);
             e.checkcast(Type.getType(target));
             Local bean = e.make_local();

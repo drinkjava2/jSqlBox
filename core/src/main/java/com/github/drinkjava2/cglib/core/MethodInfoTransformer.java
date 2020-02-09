@@ -16,7 +16,7 @@
 package com.github.drinkjava2.cglib.core;
 
 import java.lang.reflect.*;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })
 public class MethodInfoTransformer implements Transformer
 {
     private static final MethodInfoTransformer INSTANCE = new MethodInfoTransformer();

@@ -15,11 +15,12 @@
  */
 package com.github.drinkjava2.cglib.util;
 
-import java.lang.reflect.*;
 import java.util.Comparator;
 
 import com.github.drinkjava2.asm.ClassVisitor;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassesKey;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
 
 /**
  * For the efficient sorting of multiple arrays in parallel.
@@ -46,7 +47,7 @@ import com.github.drinkjava2.cglib.core.*;
  *
  * @author Chris Nokleberg
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })
 abstract public class ParallelSorter extends SorterTemplate {
     protected Object[] a;
     private Comparer comparer;

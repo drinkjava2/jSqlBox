@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.drinkjava2.cglib.beans;
-
-import com.github.drinkjava2.cglib.core.CodeGenerationException;
-@SuppressWarnings("all") // Yong
+package com.github.drinkjava2.cglib.beans; 
+@SuppressWarnings("serial")
 public class BulkBeanException extends RuntimeException
 {
     private int index;

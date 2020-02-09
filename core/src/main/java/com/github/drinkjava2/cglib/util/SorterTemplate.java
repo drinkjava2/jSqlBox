@@ -15,8 +15,6 @@
  */
 package com.github.drinkjava2.cglib.util;
 
-import java.util.*;
-@SuppressWarnings("all") // Yong
 abstract class SorterTemplate {
     private static final int MERGESORT_THRESHOLD = 12;
     private static final int QUICKSORT_THRESHOLD = 7;

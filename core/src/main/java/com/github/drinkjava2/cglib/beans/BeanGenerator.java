@@ -17,16 +17,23 @@ package com.github.drinkjava2.cglib.beans;
 
 import java.beans.PropertyDescriptor;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.KeyFactory;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
 
 /**
  * @author Juozas Baliuka, Chris Nokleberg
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})  
 public class BeanGenerator extends AbstractClassGenerator
 {
     private static final Source SOURCE = new Source(BeanGenerator.class.getName());
@@ -104,7 +111,7 @@ public class BeanGenerator extends AbstractClassGenerator
             types[i] = (Type)props.get(names[i]);
         }
         ClassEmitter ce = new ClassEmitter(v);
-        ce.begin_class(Constants.V1_8,
+        ce.begin_class(Constants.V1_2,
                        Constants.ACC_PUBLIC,
                        getClassName(),
                        superclass != null ? Type.getType(superclass) : Constants.TYPE_OBJECT,

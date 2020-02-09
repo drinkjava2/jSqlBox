@@ -18,14 +18,14 @@ package com.github.drinkjava2.cglib.transform;
 import com.github.drinkjava2.asm.AnnotationVisitor;
 import com.github.drinkjava2.asm.Attribute;
 import com.github.drinkjava2.asm.FieldVisitor;
+import com.github.drinkjava2.asm.Opcodes;
 import com.github.drinkjava2.asm.TypePath;
-import com.github.drinkjava2.cglib.core.Constants;
 
 public class FieldVisitorTee extends FieldVisitor {
     private FieldVisitor fv1, fv2;
     
     public FieldVisitorTee(FieldVisitor fv1, FieldVisitor fv2) {
-	super(Constants.ASM_API);
+	super(Opcodes.ASM5);
 	this.fv1 = fv1;
         this.fv2 = fv2;
     }

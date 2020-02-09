@@ -17,12 +17,6 @@ package com.github.drinkjava2.cglib.core;
 
 import com.github.drinkjava2.asm.Type;
 
-/**
- * Customizes key types for {@link KeyFactory} when building equals, hashCode, and toString.
- * For customization of field types, use {@link FieldTypeCustomizer}
- *
- * @see KeyFactory#CLASS_BY_NAME
- */
-public interface Customizer extends KeyFactoryCustomizer {
+public interface Customizer {
     void customize(CodeEmitter e, Type type);
 }

@@ -15,12 +15,18 @@
  */
 package com.github.drinkjava2.cglib.proxy;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
 
 /**
  * Generates new interfaces at runtime.
@@ -30,7 +36,7 @@ import com.github.drinkjava2.cglib.core.*;
  * @author Chris Nokleberg
  * @version $Id: InterfaceMaker.java,v 1.4 2006/03/05 02:43:19 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })
 public class InterfaceMaker extends AbstractClassGenerator
 {
     private static final Source SOURCE = new Source(InterfaceMaker.class.getName());
@@ -102,8 +108,8 @@ public class InterfaceMaker extends AbstractClassGenerator
 
     public void generateClass(ClassVisitor v) throws Exception {
         ClassEmitter ce = new ClassEmitter(v);
-        ce.begin_class(Constants.V1_8,
-                       Constants.ACC_PUBLIC | Constants.ACC_INTERFACE | Constants.ACC_ABSTRACT,
+        ce.begin_class(Constants.V1_2,
+                       Constants.ACC_PUBLIC | Constants.ACC_INTERFACE,
                        getClassName(),
                        null,
                        null,

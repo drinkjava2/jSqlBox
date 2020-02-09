@@ -16,15 +16,12 @@
 
 package com.github.drinkjava2.cglib.core;
 
+import java.lang.reflect.Method;
+import java.security.ProtectionDomain;
+
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.internal.CustomizerRegistry;
-
-import java.lang.reflect.Method;
-import java.security.ProtectionDomain;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Generates classes to handle multi-valued keys, for use in things such as Maps and Sets.
@@ -55,7 +52,7 @@ import java.util.List;
  *
  * @version $Id: KeyFactory.java,v 1.26 2006/03/05 02:43:19 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","static-access" })
 abstract public class KeyFactory {
     private static final Signature GET_NAME =
       TypeUtils.parseSignature("String getName()");
@@ -71,9 +68,7 @@ abstract public class KeyFactory {
       TypeUtils.parseSignature("StringBuffer append(String)");
     private static final Type KEY_FACTORY =
       TypeUtils.parseType("com.github.drinkjava2.cglib.core.KeyFactory");
-    private static final Signature GET_SORT =
-      TypeUtils.parseSignature("int getSort()");
-
+    
     //generated numbers: 
     private final static int PRIMES[] = {
                11,         73,        179,       331,
@@ -99,40 +94,6 @@ abstract public class KeyFactory {
         }
     };
 
-    public static final FieldTypeCustomizer STORE_CLASS_AS_STRING = new FieldTypeCustomizer() {
-        public void customize(CodeEmitter e, int index, Type type) {
-            if (type.equals(Constants.TYPE_CLASS)) {
-                e.invoke_virtual(Constants.TYPE_CLASS, GET_NAME);
-            }
-        }
-
-        public Type getOutType(int index, Type type) {
-            if (type.equals(Constants.TYPE_CLASS)) {
-                return Constants.TYPE_STRING;
-            }
-            return type;
-        }
-    };
-
-    /**
-     * {@link Type#hashCode()} is very expensive as it traverses full descriptor to calculate hash code.
-     * This customizer uses {@link Type#getSort()} as a hash code.
-     */
-    public static final HashCodeCustomizer HASH_ASM_TYPE = new HashCodeCustomizer() {
-        public boolean customize(CodeEmitter e, Type type) {
-            if (Constants.TYPE_TYPE.equals(type)) {
-                e.invoke_virtual(type, GET_SORT);
-                return true;
-            }
-            return false;
-        }
-    };
-
-    /**
-     * @deprecated this customizer might result in unexpected class leak since key object still holds a strong reference to the Object and class.
-     *             It is recommended to have pre-processing method that would strip Objects and represent Classes as Strings
-     */
-    @Deprecated
     public static final Customizer OBJECT_BY_CLASS = new Customizer() {
         public void customize(CodeEmitter e, Type type) {
             e.invoke_virtual(Constants.TYPE_OBJECT, GET_CLASS);
@@ -150,38 +111,18 @@ abstract public class KeyFactory {
         return create(keyInterface.getClassLoader(), keyInterface,  customizer);
     }
 
-    public static KeyFactory create(Class keyInterface, KeyFactoryCustomizer first, List<KeyFactoryCustomizer> next) {
-        return create(keyInterface.getClassLoader(), keyInterface, first, next);
-    }
-
     public static KeyFactory create(ClassLoader loader, Class keyInterface, Customizer customizer) {
-        return create(loader, keyInterface, customizer, Collections.<KeyFactoryCustomizer>emptyList());
-    }
-
-    public static KeyFactory create(ClassLoader loader, Class keyInterface, KeyFactoryCustomizer customizer,
-                                    List<KeyFactoryCustomizer> next) {
         Generator gen = new Generator();
         gen.setInterface(keyInterface);
-
-        if (customizer != null) {
-            gen.addCustomizer(customizer);
-        }
-        if (next != null && !next.isEmpty()) {
-            for (KeyFactoryCustomizer keyFactoryCustomizer : next) {
-                gen.addCustomizer(keyFactoryCustomizer);
-            }
-        }
+        gen.setCustomizer(customizer);
         gen.setClassLoader(loader);
         return gen.create();
     }
 
     public static class Generator extends AbstractClassGenerator {
         private static final Source SOURCE = new Source(KeyFactory.class.getName());
-        private static final Class[] KNOWN_CUSTOMIZER_TYPES = new Class[]{Customizer.class, FieldTypeCustomizer.class};
-
         private Class keyInterface;
-        // TODO: Make me final when deprecated methods are removed
-        private CustomizerRegistry customizers = new CustomizerRegistry(KNOWN_CUSTOMIZER_TYPES);
+        private Customizer customizer;
         private int constant;
         private int multiplier;
 
@@ -197,20 +138,8 @@ abstract public class KeyFactory {
         	return ReflectUtils.getProtectionDomain(keyInterface);
         }
 
-        /**
-         * @deprecated Use {@link #addCustomizer(KeyFactoryCustomizer)} instead.
-         */
-        @Deprecated
         public void setCustomizer(Customizer customizer) {
-            customizers = CustomizerRegistry.singleton(customizer);
-        }
-        
-        public void addCustomizer(KeyFactoryCustomizer customizer) {
-            customizers.add(customizer);
-        }
-
-        public <T> List<T> getCustomizers(Class<T> klass) {
-            return customizers.get(klass);
+            this.customizer = customizer;
         }
 
         public void setInterface(Class keyInterface) {
@@ -247,7 +176,7 @@ abstract public class KeyFactory {
             }
 
             Type[] parameterTypes = TypeUtils.getTypes(newInstance.getParameterTypes());
-            ce.begin_class(Constants.V1_8,
+            ce.begin_class(Constants.V1_2,
                            Constants.ACC_PUBLIC,
                            getClassName(),
                            KEY_FACTORY,
@@ -263,23 +192,14 @@ abstract public class KeyFactory {
             e.load_this();
             e.super_invoke_constructor();
             e.load_this();
-            List<FieldTypeCustomizer> fieldTypeCustomizers = getCustomizers(FieldTypeCustomizer.class);
             for (int i = 0; i < parameterTypes.length; i++) {
-                Type parameterType = parameterTypes[i];
-                Type fieldType = parameterType;
-                for (FieldTypeCustomizer customizer : fieldTypeCustomizers) {
-                    fieldType = customizer.getOutType(i, fieldType);
-                }
-                seed += fieldType.hashCode();
+                seed += parameterTypes[i].hashCode();
                 ce.declare_field(Constants.ACC_PRIVATE | Constants.ACC_FINAL,
                                  getFieldName(i),
-                                 fieldType,
+                                 parameterTypes[i],
                                  null);
                 e.dup();
                 e.load_arg(i);
-                for (FieldTypeCustomizer customizer : fieldTypeCustomizers) {
-                    customizer.customize(e, i, parameterType);
-                }
                 e.putfield(getFieldName(i));
             }
             e.return_value();
@@ -293,7 +213,7 @@ abstract public class KeyFactory {
             for (int i = 0; i < parameterTypes.length; i++) {
                 e.load_this();
                 e.getfield(getFieldName(i));
-                EmitUtils.hash_code(e, parameterTypes[i], hm, customizers);
+                EmitUtils.hash_code(e, parameterTypes[i], hm, customizer);
             }
             e.return_value();
             e.end_method();
@@ -310,7 +230,7 @@ abstract public class KeyFactory {
                 e.load_arg(0);
                 e.checkcast_this();
                 e.getfield(getFieldName(i));
-                EmitUtils.not_equals(e, parameterTypes[i], fail, customizers);
+                EmitUtils.not_equals(e, parameterTypes[i], fail, customizer);
             }
             e.push(1);
             e.return_value();
@@ -331,7 +251,7 @@ abstract public class KeyFactory {
                 }
                 e.load_this();
                 e.getfield(getFieldName(i));
-                EmitUtils.append_string(e, parameterTypes[i], EmitUtils.DEFAULT_DELIMITERS, customizers);
+                EmitUtils.append_string(e, parameterTypes[i], EmitUtils.DEFAULT_DELIMITERS, customizer);
             }
             e.invoke_virtual(Constants.TYPE_STRING_BUFFER, TO_STRING);
             e.return_value();

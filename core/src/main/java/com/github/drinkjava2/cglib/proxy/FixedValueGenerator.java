@@ -15,11 +15,16 @@
  */
 package com.github.drinkjava2.cglib.proxy;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+@SuppressWarnings({"rawtypes" })
 class FixedValueGenerator implements CallbackGenerator {
     public static final FixedValueGenerator INSTANCE = new FixedValueGenerator();
     private static final Type FIXED_VALUE =

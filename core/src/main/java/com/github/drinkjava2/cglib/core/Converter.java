@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package com.github.drinkjava2.cglib.core;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes"})  
 public interface Converter {
     Object convert(Object value, Class target, Object context);
 }

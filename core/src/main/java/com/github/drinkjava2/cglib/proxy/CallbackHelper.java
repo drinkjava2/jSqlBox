@@ -23,7 +23,7 @@ import com.github.drinkjava2.cglib.core.ReflectUtils;
 /**
  * @version $Id: CallbackHelper.java,v 1.2 2004/06/24 21:15:20 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})    
 abstract public class CallbackHelper
 implements CallbackFilter
 {

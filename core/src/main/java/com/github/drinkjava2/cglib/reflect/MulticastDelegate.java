@@ -15,15 +15,25 @@
  */
 package com.github.drinkjava2.cglib.reflect;
 
-import java.lang.reflect.*;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import com.github.drinkjava2.asm.ClassVisitor;
-import com.github.drinkjava2.asm.MethodVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.Local;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.ProcessArrayCallback;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+@SuppressWarnings({"rawtypes","unchecked"  })  
 abstract public class MulticastDelegate implements Cloneable {
     protected Object[] targets = {};
 
@@ -103,7 +113,7 @@ abstract public class MulticastDelegate implements Cloneable {
             final MethodInfo method = ReflectUtils.getMethodInfo(ReflectUtils.findInterfaceMethod(iface));
 
             ClassEmitter ce = new ClassEmitter(cv);
-            ce.begin_class(Constants.V1_8,
+            ce.begin_class(Constants.V1_2,
                            Constants.ACC_PUBLIC,
                            getClassName(),
                            MULTICAST_DELEGATE,

@@ -17,7 +17,7 @@ package com.github.drinkjava2.cglib.reflect;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })  
 public class FastConstructor extends FastMember
 {
     FastConstructor(FastClass fc, Constructor constructor) {

@@ -16,27 +16,38 @@
 package com.github.drinkjava2.cglib.beans;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.*;
+import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-
-import java.util.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.Converter;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.KeyFactory;
+import com.github.drinkjava2.cglib.core.Local;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
 
 /**
  * @author Chris Nokleberg
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})  
 abstract public class BeanCopier
 {
     private static final BeanCopierKey KEY_FACTORY =
       (BeanCopierKey)KeyFactory.create(BeanCopierKey.class);
     private static final Type CONVERTER =
-      TypeUtils.parseType("com.github.drinkjava2.cglib.core.Converter");
+      TypeUtils.parseType("com.github.drinkjava2.cglib.core.Converter");//YZ_DEBUG
     private static final Type BEAN_COPIER =
-      TypeUtils.parseType("com.github.drinkjava2.cglib.beans.BeanCopier");
+      TypeUtils.parseType("com.github.drinkjava2.cglib.beans.BeanCopier");//YZ_DEBUG
     private static final Signature COPY =
       new Signature("copy", Type.VOID_TYPE, new Type[]{ Constants.TYPE_OBJECT, Constants.TYPE_OBJECT, CONVERTER });
     private static final Signature CONVERT =
@@ -102,7 +113,7 @@ abstract public class BeanCopier
             Type sourceType = Type.getType(source);
             Type targetType = Type.getType(target);
             ClassEmitter ce = new ClassEmitter(v);
-            ce.begin_class(Constants.V1_8,
+            ce.begin_class(Constants.V1_2,
                            Constants.ACC_PUBLIC,
                            getClassName(),
                            BEAN_COPIER,

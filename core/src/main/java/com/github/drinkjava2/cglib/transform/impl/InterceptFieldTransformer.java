@@ -17,8 +17,12 @@ package com.github.drinkjava2.cglib.transform.impl;
 
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-import com.github.drinkjava2.cglib.transform.*;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.Local;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+import com.github.drinkjava2.cglib.transform.ClassEmitterTransformer;
 
 /**
  * @author Juozas Baliuka, Chris Nokleberg

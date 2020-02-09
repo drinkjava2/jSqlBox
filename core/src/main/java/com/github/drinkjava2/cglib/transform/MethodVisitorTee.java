@@ -15,15 +15,20 @@
  */
 package com.github.drinkjava2.cglib.transform;
 
-import com.github.drinkjava2.asm.*;
-import com.github.drinkjava2.cglib.core.Constants;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.asm.AnnotationVisitor;
+import com.github.drinkjava2.asm.Attribute;
+import com.github.drinkjava2.asm.Handle;
+import com.github.drinkjava2.asm.Label;
+import com.github.drinkjava2.asm.MethodVisitor;
+import com.github.drinkjava2.asm.Opcodes;
+import com.github.drinkjava2.asm.TypePath;
+ 
 public class MethodVisitorTee extends MethodVisitor {
     private final MethodVisitor mv1;
     private final MethodVisitor mv2;
     
     public MethodVisitorTee(MethodVisitor mv1, MethodVisitor mv2) {
-	super(Constants.ASM_API);
+	super(Opcodes.ASM5);
 	this.mv1 = mv1;
         this.mv2 = mv2;
     }
@@ -85,7 +90,8 @@ public class MethodVisitorTee extends MethodVisitor {
         mv2.visitFieldInsn(opcode, owner, name, desc);
     }
 
-    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+    @SuppressWarnings("deprecation")
+	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         mv1.visitMethodInsn(opcode, owner, name, desc);
         mv2.visitMethodInsn(opcode, owner, name, desc);
     }
@@ -115,7 +121,7 @@ public class MethodVisitorTee extends MethodVisitor {
         mv2.visitIincInsn(var, increment);
     }
     
-    public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {//label[] change to label...
+    public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
         mv1.visitTableSwitchInsn(min, max, dflt, labels);
         mv2.visitTableSwitchInsn(min, max, dflt, labels);
     }

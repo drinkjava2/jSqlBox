@@ -32,7 +32,7 @@ import com.github.drinkjava2.cglib.reflect.FastClass;
  * object of the same type.
  * @version $Id: MethodProxy.java,v 1.16 2009/01/11 20:09:48 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })
 public class MethodProxy {
     private Signature sig1;
     private Signature sig2;

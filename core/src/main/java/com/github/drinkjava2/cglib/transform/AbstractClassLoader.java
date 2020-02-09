@@ -23,7 +23,7 @@ import com.github.drinkjava2.cglib.core.CodeGenerationException;
 import com.github.drinkjava2.cglib.core.DebuggingClassWriter;
 
 import java.io.IOException;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })  
 abstract public class AbstractClassLoader extends ClassLoader {
     private ClassFilter filter;
     private ClassLoader classPath;

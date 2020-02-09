@@ -25,11 +25,11 @@ import com.github.drinkjava2.cglib.transform.MethodFilterTransformer;
 import com.github.drinkjava2.cglib.transform.TransformingClassGenerator;
 
 /**
- * A {@link GeneratorStrategy} suitable for use with {@link com.github.drinkjava2.cglib.Enhancer} which
+ * A {@link GeneratorStrategy} suitable for use with {@link com.github.drinkjava2.cglib.proxy.Enhancer} which
  * causes all undeclared exceptions thrown from within a proxied method to be wrapped
  * in an alternative exception of your choice.
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })
 public class UndeclaredThrowableStrategy extends DefaultGeneratorStrategy {
     
 

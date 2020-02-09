@@ -21,11 +21,19 @@ import java.security.ProtectionDomain;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
 /**
  * @author Chris Nokleberg
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })
 public class ImmutableBean
 {
     private static final Type ILLEGAL_STATE_EXCEPTION =
@@ -75,7 +83,7 @@ public class ImmutableBean
         public void generateClass(ClassVisitor v) {
             Type targetType = Type.getType(target);
             ClassEmitter ce = new ClassEmitter(v);
-            ce.begin_class(Constants.V1_8,
+            ce.begin_class(Constants.V1_2,
                            Constants.ACC_PUBLIC,
                            getClassName(),
                            targetType,

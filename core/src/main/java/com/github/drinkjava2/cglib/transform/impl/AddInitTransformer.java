@@ -17,7 +17,6 @@ package com.github.drinkjava2.cglib.transform.impl;
 
 import java.lang.reflect.Method;
 
-import com.github.drinkjava2.asm.Attribute;
 import com.github.drinkjava2.asm.Type;
 import com.github.drinkjava2.cglib.core.CodeEmitter;
 import com.github.drinkjava2.cglib.core.Constants;
@@ -29,7 +28,6 @@ import com.github.drinkjava2.cglib.transform.ClassEmitterTransformer;
 /**
  * @author	Mark Hobson
  */
-@SuppressWarnings("all") // Yong
 public class AddInitTransformer extends ClassEmitterTransformer {
     private MethodInfo info;
     

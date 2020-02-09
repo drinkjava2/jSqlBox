@@ -15,7 +15,6 @@ import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 
-import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 import com.github.drinkjava2.jsqlbox.DbContext;
 
@@ -42,11 +41,8 @@ public class HelloWorldJava8 implements ActiveEntity<HelloWorldJava8> {
 				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 		DbContext ctx = new DbContext(ds);
 		DbContext.setGlobalDbContext(ctx);
-		String[] ddls = ctx.toCreateDDL(HelloWorldJava8.class);
-		for (String ddl : ddls)
-			ctx.nExecute(ddl);
-
+		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorldJava8.class));
 		new HelloWorldJava8().putField("name", "Hello jSqlBox").insert();
-		Systemout.println(ctx.pQueryForString("select name from HelloWorldJava8"));
+		System.out.println(ctx.pQueryForString("select name from HelloWorldJava8"));
 	}
 }

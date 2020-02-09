@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
  <packaging>jar</packaging>
- <version>4.0.0</version> <!-- note: not released -->
+ <version>4.0.0.jre8</version> <!-- note: not released -->
  
  <name>jSqlBox</name>
  <description>jSqlBox is a full function DAO tool</description>
@@ -42,7 +42,7 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
         <!-- Release on Java8 -->
         <version.java>1.8</version.java>
-        <version.javadoc>6</version.javadoc>
+        <version.javadoc>8</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
         <version.war-plugin>2.6</version.war-plugin>
         <version.clean-plugin>3.0.0</version.clean-plugin>

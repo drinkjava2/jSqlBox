@@ -18,8 +18,12 @@ package com.github.drinkjava2.cglib.proxy;
 import java.util.Iterator;
 import java.util.List;
 
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+@SuppressWarnings({"rawtypes" })
 class NoOpGenerator
 implements CallbackGenerator
 {
@@ -33,7 +37,8 @@ implements CallbackGenerator
                     TypeUtils.isPublic(method.getModifiers()))) {
                 CodeEmitter e = EmitUtils.begin_method(ce, method);
                 e.load_this();
-                context.emitLoadArgsAndInvoke(e, method);
+                e.load_args();
+                context.emitInvoke(e, method);
                 e.return_value();
                 e.end_method();
             }

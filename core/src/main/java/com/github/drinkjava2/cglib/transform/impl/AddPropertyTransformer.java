@@ -15,12 +15,13 @@
  */
 package com.github.drinkjava2.cglib.transform.impl;
 
-import java.util.*;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-import com.github.drinkjava2.cglib.transform.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+import com.github.drinkjava2.cglib.transform.ClassEmitterTransformer;
+@SuppressWarnings({"rawtypes" })
 public class AddPropertyTransformer extends ClassEmitterTransformer {
     private final String[] names;
     private final Type[] types;

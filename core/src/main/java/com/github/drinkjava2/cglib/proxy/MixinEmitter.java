@@ -16,17 +16,26 @@
 package com.github.drinkjava2.cglib.proxy;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.MethodWrapper;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
 
 /**
  * @author Chris Nokleberg
  * @version $Id: MixinEmitter.java,v 1.9 2006/08/27 21:04:37 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })
 class MixinEmitter extends ClassEmitter {
     private static final String FIELD_NAME = "CGLIB$DELEGATES";
     private static final Signature CSTRUCT_OBJECT_ARRAY =
@@ -39,7 +48,7 @@ class MixinEmitter extends ClassEmitter {
     public MixinEmitter(ClassVisitor v, String className, Class[] classes, int[] route) {
         super(v);
 
-        begin_class(Constants.V1_8,
+        begin_class(Constants.V1_2,
                     Constants.ACC_PUBLIC,
                     className,
                     MIXIN,

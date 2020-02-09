@@ -15,12 +15,20 @@
  */
 package com.github.drinkjava2.cglib.proxy;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+@SuppressWarnings({"rawtypes","unchecked" })
 class LazyLoaderGenerator implements CallbackGenerator {
     public static final LazyLoaderGenerator INSTANCE = new LazyLoaderGenerator();
 

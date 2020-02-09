@@ -33,11 +33,6 @@ call mvn clean
 call mvn eclipse:eclipse
 cd..
 
-cd jsqlbox-java8
-call mvn clean
-call mvn eclipse:eclipse
-cd..
-
 cd jsqlbox-atomikos
 call mvn clean
 call mvn eclipse:eclipse 

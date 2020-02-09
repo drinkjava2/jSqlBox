@@ -15,13 +15,26 @@
  */
 package com.github.drinkjava2.cglib.proxy;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.ClassInfo;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.CollectionUtils;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.Local;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.ObjectSwitchCallback;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.Transformer;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+@SuppressWarnings({"rawtypes","unchecked","unused" })
 class MethodInterceptorGenerator
 implements CallbackGenerator
 {
@@ -140,7 +153,8 @@ implements CallbackGenerator
             e.throw_exception(ABSTRACT_METHOD_ERROR, method.toString() + " is abstract" );
         } else {
             e.load_this();
-            context.emitLoadArgsAndInvoke(e, method);
+            e.load_args();
+            context.emitInvoke(e, method);
         }
     }
 

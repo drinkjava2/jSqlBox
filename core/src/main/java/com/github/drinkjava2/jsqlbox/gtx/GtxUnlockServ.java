@@ -42,14 +42,14 @@ import com.github.drinkjava2.jtransactions.manual.ManualTxConnectionManager;
  * @author Yong Zhu
  */
 public abstract class GtxUnlockServ {// NOSONAR
-	protected static final Log logger = LogFactory.getLog(GtxUnlockServ.class);
+	protected static final Log log = LogFactory.getLog(GtxUnlockServ.class);
 	private static final Map<String, String> gtxIdCache = new HashMap<String, String>();
 	private static DbContext lockCtx;
 	private static DbContext[] ctxs;
 
 	private static void initContext(DbContext userCtx) {
 		GtxConnectionManager lockCM = (GtxConnectionManager) userCtx.getConnectionManager();
-		lockCtx = lockCM.getLockCtx(); 
+		lockCtx = lockCM.getLockCtx();
 		ctxs = new DbContext[userCtx.getMasters().length];
 		for (int i = 0; i < userCtx.getMasters().length; i++) {
 			DbContext userCtxArr = (DbContext) userCtx.getMasters()[i];
@@ -99,14 +99,14 @@ public abstract class GtxUnlockServ {// NOSONAR
 						try {
 							if (unlockOne(lockDb, id)) {// second time unlock it
 								gtxIdCache.remove(id);
-								logger.info("Unlocked success for gtxid:" + id);
+								log.info("Unlocked success for gtxid:" + id);
 							} else {
 								gtxIdCache.put(id, "UNLOCK FAIL"); // only try once
-								logger.info("Unlock fail for gtxid:" + id);
+								log.info("Unlock fail for gtxid:" + id);
 							}
 						} catch (Exception e) {
 							gtxIdCache.put(id, "UNLOCK FAIL"); // only try once
-							logger.warn("Unlock fail exception, for gtxid:" + id, e);
+							log.warn("Unlock fail exception, for gtxid:" + id, e);
 						}
 					}
 				} else
@@ -167,7 +167,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 		try {
 			return unlockOne(locker, txResult.getGid());
 		} catch (Exception e) {
-			logger.error("forceUnlock fail, ",e);
+			log.warn("Force unlock gtx fail. ", e);
 			return false;
 		}
 	}
@@ -180,7 +180,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 		GtxId lockGid = null; // First check and read if gtxId exist on Lock Server
 		lockGid = locker.eLoadByIdTry(GtxId.class, gid);
 		if (lockGid == null) {
-			logger.error("Can not access lock server:" + lockNo);
+			log.warn("Not found gtxId '" + gid + "' on gtx Locker server:" + locker.getName() + locker.getDbCode());
 			return false;
 		}
 		List<List<Integer>> dbLstLst = locker.iExecute("select distinct(db) from gtxlock where gid=?", param(gid),
@@ -192,7 +192,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 		}
 
 		locker.eDeleteById(GtxId.class, gid); // if no error, means all unlocked, can remove gid
-
+		log.info("Unlocked sucess for gtxId '" + gid + "' on gtx Locker server:" + locker.getName() + locker.getDbCode());
 		return true;// So far, all databases are OK
 	}
 

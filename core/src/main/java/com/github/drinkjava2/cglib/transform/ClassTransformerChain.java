@@ -15,7 +15,8 @@
  */
 package com.github.drinkjava2.cglib.transform;
 
-import com.github.drinkjava2.asm.*;
+import com.github.drinkjava2.asm.ClassVisitor;
+import com.github.drinkjava2.asm.MethodVisitor;
 
 public class ClassTransformerChain extends AbstractClassTransformer {
     private ClassTransformer[] chain;

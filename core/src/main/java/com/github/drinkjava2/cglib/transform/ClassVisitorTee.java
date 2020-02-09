@@ -15,14 +15,19 @@
  */
 package com.github.drinkjava2.cglib.transform;
 
-import com.github.drinkjava2.asm.*;
-import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.asm.AnnotationVisitor;
+import com.github.drinkjava2.asm.Attribute;
+import com.github.drinkjava2.asm.ClassVisitor;
+import com.github.drinkjava2.asm.FieldVisitor;
+import com.github.drinkjava2.asm.MethodVisitor;
+import com.github.drinkjava2.asm.Opcodes;
+import com.github.drinkjava2.asm.TypePath;
 
 public class ClassVisitorTee extends ClassVisitor {
     private ClassVisitor cv1, cv2;
     
     public ClassVisitorTee(ClassVisitor cv1, ClassVisitor cv2) {
-	super(Constants.ASM_API);
+	super(Opcodes.ASM5);
 	this.cv1 = cv1;
         this.cv2 = cv2;
     }

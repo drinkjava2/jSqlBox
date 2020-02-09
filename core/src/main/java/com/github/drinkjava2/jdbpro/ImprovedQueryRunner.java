@@ -80,7 +80,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
 	protected String name; // A name for current runner
-	protected Integer dbCode = -1; // A unique code used to identify database
+	protected Integer dbCode = 0; // A unique code used to identify database
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();

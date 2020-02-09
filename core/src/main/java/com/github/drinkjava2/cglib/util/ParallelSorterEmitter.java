@@ -15,13 +15,16 @@
  */
 package com.github.drinkjava2.cglib.util;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.Local;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+
 class ParallelSorterEmitter extends ClassEmitter {
     private static final Type PARALLEL_SORTER =
       TypeUtils.parseType("com.github.drinkjava2.cglib.util.ParallelSorter");
@@ -34,7 +37,7 @@ class ParallelSorterEmitter extends ClassEmitter {
 
     public ParallelSorterEmitter(ClassVisitor v, String className, Object[] arrays) {
         super(v);
-        begin_class(Constants.V1_8, Constants.ACC_PUBLIC, className, PARALLEL_SORTER, null, Constants.SOURCE_FILE);
+        begin_class(Constants.V1_2, Constants.ACC_PUBLIC, className, PARALLEL_SORTER, null, Constants.SOURCE_FILE);
         EmitUtils.null_constructor(this);
         EmitUtils.factory_method(this, NEW_INSTANCE);
         generateConstructor(arrays);

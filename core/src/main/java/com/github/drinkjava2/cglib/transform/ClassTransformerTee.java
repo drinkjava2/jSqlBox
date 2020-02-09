@@ -16,13 +16,13 @@
 package com.github.drinkjava2.cglib.transform;
 
 import com.github.drinkjava2.asm.ClassVisitor;
-import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.asm.Opcodes;
 
 public class ClassTransformerTee extends ClassTransformer {
     private ClassVisitor branch;
     
     public ClassTransformerTee(ClassVisitor branch) {
-        super(Constants.ASM_API);
+        super(Opcodes.ASM5);
         this.branch = branch;
     }
     

@@ -20,8 +20,6 @@ import java.lang.reflect.Method;
 
 import com.github.drinkjava2.cglib.core.CodeGenerationException;
 
-import java.lang.reflect.Member;
-
 /**
  * This class is meant to be used as replacement for
  * <code>java.lang.reflect.Proxy</code> under JDK 1.2. There are some known
@@ -37,7 +35,7 @@ import java.lang.reflect.Member;
  * <p>
  * @version $Id: Proxy.java,v 1.6 2004/06/24 21:15:19 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked", "serial" })
 public class Proxy implements Serializable {
     protected InvocationHandler h;
 

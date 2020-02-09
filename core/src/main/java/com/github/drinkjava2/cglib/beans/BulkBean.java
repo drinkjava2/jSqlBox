@@ -15,19 +15,17 @@
  */
 package com.github.drinkjava2.cglib.beans;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
-import java.util.*;
 
 import com.github.drinkjava2.asm.ClassVisitor;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.KeyFactory;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
 
 /**
  * @author Juozas Baliuka
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes"})  
 abstract public class BulkBean
 {
     private static final BulkBeanKey KEY_FACTORY =

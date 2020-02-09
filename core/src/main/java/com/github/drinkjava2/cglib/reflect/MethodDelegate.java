@@ -15,13 +15,21 @@
  */
 package com.github.drinkjava2.cglib.reflect;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.*;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.KeyFactory;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
 
 // TODO: don't require exact match for return type
 
@@ -106,7 +114,7 @@ import com.github.drinkjava2.cglib.core.*;
  *
  * @version $Id: MethodDelegate.java,v 1.25 2006/03/05 02:43:19 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })
 abstract public class MethodDelegate {
     private static final MethodDelegateKey KEY_FACTORY =
       (MethodDelegateKey)KeyFactory.create(MethodDelegateKey.class, KeyFactory.CLASS_BY_NAME);
@@ -136,7 +144,7 @@ abstract public class MethodDelegate {
 
     public boolean equals(Object obj) {
         MethodDelegate other = (MethodDelegate)obj;
-        return (other != null && target == other.target) && eqMethod.equals(other.eqMethod);
+        return target == other.target && eqMethod.equals(other.eqMethod);
     }
 
     public int hashCode() {
@@ -220,7 +228,7 @@ abstract public class MethodDelegate {
 
             ClassEmitter ce = new ClassEmitter(v);
             CodeEmitter e;
-            ce.begin_class(Constants.V1_8,
+            ce.begin_class(Constants.V1_2,
                            Constants.ACC_PUBLIC,
                            getClassName(),
                            METHOD_DELEGATE,

@@ -13,8 +13,8 @@ package com.github.drinkjava2.jsqlbox.helloworld;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
-import com.github.drinkjava2.jbeanbox.JBEANBOX;
+import org.h2.jdbcx.JdbcConnectionPool;
+
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -43,11 +43,9 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
 	}
 
 	public static void main(String[] args) {
-		// DataSource ds = JdbcConnectionPool
-		// .create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0",
-		// "sa", "");
+		DataSource ds = JdbcConnectionPool
+				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 		DbContext.setGlobalNextAllowShowSql(true);
-		DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
 		DbContext ctx = new DbContext(ds);
 		DbContext.setGlobalDbContext(ctx);
 		ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class)); 

@@ -16,29 +16,21 @@
 package com.github.drinkjava2.cglib.proxy;
 
 import com.github.drinkjava2.asm.Type;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})  
 class CallbackInfo
 {
     public static Type[] determineTypes(Class[] callbackTypes) {
-        return determineTypes(callbackTypes, true);
-    }
-
-    public static Type[] determineTypes(Class[] callbackTypes, boolean checkAll) {
         Type[] types = new Type[callbackTypes.length];
         for (int i = 0; i < types.length; i++) {
-            types[i] = determineType(callbackTypes[i], checkAll);
+            types[i] = determineType(callbackTypes[i]);
         }
         return types;
     }
 
     public static Type[] determineTypes(Callback[] callbacks) {
-        return determineTypes(callbacks, true);
-    }
-
-    public static Type[] determineTypes(Callback[] callbacks, boolean checkAll) {
         Type[] types = new Type[callbacks.length];
         for (int i = 0; i < types.length; i++) {
-            types[i] = determineType(callbacks[i], checkAll);
+            types[i] = determineType(callbacks[i]);
         }
         return types;
     }
@@ -73,16 +65,15 @@ class CallbackInfo
         type = Type.getType(cls);
     }
 
-    private static Type determineType(Callback callback, boolean checkAll) {
+    private static Type determineType(Callback callback) {
         if (callback == null) {
             throw new IllegalStateException("Callback is null");
         }
-        return determineType(callback.getClass(), checkAll);
+        return determineType(callback.getClass());
     }
 
-    private static Type determineType(Class callbackType, boolean checkAll) {
+    private static Type determineType(Class callbackType) {
         Class cur = null;
-        Type type = null;
         for (int i = 0; i < CALLBACKS.length; i++) {
             CallbackInfo info = CALLBACKS[i];
             if (info.cls.isAssignableFrom(callbackType)) {
@@ -90,16 +81,12 @@ class CallbackInfo
                     throw new IllegalStateException("Callback implements both " + cur + " and " + info.cls);
                 }
                 cur = info.cls;
-                type = info.type;
-                if (!checkAll) {
-                    break;
-                }
             }
         }
         if (cur == null) {
             throw new IllegalStateException("Unknown callback type " + callbackType);
         }
-        return type;
+        return Type.getType(cur);
     }
 
     private static CallbackGenerator getGenerator(Type callbackType) {

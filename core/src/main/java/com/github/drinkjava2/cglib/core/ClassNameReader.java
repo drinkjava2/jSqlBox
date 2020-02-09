@@ -19,15 +19,17 @@ import java.util.*;
 
 import com.github.drinkjava2.asm.ClassReader;
 import com.github.drinkjava2.asm.ClassVisitor;
+import com.github.drinkjava2.asm.Opcodes;
 
 // TODO: optimize (ClassReader buffers entire class before accept)
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})    
 public class ClassNameReader {
     private ClassNameReader() {
     }
 
     private static final EarlyExitException EARLY_EXIT = new EarlyExitException();
-    private static class EarlyExitException extends RuntimeException { }
+    @SuppressWarnings("serial")
+	private static class EarlyExitException extends RuntimeException { }
     
     public static String getClassName(ClassReader r) {
     
@@ -38,7 +40,7 @@ public class ClassNameReader {
     public static String[] getClassInfo(ClassReader r) {
         final List array = new ArrayList();
         try {
-            r.accept(new ClassVisitor(Constants.ASM_API, null) {
+            r.accept(new ClassVisitor(Opcodes.ASM5, null) {
                 public void visit(int version,
                                   int access,
                                   String name,

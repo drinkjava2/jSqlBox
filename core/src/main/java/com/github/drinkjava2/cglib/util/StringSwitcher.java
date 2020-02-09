@@ -15,17 +15,27 @@
  */
 package com.github.drinkjava2.cglib.util;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
+import com.github.drinkjava2.cglib.core.AbstractClassGenerator;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.KeyFactory;
+import com.github.drinkjava2.cglib.core.ObjectSwitchCallback;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
 
 /**
  * This class implements a simple String->int mapping for a fixed set of keys.
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })
 abstract public class StringSwitcher {
     private static final Type STRING_SWITCHER =
       TypeUtils.parseType("com.github.drinkjava2.cglib.util.StringSwitcher");
@@ -120,7 +130,7 @@ abstract public class StringSwitcher {
 
         public void generateClass(ClassVisitor v) throws Exception {
             ClassEmitter ce = new ClassEmitter(v);
-            ce.begin_class(Constants.V1_8,
+            ce.begin_class(Constants.V1_2,
                            Constants.ACC_PUBLIC,
                            getClassName(),
                            STRING_SWITCHER,

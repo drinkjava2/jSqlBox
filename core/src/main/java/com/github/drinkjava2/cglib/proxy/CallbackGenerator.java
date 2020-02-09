@@ -17,8 +17,11 @@ package com.github.drinkjava2.cglib.proxy;
 
 import java.util.List;
 
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.Signature;
+@SuppressWarnings({"rawtypes" })
 interface CallbackGenerator
 {
     void generate(ClassEmitter ce, Context context, List methods) throws Exception;
@@ -32,6 +35,6 @@ interface CallbackGenerator
         int getIndex(MethodInfo method);
         void emitCallback(CodeEmitter ce, int index);
         Signature getImplSignature(MethodInfo method);
-        void emitLoadArgsAndInvoke(CodeEmitter e, MethodInfo method);
+        void emitInvoke(CodeEmitter e, MethodInfo method);
     }
 }

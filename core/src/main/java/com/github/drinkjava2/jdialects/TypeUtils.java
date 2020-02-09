@@ -318,6 +318,8 @@ public abstract class TypeUtils {// NOSONAR
 		} else if (vType == java.sql.Date.class) { // no need convert java.util.Date
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.sql.Date) value).getTime());
+			if (javaType == java.sql.Time.class)
+				return new java.sql.Time(((java.sql.Date) value).getTime());
 			if (javaType == Calendar.class) {
 				Calendar c = Calendar.getInstance();
 				c.setTime((java.sql.Date) value);

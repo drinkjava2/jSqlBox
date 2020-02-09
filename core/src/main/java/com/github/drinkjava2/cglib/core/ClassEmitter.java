@@ -18,6 +18,7 @@ package com.github.drinkjava2.cglib.core;
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.FieldVisitor;
 import com.github.drinkjava2.asm.MethodVisitor;
+import com.github.drinkjava2.asm.Opcodes;
 import com.github.drinkjava2.asm.Type;
 import com.github.drinkjava2.cglib.transform.ClassTransformer;
 
@@ -27,7 +28,7 @@ import java.util.Map;
 /**
  * @author Juozas Baliuka, Chris Nokleberg
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked" })
 public class ClassEmitter extends ClassTransformer {
     private ClassInfo classInfo;
     private Map fieldInfo;
@@ -43,7 +44,7 @@ public class ClassEmitter extends ClassTransformer {
     }
 
     public ClassEmitter() {
-        super(Constants.ASM_API);
+        super(Opcodes.ASM5);
     }
 
     public void setTarget(ClassVisitor cv) {
@@ -147,7 +148,7 @@ public class ClassEmitter extends ClassTransformer {
                                          TypeUtils.toInternalNames(exceptions));
         if (sig.equals(Constants.SIG_STATIC) && !TypeUtils.isInterface(getAccess())) {
             rawStaticInit = v;
-            MethodVisitor wrapped = new MethodVisitor(Constants.ASM_API, v) {
+            MethodVisitor wrapped = new MethodVisitor(Opcodes.ASM5, v) {
                 public void visitMaxs(int maxStack, int maxLocals) {
                     // ignore
                 }

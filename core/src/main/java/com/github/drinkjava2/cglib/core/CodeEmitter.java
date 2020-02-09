@@ -15,15 +15,18 @@
  */
 package com.github.drinkjava2.cglib.core;
 
-import java.io.*;
-import java.util.*;
+import java.util.Arrays;
 
-import com.github.drinkjava2.asm.*;
+import com.github.drinkjava2.asm.Attribute;
+import com.github.drinkjava2.asm.Label;
+import com.github.drinkjava2.asm.MethodVisitor;
+import com.github.drinkjava2.asm.Opcodes;
+import com.github.drinkjava2.asm.Type;
 
 /**
  * @author Juozas Baliuka, Chris Nokleberg
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"unused" })
 public class CodeEmitter extends LocalVariablesSorter {
     private static final Signature BOOLEAN_VALUE =
       TypeUtils.parseSignature("boolean booleanValue()");
@@ -478,7 +481,7 @@ public class CodeEmitter extends LocalVariablesSorter {
     }
 
     public void super_invoke(Signature sig) {
-        emit_invoke(Constants.INVOKESPECIAL, ce.getSuperType(), sig, false);
+        emit_invoke(Constants.INVOKESPECIAL, ce.getSuperType(), sig);
     }
 
     public void invoke_constructor(Type type) {
@@ -493,7 +496,7 @@ public class CodeEmitter extends LocalVariablesSorter {
         invoke_constructor(ce.getClassType());
     }
 
-    private void emit_invoke(int opcode, Type type, Signature sig, boolean isInterface) {
+    private void emit_invoke(int opcode, Type type, Signature sig) {
         if (sig.getName().equals(Constants.CONSTRUCTOR_NAME) &&
             ((opcode == Constants.INVOKEVIRTUAL) ||
              (opcode == Constants.INVOKESTATIC))) {
@@ -503,24 +506,19 @@ public class CodeEmitter extends LocalVariablesSorter {
                            type.getInternalName(),
                            sig.getName(),
                            sig.getDescriptor(),
-                           isInterface);
+                           opcode == Opcodes.INVOKEINTERFACE);
     }
     
     public void invoke_interface(Type owner, Signature sig) {
-        emit_invoke(Constants.INVOKEINTERFACE, owner, sig, true);
+        emit_invoke(Constants.INVOKEINTERFACE, owner, sig);
     }
 
     public void invoke_virtual(Type owner, Signature sig) {
-        emit_invoke(Constants.INVOKEVIRTUAL, owner, sig, false);
+        emit_invoke(Constants.INVOKEVIRTUAL, owner, sig);
     }
 
-    @Deprecated
     public void invoke_static(Type owner, Signature sig) {
-        invoke_static(owner, sig, false);
-    }
-
-    public void invoke_static(Type owner, Signature sig, boolean isInterface) {
-        emit_invoke(Constants.INVOKESTATIC, owner, sig, isInterface);
+        emit_invoke(Constants.INVOKESTATIC, owner, sig);
     }
 
     public void invoke_virtual_this(Signature sig) {
@@ -532,7 +530,7 @@ public class CodeEmitter extends LocalVariablesSorter {
     }
 
     public void invoke_constructor(Type type, Signature sig) {
-        emit_invoke(Constants.INVOKESPECIAL, type, sig, false);
+        emit_invoke(Constants.INVOKESPECIAL, type, sig);
     }
 
     public void invoke_constructor_this(Signature sig) {
@@ -856,10 +854,10 @@ public class CodeEmitter extends LocalVariablesSorter {
         Signature sig = method.getSignature();
         if (sig.getName().equals(Constants.CONSTRUCTOR_NAME)) {
             invoke_constructor(type, sig);
-        } else if (TypeUtils.isStatic(method.getModifiers())) {
-            invoke_static(type, sig, TypeUtils.isInterface(classInfo.getModifiers()));
         } else if (TypeUtils.isInterface(classInfo.getModifiers())) {
             invoke_interface(type, sig);
+        } else if (TypeUtils.isStatic(method.getModifiers())) {
+            invoke_static(type, sig);
         } else {
             invoke_virtual(virtualType, sig);
         }

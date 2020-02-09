@@ -15,18 +15,22 @@
  */
 package com.github.drinkjava2.cglib.transform.impl;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
-import com.github.drinkjava2.asm.Attribute;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-import com.github.drinkjava2.cglib.transform.*;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.CodeGenerationException;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+import com.github.drinkjava2.cglib.transform.ClassEmitterTransformer;
 
 /**
  * @author Juozas Baliuka
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})  
 public class AddDelegateTransformer extends ClassEmitterTransformer {
     private static final String DELEGATE = "$CGLIB_DELEGATE";
     private static final Signature CSTRUCT_OBJECT =

@@ -16,11 +16,11 @@
 package com.github.drinkjava2.cglib.transform;
 
 import com.github.drinkjava2.asm.ClassVisitor;
-import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.asm.Opcodes;
 
 public abstract class ClassTransformer extends ClassVisitor {
     public ClassTransformer() {
-	super(Constants.ASM_API);
+	super(Opcodes.ASM5);
     }
     public ClassTransformer(int opcode) {
 	super(opcode);

@@ -49,7 +49,7 @@ public enum ClassScanner {
 	 * @return
 	 */
 	public static List<Class> scanPackages(String... scanBasePackages) {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 		if (scanBasePackages.length == 0) {
 			return classList;
 		}
@@ -88,7 +88,7 @@ public enum ClassScanner {
 	 */
 	public static List<Class> scanByName(String nameSimpleReg, String... scanBasePackages) {
 		List<Class> classList = scanPackages(scanBasePackages);
-		List<Class> result = new ArrayList<>();
+		List<Class> result = new ArrayList<Class>();
 		for (Class clz : classList)
 			if (NameMatchUtil.nameMatch(nameSimpleReg, clz.getName()))
 				result.add(clz);
@@ -102,7 +102,7 @@ public enum ClassScanner {
 	 * @return Class
 	 */
 	private static List<Class> scanOnePackage(String pkg) {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 		try {
 			// 包名转化为路径名
 			String pathName = package2Path(pkg);
@@ -126,7 +126,7 @@ public enum ClassScanner {
 	 * @throws IOException
 	 */
 	private static List<Class> scanUrls(String pkg, Enumeration<URL> urls) throws IOException {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
 			// 获取协议
@@ -170,7 +170,7 @@ public enum ClassScanner {
 	 * @return Class列表
 	 */
 	private static List<Class> recursiveScan4Path(String pkg, String filePath) {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 
 		File file = new File(filePath);
 		if (!file.exists() || !file.isDirectory()) {
@@ -186,12 +186,16 @@ public enum ClassScanner {
 		for (File child : classes) {
 			String className = classFile2SimpleClass(
 					new StringBuilder().append(pkg).append(".").append(child.getName()).toString());
+
 			try {
 				Class clz = Thread.currentThread().getContextClassLoader().loadClass(className);
 				classList.add(clz);
-			} catch (ClassNotFoundException | LinkageError e) {
+			} catch (ClassNotFoundException e) {
+				System.err.println("Warning: Can not load class:" + className);
+			} catch (LinkageError e) {
 				System.err.println("Warning: Can not load class:" + className);
 			}
+
 		}
 
 		// 处理目录
@@ -220,7 +224,7 @@ public enum ClassScanner {
 	 * @throws IOException
 	 */
 	private static List<Class> recursiveScan4Jar(String pkg, String jarPath) throws IOException {
-		List<Class> classList = new LinkedList<>();
+		List<Class> classList = new LinkedList<Class>();
 
 		JarInputStream jin = new JarInputStream(new FileInputStream(jarPath));
 		JarEntry entry = jin.getNextJarEntry();
@@ -241,7 +245,9 @@ public enum ClassScanner {
 				try {
 					Class clz = Thread.currentThread().getContextClassLoader().loadClass(className);
 					classList.add(clz);
-				} catch (ClassNotFoundException | LinkageError e) {
+				} catch (ClassNotFoundException e) {
+					System.err.println("Warning: Can not load class:" + className);
+				} catch (LinkageError e) {
 					System.err.println("Warning: Can not load class:" + className);
 				}
 			}

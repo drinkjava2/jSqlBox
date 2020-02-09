@@ -16,7 +16,7 @@
 package com.github.drinkjava2.cglib.transform;
 
 import com.github.drinkjava2.asm.AnnotationVisitor;
-import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.asm.Opcodes;
 
 public class AnnotationVisitorTee extends AnnotationVisitor {
     private AnnotationVisitor av1, av2;
@@ -30,7 +30,7 @@ public class AnnotationVisitorTee extends AnnotationVisitor {
     }
 
     public AnnotationVisitorTee(AnnotationVisitor av1, AnnotationVisitor av2) {
-	super(Constants.ASM_API);
+	super(Opcodes.ASM5);
         this.av1 = av1;
         this.av2 = av2;
     }

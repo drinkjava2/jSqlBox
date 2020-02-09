@@ -15,14 +15,19 @@
  */
 package com.github.drinkjava2.cglib.core;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 
 import com.github.drinkjava2.asm.ClassReader;
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.ClassWriter;
 import com.github.drinkjava2.asm.Opcodes;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})  
 public class DebuggingClassWriter extends ClassVisitor {
     
     public static final String DEBUG_LOCATION_PROPERTY = "cglib.debugLocation";
@@ -46,7 +51,7 @@ public class DebuggingClassWriter extends ClassVisitor {
     }
     
     public DebuggingClassWriter(int flags) {
-	super(Constants.ASM_API, new ClassWriter(flags));
+	super(Opcodes.ASM5, new ClassWriter(flags));
     }
 
     public void visit(int version,

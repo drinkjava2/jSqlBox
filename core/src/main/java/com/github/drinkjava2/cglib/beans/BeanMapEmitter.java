@@ -15,14 +15,24 @@
  */
 package com.github.drinkjava2.cglib.beans;
 
-import java.beans.*;
-import java.util.*;
+import java.beans.PropertyDescriptor;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.ObjectSwitchCallback;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+@SuppressWarnings({"rawtypes","unchecked"})  
 class BeanMapEmitter extends ClassEmitter {
     private static final Type BEAN_MAP =
       TypeUtils.parseType("com.github.drinkjava2.cglib.beans.BeanMap");
@@ -46,7 +56,7 @@ class BeanMapEmitter extends ClassEmitter {
     public BeanMapEmitter(ClassVisitor v, String className, Class type, int require) {
         super(v);
 
-        begin_class(Constants.V1_8, Constants.ACC_PUBLIC, className, BEAN_MAP, null, Constants.SOURCE_FILE);
+        begin_class(Constants.V1_2, Constants.ACC_PUBLIC, className, BEAN_MAP, null, Constants.SOURCE_FILE);
         EmitUtils.null_constructor(this);
         EmitUtils.factory_method(this, NEW_INSTANCE);
         generateConstructor();

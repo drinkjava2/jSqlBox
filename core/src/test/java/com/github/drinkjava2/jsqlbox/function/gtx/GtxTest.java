@@ -40,8 +40,7 @@ public class GtxTest {
 
 	@Before
 	public void init() {
-		DbContext.resetGlobalVariants(); 
-
+		DbContext.resetGlobalVariants();
 		DbContext lock = new DbContext(newTestDataSource());
 		lock.setName("lock");
 		lock.executeDDL(lock.toCreateDDL(GtxId.class));
@@ -79,8 +78,7 @@ public class GtxTest {
 			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			//e.printStackTrace();
-			ctx[0].rollbackTrans();
+			ctx[0].rollbackTrans(); // All transactions sucess, will not run to here
 		}
 		Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
@@ -98,8 +96,9 @@ public class GtxTest {
 			Systemout.println(1 / 0);
 			ctx[0].commitTrans();
 		} catch (Exception e) {
-			TxResult result=ctx[0].rollbackTrans();
-			GtxUnlockServ.forceUnlock(ctx[0], result);
+			TxResult result = ctx[0].rollbackTrans();
+			// A log waring will throw because in fact no any transaction committed
+			GtxUnlockServ.forceUnlock(ctx[0], result);// Unit test only, production not use forceUnlock
 		}
 		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx[1].eCountAll(Usr.class));
@@ -141,7 +140,7 @@ public class GtxTest {
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
 			TxResult result = ctx[0].rollbackTrans();
-			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
+			GtxUnlockServ.forceUnlock(ctx[0], result);// Unit test only, production not use forceUnlock
 		}
 		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
 		Assert.assertEquals(0, ctx[1].eCountAll(Usr.class));

@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 
 import com.github.drinkjava2.asm.Type;
 import com.github.drinkjava2.cglib.core.Signature;
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes" })
 public class FastMethod extends FastMember
 {
     FastMethod(FastClass fc, Method method) {

@@ -24,6 +24,7 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jlogs.ConsoleLog;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.zaxxer.hikari.HikariDataSource;
@@ -76,6 +77,8 @@ public class TestBase {
 	public void init() {
 		System.getProperties().setProperty("oracle.jdbc.J2EE13Compliant", "true");
 		DbContext.resetGlobalVariants();
+		ConsoleLog.setLogHead(true);
+		ConsoleLog.setLogLevel(ConsoleLog.WARNING);
 		DbContext.setGlobalNextAllowShowSql(true);
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
 		dialect = Dialect.guessDialect(dataSource);
@@ -87,7 +90,6 @@ public class TestBase {
 			quietDropTables(tablesForTest);
 		if (tablesForTest != null)
 			createAndRegTables(tablesForTest);
-
 	}
 
 	@After

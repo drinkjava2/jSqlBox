@@ -15,14 +15,35 @@
  */
 package com.github.drinkjava2.cglib.reflect;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.github.drinkjava2.asm.ClassVisitor;
 import com.github.drinkjava2.asm.Label;
 import com.github.drinkjava2.asm.Type;
-import com.github.drinkjava2.cglib.core.*;
-@SuppressWarnings("all") // Yong
+import com.github.drinkjava2.cglib.core.Block;
+import com.github.drinkjava2.cglib.core.ClassEmitter;
+import com.github.drinkjava2.cglib.core.CodeEmitter;
+import com.github.drinkjava2.cglib.core.CollectionUtils;
+import com.github.drinkjava2.cglib.core.Constants;
+import com.github.drinkjava2.cglib.core.DuplicatesPredicate;
+import com.github.drinkjava2.cglib.core.EmitUtils;
+import com.github.drinkjava2.cglib.core.MethodInfo;
+import com.github.drinkjava2.cglib.core.MethodInfoTransformer;
+import com.github.drinkjava2.cglib.core.ObjectSwitchCallback;
+import com.github.drinkjava2.cglib.core.ProcessSwitchCallback;
+import com.github.drinkjava2.cglib.core.ReflectUtils;
+import com.github.drinkjava2.cglib.core.Signature;
+import com.github.drinkjava2.cglib.core.Transformer;
+import com.github.drinkjava2.cglib.core.TypeUtils;
+import com.github.drinkjava2.cglib.core.VisibilityPredicate;
+    
+@SuppressWarnings({"rawtypes","unchecked"})    
 class FastClassEmitter extends ClassEmitter {
     private static final Signature CSTRUCT_CLASS =
       TypeUtils.parseConstructor("Class");
@@ -54,7 +75,7 @@ class FastClassEmitter extends ClassEmitter {
         super(v);
 
         Type base = Type.getType(type);
-        begin_class(Constants.V1_8, Constants.ACC_PUBLIC, className, FAST_CLASS, null, Constants.SOURCE_FILE);
+        begin_class(Constants.V1_2, Constants.ACC_PUBLIC, className, FAST_CLASS, null, Constants.SOURCE_FILE);
 
         // constructor
         CodeEmitter e = begin_method(Constants.ACC_PUBLIC, CSTRUCT_CLASS, null);

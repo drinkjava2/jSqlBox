@@ -27,14 +27,9 @@ import java.util.Set;
  * name has been previously been used in the same <code>ClassLoader</code>, a
  * suffix is added to ensure uniqueness.
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"unused" })
 public class DefaultNamingPolicy implements NamingPolicy {
     public static final DefaultNamingPolicy INSTANCE = new DefaultNamingPolicy();
-
-    /**
-     * This allows to test collisions of {@code key.hashCode()}.
-     */
-    private final static boolean STRESS_HASH_CODE = Boolean.getBoolean("com.github.drinkjava2.cglib.test.stressHashCodes");
     
     public String getClassName(String prefix, String source, Object key, Predicate names) {
         if (prefix == null) {
@@ -46,7 +41,7 @@ public class DefaultNamingPolicy implements NamingPolicy {
             prefix + "$$" + 
             source.substring(source.lastIndexOf('.') + 1) +
             getTag() + "$$" +
-            Integer.toHexString(STRESS_HASH_CODE ? 0 : key.hashCode());
+            Integer.toHexString(key.hashCode());
         String attempt = base;
         int index = 2;
         while (names.evaluate(attempt))

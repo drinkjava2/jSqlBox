@@ -15,10 +15,8 @@
  */
 package com.github.drinkjava2.cglib.core;
 
-import com.github.drinkjava2.asm.Attribute;
 import com.github.drinkjava2.asm.Type;
 
-@SuppressWarnings("all") // Yong
 abstract public class ClassInfo {
 
     protected ClassInfo() {

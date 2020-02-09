@@ -15,14 +15,19 @@
  */
 package com.github.drinkjava2.cglib.core;
 
-import java.util.*;
-import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Chris Nokleberg
  * @version $Id: CollectionUtils.java,v 1.7 2004/06/24 21:15:21 herbyderby Exp $
  */
-@SuppressWarnings("all") // Yong
+@SuppressWarnings({"rawtypes","unchecked"})    
 public class CollectionUtils {
     private CollectionUtils() { }
 
