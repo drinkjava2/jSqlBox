@@ -14,6 +14,7 @@ package com.github.drinkjava2.jdialects;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,6 +75,7 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(java.sql.Blob.class, Type.BLOB);
 		JAVA_TO_TYPE_MAP.put(java.util.Date.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.sql.Date.class, Type.DATE);
+		JAVA_TO_TYPE_MAP.put(java.util.Calendar.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.sql.Time.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.sql.Timestamp.class, Type.TIMESTAMP);
 		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);// Below 7 lines For Java8 & above
@@ -316,12 +318,11 @@ public abstract class TypeUtils {// NOSONAR
 		} else if (vType == java.sql.Date.class) { // no need convert java.util.Date
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.sql.Date) value).getTime());
-			if (javaType == java.sql.Time.class)
-				return new java.sql.Time(((java.sql.Date) value).getTime());
-			if (javaType == java.time.LocalDate.class) // For Java8
-				return Java8DateUtils.date2LocalDate((java.sql.Date) value);
-			if (javaType == java.time.LocalDateTime.class) // For Java8
-				return Java8DateUtils.date2LocalDateTime((java.sql.Date) value);
+			if (javaType == Calendar.class) {
+				Calendar c = Calendar.getInstance();
+				c.setTime((java.sql.Date) value);
+				return c;
+			}
 		} else if (vType == java.sql.Time.class) {
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.sql.Time) value).getTime());
@@ -332,10 +333,11 @@ public abstract class TypeUtils {// NOSONAR
 				return new java.sql.Date(((Timestamp) value).getTime());
 			if (javaType == java.sql.Time.class)
 				return new java.sql.Time(((Timestamp) value).getTime());
-			if (javaType == java.time.LocalDate.class) // For Java8
-				return Java8DateUtils.timeStamp2LocalDate((Timestamp) value);
-			if (javaType == java.time.LocalDateTime.class) // For Java8
-				return Java8DateUtils.timeStamp2LocalDateTime((Timestamp) value);
+			if (javaType == Calendar.class) {
+				Calendar c = Calendar.getInstance();
+				c.setTime(new java.util.Date(((Timestamp) value).getTime()));
+				return c;
+			}
 		} else if (vType == java.util.Date.class) {
 			if (javaType == Timestamp.class)
 				return new Timestamp(((java.util.Date) value).getTime());
@@ -343,6 +345,46 @@ public abstract class TypeUtils {// NOSONAR
 				return new java.util.Date(((java.util.Date) value).getTime());
 			if (javaType == java.sql.Time.class)
 				return new java.sql.Time(((java.util.Date) value).getTime());
+			if (javaType == Calendar.class) {
+				Calendar c = Calendar.getInstance();
+				c.setTime((java.util.Date) value);
+				return c;
+			}
+		}
+		return jdbcValue2Java8Value(value, vType, javaType); // check java8 types only
+	}
+
+	private static Object jdbcValue2Java8Value(Object value, Class<?> vType, Class<?> javaType) {// Java8 only
+		if (vType == java.sql.Date.class) {
+			if (javaType == java.time.LocalDate.class)
+				return Java8DateUtils.sqlDate2localDate((java.sql.Date) value);
+			if (javaType == java.time.LocalDateTime.class)
+				return Java8DateUtils.sqlDate2localDateTime((java.sql.Date) value);
+		} else if (vType == java.sql.Time.class) {
+			if (javaType == java.time.LocalTime.class)
+				return Java8DateUtils.sqlTime2LocalTime((java.sql.Time) value);
+			if (javaType == java.time.OffsetTime.class)
+				return Java8DateUtils.sqlTime2OffsetTime((java.sql.Time) value);
+		} else if (vType == Timestamp.class) {
+			if (javaType == java.time.LocalDate.class)
+				return Java8DateUtils.sqlTimestamp2LocalDate((Timestamp) value);
+			if (javaType == java.time.LocalTime.class)
+				return Java8DateUtils.sqlTimestamp2LocalTime((Timestamp) value);
+			if (javaType == java.time.Instant.class)
+				return Java8DateUtils.sqlTimestamp2instant((Timestamp) value);
+			if (javaType == java.time.LocalDateTime.class)
+				return Java8DateUtils.sqlTimestamp2LocalDateTime((Timestamp) value);
+			if (javaType == java.time.OffsetDateTime.class)
+				return Java8DateUtils.sqlTimestamp2OffsetDateTime((Timestamp) value);
+			if (javaType == java.time.ZonedDateTime.class)
+				return Java8DateUtils.sqlTimestamp2ZonedDateTime((Timestamp) value);
+			if (javaType == java.time.OffsetTime.class)
+				return Java8DateUtils.sqlTimestamp2OffsetTime((Timestamp) value);
+		} else if (vType == Date.class) {
+			if (javaType == java.time.LocalDate.class)
+				return Java8DateUtils.date2LocalDate((Date) value);
+			if (javaType == java.time.LocalDateTime.class)
+				return Java8DateUtils.date2LocalDateTime((Date) value);
 		}
 		String oracleTip = "oracle.sql.TIMESTAMP".equals(vType.getName()) // NOSONAR
 				? "\nBelow setting may solve this Oracle JDBC compliant issue:\n"
@@ -357,12 +399,35 @@ public abstract class TypeUtils {// NOSONAR
 	 * optionalType is optional target dialect type, if not set, result is
 	 * determined by dialect
 	 */
-	public static Object javaParam2JdbcSqlParam(Dialect dia, Object value, Type optionalType) {// NOSONAR
-		if (dia == null || value == null || dia.isOracleFamily())
-			return value;
-		if (java.util.Date.class == value.getClass())
-			return new java.sql.Date(((Date) value).getTime());
-		return value;
+	public static void javaParam2JdbcSqlParam(Object[] params, Type optionalType) {// NOSONAR
+		if (params == null)
+			return;
+		for (int i = 0; i < params.length; i++) {
+			Object value = params[i];
+			if (value != null) {
+				Class<?> vType = value.getClass();
+				if (java.util.Date.class == vType)
+					params[i] = new java.sql.Date(((Date) value).getTime());
+				else if (Calendar.class.isAssignableFrom(vType))
+					params[i] = new java.sql.Date(((Calendar) value).getTime().getTime());
+				else if (java.time.temporal.Temporal.class.isAssignableFrom(vType)) {// Java8 date types
+					if (java.time.LocalDate.class == vType)
+						params[i] = Java8DateUtils.localDate2SqlDate((java.time.LocalDate) value);
+					else if (java.time.LocalTime.class == vType)
+						params[i] = Java8DateUtils.localTime2SqlTime((java.time.LocalTime) value);
+					else if (java.time.OffsetTime.class == vType)
+						params[i] = Java8DateUtils.offsetTime2SqlTime((java.time.OffsetTime) value);
+					else if (java.time.Instant.class == vType)
+						params[i] = Java8DateUtils.instant2SqlTimestamp((java.time.Instant) value);
+					else if (java.time.LocalDateTime.class == vType)
+						params[i] = Java8DateUtils.localDateTime2SqlTimestamp((java.time.LocalDateTime) value);
+					else if (java.time.OffsetDateTime.class == vType)
+						params[i] = Java8DateUtils.offsetDateTime2SqlTimestamp((java.time.OffsetDateTime) value);
+					else if (java.time.ZonedDateTime.class == vType)
+						params[i] = Java8DateUtils.zonedDateTime2SqlTimestamp((java.time.ZonedDateTime) value);
+				}
+			}
+		}
 	}
 
 	/** Convert java.sql.Types.xxx type to Dialect's Type */

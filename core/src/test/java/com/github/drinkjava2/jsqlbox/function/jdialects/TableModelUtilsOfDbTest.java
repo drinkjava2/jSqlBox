@@ -65,7 +65,7 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 		String email;
 
-		//@SingleFKey(name = "singlefkey1", refs = { "student_sample", "stAddr" })
+		// @SingleFKey(name = "singlefkey1", refs = { "student_sample", "stAddr" })
 		String address2;
 
 		public String getId() {
@@ -118,6 +118,8 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 	@Test
 	public void doDbToModelTest() throws Exception {
+		quietDropTables(DbSample.class, studentSample.class);
+		createTables(studentSample.class, DbSample.class);
 		DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
 		Connection conn = null;
 		conn = ds.getConnection();
@@ -128,15 +130,15 @@ public class TableModelUtilsOfDbTest extends TestBase {
 			Systemout.println(TableModelUtils.model2JavaSrc(model, true, true, "somepackage"));
 		}
 		conn.close();
+		dropTables(DbSample.class, studentSample.class);
 	}
 
 	@Test
 	public void doDbToJavaSrcFiles() {
-		createTables(studentSample.class);
-		createTables(DbSample.class);
+		quietDropTables(DbSample.class, studentSample.class);
+		createTables(studentSample.class, DbSample.class);
 		TableModelUtils.db2JavaSrcFiles(ctx.getDataSource(), ctx.getDialect(), true, true, "temp", "c:/temp");
-		dropTables(DbSample.class);
-		dropTables(studentSample.class);
+		dropTables(DbSample.class, studentSample.class);
 	}
 
 }

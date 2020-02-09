@@ -1,5 +1,8 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,7 +25,7 @@ public class DateTimeTest extends TestBase {
 
 	private void useField(int x) {// Use jDialect's dynamic configuration to disable other fields
 		TableModel model = TableModelUtils.entity2Model(DT.class);
-		for (int i = 1; i <= 16; i++)
+		for (int i = 1; i <= 17; i++)
 			model.column("d" + i).setTransientable(true);
 		model.column("d" + x).setTransientable(false);
 		TableModelUtils.bindGlobalModel(DT.class, model);
@@ -204,6 +207,19 @@ public class DateTimeTest extends TestBase {
 		Assert.assertNotNull(out.getD16());
 		Systemout.println(out.getD16());
 	}
+	
+	@Test
+	public void testD17() {
+		useField(17);
+		DT in = new DT();
+		Calendar c=Calendar.getInstance();
+		c.setTime(new Date()); 
+		in.setD17(c);
+		in.insert();
+		DT out = new DT(in.getId()).load();
+		Assert.assertNotNull(out.getD17());
+		Systemout.println(out.getD17());
+	}
 
 	public static class DT extends ActiveRecord<DT> {
 		@Id
@@ -257,6 +273,9 @@ public class DateTimeTest extends TestBase {
 
 		@Column(columnDefinition = "time")
 		java.sql.Timestamp d16;
+
+		@Column
+		java.util.Calendar d17;
 
 		public DT() {
 		}
@@ -400,6 +419,14 @@ public class DateTimeTest extends TestBase {
 
 		public void setD16(java.sql.Timestamp d16) {
 			this.d16 = d16;
+		}
+
+		public java.util.Calendar getD17() {
+			return d17;
+		}
+
+		public void setD17(java.util.Calendar d17) {
+			this.d17 = d17;
 		}
 
 	}

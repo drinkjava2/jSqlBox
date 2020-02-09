@@ -93,8 +93,4 @@ public class SqlFormatter {
 		lastWord.setLength(0);
 	}
 
-	public static void main(String[] args) {
-		System.out.println(
-				format("select  \t     * from users \t  \n  where '1 =  1 '   or       '  or 2=2'\r\n" + "or    3=3 order by    id"));
-	}
 }

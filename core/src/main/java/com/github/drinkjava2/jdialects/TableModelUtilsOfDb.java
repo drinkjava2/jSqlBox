@@ -104,11 +104,11 @@ public abstract class TableModelUtilsOfDb {//NOSONAR
 			// Get Primary Keys for each model
 			for (TableModel model : tableModels) {
 				rs = meta.getPrimaryKeys(catalog, null, model.getTableName());
-				while (rs.next())
+				while (rs.next()) {
 					model.getColumnByColName(rs.getString("COLUMN_NAME")).setPkey(true);
+				}
 				rs.close();
 			}
-
 			// Get Foreign Keys for each model
 			for (TableModel model : tableModels) {
 				ResultSet foreignKeyResultSet = meta.getImportedKeys(catalog, null, model.getTableName());

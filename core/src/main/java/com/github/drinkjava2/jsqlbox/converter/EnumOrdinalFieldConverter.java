@@ -38,10 +38,9 @@ public class EnumOrdinalFieldConverter extends BaseFieldConverter {
 			Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), col.getEntityField());
 			Method method = writeMethod.getParameterTypes()[0].getMethod("values");
 			Object[] enu = (Object[]) method.invoke(null);
-			writeMethod.invoke(entityBean, enu[(Integer) value]);
+			writeMethod.invoke(entityBean, enu[Integer.parseInt(value.toString())]);
 		} catch (Exception e) {
-			throw new DbException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'",
-					e);
+			throw new DbException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'", e);
 		}
 	}
 }

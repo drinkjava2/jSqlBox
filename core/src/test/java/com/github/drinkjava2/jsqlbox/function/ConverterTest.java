@@ -44,7 +44,7 @@ public class ConverterTest extends TestBase {
 
 		@Override
 		public void writeDbValueToEntityField(Object entityBean, ColumnModel col, Object value) {
-			DbContextUtils.doWriteToFieldOrTail(col, entityBean, new FooDemo((Integer) value));
+			DbContextUtils.doWriteToFieldOrTail(col, entityBean, new FooDemo(Integer.parseInt(value.toString())));
 		}
 	}
 

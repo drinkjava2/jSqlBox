@@ -117,15 +117,15 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	private PreparedSQL doPrepare(boolean inlineStyle, Object... items) {// NOSONAR
 		PreparedSQL ps = dealSqlItems(null, inlineStyle, items);
 		ps.addGlobalAndThreadedHandlers(this);
+		preparedParamsToJdbc(ps);
 		return ps;
 	}
 
+	/** Convert parameters to JDBC type, like java.util.Date to java.sql.Date */
 	public void preparedParamsToJdbc(PreparedSQL ps) {
 		if (dialect == null || ps == null || ps.getParams() == null || ps.getParams().length == 0)
 			return;
-		for (int i = 0; i < ps.getParams().length; i++) {
-			ps.getParams()[i] = TypeUtils.javaParam2JdbcSqlParam(dialect, ps.getParams()[i], null);
-		}
+		TypeUtils.javaParam2JdbcSqlParam(ps.getParams(), null);
 	}
 
 	/**

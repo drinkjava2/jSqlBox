@@ -91,7 +91,7 @@ public class TailTest extends TestBase {
 	@Test
 	public void tailTest() {
 		new Tail().putTail("user_name", "Tom", "age", 10).insert(tail("tail_demo"));
-		Tail t = eLoadBySQL(Tail.class, "select *, 'China' as address from tail_demo");
+		Tail t = eLoadBySQL(Tail.class, "select 'China' as address, tail_demo.* from tail_demo");
 		Assert.assertEquals("China", t.getTail("address"));
 		Assert.assertEquals("Tom", t.getTail("user_name"));
 		t.update(tail("tail_demo"));
@@ -131,7 +131,7 @@ public class TailTest extends TestBase {
 
 		Tail t2 = tail.loadById("Foo", tail("tail_demo")).putTail("age", 100).update(tail("tail_demo"))
 				.load(tail("tail_demo"));
-		Assert.assertEquals(100, (int)t2.getTail("age"));
+		Assert.assertEquals("100", ""+t2.getTail("age"));
 
 	}
 

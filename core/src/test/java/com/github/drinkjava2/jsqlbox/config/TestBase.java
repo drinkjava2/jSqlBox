@@ -84,6 +84,8 @@ public class TestBase {
 		ctx = new DbContext(dataSource);
 		DbContext.setGlobalDbContext(ctx);
 		if (tablesForTest != null)
+			quietDropTables(tablesForTest);
+		if (tablesForTest != null)
 			createAndRegTables(tablesForTest);
 
 	}
@@ -144,6 +146,11 @@ public class TestBase {
 	public void dropTables(TableModel... tableModels) {
 		String[] ddls = ctx.toDropDDL(tableModels);
 		ctx.executeDDL(ddls);
+	}
+
+	public void quietDropTables(TableModel... tableModels) {
+		String[] ddls = ctx.toDropDDL(tableModels);
+		quietExecuteDDLs(ddls);
 	}
 
 	public void quietDropTables(Class<?>... classes) {
