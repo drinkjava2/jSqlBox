@@ -11,38 +11,53 @@
  */
 package com.github.drinkjava2.jsqlbox.java8;
 
+/*- JAVA8_BEGIN
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
-
+import static com.github.drinkjava2.jsqlbox.DB.*;
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
 
-/**
- * ActiveRecordDemoTest of jSqlBox configurations
- * 
- * @author Yong Zhu
- * @since 1.0.0
- */
+public class HelloWorld implements ActiveEntity<HelloWorld> {
+	@Id
+	@UUID25
+	private String id;
 
-public class HelloWorldJava8 implements ActiveEntity<HelloWorldJava8> {
 	private String name;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public HelloWorld setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 	public static void main(String[] args) {
 		DataSource ds = JdbcConnectionPool
 				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 		DbContext ctx = new DbContext(ds);
+		ctx.setAllowShowSQL(true);
 		DbContext.setGlobalDbContext(ctx);
-		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorldJava8.class));
-		new HelloWorldJava8().putField("name", "Hello jSqlBox").insert();
-		System.out.println(ctx.pQueryForString("select name from HelloWorldJava8"));
+		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
+		HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+		System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"), " or name=",
+				ques("1"), " or name =", ques("2")));
+		h.delete();
+		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
 	}
 }
+JAVA8_END */

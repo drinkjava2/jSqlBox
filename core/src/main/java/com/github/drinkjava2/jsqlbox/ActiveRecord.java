@@ -169,6 +169,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new DbException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
 		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this);
+		
 		return DbContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 

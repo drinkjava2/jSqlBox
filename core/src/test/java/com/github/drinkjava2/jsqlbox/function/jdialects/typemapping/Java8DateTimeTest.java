@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
-
+/*- JAVA8_BEGIN
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,15 +11,10 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
-
-/**
- * Test Date time type
- * 
- * @author Yong Zhu
- * @since 1.7.0
- */
+ 
+@SuppressWarnings("all")
 public class Java8DateTimeTest extends TestBase {
-
+ 
 	private void useField(int x) {// Use jDialect's dynamic configuration to disable other fields
 		TableModel model = TableModelUtils.entity2Model(DT.class);
 		for (int i = 1; i <= 6; i++)
@@ -185,3 +180,4 @@ public class Java8DateTimeTest extends TestBase {
 	}
 
 }
+JAVA8_END */

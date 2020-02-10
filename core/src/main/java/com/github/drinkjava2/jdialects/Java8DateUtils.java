@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jdialects;
 
+/*- JAVA8_BEGIN
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,16 +20,11 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.ZonedDateTime; 
+import java.util.Date; 
+ 
+public abstract class Java8DateUtils {// NOSONAR 
 
-/**
- * Java8 date utils
- * 
- * @author Yong Zhu
- * @since 4.0.0
- */
-public abstract class Java8DateUtils {// NOSONAR
 	private static final ZoneId zoneId = ZoneId.systemDefault();
 
 	public static LocalDate date2LocalDate(java.util.Date date) {
@@ -136,5 +132,6 @@ public abstract class Java8DateUtils {// NOSONAR
 	public static LocalTime sqlTimestamp2LocalTime(Timestamp t) {
 		Instant instant = new Date(t.getTime()).toInstant();
 		return instant.atZone(zoneId).toLocalTime();
-	}
+	} 
 }
+JAVA8_END */

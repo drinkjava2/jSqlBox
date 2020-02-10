@@ -161,6 +161,7 @@ public class Dialect {
 	public String sqlTemplate;
 	public String topLimitTemplate;
 	public String name;
+	public DialectType type; // To support java6 switch
 	public Map<Type, String> typeMappings = new EnumMap<Type, String>(Type.class);
 	public Map<String, String> functions = new HashMap<String, String>();
 	public DDLFeatures ddlFeatures = new DDLFeatures();// NOSONAR
@@ -172,27 +173,36 @@ public class Dialect {
 
 	public Dialect(String name) {
 		this.name = name;
+		try {
+			this.type = DialectType.valueOf(name);
+		} catch (Exception e) {
+			this.type = DialectType.Customized;
+		}
 		this.sqlTemplate = DialectPaginationTemplate.initializePaginSQLTemplate(this);
 		this.topLimitTemplate = DialectPaginationTemplate.initializeTopLimitSqlTemplate(this);
 		DDLFeatures.initDDLFeatures(this);
 	}
 
+	public static Dialect[] dialects = new Dialect[] { DerbyDialect, OracleDialect, Oracle9Dialect, DamengDialect,
+			GBaseDialect, AccessDialect, CobolDialect, DbfDialect, ExcelDialect, ParadoxDialect, SQLiteDialect,
+			TextDialect, XMLDialect, Cache71Dialect, CUBRIDDialect, DataDirectOracle9Dialect, DB2390Dialect,
+			DB2390V8Dialect, DB2400Dialect, DB297Dialect, DB2Dialect, DerbyTenFiveDialect, DerbyTenSevenDialect,
+			DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect,
+			HANARowStoreDialect, HSQLDialect, Informix10Dialect, InformixDialect, Ingres10Dialect, Ingres9Dialect,
+			IngresDialect, InterbaseDialect, JDataStoreDialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect,
+			MariaDB53Dialect, MariaDBDialect, MckoiDialect, MimerSQLDialect, MySQL55Dialect, MySQL57Dialect,
+			MySQL57InnoDBDialect, MySQL5Dialect, MySQL5InnoDBDialect, MySQL8Dialect, MySQLDialect, MySQLInnoDBDialect,
+			MySQLMyISAMDialect, Oracle10gDialect, Oracle12cDialect, Oracle8iDialect, Oracle9iDialect, PointbaseDialect,
+			PostgresPlusDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect,
+			PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, PostgreSQL9Dialect, PostgreSQLDialect,
+			ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServer2005Dialect, SQLServer2008Dialect,
+			SQLServer2012Dialect, SQLServerDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE157Dialect,
+			SybaseASE15Dialect, SybaseDialect, Teradata14Dialect, TeradataDialect, TimesTenDialect };
+
+	/** Use Dialect.dialects directly */
+	@Deprecated
 	public static Dialect[] values() {
-		return new Dialect[] { DerbyDialect, OracleDialect, Oracle9Dialect, DamengDialect, GBaseDialect, AccessDialect,
-				CobolDialect, DbfDialect, ExcelDialect, ParadoxDialect, SQLiteDialect, TextDialect, XMLDialect,
-				Cache71Dialect, CUBRIDDialect, DataDirectOracle9Dialect, DB2390Dialect, DB2390V8Dialect, DB2400Dialect,
-				DB297Dialect, DB2Dialect, DerbyTenFiveDialect, DerbyTenSevenDialect, DerbyTenSixDialect,
-				FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect, HANARowStoreDialect, HSQLDialect,
-				Informix10Dialect, InformixDialect, Ingres10Dialect, Ingres9Dialect, IngresDialect, InterbaseDialect,
-				JDataStoreDialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect, MariaDB53Dialect,
-				MariaDBDialect, MckoiDialect, MimerSQLDialect, MySQL55Dialect, MySQL57Dialect, MySQL57InnoDBDialect,
-				MySQL5Dialect, MySQL5InnoDBDialect, MySQL8Dialect, MySQLDialect, MySQLInnoDBDialect, MySQLMyISAMDialect,
-				Oracle10gDialect, Oracle12cDialect, Oracle8iDialect, Oracle9iDialect, PointbaseDialect,
-				PostgresPlusDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect,
-				PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, PostgreSQL9Dialect, PostgreSQLDialect,
-				ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServer2005Dialect, SQLServer2008Dialect,
-				SQLServer2012Dialect, SQLServerDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE157Dialect,
-				SybaseASE15Dialect, SybaseDialect, Teradata14Dialect, TeradataDialect, TimesTenDialect };
+		return dialects;
 	}
 
 	/**
@@ -293,7 +303,6 @@ public class Dialect {
 		else
 			return value;
 	}
- 
 
 	/**
 	 * inside function
@@ -602,4 +611,9 @@ public class Dialect {
 		Dialect.globalEnableTopLimitPagin = globalEnableTopLimitPagin;
 	}
 
+	public static void main(String[] args) {
+		for (Dialect d : Dialect.values()) {
+			System.out.println(d.type + " name=" + d.name);
+		}
+	}
 }

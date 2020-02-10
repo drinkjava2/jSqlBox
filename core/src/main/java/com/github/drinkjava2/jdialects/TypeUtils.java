@@ -78,13 +78,16 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(java.util.Calendar.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.sql.Time.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.sql.Timestamp.class, Type.TIMESTAMP);
-		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);// Below 7 lines For Java8 & above
+
+		/*- JAVA8_BEGIN  
+		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.time.LocalTime.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.time.OffsetTime.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.time.Instant.class, Type.TIMESTAMP);
 		JAVA_TO_TYPE_MAP.put(java.time.LocalDateTime.class, Type.TIMESTAMP);
 		JAVA_TO_TYPE_MAP.put(java.time.OffsetDateTime.class, Type.TIMESTAMP);
 		JAVA_TO_TYPE_MAP.put(java.time.ZonedDateTime.class, Type.TIMESTAMP);
+		JAVA8_END */
 
 		TYPE_TO_JAVA_MAP.put(Type.NUMERIC, BigDecimal.class);
 		TYPE_TO_JAVA_MAP.put(Type.BIGINT, BigInteger.class);
@@ -357,6 +360,7 @@ public abstract class TypeUtils {// NOSONAR
 	}
 
 	private static Object jdbcValue2Java8Value(Object value, Class<?> vType, Class<?> javaType) {// Java8 only
+		/*- JAVA8_BEGIN
 		if (vType == java.sql.Date.class) {
 			if (javaType == java.time.LocalDate.class)
 				return Java8DateUtils.sqlDate2localDate((java.sql.Date) value);
@@ -388,6 +392,7 @@ public abstract class TypeUtils {// NOSONAR
 			if (javaType == java.time.LocalDateTime.class)
 				return Java8DateUtils.date2LocalDateTime((Date) value);
 		}
+		JAVA8_END */
 		String oracleTip = "oracle.sql.TIMESTAMP".equals(vType.getName()) // NOSONAR
 				? "\nBelow setting may solve this Oracle JDBC compliant issue:\n"
 						+ "System.getProperties().setProperty(\"oracle.jdbc.J2EE13Compliant\", \"true\");"
@@ -412,7 +417,8 @@ public abstract class TypeUtils {// NOSONAR
 					params[i] = new java.sql.Date(((Date) value).getTime());
 				else if (Calendar.class.isAssignableFrom(vType))
 					params[i] = new java.sql.Date(((Calendar) value).getTime().getTime());
-				else if (java.time.temporal.Temporal.class.isAssignableFrom(vType)) {// Java8 date types
+				/*- JAVA8_BEGIN
+				else if (java.time.temporal.Temporal.class.isAssignableFrom(vType)) { 
 					if (java.time.LocalDate.class == vType)
 						params[i] = Java8DateUtils.localDate2SqlDate((java.time.LocalDate) value);
 					else if (java.time.LocalTime.class == vType)
@@ -428,6 +434,7 @@ public abstract class TypeUtils {// NOSONAR
 					else if (java.time.ZonedDateTime.class == vType)
 						params[i] = Java8DateUtils.zonedDateTime2SqlTimestamp((java.time.ZonedDateTime) value);
 				}
+				JAVA8_END */
 			}
 		}
 	}

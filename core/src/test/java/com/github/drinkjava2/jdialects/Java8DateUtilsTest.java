@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jdialects;
 
+/*- JAVA8_BEGIN
 import static com.github.drinkjava2.jdialects.Java8DateUtils.date2LocalDate;
 import static com.github.drinkjava2.jdialects.Java8DateUtils.date2LocalDateTime;
 import static com.github.drinkjava2.jdialects.Java8DateUtils.instant2SqlTimestamp;
@@ -36,15 +37,10 @@ import java.util.Date;
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
-
-/**
- * Java8 date utils
- * 
- * @author Yong Zhu
- * @since 4.0.0
- */
+  
+ 
 public class Java8DateUtilsTest {// NOSONAR
-
+  
 	@Test
 	public void testDatetimes() {
 
@@ -124,3 +120,4 @@ public class Java8DateUtilsTest {// NOSONAR
 	}
 
 }
+JAVA8_END */

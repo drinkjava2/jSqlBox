@@ -1,8 +1,11 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
 
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -158,7 +161,7 @@ public class TypeMappingTest extends TestBase {
 
 	}
 
-	// @Test
+	@Test
 	public void testNumberDemo() {
 		quietDropTables(NumberDemo.class);
 		createTables(NumberDemo.class);
@@ -184,8 +187,6 @@ public class TypeMappingTest extends TestBase {
 		r.load();
 		Assert.assertNotNull(r.i1);
 		Assert.assertNotNull(r.i2);
-		Assert.assertNotNull(r.b1);
-		Assert.assertNotNull(r.b2);
 		Assert.assertNotNull(r.s1);
 		Assert.assertNotNull(r.s2);
 		Assert.assertNotNull(r.l1);
@@ -194,8 +195,27 @@ public class TypeMappingTest extends TestBase {
 		Assert.assertNotNull(r.d2);
 		Assert.assertNotNull(r.f1);
 		Assert.assertNotNull(r.f2);
+		Assert.assertNotNull(r.b1);
+		Assert.assertNotNull(r.b2);
 		Assert.assertNotNull(r.bl1);
 		Assert.assertNotNull(r.bl2);
+
+		Systemout.println(r.i1);
+		Systemout.println(r.i2);
+		Systemout.println(r.s1);
+		Systemout.println(r.s2);
+		Systemout.println(r.l1);
+		Systemout.println(r.l2);
+		Systemout.println(r.d1);
+		Systemout.println(r.d2);
+		Systemout.println(r.f1);
+		Systemout.println(r.f2);
+		Systemout.println(r.b1);
+		Systemout.println(r.b2);
+		Systemout.println(r.bl1);
+		Systemout.println(r.bl2);
+
+
 		dropTables(NumberDemo.class);
 	}
 
@@ -205,6 +225,7 @@ public class TypeMappingTest extends TestBase {
 		String id;
 
 		java.sql.Date date1;
+		java.util.Date date2;
 
 		public String getId() {
 			return id;
@@ -214,13 +235,22 @@ public class TypeMappingTest extends TestBase {
 			this.id = id;
 		}
 
-		public java.util.Date getDate1() {
+		public java.sql.Date getDate1() {
 			return date1;
 		}
 
 		public void setDate1(java.sql.Date date1) {
 			this.date1 = date1;
 		}
+
+		public java.util.Date getDate2() {
+			return date2;
+		}
+
+		public void setDate2(java.util.Date date2) {
+			this.date2 = date2;
+		}
+
 	}
 
 	@Test
@@ -229,12 +259,14 @@ public class TypeMappingTest extends TestBase {
 		createTables(DateDemo.class);
 		DateDemo w = new DateDemo();
 		w.setDate1(new java.sql.Date(new java.util.Date().getTime()));
+		w.setDate2(new Date());
 		w.insert();
 
 		DateDemo r = new DateDemo();
 		r.setId(w.getId());
 		r.load();
 		Assert.assertNotNull(r.getDate1());
+		Assert.assertNotNull(r.getDate2());
 		dropTables(DateDemo.class);
 	}
 

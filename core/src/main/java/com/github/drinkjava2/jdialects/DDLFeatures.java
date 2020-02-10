@@ -285,8 +285,8 @@ public class DDLFeatures {
 		ddl.supportsSequences = true;
 		ddl.supportsTableCheck = true;
 		ddl.tableTypeString = "";
-		switch (dia.name) {
-		case "SQLiteDialect": {
+		switch (dia.type) {
+		case SQLiteDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = NOT_SUPPORT;
 			ddl.addForeignKeyConstraintString = NOT_SUPPORT;
@@ -309,7 +309,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "AccessDialect": {
+		case AccessDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addPrimaryKeyConstraintString = " primary key ";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -325,7 +325,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "ExcelDialect": {
+		case ExcelDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = NOT_SUPPORT;
 			ddl.addForeignKeyConstraintString = NOT_SUPPORT;
@@ -343,7 +343,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "TextDialect": {
+		case TextDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = NOT_SUPPORT;
 			ddl.addForeignKeyConstraintString = NOT_SUPPORT;
@@ -362,7 +362,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "ParadoxDialect": {
+		case ParadoxDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addPrimaryKeyConstraintString = " primary key ";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -378,7 +378,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "CobolDialect": {
+		case CobolDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addPrimaryKeyConstraintString = " primary key ";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -395,7 +395,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "XMLDialect": {
+		case XMLDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = NOT_SUPPORT;
 			ddl.addForeignKeyConstraintString = NOT_SUPPORT;
@@ -413,7 +413,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "DbfDialect": {
+		case DbfDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addPrimaryKeyConstraintString = " primary key ";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -429,7 +429,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "DamengDialect": {
+		case DamengDialect: {
 			ddl.addFKeyRefPkeyString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE constraint _FKEYNAME";
 			ddl.addForeignKeyConstraintString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2) constraint _FKEYNAME";
 			ddl.addPrimaryKeyConstraintString = " add constraint primary key constraint _PKEYNAME ";
@@ -446,12 +446,12 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "GBaseDialect": {
+		case GBaseDialect: {
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start with 11 increment by  33";
 			ddl.currentSchemaCommand = "SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL";
 		}
 			break;
-		case "Cache71Dialect": {
+		case Cache71Dialect: {
 			ddl.addColumnString = " add column";
 			ddl.addFKeyRefPkeyString = " ADD CONSTRAINT _FKEYNAME FOREIGN KEY _FKEYNAME (_FK1, _FK2) REFERENCES _REFTABLE (_REF1, _REF2) ";
 			ddl.addForeignKeyConstraintString = " ADD CONSTRAINT _FKEYNAME FOREIGN KEY _FKEYNAME (_FK1, _FK2) REFERENCES _REFTABLE (_REF1, _REF2) ";
@@ -473,7 +473,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "CUBRIDDialect": {
+		case CUBRIDDialect: {
 			ddl.createPooledSequenceStrings = "create serial _SEQ start with 11 increment by 33";
 			ddl.createSequenceStrings = "create serial _SEQ";
 			ddl.dropForeignKeyString = " drop foreign key ";
@@ -491,10 +491,10 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "DataDirectOracle9Dialect": {
+		case DataDirectOracle9Dialect: {
 		}
 			break;
-		case "DB2Dialect": {
+		case DB2Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -507,7 +507,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "DB2390Dialect": {
+		case DB2390Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -521,7 +521,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "DB2390V8Dialect": {
+		case DB2390V8Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ as integer start with 1 increment by 1 minvalue 1 nomaxvalue nocycle nocache start with 11 increment by 33";
 			ddl.createSequenceStrings = "create sequence _SEQ as integer start with 1 increment by 1 minvalue 1 nomaxvalue nocycle nocache";
@@ -536,7 +536,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "DB2400Dialect": {
+		case DB2400Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -550,7 +550,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "DB297Dialect": {
+		case DB297Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -563,7 +563,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "DerbyDialect": {
+		case DerbyDialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -579,7 +579,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "DerbyTenFiveDialect": {
+		case DerbyTenFiveDialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -595,7 +595,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "DerbyTenSevenDialect": {
+		case DerbyTenSevenDialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -610,7 +610,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "DerbyTenSixDialect": {
+		case DerbyTenSixDialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -625,7 +625,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "FirebirdDialect": {
+		case FirebirdDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = "create generator _SEQ";
 			ddl.dropSequenceStrings = "drop generator _SEQNAME";
@@ -637,7 +637,7 @@ public class DDLFeatures {
 			ddl.supportsPooledSequences = false;
 		}
 			break;
-		case "FrontBaseDialect": {
+		case FrontBaseDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
@@ -650,7 +650,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "H2Dialect": {
+		case H2Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
 			ddl.dropTableString = "drop table _TABLENAME if exists";
@@ -666,7 +666,7 @@ public class DDLFeatures {
 			ddl.supportsIfExistsBeforeConstraintName = true;
 		}
 			break;
-		case "HANAColumnStoreDialect": {
+		case HANAColumnStoreDialect: {
 			ddl.addColumnString = "add (";
 			ddl.addColumnSuffixString = ")";
 			ddl.columnComment = "comment '_COMMENT'";
@@ -683,7 +683,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "HANARowStoreDialect": {
+		case HANARowStoreDialect: {
 			ddl.addColumnString = "add (";
 			ddl.addColumnSuffixString = ")";
 			ddl.columnComment = "comment '_COMMENT'";
@@ -700,7 +700,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "HSQLDialect": {
+		case HSQLDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createSequenceStrings = "create sequence _SEQ start with 1";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME if exists";
@@ -717,7 +717,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "InformixDialect": {
+		case InformixDialect: {
 			ddl.addFKeyRefPkeyString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE constraint _FKEYNAME";
 			ddl.addForeignKeyConstraintString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2) constraint _FKEYNAME";
 			ddl.addPrimaryKeyConstraintString = " add constraint primary key constraint _PKEYNAME ";
@@ -734,7 +734,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "Informix10Dialect": {
+		case Informix10Dialect: {
 			ddl.addFKeyRefPkeyString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE constraint _FKEYNAME";
 			ddl.addForeignKeyConstraintString = " add constraint  foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2) constraint _FKEYNAME";
 			ddl.addPrimaryKeyConstraintString = " add constraint primary key constraint _PKEYNAME ";
@@ -751,7 +751,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "IngresDialect": {
+		case IngresDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
@@ -762,7 +762,7 @@ public class DDLFeatures {
 			ddl.supportsPooledSequences = false;
 		}
 			break;
-		case "Ingres10Dialect": {
+		case Ingres10Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -776,7 +776,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "Ingres9Dialect": {
+		case Ingres9Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.dropSequenceStrings = "drop sequence _SEQNAME restrict";
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -787,7 +787,7 @@ public class DDLFeatures {
 			ddl.supportsCommentOn = false;
 		}
 			break;
-		case "InterbaseDialect": {
+		case InterbaseDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = "create generator _SEQ";
 			ddl.dropSequenceStrings = "delete from RDB$GENERATORS where RDB$GENERATOR_NAME = '_SEQNAME'";
@@ -799,7 +799,7 @@ public class DDLFeatures {
 			ddl.supportsPooledSequences = false;
 		}
 			break;
-		case "JDataStoreDialect": {
+		case JDataStoreDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.dropSequenceStrings = NOT_SUPPORT;
@@ -816,7 +816,7 @@ public class DDLFeatures {
 			ddl.supportsTableCheck = false;
 		}
 			break;
-		case "MariaDBDialect": {
+		case MariaDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -844,7 +844,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MariaDB53Dialect": {
+		case MariaDB53Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -872,7 +872,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MariaDB102Dialect": {
+		case MariaDB102Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -900,7 +900,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MariaDB103Dialect": {
+		case MariaDB103Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -923,7 +923,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MariaDB10Dialect": {
+		case MariaDB10Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -952,7 +952,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MckoiDialect": {
+		case MckoiDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.dropTableString = "drop table _TABLENAME";
@@ -963,7 +963,7 @@ public class DDLFeatures {
 			ddl.supportsPooledSequences = false;
 		}
 			break;
-		case "MimerSQLDialect": {
+		case MimerSQLDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = "create unique sequence _SEQ";
@@ -975,7 +975,7 @@ public class DDLFeatures {
 			ddl.supportsPooledSequences = false;
 		}
 			break;
-		case "MySQLDialect": {
+		case MySQLDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1001,7 +1001,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " type=MyISAM";
 		}
 			break;
-		case "MySQL5Dialect": {
+		case MySQL5Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1028,7 +1028,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=MyISAM";
 		}
 			break;
-		case "MySQL55Dialect": {
+		case MySQL55Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1056,7 +1056,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MySQL57Dialect": {
+		case MySQL57Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1084,7 +1084,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MySQL57InnoDBDialect": {
+		case MySQL57InnoDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1112,7 +1112,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MySQL5InnoDBDialect": {
+		case MySQL5InnoDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1140,7 +1140,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "MySQLInnoDBDialect": {
+		case MySQLInnoDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1167,7 +1167,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " type=InnoDB";
 		}
 			break;
-		case "MySQLMyISAMDialect": {
+		case MySQLMyISAMDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1193,7 +1193,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " type=MyISAM";
 		}
 			break;
-		case "MySQL8Dialect": {
+		case MySQL8Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.columnComment = " comment '_COMMENT'";
@@ -1221,15 +1221,15 @@ public class DDLFeatures {
 			ddl.tableTypeString = " engine=InnoDB";
 		}
 			break;
-		case "OracleDialect": {
+		case OracleDialect: {
 		}
 			break;
-		case "Oracle10gDialect": {
+		case Oracle10gDialect: {
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start with 11 increment by  33";
 			ddl.currentSchemaCommand = "SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL";
 		}
 			break;
-		case "Oracle12cDialect": {
+		case Oracle12cDialect: {
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start with 11 increment by  33";
 			ddl.currentSchemaCommand = "SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL";
 			ddl.identityColumnString = "generated as identity";
@@ -1237,20 +1237,20 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "Oracle8iDialect": {
+		case Oracle8iDialect: {
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start with 11 increment by  33";
 			ddl.currentSchemaCommand = "SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL";
 		}
 			break;
-		case "Oracle9Dialect": {
+		case Oracle9Dialect: {
 		}
 			break;
-		case "Oracle9iDialect": {
+		case Oracle9iDialect: {
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start with 11 increment by  33";
 			ddl.currentSchemaCommand = "SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL";
 		}
 			break;
-		case "PointbaseDialect": {
+		case PointbaseDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.dropSequenceStrings = NOT_SUPPORT;
@@ -1262,7 +1262,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "PostgresPlusDialect": {
+		case PostgresPlusDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1279,7 +1279,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "PostgreSQLDialect": {
+		case PostgreSQLDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1296,7 +1296,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "PostgreSQL81Dialect": {
+		case PostgreSQL81Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropTableString = "drop table _TABLENAME cascade";
@@ -1312,7 +1312,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "PostgreSQL82Dialect": {
+		case PostgreSQL82Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1329,25 +1329,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "PostgreSQL9Dialect": {
-			ddl.addColumnString = "add column";
-			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
-			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
-			ddl.dropTableString = "drop table if exists _TABLENAME cascade";
-			ddl.hasDataTypeInIdentityColumn = false;
-			ddl.identityColumnString = "serial not null";
-			ddl.identityColumnStringBigINT = "bigserial not null";
-			ddl.identitySelectString = "select currval('_table__col_seq')";
-			ddl.identitySelectStringBigINT = "select currval('_table__col_seq')";
-			ddl.needDropConstraintsBeforeDropTable = true;
-			ddl.requiresParensForTupleDistinctCounts = true;
-			ddl.selectSequenceNextValString = "nextval ('_SEQNAME')";
-			ddl.sequenceNextValString = "select nextval ('_SEQNAME')";
-			ddl.supportsIdentityColumns = true;
-			ddl.supportsIfExistsBeforeConstraintName = true;
-		}
-			break;
-		case "PostgreSQL91Dialect": {
+		case PostgreSQL9Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1365,7 +1347,7 @@ public class DDLFeatures {
 			ddl.supportsIfExistsBeforeConstraintName = true;
 		}
 			break;
-		case "PostgreSQL92Dialect": {
+		case PostgreSQL91Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1383,7 +1365,7 @@ public class DDLFeatures {
 			ddl.supportsIfExistsBeforeConstraintName = true;
 		}
 			break;
-		case "PostgreSQL93Dialect": {
+		case PostgreSQL92Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1401,7 +1383,7 @@ public class DDLFeatures {
 			ddl.supportsIfExistsBeforeConstraintName = true;
 		}
 			break;
-		case "PostgreSQL94Dialect": {
+		case PostgreSQL93Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1419,7 +1401,7 @@ public class DDLFeatures {
 			ddl.supportsIfExistsBeforeConstraintName = true;
 		}
 			break;
-		case "PostgreSQL95Dialect": {
+		case PostgreSQL94Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
 			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
@@ -1437,7 +1419,25 @@ public class DDLFeatures {
 			ddl.supportsIfExistsBeforeConstraintName = true;
 		}
 			break;
-		case "ProgressDialect": {
+		case PostgreSQL95Dialect: {
+			ddl.addColumnString = "add column";
+			ddl.createPooledSequenceStrings = "create sequence _SEQ start 11 increment 33";
+			ddl.dropSequenceStrings = "drop sequence if exists _SEQNAME";
+			ddl.dropTableString = "drop table if exists _TABLENAME cascade";
+			ddl.hasDataTypeInIdentityColumn = false;
+			ddl.identityColumnString = "serial not null";
+			ddl.identityColumnStringBigINT = "bigserial not null";
+			ddl.identitySelectString = "select currval('_table__col_seq')";
+			ddl.identitySelectStringBigINT = "select currval('_table__col_seq')";
+			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.requiresParensForTupleDistinctCounts = true;
+			ddl.selectSequenceNextValString = "nextval ('_SEQNAME')";
+			ddl.sequenceNextValString = "select nextval ('_SEQNAME')";
+			ddl.supportsIdentityColumns = true;
+			ddl.supportsIfExistsBeforeConstraintName = true;
+		}
+			break;
+		case ProgressDialect: {
 			ddl.addColumnString = "add column";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
@@ -1452,7 +1452,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "RDMSOS2200Dialect": {
+		case RDMSOS2200Dialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.dropSequenceStrings = "";
@@ -1466,7 +1466,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "SAPDBDialect": {
+		case SAPDBDialect: {
 			ddl.addFKeyRefPkeyString = " foreign key _FKEYNAME (_FK1, _FK2) references _REFTABLE";
 			ddl.addForeignKeyConstraintString = " foreign key _FKEYNAME (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 			ddl.addPrimaryKeyConstraintString = " primary key ";
@@ -1477,7 +1477,7 @@ public class DDLFeatures {
 			ddl.supportsPooledSequences = false;
 		}
 			break;
-		case "SQLServerDialect": {
+		case SQLServerDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
@@ -1496,7 +1496,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "SQLServer2005Dialect": {
+		case SQLServer2005Dialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
@@ -1515,7 +1515,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "SQLServer2008Dialect": {
+		case SQLServer2008Dialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
@@ -1534,7 +1534,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "SQLServer2012Dialect": {
+		case SQLServer2012Dialect: {
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
 			ddl.dropTableString = "drop table _TABLENAME";
 			ddl.identityColumnString = "identity not null";
@@ -1548,7 +1548,7 @@ public class DDLFeatures {
 			ddl.supportsIdentityColumns = true;
 		}
 			break;
-		case "SybaseDialect": {
+		case SybaseDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "select db_name()";
@@ -1568,7 +1568,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "Sybase11Dialect": {
+		case Sybase11Dialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "select db_name()";
@@ -1588,7 +1588,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "SybaseAnywhereDialect": {
+		case SybaseAnywhereDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "select db_name()";
@@ -1607,7 +1607,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "SybaseASE15Dialect": {
+		case SybaseASE15Dialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "select db_name()";
@@ -1627,7 +1627,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "SybaseASE157Dialect": {
+		case SybaseASE157Dialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "select db_name()";
@@ -1648,7 +1648,7 @@ public class DDLFeatures {
 			ddl.tableTypeString = " lock datarows";
 		}
 			break;
-		case "TeradataDialect": {
+		case TeradataDialect: {
 			ddl.addColumnString = "Add Column";
 			ddl.createMultisetTableString = "create multiset table ";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1663,7 +1663,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "Teradata14Dialect": {
+		case Teradata14Dialect: {
 			ddl.addColumnString = "Add";
 			ddl.createMultisetTableString = "create multiset table ";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1681,7 +1681,7 @@ public class DDLFeatures {
 			ddl.supportsSequences = false;
 		}
 			break;
-		case "TimesTenDialect": {
+		case TimesTenDialect: {
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.dropTableString = "drop table _TABLENAME";
 			ddl.needDropConstraintsBeforeDropTable = true;

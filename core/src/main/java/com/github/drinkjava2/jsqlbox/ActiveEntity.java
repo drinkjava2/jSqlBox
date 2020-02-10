@@ -9,7 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
+ 
 package com.github.drinkjava2.jsqlbox;
+/*- JAVA8_BEGIN
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -28,12 +30,8 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
-/**
- * ActiveEntity is a interface has default methods only supported for Java8+, so
- * in Java8 and above, a POJO can implements ActiveEntity interface to obtain
- * CRUD methods instead of extends ActiveRecord class
- */
-@SuppressWarnings("unchecked")
+ 
+@SuppressWarnings("all")
 public interface ActiveEntity<T> extends EntityType {
 
 	default void miscMethods__________________() {// NOSONAR
@@ -227,5 +225,6 @@ public interface ActiveEntity<T> extends EntityType {
 	public default <E> E tInsert(Object... items) {return ctx(items).tInsert(items);}
 	public default <E> E tExecute(Object... items) {return ctx(items).tExecute(items);}
 	public default <E> List<E> tQueryForEntityList(Class<E> entityClass, Object... items) {return ctx(items).tQueryForEntityList(entityClass, items); }
-  
+   
 }
+JAVA8_END */

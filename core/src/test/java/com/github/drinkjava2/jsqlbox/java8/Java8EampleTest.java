@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.java8;
-
+/*- JAVA8_BEGIN
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.JAVA8.*;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
@@ -23,14 +23,9 @@ import com.github.drinkjava2.jsqlbox.LambdSqlItem.COL;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.C_ALIAS;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
+ 
 
-/**
- * This is a demo shows how to write refactor-support SQL in Java8 by using
- * Lambda
- */
-
-public class Java8EampleTest {
-
+public class Java8EampleTest { 
 	@Before
 	public void init() {
 		DbContext ctx = new DbContext(JdbcConnectionPool
@@ -104,5 +99,6 @@ public class Java8EampleTest {
 		);
 		Assert.assertEquals(10, list2.size());
 	}
-
+	
 }
+JAVA8_END */

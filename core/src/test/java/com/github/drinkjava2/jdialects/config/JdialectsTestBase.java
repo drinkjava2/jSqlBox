@@ -114,9 +114,8 @@ public class JdialectsTestBase {
 		}
 	}
 
-	protected static void printAllDialectsDDLs(TableModel... tables) {
-		Dialect[] diaList = Dialect.values();
-		for (Dialect dialect : diaList) {
+	protected static void printAllDialectsDDLs(TableModel... tables) { 
+		for (Dialect dialect : Dialect.dialects) {
 			Systemout.println("======" + dialect + "=====");
 			try {
 				String[] ddls = dialect.toDropAndCreateDDL(tables);

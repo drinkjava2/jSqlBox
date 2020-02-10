@@ -32,8 +32,7 @@ public class DialectTest {
 
 	@Test
 	public void testPagination() {
-		Dialect[] dialects = Dialect.values();
-		for (Dialect dialect : dialects) {
+		for (Dialect dialect : Dialect.dialects) {
 			Systemout.println("=========" + dialect + "==========");
 			String result = "";
 			try {
@@ -71,8 +70,7 @@ public class DialectTest {
 
 	@Test
 	public void testPagination2() {
-		Dialect[] dialects = Dialect.values();
-		for (Dialect dialect : dialects) {
+		for (Dialect dialect : Dialect.dialects) {
 			Systemout.println("=========" + dialect + "==========");
 			String result = "";
 			try {
@@ -154,7 +152,7 @@ public class DialectTest {
 		Assert.assertEquals("H2Dialect", dialectName);
 		ds.close();
 	}
- 
+
 	@Test(expected = DialectException.class)
 	public void testDDLTypeMapping4() {
 		Dialect.setGlobalAllowReservedWords(false);
@@ -202,7 +200,7 @@ public class DialectTest {
 
 	@Test
 	public void testDropTable() {
-		for (Dialect d : Dialect.values()) {
+		for (Dialect d : Dialect.dialects) {
 			String dropTable = d.dropTableDDL("testTable");
 			Systemout.println(dropTable);
 			Assert.assertTrue(StrUtils.containsIgnoreCase(dropTable, "drop"));

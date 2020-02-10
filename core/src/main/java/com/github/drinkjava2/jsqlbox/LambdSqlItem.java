@@ -1,23 +1,25 @@
 package com.github.drinkjava2.jsqlbox;
-
+/*- JAVA8_BEGIN
 import com.github.drinkjava2.jdbpro.CustomizedSqlItem;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.AliasProxyUtil.AliasItemInfo;
 
+@SuppressWarnings("all")
 public interface LambdSqlItem extends CustomizedSqlItem {
+ 
 
-	/** Build a "col" or "alias.col as alias_col" sql piece */
+	// Build a "col" or "alias.col as alias_col" sql piece  
 	public static interface ALIAS extends LambdSqlItem {
 		public Object get();
 	}
 
-	/** Build a ", col" or ", alias.col as alias_col" sql piece */
+	// Build a ", col" or ", alias.col as alias_col" sql piece 
 	public static interface C_ALIAS extends LambdSqlItem {
 		public Object get();
 	}
 
-	/** Build a "col" or "alias.col" sql piece */
+	// Build a "col" or "alias.col" sql piece  
 	public static interface COL extends LambdSqlItem {// "a.col"
 		public Object get();
 	}
@@ -57,5 +59,7 @@ public interface LambdSqlItem extends CustomizedSqlItem {
 		} else
 			throw new DbException("Unsupported CustomizedSqlItem found.");
 	}
-
+	 
 }
+
+JAVA8_END */

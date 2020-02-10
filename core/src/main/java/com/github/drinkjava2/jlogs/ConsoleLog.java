@@ -35,7 +35,7 @@ public class ConsoleLog implements Log {
 
 	Class<?> clazz;
 	private static int logLevel = INFO;
-	private static boolean logHead = true;
+	private static boolean logHead = false;
 
 	public ConsoleLog(Class<?> clazz) {
 		this.clazz = clazz;

@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.java8;
-
+/*- JAVA8_BEGIN
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import java.util.List;
@@ -10,13 +10,8 @@ import org.junit.Test;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
-
-/**
- * ActiveRecordJava8 is a interface has default methods only supported for
- * Java8+, so in Java8 and above, a POJO can implements ActiveRecordJava8
- * interface to obtain CRUD methods instead of extends ActiveRecord class
- */
-public class ActiveEntityTest extends TestBase implements ActiveEntity<ActiveEntityTest> {
+ 
+public class ActiveEntityTest  extends TestBase implements ActiveEntity<ActiveEntityTest>{
 	@Id
 	private String name;
 	private Integer age;
@@ -48,4 +43,6 @@ public class ActiveEntityTest extends TestBase implements ActiveEntity<ActiveEnt
 				.findBySQL("select * from ActiveEntityTest where age>=?", param(50));
 		Assert.assertEquals(50, userList.size());
 	}
+	 
 }
+JAVA8_END */
