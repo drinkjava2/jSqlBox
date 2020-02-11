@@ -11,7 +11,7 @@
  */
  
 package com.github.drinkjava2.jsqlbox;
-/*- JAVA8_BEGIN
+/*- JAVA8_BEGIN */
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -227,4 +227,4 @@ public interface ActiveEntity<T> extends EntityType {
 	public default <E> List<E> tQueryForEntityList(Class<E> entityClass, Object... items) {return ctx(items).tQueryForEntityList(entityClass, items); }
    
 }
-JAVA8_END */
+/*- JAVA8_END */

@@ -36,15 +36,15 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 ## 优点 | Advantages
 
 - **架构合理**：模块式架构，各个模块都可以脱离jSqlBox单独存在。  
-- **跨数据库**：基于jDialects，支持80多种数据库的分页、DDl脚本生成、实体源码生成、函数变换、主键生成等功能。  
+- **跨数据库**：基于jDialects，支持80多种数据库的分页、DDl脚本生成、从数据库生成实体源码、函数变换、主键生成等功能。  
 - **与DbUtils兼容**：内核基于DbUtils, 原有基于DbUtils的旧项目可以无缝升级到jSqlBox。  
 - **多种SQL写法**：Inline方法、模板方法、DataMapper、ActiveRecord、链式写法等。  
-- **多项技术创新**：Inline风格、多行文本支持、实体越级关联查询、树结构查询等。  
+- **多项技术创新**：Inline风格、多行文本支持、实体关联查询、树结构查询等。  
 - **动态配置**：除了支持实体Bean注解式配置，jSqlBox还支持在运行期动态更改配置。  
 - **无会话设计**：无会话设计(Sessionless)，是一个真正轻量级的、全功能的持久层工具，也可以作为其它持久层工具的补丁来使用。  
-- **自带声明式事务**：内置微型声明式事务工具jTransactions。也支持配置成Spring事务。  
 - **主从、分库分表**：无需引入第三方工具，jSqlBox本身就具备主从、分库分表功能。  
-- **自带分布式事务**：无需引入第三方工具，jSqlBox本身就支持分布式事务功能，包括分库分表环境下的分布式事务。 
+- **自带声明式事务**：内置微型IOC/AOP工具，不依赖Spring就可提供声明式事务。  
+- **自带分布式事务**：无需引入第三方工具，jSqlBox本身就提供无侵入的分布式事务功能，和Seata项目类似，它可以自动生成回滚SQL，但源码远比Seata简洁。
 - **学习曲线平滑**：模块化学习，了解了各个子模块，就掌握了jSqlBox，jSqlBox主体模块源码只有40多个类。  
  
 ## 文档 | Documentation
@@ -60,7 +60,8 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
    <version>4.0.0.jre8</version>
 </dependency> 
 ```
-jSqlBox分为Java8和Java6两个版本发布，并分别用.jre8和.jre6来区分。如果是Java6、7环境下，要改上面的版本号为4.0.0.jre6。
+jSqlBox分为Java8和Java6两个版本发布，并分别用.jre8和.jre6来区分。如果是Java6或7环境下，只能使用4.0.0.jre6版本。
+Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。
 
 ## 入门 | First Example
 以下示例演示了jSqlBox的基本配置和使用:
@@ -91,14 +92,14 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 	}
 
 	public static void main(String[] args) {
-		DataSource ds = JdbcConnectionPool
+		DataSource ds = JdbcConnectionPool //这个示例使用h2内存数据库
 				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 		DbContext ctx = new DbContext(ds);
-		ctx.setAllowShowSQL(true);
+		ctx.setAllowShowSQL(true); //开启SQL日志输出
 		DbContext.setGlobalDbContext(ctx);
 		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
 		HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
-		System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"), " or name=",
+		System.out.println(DB.iQueryForString("select name from HelloWorld where name like ?", param("H%"), " or name=",
 				ques("1"), " or name =", ques("2")));
 		h.delete();
 		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
@@ -106,8 +107,8 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 }
 ```
 上面这个示例包括了根据实体类生成DDL并执行、插入实体到数据库、执行更新、查询出结果、即打印出"Hello jSqlBox"、删除实体、删除数据库。
-示例中的实体类只需要声明接口(限jSqlBox的java8版)，查询语句使用了jSqlBox独创的参数内嵌式SQL写法。   
-因为开启了日志输出，可以看到命令行打印出的SQL日志:
+示例中的实体类只需要声明接口(限Java8版)。查询语句使用了jSqlBox独创的参数内嵌式SQL写法，可以自由拼接复杂的SQL，不用考虑参数和问号对齐的问题了。  
+因为开启了日志输出，可以看到命令行打印出的SQL执行日志:
 ```
 0 SQL: drop table HelloWorld if exists
 0 PAR: []
@@ -124,7 +125,7 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 0 SQL: drop table HelloWorld if exists
 0 PAR: []
 ```
-以上是jSqlBox最简短的入门介绍，详细使用请参见它的[用户手册](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)。  
+以上是jSqlBox最简短的入门介绍，更详细的使用说明请参见[用户手册](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)。  
 
 ## 范例 | Demo
 以下范例位于jSqlBox的demo目录下：  
@@ -137,7 +138,6 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 * [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetl) 演示如何在jSqlBox中自定义SQL模板引擎，此演示使用了Beetl作为SQL模板。
  
 ## 相关开源项目 | Related Projects
-
 - [数据库方言工具 jDialects](https://gitee.com/drinkjava2/jdialects)
 - [独立的声明式事务工具 jTransactions](https://gitee.com/drinkjava2/jTransactions)
 - [微型IOC/AOP工具 jBeanBox](https://gitee.com/drinkjava2/jBeanBox)

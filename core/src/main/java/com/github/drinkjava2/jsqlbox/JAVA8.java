@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox;
 
-/*- JAVA8_BEGIN
+/*- JAVA8_BEGIN */
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.AliasProxyUtil.AliasItemInfo;
@@ -75,4 +75,4 @@ public class JAVA8 {//NOSONAR
 	}
 	 
 }
-JAVA8_END */
+/*- JAVA8_END */

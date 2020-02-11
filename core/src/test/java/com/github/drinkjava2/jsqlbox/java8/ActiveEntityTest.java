@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.java8;
-/*- JAVA8_BEGIN
+/*- JAVA8_BEGIN */
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import java.util.List;
@@ -45,4 +45,4 @@ public class ActiveEntityTest  extends TestBase implements ActiveEntity<ActiveEn
 	}
 	 
 }
-JAVA8_END */
+/*- JAVA8_END */
