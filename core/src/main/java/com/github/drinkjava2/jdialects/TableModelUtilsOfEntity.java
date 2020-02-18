@@ -337,14 +337,11 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setScale((Integer) colMap.get("scale"));
 					if (!StrUtils.isEmpty(colMap.get("columnDefinition"))) {
 						String colDEF=(String) colMap.get("columnDefinition");
-						colDEF=colDEF.trim();
-						String colTail=null;
-						if(colDEF.contains(" ")) {
-							colTail=" "+StrUtils.substringAfter(colDEF, " ");
-							colDEF=StrUtils.substringBefore(colDEF, " ");
-						}  
-						col.setColumnType(TypeUtils.colDef2DialectType(colDEF ));
-						col.setTail(colTail);
+						col.setColumnDefinition(colDEF);
+						colDEF=colDEF.trim(); 
+						if(colDEF.contains(" "))   
+							colDEF=StrUtils.substringBefore(colDEF, " "); 
+						col.setColumnType(TypeUtils.colDef2DialectType(colDEF )); 
 					}
 					else
 						col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));
@@ -471,5 +468,5 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 			throw new DialectException("Can not create TableModel for entityClass " + entityClass);
 		TableModel.sortColumns(model.getColumns());
 		return model;
-	} 
+	}
 }

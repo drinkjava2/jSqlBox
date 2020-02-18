@@ -28,7 +28,6 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.TypeUtils;
 
 /**
  * DbPro is the enhanced version of Apache Commons DbUtils's QueryRunner, add
@@ -119,16 +118,14 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	 */
 	private PreparedSQL doPrepare(boolean inlineStyle, Object... items) {// NOSONAR
 		PreparedSQL ps = dealSqlItems(null, inlineStyle, items);
-		ps.addGlobalAndThreadedHandlers(this);
-		preparedParamsToJdbc(ps);
+		ps.addGlobalAndThreadedHandlers(this); 
 		return ps;
 	}
 
 	/** Convert parameters to JDBC type, like java.util.Date to java.sql.Date */
 	public void preparedParamsToJdbc(PreparedSQL ps) {
 		if (dialect == null || ps == null || ps.getParams() == null || ps.getParams().length == 0)
-			return;
-		TypeUtils.javaParam2JdbcSqlParam(ps.getParams(), null);
+			return; 
 	}
 
 	/**

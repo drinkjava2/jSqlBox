@@ -181,7 +181,9 @@ public class DDLCreateUtils {// NOSONAR
 						+ c.getColumnName() + "\" at table \"" + tableName + "\"");
 
 			// Column type definition
-			if (GenerationType.IDENTITY.equals(c.getIdGenerationType())) {
+			if (!StrUtils.isEmpty(c.getColumnDefinition()))
+				buf.append(c.getColumnDefinition());
+			else if (GenerationType.IDENTITY.equals(c.getIdGenerationType())) {
 				if (features.hasDataTypeInIdentityColumn)
 					buf.append(dialect.translateToDDLType(c));
 				buf.append(' ');
@@ -191,13 +193,11 @@ public class DDLCreateUtils {// NOSONAR
 					buf.append(features.identityColumnString);
 			} else {
 				buf.append(dialect.translateToDDLType(c));
-
 				// Default
 				String defaultValue = c.getDefaultValue();
 				if (defaultValue != null) {
 					buf.append(" default ").append(defaultValue);
 				}
-
 				// Not null
 				if (!c.getNullable())
 					buf.append(" not null");
@@ -377,8 +377,9 @@ public class DDLCreateUtils {// NOSONAR
 			notRepeatedSeq.add(tab);
 	}
 
-	private static final ColumnModel VARCHAR100=new ColumnModel("VARCHAR100").VARCHAR(100);
-	private static final ColumnModel BINGINT=new ColumnModel("BINGINT").BIGINT();
+	private static final ColumnModel VARCHAR100 = new ColumnModel("VARCHAR100").VARCHAR(100);
+	private static final ColumnModel BINGINT = new ColumnModel("BINGINT").BIGINT();
+
 	private static void buildTableGeneratorDDL(Dialect dialect, List<String> stringList,
 			List<TableIdGenerator> tbGeneratorList) {
 		Set<TableIdGenerator> notRepeatedTab = new HashSet<TableIdGenerator>();
@@ -388,10 +389,7 @@ public class DDLCreateUtils {// NOSONAR
 
 		Set<String> tableExisted = new HashSet<String>();
 		Set<String> columnExisted = new HashSet<String>();
-		
-		
-		
-		
+
 		for (TableIdGenerator tg : tbGeneratorList)
 			if (tg.getAllocationSize() != 0) {
 				String tableName = tg.getTable().toLowerCase();

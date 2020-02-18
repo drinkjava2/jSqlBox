@@ -1,5 +1,6 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
 
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -25,11 +26,14 @@ public class DateTimeTest extends TestBase {
 
 	private void useField(int x) {// Use jDialect's dynamic configuration to disable other fields
 		TableModel model = TableModelUtils.entity2Model(DT.class);
-		for (int i = 1; i <= 17; i++)
-			model.column("d" + i).setTransientable(true);
+		for (int i = 1; i <= 20; i++)
+			try {
+				model.column("d" + i).setTransientable(true);
+			} catch (Exception e) {
+			}
 		model.column("d" + x).setTransientable(false);
 		TableModelUtils.bindGlobalModel(DT.class, model);
-		createAndRegTables(DT.class);
+		quietCreateRegTables(DT.class);
 	}
 
 	@Test
@@ -91,7 +95,7 @@ public class DateTimeTest extends TestBase {
 	public void testD6() {
 		useField(6);
 		DT in = new DT();
-		in.setD6(new java.sql.Date(0L));
+		in.setD6(new java.sql.Date(1000L));
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD6());
@@ -102,7 +106,7 @@ public class DateTimeTest extends TestBase {
 	public void testD7() {
 		useField(7);
 		DT in = new DT();
-		in.setD7(new java.sql.Time(0L));
+		in.setD7(new Timestamp(new Date().getTime()));
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD7());
@@ -113,7 +117,9 @@ public class DateTimeTest extends TestBase {
 	public void testD8() {
 		useField(8);
 		DT in = new DT();
-		in.setD8(new java.sql.Timestamp(0L));
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		in.setD8(c);
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD8());
@@ -122,103 +128,15 @@ public class DateTimeTest extends TestBase {
 
 	@Test
 	public void testD9() {
+		if (!dialect.isMySqlFamily())
+			return;
 		useField(9);
 		DT in = new DT();
-		in.setD9(new java.util.Date());
+		in.setD5(new java.util.Date());
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD9());
 		Systemout.println(out.getD9());
-	}
-
-	@Test
-	public void testD10() {
-		useField(10);
-		DT in = new DT();
-		in.setD10(new java.sql.Date(0L));
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD10());
-		Systemout.println(out.getD10());
-	}
-
-	@Test
-	public void testD11() {
-		useField(11);
-		DT in = new DT();
-		in.setD11(new java.sql.Time(0L));
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD11());
-		Systemout.println(out.getD11());
-	}
-
-	@Test
-	public void testD12() {
-		useField(12);
-		DT in = new DT();
-		in.setD12(new java.sql.Timestamp(0L));
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD12());
-		Systemout.println(out.getD12());
-	}
-
-	@Test
-	public void test13() {
-		useField(13);
-		DT in = new DT();
-		in.setD13(new java.util.Date());
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD13());
-		Systemout.println(out.getD13());
-	}
-
-	@Test
-	public void testD14() {
-		useField(14);
-		DT in = new DT();
-		in.setD14(new java.sql.Date(0L));
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD14());
-		Systemout.println(out.getD14());
-	}
-
-	@Test
-	public void testD15() {
-		useField(15);
-		DT in = new DT();
-		in.setD15(new java.sql.Time(0L));
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD15());
-		Systemout.println(out.getD15());
-	}
-
-	@Test
-	public void testD16() {
-		useField(16);
-		DT in = new DT();
-		in.setD16(new java.sql.Timestamp(0L));
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD16());
-		Systemout.println(out.getD16());
-	}
-	
-	@Test
-	public void testD17() {
-		useField(17);
-		DT in = new DT();
-		Calendar c=Calendar.getInstance();
-		c.setTime(new Date()); 
-		in.setD17(c);
-		in.insert();
-		DT out = new DT(in.getId()).load();
-		Assert.assertNotNull(out.getD17());
-		Systemout.println(out.getD17());
 	}
 
 	public static class DT extends ActiveRecord<DT> {
@@ -241,41 +159,17 @@ public class DateTimeTest extends TestBase {
 		@Column(columnDefinition = "timestamp")
 		java.util.Date d5;
 
-		@Column(columnDefinition = "timestamp not null") // JPA allow add extra string in columnDefinition
+		@Column(columnDefinition = "timestamp")
 		java.sql.Date d6;
 
 		@Column(columnDefinition = "timestamp")
-		java.sql.Time d7;
-
-		@Column(columnDefinition = "timestamp")
-		java.sql.Timestamp d8;
-
-		@Column(columnDefinition = "date")
-		java.util.Date d9;
-
-		@Column(columnDefinition = "date")
-		java.sql.Date d10;
-
-		@Column(columnDefinition = "date")
-		java.sql.Time d11;
-
-		@Column(columnDefinition = "date")
-		java.sql.Timestamp d12;
-
-		@Column(columnDefinition = "time")
-		java.util.Date d13;
-
-		@Column(columnDefinition = "time")
-		java.sql.Date d14;
-
-		@Column(columnDefinition = "time")
-		java.sql.Time d15;
-
-		@Column(columnDefinition = "time")
-		java.sql.Timestamp d16;
+		java.sql.Timestamp d7;
 
 		@Column
-		java.util.Calendar d17;
+		java.util.Calendar d8;
+
+		@Column(columnDefinition = "timestamp not null default now() comment 'CREATE TIME'")
+		java.util.Date d9;
 
 		public DT() {
 		}
@@ -341,19 +235,19 @@ public class DateTimeTest extends TestBase {
 			this.d6 = d6;
 		}
 
-		public java.sql.Time getD7() {
+		public java.sql.Timestamp getD7() {
 			return d7;
 		}
 
-		public void setD7(java.sql.Time d7) {
+		public void setD7(java.sql.Timestamp d7) {
 			this.d7 = d7;
 		}
 
-		public java.sql.Timestamp getD8() {
+		public java.util.Calendar getD8() {
 			return d8;
 		}
 
-		public void setD8(java.sql.Timestamp d8) {
+		public void setD8(java.util.Calendar d8) {
 			this.d8 = d8;
 		}
 
@@ -364,71 +258,6 @@ public class DateTimeTest extends TestBase {
 		public void setD9(java.util.Date d9) {
 			this.d9 = d9;
 		}
-
-		public java.sql.Date getD10() {
-			return d10;
-		}
-
-		public void setD10(java.sql.Date d10) {
-			this.d10 = d10;
-		}
-
-		public java.sql.Time getD11() {
-			return d11;
-		}
-
-		public void setD11(java.sql.Time d11) {
-			this.d11 = d11;
-		}
-
-		public java.sql.Timestamp getD12() {
-			return d12;
-		}
-
-		public void setD12(java.sql.Timestamp d12) {
-			this.d12 = d12;
-		}
-
-		public java.util.Date getD13() {
-			return d13;
-		}
-
-		public void setD13(java.util.Date d13) {
-			this.d13 = d13;
-		}
-
-		public java.sql.Date getD14() {
-			return d14;
-		}
-
-		public void setD14(java.sql.Date d14) {
-			this.d14 = d14;
-		}
-
-		public java.sql.Time getD15() {
-			return d15;
-		}
-
-		public void setD15(java.sql.Time d15) {
-			this.d15 = d15;
-		}
-
-		public java.sql.Timestamp getD16() {
-			return d16;
-		}
-
-		public void setD16(java.sql.Timestamp d16) {
-			this.d16 = d16;
-		}
-
-		public java.util.Calendar getD17() {
-			return d17;
-		}
-
-		public void setD17(java.util.Calendar d17) {
-			this.d17 = d17;
-		}
-
 	}
 
 }

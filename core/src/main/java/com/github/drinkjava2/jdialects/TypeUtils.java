@@ -79,7 +79,7 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(java.sql.Time.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.sql.Timestamp.class, Type.TIMESTAMP);
 
-		/*- JAVA8_BEGIN */  
+		/*- JAVA8_BEGIN */
 		JAVA_TO_TYPE_MAP.put(java.time.LocalDate.class, Type.DATE);
 		JAVA_TO_TYPE_MAP.put(java.time.LocalTime.class, Type.TIME);
 		JAVA_TO_TYPE_MAP.put(java.time.OffsetTime.class, Type.TIME);
@@ -155,7 +155,8 @@ public abstract class TypeUtils {// NOSONAR
 	/**
 	 * Convert column definition String to Dialect's Type
 	 */
-	public static Type colDef2DialectType(String columnDef) {
+	public static Type colDef2DialectType(String columnDefination) {
+		String columnDef = StrUtils.substringBefore(columnDefination, "(");
 		if (BIGINT.equalsIgnoreCase(columnDef))
 			return Type.BIGINT;
 		if (BINARY.equalsIgnoreCase(columnDef))
@@ -213,7 +214,7 @@ public abstract class TypeUtils {// NOSONAR
 		if (VARCHAR.equalsIgnoreCase(columnDef))
 			return Type.VARCHAR;
 		// @formatter:on
-		throw new DialectException("'" + columnDef + "' is not a legal SQL column definition name");
+		throw new DialectException("'" + columnDef + "' can not be map to a dialect type");
 	}
 
 	/** Convert a JDBC value to Java type value */
@@ -402,41 +403,36 @@ public abstract class TypeUtils {// NOSONAR
 	}
 
 	/**
-	 * Convert java value to JDBC Sql parameter value according Dialect,
-	 * optionalType is optional target dialect type, if not set, result is
-	 * determined by dialect
+	 * Convert java value to JDBC Sql parameter value according Dialect, dialect is
+	 * optional, if dialect is null params will not be converted
 	 */
-	public static void javaParam2JdbcSqlParam(Object[] params, Type optionalType) {// NOSONAR
-		if (params == null)
-			return;
-		for (int i = 0; i < params.length; i++) {
-			Object value = params[i];
-			if (value != null) {
-				Class<?> vType = value.getClass();
-				if (java.util.Date.class == vType)
-					params[i] = new java.sql.Date(((Date) value).getTime());
-				else if (Calendar.class.isAssignableFrom(vType))
-					params[i] = new java.sql.Date(((Calendar) value).getTime().getTime());
-				/*- JAVA8_BEGIN */
-				else if (java.time.temporal.Temporal.class.isAssignableFrom(vType)) { 
-					if (java.time.LocalDate.class == vType)
-						params[i] = Java8DateUtils.localDate2SqlDate((java.time.LocalDate) value);
-					else if (java.time.LocalTime.class == vType)
-						params[i] = Java8DateUtils.localTime2SqlTime((java.time.LocalTime) value);
-					else if (java.time.OffsetTime.class == vType)
-						params[i] = Java8DateUtils.offsetTime2SqlTime((java.time.OffsetTime) value);
-					else if (java.time.Instant.class == vType)
-						params[i] = Java8DateUtils.instant2SqlTimestamp((java.time.Instant) value);
-					else if (java.time.LocalDateTime.class == vType)
-						params[i] = Java8DateUtils.localDateTime2SqlTimestamp((java.time.LocalDateTime) value);
-					else if (java.time.OffsetDateTime.class == vType)
-						params[i] = Java8DateUtils.offsetDateTime2SqlTimestamp((java.time.OffsetDateTime) value);
-					else if (java.time.ZonedDateTime.class == vType)
-						params[i] = Java8DateUtils.zonedDateTime2SqlTimestamp((java.time.ZonedDateTime) value);
-				}
-				/*- JAVA8_END */
-			}
+	public static Object javaParam2JdbcParam(Object value) {// NOSONAR
+		if (value == null)
+			return value;
+		Class<?> vType = value.getClass();
+		if (java.util.Date.class == vType)
+			return new java.sql.Date(((Date) value).getTime());
+		else if (Calendar.class.isAssignableFrom(vType))
+			return new java.sql.Date(((Calendar) value).getTime().getTime()); 
+		/*- JAVA8_BEGIN */
+		else if (java.time.temporal.Temporal.class.isAssignableFrom(vType)) {
+			if (java.time.LocalDate.class == vType)
+				return Java8DateUtils.localDate2SqlDate((java.time.LocalDate) value);
+			else if (java.time.LocalTime.class == vType)
+				return Java8DateUtils.localTime2SqlTime((java.time.LocalTime) value);
+			else if (java.time.OffsetTime.class == vType)
+				return Java8DateUtils.offsetTime2SqlTime((java.time.OffsetTime) value);
+			else if (java.time.Instant.class == vType)
+				return Java8DateUtils.instant2SqlTimestamp((java.time.Instant) value);
+			else if (java.time.LocalDateTime.class == vType)
+				return Java8DateUtils.localDateTime2SqlTimestamp((java.time.LocalDateTime) value);
+			else if (java.time.OffsetDateTime.class == vType)
+				return Java8DateUtils.offsetDateTime2SqlTimestamp((java.time.OffsetDateTime) value);
+			else if (java.time.ZonedDateTime.class == vType)
+				return Java8DateUtils.zonedDateTime2SqlTimestamp((java.time.ZonedDateTime) value);
 		}
+		/*- JAVA8_END */
+		return value;
 	}
 
 	/** Convert java.sql.Types.xxx type to Dialect's Type */
@@ -502,4 +498,5 @@ public abstract class TypeUtils {// NOSONAR
 			throw new DialectException("Unsupported java.sql.Types:" + javaSqlType);
 		}
 	}
+
 }

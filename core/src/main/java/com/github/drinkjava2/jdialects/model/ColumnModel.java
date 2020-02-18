@@ -39,6 +39,8 @@ public class ColumnModel {
 	private TableModel tableModel; // belong to which tableModel
 
 	private Type columnType;// See com.github.drinkjava2.jdialects.Type
+	
+	private String columnDefinition;//if not empty, will use it to create DDL
 
 	private Boolean pkey = false; // if is primary key
 
@@ -144,6 +146,7 @@ public class ColumnModel {
 		col.converterClassOrName = converterClassOrName;
 		col.value = value;
 		col.valueExist = valueExist;
+		col.columnDefinition=columnDefinition;
 		return col;
 	}
 
@@ -646,6 +649,15 @@ public class ColumnModel {
 
 	public ColumnModel setValueExist(Boolean valueExist) {
 		this.valueExist = valueExist;
+		return this;
+	}
+
+	public String getColumnDefinition() {
+		return columnDefinition;
+	}
+
+	public ColumnModel setColumnDefinition(String columnDefinition) {
+		this.columnDefinition = columnDefinition;
 		return this;
 	}
 

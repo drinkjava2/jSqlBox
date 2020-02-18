@@ -34,6 +34,7 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jlogs.Log;
 import com.github.drinkjava2.jlogs.LogFactory;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
@@ -183,7 +184,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * SQL format
 	 */
 	protected String formatSqlForLoggerOutput(String sql) {
-		return new StringBuilder(name == null ? "" : name).append(dbCode < 0 ? "" : dbCode + " ").append("SQL: ")
+		return new StringBuilder(name == null ? "" : name).append(dbCode <= 0 ? "" : dbCode + " ").append("SQL: ")
 				.append(sql).toString();
 	}
 
@@ -192,7 +193,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * customise parameters format
 	 */
 	protected String formatParametersForLoggerOutput(Object... params) {
-		return new StringBuilder(name == null ? "" : name).append(dbCode < 0 ? "" : dbCode + " ").append("PAR: ")
+		return new StringBuilder(name == null ? "" : name).append(dbCode <= 0 ? "" : dbCode + " ").append("PAR: ")
 				.append(Arrays.deepToString(params)).toString();
 	}
 
@@ -419,11 +420,16 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * This is the core method of whole project, handle a PreparedSQL instance and
 	 * return a result
 	 */
-	public Object runPreparedSQL(PreparedSQL ps) {
+	public Object runPreparedSQL(PreparedSQL ps) { 
 		if (ps.getSwitchTo() != null) {
 			DbPro pro = ps.getSwitchTo();
 			ps.setSwitchTo(null);
 			return pro.runPreparedSQL(ps);// SwitchTo run
+		}
+		if(ps.getParams().length>0) {
+			for (int i = 0; i < ps.getParams().length; i++) {
+				ps.getParams()[i]=TypeUtils.javaParam2JdbcParam(ps.getParams()[i]);
+			}
 		}
 		if (ps.getMasterSlaveOption() == null)
 			ps.setMasterSlaveOption(this.getMasterSlaveOption());
