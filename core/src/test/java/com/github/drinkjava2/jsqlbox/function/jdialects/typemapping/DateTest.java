@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
-/*- JAVA8_BEGIN
+/*- JAVA8_BEGIN */
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
@@ -389,4 +389,4 @@ public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 	}
 
 }
-JAVA8_END */
+/* JAVA8_END */
