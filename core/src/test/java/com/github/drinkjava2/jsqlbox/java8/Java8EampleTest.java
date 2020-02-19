@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.java8;
-/*- JAVA8_BEGIN */
+/*- JAVA8_BEGIN
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.JAVA8.*;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
@@ -101,4 +101,4 @@ public class Java8EampleTest {
 	}
 	
 }
-/*- JAVA8_END */
+JAVA8_END */

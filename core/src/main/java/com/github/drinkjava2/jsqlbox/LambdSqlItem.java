@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox;
-/*- JAVA8_BEGIN */
+/*- JAVA8_BEGIN
 import com.github.drinkjava2.jdbpro.CustomizedSqlItem;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -62,4 +62,4 @@ public interface LambdSqlItem extends CustomizedSqlItem {
 	 
 }
 
-/*- JAVA8_END */
+JAVA8_END */

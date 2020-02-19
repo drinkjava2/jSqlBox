@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
-/*- JAVA8_BEGIN */
+/*- JAVA8_BEGIN
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,12 +18,8 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
-/**
- * Test Date time type
- * 
- * @author Yong Zhu
- * @since 1.7.0
- */
+ 
+// Test Date time type
 public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 	private static final Date D3000 = new Date(40000000000000l); // year 3237
 	private static final Date D2000 = new Date(1000000000000l); // year 2001
@@ -393,4 +389,4 @@ public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 	}
 
 }
-/*- JAVA8_END */
+JAVA8_END */

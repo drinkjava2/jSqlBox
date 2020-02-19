@@ -11,7 +11,7 @@
  */
 package com.github.drinkjava2.jdialects;
 
-/*- JAVA8_BEGIN */
+/*- JAVA8_BEGIN
 import static com.github.drinkjava2.jdialects.Java8DateUtils.date2LocalDate;
 import static com.github.drinkjava2.jdialects.Java8DateUtils.date2LocalDateTime;
 import static com.github.drinkjava2.jdialects.Java8DateUtils.instant2SqlTimestamp;
@@ -120,4 +120,4 @@ public class Java8DateUtilsTest {// NOSONAR
 	}
 
 }
-/*- JAVA8_END */
+JAVA8_END */

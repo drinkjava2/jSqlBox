@@ -1,5 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
-/*- JAVA8_BEGIN */
+/*- JAVA8_BEGIN
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -180,4 +180,4 @@ public class Java8DateTimeTest extends TestBase {
 	}
 
 }
-/*- JAVA8_END */
+JAVA8_END */

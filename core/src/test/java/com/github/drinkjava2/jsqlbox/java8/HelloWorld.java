@@ -11,7 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.java8;
 
-/*- JAVA8_BEGIN */
+/*- JAVA8_BEGIN
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -60,4 +60,4 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
 	}
 }
-/*- JAVA8_END */
+JAVA8_END */
