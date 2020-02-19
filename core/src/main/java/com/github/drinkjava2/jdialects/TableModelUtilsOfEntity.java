@@ -362,7 +362,7 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 				// Temporal annotation
 				Map<String, Object> TemporalMap = getFirstEntityAnno(field, "Temporal");
 				if (!TemporalMap.isEmpty()) {
-					Object temporalType = TemporalMap.get("value");
+					Object temporalType = TemporalMap.get("value").toString();
 					if ("TIMESTAMP".equals(temporalType))
 						col.setColumnType(Type.TIMESTAMP);
 					else if ("DATE".equals(temporalType))

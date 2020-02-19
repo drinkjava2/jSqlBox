@@ -611,9 +611,4 @@ public class Dialect {
 		Dialect.globalEnableTopLimitPagin = globalEnableTopLimitPagin;
 	}
 
-	public static void main(String[] args) {
-		for (Dialect d : Dialect.values()) {
-			System.out.println(d.type + " name=" + d.name);
-		}
-	}
 }

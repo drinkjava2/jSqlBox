@@ -521,17 +521,23 @@ public abstract class DbContextUtils {// NOSONAR
 	}
 
 	/** Read value from entityBean field or tail */
-	public static Object readValueFromBeanFieldOrTail(ColumnModel columnModel, Object entityBean) {
-		DbException.assureNotNull(columnModel, "columnModel can not be null.");
-		if (columnModel.getValueExist()) // value is stored in model
-			return columnModel.getValue();
-		if (columnModel.getConverterClassOrName() != null) {
-			FieldConverter cust = FieldConverterUtils.getFieldConverter(columnModel.getConverterClassOrName());
-			return cust.entityFieldToDbValue(columnModel, entityBean);
+	public static Object readValueFromBeanFieldOrTail(ColumnModel col, Object entityBean) {
+		DbException.assureNotNull(col, "columnModel can not be null.");
+		if (col.getValueExist()) // value is stored in model
+			return col.getValue();
+		if (col.getConverterClassOrName() != null) {
+			FieldConverter cust = FieldConverterUtils.getFieldConverter(col.getConverterClassOrName());
+			return cust.entityFieldToDbValue(col, entityBean);
 		}
-		Object result= doReadFromFieldOrTail(columnModel, entityBean);
-		if(result!=null && Date.class.isAssignableFrom(result.getClass())) {
-			//TODO here
+		Object result = doReadFromFieldOrTail(col, entityBean);
+		if (result != null && Date.class.isAssignableFrom(result.getClass())) {// convert date to jdbc
+			Date d = (Date) result;
+			if (col.getColumnType() == Type.DATE)
+				return new java.sql.Date(d.getTime());
+			else if (col.getColumnType() == Type.TIMESTAMP)
+				return new java.sql.Timestamp(d.getTime());
+			else if (col.getColumnType() == Type.TIME)
+				return new java.sql.Time(d.getTime());
 		}
 		return result;
 	}
@@ -589,8 +595,9 @@ public abstract class DbContextUtils {// NOSONAR
 					value = TypeUtils.jdbcValue2JavaValue(value, writeMethod.getParameterTypes()[0]);
 				writeMethod.invoke(entityBean, value);
 			} catch (Exception e) {
-				throw new DbException("Field '" + fieldName + "' can not write with " + (value == null ? ""
-						: " type '" + value.getClass() + "' value '") + value + "'\n" +e.getMessage(), e);
+				throw new DbException("Field '" + fieldName + "' can not write with "
+						+ (value == null ? "" : " type '" + value.getClass() + "' value '") + value + "'\n"
+						+ e.getMessage(), e);
 			}
 	}
 

@@ -49,7 +49,7 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>4.0.0.jre8</version><!--Or newest jSqlBox -->
+      <version>4.0.1.jre8</version><!--Or newest jSqlBox -->
     </dependency>
     
 		<dependency>

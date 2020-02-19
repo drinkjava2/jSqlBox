@@ -77,9 +77,9 @@ public class TestBase {
 	public void init() {
 		System.getProperties().setProperty("oracle.jdbc.J2EE13Compliant", "true");
 		DbContext.resetGlobalVariants();
-		ConsoleLog.setLogHead(false);
-		ConsoleLog.setLogLevel(ConsoleLog.INFO);
-		DbContext.setGlobalNextAllowShowSql(true);
+		ConsoleLog.setLogHead(false);// do not print log head
+		ConsoleLog.setLogLevel(ConsoleLog.INFO); // info lever log
+		DbContext.setGlobalNextAllowShowSql(false); //disable sql log
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);

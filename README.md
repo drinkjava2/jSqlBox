@@ -57,11 +57,10 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>4.0.0.jre8</version>
+   <version>4.0.1.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
-jSqlBox分为Java8和Java6两个版本发布，并分别用.jre8和.jre6来区分。如果是Java6或7环境下，只能使用4.0.0.jre6版本。
-Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。
+jSqlBox分为Java8和Java6两个版本发布，如果是Java6或7环境下，请将上面的版本号改为4.0.1.jre6，Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。
 
 ## 入门 | First Example
 以下示例演示了jSqlBox的基本配置和使用:
@@ -106,24 +105,24 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 	}
 }
 ```
-上面这个示例包括了根据实体类生成DDL并执行、插入实体到数据库、执行更新、查询出结果、即打印出"Hello jSqlBox"、删除实体、删除数据库。
+上面这个演示包括了根据实体类生成DDL并执行、插入实体到数据库、执行更新、查询出结果、即打印出"Hello jSqlBox"、删除实体、删除数据库。
 示例中的实体类只需要声明接口(限Java8版)。查询语句使用了jSqlBox独创的参数内嵌式SQL写法，可以自由拼接复杂的SQL，不用考虑参数和问号对齐的问题了。  
 因为开启了日志输出，可以看到命令行打印出的SQL执行日志:
 ```
-0 SQL: drop table HelloWorld if exists
-0 PAR: []
-0 SQL: create table HelloWorld ( id varchar(250),name varchar(250), primary key (id))
-0 PAR: []
-0 SQL: insert into HelloWorld (name, id)  values(?,?)
-0 PAR: [Foo, dlo3krj8dqitbd46kvel0udo2]
-0 SQL: update HelloWorld set name=?  where id=?
-0 PAR: [Hello jSqlBox, dlo3krj8dqitbd46kvel0udo2]
-0 SQL: select name from HelloWorld where name like? or name=? or name =?
-0 PAR: [H%, 1, 2]
-0 SQL: delete from HelloWorld where id=? 
-0 PAR: [dlo3krj8dqitbd46kvel0udo2]
-0 SQL: drop table HelloWorld if exists
-0 PAR: []
+SQL: drop table HelloWorld if exists
+PAR: []
+SQL: create table HelloWorld ( id varchar(250),name varchar(250), primary key (id))
+PAR: []
+SQL: insert into HelloWorld (name, id)  values(?,?)
+PAR: [Foo, emeai4bfdsciufuuteb9a7nmo]
+SQL: update HelloWorld set name=?  where id=?
+PAR: [Hello jSqlBox, emeai4bfdsciufuuteb9a7nmo]
+SQL: select name from HelloWorld where name like? or name=? or name =?
+PAR: [H%, 1, 2]
+SQL: delete from HelloWorld where id=? 
+PAR: [emeai4bfdsciufuuteb9a7nmo]
+SQL: drop table HelloWorld if exists
+PAR: []
 ```
 以上是jSqlBox最简短的入门介绍，更详细的使用说明请参见[用户手册](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)。  
 
@@ -141,7 +140,7 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 - [数据库方言工具 jDialects](https://gitee.com/drinkjava2/jdialects)
 - [独立的声明式事务工具 jTransactions](https://gitee.com/drinkjava2/jTransactions)
 - [微型IOC/AOP工具 jBeanBox](https://gitee.com/drinkjava2/jBeanBox)
-- [前端写SQL和Java工具 GoSqlGo](https://gitee.com/drinkjava2/gosqlgo)
+- [前端直接写SQL和业务逻辑 GoSqlGo](https://gitee.com/drinkjava2/gosqlgo)
 
 ## 期望 | Futures
 
