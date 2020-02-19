@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.github.drinkjava2.jdialects.annotation.jpa.TemporalType;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.springsrc.utils.ReflectionUtils;
@@ -336,14 +337,13 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 					col.setPrecision((Integer) colMap.get("precision"));
 					col.setScale((Integer) colMap.get("scale"));
 					if (!StrUtils.isEmpty(colMap.get("columnDefinition"))) {
-						String colDEF=(String) colMap.get("columnDefinition");
+						String colDEF = (String) colMap.get("columnDefinition");
 						col.setColumnDefinition(colDEF);
-						colDEF=colDEF.trim(); 
-						if(colDEF.contains(" "))   
-							colDEF=StrUtils.substringBefore(colDEF, " "); 
-						col.setColumnType(TypeUtils.colDef2DialectType(colDEF )); 
-					}
-					else
+						colDEF = colDEF.trim();
+						if (colDEF.contains(" "))
+							colDEF = StrUtils.substringBefore(colDEF, " ");
+						col.setColumnType(TypeUtils.colDef2DialectType(colDEF));
+					} else
 						col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));
 					col.setInsertable((Boolean) colMap.get("insertable"));
 					col.setUpdatable((Boolean) colMap.get("updatable"));
@@ -358,6 +358,18 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 				// @Id
 				if (!getFirstEntityAnno(field, "Id").isEmpty() || !getFirstEntityAnno(field, "PKey").isEmpty())
 					col.pkey();
+
+				// Temporal annotation
+				Map<String, Object> TemporalMap = getFirstEntityAnno(field, "Temporal");
+				if (!TemporalMap.isEmpty()) {
+					Object temporalType = TemporalMap.get("value");
+					if ("TIMESTAMP".equals(temporalType))
+						col.setColumnType(Type.TIMESTAMP);
+					else if ("DATE".equals(temporalType))
+						col.setColumnType(Type.DATE);
+					else if ("TIME".equals(temporalType))
+						col.setColumnType(Type.TIME);
+				}
 
 				// @ShardTable
 				Map<String, Object> shardTableMap = getFirstEntityAnno(field, "ShardTable");

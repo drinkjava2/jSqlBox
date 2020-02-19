@@ -19,6 +19,7 @@ import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
+import com.github.drinkjava2.jdialects.annotation.jpa.TemporalType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
 
@@ -39,8 +40,8 @@ public class ColumnModel {
 	private TableModel tableModel; // belong to which tableModel
 
 	private Type columnType;// See com.github.drinkjava2.jdialects.Type
-	
-	private String columnDefinition;//if not empty, will use it to create DDL
+
+	private String columnDefinition;// if not empty, will use it to create DDL
 
 	private Boolean pkey = false; // if is primary key
 
@@ -146,7 +147,7 @@ public class ColumnModel {
 		col.converterClassOrName = converterClassOrName;
 		col.value = value;
 		col.valueExist = valueExist;
-		col.columnDefinition=columnDefinition;
+		col.columnDefinition = columnDefinition;
 		return col;
 	}
 

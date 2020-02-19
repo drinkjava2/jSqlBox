@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -528,7 +529,11 @@ public abstract class DbContextUtils {// NOSONAR
 			FieldConverter cust = FieldConverterUtils.getFieldConverter(columnModel.getConverterClassOrName());
 			return cust.entityFieldToDbValue(columnModel, entityBean);
 		}
-		return doReadFromFieldOrTail(columnModel, entityBean);
+		Object result= doReadFromFieldOrTail(columnModel, entityBean);
+		if(result!=null && Date.class.isAssignableFrom(result.getClass())) {
+			//TODO here
+		}
+		return result;
 	}
 
 	/** Read value from entityBean field or tail */

@@ -12,6 +12,8 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.annotation.jpa.Temporal;
+import com.github.drinkjava2.jdialects.annotation.jpa.TemporalType;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
@@ -23,7 +25,9 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
  * @since 1.7.0
  */
 public class DateTimeTest extends TestBase {
+	private static final Date y3000=new Date(40000000000000l); //year 3237
 
+	
 	private void useField(int x) {// Use jDialect's dynamic configuration to disable other fields
 		TableModel model = TableModelUtils.entity2Model(DT.class);
 		for (int i = 1; i <= 20; i++)
@@ -40,7 +44,7 @@ public class DateTimeTest extends TestBase {
 	public void testD1() {
 		useField(1);
 		DT in = new DT();
-		in.setD1(new java.util.Date(0L));
+		in.setD1(y3000);
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD1());
@@ -51,7 +55,7 @@ public class DateTimeTest extends TestBase {
 	public void testD2() {
 		useField(2);
 		DT in = new DT();
-		in.setD2(new java.sql.Date(0L));
+		in.setD2(new java.sql.Date(y3000.getTime()));
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD2());
@@ -62,7 +66,7 @@ public class DateTimeTest extends TestBase {
 	public void testD3() {
 		useField(3);
 		DT in = new DT();
-		in.setD3(new java.sql.Time(0L));
+		in.setD3(new java.sql.Time(y3000.getTime()));
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD3());
@@ -73,7 +77,7 @@ public class DateTimeTest extends TestBase {
 	public void testD4() {
 		useField(4);
 		DT in = new DT();
-		in.setD4(new java.sql.Timestamp(0L));
+		in.setD4(new java.sql.Timestamp(y3000.getTime()));
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD4());
@@ -84,7 +88,7 @@ public class DateTimeTest extends TestBase {
 	public void testD5() {
 		useField(5);
 		DT in = new DT();
-		in.setD5(new java.util.Date());
+		in.setD5(y3000);
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD5());
@@ -95,7 +99,7 @@ public class DateTimeTest extends TestBase {
 	public void testD6() {
 		useField(6);
 		DT in = new DT();
-		in.setD6(new java.sql.Date(1000L));
+		in.setD6(new java.sql.Date(y3000.getTime()));
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD6());
@@ -106,7 +110,7 @@ public class DateTimeTest extends TestBase {
 	public void testD7() {
 		useField(7);
 		DT in = new DT();
-		in.setD7(new Timestamp(new Date().getTime()));
+		in.setD7(new Timestamp(y3000.getTime()));
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD7());
@@ -118,7 +122,7 @@ public class DateTimeTest extends TestBase {
 		useField(8);
 		DT in = new DT();
 		Calendar c = Calendar.getInstance();
-		c.setTime(new Date());
+		c.setTime(y3000);
 		in.setD8(c);
 		in.insert();
 		DT out = new DT(in.getId()).load();
@@ -132,7 +136,7 @@ public class DateTimeTest extends TestBase {
 			return;
 		useField(9);
 		DT in = new DT();
-		in.setD5(new java.util.Date());
+		in.setD9(y3000);
 		in.insert();
 		DT out = new DT(in.getId()).load();
 		Assert.assertNotNull(out.getD9());
@@ -145,6 +149,7 @@ public class DateTimeTest extends TestBase {
 		String id;
 
 		@Column
+		@Temporal(TemporalType.TIMESTAMP)
 		java.util.Date d1;
 
 		@Column
