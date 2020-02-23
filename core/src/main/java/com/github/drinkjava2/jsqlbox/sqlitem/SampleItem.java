@@ -104,7 +104,7 @@ public class SampleItem implements CustomizedSqlItem {
 			ColumnModel col = model.getColumn(fieldName);
 			if (Boolean.TRUE.equals(col.getTransientable()))
 				continue;
-			Object fieldValue = DbContextUtils.readValueFromBeanFieldOrTail(col, entityBean);
+			Object fieldValue = DbContextUtils.readValueFromBeanFieldOrTail(col, entityBean, false,false);
 			if (fieldValue != null && (nullFieldsOnly == null || !nullFieldsOnly)) {
 				if (!isfirst)
 					ps.addSql(" and ");

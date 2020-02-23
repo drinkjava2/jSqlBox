@@ -88,7 +88,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			throw new DbException("No Pkey setting for '" + model.getTableName() + "'");
 		ColumnModel firstPkeyCol = model.getFirstPKeyColumn();
 		// DbUtils don't care UP/LOW case
-		Object firstPKeyValue = DbContextUtils.readValueFromBeanFieldOrTail(firstPkeyCol, entity);
+		Object firstPKeyValue = DbContextUtils.readValueFromBeanFieldOrTail(firstPkeyCol, entity, false, false);
 		if (firstPKeyValue == null)
 			return null;// Single or Compound Pkey not found in entity
 		if (pkeyCount == 1)
@@ -98,7 +98,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		for (ColumnModel col : l) {
 			if (sb.length() > 0)
 				sb.append(COMPOUND_ID_SEPARATOR);
-			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity);
+			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
 			if (value == null)
 				return null;
 			sb.append(value);
@@ -148,8 +148,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			for (Annotation annotation : anno)
 				if (annotation.annotationType().getName().endsWith(".Entity"))
 					return buildEntityIdFromEntity(entityId, model);
-			throw new DbException(
-					"Can not determine entityId type, if it's a entity, put @Entity annotation on it");
+			throw new DbException("Can not determine entityId type, if it's a entity, put @Entity annotation on it");
 		}
 	}
 
@@ -180,7 +179,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		for (ColumnModel col : cols) {
 			if (!col.getPkey())
 				continue;
-			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entityId);
+			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entityId, false, false);
 			DbContextUtils.writeValueToBeanFieldOrTail(col, bean, value);
 		}
 		return bean;
@@ -208,7 +207,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		if (TypeUtils.canMapToDialectType(entityId.getClass()))
 			return entityId;
 		else
-			return DbContextUtils.readValueFromBeanFieldOrTail(col, entityId);
+			return DbContextUtils.readValueFromBeanFieldOrTail(col, entityId, false, false);
 	}
 
 }

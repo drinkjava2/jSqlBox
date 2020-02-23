@@ -158,7 +158,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new DbException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this);
+		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this, false, false);
 		return DbContextUtils.getShardedTB(ctx(), model.getEntityClass(), shardKey1);
 	}
 
@@ -168,8 +168,8 @@ public class ActiveRecord<T> implements TailType, EntityType {
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new DbException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this);
-		
+		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this, false, false);
+
 		return DbContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 

@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
- 
+
 package com.github.drinkjava2.jsqlbox;
 /*- JAVA8_BEGIN */
 
@@ -30,7 +30,6 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 
- 
 @SuppressWarnings("all")
 public interface ActiveEntity<T> extends EntityType {
 
@@ -41,8 +40,7 @@ public interface ActiveEntity<T> extends EntityType {
 		for (Object item : optionItems)
 			if (item != null && item instanceof DbContext)
 				return (DbContext) item;
-		DbException.assureNotNull(DbContext.getGlobalDbContext(),
-				DbContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
+		DbException.assureNotNull(DbContext.getGlobalDbContext(), DbContext.NO_GLOBAL_SQLBOXCONTEXT_FOUND);
 		return DbContext.getGlobalDbContext();
 	}
 
@@ -94,7 +92,7 @@ public interface ActiveEntity<T> extends EntityType {
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null || col.getShardTable() == null || col.getShardTable().length == 0)
 			throw new DbException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this);
+		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this, false, false);
 		return DbContextUtils.getShardedTB(ctx(), model.getEntityClass(), shardKey1);
 	}
 
@@ -103,7 +101,7 @@ public interface ActiveEntity<T> extends EntityType {
 		ColumnModel col = model.getShardDatabaseColumn();
 		if (col == null || col.getShardDatabase() == null || col.getShardDatabase().length == 0)
 			throw new DbException("Not found ShardTable setting for '" + model.getEntityClass() + "'");
-		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this);
+		Object shardKey1 = DbContextUtils.readValueFromBeanFieldOrTail(col, this, false, false);
 		return DbContextUtils.getShardedDB(ctx(), model.getEntityClass(), shardKey1);
 	}
 

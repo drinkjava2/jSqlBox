@@ -28,7 +28,7 @@
 jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能、易用性等方面都不输于其它持久层工具，可以说，只要是与数据库操作相关的功能，jSqlBox都已具备，如DDL操作、分页、分库分表、声明式事务、分布式事务、关联映射查询等，所有这些功能都包含在一个1M大小的jar包中，不依赖任何第三方库。 
 
 ## 与其它持久层工具对比
-请见[与其它DAO工具对比](https://gitee.com/drinkjava2/jsqlbox/wikis/pages?title=%E9%99%84%E5%BD%952%EF%BC%9ADAO%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94&parent=%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C), 可以对jSqlBox的功能与特点有一个大概的了解。  
+请见[与其它DAO工具对比](https://gitee.com/drinkjava2/jsqlbox/wikis/pages?sort_id=1010925&doc_id=92178), 可以对jSqlBox的功能与特点有一个大概的了解。  
 
 ## 架构 | Architecture  
 ![image](arch.png)  
@@ -49,7 +49,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
  
 ## 文档 | Documentation
 
-[中文](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)  |  [English](https://github.com/drinkjava2/jsqlbox/wiki) | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
+[中文](https://gitee.com/drinkjava2/jsqlbox/wikis/pages) | [English](https://github.com/drinkjava2/jsqlbox/wiki) | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22) | [PDF](https://gitee.com/drinkjava2/jsqlbox/wikis/pages/export?type=pdf&info_id=92178)
 
 ## 配置 | Configuration
 在pom.xml中加入：  
@@ -57,10 +57,11 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>4.0.1.jre8</version> <!-- 或最新版 -->
+   <version>4.0.2.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
-jSqlBox分为Java8和Java6两个版本发布，如果是Java6或7环境下，请将上面的版本号改为4.0.1.jre6，Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。
+jSqlBox分为Java8和Java6两个版本发布，如果是Java6或7环境下，请将版本号改为4.0.1.jre6，Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。对于新项目开发，请尽量使用Java8版本。
+另一种使用jSqlBox的方式是：因为它没有用到第三方依赖，对于需要学习或更改它的源码的场合，也可以直接将jSqlBox的源码拷到项目目录里就可以直接使用它了。  
 
 ## 入门 | First Example
 以下示例演示了jSqlBox的基本配置和使用:
@@ -95,18 +96,18 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 		DbContext ctx = new DbContext(ds);
 		ctx.setAllowShowSQL(true); //开启SQL日志输出
-		DbContext.setGlobalDbContext(ctx);
-		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
+		DbContext.setGlobalDbContext(ctx); //设定全局DbContext
+		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class)); //从实体创建DDL，创建表格
 		HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
 		System.out.println(DB.iQueryForString("select name from HelloWorld where name like ?", param("H%"), " or name=",
-				ques("1"), " or name =", ques("2")));
-		h.delete();
-		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
+				ques("1"), " or name =?", param("2")));
+		h.delete(); //删除实体
+		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class)); //删除表格
 	}
 }
 ```
 上面这个演示包括了根据实体类生成DDL并执行、插入实体到数据库、执行更新、查询出结果、即打印出"Hello jSqlBox"、删除实体、删除数据库。
-示例中的实体类只需要声明接口(限Java8版)。查询语句使用了jSqlBox独创的参数内嵌式SQL写法，可以自由拼接复杂的SQL，不用考虑参数和问号对齐的问题了。  
+示例中的实体类只需要声明接口(限Java8版)。查询语句使用了jSqlBox独创的参数内嵌式SQL写法，可以自由拼接复杂的条件SQL，也不用考虑参数和问号对齐的问题了。  
 因为开启了日志输出，可以看到命令行打印出的SQL执行日志:
 ```
 SQL: drop table HelloWorld if exists
@@ -124,17 +125,17 @@ PAR: [emeai4bfdsciufuuteb9a7nmo]
 SQL: drop table HelloWorld if exists
 PAR: []
 ```
-以上是jSqlBox最简短的入门介绍，更详细的使用说明请参见[用户手册](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)。  
+以上是jSqlBox最简短的入门介绍，详细的使用说明请参见[用户手册](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)。  
 
 ## 范例 | Demo
 以下范例位于jSqlBox的demo目录下：  
-* [jBooox](../../tree/master/demo/jbooox) 这是一个微型Web演示项目，基于三个开源项目jBeanBox、jSqlBox、jWebBox的整合。
+* [jbooox](../../tree/master/demo/jsqlbox-jbooox) 这是一个微型Web演示项目，基于三个开源项目jBeanBox、jSqlBox、jWebBox的整合。
 * [jsqlbox-actframework](../../tree/master/demo/jsqlbox-actframework) 演示jSqlBox与ActFramework框架的整合，分别展示利用jBeanBox和Guice来实现声明式事务。
 * [jsqlbox-jfinal](../../tree/master/demo/jsqlbox-jfinal) 演示jSqlBox与jFinal的整合，用jSqlBox替换掉jFinal自带的DAO工具。
 * [jSqlBox-Spring](../../tree/master/demo/jsqlbox-spring) 演示jSqlBox在Spring+Tomcat环境下的配置和使用
 * [jsqlbox-springboot](../../tree/master/demo/jsqlbox-springboot) 演示jSqlBox在SpringBoot环境下的配置和使用。  
 * [jsqlbox-mybatis](../../tree/master/demo/jsqlbox-mybatis) 演示在SpringBoot环境下jSqlBox和MyBatis的混合使用。
-* [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetl) 演示如何在jSqlBox中自定义SQL模板引擎，此演示使用了Beetl作为SQL模板。
+* [jsqlbox-beetl](../../tree/master/demo/jsqlbox-beetl) 演示如何在jSqlBox中自定义SQL模板引擎，此演示使用Beetl作为SQL模板。
  
 ## 相关开源项目 | Related Projects
 - [数据库方言工具 jDialects](https://gitee.com/drinkjava2/jdialects)

@@ -13,7 +13,7 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>4.0.0.jre8</version><!-- 或其它版本号,以jre8结尾 -->
+      <version>x.x.x.jre8</version><!-- 以jre8结尾 -->
     </dependency>
 ```
 
@@ -25,11 +25,11 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>4.0.0.jre6</version><!-- 或其它版本号,以jre6结尾 -->
+      <version>x.x.x.jre6</version><!-- 以jre6结尾 -->
     </dependency>
 ```
 具体Java6版本的发布过程如下：   
-1. 修改pom.xml中的4.x.x.jre8版本号为4.x.x.jre6, 并将<version.java>1.8</version.java>中的1.8改为1.6   
+1. 修改pom.xml中的x.x.x.jre8版本号为x.x.x.jre6, 并将<version.java>1.8</version.java>中的1.8改为1.6   
 2. 使用IDE将所有源码中的/*- JAVA8_BEGIN */替换成 /*- JAVA8_BEGIN ，将所有源码中的/* JAVA8_END */替换成 JAVA8_END */  
 3. 在IDE里测试通过后, 在纯JDK1.6环境下发布即可  
 JAVA里没有条件编译功能，以上做法是通过文本替换方式来进行代码与注释转换。  

@@ -63,7 +63,7 @@ public class VersionFieldConverter extends BaseFieldConverter {
 	@Override
 	public void handleSQL(SqlOption sqlOption, DbContext ctx, ColumnModel col, Object entity,
 			LinkArrayList<Object> sqlBody, LinkArrayList<Object> sqlWhere) {
-		Object oldVersion = DbContextUtils.readValueFromBeanFieldOrTail(col, entity);
+		Object oldVersion = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
 		Object firstOrOldVersion = getFirstVersion(col, oldVersion);
 		Object nextVersion = getNextVersion(col, firstOrOldVersion);
 		if (SqlOption.UPDATE.equals(sqlOption)) {

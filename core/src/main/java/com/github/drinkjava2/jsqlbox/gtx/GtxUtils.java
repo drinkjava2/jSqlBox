@@ -76,7 +76,7 @@ public abstract class GtxUtils {// NOSONAR
 		for (ColumnModel col : model.getPKeyColumns()) {
 			if (idSB.length() > 0)
 				idSB.append("|");
-			idSB.append(DbContextUtils.readValueFromBeanFieldOrTail(col, entity));
+			idSB.append(DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false));
 		}
 		String id = idSB.toString();
 
@@ -149,8 +149,7 @@ public abstract class GtxUtils {// NOSONAR
 				tableSet.add(md.getTableName().toLowerCase());
 			}
 			for (String table : tableSet)
-				locker.iExecute("delete from ", table, " where ", GTXID, "=?", DB.param(gid),
-						DB.shardDB(gid));
+				locker.iExecute("delete from ", table, " where ", GTXID, "=?", DB.param(gid), DB.shardDB(gid));
 			locker.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			locker.getConnectionManager().rollbackTransaction();

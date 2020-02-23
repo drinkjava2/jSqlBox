@@ -19,7 +19,6 @@ import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
-import com.github.drinkjava2.jdialects.annotation.jpa.TemporalType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
 
@@ -56,8 +55,16 @@ public class ColumnModel {
 	/** Optional, put an extra tail String at end of column definition DDL */
 	private String tail;
 
-	/** Comment of this column */
+	/** Optional, Comment of this column */
 	private String comment;
+
+	boolean createTimestamp;
+
+	boolean updateTimestamp;
+
+	boolean createdBy;
+
+	boolean LastModifiedBy;
 
 	// =======================================================================
 	private GenerationType idGenerationType;
@@ -148,6 +155,10 @@ public class ColumnModel {
 		col.value = value;
 		col.valueExist = valueExist;
 		col.columnDefinition = columnDefinition;
+		col.createTimestamp = createTimestamp;
+		col.updateTimestamp = updateTimestamp;
+		col.createdBy = createdBy;
+		col.LastModifiedBy = LastModifiedBy;
 		return col;
 	}
 
@@ -660,6 +671,38 @@ public class ColumnModel {
 	public ColumnModel setColumnDefinition(String columnDefinition) {
 		this.columnDefinition = columnDefinition;
 		return this;
+	}
+
+	public boolean isCreateTimestamp() {
+		return createTimestamp;
+	}
+
+	public void setCreateTimestamp(boolean createTimestamp) {
+		this.createTimestamp = createTimestamp;
+	}
+
+	public boolean isUpdateTimestamp() {
+		return updateTimestamp;
+	}
+
+	public void setUpdateTimestamp(boolean updateTimestamp) {
+		this.updateTimestamp = updateTimestamp;
+	}
+
+	public boolean isCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(boolean createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public boolean isLastModifiedBy() {
+		return LastModifiedBy;
+	}
+
+	public void setLastModifiedBy(boolean lastModifiedBy) {
+		LastModifiedBy = lastModifiedBy;
 	}
 
 }

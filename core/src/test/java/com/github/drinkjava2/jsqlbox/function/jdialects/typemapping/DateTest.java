@@ -1,4 +1,5 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
+
 /*- JAVA8_BEGIN */
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -18,7 +19,6 @@ import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
- 
 // Test Date time type
 public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 	private static final Date D3000 = new Date(40000000000000l); // year 3237
@@ -29,7 +29,7 @@ public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 		TableModel model = TableModelUtils.entity2Model(DateTest.class);
 		for (int i = 1; i <= 20; i++)
 			try {
-				model.column("d" + i).setTransientable(true);
+				model.getColumn("d" + i).setTransientable(true);
 			} catch (Exception e) {
 			}
 		model.column("d" + x).setTransientable(false);
@@ -165,7 +165,6 @@ public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 		in.insert();
 		DateTest out = new DateTest().setId(in.getId()).load();
 		Assert.assertNotNull(out.getD9());
-		System.out.println(out.getD9());
 	}
 
 	@Temporal(TemporalType.DATE)

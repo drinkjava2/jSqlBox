@@ -215,7 +215,7 @@ public class DDLCreateUtils {// NOSONAR
 			}
 
 			// Comments
-			if (c.getComment() != null) {
+			if (!StrUtils.isEmpty(c.getComment())) {
 				if (StrUtils.isEmpty(features.columnComment) && !features.supportsCommentOn)
 					logger.warn("Ignore unsupported comment setting for dialect \"" + dialect + "\" on column \""
 							+ c.getColumnName() + "\" at table \"" + tableName + "\" with value: " + c.getComment());
@@ -259,7 +259,7 @@ public class DDLCreateUtils {// NOSONAR
 		objectResultList.add(buf.toString());
 
 		// table comment on
-		if (t.getComment() != null) {
+		if (!StrUtils.isEmpty(t.getComment())) {
 			if (features.supportsCommentOn)
 				objectResultList.add("comment on table " + t.getTableName() + " is '" + t.getComment() + "'");
 			else
@@ -269,7 +269,7 @@ public class DDLCreateUtils {// NOSONAR
 
 		// column comment on
 		for (ColumnModel c : columns) {
-			if (features.supportsCommentOn && c.getComment() != null && StrUtils.isEmpty(features.columnComment))
+			if (!c.getTransientable() && features.supportsCommentOn && c.getComment() != null && StrUtils.isEmpty(features.columnComment))
 				objectResultList.add(
 						"comment on column " + tableName + '.' + c.getColumnName() + " is '" + c.getComment() + "'");
 		}

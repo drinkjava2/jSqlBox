@@ -20,6 +20,7 @@ import static com.github.drinkjava2.jsqlbox.DB.shardTB;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
@@ -35,6 +37,7 @@ import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
@@ -46,6 +49,7 @@ import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.converter.FieldConverter;
 import com.github.drinkjava2.jsqlbox.converter.FieldConverterUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
@@ -110,7 +114,7 @@ public abstract class DbContextUtils {// NOSONAR
 		ColumnModel col = TableModelUtils.entity2ReadOnlyModel(entity.getClass()).getShardDatabaseColumn();
 		if (col == null)
 			return ctx.getDbCode();
-		Object value = readValueFromBeanFieldOrTail(col, entity);
+		Object value = readValueFromBeanFieldOrTail(col, entity, false, false);
 		DbException.assureNotNull(value, "Entity bean's shardDatabase field value can not be null.");
 		Integer dbCode = getShardedDBCode(ctx, entity.getClass(), value);
 		DbException.assureNotNull(dbCode, "Entity bean's shardDatabase value can not map to a dbCode.");
@@ -126,7 +130,7 @@ public abstract class DbContextUtils {// NOSONAR
 		ColumnModel col = model.getShardTableColumn();
 		if (col == null)
 			return model.getTableName();
-		Object value = readValueFromBeanFieldOrTail(col, entity);
+		Object value = readValueFromBeanFieldOrTail(col, entity, false, false);
 		DbException.assureNotNull(value, "Entity bean's shardTable field value can not be null.");
 		Integer tbCode = getShardedTBCode(ctx, entity.getClass(), value);
 		DbException.assureNotNull(tbCode, "Entity bean's shardTable value can not map to a table code");
@@ -521,9 +525,10 @@ public abstract class DbContextUtils {// NOSONAR
 	}
 
 	/** Read value from entityBean field or tail */
-	public static Object readValueFromBeanFieldOrTail(ColumnModel col, Object entityBean) {
+	public static Object readValueFromBeanFieldOrTail(ColumnModel col, Object entityBean, boolean isInsert,
+			boolean isUpdate) {
 		DbException.assureNotNull(col, "columnModel can not be null.");
-		if (col.getValueExist()) // value is stored in model
+		if (col.getValueExist()) // NOSONAR value is stored in model
 			return col.getValue();
 		if (col.getConverterClassOrName() != null) {
 			FieldConverter cust = FieldConverterUtils.getFieldConverter(col.getConverterClassOrName());
@@ -533,11 +538,35 @@ public abstract class DbContextUtils {// NOSONAR
 		if (result != null && Date.class.isAssignableFrom(result.getClass())) {// convert date to jdbc
 			Date d = (Date) result;
 			if (col.getColumnType() == Type.DATE)
-				return new java.sql.Date(d.getTime());
+				result = new java.sql.Date(d.getTime());
 			else if (col.getColumnType() == Type.TIMESTAMP)
-				return new java.sql.Timestamp(d.getTime());
+				result = new java.sql.Timestamp(d.getTime());
 			else if (col.getColumnType() == Type.TIME)
-				return new java.sql.Time(d.getTime());
+				result = new java.sql.Time(d.getTime());
+		}
+		if ((isInsert && result == null && col.isCreateTimestamp())
+				|| ((isUpdate || isInsert) && col.isUpdateTimestamp())) {
+			result = new Timestamp(new Date().getTime());
+			writeValueToBeanFieldOrTail(col, entityBean, result);
+		}
+		if ((col.isCreatedBy() && isInsert && StrUtils.isEmpty(result))
+				|| (col.isLastModifiedBy() && (isUpdate || isInsert))) {
+			result = getCurrentAuditor();
+			writeValueToBeanFieldOrTail(col, entityBean, result);
+		}
+		return result;
+	}
+
+	private static Object getCurrentAuditor() {
+		Object bean = JBEANBOX.getBean("AuditorAware");
+		DbException.assureNotNull(bean,
+				"insertTimestamp found, but did not use JBEANBOX.bind(\"AuditorAware\", Xxxx.class) to bind a class");
+		Object result = null;
+		try {
+			Method mtd = ClassUtils.getMethod(bean.getClass(), "getCurrentAuditor");
+			result = mtd.invoke(bean);
+		} catch (Exception e) {
+			throw new DialectException("AuditorAware class should have a getCurrentAuditor method. ", e);
 		}
 		return result;
 	}
@@ -611,8 +640,8 @@ public abstract class DbContextUtils {// NOSONAR
 		for (ColumnModel col : model.getColumns()) {
 			if (col == null || col.getTransientable())
 				continue;
-			Object value1 = readValueFromBeanFieldOrTail(col, entityBean1);
-			Object value2 = readValueFromBeanFieldOrTail(col, entityBean2);
+			Object value1 = readValueFromBeanFieldOrTail(col, entityBean1, false, false);
+			Object value2 = readValueFromBeanFieldOrTail(col, entityBean2, false, false);
 			if (value1 != null && !value1.equals(value2))
 				return col.getEntityField();
 			if (value2 != null && !value2.equals(value1))
@@ -680,7 +709,7 @@ public abstract class DbContextUtils {// NOSONAR
 				converter.handleSQL(SqlOption.INSERT, ctx, col, entityBean, sqlBody, null);
 				continue;
 			}
-			Object value = readValueFromBeanFieldOrTail(col, entityBean);
+			Object value = readValueFromBeanFieldOrTail(col, entityBean, true, false);
 			if (value == null && col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
 				if (col.getIdGenerator() == null)
 					throw new DbException("No IdGenerator found for column '" + col.getColumnName() + "'");
@@ -730,10 +759,10 @@ public abstract class DbContextUtils {// NOSONAR
 			}
 
 			if (col.getShardTable() != null) // Sharding Table?
-				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean));
+				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean, true, false));
 
 			if (col.getShardDatabase() != null) // Sharding DB?
-				shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean));
+				shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean, true, false));
 		}
 
 		if (foundColumnToInsert)
@@ -828,7 +857,7 @@ public abstract class DbContextUtils {// NOSONAR
 				converter.handleSQL(SqlOption.UPDATE, ctx, col, entityBean, sqlBody, sqlWhere);
 				continue;
 			}
-			Object value = readValueFromBeanFieldOrTail(col, entityBean);
+			Object value = readValueFromBeanFieldOrTail(col, entityBean, false, true);
 			if (col.getPkey()) {
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");// NOSONAR
@@ -1032,12 +1061,12 @@ public abstract class DbContextUtils {// NOSONAR
 				continue;
 			if (col.getPkey()) {
 				sqlWhere.append(col.getColumnName()).append("=?")
-						.append(param(readValueFromBeanFieldOrTail(col, entityBean))).append(" and ");
+						.append(param(readValueFromBeanFieldOrTail(col, entityBean, false, false))).append(" and ");
 			}
 			if (col.getShardTable() != null) // Sharding Table?
-				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean));
+				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean, false, false));
 			if (col.getShardDatabase() != null) // Sharding DB?
-				shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean));
+				shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean, false, false));
 			sqlBody.append(col.getColumnName()).append(", ");
 			effectColumns.add(col);
 		}

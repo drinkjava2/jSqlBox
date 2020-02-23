@@ -54,6 +54,11 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("scale" + c.getScale()).append(", ");
 		sb.append("valueExist=" + c.getValueExist()).append(", ");
 		sb.append("value=" + c.getValue()).append(", ");
+		sb.append("createTimestamp=" + c.isCreateTimestamp()).append(", ");
+		sb.append("updateTimestamp=" + c.isUpdateTimestamp()).append(", ");
+		sb.append("createdBy=" + c.isCreatedBy()).append(", ");
+		sb.append("lastModifiedBy=" + c.isLastModifiedBy()).append(", ");
+		
 		return sb.toString();
 	}
 

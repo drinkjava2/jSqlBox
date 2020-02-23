@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
  <packaging>jar</packaging>
- <version>4.0.2.jre8</version> <!-- Not released -->
+ <version>4.0.2.jre8</version>
  
  <name>jSqlBox</name>
  <description>jSqlBox is a full function DAO tool</description>
@@ -57,7 +57,7 @@
  
 
  <dependencies>   
-    <!-- ===== test dependencies=====  -->
+    <!-- JUnit for unit test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -65,55 +65,47 @@
       <scope>test</scope>
     </dependency>
      
-    <!-- HikariCP Java8 -->
+    <!-- HikariCP Java8 datasource pool -->
     <dependency>
       <groupId>com.zaxxer</groupId>
-      <artifactId>HikariCP</artifactId>
-      <version>3.4.2</version> 
+      <artifactId>HikariCP</artifactId>  <!-- Java6 release is HikariCP-java6 -->
+      <version>3.4.2</version>  <!-- Java6 relese is 2.3.13 -->
       <scope>test</scope>
     </dependency>  
- 
-   <!-- HikariCP Java6 -->
-   <!--dependency>
-      <groupId>com.zaxxer</groupId>
-      <artifactId>HikariCP-java6</artifactId>
-      <version>2.3.13</version>
-      <scope>test</scope>
-   </dependency-->
-     
-    <dependency>
+    
+   <!-- H2 Memory database for unit test -->
+   <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>1.3.176</version>
       <scope>test</scope>
-    </dependency> 
+   </dependency> 
     
-    <!--dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.43</version>
-        <scope>test</scope>
-    </dependency-->
+   <!-- MySql JDBC driver -->
+   <!--dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.43</version>
+      <scope>test</scope>
+   </dependency-->
     
-    <!-- Ugly Oracle JDBC jar need manually add into maven, ojdbc6.jar can found in Oracle 
+   <!-- Ugly Oracle JDBC jar need manually add into maven, ojdbc6.jar can found in Oracle 
        install folder, then copy to C:\ and use below command to install to maven:
      mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0 -Dpackaging=jar -Dfile=C:\ojdbc6.jar -->
-    <!--dependency>
-		<groupId>com.oracle</groupId>
-		<artifactId>ojdbc6</artifactId>
-		<version>11.2.0</version>
-		<scope>test</scope>
-    </dependency--> 
+   <!--dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>ojdbc6</artifactId>
+      <version>11.2.0</version>
+      <scope>test</scope>
+   </dependency--> 
 	
-<!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
-<!--dependency>
-    <groupId>com.microsoft.sqlserver</groupId>
-    <artifactId>mssql-jdbc</artifactId>
-    <version>6.1.0.jre8</version>
-    <scope>test</scope>
-</dependency-->
-
-
+   <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
+   <!--dependency>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <artifactId>mssql-jdbc</artifactId>
+      <version>6.1.0.jre8</version>
+      <scope>test</scope>
+   </dependency--> 
     
  </dependencies>
   
@@ -210,11 +202,13 @@
                             <links>
                                 <link>http://docs.oracle.com/javase/${version.javadoc}/docs/api</link>
                             </links>
-							<!-- close doc line check, for Java6,7 only, if run on Java8 will get a Javadoc-plugin error -->
-							<properties>
-								<javadoc.opts>-Xdoclint:none</javadoc.opts>
-							</properties>
-							<!--additionalparam>-Xdoclint:none</additionalparam-->
+                                        <!-- Close doc check, for Java6 only -->
+					<!--properties>
+						<javadoc.opts>-Xdoclint:none</javadoc.opts>
+					</properties-->
+							
+                                       <!-- Close doc check, for Java8 only -->
+                                       <additionalparam>-Xdoclint:none</additionalparam>  
                         </configuration>
                     </plugin>
                     <plugin>

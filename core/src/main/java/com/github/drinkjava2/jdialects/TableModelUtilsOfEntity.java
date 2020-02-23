@@ -328,6 +328,9 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 
 				// Column
 				Map<String, Object> colMap = getFirstEntityAnno(field, "Column");
+				Map<String, Object> COLUMNMap = getFirstEntityAnno(field, "COLUMN");
+				if (colMap.isEmpty())
+					colMap = COLUMNMap;
 				if (!colMap.isEmpty()) {
 					if (!(Boolean) colMap.get("nullable"))
 						col.setNullable(false);
@@ -347,9 +350,29 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
 						col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));
 					col.setInsertable((Boolean) colMap.get("insertable"));
 					col.setUpdatable((Boolean) colMap.get("updatable"));
+
+					// Enhenched @COLUMN annotation
+					if (!COLUMNMap.isEmpty()) {
+						col.setTail((String) COLUMNMap.get("tail"));
+						col.setComment((String) COLUMNMap.get("comment"));
+						col.setCreateTimestamp((Boolean) COLUMNMap.get("createTimestamp"));
+						col.setUpdateTimestamp((Boolean) COLUMNMap.get("updateTimestamp"));
+						col.setCreatedBy((Boolean) COLUMNMap.get("createdBy"));
+						col.setLastModifiedBy((Boolean) COLUMNMap.get("lastModifiedBy"));
+					}
 				} else {
 					col.setColumnType(TypeUtils.javaType2DialectType(propertyClass));// TODO_ check
 				}
+
+				if (existEntityAnno(field, "CreateTimestamp"))
+					col.setCreateTimestamp(true);
+				if (existEntityAnno(field, "UpdateTimestamp"))
+					col.setUpdateTimestamp(true);
+				if (existEntityAnno(field, "CreatedBy"))
+					col.setCreatedBy(true);
+				if (existEntityAnno(field, "LastModifiedBy"))
+					col.setLastModifiedBy(true);
+
 				if ("EnumType.ORDINAL".equals(col.getConverterClassOrName()))
 					col.setColumnType(Type.INTEGER);
 				else if ("EnumType.STRING".equals(col.getConverterClassOrName()))

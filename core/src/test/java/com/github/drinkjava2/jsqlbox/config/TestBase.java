@@ -77,9 +77,10 @@ public class TestBase {
 	public void init() {
 		System.getProperties().setProperty("oracle.jdbc.J2EE13Compliant", "true");
 		DbContext.resetGlobalVariants();
+		Systemout.allowPrint = false; // debug only, allow Systemout.print out put
 		ConsoleLog.setLogHead(false);// do not print log head
-		ConsoleLog.setLogLevel(ConsoleLog.INFO); // info lever log
-		DbContext.setGlobalNextAllowShowSql(false); //disable sql log
+		ConsoleLog.setLogLevel(ConsoleLog.WARNING); // info lever log
+		DbContext.setGlobalNextAllowShowSql(false); // disable sql log
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
@@ -134,10 +135,10 @@ public class TestBase {
 		this.tablesForTest = TableModelUtils.entity2ReadOnlyModels(classes);
 		createTables(tablesForTest);
 	}
-	
-	public void quietCreateRegTables(Class<?>... classes) { 
-		quietDropTables(classes);
-		createAndRegTables(classes);
+
+	public void quietCreateRegTables(Class<?>... classes) {
+		ctx.quiteExecute(ctx.toDropDDL(classes));
+		ctx.executeDDL(ctx.toCreateDDL(classes));
 	}
 
 	public void createTables(TableModel... tableModels) {
