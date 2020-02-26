@@ -85,6 +85,12 @@ public class PreparedSQL {
 	 */
 	private Boolean ignoreNull = null;
 
+	/**
+	 * Designed for ORM program, if set true will ignore fields with null value or
+	 * Empty String value in insert & update methods
+	 */
+	private Boolean ignoreEmpty = null;
+
 	/** TableModels, this is designed for ORM program */
 	private Object[] models;
 
@@ -196,8 +202,7 @@ public class PreparedSQL {
 
 	public void addTemplateParam(SqlItem sp) {
 		if (sp.getParameters() == null || ((sp.getParameters().length % 2) != 0))
-			throw new DbProException(
-					"Put type template parameter should be key1, value1, key2,value2... format");
+			throw new DbProException("Put type template parameter should be key1, value1, key2,value2... format");
 		if (templateParamMap == null)
 			templateParamMap = new HashMap<String, Object>();
 		for (int i = 1; i <= sp.getParameters().length / 2; i++)
@@ -474,6 +479,14 @@ public class PreparedSQL {
 
 	public void setIgnoreNull(Boolean ignoreNull) {
 		this.ignoreNull = ignoreNull;
+	}
+
+	public Boolean getIgnoreEmpty() {
+		return ignoreEmpty;
+	}
+
+	public void setIgnoreEmpty(Boolean ignoreEmpty) {
+		this.ignoreEmpty = ignoreEmpty;
 	}
 
 }

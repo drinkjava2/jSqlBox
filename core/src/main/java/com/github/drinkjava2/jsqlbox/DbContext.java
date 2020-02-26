@@ -60,17 +60,19 @@ public class DbContext extends DbPro {// NOSONAR
 			new ShardingRangeTool() };
 	protected static SnowflakeCreator globalNextSnowflakeCreator = null;
 	protected static Object[] globalNextSsModels = null;
+	protected static boolean globalNextIgnoreNull = false;
+	protected static boolean globalNextIgnoreEmpty = false;
 
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global DbContext found, need use method DbContext.setGlobalDbContext() to set a global default DbContext instance at the beginning of appication.";
 
 	protected static DbContext globalDbContext = new DbContext(); // this is a empty ctx
 
- 
-
 	protected ShardingTool[] shardingTools = globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 	protected TableModel[] tailModels; // TableModels loaded from DB, only used for tail mode
-
+	protected  boolean ignoreNull = globalNextIgnoreNull;
+	protected  boolean ignoreEmpty = globalNextIgnoreEmpty;
+	
 	public DbContext() {
 		super(); 
 	}
@@ -136,7 +138,9 @@ public class DbContext extends DbPro {// NOSONAR
 		if (super.dealOneSqlItem(iXxxStyle, ps, item))
 			return true; // if super class DbPro can deal it, let it do
 		if (item instanceof SqlOption) {
-			if (SqlOption.IGNORE_NULL.equals(item))
+			if (SqlOption.IGNORE_EMPTY.equals(item))
+				ps.setIgnoreEmpty(true);
+			else if (SqlOption.IGNORE_NULL.equals(item))
 				ps.setIgnoreNull(true);
 			else if (SqlOption.AUTO_SQL.equals(item))
 				DbContextUtils.appendLeftJoinSQL(ps);
@@ -529,7 +533,13 @@ public class DbContext extends DbPro {// NOSONAR
 	protected void staticGlobalNextMethods______________________() {// NOSONAR
 	}
 
- 
+	public static void setGlobalNextIgnoreNull(boolean globalNextIgnoreNull) {
+		DbContext.globalNextIgnoreNull = globalNextIgnoreNull;
+	}
+
+	public static void setGlobalNextIgnoreEmpty(boolean globalNextIgnoreEmpty) {
+		DbContext.globalNextIgnoreEmpty = globalNextIgnoreEmpty;
+	}
 
 	public static ShardingTool[] getGlobalNextShardingTools() {
 		return globalNextShardingTools;
@@ -578,6 +588,22 @@ public class DbContext extends DbPro {// NOSONAR
 
 	public void setTailModels(TableModel[] tailModels) {
 		this.tailModels = tailModels;
+	}
+
+	public boolean isIgnoreNull() {
+		return ignoreNull;
+	}
+
+	public void setIgnoreNull(boolean ignoreNull) {
+		this.ignoreNull = ignoreNull;
+	}
+
+	public boolean isIgnoreEmpty() {
+		return ignoreEmpty;
+	}
+
+	public void setIgnoreEmpty(boolean ignoreEmpty) {
+		this.ignoreEmpty = ignoreEmpty;
 	}
 
 }

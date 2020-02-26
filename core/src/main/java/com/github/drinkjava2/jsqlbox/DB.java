@@ -42,6 +42,7 @@ public abstract class DB extends JDBPRO {// NOSONAR
 	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
 	public static final SqlOption IGNORE_NULL = SqlOption.IGNORE_NULL;
+	public static final SqlOption IGNORE_EMPTY = SqlOption.IGNORE_EMPTY;
 	public static final SqlOption AUTO_SQL = SqlOption.AUTO_SQL;
 	public static final SqlItem TAIL = new SqlItem(SqlOption.TAIL);
 

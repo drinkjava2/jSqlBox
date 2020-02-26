@@ -87,7 +87,7 @@ public enum SqlOption {
 	/** Mark a QUERY SqlOption */
 	QUERY,
 
-	/** Mark a USE_SLAVE SqlItem, used to store some other items */
+	/** Mark a OTHER SqlItem, used to store some other items */
 	OTHER,
 
 	// =================================
@@ -134,6 +134,12 @@ public enum SqlOption {
 	 * ignore null fields
 	 */
 	IGNORE_NULL,
+
+	/**
+	 * Mark a IGNORE_EMPTY SqlOption, if true in ORM insert and update method will
+	 * ignore null Object and empty String fields
+	 */
+	IGNORE_EMPTY,
 
 	/** Mark a AUTO_SQL SqlOption, tell ORM to create left join SQL automatically */
 	AUTO_SQL,

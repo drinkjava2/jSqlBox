@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jsqlbox.DB.IGNORE_NULL;
+import static com.github.drinkjava2.jsqlbox.DB.*;
 import static com.github.drinkjava2.jsqlbox.DB.TAIL;
 
 import java.util.HashMap;
@@ -75,12 +75,13 @@ public class CrudTest extends TestBase {
 	public void crudTest() {
 		// ======insert
 		CrudUser u1 = new CrudUser("Name1", "Address1");
-		CrudUser u2 = new CrudUser("Name2", "Address2");
-		CrudUser u3 = new CrudUser("Name3", "Address3");
+		u1.setAge(null);
+		CrudUser u2 = new CrudUser("Name2", "");
+		CrudUser u3 = new CrudUser("Name3", "");
 		CrudUser u4 = new CrudUser().putField("name", "Name4", "address", "Address4");
 		ctx.eInsert(u1);
-		ctx.eInsert(u2, IGNORE_NULL);
-		u3.insert();
+		u2.insert(IGNORE_NULL);
+		u3.insert(IGNORE_EMPTY);
 		u4.insert(IGNORE_NULL);
 
 		// ======update
