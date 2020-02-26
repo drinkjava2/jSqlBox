@@ -100,7 +100,7 @@ public abstract class TableModelUtilsOfJavaSrc {//NOSONAR
 		body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
 		if (activeRecord) {
 			body.append("import com.github.drinkjava2.jsqlbox.*;\n");
-			body.append("import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;\n");
+			body.append("import static com.github.drinkjava2.jsqlbox.DB.*;\n");
 		}
 		body.append("\n");
 

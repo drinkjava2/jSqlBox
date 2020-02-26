@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
@@ -37,7 +36,6 @@ import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
@@ -49,7 +47,6 @@ import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.converter.FieldConverter;
 import com.github.drinkjava2.jsqlbox.converter.FieldConverterUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityIdUtils;
@@ -549,25 +546,6 @@ public abstract class DbContextUtils {// NOSONAR
 			result = new Timestamp(new Date().getTime());
 			writeValueToBeanFieldOrTail(col, entityBean, result);
 		}
-		if ((col.isCreatedBy() && isInsert && StrUtils.isEmpty(result))
-				|| (col.isLastModifiedBy() && (isUpdate || isInsert))) {
-			result = getCurrentAuditor();
-			writeValueToBeanFieldOrTail(col, entityBean, result);
-		}
-		return result;
-	}
-
-	private static Object getCurrentAuditor() {
-		Object bean = JBEANBOX.getBean("AuditorAware");
-		DbException.assureNotNull(bean,
-				"insertTimestamp found, but did not use JBEANBOX.bind(\"AuditorAware\", Xxxx.class) to bind a class");
-		Object result = null;
-		try {
-			Method mtd = ClassUtils.getMethod(bean.getClass(), "getCurrentAuditor");
-			result = mtd.invoke(bean);
-		} catch (Exception e) {
-			throw new DialectException("AuditorAware class should have a getCurrentAuditor method. ", e);
-		}
 		return result;
 	}
 
@@ -727,6 +705,10 @@ public abstract class DbContextUtils {// NOSONAR
 				continue;
 			}
 			Object value = readValueFromBeanFieldOrTail(col, entityBean, true, false);
+			if (col.isCreatedBy() || col.isLastModifiedBy()) { // deal CreatedBy annotation
+				value = ctx.getCurrentAuditor();
+				writeValueToBeanFieldOrTail(col, entityBean, value);
+			}
 			if (value == null && col.getIdGenerationType() != null || !StrUtils.isEmpty(col.getIdGeneratorName())) {
 				if (col.getIdGenerator() == null)
 					throw new DbException("No IdGenerator found for column '" + col.getColumnName() + "'");
@@ -866,6 +848,10 @@ public abstract class DbContextUtils {// NOSONAR
 				continue;
 			}
 			Object value = readValueFromBeanFieldOrTail(col, entityBean, false, true);
+			if (col.isLastModifiedBy()) { // deal LastModified annotation
+				value = ctx.getCurrentAuditor();
+				writeValueToBeanFieldOrTail(col, entityBean, value);
+			}
 			if (col.getPkey()) {
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");// NOSONAR

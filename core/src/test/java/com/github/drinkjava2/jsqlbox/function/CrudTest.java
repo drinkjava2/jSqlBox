@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.sqlitem.SampleItem;
 
@@ -62,6 +63,23 @@ public class CrudTest extends TestBase {
 		public void setAge(Integer age) {
 			this.age = age;
 		}
+	}
+
+	@Test
+	public void globalIgnoreNullTest() {
+		DbContext ctx1 = new DbContext(ctx.getDataSource());
+		ctx1.setIgnoreNull(true);
+		CrudUser u = new CrudUser("Name_u", "");
+		ctx1.eInsert(u);
+		ctx1.setIgnoreEmpty(true);
+		CrudUser u2 = new CrudUser("Name_u2", "");
+		ctx1.eInsert(u2);
+		ctx1.setIgnoreNull(false);
+		ctx1.setIgnoreEmpty(false);
+		CrudUser u3 = new CrudUser("Name_u3", "");
+		ctx1.eInsert(u3);
+		CrudUser u4 = new CrudUser("Name_u4", "");
+		ctx1.eInsert(u4, IGNORE_EMPTY);
 	}
 
 	/**

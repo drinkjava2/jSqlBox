@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -27,10 +28,12 @@ import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
@@ -43,11 +46,11 @@ import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 
 /**
- * DbContext is extended from DbPro, DbPro is extended from QueryRunner, by
- * this way DbContext have all JDBC methods of QueryRunner and DbPro. <br/>
+ * DbContext is extended from DbPro, DbPro is extended from QueryRunner, by this
+ * way DbContext have all JDBC methods of QueryRunner and DbPro. <br/>
  * 
- * As a ORM tool, DbContext focus on ORM methods like entity bean's CRUD
- * methods and EntityNet methods.
+ * As a ORM tool, DbContext focus on ORM methods like entity bean's CRUD methods
+ * and EntityNet methods.
  * 
  * @author Yong Zhu
  * @since 1.0.0
@@ -55,13 +58,13 @@ import com.github.drinkjava2.jtransactions.tinytx.TinyTxConnectionManager;
 @SuppressWarnings("unchecked")
 public class DbContext extends DbPro {// NOSONAR
 
- 
 	protected static ShardingTool[] globalNextShardingTools = new ShardingTool[] { new ShardingModTool(),
 			new ShardingRangeTool() };
 	protected static SnowflakeCreator globalNextSnowflakeCreator = null;
 	protected static Object[] globalNextSsModels = null;
 	protected static boolean globalNextIgnoreNull = false;
 	protected static boolean globalNextIgnoreEmpty = false;
+	protected static Object globalNextAuditorGetter = null;
 
 	public static final String NO_GLOBAL_SQLBOXCONTEXT_FOUND = "No default global DbContext found, need use method DbContext.setGlobalDbContext() to set a global default DbContext instance at the beginning of appication.";
 
@@ -70,15 +73,17 @@ public class DbContext extends DbPro {// NOSONAR
 	protected ShardingTool[] shardingTools = globalNextShardingTools;
 	protected SnowflakeCreator snowflakeCreator = globalNextSnowflakeCreator;
 	protected TableModel[] tailModels; // TableModels loaded from DB, only used for tail mode
-	protected  boolean ignoreNull = globalNextIgnoreNull;
-	protected  boolean ignoreEmpty = globalNextIgnoreEmpty;
-	
+	protected boolean ignoreNull = globalNextIgnoreNull;
+	protected boolean ignoreEmpty = globalNextIgnoreEmpty;
+	// auditorGetter should have a public Object getCurrentAuditor() method
+	protected Object auditorGetter = globalNextAuditorGetter;
+
 	public DbContext() {
-		super(); 
+		super();
 	}
 
 	public DbContext(DataSource ds) {
-		super(ds); 
+		super(ds);
 	}
 
 	public DbContext(DataSource ds, Dialect dialect) {
@@ -88,8 +93,7 @@ public class DbContext extends DbPro {// NOSONAR
 	// ==========================Global Transaction about================
 	/** If current GlobalTxCM opened global Transaction */
 	public boolean isGtxOpen() {
-		return connectionManager instanceof GtxConnectionManager
-				&& getGtxManager().isInTransaction();
+		return connectionManager instanceof GtxConnectionManager && getGtxManager().isInTransaction();
 	}
 
 	/** Get current GtxLockId, should be called inside of a global transaction */
@@ -117,6 +121,9 @@ public class DbContext extends DbPro {// NOSONAR
 		setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
 		setGlobalNextDialect(null);
 		setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
+		setGlobalNextIgnoreNull(false);
+		setGlobalNextIgnoreEmpty(false);
+		setGlobalNextAuditorGetter(null);
 		globalDbContext = new DbContext();
 	}
 
@@ -128,6 +135,22 @@ public class DbContext extends DbPro {// NOSONAR
 	/** Get the global static DbContext instance */
 	public static DbContext getGlobalDbContext() {
 		return DbContext.globalDbContext;
+	}
+
+	private Method methodOfGetCurrentAuditor = null;
+
+	/** For &#064;CreatedBy and &#064;LastModifiedBy, get current auditor */
+	public Object getCurrentAuditor() {
+		DbException.assureNotNull(auditorGetter, "Can not call getCurrentAuditor() when auditorGetter is null.");
+		Object result = null;
+		if (methodOfGetCurrentAuditor == null)
+			methodOfGetCurrentAuditor = ClassUtils.getMethod(auditorGetter.getClass(), "getCurrentAuditor");
+		try {
+			result = methodOfGetCurrentAuditor.invoke(auditorGetter);
+		} catch (Exception e) {
+			throw new DialectException("Fail to call auditorGetter's getCurrentAuditor method. ", e);
+		}
+		return result;
 	}
 
 	/**
@@ -244,8 +267,7 @@ public class DbContext extends DbPro {// NOSONAR
 		if (result <= 0)
 			throw new DbException("No record found in database when do '" + curdType + "' operation.");
 		if (result > 1)
-			throw new DbException(
-					"Affect more than 1 row record in database when do '" + curdType + "' operation.");
+			throw new DbException("Affect more than 1 row record in database when do '" + curdType + "' operation.");
 	}
 
 	/** Use i style to query for an entity list */
@@ -533,6 +555,10 @@ public class DbContext extends DbPro {// NOSONAR
 	protected void staticGlobalNextMethods______________________() {// NOSONAR
 	}
 
+	public static void setGlobalNextAuditorGetter(Object globalNextAuditorGetter) {
+		DbContext.globalNextAuditorGetter = globalNextAuditorGetter;
+	}
+
 	public static void setGlobalNextIgnoreNull(boolean globalNextIgnoreNull) {
 		DbContext.globalNextIgnoreNull = globalNextIgnoreNull;
 	}
@@ -558,7 +584,6 @@ public class DbContext extends DbPro {// NOSONAR
 	}
 
 	// =========getter & setter =======
- 
 
 	public ShardingTool[] getShardingTools() {
 		return shardingTools;
@@ -606,4 +631,11 @@ public class DbContext extends DbPro {// NOSONAR
 		this.ignoreEmpty = ignoreEmpty;
 	}
 
+	public Object getAuditorGetter() {
+		return auditorGetter;
+	}
+
+	public void setAuditorGetter(Object auditorGetter) {
+		this.auditorGetter = auditorGetter;
+	}
 }

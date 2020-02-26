@@ -2,6 +2,7 @@ package com.github.drinkjava2.jsqlbox.function.jdialects;
 /*- JAVA8_BEGIN */
 
 import java.util.Date;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,7 +17,6 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UpdateTimestamp;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Temporal;
 import com.github.drinkjava2.jdialects.annotation.jpa.TemporalType;
-import com.github.drinkjava2.jdialects.id.UUID25Generator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
@@ -99,7 +99,7 @@ public class ColumnTest extends TestBase implements ActiveEntity<ColumnTest> {
 
 	public static class GetUserIdDemo {
 		public Object getCurrentAuditor() {
-			return UUID25Generator.getUUID25();// should get from Shiro
+			return "" + new Random().nextInt();
 		}
 	}
 
@@ -108,7 +108,7 @@ public class ColumnTest extends TestBase implements ActiveEntity<ColumnTest> {
 
 	@Test
 	public void testC4() {
-		JBEANBOX.bind("AuditorAware", GetUserIdDemo.class);
+		ctx.setAuditorGetter(JBEANBOX.getBean(GetUserIdDemo.class));
 		useField(4);
 		ColumnTest in = new ColumnTest();
 		in.insert();
@@ -125,7 +125,7 @@ public class ColumnTest extends TestBase implements ActiveEntity<ColumnTest> {
 
 	@Test
 	public void testC5() {
-		JBEANBOX.bind("AuditorAware", GetUserIdDemo.class);
+		ctx.setAuditorGetter(JBEANBOX.getBean(GetUserIdDemo.class));
 		useField(5);
 		ColumnTest in = new ColumnTest();
 		in.insert();
