@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -74,19 +75,13 @@ public abstract class TableModelUtils {// NOSONAR
 	 *            The DataSource instance
 	 * @param dialect
 	 *            The dialect of database
-	 * @param linkStyle
-	 *            if true, create linked style setter, otherwise create normal
-	 *            setter
-	 * @param activeRecord
-	 *            if true, build a jSqlBox ActiveRecord Entity class, otherwise
-	 *            build a POJO class
-	 * @param packageName
-	 *            Optional, the package name of this entity class
 	 * @param outputfolder
 	 *            the out put folder
+	 * @param setting
+	 *            see TableModelUtilsOfJavaSrc.modelToJavaSourceCode() method
 	 */
-	public static void db2JavaSrcFiles(DataSource ds, Dialect dialect, boolean linkStyle, boolean activeRecord,
-			String packageName, String outputfolder) {
+	public static void db2JavaSrcFiles(DataSource ds, Dialect dialect, String outputfolder,
+			Map<String, Object> setting) {
 		Connection conn = null;
 		try {
 			conn = ds.getConnection();
@@ -96,7 +91,7 @@ public abstract class TableModelUtils {// NOSONAR
 						outputfolder + "/" + TableModelUtilsOfJavaSrc.getClassNameFromTableModel(model) + ".java");
 				writename.createNewFile();// NOSONAR
 				BufferedWriter out = new BufferedWriter(new FileWriter(writename));
-				String javaSrc = model2JavaSrc(model, linkStyle, activeRecord, packageName);
+				String javaSrc = model2JavaSrc(model, setting);
 				out.write(javaSrc);
 				out.flush();
 				out.close();
@@ -116,18 +111,12 @@ public abstract class TableModelUtils {// NOSONAR
 	 * 
 	 * @param model
 	 *            The TableModel instance
-	 * @param linkStyle
-	 *            if true, create linked style setter, otherwise create normal
-	 *            setter
-	 * @param activeRecord
-	 *            if true, build a jSqlBox ActiveRecord Entity class, otherwise
-	 *            build a POJO class
-	 * @param packageName
-	 *            Optional, the package name of this entity class
-	 * @return Java Bean source code of entity
+	 * @param setting
+	 *            see TableModelUtilsOfJavaSrc.modelToJavaSourceCode() method
+	 * @return class source code
 	 */
-	public static String model2JavaSrc(TableModel model, boolean linkStyle, boolean activeRecord, String packageName) {
-		return TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, linkStyle, activeRecord, packageName);
+	public static String model2JavaSrc(TableModel model, Map<String, Object> setting) {
+		return TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting);
 	}
 
 	/**

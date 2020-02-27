@@ -1,5 +1,8 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
@@ -73,9 +76,20 @@ public class TableModelUtilsOfJavaSrcTest {
 		}
 	}
 
+	public static Map<String, Object> setting = new HashMap<String, Object>();
+	static {
+		setting.put("packageName", "somepackage");
+		setting.put("imports", "import com.github.drinkjava2.jdialects.annotation.jdia.*;\n"
+				+ "import com.github.drinkjava2.jdialects.annotation.jpa.*;\n"
+				+ "import com.github.drinkjava2.jsqlbox.*;\n" + "import static com.github.drinkjava2.jsqlbox.DB.*;\n");
+		setting.put("classDefinition", "public class $1 extends ActiveRecord<$1>");
+		setting.put("linkStyle", true);
+		setting.put("fieldFlags", true);
+	}
+
 	@Test
 	public void modelToJavaSrcTest() {
 		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
-		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, true, true, "somepackage"));
+		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));
 	}
 }

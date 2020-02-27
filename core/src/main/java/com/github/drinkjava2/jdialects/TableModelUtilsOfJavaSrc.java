@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jdialects;
 
+import java.util.Map;
+
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -21,7 +23,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 2.0.4
  */
-public abstract class TableModelUtilsOfJavaSrc {//NOSONAR
+public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 
 	/**
 	 * Map DB column name to entity field name, example: <br/>
@@ -80,28 +82,32 @@ public abstract class TableModelUtilsOfJavaSrc {//NOSONAR
 	 * 
 	 * @param model
 	 *            The TableModel instance
-	 * @param linkStyle
-	 *            if true, create linked style setter, otherwise create normal
-	 *            setter
-	 * @param activeRecord
-	 *            if true, build a jSqlBox ActiveRecord Entity class, otherwise
-	 *            build a POJO class
-	 * @param packageName
-	 *            Optional, the package name of this entity class
+	 * @param setting
+	 *            The setting options, for example:
+	 * 
+	 *            <pre>
+	 *            Map<String, Object> setting = new HashMap<String, Object>();
+	 *            setting.put("linkStyle", false);
+	 *            setting.put("activeRecord", false);
+	 *            setting.put("activeEntity", true);
+	 *            setting.put("packageName", "somepackage");
+	 *            setting.put("fieldFlags", true);
+	 *            </pre>
+	 * 
 	 * @return Java Bean source code of entity
 	 */
-	public static String modelToJavaSourceCode(TableModel model, boolean linkStyle, boolean activeRecord,
-			String packageName) {
+	public static String modelToJavaSourceCode(TableModel model, Map<String, Object> setting) {
+		boolean linkStyle = Boolean.TRUE.equals(setting.get("linkStyle"));
+		boolean fieldFlags = Boolean.TRUE.equals(setting.get("fieldFlags"));
+		String classDefinition = (String) setting.get("classDefinition");
+		String packageName = (String) setting.get("packageName");
+		String imports = (String) setting.get("imports");
 		// head
 		StringBuilder body = new StringBuilder();
 		if (!StrUtils.isEmpty(packageName))
 			body.append("package ").append(packageName).append(";\n");
-		body.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
-		body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
-		if (activeRecord) {
-			body.append("import com.github.drinkjava2.jsqlbox.*;\n");
-			body.append("import static com.github.drinkjava2.jsqlbox.DB.*;\n");
-		}
+		if (!StrUtils.isEmpty(imports))
+			body.append(imports);
 		body.append("\n");
 
 		// @table
@@ -133,11 +139,7 @@ public abstract class TableModelUtilsOfJavaSrc {//NOSONAR
 		}
 
 		// class
-		if (activeRecord)
-			body.append("public class ").append(className).append(" extends ActiveRecord<").append(className)
-					.append("> {\n");
-		else
-			body.append("public class ").append(className).append(" {\n");
+		body.append(StrUtils.replace(classDefinition, "$1", className)).append(" {\n\n");
 
 		// Fields
 		StringBuilder pkeySB = new StringBuilder();
@@ -151,16 +153,26 @@ public abstract class TableModelUtilsOfJavaSrc {//NOSONAR
 			String fieldName = col.getEntityField();
 			if (StrUtils.isEmpty(fieldName))
 				fieldName = transColumnNameToFieldName(col.getColumnName());
+			// fieldStaticNames
+			if (fieldFlags)
+				sb.append("  public static final String " + fieldName.toUpperCase() + " = \"" + col.getColumnName()
+						+ "\";\n");
 			// @Id
 			if (col.getPkey())
 				sb.append("  @Id\n");
 
 			// @Column
 			boolean isStr = Type.VARCHAR.equals(col.getColumnType()) || Type.CHAR.equals(col.getColumnType());
-			if (!fieldName.equalsIgnoreCase(col.getColumnName()) || (isStr && 255 != col.getLength())) {
-				sb.append("  @Column(name=\"").append(col.getColumnName()).append("\"");
-				if (isStr && 255 != col.getLength())
-					sb.append(", length=").append(col.getLength());
+			if (fieldFlags || !fieldName.equalsIgnoreCase(col.getColumnName()) || (isStr && 250 != col.getLength())) {
+				sb.append("  @Column(");
+				if (fieldFlags)
+					sb.append("name=").append(fieldName.toUpperCase()).append(", ");
+				else if (!fieldName.equalsIgnoreCase(col.getColumnName()))
+					sb.append("name=\"").append(col.getColumnName()).append("\", ");
+
+				if (isStr && 250 != col.getLength())
+					sb.append("length=").append(col.getLength()).append(", ");
+				sb.setLength(sb.length() - 2);
 				sb.append(")\n");
 			}
 

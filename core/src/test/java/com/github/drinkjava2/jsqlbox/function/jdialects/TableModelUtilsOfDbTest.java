@@ -127,7 +127,7 @@ public class TableModelUtilsOfDbTest extends TestBase {
 		TableModel[] models = TableModelUtils.db2Models(conn, dialect);
 		for (TableModel model : models) {
 			Systemout.println("\n\n\n\n");
-			Systemout.println(TableModelUtils.model2JavaSrc(model, true, true, "somepackage"));
+			Systemout.println(TableModelUtils.model2JavaSrc(model, TableModelUtilsOfJavaSrcTest.setting));
 		}
 		conn.close();
 		dropTables(DbSample.class, studentSample.class);
@@ -137,7 +137,8 @@ public class TableModelUtilsOfDbTest extends TestBase {
 	public void doDbToJavaSrcFiles() {
 		quietDropTables(DbSample.class, studentSample.class);
 		createTables(studentSample.class, DbSample.class);
-		TableModelUtils.db2JavaSrcFiles(ctx.getDataSource(), ctx.getDialect(), true, true, "temp", "c:/temp");
+		TableModelUtils.db2JavaSrcFiles(ctx.getDataSource(), ctx.getDialect(), "c:/temp",
+				TableModelUtilsOfJavaSrcTest.setting);
 		dropTables(DbSample.class, studentSample.class);
 	}
 
