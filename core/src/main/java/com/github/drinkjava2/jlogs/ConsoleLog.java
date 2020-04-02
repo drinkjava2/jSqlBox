@@ -71,13 +71,13 @@ public class ConsoleLog implements Log {
 	@Override
 	public void warn(String msg) {
 		if (logLevel <= WARNING)
-			System.out.println(logheadStr("warn") + msg);
+			System.out.println(logheadStr("warning") + msg);
 	}
 
 	@Override
 	public void warn(String msg, Throwable t) {
 		if (logLevel <= WARNING)
-			System.out.println(logheadStr("warn") + msg + getStackTrace(t));
+			System.out.println(logheadStr("warning") + msg + getStackTrace(t));
 	}
 
 	@Override

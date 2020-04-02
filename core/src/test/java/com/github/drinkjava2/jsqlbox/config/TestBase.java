@@ -41,44 +41,12 @@ public class TestBase {
 	protected DbContext ctx;
 	protected TableModel[] tablesForTest;
 
-	public static class Demo extends ActiveRecord<Demo> {
-		@Id
-		@UUID25
-		private String id;
-		private String name;
-		private Integer age;
-
-		public String getId() {
-			return id;
-		}
-
-		public void setId(String id) {
-			this.id = id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public Integer getAge() {
-			return age;
-		}
-
-		public void setAge(Integer age) {
-			this.age = age;
-		}
-	}
-
 	@Before
 	public void init() {
 		System.getProperties().setProperty("oracle.jdbc.J2EE13Compliant", "true");
 		DbContext.resetGlobalVariants();
 		Systemout.allowPrint = false; // debug only, allow Systemout.print out put
-		ConsoleLog.setLogHead(false);// do not print log head
+		ConsoleLog.setLogHead(true);// print log head
 		ConsoleLog.setLogLevel(ConsoleLog.WARNING); // info lever log
 		DbContext.setGlobalNextAllowShowSql(false); // disable sql log
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
@@ -186,4 +154,35 @@ public class TestBase {
 		return ds;
 	}
 
+	public static class Demo extends ActiveRecord<Demo> {
+		@Id
+		@UUID25
+		private String id;
+		private String name;
+		private Integer age;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
+		}
+	}
 }

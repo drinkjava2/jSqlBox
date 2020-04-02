@@ -38,6 +38,12 @@ public class EnumTest extends TestBase {
 		@Enumerated(EnumType.STRING)
 		private EnumDemo enum2 = EnumDemo.PART_TIME;
 
+		@Enumerated
+		private EnumDemo enum3 = null; // null test
+
+		@Enumerated(EnumType.STRING)
+		private EnumDemo enum4 = null; // null test
+
 		public String getId() {
 			return id;
 		}
@@ -68,6 +74,22 @@ public class EnumTest extends TestBase {
 
 		public void setEnum2(EnumDemo enum2) {
 			this.enum2 = enum2;
+		}
+
+		public EnumDemo getEnum3() {
+			return enum3;
+		}
+
+		public void setEnum3(EnumDemo enum3) {
+			this.enum3 = enum3;
+		}
+
+		public EnumDemo getEnum4() {
+			return enum4;
+		}
+
+		public void setEnum4(EnumDemo enum4) {
+			this.enum4 = enum4;
 		}
 
 	}

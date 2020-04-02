@@ -29,11 +29,13 @@ public class EnumOrdinalFieldConverter extends BaseFieldConverter {
 	@Override
 	public Object entityFieldToDbValue(ColumnModel col, Object entity) {
 		Object value = DbContextUtils.doReadFromFieldOrTail(col, entity);
-		return ((Enum<?>) value).ordinal();
+		return value == null ? null : ((Enum<?>) value).ordinal();
 	}
 
 	@Override
 	public void writeDbValueToEntityField(Object entityBean, ColumnModel col, Object value) {
+		if (value == null)
+			return;
 		try {
 			Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), col.getEntityField());
 			Method method = writeMethod.getParameterTypes()[0].getMethod("values");

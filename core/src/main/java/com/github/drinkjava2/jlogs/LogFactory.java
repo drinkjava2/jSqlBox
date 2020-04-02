@@ -28,10 +28,10 @@ import java.util.Properties;
  * 
  * JLog used for inside of jSqlBox project, if a "jlogs.properties" file if
  * found on class root folder (main/resources), will try load the designated
- * JLog implementation, otherwise use default EmptyLog<br/>
+ * JLog implementation, otherwise use default ConsoleLog as logger<br/>
  * 
  * An example of "jlogs.properties": <br/>
- * log=com.github.drinkjava2.jlogs.ConsoleLog
+ * log=com.github.drinkjava2.jlogs.SimpleSLF4JLog
  * 
  * @author Yong Zhu
  * @since 1.7.0

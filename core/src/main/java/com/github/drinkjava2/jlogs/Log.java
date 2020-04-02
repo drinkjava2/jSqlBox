@@ -16,12 +16,12 @@
 package com.github.drinkjava2.jlogs;
 
 /**
- * JLog used for jSqlBox project, if a "jlogs.properties" file if found on class
- * root folder (main/resources), will try load the JLog implementation,
- * otherwise use default EmptyLog<br/>
+ * JLog used for inside of jSqlBox project, if a "jlogs.properties" file if
+ * found on class root folder (main/resources), will try load the designated
+ * JLog implementation, otherwise use default ConsoleLog as logger<br/>
  * 
- * A format example of "jlogs.properties": <br/>
- * log=com.github.drinkjava2.jlogs.ConsoleLog
+ * An example of "jlogs.properties": <br/>
+ * log=com.github.drinkjava2.jlogs.SimpleSLF4JLog
  * 
  * Another full example of using SLF4j+LogBack in production environment please
  * see jsqlbox-jbooox demo project

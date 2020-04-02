@@ -30,20 +30,21 @@ public class EnumStringFieldConverter extends BaseFieldConverter {
 	@Override
 	public Object entityFieldToDbValue(ColumnModel col, Object entity) {
 		Object value = DbContextUtils.doReadFromFieldOrTail(col, entity);
-		return value.toString();
+		return value == null ? null : value.toString();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void writeDbValueToEntityField(Object entityBean, ColumnModel col, Object value) {
+		if (value == null)
+			return;
 		try {
 			Method writeMethod = null;
 			writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), col.getEntityField());
 			Enum enu = Enum.valueOf((Class<? extends Enum>) writeMethod.getParameterTypes()[0], (String) value);
 			writeMethod.invoke(entityBean, enu);
 		} catch (Exception e) {
-			throw new DbException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'",
-					e);
+			throw new DbException("Field '" + col.getEntityField() + "' can not write with value '" + value + "'", e);
 		}
 	}
 }

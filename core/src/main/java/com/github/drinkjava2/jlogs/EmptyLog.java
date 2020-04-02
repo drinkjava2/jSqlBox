@@ -16,7 +16,7 @@
 package com.github.drinkjava2.jlogs;
 
 /**
- * EmptyLog is the default logger of jSqlBox project
+ * EmptyLog is an empty implementation of Log
  * 
  * @author Yong Zhu
  * @since 1.7.0

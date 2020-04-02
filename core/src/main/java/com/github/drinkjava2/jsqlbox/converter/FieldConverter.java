@@ -26,7 +26,9 @@ import com.github.drinkjava2.jsqlbox.DbContext;
 public interface FieldConverter {
 
 	/**
-	 * handle SQL, can insert/modify sqlBody and sqlWhere items
+	 * Handle SQL, can insert/modify sqlBody and sqlWhere items, for example,
+	 * Version annothin it use VersionFieldConverter to modify sql and sql
+	 * parameters
 	 * 
 	 * @param sqlOption
 	 *            can be INSERT/UPDATE/DELETE/LOAD

@@ -241,6 +241,22 @@ public abstract class TypeUtils {// NOSONAR
 				return ((BigDecimal) value).shortValue();
 			if (javaType == Boolean.class || javaType == boolean.class)
 				return ((BigDecimal) value).byteValue() != 0;
+		}
+		if (vType == BigInteger.class) {
+			if (javaType == Integer.class || javaType == int.class)
+				return ((BigInteger) value).intValue();
+			if (javaType == Long.class || javaType == long.class)
+				return ((BigInteger) value).longValue();
+			if (javaType == Byte.class || javaType == byte.class)
+				return ((BigInteger) value).byteValue();
+			if (javaType == Double.class || javaType == double.class)
+				return ((BigInteger) value).doubleValue();
+			if (javaType == Float.class || javaType == float.class)
+				return ((BigInteger) value).floatValue();
+			if (javaType == Short.class || javaType == short.class)
+				return ((BigInteger) value).shortValue();
+			if (javaType == Boolean.class || javaType == boolean.class)
+				return ((BigInteger) value).byteValue() != 0;
 		} else if (vType == Integer.class) {
 			if (javaType == int.class)
 				return ((Integer) value).intValue();
@@ -413,7 +429,7 @@ public abstract class TypeUtils {// NOSONAR
 		if (java.util.Date.class == vType)
 			return new java.sql.Date(((Date) value).getTime());
 		else if (Calendar.class.isAssignableFrom(vType))
-			return new java.sql.Date(((Calendar) value).getTime().getTime()); 
+			return new java.sql.Date(((Calendar) value).getTime().getTime());
 		/*- JAVA8_BEGIN */
 		else if (java.time.temporal.Temporal.class.isAssignableFrom(vType)) {
 			if (java.time.LocalDate.class == vType)
