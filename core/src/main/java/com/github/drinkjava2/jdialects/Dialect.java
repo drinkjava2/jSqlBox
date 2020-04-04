@@ -88,22 +88,22 @@ public class Dialect {
 	public static final Dialect IngresDialect = new Dialect("IngresDialect");
 	public static final Dialect InterbaseDialect = new Dialect("InterbaseDialect");
 	public static final Dialect JDataStoreDialect = new Dialect("JDataStoreDialect");
-	public static final Dialect MariaDB102Dialect = new MysqlDialect("MariaDB102Dialect");
-	public static final Dialect MariaDB103Dialect = new MysqlDialect("MariaDB103Dialect");
-	public static final Dialect MariaDB10Dialect = new MysqlDialect("MariaDB10Dialect");
-	public static final Dialect MariaDB53Dialect = new MysqlDialect("MariaDB53Dialect");
-	public static final Dialect MariaDBDialect = new MysqlDialect("MariaDBDialect");
+	public static final Dialect MariaDB102Dialect = new Dialect("MariaDB102Dialect");
+	public static final Dialect MariaDB103Dialect = new Dialect("MariaDB103Dialect");
+	public static final Dialect MariaDB10Dialect = new Dialect("MariaDB10Dialect");
+	public static final Dialect MariaDB53Dialect = new Dialect("MariaDB53Dialect");
+	public static final Dialect MariaDBDialect = new Dialect("MariaDBDialect");
 	public static final Dialect MckoiDialect = new Dialect("MckoiDialect");
 	public static final Dialect MimerSQLDialect = new Dialect("MimerSQLDialect");
-	public static final Dialect MySQL55Dialect = new MysqlDialect("MySQL55Dialect");
-	public static final Dialect MySQL57Dialect = new MysqlDialect("MySQL57Dialect");
-	public static final Dialect MySQL57InnoDBDialect = new MysqlDialect("MySQL57InnoDBDialect");
-	public static final Dialect MySQL5Dialect = new MysqlDialect("MySQL5Dialect");
-	public static final Dialect MySQL5InnoDBDialect = new MysqlDialect("MySQL5InnoDBDialect");
-	public static final Dialect MySQL8Dialect = new MysqlDialect("MySQL8Dialect");
-	public static final Dialect MySQLDialect = new MysqlDialect("MySQLDialect");
-	public static final Dialect MySQLInnoDBDialect = new MysqlDialect("MySQLInnoDBDialect");
-	public static final Dialect MySQLMyISAMDialect = new MysqlDialect("MySQLMyISAMDialect");
+	public static final Dialect MySQL55Dialect = new Dialect("MySQL55Dialect");
+	public static final Dialect MySQL57Dialect = new Dialect("MySQL57Dialect");
+	public static final Dialect MySQL57InnoDBDialect = new Dialect("MySQL57InnoDBDialect");
+	public static final Dialect MySQL5Dialect = new Dialect("MySQL5Dialect");
+	public static final Dialect MySQL5InnoDBDialect = new Dialect("MySQL5InnoDBDialect");
+	public static final Dialect MySQL8Dialect = new Dialect("MySQL8Dialect");
+	public static final Dialect MySQLDialect = new Dialect("MySQLDialect");
+	public static final Dialect MySQLInnoDBDialect = new Dialect("MySQLInnoDBDialect");
+	public static final Dialect MySQLMyISAMDialect = new Dialect("MySQLMyISAMDialect");
 	public static final Dialect Oracle10gDialect = new Dialect("Oracle10gDialect");
 	public static final Dialect Oracle12cDialect = new Dialect("Oracle12cDialect");
 	public static final Dialect Oracle8iDialect = new Dialect("Oracle8iDialect");
@@ -135,18 +135,6 @@ public class Dialect {
 	public static final Dialect TeradataDialect = new Dialect("TeradataDialect");
 	public static final Dialect TimesTenDialect = new Dialect("TimesTenDialect");
 
-	public static final class MysqlDialect extends Dialect {
-
-		public MysqlDialect(String name)
-		{
-			super(name);
-		}
-
-		@Override
-		public String wrapColumn(String col) {
-			return "`" + col + "`";
-		}
-	}
 	/** If set true will allow use reserved words in DDL, default value is false */
 	private static Boolean globalAllowReservedWords = false;
 
@@ -416,9 +404,6 @@ public class Dialect {
 		return result;
 	}
 
-	public String wrapColumn(String col) {
-		return col;
-	}
 	@Override
 	public String toString() {
 		return name;

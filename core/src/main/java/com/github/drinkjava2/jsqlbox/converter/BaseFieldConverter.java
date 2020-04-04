@@ -15,7 +15,6 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
-import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.DbContextUtils;
@@ -31,16 +30,15 @@ public class BaseFieldConverter implements FieldConverter {
 	@Override
 	public void handleSQL(SqlOption sqlOption, DbContext ctx, ColumnModel col, Object entity,
 			LinkArrayList<Object> sqlBody, LinkArrayList<Object> sqlWhere) {
-		Dialect dialect = ctx.getDialect();
 		if (SqlOption.UPDATE.equals(sqlOption)) {
 			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
-			sqlBody.append(dialect.wrapColumn(col.getColumnName())).append("=?").append(param(value));
+			sqlBody.append(col.getColumnName()).append("=?").append(param(value));
 		} else if (SqlOption.DELETE.equals(sqlOption)) {// NOSONAR
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
 			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
-			sqlBody.append(dialect.wrapColumn(col.getColumnName()));
+			sqlBody.append(col.getColumnName());
 			sqlBody.append(param(value)).append(",");
 		}
 	}

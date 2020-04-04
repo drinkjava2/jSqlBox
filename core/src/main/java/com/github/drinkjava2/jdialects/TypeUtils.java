@@ -90,7 +90,7 @@ public abstract class TypeUtils {// NOSONAR
 		/* JAVA8_END */
 
 		TYPE_TO_JAVA_MAP.put(Type.NUMERIC, BigDecimal.class);
-		//TYPE_TO_JAVA_MAP.put(Type.BIGINT, BigInteger.class);
+		TYPE_TO_JAVA_MAP.put(Type.BIGINT, BigInteger.class);
 		TYPE_TO_JAVA_MAP.put(Type.BOOLEAN, Boolean.class);
 		TYPE_TO_JAVA_MAP.put(Type.TINYINT, Byte.class);
 		TYPE_TO_JAVA_MAP.put(Type.SMALLINT, Short.class);
@@ -99,8 +99,7 @@ public abstract class TypeUtils {// NOSONAR
 		TYPE_TO_JAVA_MAP.put(Type.BINARY, java.sql.Blob.class);
 		TYPE_TO_JAVA_MAP.put(Type.BIT, Boolean.class);
 		TYPE_TO_JAVA_MAP.put(Type.BLOB, java.sql.Blob.class);
-		//TYPE_TO_JAVA_MAP.put(Type.CHAR, Character.class);
-		TYPE_TO_JAVA_MAP.put(Type.CHAR, String.class);
+		TYPE_TO_JAVA_MAP.put(Type.CHAR, Character.class);
 		TYPE_TO_JAVA_MAP.put(Type.CLOB, java.sql.Clob.class);
 		TYPE_TO_JAVA_MAP.put(Type.DECIMAL, BigDecimal.class);
 		TYPE_TO_JAVA_MAP.put(Type.DOUBLE, Double.class);

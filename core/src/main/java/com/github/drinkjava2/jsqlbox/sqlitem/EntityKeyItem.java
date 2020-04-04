@@ -55,7 +55,7 @@ public class EntityKeyItem implements CustomizedSqlItem {
 				if (col.getPkey() && !col.getTransientable()) {
 					if (i > 0)
 						ps.addSql(" and ");
-					ps.addSql(alias).append(".").append(ps.wrapColumn(col.getColumnName())).append("=? ");
+					ps.addSql(alias).append(".").append(col.getColumnName()).append("=? ");
 					Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
 					ps.addParam(value);
 					i++;
