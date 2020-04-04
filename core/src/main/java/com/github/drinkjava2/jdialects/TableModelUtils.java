@@ -16,8 +16,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
+import java.util.Set;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -86,9 +89,23 @@ public abstract class TableModelUtils {// NOSONAR
 		try {
 			conn = ds.getConnection();
 			TableModel[] models = db2Models(conn, dialect);
+			File dir = new File(outputfolder);
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+			Collection<String> filterModels = (Collection<String>)setting.get("filterModels");
+			if (filterModels != null) {
+				Set<String> t = new HashSet<>();
+				for(String s : filterModels) t.add(s.trim().toLowerCase());
+				filterModels = t;
+			}
 			for (TableModel model : models) {
-				File writename = new File(
-						outputfolder + "/" + TableModelUtilsOfJavaSrc.getClassNameFromTableModel(model) + ".java");
+				String tableName = model.getTableName();
+				if (filterModels != null && filterModels.contains(tableName.toLowerCase())) {
+					continue;
+				}
+				File writename = new File(dir,  TableModelUtilsOfJavaSrc.getClassNameFromTableModel(model) + ".java");
+
 				writename.createNewFile();// NOSONAR
 				BufferedWriter out = new BufferedWriter(new FileWriter(writename));
 				String javaSrc = model2JavaSrc(model, setting);

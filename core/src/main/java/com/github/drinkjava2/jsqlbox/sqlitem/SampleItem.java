@@ -11,11 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox.sqlitem;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.github.drinkjava2.jdbpro.CustomizedSqlItem;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
@@ -24,6 +19,10 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.DbContextUtils;
 import com.github.drinkjava2.jsqlbox.DbException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This Sample is a CustomizedSqlItem, used to build a " where field1=? and
@@ -108,13 +107,13 @@ public class SampleItem implements CustomizedSqlItem {
 			if (fieldValue != null && (nullFieldsOnly == null || !nullFieldsOnly)) {
 				if (!isfirst)
 					ps.addSql(" and ");
-				ps.addSql(col.getColumnName()).append(" =? ");
+				ps.addSql(ps.wrapColumn(col.getColumnName())).append(" =? ");
 				ps.addParam(fieldValue);
 				isfirst = false;
 			} else if (nullFieldsOnly == null || nullFieldsOnly) {
 				if (!isfirst)
 					ps.addSql(" and ");
-				ps.addSql(col.getColumnName()).append(" is null ");
+				ps.addSql(ps.wrapColumn(col.getColumnName())).append(" is null ");
 				isfirst = false;
 			}
 		}

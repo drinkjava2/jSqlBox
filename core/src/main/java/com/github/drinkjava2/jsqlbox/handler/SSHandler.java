@@ -132,8 +132,8 @@ public class SSHandler extends DefaultOrderSqlHandler {
 								"Alias '" + alias + "' not same as tableModel's alias '" + ps.getAliases()[i] + "'");
 					for (ColumnModel col : tb.getColumns()) {
 						if (!col.getTransientable())
-							sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
+							sb.append(alias).append(".").append(ps.wrapColumn(col.getColumnName())).append(" as ").append(alias)
+									.append("_").append(ps.wrapColumn(col.getColumnName())).append(", ");
 					}
 					break;
 				}
@@ -167,8 +167,8 @@ public class SSHandler extends DefaultOrderSqlHandler {
 							}
 						}
 						if (found)
-							sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
+							sb.append(alias).append(".").append(ps.wrapColumn(col.getColumnName())).append(" as ").append(alias)
+									.append("_").append(ps.wrapColumn(col.getColumnName())).append(", ");
 					}
 					break;
 				}

@@ -15,6 +15,7 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jsqlbox.DbContext;
@@ -63,27 +64,28 @@ public class VersionFieldConverter extends BaseFieldConverter {
 	@Override
 	public void handleSQL(SqlOption sqlOption, DbContext ctx, ColumnModel col, Object entity,
 			LinkArrayList<Object> sqlBody, LinkArrayList<Object> sqlWhere) {
-		Object oldVersion = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
-		Object firstOrOldVersion = getFirstVersion(col, oldVersion);
-		Object nextVersion = getNextVersion(col, firstOrOldVersion);
+		Object  oldVersion        = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
+		Object  firstOrOldVersion = getFirstVersion(col, oldVersion);
+		Object  nextVersion       = getNextVersion(col, firstOrOldVersion);
+		Dialect dialect           = ctx.getDialect();
 		if (SqlOption.UPDATE.equals(sqlOption)) {
 			DbContextUtils.writeValueToBeanFieldOrTail(col, entity, nextVersion);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
-			sqlBody.append(col.getColumnName()).append("=?").append(param(nextVersion));
+			sqlBody.append(dialect.wrapColumn(col.getColumnName())).append("=?").append(param(nextVersion));
 
 			if (!sqlWhere.isEmpty())
 				sqlWhere.append(" and ");// NOSONAR
-			sqlWhere.append(col.getColumnName()).append("=?").append(param(firstOrOldVersion));
+			sqlWhere.append(dialect.wrapColumn(col.getColumnName())).append("=?").append(param(firstOrOldVersion));
 		} else if (SqlOption.DELETE.equals(sqlOption)) {
 			if (!sqlWhere.isEmpty())
 				sqlWhere.append(" and ");// NOSONAR
-			sqlWhere.append(col.getColumnName()).append("=?");
+			sqlWhere.append(dialect.wrapColumn(col.getColumnName())).append("=?");
 			sqlWhere.append(param(firstOrOldVersion));
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
 			if (oldVersion != firstOrOldVersion)
 				DbContextUtils.writeValueToBeanFieldOrTail(col, entity, firstOrOldVersion);
-			sqlBody.append(col.getColumnName());
+			sqlBody.append(dialect.wrapColumn(col.getColumnName()));
 			sqlBody.append(param(firstOrOldVersion)).append(",");
 		}
 	}

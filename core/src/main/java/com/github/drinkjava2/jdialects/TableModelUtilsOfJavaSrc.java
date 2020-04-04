@@ -11,11 +11,14 @@
  */
 package com.github.drinkjava2.jdialects;
 
+import com.github.drinkjava2.jdialects.springsrc.utils.StringUtils;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import java.util.Set;
 
 /**
  * The tool to convert TableModel to Java source code
@@ -31,25 +34,30 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 	 * USER_NAME -> userName <br/>
 	 * User_naMe -> userName <br/>
 	 * UserName -> userName <br/>
-	 * USERNAME -> uSERNAME <br/>
-	 * userName -> userName <br/>
+	 * USERNAME -> username <br/>
+	 * userName -> username <br/>
 	 * username -> username <br/>
 	 */
 	private static String transColumnNameToFieldName(String colName) {
-		if (StrUtils.isEmpty(colName))
-			return colName;
-		if (!colName.contains("_"))
-			return StrUtils.toLowerCaseFirstOne(colName);
+		if (StrUtils.isEmpty(colName)) return colName;
+
+		if (!colName.contains("_")) {
+			//return StrUtils.toLowerCaseFirstOne(colName);
+			// 这才是符合 java bean 规范
+			return colName.toLowerCase();
+		}
 		StringBuilder sb = new StringBuilder();
 		char[] chars = colName.toLowerCase().toCharArray();
 		for (int i = 0; i < chars.length; i++) {
 			char c = chars[i];
-			if (c == '_')
+			if (c == '_') {
 				continue;
-			if ((i > 0) && (chars[i - 1]) == '_' && sb.length() > 0)
+			}
+			if ((i > 0) && (chars[i - 1]) == '_' && sb.length() > 0) {
 				sb.append(Character.toUpperCase(c));
-			else
+			} else {
 				sb.append(c);
+			}
 		}
 		return sb.toString();
 	}
@@ -67,9 +75,9 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 	public static String getClassNameFromTableModel(TableModel model) {
 		DialectException.assureNotNull(model, "TableModel can not be null");
 		String className;
-		if (model.getEntityClass() != null)
+		if (model.getEntityClass() != null) {
 			className = model.getEntityClass().getSimpleName();
-		else {
+		} else {
 			DialectException.assureNotEmpty(model.getTableName(), "TableName can not be empty in TableModel");
 			className = StrUtils.toUpperCaseFirstOne(transColumnNameToFieldName(model.getTableName()));
 		}
@@ -104,14 +112,19 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		String imports = (String) setting.get("imports");
 		// head
 		StringBuilder body = new StringBuilder();
-		if (!StrUtils.isEmpty(packageName))
+		if (!StrUtils.isEmpty(packageName)) {
 			body.append("package ").append(packageName).append(";\n");
-		if (!StrUtils.isEmpty(imports))
+		}
+		if (!StrUtils.isEmpty(imports)) {
 			body.append(imports);
+		}
 		body.append("\n");
 
 		// @table
 		String className = getClassNameFromTableModel(model);
+		if (!StringUtils.isEmpty(model.getComment())) {
+			body.append("/**\n * ").append(model.getComment()).append("\n */\n");
+		}
 		if (!className.equals(model.getTableName())) {
 			body.append("@Table").append("(name=\"").append(model.getTableName()).append("\")\n");
 		}
@@ -119,17 +132,19 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		// Compound FKEY
 		int fkeyCount = 0;
 		for (FKeyModel fkey : model.getFkeyConstraints()) {
-			if (fkey.getColumnNames().size() <= 1)// Not compound Fkey
-				continue;
+			if (fkey.getColumnNames().size() <= 1)/* Not compound Fkey*/ continue;
 			body.append("@FKey");
-			if (fkeyCount > 0)
+			if (fkeyCount > 0) {
 				body.append(fkeyCount);
+			}
 			body.append("(");
 			fkeyCount++;
-			if (!StrUtils.isEmpty(fkey.getFkeyName()))
+			if (!StrUtils.isEmpty(fkey.getFkeyName())) {
 				body.append("name=\"").append(fkey.getFkeyName()).append("\", ");
-			if (!fkey.getDdl())
+			}
+			if (!fkey.getDdl()) {
 				body.append("ddl=false, ");
+			}
 			String fkeyCols = StrUtils.listToString(fkey.getColumnNames());
 			fkeyCols = StrUtils.replace(fkeyCols, ",", "\",\"");
 			String refCols = StrUtils.arrayToString(fkey.getRefTableAndColumns());
@@ -142,90 +157,130 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		body.append(StrUtils.replace(classDefinition, "$1", className)).append(" {\n\n");
 
 		// Fields
+		StringBuilder fieldSB = new StringBuilder();
 		StringBuilder pkeySB = new StringBuilder();
 		StringBuilder normalSB = new StringBuilder();
 		StringBuilder sb = null;
+		// 不知道为什么有些表的column 定义信息是重复的，我不是DBA不清楚原因。
+		// 也需要还有什么废弃的标志，但前面的处理没有过滤，这里先临时处理一下。
+		Set<String> processed = new HashSet<>();
+		// fieldStaticNames
+		if (fieldFlags) {
+			for (ColumnModel col : model.getColumns()) {
+				if (processed.contains(col.getColumnName())) {
+					continue;
+				}
+				processed.add(col.getColumnName());
+
+				fieldSB.append("\tpublic static final String ").append(col.getColumnName().toUpperCase()).append(" = \"").append(col.getColumnName()) .append("\";\n");
+			}
+		}
+		processed.clear();
 		for (ColumnModel col : model.getColumns()) {
+			if (processed.contains(col.getColumnName()))  continue;
+			processed.add(col.getColumnName());
 			Class<?> javaType = TypeUtils.dialectTypeToJavaType(col.getColumnType());
-			if (javaType == null)
-				continue;
+
+			if (javaType == null) continue;
+
 			sb = col.getPkey() ? pkeySB : normalSB;
+
+			if (!StringUtils.isEmpty(col.getComment())) {
+				sb.append("\t/**\n\t * ").append(col.getComment()).append("\n\t */\n");
+			}
+
 			String fieldName = col.getEntityField();
-			if (StrUtils.isEmpty(fieldName))
+
+			if (StrUtils.isEmpty(fieldName)) {
 				fieldName = transColumnNameToFieldName(col.getColumnName());
-			// fieldStaticNames
-			if (fieldFlags)
-				sb.append("  public static final String " + fieldName.toUpperCase() + " = \"" + col.getColumnName()
-						+ "\";\n");
+			}
+
 			// @Id
-			if (col.getPkey())
-				sb.append("  @Id\n");
+			if (col.getPkey()) {
+				sb.append("\t@Id\n");
+			}
 
 			// @Column
 			boolean isStr = Type.VARCHAR.equals(col.getColumnType()) || Type.CHAR.equals(col.getColumnType());
-			if (fieldFlags || !fieldName.equalsIgnoreCase(col.getColumnName()) || (isStr && 250 != col.getLength())) {
-				sb.append("  @Column(");
-				if (fieldFlags)
-					sb.append("name=").append(fieldName.toUpperCase()).append(", ");
-				else if (!fieldName.equalsIgnoreCase(col.getColumnName()))
-					sb.append("name=\"").append(col.getColumnName()).append("\", ");
+			// 好魔幻的数字
+			boolean lenNotEq250 = 250 != col.getLength();
+			if (!fieldName.equalsIgnoreCase(col.getColumnName()) || (isStr && lenNotEq250)) {
+				sb.append("\t@Column(");
+				sb.append("name=\"").append(col.getColumnName()).append("\", ");
 
-				if (isStr && 250 != col.getLength())
+				if (isStr && lenNotEq250) {
 					sb.append("length=").append(col.getLength()).append(", ");
+				}
 				sb.setLength(sb.length() - 2);
 				sb.append(")\n");
 			}
 
 			// @SingleFKey
 			for (FKeyModel fkey : model.getFkeyConstraints()) {
-				if (fkey.getColumnNames().size() != 1)// Not compound Fkey
-					continue;
-				if (!col.getColumnName().equalsIgnoreCase(fkey.getColumnNames().get(0)))
-					continue;
-				sb.append("  @SingleFKey");
+				/* Not compound Fkey*/
+				if (fkey.getColumnNames().size() != 1) continue;
+				if (!col.getColumnName().equalsIgnoreCase(fkey.getColumnNames().get(0))) continue;
+				sb.append("\t@SingleFKey");
 				sb.append("(");
 				fkeyCount++;
-				if (!StrUtils.isEmpty(fkey.getFkeyName()))
+				if (!StrUtils.isEmpty(fkey.getFkeyName())) {
 					sb.append("name=\"").append(fkey.getFkeyName()).append("\", ");
-				if (!fkey.getDdl())
+				}
+				if (!fkey.getDdl()) {
 					sb.append("ddl=false, ");
+				}
 				String refCols = StrUtils.arrayToString(fkey.getRefTableAndColumns());
 				refCols = StrUtils.replace(refCols, ",", "\",\"");
 				sb.append("refs={\"").append(refCols).append("\"}");
 				sb.append(")\n");
 			}
-			sb.append("  private ").append(javaType.getSimpleName()).append(" ").append(fieldName).append(";\n\n");
-		}
-		body.append(pkeySB.toString()).append(normalSB.toString());
 
+
+			sb.append(" \tprivate ").append(javaType.getSimpleName()).append(" ").append(fieldName).append(";\n\n");
+		}
+		body.append(fieldSB.toString()).append("\n\n")
+		    .append(pkeySB.toString()).append("\n\n")
+		    .append(normalSB.toString()).append("\n\n");
+		fieldSB.setLength(0);
 		pkeySB.setLength(0);
 		normalSB.setLength(0);
+		processed.clear();
 		for (ColumnModel col : model.getColumns()) {
+			if (processed.contains(col.getColumnName())) continue;
+
+			processed.add(col.getColumnName());
 			// getter
 			Class<?> javaType = TypeUtils.dialectTypeToJavaType(col.getColumnType());
-			if (javaType == null)
-				continue;
+
+			if (javaType == null) continue;
+
 			sb = col.getPkey() ? pkeySB : normalSB;
 			String fieldName = col.getEntityField();
-			if (StrUtils.isEmpty(fieldName))
+			if (StrUtils.isEmpty(fieldName)) {
 				fieldName = transColumnNameToFieldName(col.getColumnName());
+			}
 			String getFieldName = "get" + StrUtils.toUpperCaseFirstOne(fieldName);
-			sb.append("  public ").append(javaType.getSimpleName()).append(" ").append(getFieldName).append("(){\n");
-			sb.append("    return ").append(fieldName).append(";\n");
-			sb.append("  }\n\n");
+			sb.append("\tpublic ").append(javaType.getSimpleName()).append(" ").append(getFieldName).append("(){\n");
+			sb.append("\t\treturn ").append(fieldName).append(";\n");
+			sb.append("\t}\n\n");
 
 			// settter
 			String setFieldName = "set" + StrUtils.toUpperCaseFirstOne(fieldName);
-			sb.append("  public ").append(linkStyle ? className : "void").append(" ").append(setFieldName).append("(")
-					.append(javaType.getSimpleName()).append(" ").append(fieldName).append("){\n");
-			sb.append("    this.").append(fieldName).append("=").append(fieldName).append(";\n");
-			if (linkStyle)
-				sb.append("    return this;\n");
-			sb.append("  }\n\n");
+			if (linkStyle) {
+				sb.append("\tpublic ").append(className).append(" ").append(setFieldName).append("(")
+				  .append(javaType.getSimpleName()).append(" ").append(fieldName).append("){\n");
+				sb.append("\t\tthis.").append(fieldName).append("=").append(fieldName).append(";\n");
+				sb.append("\t\treturn this;\n");
+			} else {
+				sb.append("\tpublic ").append("void").append(" ").append(setFieldName).append("(")
+				  .append(javaType.getSimpleName()).append(" ").append(fieldName).append("){\n");
+				sb.append("\t\tthis.").append(fieldName).append("=").append(fieldName).append(";\n");
+			}
+			sb.append("\t}\n\n");
 		}
 		body.append(pkeySB.toString()).append(normalSB.toString());
 
-		body.append("}");
+		body.append("}\n");
 
 		return body.toString();
 	}

@@ -16,6 +16,7 @@
 package com.github.drinkjava2.jdbpro;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -489,4 +490,16 @@ public class PreparedSQL {
 		this.ignoreEmpty = ignoreEmpty;
 	}
 
+	public String wrapColumn(String col) {
+		return isMysql() ? "`" + col + "`" : col;
+	}
+	private boolean isMysql() {
+		try {
+			DatabaseMetaData metaData            = connection.getMetaData();
+			String           databaseProductName = metaData.getDatabaseProductName();
+			return "MySQL".equals(databaseProductName);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 }

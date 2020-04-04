@@ -155,9 +155,9 @@ public class DDLCreateUtils {// NOSONAR
 			if (col.getPkey()) {
 				hasPkey = true;
 				if (StrUtils.isEmpty(pkeys))
-					pkeys = col.getColumnName();
+					pkeys = dialect.wrapColumn(col.getColumnName());
 				else
-					pkeys += "," + col.getColumnName();
+					pkeys += "," + dialect.wrapColumn(col.getColumnName());
 			}
 		}
 

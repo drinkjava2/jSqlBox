@@ -696,6 +696,7 @@ public abstract class DbContextUtils {// NOSONAR
 		boolean foundColumnToInsert = false;
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
+		Dialect dialect             = ctx.getDialect();
 		for (ColumnModel col : cols.values()) {// NOSONAR
 			if (col == null || col.getTransientable() || !col.getInsertable())
 				continue;
@@ -720,7 +721,7 @@ public abstract class DbContextUtils {// NOSONAR
 					identityType = col.getColumnType();
 					identityCol = col;
 				} else if (GenerationType.SNOWFLAKE.equals(idGen.getGenerationType())) {// Snow
-					sqlBody.append(col.getColumnName());
+					sqlBody.append(dialect.wrapColumn(col.getColumnName()));
 					SnowflakeCreator snow = ctx.getSnowflakeCreator();
 					if (snow == null)
 						throw new DbException(
@@ -731,7 +732,7 @@ public abstract class DbContextUtils {// NOSONAR
 					foundColumnToInsert = true;
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				} else {// Normal Id Generator
-					sqlBody.append(col.getColumnName());
+					sqlBody.append(dialect.wrapColumn(col.getColumnName()));
 					Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
 					sqlBody.append(param(id));
 					sqlBody.append(", ");
@@ -740,7 +741,7 @@ public abstract class DbContextUtils {// NOSONAR
 				}
 			} else {
 				if (!(((ignoreNull || ignoreEmpty) && value == null) || (ignoreEmpty && StrUtils.isEmpty(value)))) {
-					sqlBody.append(col.getColumnName());
+					sqlBody.append(dialect.wrapColumn(col.getColumnName()));
 					sqlBody.append(new SqlItem(SqlOption.PARAM, value));
 					sqlBody.append(", ");
 					foundColumnToInsert = true;
@@ -832,7 +833,7 @@ public abstract class DbContextUtils {// NOSONAR
 		SqlItem shardDbItem = null;
 		boolean ignoreNull = hasIgnoreNullItem(optionItems); // if have ignoreNull?
 		boolean ignoreEmpty = hasIgnoreEmptyItem(optionItems); // if have ignoreEmpty?
-
+		Dialect dialect = ctx.getDialect();
 		for (ColumnModel col : cols.values()) {// NOSONAR
 			if (col.getTransientable() || !col.getUpdatable())
 				continue;
@@ -855,13 +856,13 @@ public abstract class DbContextUtils {// NOSONAR
 			if (col.getPkey()) {
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");// NOSONAR
-				sqlWhere.append(col.getColumnName()).append("=?");
+				sqlWhere.append(dialect.wrapColumn(col.getColumnName())).append("=?");
 				sqlWhere.append(param(value));
 			} else {
 				if (!(((ignoreNull || ignoreEmpty) && value == null) || (ignoreEmpty && StrUtils.isEmpty(value)))) {
 					if (!sqlBody.isEmpty())
 						sqlBody.append(", ");
-					sqlBody.append(col.getColumnName()).append("=? ");
+					sqlBody.append(dialect.wrapColumn(col.getColumnName())).append("=? ");
 					sqlBody.append(param(value));
 				}
 			}
@@ -952,7 +953,7 @@ public abstract class DbContextUtils {// NOSONAR
 		LinkArrayList<Object> sqlWhere = new LinkArrayList<Object>();
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
-
+		Dialect               dialect = ctx.getDialect();
 		for (ColumnModel col : cols.values()) {// NOSONAR
 			if (col == null || col.getTransientable())
 				continue;
@@ -966,7 +967,7 @@ public abstract class DbContextUtils {// NOSONAR
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");
 				sqlWhere.append(param(value));
-				sqlWhere.append(col.getColumnName()).append("=? ");
+				sqlWhere.append(dialect.wrapColumn(col.getColumnName())).append("=? ");
 			}
 			if (col.getShardTable() != null) // Sharding Table?
 				shardTableItem = shardTB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
@@ -1040,19 +1041,19 @@ public abstract class DbContextUtils {// NOSONAR
 		List<ColumnModel> effectColumns = new ArrayList<ColumnModel>();
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
-
+		Dialect dialect = ctx.getDialect();
 		for (ColumnModel col : cols.values()) {
 			if (col.getTransientable())
 				continue;
 			if (col.getPkey()) {
-				sqlWhere.append(col.getColumnName()).append("=?")
+				sqlWhere.append(dialect.wrapColumn(col.getColumnName())).append("=?")
 						.append(param(readValueFromBeanFieldOrTail(col, entityBean, false, false))).append(" and ");
 			}
 			if (col.getShardTable() != null) // Sharding Table?
 				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean, false, false));
 			if (col.getShardDatabase() != null) // Sharding DB?
 				shardDbItem = shardDB(readValueFromBeanFieldOrTail(col, entityBean, false, false));
-			sqlBody.append(col.getColumnName()).append(", ");
+			sqlBody.append(dialect.wrapColumn(col.getColumnName())).append(", ");
 			effectColumns.add(col);
 		}
 		sqlBody.remove(sqlBody.size() - 1);// delete the last ", "
@@ -1200,6 +1201,7 @@ public abstract class DbContextUtils {// NOSONAR
 		LinkArrayList<Object> sqlWhere = new LinkArrayList<Object>();
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
+		Dialect               dialect = ctx.getDialect();
 		for (ColumnModel col : cols.values()) {
 			if (col.getTransientable())
 				continue;
@@ -1208,7 +1210,7 @@ public abstract class DbContextUtils {// NOSONAR
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");
 				sqlWhere.append(param(value));
-				sqlWhere.append(col.getColumnName()).append("=? ");
+				sqlWhere.append(dialect.wrapColumn(col.getColumnName())).append("=? ");
 			}
 			if (col.getShardTable() != null) // Sharding Table?
 				shardTableItem = shardTB(EntityIdUtils.readFeidlValueFromEntityId(id, col));
@@ -1308,13 +1310,13 @@ public abstract class DbContextUtils {// NOSONAR
 
 		LinkArrayList<Object> sqlBody = new LinkArrayList<Object>();
 		List<ColumnModel> effectColumns = new ArrayList<ColumnModel>();
-
+		Dialect               dialect = ctx.getDialect();
 		for (ColumnModel col : cols.values()) {
 			if (col.getTransientable())
 				continue;
 			if (col.getShardTable() != null)
 				throw new DbException("Fail to load all entity because ShardTable columns exist.");
-			sqlBody.append(col.getColumnName()).append(", ");
+			sqlBody.append(dialect.wrapColumn(col.getColumnName())).append(", ");
 			effectColumns.add(col);
 		}
 		sqlBody.remove(sqlBody.size() - 1);// delete the last ", "
