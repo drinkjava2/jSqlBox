@@ -53,7 +53,7 @@ public abstract class EntityIdUtils {// NOSONAR
 		// DbUtils don't care UP/LOW case
 
 		Object firstPKeyValue = null;
-		String keColName = new StringBuilder(alias).append("_").append(firstPkeyCol.getColumnName()).toString();
+		String keColName = new StringBuilder(alias).append("_").append(firstPkeyCol.getClearQuoteColumnName()).toString();
 		for (int i = 0; i < titles.length; i++) {
 			if (titles[i].equalsIgnoreCase(keColName))
 				firstPKeyValue = oneRow[i];
@@ -70,7 +70,7 @@ public abstract class EntityIdUtils {// NOSONAR
 				sb.append(COMPOUND_ID_SEPARATOR);
 
 			Object value = null;
-			keColName = new StringBuilder(alias).append("_").append(col.getColumnName()).toString();
+			keColName = new StringBuilder(alias).append("_").append(col.getClearQuoteColumnName()).toString();
 			for (int i = 0; i < titles.length; i++) {
 				if (titles[i].equalsIgnoreCase(keColName))
 					value = oneRow[i];

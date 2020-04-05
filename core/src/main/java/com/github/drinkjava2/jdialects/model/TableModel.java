@@ -295,7 +295,10 @@ public class TableModel {
 	 */
 	public ColumnModel getColumnByColName(String colName) {
 		for (ColumnModel columnModel : columns) {
-			if (columnModel.getColumnName() != null && columnModel.getColumnName().equalsIgnoreCase(colName))
+			if (columnModel.getColumnName() != null && (columnModel.getColumnName().equalsIgnoreCase(colName)
+					|| columnModel.getColumnName().equalsIgnoreCase("`" + colName + "`"))
+
+			)
 				return columnModel;
 		}
 		return null;

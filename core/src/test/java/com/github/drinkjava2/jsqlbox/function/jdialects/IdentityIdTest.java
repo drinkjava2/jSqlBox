@@ -55,9 +55,10 @@ public class IdentityIdTest extends TestBase {
 
 	@Test
 	public void doTest() {
-		if (!dialect.ddlFeatures.getSupportsIdentityColumns())
+		if (!dialect.ddlFeatures.getSupportsIdentityColumns()) {
 			Systemout.print("Dialect '" + dialect + "' does not support identity type, skip IdentityId unit test.");
-
+			return;
+		}
 		createAndRegTables(EntityDemo.class);
 
 		EntityDemo e = new EntityDemo();

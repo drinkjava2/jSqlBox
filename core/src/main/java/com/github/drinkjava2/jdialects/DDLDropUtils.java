@@ -205,6 +205,7 @@ public class DDLDropUtils {
 			if (StrUtils.isEmpty(constName))
 				constName = "fk_" + t.getTableName().toLowerCase() + "_"
 						+ StrUtils.replace(StrUtils.listToString(t.getColumnNames()), ",", "_");
+			constName = StrUtils.clearQuote(constName);
 			if (DDLFeatures.NOT_SUPPORT.equals(dropStr))
 				DialectException.throwEX("Dialect \"" + dialect
 						+ "\" does not support drop foreign key, for setting: \"" + "fk_" + constName + "\"");

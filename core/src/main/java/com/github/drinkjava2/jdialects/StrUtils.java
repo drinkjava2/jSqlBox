@@ -996,4 +996,18 @@ public class StrUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Some column has quote chars, like `someCol` or "someCol" or [someCol] use
+	 * this method to clear quote chars
+	 */
+	public static String clearQuote(String columnName) {
+		if (StrUtils.isEmpty(columnName))
+			return columnName;
+		String s = StrUtils.replace(columnName, "`", "");
+		s = StrUtils.replace(s, "\"", "");
+		s = StrUtils.replace(s, "[", "");
+		s = StrUtils.replace(s, "]", "");
+		return s;
+	}
+
 }

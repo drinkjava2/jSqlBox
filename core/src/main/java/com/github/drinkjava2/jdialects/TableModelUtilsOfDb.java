@@ -29,7 +29,7 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @author Yong Zhu
  * @since 1.0.6
  */
-public abstract class TableModelUtilsOfDb {//NOSONAR
+public abstract class TableModelUtilsOfDb {// NOSONAR
 	private static final String TABLE_NAME = "TABLE_NAME";
 
 	/**
@@ -68,6 +68,8 @@ public abstract class TableModelUtilsOfDb {//NOSONAR
 				rs = meta.getColumns(null, null, tableName, null); // detail see meta.getC alt + /
 				while (rs.next()) {// NOSONAR
 					String colName = rs.getString("COLUMN_NAME");
+					if (ReservedDBWords.isReservedWord(dialect, colName))
+						colName = dialect.ddlFeatures.openQuote + colName + dialect.ddlFeatures.openQuote;
 					ColumnModel col = new ColumnModel(colName);
 					model.addColumn(col);
 

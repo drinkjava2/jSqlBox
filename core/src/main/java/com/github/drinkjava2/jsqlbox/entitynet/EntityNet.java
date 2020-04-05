@@ -366,8 +366,8 @@ public class EntityNet {
 				return realDoRelationCheck(e2, e1, m2, m1, fkey);
 			}
 		}
-		throw new DbException("Not found relationship(foreign key) setting between '" + m1.getEntityClass()
-				+ "' and '" + m2.getEntityClass() + "'");
+		throw new DbException("Not found relationship(foreign key) setting between '" + m1.getEntityClass() + "' and '"
+				+ m2.getEntityClass() + "'");
 	}
 
 	/**

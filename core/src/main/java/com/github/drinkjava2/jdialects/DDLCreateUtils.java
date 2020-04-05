@@ -269,7 +269,8 @@ public class DDLCreateUtils {// NOSONAR
 
 		// column comment on
 		for (ColumnModel c : columns) {
-			if (!c.getTransientable() && features.supportsCommentOn && c.getComment() != null && StrUtils.isEmpty(features.columnComment))
+			if (!c.getTransientable() && features.supportsCommentOn && c.getComment() != null
+					&& StrUtils.isEmpty(features.columnComment))
 				objectResultList.add(
 						"comment on column " + tableName + '.' + c.getColumnName() + " is '" + c.getComment() + "'");
 		}
@@ -436,6 +437,7 @@ public class DDLCreateUtils {// NOSONAR
 			if (StrUtils.isEmpty(constName))
 				constName = "fk_" + t.getTableName().toLowerCase() + "_"
 						+ StrUtils.replace(StrUtils.listToString(t.getColumnNames()), ",", "_");
+			constName = StrUtils.clearQuote(constName);
 			String[] refTableAndColumns = t.getRefTableAndColumns();
 			DialectException.assureNotNull(refTableAndColumns);
 			String fkeyTemplate;

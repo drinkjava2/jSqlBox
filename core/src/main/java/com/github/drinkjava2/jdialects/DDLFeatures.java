@@ -54,6 +54,8 @@ public class DDLFeatures {
 	protected Boolean supportsCommentOn;
 	protected Boolean supportsIdentityColumns;
 	protected Boolean supportsIfExistsAfterConstraintName;
+	protected String openQuote; // for quote column which used keywords
+	protected String closeQuote; // for quote column which used keywords
 
 	public String getAddColumnString() {
 		return addColumnString;
@@ -219,6 +221,14 @@ public class DDLFeatures {
 		return identitySelectStringBigINT;
 	}
 
+	public String getOpenQuote() {
+		return openQuote;
+	}
+
+	public String getCloseQuote() {
+		return closeQuote;
+	}
+
 	/**
 	 * For dropping a table, can the phrase "if exists" be applied beforeQuery the
 	 * table name
@@ -252,6 +262,8 @@ public class DDLFeatures {
 		ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE";
 		ddl.addForeignKeyConstraintString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
 		ddl.addPrimaryKeyConstraintString = " add constraint _PKEYNAME primary key ";
+		ddl.closeQuote = "`";
+		ddl.openQuote = "`";
 		ddl.columnComment = "";
 		ddl.createCatalogCommand = NOT_SUPPORT;
 		ddl.createMultisetTableString = "create table";
@@ -474,6 +486,7 @@ public class DDLFeatures {
 		}
 			break;
 		case CUBRIDDialect: {
+			ddl.closeQuote = "]";
 			ddl.createPooledSequenceStrings = "create serial _SEQ start with 11 increment by 33";
 			ddl.createSequenceStrings = "create serial _SEQ";
 			ddl.dropForeignKeyString = " drop foreign key ";
@@ -484,6 +497,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "[";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = "select _SEQNAME.next_value from table({1}) as T(X)";
 			ddl.supportsColumnCheck = false;
@@ -819,6 +833,7 @@ public class DDLFeatures {
 		case MariaDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -834,6 +849,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -847,6 +863,7 @@ public class DDLFeatures {
 		case MariaDB53Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -862,6 +879,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -875,6 +893,7 @@ public class DDLFeatures {
 		case MariaDB102Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -890,6 +909,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsCommentOn = false;
@@ -903,6 +923,7 @@ public class DDLFeatures {
 		case MariaDB103Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createSchemaCommand = NOT_SUPPORT;
@@ -915,6 +936,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = "nextval(_SEQNAME)";
 			ddl.sequenceNextValString = "select nextval(_SEQNAME)";
 			ddl.supportsCommentOn = false;
@@ -926,6 +948,7 @@ public class DDLFeatures {
 		case MariaDB10Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -941,6 +964,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -978,6 +1002,7 @@ public class DDLFeatures {
 		case MySQLDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -992,6 +1017,7 @@ public class DDLFeatures {
 			ddl.identityColumnStringBigINT = "not null auto_increment";
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsCommentOn = false;
@@ -1004,6 +1030,7 @@ public class DDLFeatures {
 		case MySQL5Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1018,6 +1045,7 @@ public class DDLFeatures {
 			ddl.identityColumnStringBigINT = "not null auto_increment";
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -1031,6 +1059,7 @@ public class DDLFeatures {
 		case MySQL55Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1046,6 +1075,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -1059,6 +1089,7 @@ public class DDLFeatures {
 		case MySQL57Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1074,6 +1105,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -1087,6 +1119,7 @@ public class DDLFeatures {
 		case MySQL57InnoDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1102,6 +1135,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -1115,6 +1149,7 @@ public class DDLFeatures {
 		case MySQL5InnoDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1130,6 +1165,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -1143,6 +1179,7 @@ public class DDLFeatures {
 		case MySQLInnoDBDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1158,6 +1195,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsCommentOn = false;
@@ -1170,6 +1208,7 @@ public class DDLFeatures {
 		case MySQLMyISAMDialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1184,6 +1223,7 @@ public class DDLFeatures {
 			ddl.identityColumnStringBigINT = "not null auto_increment";
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsCommentOn = false;
@@ -1196,6 +1236,7 @@ public class DDLFeatures {
 		case MySQL8Dialect: {
 			ddl.addColumnString = "add column";
 			ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
+			ddl.closeQuote = "`";
 			ddl.columnComment = " comment '_COMMENT'";
 			ddl.createCatalogCommand = "create database _CATALOGNAME";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
@@ -1211,6 +1252,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select last_insert_id()";
 			ddl.identitySelectStringBigINT = "select last_insert_id()";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "`";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsColumnCheck = false;
@@ -1478,6 +1520,7 @@ public class DDLFeatures {
 		}
 			break;
 		case SQLServerDialect: {
+			ddl.closeQuote = "]";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
@@ -1488,6 +1531,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select @@identity";
 			ddl.identitySelectStringBigINT = "select @@identity";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "[";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsCommentOn = false;
@@ -1497,6 +1541,7 @@ public class DDLFeatures {
 		}
 			break;
 		case SQLServer2005Dialect: {
+			ddl.closeQuote = "]";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
@@ -1507,6 +1552,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select @@identity";
 			ddl.identitySelectStringBigINT = "select @@identity";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "[";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsCommentOn = false;
@@ -1516,6 +1562,7 @@ public class DDLFeatures {
 		}
 			break;
 		case SQLServer2008Dialect: {
+			ddl.closeQuote = "]";
 			ddl.createPooledSequenceStrings = NOT_SUPPORT;
 			ddl.createSequenceStrings = NOT_SUPPORT;
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
@@ -1526,6 +1573,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select @@identity";
 			ddl.identitySelectStringBigINT = "select @@identity";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "[";
 			ddl.selectSequenceNextValString = NOT_SUPPORT;
 			ddl.sequenceNextValString = NOT_SUPPORT;
 			ddl.supportsCommentOn = false;
@@ -1535,6 +1583,7 @@ public class DDLFeatures {
 		}
 			break;
 		case SQLServer2012Dialect: {
+			ddl.closeQuote = "]";
 			ddl.currentSchemaCommand = "SELECT SCHEMA_NAME()";
 			ddl.dropTableString = "drop table _TABLENAME";
 			ddl.identityColumnString = "identity not null";
@@ -1542,6 +1591,7 @@ public class DDLFeatures {
 			ddl.identitySelectString = "select @@identity";
 			ddl.identitySelectStringBigINT = "select @@identity";
 			ddl.needDropConstraintsBeforeDropTable = true;
+			ddl.openQuote = "[";
 			ddl.selectSequenceNextValString = "next value for _SEQNAME";
 			ddl.sequenceNextValString = "select next value for _SEQNAME";
 			ddl.supportsCommentOn = false;

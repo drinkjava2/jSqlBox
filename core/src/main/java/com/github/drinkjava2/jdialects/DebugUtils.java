@@ -138,6 +138,8 @@ public abstract class DebugUtils {//// NOSONAR
 		s += "supportsCommentOn=" + l.supportsCommentOn + r;
 		s += "supportsIdentityColumns=" + l.supportsIdentityColumns + r;
 		s += "supportsIfExistsAfterConstraintName=" + l.supportsIfExistsAfterConstraintName + r;
+		s += "openQuote=" + l.openQuote + r;
+		s += "closeQuote=" + l.closeQuote + r;
 
 		s += "===== Dialect type mapping templates =====" + r;
 		Map<Type, String> t = d.typeMappings;

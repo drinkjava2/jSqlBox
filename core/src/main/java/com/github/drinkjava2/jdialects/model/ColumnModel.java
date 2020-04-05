@@ -476,6 +476,10 @@ public class ColumnModel {
 	
 	//@formatter:on
 
+	public String getClearQuoteColumnName() {
+		return StrUtils.clearQuote(columnName);
+	}
+
 	// getter & setters==============
 	public String getColumnName() {
 		return columnName;

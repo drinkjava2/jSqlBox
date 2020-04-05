@@ -102,12 +102,12 @@ public class SSHandler extends DefaultOrderSqlHandler {
 			if (tableNameSb.length() == 0)
 				throw new DbException("Alias '" + alias + "' not found tablename in SQL");
 			String tbStr = tableNameSb.toString();
-
-			sql = replaceStarStarToColumn(sql, alias, tbStr, ps);
+ 
+			sql = replaceStarStarToColumn(sql, alias, tbStr, ps); 
 			pos = sql.indexOf(".**");
 			if (pos < 0)
 				pos = sql.indexOf(".##");
-		}
+		} 
 		return sql;
 	}
 
@@ -121,7 +121,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 	 * </pre>
 	 */
 	private static String replaceStarStarToColumn(String sql, String alias, String tableName, PreparedSQL ps) {
-		String result = sql;
+		String result = sql; 
 		if (sql.contains(alias + ".**")) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < ps.getModels().length; i++) {
@@ -133,7 +133,7 @@ public class SSHandler extends DefaultOrderSqlHandler {
 					for (ColumnModel col : tb.getColumns()) {
 						if (!col.getTransientable())
 							sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
+									.append("_").append(col.getClearQuoteColumnName()).append(", ");
 					}
 					break;
 				}
@@ -168,14 +168,13 @@ public class SSHandler extends DefaultOrderSqlHandler {
 						}
 						if (found)
 							sb.append(alias).append(".").append(col.getColumnName()).append(" as ").append(alias)
-									.append("_").append(col.getColumnName()).append(", ");
+									.append("_").append(col.getClearQuoteColumnName()).append(", ");
 					}
 					break;
 				}
 			}
 			if (sb.length() == 0)
-				throw new DbException(
-						"In SQL '" + sql + "', Can not find key columns in table '" + tableName + "'");
+				throw new DbException("In SQL '" + sql + "', Can not find key columns in table '" + tableName + "'");
 			sb.setLength(sb.length() - 2);
 			result = StrUtils.replaceFirst(result, alias + ".##", sb.toString());
 		}

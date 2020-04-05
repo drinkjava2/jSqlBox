@@ -470,7 +470,7 @@ public abstract class DbContextUtils {// NOSONAR
 				else
 					sb.append(", ");
 				sb.append(a[i]).append(".").append(col.getColumnName()).append(" as ").append(a[i]).append("_")
-						.append(col.getColumnName());
+						.append(col.getClearQuoteColumnName());
 			}
 		}
 		sb.append(" from ");
