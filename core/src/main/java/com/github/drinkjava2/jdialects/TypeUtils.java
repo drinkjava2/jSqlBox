@@ -63,14 +63,23 @@ public abstract class TypeUtils {// NOSONAR
 		JAVA_TO_TYPE_MAP.put(BigDecimal.class, Type.NUMERIC);
 		JAVA_TO_TYPE_MAP.put(BigInteger.class, Type.BIGINT);
 		JAVA_TO_TYPE_MAP.put(Boolean.class, Type.BOOLEAN);
+		JAVA_TO_TYPE_MAP.put(boolean.class, Type.BOOLEAN);
 		JAVA_TO_TYPE_MAP.put(Byte.class, Type.TINYINT);
+		JAVA_TO_TYPE_MAP.put(byte.class, Type.TINYINT);
 		JAVA_TO_TYPE_MAP.put(Character.class, Type.CHAR);
+		JAVA_TO_TYPE_MAP.put(char.class, Type.CHAR);
 		JAVA_TO_TYPE_MAP.put(Double.class, Type.DOUBLE);
+		JAVA_TO_TYPE_MAP.put(double.class, Type.DOUBLE);
 		JAVA_TO_TYPE_MAP.put(Float.class, Type.FLOAT);
+		JAVA_TO_TYPE_MAP.put(float.class, Type.FLOAT);
 		JAVA_TO_TYPE_MAP.put(Integer.class, Type.INTEGER);
+		JAVA_TO_TYPE_MAP.put(int.class, Type.INTEGER);
 		JAVA_TO_TYPE_MAP.put(Long.class, Type.BIGINT);
+		JAVA_TO_TYPE_MAP.put(long.class, Type.BIGINT);
 		JAVA_TO_TYPE_MAP.put(Short.class, Type.SMALLINT);
+		JAVA_TO_TYPE_MAP.put(short.class, Type.SMALLINT);
 		JAVA_TO_TYPE_MAP.put(String.class, Type.VARCHAR);
+		JAVA_TO_TYPE_MAP.put(char.class, Type.VARCHAR);
 		JAVA_TO_TYPE_MAP.put(java.sql.Clob.class, Type.CLOB);
 		JAVA_TO_TYPE_MAP.put(java.sql.Blob.class, Type.BLOB);
 		JAVA_TO_TYPE_MAP.put(java.util.Date.class, Type.DATE);
@@ -283,6 +292,8 @@ public abstract class TypeUtils {// NOSONAR
 				return ((Long) value).floatValue();
 			if (javaType == Short.class || javaType == short.class)
 				return ((Long) value).shortValue();
+			if (javaType == BigInteger.class)
+				return BigInteger.valueOf((Long) value);
 		} else if (vType == Double.class) {
 			if (javaType == Integer.class || javaType == int.class)
 				return ((Double) value).intValue();
@@ -372,6 +383,12 @@ public abstract class TypeUtils {// NOSONAR
 				c.setTime((java.util.Date) value);
 				return c;
 			}
+		} else if (vType == String.class) {
+			if (javaType == char.class || javaType == Character.class) {
+				return ((String) value).length() > 0 ? ((String) value).charAt(0) : '\u0000';
+			}
+		} else if (vType == Boolean.class) {
+			return ((Boolean) value).booleanValue();
 		}
 		return jdbcValue2Java8Value(value, vType, javaType); // check java8 types only
 	}
@@ -428,6 +445,12 @@ public abstract class TypeUtils {// NOSONAR
 		Class<?> vType = value.getClass();
 		if (java.util.Date.class == vType)
 			return new java.sql.Date(((Date) value).getTime());
+		if (Character.class == vType)
+			return ((Character) value).toString();
+		if (BigInteger.class == vType)
+			return ((BigInteger) value).intValue();
+		if (Boolean.class == vType)
+			return ((Boolean) value).booleanValue();
 		else if (Calendar.class.isAssignableFrom(vType))
 			return new java.sql.Date(((Calendar) value).getTime().getTime());
 		/*- JAVA8_BEGIN */

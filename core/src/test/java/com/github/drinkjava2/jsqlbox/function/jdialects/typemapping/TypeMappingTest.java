@@ -1,5 +1,6 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects.typemapping;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 import org.junit.Assert;
@@ -26,18 +27,23 @@ public class TypeMappingTest extends TestBase {
 
 		Integer i1;
 		int i2;
-		Long l1;
-		long l2;
-		Byte b1;
-		byte b2;
-		Short s1;
-		short s2;
-		Double d1;
-		double d2;
-		Float f1;
-		float f2;
-		Boolean bl1;
-		boolean bl2;
+		Long l3;
+		long l4;
+		Byte b5;
+		byte b6;
+		Short s7;
+		short s8;
+		Double d9;
+		double d10;
+		Float f11;
+		float f12;
+		Boolean bl13;
+		boolean bl14;
+
+		Character c15;
+		char c16;
+
+		BigInteger i17;
 
 		public String getId() {
 			return id;
@@ -63,100 +69,124 @@ public class TypeMappingTest extends TestBase {
 			this.i2 = i2;
 		}
 
-		public Long getL1() {
-			return l1;
+		public Long getL3() {
+			return l3;
 		}
 
-		public void setL1(Long l1) {
-			this.l1 = l1;
+		public void setL3(Long l) {
+			this.l3 = l;
 		}
 
-		public long getL2() {
-			return l2;
+		public long getL4() {
+			return l4;
 		}
 
-		public void setL2(long l2) {
-			this.l2 = l2;
+		public void setL4(long l) {
+			this.l4 = l;
 		}
 
-		public Byte getB1() {
-			return b1;
+		public Byte getB5() {
+			return b5;
 		}
 
-		public void setB1(Byte b1) {
-			this.b1 = b1;
+		public void setB5(Byte b) {
+			this.b5 = b;
 		}
 
-		public byte getB2() {
-			return b2;
+		public byte getB6() {
+			return b6;
 		}
 
-		public void setB2(byte b2) {
-			this.b2 = b2;
+		public void setB6(byte b) {
+			this.b6 = b;
 		}
 
-		public Short getS1() {
-			return s1;
+		public Short getS7() {
+			return s7;
 		}
 
-		public void setS1(Short s1) {
-			this.s1 = s1;
+		public void setS7(Short s) {
+			this.s7 = s;
 		}
 
-		public short getS2() {
-			return s2;
+		public short getS8() {
+			return s8;
 		}
 
-		public void setS2(short s2) {
-			this.s2 = s2;
+		public void setS8(short s) {
+			this.s8 = s;
 		}
 
-		public Double getD1() {
-			return d1;
+		public Double getD9() {
+			return d9;
 		}
 
-		public void setD1(Double d1) {
-			this.d1 = d1;
+		public void setD9(Double d) {
+			this.d9 = d;
 		}
 
-		public double getD2() {
-			return d2;
+		public double getD10() {
+			return d10;
 		}
 
-		public void setD2(double d2) {
-			this.d2 = d2;
+		public void setD10(double d) {
+			this.d10 = d;
 		}
 
-		public Float getF1() {
-			return f1;
+		public Float getF11() {
+			return f11;
 		}
 
-		public void setF1(Float f1) {
-			this.f1 = f1;
+		public void setF11(Float f) {
+			this.f11 = f;
 		}
 
-		public float getF2() {
-			return f2;
+		public float getF12() {
+			return f12;
 		}
 
-		public void setF2(float f2) {
-			this.f2 = f2;
+		public void setF12(float f) {
+			this.f12 = f;
 		}
 
-		public Boolean getBl1() {
-			return bl1;
+		public Boolean getBl13() {
+			return bl13;
 		}
 
-		public void setBl1(Boolean bl1) {
-			this.bl1 = bl1;
+		public void setBl13(Boolean b) {
+			this.bl13 = b;
 		}
 
-		public boolean isBl2() {
-			return bl2;
+		public boolean isBl14() {
+			return bl14;
 		}
 
-		public void setBl2(boolean bl2) {
-			this.bl2 = bl2;
+		public void setBl14(boolean b) {
+			this.bl14 = b;
+		}
+
+		public Character getC15() {
+			return c15;
+		}
+
+		public void setC15(Character c) {
+			this.c15 = c;
+		}
+
+		public char getC16() {
+			return c16;
+		}
+
+		public void setC16(char c) {
+			this.c16 = c;
+		}
+
+		public BigInteger getI17() {
+			return i17;
+		}
+
+		public void setI17(BigInteger b) {
+			this.i17 = b;
 		}
 
 	}
@@ -168,18 +198,21 @@ public class TypeMappingTest extends TestBase {
 		NumberDemo w = new NumberDemo();
 		w.setI1(1);
 		w.setI2(2);
-		w.setB1((byte) 3);
-		w.setB2((byte) 4);
-		w.setS1((short) 1);
-		w.setS2((short) 2);
-		w.setL1(5L);
-		w.setL2(6L);
-		w.setD1(7.0);
-		w.setD2(8.0);
-		w.setF1(9.0f);
-		w.setF2(10.0f);
-		w.setBl1(true);
-		w.setBl2(true);
+		w.setB5((byte) 3);
+		w.setB6((byte) 4);
+		w.setS7((short) 1);
+		w.setS8((short) 2);
+		w.setL3(5L);
+		w.setL4(6L);
+		w.setD9(7.0);
+		w.setD10(8.0);
+		w.setF11(9.0f);
+		w.setF12(10.0f);
+		w.setBl13(true);
+		w.setBl14(true);
+		w.setC15('a');
+		w.setC16('b');
+		w.setI17(BigInteger.valueOf(5L));
 		w.insert();
 
 		NumberDemo r = new NumberDemo();
@@ -187,34 +220,39 @@ public class TypeMappingTest extends TestBase {
 		r.load();
 		Assert.assertNotNull(r.i1);
 		Assert.assertNotNull(r.i2);
-		Assert.assertNotNull(r.s1);
-		Assert.assertNotNull(r.s2);
-		Assert.assertNotNull(r.l1);
-		Assert.assertNotNull(r.l2);
-		Assert.assertNotNull(r.d1);
-		Assert.assertNotNull(r.d2);
-		Assert.assertNotNull(r.f1);
-		Assert.assertNotNull(r.f2);
-		Assert.assertNotNull(r.b1);
-		Assert.assertNotNull(r.b2);
-		Assert.assertNotNull(r.bl1);
-		Assert.assertNotNull(r.bl2);
+		Assert.assertNotNull(r.s7);
+		Assert.assertNotNull(r.s8);
+		Assert.assertNotNull(r.l3);
+		Assert.assertNotNull(r.l4);
+		Assert.assertNotNull(r.d9);
+		Assert.assertNotNull(r.d10);
+		Assert.assertNotNull(r.f11);
+		Assert.assertNotNull(r.f12);
+		Assert.assertNotNull(r.b5);
+		Assert.assertNotNull(r.b6);
+		Assert.assertNotNull(r.bl13);
+		Assert.assertNotNull(r.bl14);
+		Assert.assertNotNull(r.c15);
+		Assert.assertNotNull(r.c16);
+		Assert.assertNotNull(r.i17);
 
 		Systemout.println(r.i1);
 		Systemout.println(r.i2);
-		Systemout.println(r.s1);
-		Systemout.println(r.s2);
-		Systemout.println(r.l1);
-		Systemout.println(r.l2);
-		Systemout.println(r.d1);
-		Systemout.println(r.d2);
-		Systemout.println(r.f1);
-		Systemout.println(r.f2);
-		Systemout.println(r.b1);
-		Systemout.println(r.b2);
-		Systemout.println(r.bl1);
-		Systemout.println(r.bl2);
-
+		Systemout.println(r.s7);
+		Systemout.println(r.s8);
+		Systemout.println(r.l3);
+		Systemout.println(r.l4);
+		Systemout.println(r.d9);
+		Systemout.println(r.d10);
+		Systemout.println(r.f11);
+		Systemout.println(r.f12);
+		Systemout.println(r.b5);
+		Systemout.println(r.b6);
+		Systemout.println(r.bl13);
+		Systemout.println(r.bl14);
+		Systemout.println(r.c15);
+		Systemout.println(r.c16);
+		Systemout.println(r.i17);
 
 		dropTables(NumberDemo.class);
 	}
