@@ -82,22 +82,22 @@
    </dependency> 
     
    <!-- MySql JDBC driver -->
-   <dependency>
+   <!--dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.43</version>
       <scope>test</scope>
-   </dependency>
+   </dependency-->
     
    <!-- Ugly Oracle JDBC jar need manually add into maven, ojdbc6.jar can found in Oracle 
        install folder, then copy to C:\ and use below command to install to maven:
      mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0 -Dpackaging=jar -Dfile=C:\ojdbc6.jar -->
-   <dependency>
+   <!--dependency>
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc6</artifactId>
       <version>11.2.0</version>
       <scope>test</scope>
-   </dependency> 
+   </dependency--> 
 	
    <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
    <!--dependency>

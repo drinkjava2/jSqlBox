@@ -48,7 +48,7 @@ public class TestBase {
 		Systemout.allowPrint = false; // debug only, allow Systemout.print out put
 		ConsoleLog.setLogHead(false);// print log head
 		ConsoleLog.setLogLevel(ConsoleLog.INFO); // info lever log
-		DbContext.setGlobalNextAllowShowSql(true); // disable sql log
+		DbContext.setGlobalNextAllowShowSql(false); // disable sql log
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
 		dialect = Dialect.guessDialect(dataSource);
 		Dialect.setGlobalAllowReservedWords(true);
