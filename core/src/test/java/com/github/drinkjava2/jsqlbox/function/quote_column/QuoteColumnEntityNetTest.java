@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlbox.function;
+package com.github.drinkjava2.jsqlbox.function.quote_column;
 
 import static com.github.drinkjava2.jsqlbox.DB.AUTO_SQL;
 import static com.github.drinkjava2.jsqlbox.DB.giveBoth;
@@ -26,9 +26,6 @@ import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
  * @since 1.7.0
  */
 public class QuoteColumnEntityNetTest extends TestBase {
-	{
-		regTables(Ademo.class, Bdemo.class);
-	}
 
 	public static class Ademo extends ActiveRecord<Ademo> {
 		@Id
@@ -87,6 +84,10 @@ public class QuoteColumnEntityNetTest extends TestBase {
 
 	@Test
 	public void doTest() {
+		if (!(dialect.isMySqlFamily() || dialect.isH2Family()))
+			return;
+		createAndRegTables(Ademo.class, Bdemo.class);
+
 		new Ademo().forFields("order", "select");
 		new Ademo().putValues("o1", "s1").insert();
 		new Ademo().putValues("o2", "s2").insert();

@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlbox.function;
+package com.github.drinkjava2.jsqlbox.function.quote_column;
 
 import static com.github.drinkjava2.jsqlbox.DB.IGNORE_EMPTY;
 import static com.github.drinkjava2.jsqlbox.DB.IGNORE_NULL;
@@ -10,7 +10,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -26,10 +25,7 @@ import com.github.drinkjava2.jsqlbox.sqlitem.SampleItem;
  * @author Yong Zhu
  * @since 1.7.0
  */
-public class QuoteColumnTest extends TestBase {
-	{
-		regTables(CrudUser.class);
-	}
+public class QuoteColumnOracleTest extends TestBase {
 
 	public static class CrudUser extends ActiveRecord<CrudUser> {
 		@Id
@@ -78,6 +74,9 @@ public class QuoteColumnTest extends TestBase {
 
 	@Test
 	public void globalIgnoreNullTest() {
+		if (!dialect.isOracleFamily())
+			return;
+		createAndRegTables(CrudUser.class);
 		DbContext ctx1 = new DbContext(ctx.getDataSource());
 		ctx1.setIgnoreNull(true);
 		CrudUser u = new CrudUser("order_u", "select1");
@@ -106,9 +105,10 @@ public class QuoteColumnTest extends TestBase {
 	 */
 	@Test
 	public void crudTest() {
-		System.out.println(dialect.name);
-		System.out.println(dialect.ddlFeatures.getOpenQuote());
-		
+		if (!dialect.isOracleFamily())
+			return;
+		createAndRegTables(CrudUser.class);
+
 		// ======insert
 		CrudUser u1 = new CrudUser("order1", "select1");
 		CrudUser u2 = new CrudUser("order2", "");
