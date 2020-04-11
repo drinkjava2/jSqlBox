@@ -143,8 +143,9 @@ public class DbContext extends DbPro {// NOSONAR
 	public Object getCurrentAuditor() {
 		DbException.assureNotNull(auditorGetter, "Can not call getCurrentAuditor() when auditorGetter is null.");
 		Object result = null;
-		if (methodOfGetCurrentAuditor == null)
+		if (methodOfGetCurrentAuditor == null) {
 			methodOfGetCurrentAuditor = ClassUtils.getMethod(auditorGetter.getClass(), "getCurrentAuditor");
+		}
 		try {
 			result = methodOfGetCurrentAuditor.invoke(auditorGetter);
 		} catch (Exception e) {
@@ -158,17 +159,19 @@ public class DbContext extends DbPro {// NOSONAR
 	 */
 	@Override
 	protected boolean dealOneSqlItem(boolean iXxxStyle, PreparedSQL ps, Object item) {// NOSONAR
-		if (super.dealOneSqlItem(iXxxStyle, ps, item))
+		if (super.dealOneSqlItem(iXxxStyle, ps, item)) {
 			return true; // if super class DbPro can deal it, let it do
+		}
 		if (item instanceof SqlOption) {
-			if (SqlOption.IGNORE_EMPTY.equals(item))
+			if (SqlOption.IGNORE_EMPTY.equals(item)) {
 				ps.setIgnoreEmpty(true);
-			else if (SqlOption.IGNORE_NULL.equals(item))
+			} else if (SqlOption.IGNORE_NULL.equals(item)) {
 				ps.setIgnoreNull(true);
-			else if (SqlOption.AUTO_SQL.equals(item))
+			} else if (SqlOption.AUTO_SQL.equals(item)) {
 				DbContextUtils.appendLeftJoinSQL(ps);
-			else
+			} else {
 				return false;
+			}
 		} else if (item instanceof TableModel) {
 			ps.addModel(item);
 			DbContextUtils.createLastAutoAliasName(ps);
@@ -179,95 +182,113 @@ public class DbContext extends DbPro {// NOSONAR
 		} else if (item instanceof SqlItem) {
 			SqlItem sqItem = (SqlItem) item;
 			SqlOption sqlItemType = sqItem.getType();
-			if (SqlOption.SHARD_TABLE.equals(sqlItemType))
+			if (SqlOption.SHARD_TABLE.equals(sqlItemType)) {
 				handleShardTable(ps, sqItem);
-			else if (SqlOption.SHARD_DATABASE.equals(sqlItemType))
+			} else if (SqlOption.SHARD_DATABASE.equals(sqlItemType)) {
 				handleShardDatabase(ps, sqItem);
-			else if (SqlOption.GIVE.equals(sqlItemType)) {
+			} else if (SqlOption.GIVE.equals(sqlItemType)) {
 				Object[] o = ((SqlItem) item).getParameters();
 				String[] s = new String[o.length];
-				for (int i = 0; i < o.length; i++)
+				for (int i = 0; i < o.length; i++) {
 					s[i] = (String) o[i];
+				}
 				ps.addGives(s);
 			} else if (SqlOption.GIVE_BOTH.equals(sqlItemType)) {
 				Object[] a = ((SqlItem) item).getParameters();
 				ps.addGives(new String[] { (String) a[0], (String) a[1] });
 				ps.addGives(new String[] { (String) a[1], (String) a[0] });
 			} else if (SqlOption.ALIAS.equals(sqlItemType)) {
-				if (sqItem.getParameters().length == 0)
+				if (sqItem.getParameters().length == 0) {
 					throw new DbException("alias method need parameter");
+				}
 				ps.setLastAliases((String[]) sqItem.getParameters());// NOSONAR
 			} else if (SqlOption.TAIL.equals(sqlItemType)) {
 				return true; // do nothing
-			} else
+			} else {
 				return false;
+			}
 		} else if (item instanceof EntityNet) {
 			ps.setEntityNet((EntityNet) item);
 			ps.addHandler(new EntityNetHandler());
-		} else
+		} else {
 			return false;
+		}
 		return true;
 	}
 
 	/** Get the sharded table name by given shard values */
 	public String getShardedTB(Object entityOrClass, Object... shardvalues) {
 		String table = DbContextUtils.getShardedTB(this, entityOrClass, shardvalues);
-		if (table == null)
-			throw new DbException("No found ShardingTool can handle target '" + entityOrClass + "' ");
+		if (table == null) {
+			throw new DbException(
+					"No found ShardingTool can handle target '" + entityOrClass + "' ");
+		}
 		return table;
 	}
 
 	/** Get the sharded DB(=DbContext) instance by given shard values */
 	public DbContext getShardedDB(Object entityOrClass, Object... shardvalues) {
 		DbContext ctx = DbContextUtils.getShardedDB(this, entityOrClass, shardvalues);
-		if (ctx == null)
-			throw new DbException("Not found ShardingTool can handle entity '" + entityOrClass + "' ");
+		if (ctx == null) {
+			throw new DbException(
+					"Not found ShardingTool can handle entity '" + entityOrClass + "' ");
+		}
 		return ctx;
 	}
 
 	protected String handleShardTable(PreparedSQL predSQL, SqlItem item) {
 		Object[] params = item.getParameters();
 		String table = null;
-		if (predSQL.getModels() == null || predSQL.getModels().length == 0)
+		if (predSQL.getModels() == null || predSQL.getModels().length == 0) {
 			throw new DbException("ShardTable not found model setting");
+		}
 		TableModel model = (TableModel) predSQL.getModels()[0];
-		if (params.length == 1)
+		if (params.length == 1) {
 			table = DbContextUtils.getShardedTB(this, model, params[0]);
-		else if (params.length == 2)
+		} else if (params.length == 2) {
 			table = DbContextUtils.getShardedTB(this, model, params[0], params[1]);
-		else
+		} else {
 			throw new DbException("ShardTable need 1 or 2 parameters");
-		if (table == null)
+		}
+		if (table == null) {
 			throw new DbException("No ShardTable Tool found.");
-		else
+		} else {
 			predSQL.addSql(table);
+		}
 		return table;
 	}
 
 	protected DbPro handleShardDatabase(PreparedSQL predSQL, SqlItem item) {
 		Object[] params = item.getParameters();
 		DbContext ctx = null;
-		if (predSQL.getModels() == null || predSQL.getModels().length == 0)
+		if (predSQL.getModels() == null || predSQL.getModels().length == 0) {
 			return this;
+		}
 		TableModel model = (TableModel) predSQL.getModels()[0];
-		if (params.length == 1)
+		if (params.length == 1) {
 			ctx = DbContextUtils.getShardedDB(this, model, params[0]);
-		else if (params.length == 2)
+		} else if (params.length == 2) {
 			ctx = DbContextUtils.getShardedDB(this, model, params[0], params[1]);
-		else
+		} else {
 			throw new DbException("ShardDatabase need 1 or 2 parameters");
-		if (ctx == null)
+		}
+		if (ctx == null) {
 			throw new DbException("No ShardDatabase Tool found.");
-		else
+		} else {
 			predSQL.setSwitchTo(ctx);
+		}
 		return ctx;
 	}
 
 	private static void checkOnlyOneRowAffected(int result, String curdType) {
-		if (result <= 0)
-			throw new DbException("No record found in database when do '" + curdType + "' operation.");
-		if (result > 1)
-			throw new DbException("Affect more than 1 row record in database when do '" + curdType + "' operation.");
+		if (result <= 0) {
+			throw new DbException(
+					"No record found in database when do '" + curdType + "' operation.");
+		}
+		if (result > 1) {
+			throw new DbException("Affect more than 1 row record in database when do '" + curdType
+					                      + "' operation.");
+		}
 	}
 
 	/** Use i style to query for an entity list */
@@ -292,8 +313,9 @@ public class DbContext extends DbPro {// NOSONAR
 
 	/** If dbModels not loaded, loaded from database */
 	public void ensureTailModelLoaded() {
-		if (tailModels != null)
+		if (tailModels != null) {
 			return;
+		}
 		reloadTailModels();
 	}
 
@@ -319,12 +341,13 @@ public class DbContext extends DbPro {// NOSONAR
 		} catch (SQLException e) {
 			throw new DbException(e);
 		} finally {
-			if (conn != null)
+			if (conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {
 					DbException.eatException(e);
 				}
+			}
 		}
 	}
 
@@ -407,12 +430,15 @@ public class DbContext extends DbPro {// NOSONAR
 	/** Load entity by given id, if not 1 row found, throw SqlBoxException */
 	public <T> T eLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
 		T entity = DbContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
-		if (entity == null)
+		if (entity == null) {
 			throw new DbException("No record found in database when do 'LoadById' operation.");
+		}
 		return entity;
 	}
 
-	/** Load one entity according SQL, if not found, return null */
+	/** Load one entity according SQL, if not found or found more than 1, throw DbException 
+	 * 这个函数假设有且只能加载一个实体，否则应抛出异常，这样更利于发现编程错误。如果用户不确定数据库有没有，应使用eFindBySQL或eFindAll获取实体列表
+	 */
 	public <T> T eLoadBySQL(Object... optionItems) {
 		List<T> entities = iQueryForEntityList(optionItems);
 		if (entities == null || entities.isEmpty())
@@ -520,8 +546,9 @@ public class DbContext extends DbPro {// NOSONAR
 	public String[] toCreateGtxLogDDL(Class<?>... entityClasses) {
 		assertDialectNotNull();
 		TableModel[] mds = new TableModel[entityClasses.length];
-		for (int i = 0; i < entityClasses.length; i++)
+		for (int i = 0; i < entityClasses.length; i++) {
 			mds[i] = GtxUtils.entity2GtxLogModel(entityClasses[i]);
+		}
 		return dialect.toCreateDDL(mds);
 	}
 
@@ -539,13 +566,15 @@ public class DbContext extends DbPro {// NOSONAR
 
 	/** Execute DDL stored in a String array */
 	public void executeDDL(String[] sqls) {
-		for (String sql : sqls)
+		for (String sql : sqls) {
 			nExecute(sql);
+		}
 	}
 
 	private void assertDialectNotNull() {
-		if (dialect == null)
+		if (dialect == null) {
 			throw new DbProException("Try use a dialect method but dialect is null");
+		}
 	}
 
 	protected void getteSetters__________________________() {// NOSONAR

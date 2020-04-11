@@ -179,7 +179,7 @@ public abstract class GtxUtils {// NOSONAR
 		t.column(GTXTYPE).CHAR(8).setValueExist(true);
 		t.column(GTXDB).INTEGER().setValueExist(true);
 		t.column(GTXTB).VARCHAR(64).setValueExist(true);// oracle limit is 30
-		t.column(GTXENTITY).VARCHAR(250).setValueExist(true);
+		t.column(GTXENTITY).VARCHAR(255).setValueExist(true);
 		ColumnModel topicCol = t.column(GTXTOPIC).VARCHAR(50).setValueExist(true);
 		if (topicShardingParam != null)
 			topicCol.setShardDatabase(topicShardingParam);

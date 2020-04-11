@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +165,8 @@ public abstract class DB extends JDBPRO {// NOSONAR
 	public static <T> T iInsert(Object... items) {return gctx().iInsert(items);}
 	public static <T> T iExecute(Object... items) {return gctx().iExecute(items); }
 	public static <T> List<T> iQueryForEntityList(Object... items) {return gctx().iQueryForEntityList(items);}
-	   
+	public static PreparedSQL iPrepare(Object... items) { return gctx().iPrepare(items); }
+
 	public static <T> T nQuery(Connection conn, ResultSetHandler<T> rsh, String sql, Object... items) {return gctx().nQuery(conn, rsh, sql, items);}
 	public static <T> T nQueryForObject(Connection conn, String sql, Object... items) {return gctx().nQueryForObject(conn, sql, items);}
 	public static String nQueryForString(Connection conn, String sql, Object... items) {return gctx().nQueryForString(conn, sql, items);}

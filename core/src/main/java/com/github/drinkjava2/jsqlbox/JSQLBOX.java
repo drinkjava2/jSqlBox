@@ -12,12 +12,15 @@
 package com.github.drinkjava2.jsqlbox;
 
 /**
- * JSQLBOX store some public static methods, usually used for static import to
- * simplify programming
+ * JSQLBOX is deprecated from 4.xx version and may be deleted in future version,
+ * Keep this this class is for compatible purpose only
+ * 
+ * @deprecated use DB instead
  * 
  * @author Yong Zhu
  * @since 1.0.8
  */
-public abstract class JSQLBOX extends DB { 
-	
+@Deprecated
+public abstract class JSQLBOX extends DB {// NOSONAR
+	// do not change this file
 }

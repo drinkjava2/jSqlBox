@@ -83,8 +83,8 @@ public class ColumnModel {
 	/** Map to a Java entity field, for DDL and ORM tool use */
 	private String entityField;
 
-	/** The column length, for DDL and ORM tool use */
-	private Integer length = 250;
+	/** The column length, for DDL and ORM tool use, defalut is 255 */
+	private Integer length = 255;
 
 	/** The numeric precision, for DDL and ORM tool use */
 	private Integer precision = 0;

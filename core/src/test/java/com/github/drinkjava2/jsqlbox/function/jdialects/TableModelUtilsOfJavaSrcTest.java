@@ -1,11 +1,13 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
+import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.TableModelUtilsOfEntity;
 import com.github.drinkjava2.jdialects.TableModelUtilsOfJavaSrc;
 import com.github.drinkjava2.jdialects.annotation.jdia.FKey;
@@ -78,18 +80,19 @@ public class TableModelUtilsOfJavaSrcTest {
 
 	public static Map<String, Object> setting = new HashMap<String, Object>();
 	static {
-		setting.put("packageName", "somepackage");
-		setting.put("imports", "import com.github.drinkjava2.jdialects.annotation.jdia.*;\n"
-				+ "import com.github.drinkjava2.jdialects.annotation.jpa.*;\n"
-				+ "import com.github.drinkjava2.jsqlbox.*;\n" + "import static com.github.drinkjava2.jsqlbox.DB.*;\n");
-		setting.put("classDefinition", "public class $1 extends ActiveRecord<$1>");
-		setting.put("linkStyle", true);
-		setting.put("fieldFlags", true);
+		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");
+		setting.put(TableModelUtils.OPT_IMPORTS, "import java.util.Map;\n");
+		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");
+		setting.put(TableModelUtils.OPT_LINK_STYLE, true);
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true);
+		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false);
+		setting.put(TableModelUtils.OPT_EXCLUDE_TABLES, Arrays.asList("Dbsample"));
 	}
 
 	@Test
 	public void modelToJavaSrcTest() {
 		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
+		//Systemout.allowPrint = true;
 		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));
 	}
 }
