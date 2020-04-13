@@ -37,6 +37,7 @@ public abstract class TableModelUtils {// NOSONAR
 	public static final String OPT_FIELD_FLAGS = "fieldFlags";
 	public static final String OPT_PACKAGE_NAME = "packageName";
 	public static final String OPT_IMPORTS = "imports";
+	public static final String OPT_REMOVE_DEFAULT_IMPORTS = "removeDefaultImports";
 	public static final String OPT_CLASS_DEFINITION = "classDefinition";
 	public static final String OPT_PUBLIC_FIELD = "enablePublicField";
 	public static final String OPT_EXCLUDE_TABLES = "excludeTables";
@@ -124,12 +125,12 @@ public abstract class TableModelUtils {// NOSONAR
 				out.close();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();//NOSONAR
+			e.printStackTrace();// NOSONAR
 			if (conn != null)
 				try {
 					conn.close();
 				} catch (SQLException e1) {
-					e1.printStackTrace();//NOSONAR
+					e1.printStackTrace();// NOSONAR
 				}
 		}
 	}

@@ -80,13 +80,14 @@ public class TableModelUtilsOfJavaSrcTest {
 
 	public static Map<String, Object> setting = new HashMap<String, Object>();
 	static {
-		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");
-		setting.put(TableModelUtils.OPT_IMPORTS, "import java.util.Map;\n");
-		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");
-		setting.put(TableModelUtils.OPT_LINK_STYLE, true);
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true);
-		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false);
-		setting.put(TableModelUtils.OPT_EXCLUDE_TABLES, Arrays.asList("Dbsample"));
+		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");//包名
+		setting.put(TableModelUtils.OPT_IMPORTS, "import java.util.Map;\n"); //追加新的imports
+		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");//类定义
+		setting.put(TableModelUtils.OPT_LINK_STYLE, true); //链式风格
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); //全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); //全局属性
+		setting.put(TableModelUtils.OPT_EXCLUDE_TABLES, Arrays.asList("Dbsample")); //排除表名
+		setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, false); //是要否去掉自带的imports
 	}
 
 	@Test

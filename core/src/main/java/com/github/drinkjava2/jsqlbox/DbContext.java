@@ -34,6 +34,7 @@ import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
+import com.github.drinkjava2.jdialects.springsrc.utils.CollectionUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.gtx.GtxConnectionManager;
 import com.github.drinkjava2.jsqlbox.gtx.GtxInfo;
@@ -467,6 +468,15 @@ public class DbContext extends DbPro {// NOSONAR
 	 */
 	public <T> List<T> eFindBySQL(Object... optionItems) {
 		return iQueryForEntityList(optionItems);
+	}
+	
+	/** Find entity according SQL, if not found, return null */
+	public <T> T eFindOneBySQL(Object... optionItems) {
+		List<T> objects = iQueryForEntityList(optionItems);
+		if (CollectionUtils.isEmpty(objects)) {
+			return null;
+		}
+		return objects.get(0);
 	}
 
 	/**

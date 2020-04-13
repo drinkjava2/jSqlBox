@@ -57,7 +57,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>4.0.5.jre8</version> <!-- 或最新版 -->
+   <version>4.0.6.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 jSqlBox分为Java8和Java6两个版本发布，如果是Java6或7环境下，请将版本号改为4.0.1.jre6，Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。对于新项目开发，请尽量使用Java8版本。
@@ -70,7 +70,7 @@ pom.xml中引入：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>4.0.5.jre8</version> <!-- Java8版 -->
+       <version>4.0.6.jre8</version> <!-- Java8版 -->
     </dependency>
 
     <dependency>

@@ -11,7 +11,6 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import com.github.drinkjava2.jdbpro.PreparedSQL;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import java.util.Set;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdbpro.JDBPRO;
+import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
@@ -117,15 +117,20 @@ public abstract class DB extends JDBPRO {// NOSONAR
 	//@formatter:off
 	
 	//Entity series methods from DbContext
+	
+	//eFindXxxx method if not found any entity, will return empty List or null value
 	public static <T> List<T> eFindAll(Class<T> entityClass, Object... items) {return gctx().eFindAll(entityClass, items);}
 	public static <T> List<T> eFindBySample(Object sampleBean, Object... items) {return gctx().eFindBySample(sampleBean, items);}
-	public static <T> List<T> eFindBySQL(Object... items) {return gctx().eFindBySQL(items);}   
-	public static <T> T eInsert(T entity, Object... items) {return gctx().eInsert(entity, items);} 
+	public static <T> List<T> eFindBySQL(Object... items) {return gctx().eFindBySQL(items);}
+	public static <T> T eFindOneBySQL(Object... items) {return gctx().eFindOneBySQL(items);} 
+	 
+ 	//eLoadXxx method if load fail, will throw DbException
 	public static <T> T eLoad(T entity, Object... items) {return gctx().eLoad(entity, items);} 
 	public static <T> T eLoadById(Class<T> entityClass, Object entityId, Object... items) {return gctx().eLoadById(entityClass, entityId, items);}
     public static <T> T eLoadByIdTry(Class<T> entityClass, Object entityId, Object... items) {return gctx().eLoadByIdTry(entityClass, entityId, items);}
     public static <T> T eLoadBySQL(Object... items) {return gctx().eLoadBySQL(items);}
-	
+
+	public static <T> T eInsert(T entity, Object... items) {return gctx().eInsert(entity, items);} 
     public static <T> T eUpdate(Object entity, Object... items) {return gctx().eUpdate(entity, items);}
 	public static boolean eExist(Object entity, Object... items) {return gctx().eExist(entity, items);}
 	public static boolean eExistById(Class<?> entityClass, Object id, Object... items) {return gctx().eExistById(entityClass, id, items);}

@@ -19,20 +19,21 @@ package com.github.drinkjava2.jsqlbox;
  * @author Yong Zhu
  * @since 4.0.6
  */
-public abstract class SQL  {//NOSONAR
-	public static final String EQ_P        = " = ? ";
-	public static final String EQ          = " = ";
-	public static final String LTEQ_P      = " <= ? ";
-	public static final String LTEQ        = " <= ";
-	public static final String GTEQ_P      = " >= ? ";
-	public static final String GTEQ        = " >= ";
-	public static final String NOTEQ        = " != ";
-	public static final String NOTEQ_P        = " != ? ";
-	public static final String IS_NULL     = " IS NULL ";
+@SuppressWarnings("all")
+public abstract class SQL {// NOSONAR
+	public static final String EQ_P = " = ? ";
+	public static final String EQ = " = ";
+	public static final String LTEQ_P = " <= ? ";
+	public static final String LTEQ = " <= ";
+	public static final String GTEQ_P = " >= ? ";
+	public static final String GTEQ = " >= ";
+	public static final String NOTEQ = " != ";
+	public static final String NOTEQ_P = " != ? ";
+	public static final String IS_NULL = " IS NULL ";
 	public static final String IS_NOT_NULL = " IS NOT NULL ";
-	public static final String NOT_IN      = " NOT IN ";
-	public static final String ORDER_BY    = " ORDER BY ";
-	public static final String LIMIT_1     = " LIMIT 1";
+	public static final String NOT_IN = " NOT IN ";
+	public static final String ORDER_BY = " ORDER BY ";
+	public static final String LIMIT_1 = " LIMIT 1";
 	public static final String SELECT_STAR = " SELECT * ";
 	public static final String DELETE_FROM = " DELETE FROM ";
 	public static final String INSERT_INTO = " INSERT INTO ";

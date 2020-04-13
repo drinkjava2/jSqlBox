@@ -1010,4 +1010,41 @@ public class StrUtils {
 		return s;
 	}
 
+	/** Simple replace danderous chars in String to avoid SQL injection attack */
+	public static String simpleReplaceDangerous(String str) {
+		str = str.replaceAll(";", "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+				.replaceAll("'", "''").replaceAll("--", "").replaceAll("/", "").replaceAll("%", "");
+		return str;
+	}
+
+	/**
+	 * Build a ('xxx',xxx,xxx, ..., xxx) format String based on a object array,
+	 * usually used for an "in" condition SQL String, for example: <br/>
+	 * 
+	 * array("a","b",1,2) return String ('a','b',1,2)
+	 */
+	public static String array(Object... arr) {
+		if (arr.length == 0) {
+			return "";
+		}
+		StringBuilder builder = new StringBuilder(200);
+		builder.append("(");
+		for (Object obj : arr) {
+			if (obj == null)
+				continue;
+			Class<?> c = obj.getClass();
+			if (String.class == c) {
+				builder.append("'").append(simpleReplaceDangerous((String) obj)).append("',");
+			} else {
+				if (int.class == c || Integer.class == c || long.class == c || Long.class == c || short.class == c
+						|| Short.class == c || byte.class == c || Byte.class == c)
+					builder.append(obj).append(",");
+			}
+		}
+		if (builder.length() > 1) {
+			builder.setLength(builder.length() - 1);
+			return builder.append(")").toString();
+		}
+		return "";
+	}
 }

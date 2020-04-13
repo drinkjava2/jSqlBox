@@ -220,13 +220,16 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 	}
 
 	private static void generateImports(Map<String, Object> setting, StringBuilder body) {
-		body.append("import static com.github.drinkjava2.jsqlbox.JAVA8.*;\n");
-		body.append("import static com.github.drinkjava2.jsqlbox.SQL.*;\n");
-		body.append("import static com.github.drinkjava2.jsqlbox.DB.*;\n");
-		body.append("import com.github.drinkjava2.jdbpro.SqlItem;\n");
-		body.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
-		body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
-		body.append("import com.github.drinkjava2.jsqlbox.*;\n");
+		Boolean removeDefaultImports = (Boolean) setting.get(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS);
+		if (removeDefaultImports == null || !removeDefaultImports) {// default imports
+			body.append("import static com.github.drinkjava2.jsqlbox.JAVA8.*;\n");
+			body.append("import static com.github.drinkjava2.jsqlbox.SQL.*;\n");
+			body.append("import static com.github.drinkjava2.jsqlbox.DB.*;\n");
+			body.append("import com.github.drinkjava2.jdbpro.SqlItem;\n");
+			body.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
+			body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
+			body.append("import com.github.drinkjava2.jsqlbox.*;\n");
+		}
 		String imports = (String) setting.get(TableModelUtils.OPT_IMPORTS);
 		if (!StrUtils.isEmpty(imports)) {
 			body.append(imports);
