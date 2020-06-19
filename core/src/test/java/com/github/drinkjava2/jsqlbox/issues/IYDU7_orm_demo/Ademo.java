@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlbox.issues.IYDU7;
+package com.github.drinkjava2.jsqlbox.issues.IYDU7_orm_demo;
 
 import java.util.List;
 
