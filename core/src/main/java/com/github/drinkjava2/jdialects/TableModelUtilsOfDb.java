@@ -53,6 +53,8 @@ public abstract class TableModelUtilsOfDb {// NOSONAR
 			while (rs.next()) {
 				String tableName = rs.getString(TABLE_NAME);
 				if (!StrUtils.isEmpty(tableName)) {
+					if (ReservedDBWords.isReservedWord(dialect, tableName))
+						tableName = dialect.ddlFeatures.openQuote + tableName + dialect.ddlFeatures.openQuote;
 					TableModel model = new TableModel(tableName);
 					tableModels.add(model);
 					String comment = rs.getString("REMARKS");

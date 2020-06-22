@@ -53,7 +53,8 @@ public abstract class EntityIdUtils {// NOSONAR
 		// DbUtils don't care UP/LOW case
 
 		Object firstPKeyValue = null;
-		String keColName = new StringBuilder(alias).append("_").append(firstPkeyCol.getClearQuoteColumnName()).toString();
+		String keColName = new StringBuilder(alias).append("_").append(firstPkeyCol.getClearQuoteColumnName())
+				.toString();
 		for (int i = 0; i < titles.length; i++) {
 			if (titles[i].equalsIgnoreCase(keColName))
 				firstPKeyValue = oneRow[i];
@@ -166,7 +167,7 @@ public abstract class EntityIdUtils {// NOSONAR
 			return bean;
 		}
 
-		if (TypeUtils.canMapToDialectType(entityId.getClass())) {
+		if (TypeUtils.canMapToDialectType(entityId.getClass())) {// simple type like String, Integer...
 			for (ColumnModel col : cols) {
 				if (!col.getTransientable() && col.getPkey()) {
 					DbContextUtils.writeValueToBeanFieldOrTail(col, bean, entityId);

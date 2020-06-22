@@ -40,6 +40,7 @@ public abstract class TypeUtils {// NOSONAR
 	public static final String DOUBLE = "DOUBLE";
 	public static final String FLOAT = "FLOAT";
 	public static final String INTEGER = "INTEGER";
+	public static final String INT = "INT";
 	public static final String JAVA_OBJECT = "JAVA_OBJECT";
 	public static final String LONGNVARCHAR = "LONGNVARCHAR";
 	public static final String LONGVARBINARY = "LONGVARBINARY";
@@ -189,6 +190,8 @@ public abstract class TypeUtils {// NOSONAR
 		if (FLOAT.equalsIgnoreCase(columnDef))
 			return Type.FLOAT;
 		if (INTEGER.equalsIgnoreCase(columnDef))
+			return Type.INTEGER;
+		if (INT.equalsIgnoreCase(columnDef))
 			return Type.INTEGER;
 		if (JAVA_OBJECT.equalsIgnoreCase(columnDef))
 			return Type.JAVA_OBJECT;

@@ -560,17 +560,19 @@ public abstract class DbContextUtils {// NOSONAR
 			} else
 				throw new DbException("Can not read tail value from instance which is not TailSupport");
 		} else {
+			Object result = null;
+			if (entityBean instanceof TailType)
+				result = ((TailType) entityBean).tails().get(fieldName);
+			if (result != null)
+				return result;
 			Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
 			if (readMethod != null)
 				try {
-					return readMethod.invoke(entityBean);
+					result = readMethod.invoke(entityBean);
 				} catch (Exception e) {
 					throw new DbException(e);
 				}
-			else if (entityBean instanceof TailType) {
-				return ((TailType) entityBean).tails().get(fieldName);
-			} else
-				throw new DbException("No read method for '" + fieldName + "'");
+			return result;
 		}
 	}
 

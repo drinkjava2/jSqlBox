@@ -420,15 +420,19 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * This is the core method of whole project, handle a PreparedSQL instance and
 	 * return a result
 	 */
-	public Object runPreparedSQL(PreparedSQL ps) { 
+	public Object runPreparedSQL(PreparedSQL ps) {
+		if (allowShowSQL) {
+			logger.debug("DEBUG SQL>>" + ps.getSql());
+			logger.debug("DEBUG PAR>>" + Arrays.toString(ps.getParams()));
+		}
 		if (ps.getSwitchTo() != null) {
 			DbPro pro = ps.getSwitchTo();
 			ps.setSwitchTo(null);
 			return pro.runPreparedSQL(ps);// SwitchTo run
 		}
-		if(ps.getParams().length>0) {
+		if (ps.getParams().length > 0) {
 			for (int i = 0; i < ps.getParams().length; i++) {
-				ps.getParams()[i]=TypeUtils.javaParam2JdbcParam(ps.getParams()[i]);
+				ps.getParams()[i] = TypeUtils.javaParam2JdbcParam(ps.getParams()[i]);
 			}
 		}
 		if (ps.getMasterSlaveOption() == null)
@@ -955,7 +959,6 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	public void setDialect(Dialect dialect) {// NOSONAR
 		this.dialect = dialect;
 	}
-	
 
 	public Boolean getAllowShowSQL() {
 		return allowShowSQL;

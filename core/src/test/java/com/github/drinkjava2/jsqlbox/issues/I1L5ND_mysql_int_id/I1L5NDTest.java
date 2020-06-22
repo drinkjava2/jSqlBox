@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.annotation.jdia.IdentityId;
+import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
@@ -20,9 +21,6 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
  * @since 1.7.0
  */
 public class I1L5NDTest extends TestBase {
-	{
-		regTables(Entity1.class, Entity2.class, Entity3.class);
-	}
 
 	/** test Integer primary key */
 	public static class Entity1 extends ActiveRecord<Entity1> {
@@ -44,6 +42,7 @@ public class I1L5NDTest extends TestBase {
 		if (!ctx.getDialect().isMySqlFamily())
 			return;
 		Systemout.println("testEntity1");
+		createAndRegTables(Entity1.class);
 		Entity1 e = new Entity1().putField("id", 1).insert();
 		Systemout.println(e.id);
 		Object o = ctx.iQueryForIntValue("select id from entity1");
@@ -83,6 +82,7 @@ public class I1L5NDTest extends TestBase {
 		if (!ctx.getDialect().isMySqlFamily())
 			return;
 		Systemout.println("testEntity2");
+		createAndRegTables(Entity2.class);
 		Entity2 e = new Entity2().setName("name1").insert();
 		Assert.assertEquals(1, (int) e.getId());
 		Assert.assertEquals(Integer.class, e.getId().getClass());
@@ -124,11 +124,52 @@ public class I1L5NDTest extends TestBase {
 		if (!ctx.getDialect().isMySqlFamily())
 			return;
 		Systemout.println("testEntity3");
+		createAndRegTables(Entity3.class);
 		Entity3 e = new Entity3().setId(1).setName("name1").insert();
 		Assert.assertEquals(1, e.getId());
 		Object o = ctx.iQueryForIntValue("select id from entity3");
 		Assert.assertEquals(1, o);
 		Assert.assertEquals(Integer.class, o.getClass());
+	}
 
+	/** test int unsigned primary key */
+	public static class Entity4 extends ActiveRecord<Entity4> {
+		@Id
+		@Column(columnDefinition = "int(11) unsigned")
+		int id;
+
+		String name;
+
+		public int getId() {
+			return id;
+		}
+
+		public Entity4 setId(int id) {
+			this.id = id;
+			return this;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public Entity4 setName(String name) {
+			this.name = name;
+			return this;
+		}
+
+	}
+
+	@Test
+	public void testEntity4() {
+		if (!ctx.getDialect().isMySqlFamily())
+			return;
+		createAndRegTables(Entity4.class);
+		Systemout.println("testEntity4");
+		Entity4 e = new Entity4().setId(1).setName("name1").insert();
+		Assert.assertEquals(1, e.getId());
+		Object o = ctx.iQueryForIntValue("select id from entity4");
+		Assert.assertEquals(1, o);
+		Assert.assertEquals(Integer.class, o.getClass());
 	}
 }
