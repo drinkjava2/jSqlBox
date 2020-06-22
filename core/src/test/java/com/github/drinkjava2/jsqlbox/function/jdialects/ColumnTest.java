@@ -88,10 +88,9 @@ public class ColumnTest extends TestBase implements ActiveEntity<ColumnTest> {
 		Assert.assertNotNull(out.getC3());
 		Date old = out.getC3();
 		try {
-			Thread.sleep(1);
+			Thread.sleep(1001);
 		} catch (InterruptedException e) {
 		}
-
 		out.update();
 		ColumnTest out2 = new ColumnTest().setId(in.getId()).load();
 		Assert.assertNotEquals(old, out2.getC3());
