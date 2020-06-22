@@ -903,28 +903,21 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		this.startTrans();
 		try {
 			txBody.run();
-			txResult = this.commitTrans();
-			lastTxResult.set(txResult);
+			lastTxResult.set(commitTrans());
 			return true;
 		} catch (Exception e) {
-			txResult = this.rollbackTrans();
-			txResult.addCommitEx(e);
-			lastTxResult.set(txResult);
+			lastTxResult.set(rollbackTrans().addCommitEx(e));
 			return false;
 		}
 	}
 
 	public void tx(TxBody txBody) {
-		TxResult txResult;
 		this.startTrans();
 		try {
 			txBody.run();
-			txResult = this.commitTrans();
-			lastTxResult.set(txResult);
+			lastTxResult.set(commitTrans());
 		} catch (Exception e) {
-			txResult = this.rollbackTrans();
-			txResult.addCommitEx(e);
-			lastTxResult.set(txResult);
+			lastTxResult.set(rollbackTrans().addCommitEx(e));
 			throw new DbException(e);
 		}
 	}

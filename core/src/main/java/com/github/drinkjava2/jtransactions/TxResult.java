@@ -104,46 +104,49 @@ public class TxResult {
 		}
 	}
 
-	public void addCommitEx(Exception e) {
+	public TxResult addCommitEx(Exception e) {
 		if (commitEx == null)
 			commitEx = new Exception[1];
 		else {
 			for (Exception oldeX : commitEx)
 				if (oldeX == e)
-					return;
+					return this;
 			Exception[] newArray = new Exception[commitEx.length + 1];
 			System.arraycopy(commitEx, 0, newArray, 0, commitEx.length);
 			commitEx = newArray;
 		}
 		commitEx[commitEx.length - 1] = e;
+		return this;
 	}
 
-	public void addRollbackEx(Exception e) {
+	public TxResult addRollbackEx(Exception e) {
 		if (rollbackEx == null)
 			rollbackEx = new Exception[1];
 		else {
 			for (Exception oldeX : rollbackEx)
 				if (oldeX == e)
-					return;
+					return this;
 			Exception[] newArray = new Exception[rollbackEx.length + 1];
 			System.arraycopy(rollbackEx, 0, newArray, 0, rollbackEx.length);
 			rollbackEx = newArray;
 		}
 		rollbackEx[rollbackEx.length - 1] = e;
+		return this;
 	}
 
-	public void addCleanupEx(Exception e) {
+	public TxResult addCleanupEx(Exception e) {
 		if (cleanupEx == null)
 			cleanupEx = new Exception[1];
 		else {
 			for (Exception oldeX : cleanupEx)
 				if (oldeX == e)
-					return;
+					return this;
 			Exception[] newArray = new Exception[cleanupEx.length + 1];
 			System.arraycopy(cleanupEx, 0, newArray, 0, cleanupEx.length);
 			cleanupEx = newArray;
 		}
 		cleanupEx[cleanupEx.length - 1] = e;
+		return this;
 	}
 
 	public boolean isSuccess() {

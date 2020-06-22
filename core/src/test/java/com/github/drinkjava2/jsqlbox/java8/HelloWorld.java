@@ -53,10 +53,12 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 		ctx.setAllowShowSQL(true);
 		DbContext.setGlobalDbContext(ctx);
 		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
-		HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
-		System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"), " or name=",
-				ques("1"), " or name =", ques("2")));
-		h.delete();
+		ctx.tx(() -> {
+			HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+			System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"),
+					" or name=", ques("1"), " or name =", ques("2")));
+			h.delete();
+		});
 		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
 	}
 }
