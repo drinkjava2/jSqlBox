@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
  <packaging>jar</packaging>
- <version>4.0.6.jre8</version>
+ <version>4.0.7.jre8</version> <!-- not released -->
  
  <name>jSqlBox</name>
  <description>jSqlBox is a full function DAO tool</description>
@@ -82,12 +82,12 @@
    </dependency> 
     
    <!-- MySql JDBC driver -->
-   <!--dependency>
+   <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.43</version>
       <scope>test</scope>
-   </dependency-->
+   </dependency>
     
    <!-- Ugly Oracle JDBC jar need manually add into maven, ojdbc6.jar can found in Oracle 
        install folder, then copy to C:\ and use below command to install to maven:
