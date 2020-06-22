@@ -18,12 +18,14 @@ import java.util.Set;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
+import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.JDBPRO;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
+import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
  * DB store some public static methods, usually used for static import to
@@ -50,6 +52,14 @@ public abstract class DB extends JDBPRO {// NOSONAR
 	/** Shortcut method equal to DbContext.getGlobalDbContext() */
 	public static DbContext gctx() {
 		return DbContext.getGlobalDbContext();
+	}
+
+	public static boolean tx(TxBody txBody) {
+		return DbContext.getGlobalDbContext().tryTx(txBody);
+	}
+
+	public static TxResult getLastTxResult() {
+		return ImprovedQueryRunner.getLastTxResult();
 	}
 
 	/** Build a TAIL SqlItem, tableName is the only parameter */

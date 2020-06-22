@@ -92,7 +92,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 		try {
 			Connection con = txInfo.getConnection();
 			if (con == null)
-				return TxResult.TX_SUCESS; // no actual transaction open
+				return TxResult.txSucess(); // no actual transaction open
 			if (!con.getAutoCommit())
 				con.commit();
 			else
@@ -100,7 +100,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 		} finally {
 			endTransaction();
 		}
-		return TxResult.TX_SUCESS;
+		return TxResult.txSucess();
 	}
 
 	/** roll back the transaction, close connection */
@@ -110,7 +110,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 		try {
 			Connection con = txInfo.getConnection();
 			if (con == null)
-				return TxResult.TX_FAIL; // no actual transaction open
+				return TxResult.txFail(); // no actual transaction open
 			if (!con.getAutoCommit())
 				con.rollback();
 			else
@@ -120,7 +120,7 @@ public class ManualTxConnectionManager implements ConnectionManager {
 		} finally {
 			endTransaction();
 		}
-		return TxResult.TX_FAIL;
+		return TxResult.txFail();
 	}
 
 	/**

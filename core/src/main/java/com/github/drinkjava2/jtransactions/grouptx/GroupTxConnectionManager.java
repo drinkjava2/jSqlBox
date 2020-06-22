@@ -79,7 +79,7 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 		for (Connection con : conns)
 			con.commit();
 		endTransaction(null);
-		return TxResult.TX_SUCESS;
+		return TxResult.txSucess();
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class GroupTxConnectionManager extends ThreadConnectionManager {
 			}
 		}
 		endTransaction(lastExp);
-		return TxResult.TX_FAIL;
+		return TxResult.txFail();
 	}
 
 	private void endTransaction(SQLException lastExp) {// NOSONAR

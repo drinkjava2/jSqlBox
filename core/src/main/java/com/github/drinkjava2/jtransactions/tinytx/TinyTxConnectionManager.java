@@ -77,7 +77,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 		try {
 			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 			if (conns.isEmpty())
-				return TxResult.TX_SUCESS; // no actual transaction open
+				return TxResult.txSucess(); // no actual transaction open
 			if (conns.size() > 1)
 				throw new TransactionsException("TinyTx can only support one dataSource in one thread, can not commit");
 			Connection con = conns.iterator().next();
@@ -87,7 +87,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 		} finally {
 			endTransaction();
 		}
-		return TxResult.TX_SUCESS;
+		return TxResult.txSucess();
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 		try {
 			Collection<Connection> conns = getThreadTxInfo().getConnectionCache().values();
 			if (conns.isEmpty())
-				return TxResult.TX_FAIL; // no actual transaction open
+				return TxResult.txFail(); // no actual transaction open
 			Connection con = conns.iterator().next();
 			if (con.getAutoCommit())
 				throw new TransactionsException("Connection is auto commit status, can not rollback");
@@ -108,7 +108,7 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 		} finally {
 			endTransaction();
 		}
-		return TxResult.TX_FAIL;
+		return TxResult.txFail();
 	}
 
 	private void endTransaction() {

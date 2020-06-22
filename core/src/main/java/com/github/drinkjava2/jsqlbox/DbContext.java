@@ -221,8 +221,7 @@ public class DbContext extends DbPro {// NOSONAR
 	public String getShardedTB(Object entityOrClass, Object... shardvalues) {
 		String table = DbContextUtils.getShardedTB(this, entityOrClass, shardvalues);
 		if (table == null) {
-			throw new DbException(
-					"No found ShardingTool can handle target '" + entityOrClass + "' ");
+			throw new DbException("No found ShardingTool can handle target '" + entityOrClass + "' ");
 		}
 		return table;
 	}
@@ -231,8 +230,7 @@ public class DbContext extends DbPro {// NOSONAR
 	public DbContext getShardedDB(Object entityOrClass, Object... shardvalues) {
 		DbContext ctx = DbContextUtils.getShardedDB(this, entityOrClass, shardvalues);
 		if (ctx == null) {
-			throw new DbException(
-					"Not found ShardingTool can handle entity '" + entityOrClass + "' ");
+			throw new DbException("Not found ShardingTool can handle entity '" + entityOrClass + "' ");
 		}
 		return ctx;
 	}
@@ -283,12 +281,10 @@ public class DbContext extends DbPro {// NOSONAR
 
 	private static void checkOnlyOneRowAffected(int result, String curdType) {
 		if (result <= 0) {
-			throw new DbException(
-					"No record found in database when do '" + curdType + "' operation.");
+			throw new DbException("No record found in database when do '" + curdType + "' operation.");
 		}
 		if (result > 1) {
-			throw new DbException("Affect more than 1 row record in database when do '" + curdType
-					                      + "' operation.");
+			throw new DbException("Affect more than 1 row record in database when do '" + curdType + "' operation.");
 		}
 	}
 
@@ -437,7 +433,9 @@ public class DbContext extends DbPro {// NOSONAR
 		return entity;
 	}
 
-	/** Load one entity according SQL, if not found or found more than 1, throw DbException 
+	/**
+	 * Load one entity according SQL, if not found or found more than 1, throw
+	 * DbException
 	 * 这个函数假设有且只能加载一个实体，否则应抛出异常，这样更利于发现编程错误。如果用户不确定数据库有没有，应使用eFindBySQL或eFindAll获取实体列表
 	 */
 	public <T> T eLoadBySQL(Object... optionItems) {
@@ -469,7 +467,7 @@ public class DbContext extends DbPro {// NOSONAR
 	public <T> List<T> eFindBySQL(Object... optionItems) {
 		return iQueryForEntityList(optionItems);
 	}
-	
+
 	/** Find entity according SQL, if not found, return null */
 	public <T> T eFindOneBySQL(Object... optionItems) {
 		List<T> objects = iQueryForEntityList(optionItems);
@@ -587,11 +585,8 @@ public class DbContext extends DbPro {// NOSONAR
 		}
 	}
 
-	protected void getteSetters__________________________() {// NOSONAR
-	}
-
 	// static global variants setting
-	protected void staticGlobalNextMethods______________________() {// NOSONAR
+	protected void staticGlobalSetMethods______________________() {// NOSONAR
 	}
 
 	public static void setGlobalNextAuditorGetter(Object globalNextAuditorGetter) {
@@ -624,6 +619,17 @@ public class DbContext extends DbPro {// NOSONAR
 
 	// =========getter & setter =======
 
+	// =========getter & setter =======
+
+	public static void setGlobalDbContext(DbContext globalDbContext) {
+		DbContext.globalDbContext = globalDbContext;
+	}
+
+	protected void getteSetters__________________________() {// NOSONAR
+	}
+
+	// =========getter & setter =======
+
 	public ShardingTool[] getShardingTools() {
 		return shardingTools;
 	}
@@ -640,10 +646,6 @@ public class DbContext extends DbPro {// NOSONAR
 	/** This method is not thread safe, suggest only use at program starting */
 	public void setSnowflakeCreator(SnowflakeCreator snowflakeCreator) {// NOSONAR
 		this.snowflakeCreator = snowflakeCreator;
-	}
-
-	public static void setGlobalDbContext(DbContext globalDbContext) {
-		DbContext.globalDbContext = globalDbContext;
 	}
 
 	public TableModel[] getTailModels() {
