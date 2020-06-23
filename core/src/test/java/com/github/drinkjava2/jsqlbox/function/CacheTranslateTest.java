@@ -31,13 +31,17 @@ import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
  * @author Yong Zhu
  */
 @SuppressWarnings("all")
-public class CacheTransferTest extends TestBase {
+public class CacheTranslateTest extends TestBase {
+	{
+		createAndRegTables(User.class, Order.class);
+	}
 
-	public static class DemoUser extends ActiveRecord<DemoUser> {
+	@Table(name = "users")
+	public static class User extends ActiveRecord<User> {
 		@Id
 		String id;
 		String userName;
-		Integer age;
+		Integer userAge;
 
 		public String getId() {
 			return id;
@@ -55,19 +59,21 @@ public class CacheTransferTest extends TestBase {
 			this.userName = userName;
 		}
 
-		public Integer getAge() {
-			return age;
+		public Integer getUserAge() {
+			return userAge;
 		}
 
-		public void setAge(Integer age) {
-			this.age = age;
+		public void setUserAge(Integer userAge) {
+			this.userAge = userAge;
 		}
 	}
 
-	public static class DemoGroup extends ActiveRecord<DemoGroup> {
+	@Table(name = "orders")
+	public static class Order extends ActiveRecord<Order> {
 		@Id
 		Integer id;
-		String groupName;
+		String OrderNO;
+		String userId;
 
 		public Integer getId() {
 			return id;
@@ -77,29 +83,28 @@ public class CacheTransferTest extends TestBase {
 			this.id = id;
 		}
 
-		public String getGroupName() {
-			return groupName;
+		public String getOrderNO() {
+			return OrderNO;
 		}
 
-		public void setGroupName(String groupName) {
-			this.groupName = groupName;
+		public void setOrderNO(String orderNO) {
+			OrderNO = orderNO;
 		}
-	}
 
-	@Table(name = "DemoGroup")
-	public static class Orders extends ActiveRecord<Orders> {
-		@Id
-		Integer id;
-		String groupName;
+		public String getUserId() {
+			return userId;
+		}
 
+		public void setUserId(String userId) {
+			this.userId = userId;
+		}
 	}
 
 	@Before
 	public void init() {
-		super.init();
-		createAndRegTables(DemoUser.class);
+
 		for (int i = 0; i < 100; i++)
-			new DemoUser().putField("id", "" + i).putField("userName", "user" + i).putField("age", i).insert();
+			new User().putField("id", "" + i).putField("userName", "user" + i).putField("age", i).insert();
 	}
 
 	@Test
