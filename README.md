@@ -38,7 +38,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 - **架构合理**：模块式架构，各个模块都可以脱离jSqlBox单独存在。  
 - **跨数据库**：基于jDialects，支持80多种数据库的分页、DDl脚本生成、从数据库生成实体源码、函数变换、主键生成等功能。  
 - **与DbUtils兼容**：内核基于DbUtils, 原有基于DbUtils的旧项目可以无缝升级到jSqlBox。  
-- **多种SQL写法**：Inline方法、模板方法、DataMapper、ActiveRecord、链式写法等。  
+- **多种SQL写法**：Inline方法、模板方法、DataMapper、ActiveRecord、链式写法、缓存翻译等。  
 - **多项技术创新**：Inline风格、多行文本支持、实体关联查询、树结构查询等。  
 - **动态配置**：除了支持实体Bean注解式配置，jSqlBox还支持在运行期动态更改配置。  
 - **无会话设计**：无会话设计(Sessionless)，是一个真正轻量级的、全功能的持久层工具，也可以作为其它持久层工具的补丁来使用。  
@@ -57,7 +57,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>4.0.6.jre8</version> <!-- 或最新版 -->
+   <version>4.0.7.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 jSqlBox分为Java8和Java6两个版本发布，如果是Java6或7环境下，请将版本号改为4.0.1.jre6，Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。对于新项目开发，请尽量使用Java8版本。
@@ -70,7 +70,7 @@ pom.xml中引入：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>4.0.6.jre8</version> <!-- Java8版 -->
+       <version>4.0.7.jre8</version> <!-- Java8版 -->
     </dependency>
 
     <dependency>
@@ -118,11 +118,13 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 		ctx.setAllowShowSQL(true); //开启SQL日志输出
 		DbContext.setGlobalDbContext(ctx); //设定全局DbContext
 		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class)); //从实体创建DDL，创建表格
-		HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
-		System.out.println(DB.iQueryForString("select name from HelloWorld where name like ?", param("H%"), " or name=",
-				ques("1"), " or name =?", param("2")));
-		h.delete(); //删除实体
-		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class)); //删除表格
+		ctx.tx(() -> {//开启事务
+			HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+			System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"),
+					" or name=", ques("1"), " or name =", ques("2")));
+			h.delete();//删除实体
+		});
+		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));//删除表格
 	}
 }
 ```

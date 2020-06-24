@@ -37,6 +37,101 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 
 [Chinese中文](https://gitee.com/drinkjava2/jSqlBox/wikis/%E7%AE%80%E4%BB%8B)  |  [English User Manual](https://github.com/drinkjava2/jSqlBox/wiki)  | [JavaDoc](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
 
+# Download
+
+[Maven site](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
+
+```xml
+<dependency>
+   <groupId>com.github.drinkjava2</groupId>
+   <artifactId>jsqlbox</artifactId>
+   <version>4.0.7.jre8</version> <!--Or newest version-->
+</dependency> 
+```
+
+# First Example  
+```
+pom.xml：
+    <dependency>
+      <groupId>com.github.drinkjava2</groupId>
+       <artifactId>jsqlbox</artifactId> 
+       <version>4.0.7.jre8</version> <!-- Java8 -->
+    </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId> <!--H2 database->
+      <artifactId>h2</artifactId>  
+      <version>1.3.176</version>
+    </dependency>
+
+And create below java file in IDE:
+
+import javax.sql.DataSource;
+import org.h2.jdbcx.JdbcConnectionPool;
+import static com.github.drinkjava2.jsqlbox.DB.*;
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
+import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jsqlbox.*; 
+public class HelloWorld implements ActiveEntity<HelloWorld> {
+	@Id
+	@UUID25
+	private String id;
+
+	private String name;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public HelloWorld setName(String name) {
+		this.name = name;
+		return this;
+	}
+
+	public static void main(String[] args) {
+		DataSource ds = JdbcConnectionPool //user H2
+				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+		DbContext ctx = new DbContext(ds);
+		ctx.setAllowShowSQL(true); //Sql Log
+		DbContext.setGlobalDbContext(ctx);  
+		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class)); //create DDL and create table
+		ctx.tx(() -> {//Open transaction
+			HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+			System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"),
+					" or name=", ques("1"), " or name =", ques("2")));
+			h.delete();
+		});
+		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));//drop table
+	}
+}
+```
+Below is the log output:
+```
+SQL: drop table HelloWorld if exists
+PAR: []
+SQL: create table HelloWorld ( id varchar(250),name varchar(250), primary key (id))
+PAR: []
+SQL: insert into HelloWorld (name, id)  values(?,?)
+PAR: [Foo, emeai4bfdsciufuuteb9a7nmo]
+SQL: update HelloWorld set name=?  where id=?
+PAR: [Hello jSqlBox, emeai4bfdsciufuuteb9a7nmo]
+SQL: select name from HelloWorld where name like? or name=? or name =?
+PAR: [H%, 1, 2]
+SQL: delete from HelloWorld where id=? 
+PAR: [emeai4bfdsciufuuteb9a7nmo]
+SQL: drop table HelloWorld if exists
+PAR: []
+```
+More documents please see wiki. 
+
 # Demo
 
 * [jBooox](https://gitee.com/drinkjava2/jBooox) A micro mvc web demo based on jBeanBox+jSqlBox+jWebBox.
@@ -48,19 +143,7 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 * [jsqlbox-springboot-mybatis](../../tree/master/demo/jsqlbox-springboot-mybatis) Shows mixed use jSqlBox and MyBatis in SpringBoot.
 * [jsqlbox-java](../../tree/master/demo/jsqlbox-java8) Shows jSqlBox-Java8 version usage and use Lambda to write SQL。
 * [jsqlbox-atomikos](../../tree/master/demo/jsqlbox-atomikos) Shows sharding feature in jSqlBox when use XA transaction be implemented by Atomikos 。
-
-# Download
-
-[Maven site](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jsqlbox%22)
-
-```xml
-<dependency>
-   <groupId>com.github.drinkjava2</groupId>
-   <artifactId>jsqlbox</artifactId>
-   <version>4.0.3.jre8</version> <!--Or newest version-->
-</dependency> 
-```
-
+ 
 # Related Other Projects
 
 - [jDialects, a database dialect tool](https://github.com/drinkjava2/jDialects)

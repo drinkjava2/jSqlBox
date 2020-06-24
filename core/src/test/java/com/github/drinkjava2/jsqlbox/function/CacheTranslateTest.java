@@ -19,13 +19,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.handlers.KeyedHandler;
+import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
-import com.github.drinkjava2.jdialects.annotation.jdia.UUID32;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.CacheTransUtils;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 /**
@@ -36,7 +38,7 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
 @SuppressWarnings("all")
 public class CacheTranslateTest extends TestBase {
 	{
-		regTables(User.class, Order.class);
+		regTables(User.class, Group.class, Order.class);
 	}
 
 	@Table(name = "users")
@@ -72,14 +74,39 @@ public class CacheTranslateTest extends TestBase {
 
 	}
 
+	@Table(name = "groups")
+	public static class Group extends ActiveRecord<Group> {
+		@Id
+		Integer id;
+		String groupName;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public String getGroupName() {
+			return groupName;
+		}
+
+		public void setGroupName(String groupName) {
+			this.groupName = groupName;
+		}
+
+	}
+
 	@Table(name = "orders")
 	public static class Order extends ActiveRecord<Order> {
 		@Id
-		@UUID32
 		String id;
 		String orderNO;
 		@SingleFKey(refs = { "users", "id" })
 		Integer userId;
+		@SingleFKey(refs = { "groups", "id" })
+		Integer groupId;
 
 		public String getId() {
 			return id;
@@ -105,20 +132,53 @@ public class CacheTranslateTest extends TestBase {
 			this.userId = userId;
 		}
 
+		public Integer getGroupId() {
+			return groupId;
+		}
+
+		public void setGroupId(Integer groupId) {
+			this.groupId = groupId;
+		}
 	}
 
 	@Test
-	public void testEntityListHandler2() {// TODO add test body
+	public void testCacheTranslate() {
 		ctx.nBatchBegin();
-		for (int i = 0; i < 100; i++)
+		int n = 2000;
+		for (int i = 0; i < n; i++)
 			new User().putField("id", i).putField("name", "user" + i).putField("age", i).insert();
-		for (int i = 0; i < 500; i++)
-			new Order().putField("orderNO", "order" + i, "userId", i % 100).insert();
-		ctx.nBatchEnd(); 
-		Map<Integer, Map<String, Object>> users = ctx.iQuery("select id, name, age from users", new KeyedHandler<Integer>(1));
-		List<Map<String,Object>> orders=ctx.iQuery("select * from orders"); 
-		// List<Map<String,Object>> result2=DB.cacheTransfer(orders, "userId", userCache, "groupId",groupCache);
-		// List<Orders> o
-
+		for (int i = 0; i < n; i++)
+			new Group().putField("id", i).putField("groupName", "group" + i).insert();
+		for (int i = 0; i < n; i++)
+			new Order().putField("id", "o" + i, "orderNO", "order" + i, "userId", i, "groupId", i).insert();
+		ctx.nBatchEnd();
+		Map<Integer, Map<String, Object>> users = ctx.iQuery("select * from users", new KeyedHandler<Integer>("id"));
+		Map<Integer, Map<String, Object>> groups = ctx.iQuery("select * from groups", new KeyedHandler<Integer>("id"));
+		long oldTime = System.currentTimeMillis();
+		List<Map<String, Object>> orders = ctx
+				.iQueryForMapList("select id,orderNo,userId,groupId from orders where id>'10' ");
+		CacheTransUtils.translate(orders, users, "userID", "name", "userName", "age", "userAge", groups, "groupId",
+				"groupName", "groupName");
+		Systemout.println("Cache Translate, Time used(ms):" + (System.currentTimeMillis() - oldTime));
+		Assert.assertEquals(7, orders.get(0).size());
 	}
+
+	@Test
+	public void testNoTranslate() {
+		ctx.nBatchBegin();
+		int n = 2000;
+		for (int i = 0; i < n; i++)
+			new User().putField("id", i).putField("name", "user" + i).putField("age", i).insert();
+		for (int i = 0; i < n; i++)
+			new Group().putField("id", i).putField("groupName", "group" + i).insert();
+		for (int i = 0; i < n; i++)
+			new Order().putField("id", "o" + i, "orderNO", "order" + i, "userId", i, "groupId", i).insert();
+		ctx.nBatchEnd();
+		long oldTime = System.currentTimeMillis();
+		List<Map<String, Object>> orders = ctx.iQueryForMapList("select o.*, u.*, g.* from orders o  "
+				+ " left join users u on o.userId=u.id left join groups g on o.groupId=g.id where o.id>'10' ");
+		Systemout.println("No Cache Translate, Time used(ms):" + (System.currentTimeMillis() - oldTime));
+		Assert.assertEquals(7, orders.get(0).size());
+	}
+
 }
