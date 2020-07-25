@@ -74,7 +74,7 @@ public class CacheTranslateTest extends TestBase {
 
 	}
 
-	@Table(name = "groups")
+	@Table(name = "groupnm")
 	public static class Group extends ActiveRecord<Group> {
 		@Id
 		Integer id;
@@ -105,7 +105,7 @@ public class CacheTranslateTest extends TestBase {
 		String orderNO;
 		@SingleFKey(refs = { "users", "id" })
 		Integer userId;
-		@SingleFKey(refs = { "groups", "id" })
+		@SingleFKey(refs = { "groupnm", "id" })
 		Integer groupId;
 
 		public String getId() {
@@ -153,11 +153,11 @@ public class CacheTranslateTest extends TestBase {
 			new Order().putField("id", "o" + i, "orderNO", "order" + i, "userId", i, "groupId", i).insert();
 		ctx.nBatchEnd();
 		Map<Integer, Map<String, Object>> users = ctx.iQuery("select * from users", new KeyedHandler<Integer>("id"));
-		Map<Integer, Map<String, Object>> groups = ctx.iQuery("select * from groups", new KeyedHandler<Integer>("id"));
+		Map<Integer, Map<String, Object>> groupnm = ctx.iQuery("select * from groupnm", new KeyedHandler<Integer>("id"));
 		long oldTime = System.currentTimeMillis();
 		List<Map<String, Object>> orders = ctx
 				.iQueryForMapList("select id,orderNo,userId,groupId from orders where id>'10' ");
-		CacheTransUtils.translate(orders, users, "userID", "name", "userName", "age", "userAge", groups, "groupId",
+		CacheTransUtils.translate(orders, users, "userID", "name", "userName", "age", "userAge", groupnm, "groupId",
 				"groupName", "groupName");
 		Systemout.println("Cache Translate, Time used(ms):" + (System.currentTimeMillis() - oldTime));
 		Assert.assertEquals(7, orders.get(0).size());
@@ -176,7 +176,7 @@ public class CacheTranslateTest extends TestBase {
 		ctx.nBatchEnd();
 		long oldTime = System.currentTimeMillis();
 		List<Map<String, Object>> orders = ctx.iQueryForMapList("select o.*, u.*, g.* from orders o  "
-				+ " left join users u on o.userId=u.id left join groups g on o.groupId=g.id where o.id>'10' ");
+				+ " left join users u on o.userId=u.id left join groupnm g on o.groupId=g.id where o.id>'10' ");
 		Systemout.println("No Cache Translate, Time used(ms):" + (System.currentTimeMillis() - oldTime));
 		Assert.assertEquals(7, orders.get(0).size());
 	}
