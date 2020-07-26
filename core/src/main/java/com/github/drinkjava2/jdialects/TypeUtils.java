@@ -225,6 +225,8 @@ public abstract class TypeUtils {// NOSONAR
 			return Type.VARBINARY;
 		if (VARCHAR.equalsIgnoreCase(columnDef))
 			return Type.VARCHAR;
+	      if ("TEXT".equalsIgnoreCase(columnDef))
+	            return Type.VARCHAR;
 		// @formatter:on
 		throw new DialectException("'" + columnDef + "' can not be map to a dialect type");
 	}

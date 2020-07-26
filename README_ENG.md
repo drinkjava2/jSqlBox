@@ -55,7 +55,7 @@ pom.xml：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>4.0.7.jre8</version> <!-- Java8 -->
+       <version>4.0.8.jre8</version> <!-- Java8 -->
     </dependency>
 
     <dependency>
