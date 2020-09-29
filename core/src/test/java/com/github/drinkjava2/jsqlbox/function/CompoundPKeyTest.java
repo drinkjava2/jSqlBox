@@ -110,7 +110,7 @@ public class CompoundPKeyTest extends TestBase {
 
 	@Test
 	public void testOrmQry() {
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), "select u.** from CmpEntity u", CmpEntity.class, alias("u"),
+		EntityNet net = ctx.qry(new EntityNetHandler(), "select u.** from CmpEntity u", CmpEntity.class, alias("u"),
 				" where age>?", param(5));
 		List<CmpEntity> entities = net.pickEntityList(CmpEntity.class);
 		Assert.assertEquals(5, entities.size());

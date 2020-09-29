@@ -1,5 +1,6 @@
 package com.github.drinkjava2.jsqlbox.function.entitynet;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.DB.alias;
 import static com.github.drinkjava2.jsqlbox.DB.give;
 
@@ -40,7 +41,7 @@ public class EntityNetTreeTest extends TestBase {
 
 	@Test
 	public void testSearchTreeChild() {
-		EntityNet net = ctx.iQuery(targets, "select t.**, t.pid as p_id from treenodetb t");
+		EntityNet net = ctx.qry(targets, "select t.**, t.pid as p_id from treenodetb t");
 		TreeNode node = net.pickOneEntity("t", "A");
 		printTree(node, 0);
 
@@ -61,9 +62,9 @@ public class EntityNetTreeTest extends TestBase {
 	 * https://my.oschina.net/drinkjava2/blog/1818631 (海底捞算法 )
 	 */
 	public void loadSubTreeByGivenNode(TreeNode d) {
-		EntityNet net = ctx.pQuery(targets,
+		EntityNet net = ctx.qry(targets,
 				"select t.**, t.pid as p_id from treenodetb t where t.line>=? and t.line< (select min(line) from treenodetb where line>? and lvl<=?) ",
-				d.getLine(), d.getLine(), d.getLvl());
+				param(d.getLine(), d.getLine(), d.getLvl()));
 		TreeNode node = net.pickOneEntity("t", d.getId());
 		printTree(node, 0);
 	}

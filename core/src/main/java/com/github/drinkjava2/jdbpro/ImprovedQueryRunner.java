@@ -31,8 +31,6 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
-import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jlogs.Log;
@@ -69,10 +67,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected static ConnectionManager globalNextConnectionManager = TinyTxConnectionManager.instance();
 
 	protected static Integer globalNextBatchSize = 300;
-	protected static SqlTemplateEngine globalNextTemplateEngine = BasicSqlTemplate.instance();
 	protected static SqlHandler[] globalNextSqlHandlers = null;
 
-	protected SqlTemplateEngine sqlTemplateEngine = globalNextTemplateEngine;
 	protected ConnectionManager connectionManager = globalNextConnectionManager;
 	protected Boolean allowShowSQL = globalNextAllowShowSql;
 	protected SqlOption masterSlaveOption = globalNextMasterSlaveOption;
@@ -443,12 +439,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		if (ps.getMasterSlaveOption() == null)
 			ps.setMasterSlaveOption(this.getMasterSlaveOption());
 
-		if (ps.getUseTemplate() != null && ps.getUseTemplate()) {
-			ps.setUseTemplate(false);
-			SqlTemplateEngine engine = ps.getTemplateEngine();
-			if (engine == null)
-				engine = this.sqlTemplateEngine;
-			PreparedSQL rendered = engine.render(ps.getSql(), ps.getTemplateParamMap(), ps.getParams());
+		if (ps.getTemplateEngine()!=null) {
+			PreparedSQL rendered = ps.getTemplateEngine().render(ps.getSql(), ps.getTemplateParamMap(), ps.getParams());
 			ps.setSql(rendered.getSql());
 			ps.setParams(rendered.getParams());
 		}
@@ -945,14 +937,6 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		globalNextBatchSize = batchSize;
 	}
 
-	public static SqlTemplateEngine getGlobalNextTemplateEngine() {
-		return globalNextTemplateEngine;
-	}
-
-	public static void setGlobalNextTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
-		globalNextTemplateEngine = sqlTemplateEngine;
-	}
-
 	public static Boolean getGlobalNextAllowShowSql() {
 		return globalNextAllowShowSql;
 	}
@@ -1004,15 +988,6 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	/** This method is not thread safe, suggest only use at program starting */
 	public void setAllowShowSQL(Boolean allowShowSQL) {// NOSONAR
 		this.allowShowSQL = allowShowSQL;
-	}
-
-	public SqlTemplateEngine getSqlTemplateEngine() {
-		return sqlTemplateEngine;
-	}
-
-	/** This method is not thread safe, suggest only use at program starting */
-	public void setSqlTemplateEngine(SqlTemplateEngine sqlTemplateEngine) {
-		this.sqlTemplateEngine = sqlTemplateEngine;
 	}
 
 	public ConnectionManager getConnectionManager() {

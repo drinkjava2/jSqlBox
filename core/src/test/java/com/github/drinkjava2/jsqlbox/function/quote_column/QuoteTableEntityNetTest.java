@@ -100,7 +100,7 @@ public class QuoteTableEntityNetTest extends TestBase {
 		new Group().putValues("w2", "o1").insert();
 		new Group().putValues("w3", "o2").insert();
 
-		EntityNet net = ctx.iQuery(targets, AUTO_SQL);
+		EntityNet net = ctx.qry(targets, AUTO_SQL);
 		List<From> a = net.pickEntityList("f");
 		List<Group> b = net.pickEntityList("g");
 		Assert.assertEquals(2, (int) a.size());

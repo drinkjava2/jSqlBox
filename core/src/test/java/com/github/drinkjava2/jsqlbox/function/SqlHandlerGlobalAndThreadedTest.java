@@ -15,6 +15,8 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+
 import java.util.List;
 
 import org.junit.Assert;
@@ -75,8 +77,8 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 
 	@Test
 	public void testHandlers() {
-		List<DemoUser> result = ctx.pQuery(new EntityListHandler(), DemoUser.class, new PrintSqlHandler(),
-				"select u.* from DemoUser u where u.age>?", 10);
+		List<DemoUser> result = ctx.qry(new EntityListHandler(), DemoUser.class, new PrintSqlHandler(),
+				"select u.* from DemoUser u where u.age>?", param(10));
 		Assert.assertEquals(90l, result.size());
 
 		DbContext.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(),
@@ -84,7 +86,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 		DbContext.setThreadLocalSqlHandlers(new EntityListHandler());
 		try {
 			DbContext newCtx = new DbContext(ctx.getDataSource());
-			List<DemoUser> result2 = newCtx.pQuery("select u.* from DemoUser u where u.age>?", 10, DemoUser.class);
+			List<DemoUser> result2 = newCtx.qry("select u.* from DemoUser u where u.age>?", param(10), DemoUser.class);
 			Assert.assertEquals(5l, result2.size());
 		} finally {
 			DbContext.resetGlobalVariants();

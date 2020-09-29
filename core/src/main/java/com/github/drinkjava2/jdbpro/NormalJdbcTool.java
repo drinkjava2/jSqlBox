@@ -36,7 +36,7 @@ public interface NormalJdbcTool {// NOSONAR
 	 * @param params
 	 * @return An Object or null, Object type determined by SQL content
 	 */
-	public <T> T nQueryForObject(String sql, Object... params);
+	public <T> T jdbcQueryForObject(String sql, Object... params);
 
 	/**
 	 * Executes the given INSERT, UPDATE, or DELETE SQL statement.
@@ -47,7 +47,7 @@ public interface NormalJdbcTool {// NOSONAR
 	 *            the parameters if have
 	 * @return The number of rows updated.
 	 */
-	public int nUpdate(String sql, Object... params);
+	public int jdbcUpdate(String sql, Object... params);
 
 	/**
 	 * Execute an statement, including a stored procedure call, which does not
@@ -66,5 +66,5 @@ public interface NormalJdbcTool {// NOSONAR
 	 *            the SQL
 	 * @return The number of rows updated.
 	 */
-	public int nExecute(String sql, Object... params);
+	public int jdbcExecute(String sql, Object... params);
 }

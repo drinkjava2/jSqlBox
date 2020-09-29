@@ -45,7 +45,7 @@ public class I1L5NDTest extends TestBase {
 		createAndRegTables(Entity1.class);
 		Entity1 e = new Entity1().putField("id", 1).insert();
 		Systemout.println(e.id);
-		Object o = ctx.iQueryForIntValue("select id from entity1");
+		Object o = ctx.qryIntValue("select id from entity1");
 		Assert.assertEquals(1, o);
 		Assert.assertEquals(Integer.class, o.getClass());
 	}
@@ -86,7 +86,7 @@ public class I1L5NDTest extends TestBase {
 		Entity2 e = new Entity2().setName("name1").insert();
 		Assert.assertEquals(1, (int) e.getId());
 		Assert.assertEquals(Integer.class, e.getId().getClass());
-		Object o = ctx.iQueryForIntValue("select id from entity2");
+		Object o = ctx.qryIntValue("select id from entity2");
 		Assert.assertEquals(1, o);
 		Assert.assertEquals(Integer.class, o.getClass());
 
@@ -127,7 +127,7 @@ public class I1L5NDTest extends TestBase {
 		createAndRegTables(Entity3.class);
 		Entity3 e = new Entity3().setId(1).setName("name1").insert();
 		Assert.assertEquals(1, e.getId());
-		Object o = ctx.iQueryForIntValue("select id from entity3");
+		Object o = ctx.qryIntValue("select id from entity3");
 		Assert.assertEquals(1, o);
 		Assert.assertEquals(Integer.class, o.getClass());
 	}
@@ -168,7 +168,7 @@ public class I1L5NDTest extends TestBase {
 		Systemout.println("testEntity4");
 		Entity4 e = new Entity4().setId(1).setName("name1").insert();
 		Assert.assertEquals(1, e.getId());
-		Object o = ctx.iQueryForIntValue("select id from entity4");
+		Object o = ctx.qryIntValue("select id from entity4");
 		Assert.assertEquals(1, o);
 		Assert.assertEquals(Integer.class, o.getClass());
 	}

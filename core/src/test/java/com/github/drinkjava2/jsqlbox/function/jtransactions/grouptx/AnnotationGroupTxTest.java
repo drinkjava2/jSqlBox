@@ -42,8 +42,8 @@ public class AnnotationGroupTxTest {
 			new Usr().setFirstName("FOO" + i).setLastName("BAR" + i).setAge(i).insert(ctx2);
 		}
 
-		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(100, ctx1.entityCount(Usr.class));
+		Assert.assertEquals(100, ctx2.entityCount(Usr.class));
 	}
 
 	@After
@@ -79,19 +79,19 @@ public class AnnotationGroupTxTest {
 		} catch (Exception e) {
 			// e.printStackTrace();
 		}
-		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(100, ctx1.entityCount(Usr.class));
+		Assert.assertEquals(100, ctx2.entityCount(Usr.class));
 
 		t.groupCommit();
-		Assert.assertEquals(101, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(101, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(101, ctx1.entityCount(Usr.class));
+		Assert.assertEquals(101, ctx2.entityCount(Usr.class));
 
 		try {
 			t.groupPartialCommit();
 		} catch (Exception e) {
 			Systemout.println(e.getMessage());
 		}
-		Assert.assertEquals(102, ctx1.eCountAll(Usr.class));
+		Assert.assertEquals(102, ctx1.entityCount(Usr.class));
 
 	}
 

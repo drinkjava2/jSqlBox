@@ -53,8 +53,8 @@ public class GroupShardTxTest {
 	public void init() {
 		String[] ddlArray = ctx1.toDropAndCreateDDL(ShardUser.class);
 		for (String ddl : ddlArray) {
-			ctx1.nExecute(ddl);
-			ctx2.nExecute(ddl);
+			ctx1.jdbcExecute(ddl);
+			ctx2.jdbcExecute(ddl);
 		}
 		DbContext[] masters = new DbContext[] { ctx1, ctx2 };
 		DbContext.getGlobalDbContext().setMasters(masters);
@@ -62,8 +62,8 @@ public class GroupShardTxTest {
 		for (int i = 1; i <= 100; i++)
 			new ShardUser().setId(i).setName("Foo" + i).insert(); // Sharded!
 
-		Assert.assertEquals(50, ctx1.eCountAll(ShardUser.class));
-		Assert.assertEquals(50, ctx2.eCountAll(ShardUser.class));
+		Assert.assertEquals(50, ctx1.entityCount(ShardUser.class));
+		Assert.assertEquals(50, ctx2.entityCount(ShardUser.class));
 	}
 
 	@After
@@ -81,16 +81,16 @@ public class GroupShardTxTest {
 	public void testCommit() {
 		GroupShardTxTest t = JBEANBOX.getInstance(GroupShardTxTest.class);
 		t.groupCommitTest();
-		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
-		Assert.assertEquals(51, ctx2.eCountAll(ShardUser.class));
+		Assert.assertEquals(51, ctx1.entityCount(ShardUser.class));
+		Assert.assertEquals(51, ctx2.entityCount(ShardUser.class));
 	}
 
 	@GrpTX
 	public void groupRollbackTest() { // test group roll back
 		new ShardUser().setId(300).setName("Foo").insert();
 		new ShardUser().setId(301).setName("Bar").insert();
-		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
-		Assert.assertEquals(51, ctx2.eCountAll(ShardUser.class));
+		Assert.assertEquals(51, ctx1.entityCount(ShardUser.class));
+		Assert.assertEquals(51, ctx2.entityCount(ShardUser.class));
 		Systemout.println(1 / 0); // div 0!
 	}
 
@@ -102,16 +102,16 @@ public class GroupShardTxTest {
 		} catch (Exception e) {
 			Systemout.println(e.getMessage());
 		}
-		Assert.assertEquals(50, ctx1.eCountAll(ShardUser.class));
-		Assert.assertEquals(50, ctx2.eCountAll(ShardUser.class));
+		Assert.assertEquals(50, ctx1.entityCount(ShardUser.class));
+		Assert.assertEquals(50, ctx2.entityCount(ShardUser.class));
 	}
 
 	@GrpTX
 	public void groupPartialCommitTest() { // simulate partial commit test
 		new ShardUser().setId(400).setName("Foo").insert();
-		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
+		Assert.assertEquals(51, ctx1.entityCount(ShardUser.class));
 		new ShardUser().setId(401).setName("Bar").insert();
-		Assert.assertEquals(51, ctx2.eCountAll(ShardUser.class));
+		Assert.assertEquals(51, ctx2.entityCount(ShardUser.class));
 		((HikariDataSource) ctx2.getDataSource()).close();// DS2 is closed, this will cause ctx1 fail
 	}
 
@@ -124,7 +124,7 @@ public class GroupShardTxTest {
 			// e.printStackTrace();
 			Systemout.println(e.getMessage());
 		}
-		Assert.assertEquals(51, ctx1.eCountAll(ShardUser.class));
+		Assert.assertEquals(51, ctx1.entityCount(ShardUser.class));
 	}
 
 	// ========== Singleton settings =======================

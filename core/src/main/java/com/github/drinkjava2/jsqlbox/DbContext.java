@@ -26,7 +26,6 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
-import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.TableModelUtils;
@@ -119,7 +118,6 @@ public class DbContext extends DbPro {// NOSONAR
 		setGlobalNextConnectionManager(TinyTxConnectionManager.instance());
 		setGlobalNextSqlHandlers((SqlHandler[]) null);
 		setGlobalNextBatchSize(300);
-		setGlobalNextTemplateEngine(BasicSqlTemplate.instance());
 		setGlobalNextDialect(null);
 		setGlobalNextShardingTools(new ShardingTool[] { new ShardingModTool(), new ShardingRangeTool() });
 		setGlobalNextIgnoreNull(false);
@@ -203,10 +201,8 @@ public class DbContext extends DbPro {// NOSONAR
 					throw new DbException("alias method need parameter");
 				}
 				ps.setLastAliases((String[]) sqItem.getParameters());// NOSONAR
-			} else if (SqlOption.TAIL.equals(sqlItemType)) {
-				return true; // do nothing
 			} else {
-				return false;
+				return SqlOption.TAIL.equals(sqlItemType);
 			}
 		} else if (item instanceof EntityNet) {
 			ps.setEntityNet((EntityNet) item);
@@ -289,18 +285,8 @@ public class DbContext extends DbPro {// NOSONAR
 	}
 
 	/** Use i style to query for an entity list */
-	public <T> List<T> iQueryForEntityList(Object... optionItems) {
-		return this.iQuery(new EntityListHandler(), optionItems);
-	}
-
-	/** Use p style to query for an entity list */
-	public <T> List<T> pQueryForEntityList(Object... optionItems) {
-		return this.pQuery(new EntityListHandler(), optionItems);
-	}
-
-	/** Use t style to query for an entity list */
-	public <T> List<T> tQueryForEntityList(Object... optionItems) {
-		return this.tQuery(new EntityListHandler(), optionItems);
+	public <T> List<T> qryEntityList(Object... optionItems) {
+		return this.qry(new EntityListHandler(), optionItems);
 	}
 
 	/** Build a entityNet, only give both between start class and end classes */
@@ -348,84 +334,84 @@ public class DbContext extends DbPro {// NOSONAR
 		}
 	}
 
-	protected void entityCrudMethods______________________________() {// NOSONAR
+	protected void beanCrudMethods______________________________() {// NOSONAR
 	}
 
 	/** Insert entity to database, if not 1 row updated, throw SqlBoxException */
-	public <T> T eInsert(T entity, Object... optionItems) {
+	public <T> T entityInsert(T entity, Object... optionItems) {
 		int result = DbContextUtils.entityInsertTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "insert");
 		return entity;
 	}
 
 	/** Update entity in database, if not 1 row updated, throw SqlBoxException */
-	public <T> T eUpdate(Object entity, Object... optionItems) {
+	public <T> T entityUpdate(Object entity, Object... optionItems) {
 		int result = DbContextUtils.entityUpdateTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "update");
 		return (T) entity;
 	}
 
 	/** Update entity in database, return how many rows affected */
-	public int eUpdateTry(Object entity, Object... optionItems) {
+	public int entityUpdateTry(Object entity, Object... optionItems) {
 		return DbContextUtils.entityUpdateTry(this, entity, optionItems);
 	}
 
 	/** Delete entity in database, if not 1 row deleted, throw SqlBoxException */
-	public void eDelete(Object entity, Object... optionItems) {
+	public void entityDelete(Object entity, Object... optionItems) {
 		int result = DbContextUtils.entityDeleteTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "delete");
 	}
 
 	/** Delete entity in database, return how many rows affected */
-	public int eDeleteTry(Object entity, Object... optionItems) {
+	public int entityDeleteTry(Object entity, Object... optionItems) {
 		return DbContextUtils.entityDeleteTry(this, entity, optionItems);
 	}
 
 	/** Delete entity by given id, if not 1 row deleted, throw SqlBoxException */
-	public void eDeleteById(Class<?> entityClass, Object id, Object... optionItems) {
+	public void entityDeleteById(Class<?> entityClass, Object id, Object... optionItems) {
 		int result = DbContextUtils.entityDeleteByIdTry(this, entityClass, id, optionItems);
 		checkOnlyOneRowAffected(result, "deleteById");
 	}
 
 	/** Delete entity by given id, return how many rows deleted */
-	public int eDeleteByIdTry(Class<?> entityClass, Object id, Object... optionItems) {
+	public int entityDeleteByIdTry(Class<?> entityClass, Object id, Object... optionItems) {
 		return DbContextUtils.entityDeleteByIdTry(this, entityClass, id, optionItems);
 	}
 
-	/** Check if entity exist by its id */
-	public boolean eExistStrict(Object entity, Object... optionItems) {
+	/** Check if entity exist by its id, all fields should equal in GTX transaction */
+	public boolean entityExistStrict(Object entity, Object... optionItems) {
 		return DbContextUtils.entityExistStrict(this, entity, optionItems);
 	}
 
 	/** Check if entity exist by its id */
-	public boolean eExist(Object entity, Object... optionItems) {
+	public boolean entityExist(Object entity, Object... optionItems) {
 		return DbContextUtils.entityExist(this, entity, optionItems);
 	}
 
 	/** Check if entity exist by given id */
-	public boolean eExistById(Class<?> entityClass, Object id, Object... optionItems) {
+	public boolean entityExistById(Class<?> entityClass, Object id, Object... optionItems) {
 		return DbContextUtils.entityExistById(this, entityClass, id, optionItems);
 	}
 
 	/** Return how many records for current entity class */
-	public int eCountAll(Class<?> entityClass, Object... optionItems) {
-		return DbContextUtils.entityCountAll(this, entityClass, optionItems);
+	public int entityCount(Class<?> entityClass, Object... optionItems) {
+		return DbContextUtils.entityCount(this, entityClass, optionItems);
 	}
 
 	/** Load entity according its id, if not 1 row round, throw SqlBoxException */
-	public <T> T eLoad(T entity, Object... optionItems) {
+	public <T> T entityLoad(T entity, Object... optionItems) {
 		int result = DbContextUtils.entityLoadTry(this, entity, optionItems);
 		checkOnlyOneRowAffected(result, "load");
 		return entity;
 	}
 
 	/** Load entity according its id, return how many rows found */
-	public int eLoadTry(Object entity, Object... optionItems) {
+	public int entityLoadTry(Object entity, Object... optionItems) {
 		return DbContextUtils.entityLoadTry(this, entity, optionItems);
 	}
 
 	/** Load entity by given id, if not 1 row found, throw SqlBoxException */
-	public <T> T eLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
+	public <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... optionItems) {
 		T entity = DbContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
 		if (entity == null) {
 			throw new DbException("No record found in database when do 'LoadById' operation.");
@@ -438,8 +424,8 @@ public class DbContext extends DbPro {// NOSONAR
 	 * DbException
 	 * 这个函数假设有且只能加载一个实体，否则应抛出异常，这样更利于发现编程错误。如果用户不确定数据库有没有，应使用eFindBySQL或eFindAll获取实体列表
 	 */
-	public <T> T eLoadBySQL(Object... optionItems) {
-		List<T> entities = iQueryForEntityList(optionItems);
+	public <T> T entityLoadBySql(Object... optionItems) {
+		List<T> entities = qryEntityList(optionItems);
 		if (entities == null || entities.isEmpty())
 			throw new DbException("No record found in database when try to load entity.");
 		if (entities.size() > 1)
@@ -448,7 +434,7 @@ public class DbContext extends DbPro {// NOSONAR
 	}
 
 	/** Load entity by given id, if not found, return null */
-	public <T> T eLoadByIdTry(Class<T> entityClass, Object entityId, Object... optionItems) {
+	public <T> T entityLoadByIdTry(Class<T> entityClass, Object entityId, Object... optionItems) {
 		return DbContextUtils.entityLoadByIdTry(this, entityClass, entityId, optionItems);
 	}
 
@@ -456,7 +442,7 @@ public class DbContext extends DbPro {// NOSONAR
 	 * Find all entity of given entity class as List, if not found, return empty
 	 * list
 	 */
-	public <T> List<T> eFindAll(Class<T> entityClass, Object... optionItems) {
+	public <T> List<T> entityFind(Class<T> entityClass, Object... optionItems) {
 		return DbContextUtils.entityFindAll(this, entityClass, optionItems);
 	}
 
@@ -464,13 +450,13 @@ public class DbContext extends DbPro {// NOSONAR
 	 * Find entity according SQL, entityClass usually is first param, if not found,
 	 * return empty list
 	 */
-	public <T> List<T> eFindBySQL(Object... optionItems) {
-		return iQueryForEntityList(optionItems);
+	public <T> List<T> beanFindBySql(Object... optionItems) {
+		return qryEntityList(optionItems);
 	}
 
 	/** Find entity according SQL, if not found, return null */
-	public <T> T eFindOneBySQL(Object... optionItems) {
-		List<T> objects = iQueryForEntityList(optionItems);
+	public <T> T entityFindOneBySQL(Object... optionItems) {
+		List<T> objects = qryEntityList(optionItems);
 		if (CollectionUtils.isEmpty(objects)) {
 			return null;
 		}
@@ -481,27 +467,27 @@ public class DbContext extends DbPro {// NOSONAR
 	 * Find entity according a sample bean, ignore null fields, if not found, return
 	 * empty list
 	 */
-	public <T> List<T> eFindBySample(Object sampleBean, Object... optionItems) {
+	public <T> List<T> entityFindBySample(Object sampleBean, Object... optionItems) {
 		return DbContextUtils.entityFindBySample(this, sampleBean, optionItems);
 	}
 
 	/** Find one related entity by given entity */
-	public <E> E eFindRelatedOne(Object entity, Object... sqlItems) {
+	public <E> E entityFindRelatedOne(Object entity, Object... sqlItems) {
 		return DbContextUtils.entityFindRelatedOne(this, entity, sqlItems);
 	}
 
 	/** Find related entity list by given entity or Iterable */
-	public <E> List<E> eFindRelatedList(Object entityOrIterable, Object... sqlItems) {
+	public <E> List<E> entityFindRelatedList(Object entityOrIterable, Object... sqlItems) {
 		return DbContextUtils.entityFindRelatedList(this, entityOrIterable, sqlItems);
 	}
 
 	/** Find related entity set by given entity or Iterable */
-	public <E> Set<E> eFindRelatedSet(Object entity, Object... sqlItems) {
+	public <E> Set<E> entityFindRelatedSet(Object entity, Object... sqlItems) {
 		return DbContextUtils.entityFindRelatedSet(this, entity, sqlItems);
 	}
 
 	/** Find related entity map(key is entityID) by given entity or Iterable */
-	public <E> Map<Object, E> eFindRelatedMap(Object entity, Object... sqlItems) {
+	public <E> Map<Object, E> entityFindRelatedMap(Object entity, Object... sqlItems) {
 		return DbContextUtils.entityFindRelatedMap(this, entity, sqlItems);
 	}
 
@@ -575,7 +561,7 @@ public class DbContext extends DbPro {// NOSONAR
 	/** Execute DDL stored in a String array */
 	public void executeDDL(String[] sqls) {
 		for (String sql : sqls) {
-			nExecute(sql);
+			jdbcExecute(sql);
 		}
 	}
 

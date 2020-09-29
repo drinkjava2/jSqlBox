@@ -101,7 +101,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 
 		// Save GtxTag into DBs, use a Tag to confirm tx committed
 		for (Object ctx : gtxInfo.getConnectionCache().keySet())
-			((DbContext) ctx).eInsert(new GtxTag(gtxInfo.getGtxId().getGid()));
+			((DbContext) ctx).entityInsert(new GtxTag(gtxInfo.getGtxId().getGid()));
 
 		// Save lock and log
 		try {
@@ -150,7 +150,7 @@ public class GtxConnectionManager extends ThreadConnectionManager {
 		for (Object key : gtxInfo.getConnectionCache().keySet()) {
 			DbContext ctx = (DbContext) key;
 			try {
-				ctx.eDelete(new GtxTag(gtxInfo.getGtxId().getGid()));// In autoCommit mode delete tags
+				ctx.entityDelete(new GtxTag(gtxInfo.getGtxId().getGid()));// In autoCommit mode delete tags
 			} catch (Exception e) {
 				result.setStage(CLEANUP_FAIL);
 				result.addCommitEx(e);

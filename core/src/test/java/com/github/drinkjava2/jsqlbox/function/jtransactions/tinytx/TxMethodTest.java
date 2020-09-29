@@ -92,22 +92,22 @@ public class TxMethodTest {
 	public void DemoTest() {
 		for (int i = 0; i < 1000; i++) {
 			ctx.tryTx(() -> {
-				Assert.assertEquals(100, ctx.eCountAll(Usrdemo.class));
+				Assert.assertEquals(100, ctx.entityCount(Usrdemo.class));
 				new Usrdemo().putField("firstName", "Foo").insert(ctx);
-				Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("Usrdemo")));
+				Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("Usrdemo")));
 				Systemout.println(1 / 0);
 			});
 		}
-		Assert.assertEquals(100, ctx.eCountAll(Tail.class, tail("Usrdemo")));
+		Assert.assertEquals(100, ctx.entityCount(Tail.class, tail("Usrdemo")));
 		Assert.assertEquals(false, DB.getLastTxResult().isSuccess());
 
 		ctx.tx(() -> {
-			Assert.assertEquals(100, ctx.eCountAll(Usrdemo.class));
+			Assert.assertEquals(100, ctx.entityCount(Usrdemo.class));
 			new Usrdemo().putField("firstName", "Foo").insert(ctx);
-			Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("Usrdemo")));
+			Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("Usrdemo")));
 			new Usrdemo().putField("firstName", "Bar").insert(ctx);
 		});
-		Assert.assertEquals(102, ctx.eCountAll(Tail.class, tail("Usrdemo")));
+		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("Usrdemo")));
 		Assert.assertEquals(true, DB.getLastTxResult().isSuccess());
 	}
 

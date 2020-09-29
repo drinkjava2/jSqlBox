@@ -47,32 +47,32 @@ public class ManualTxTest {
 		for (int i = 0; i < 1000; i++) {
 			ctx.startTrans();
 			try {
-				Assert.assertEquals(100, ctx.eCountAll(Usr.class));
+				Assert.assertEquals(100, ctx.entityCount(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx);
-				Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
+				Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("users")));
 				Systemout.println(1 / 0);
 				new Usr().putField("firstName", "Bar").insert(ctx);
 				ctx.commitTrans();
 			} catch (Exception e) {
 				ctx.rollbackTrans();
 			}
-			Assert.assertEquals(100, ctx.eCountAll(Tail.class, tail("users")));
+			Assert.assertEquals(100, ctx.entityCount(Tail.class, tail("users")));
 		}
 
 		ctx.startTrans();
 		try {
-			Assert.assertEquals(100, ctx.eCountAll(Usr.class));
+			Assert.assertEquals(100, ctx.entityCount(Usr.class));
 			new Usr().putField("firstName", "Foo").insert(ctx);
-			Assert.assertEquals(101, ctx.eCountAll(Tail.class, tail("users")));
+			Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("users")));
 			new Usr().putField("firstName", "Bar").insert(ctx);
 			ctx.commitTrans();
 		} catch (Exception e) {
 			ctx.rollbackTrans();
 		}
-		Assert.assertEquals(102, ctx.eCountAll(Tail.class, tail("users")));
+		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("users")));
 
 		ctx.setConnectionManager(null);
-		Assert.assertEquals(102, ctx.eCountAll(Tail.class, tail("users")));
+		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("users")));
 	}
 
 }

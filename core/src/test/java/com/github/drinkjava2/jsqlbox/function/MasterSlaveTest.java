@@ -14,6 +14,7 @@ package com.github.drinkjava2.jsqlbox.function;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -32,7 +33,6 @@ import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
-import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jtransactions.tinytx.TinyTxAOP;
@@ -92,7 +92,7 @@ public class MasterSlaveTest {
 		master.setSlaves(slaves);
 		String[] ddls = master.toCreateDDL(TheUser.class);
 		for (String ddl : ddls)
-			master.iExecute(ddl, USE_BOTH);
+			master.exe(ddl, USE_BOTH);
 
 		for (long j = 0; j < SLAVE_RECORD_ROWS; j++)// insert 5 row in slaves
 			new TheUser().useContext(master).putField("id", j, "name", "Slave_Row" + j).insert(USE_SLAVE);
@@ -104,7 +104,7 @@ public class MasterSlaveTest {
 	@After
 	public void cleanup() {
 		for (String ddl : master.toDropDDL(TheUser.class))
-			master.iExecute(ddl, USE_BOTH);
+			master.exe(ddl, USE_BOTH);
 		for (DbPro pro : master.getSlaves())
 			((HikariDataSource) pro.getDataSource()).close();
 		((HikariDataSource) master.getDataSource()).close();
@@ -112,9 +112,9 @@ public class MasterSlaveTest {
 
 	@Test
 	public void testCreateTables() {
-		Assert.assertEquals(10L, master.iQueryForLongValue("select count(*) from TheUser", USE_MASTER));
-		Assert.assertEquals(5L, master.iQueryForLongValue("select count(*) from TheUser", USE_SLAVE));
-		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", DB.param("Tom"), USE_MASTER,
+		Assert.assertEquals(10L, master.qryLongValue("select count(*) from TheUser", USE_MASTER));
+		Assert.assertEquals(5L, master.qryLongValue("select count(*) from TheUser", USE_SLAVE));
+		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", param("Tom"), USE_MASTER,
 				new PrintSqlHandler());
 		Systemout.println(u.getName());
 	}
@@ -123,11 +123,11 @@ public class MasterSlaveTest {
 	public void testMasterSlaveUpdate() {
 		Systemout.println("============Test testMasterSlaveUpdate==================");
 		// AutoChoose, not in Transaction, should use Master
-		master.pUpdate("update TheUser set name=? where id=3", "NewValue");
+		master.upd("update TheUser set name=? where id=3", param("NewValue"));
 		// TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
 		TheUser u1 = new TheUser().useContext(master).putField("id", 3L).load(USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());
-		TheUser u2 = master.eLoadById(TheUser.class, 3L, USE_SLAVE);
+		TheUser u2 = master.entityLoadById(TheUser.class, 3L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row3", u2.getName());
 	}
 
@@ -135,19 +135,19 @@ public class MasterSlaveTest {
 	public void testMasterSlaveQuery() {
 		Systemout.println("============Test testMasterSlaveNoTransaction==================");
 		// AutoChoose, not in Transaction, should use slave
-		Assert.assertEquals(SLAVE_RECORD_ROWS, master.iQueryForLongValue("select count(*) from TheUser"));
-		TheUser u1 = master.eLoadById(TheUser.class, 1L);
+		Assert.assertEquals(SLAVE_RECORD_ROWS, master.qryLongValue("select count(*) from TheUser"));
+		TheUser u1 = master.entityLoadById(TheUser.class, 1L);
 		Assert.assertEquals("Slave_Row1", u1.getName());
 
 		// Force use master
-		Assert.assertEquals(MASTER_RECORD_ROWS, master.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
-		TheUser u2 = master.eLoadById(TheUser.class, 1L, USE_MASTER);
+		Assert.assertEquals(MASTER_RECORD_ROWS, master.qryLongValue(USE_MASTER, "select count(*) from TheUser"));
+		TheUser u2 = master.entityLoadById(TheUser.class, 1L, USE_MASTER);
 		Assert.assertEquals("Master_Row1", u2.getName());
 
 		// Force use slave
 		Assert.assertEquals(SLAVE_RECORD_ROWS,
-				master.iQueryForLongValue("select count(*)", USE_SLAVE, " from TheUser"));
-		TheUser u3 = master.eLoadById(TheUser.class, 1L, USE_SLAVE);
+				master.qryLongValue("select count(*)", USE_SLAVE, " from TheUser"));
+		TheUser u3 = master.entityLoadById(TheUser.class, 1L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row1", u3.getName());
 	}
 
@@ -170,17 +170,17 @@ public class MasterSlaveTest {
 	@TX
 	public void queryInTransaction(DbContext ctx) {
 		// AutoChoose, in Transaction, should use master
-		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue("select count(*) from TheUser"));
-		TheUser u1 = ctx.eLoadById(TheUser.class, 1L);
+		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.qryLongValue("select count(*) from TheUser"));
+		TheUser u1 = ctx.entityLoadById(TheUser.class, 1L);
 		Assert.assertEquals("Master_Row1", u1.getName());
 
 		// Force use master
-		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.iQueryForLongValue(USE_MASTER, "select count(*) from TheUser"));
-		TheUser u2 = ctx.eLoadById(TheUser.class, 1L, USE_MASTER);
+		Assert.assertEquals(MASTER_RECORD_ROWS, ctx.qryLongValue(USE_MASTER, "select count(*) from TheUser"));
+		TheUser u2 = ctx.entityLoadById(TheUser.class, 1L, USE_MASTER);
 		Assert.assertEquals("Master_Row1", u2.getName());
 
 		// Force use slave
-		Assert.assertEquals(SLAVE_RECORD_ROWS, ctx.iQueryForLongValue(USE_SLAVE, "select count(*) from TheUser"));
+		Assert.assertEquals(SLAVE_RECORD_ROWS, ctx.qryLongValue(USE_SLAVE, "select count(*) from TheUser"));
 		TheUser u3 = new TheUser().useContext(ctx).putField("id", 1L).load(USE_SLAVE);
 		Assert.assertEquals("Slave_Row1", u3.getName());
 	}

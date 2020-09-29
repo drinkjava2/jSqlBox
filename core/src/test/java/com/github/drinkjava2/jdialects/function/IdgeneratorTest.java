@@ -58,7 +58,7 @@ public class IdgeneratorTest extends JdialectsTestBase {
 			Assert.assertTrue(("" + id1).length() == 25);
 			Assert.assertTrue(("" + id2).length() == 32);
 			Assert.assertTrue(("" + id3).length() == 36);
-			dbPro.nExecute("insert into testNextIdTable (id1,id2,id3) values(?,?,?) ", id1, id2, id3);
+			dbPro.jdbcExecute("insert into testNextIdTable (id1,id2,id3) values(?,?,?) ", id1, id2, id3);
 		}
 		dropDB(t);
 	}
@@ -171,8 +171,8 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		table.column("name").STRING(30);
 		reBuildDB(table);
 
-		dbPro.nExecute("insert into testIdentity (name) values(?)", "Tom");
-		dbPro.nExecute("insert into testIdentity (name) values(?)", "Sam");
+		dbPro.jdbcExecute("insert into testIdentity (name) values(?)", "Tom");
+		dbPro.jdbcExecute("insert into testIdentity (name) values(?)", "Sam");
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
 		Systemout.println(idGen.getNextID(dbPro, guessedDialect, Type.INTEGER));
 

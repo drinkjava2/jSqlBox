@@ -16,7 +16,7 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
-import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.shard;
 
 import org.junit.After;
@@ -89,7 +89,7 @@ public class ShardingShardMethodTest {
 			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
 				model.setTableName("TheUser" + "_" + j);
 				for (String ddl : masters[i].getDialect().toCreateDDL(model))
-					masters[i].iExecute(ddl, USE_BOTH);
+					masters[i].exe(ddl, USE_BOTH);
 			}
 		}
 	}
@@ -101,7 +101,7 @@ public class ShardingShardMethodTest {
 			for (int j = 0; j < TABLE_QTY; j++) {
 				model.setTableName("TheUser" + "_" + j);
 				for (String ddl : masters[i].getDialect().toDropDDL(model))
-					masters[i].iExecute(ddl, USE_BOTH);
+					masters[i].exe(ddl, USE_BOTH);
 			}
 		}
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
@@ -114,9 +114,9 @@ public class ShardingShardMethodTest {
 	@Test
 	public void testInsertSQLs() {
 		Systemout.println("=========================================================");
-		masters[2].iExecute(TheUser.class, "insert into ", shard(3), " (id, name) values(?,?)", param(10, "u1"),
+		masters[2].exe(TheUser.class, "insert into ", shard(3), " (id, name) values(?,?)", param(10, "u1"),
 				USE_BOTH, new PrintSqlHandler());
-		Assert.assertEquals(1, masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shard(3),
+		Assert.assertEquals(1, masters[2].qryLongValue(TheUser.class, "select count(*) from ", shard(3),
 				USE_SLAVE, new PrintSqlHandler()));
 	}
 
@@ -138,12 +138,12 @@ public class ShardingShardMethodTest {
 
 		u2.delete(new PrintSqlHandler());// only deleted master
 		// Old style
-		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
-		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist
+		Assert.assertEquals(0, qryLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
+		Assert.assertEquals(1, qryLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist
 
 		// new style
-		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shard(), USE_MASTER));
-		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shard()));// slave exist
+		Assert.assertEquals(0, qryLongValue("select count(*) from ", u2.shard(), USE_MASTER));
+		Assert.assertEquals(1, qryLongValue("select count(*) from ", u2.shard()));// slave exist
 	}
 
 }

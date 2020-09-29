@@ -41,7 +41,7 @@ public class TinyJdbc implements NormalJdbcTool {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T nQueryForObject(String sql, Object... params) {
+	public <T> T jdbcQueryForObject(String sql, Object... params) {
 		ResultSet rs = null;
 		Connection con = null;
 		PreparedStatement pst = null;
@@ -70,12 +70,12 @@ public class TinyJdbc implements NormalJdbcTool {
 	}
 
 	@Override
-	public int nUpdate(String sql, Object... params) {
-		return nExecute(sql, params);
+	public int jdbcUpdate(String sql, Object... params) {
+		return jdbcExecute(sql, params);
 	}
 
 	@Override
-	public int nExecute(String sql, Object... params) {
+	public int jdbcExecute(String sql, Object... params) {
 		Connection con = null;
 		PreparedStatement pst = null;
 		try {

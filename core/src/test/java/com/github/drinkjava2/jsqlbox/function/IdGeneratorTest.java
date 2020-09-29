@@ -138,7 +138,7 @@ public class IdGeneratorTest extends TestBase {
 			Assert.assertTrue(("" + id1).length() == 25);
 			Assert.assertTrue(("" + id2).length() == 32);
 			Assert.assertTrue(("" + id3).length() == 36);
-			ctx.iExecute("insert into testNextIdTable (id1,id2,id3) ", param(id1, id2, id3), valuesQuestions());
+			ctx.exe("insert into testNextIdTable (id1,id2,id3) ", param(id1, id2, id3), valuesQuestions());
 		}
 	}
 
@@ -255,8 +255,8 @@ public class IdGeneratorTest extends TestBase {
 		table.column("name").STRING(30);
 		createAndRegTables(table);
 
-		ctx.nExecute("insert into testIdentity (name) values(?)", "Tom");
-		ctx.nExecute("insert into testIdentity (name) values(?)", "Sam");
+		ctx.jdbcExecute("insert into testIdentity (name) values(?)", "Tom");
+		ctx.jdbcExecute("insert into testIdentity (name) values(?)", "Sam");
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
 		Systemout.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
 

@@ -43,7 +43,7 @@ public class IYDU7Test extends TestBase {
 	public void testQuery1() {
 		Systemout.println("\ntest testQuery1");
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), Ademo.class, Bdemo.class, give("b", "a"),
+		EntityNet net = ctx.qry(new EntityNetHandler(), Ademo.class, Bdemo.class, give("b", "a"),
 				"select a.**, b.** from Ademo a, Bdemo b where a.bid=b.bid order by a.aid");
 		List<Ademo> aList = net.pickEntityList("a");
 		for (Ademo a : aList) {
@@ -57,7 +57,7 @@ public class IYDU7Test extends TestBase {
 	public void testQuery2() {
 		Systemout.println("\ntest testQuery2");
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), Ademo.class, Bdemo.class, Cdemo.class, give("b", "a"),
+		EntityNet net = ctx.qry(new EntityNetHandler(), Ademo.class, Bdemo.class, Cdemo.class, give("b", "a"),
 				give("c", "a", "cdemoList"), "select a.**, b.**, c.** from Ademo a", //
 				" left join Bdemo b on b.bid=a.bid ", //
 				" left join Cdemo c on c.aid=a.aid ", //

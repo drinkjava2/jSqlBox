@@ -71,12 +71,12 @@ public class DynamicConfigTest extends TestBase {
 
 		// A Fake PKey dynamically created
 		model.column("id").pkey();
-		ctx.eInsert(u, model);
+		ctx.entityInsert(u, model);
 
 		u.setUserName("Tom");
 		u.update(model);
 
-		Assert.assertEquals(1L, ctx.iQueryForLongValue("select count(*) from table2", model));
+		Assert.assertEquals(1L, ctx.qryLongValue("select count(*) from table2", model));
 	}
 
 	@Test
@@ -90,11 +90,11 @@ public class DynamicConfigTest extends TestBase {
 		u1.setUserName("Tom");
 		u1.insert(model);
 
-		UserDemo u2 = ctx.eLoadById(UserDemo.class, "u1", model);
+		UserDemo u2 = ctx.entityLoadById(UserDemo.class, "u1", model);
 		Assert.assertEquals("Tom", u2.getUserName());
 
 		model.column("userName").setTransientable(true);
-		UserDemo u3 = ctx.eLoadById(UserDemo.class, "u1", model);
+		UserDemo u3 = ctx.entityLoadById(UserDemo.class, "u1", model);
 		Assert.assertEquals(null, u3.getUserName());
 	}
 
@@ -114,11 +114,11 @@ public class DynamicConfigTest extends TestBase {
 		UserDemo newU = u.loadById(u.getId(), t);
 		Assert.assertEquals("Tom", newU.getUserName());
 
-		UserDemo u2 = ctx.eLoadById(UserDemo.class, u.getId(), t);
+		UserDemo u2 = ctx.entityLoadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals("Tom", u2.getUserName());
 
 		t.getColumnByFieldName("userName").setTransientable(true);// ignore userName
-		UserDemo u3 = ctx.eLoadById(UserDemo.class, u.getId(), t);
+		UserDemo u3 = ctx.entityLoadById(UserDemo.class, u.getId(), t);
 		Assert.assertEquals(null, u3.getUserName());
 	}
 
@@ -126,7 +126,7 @@ public class DynamicConfigTest extends TestBase {
 	public void doExceptionTest() {
 		createAndRegTables(UserDemo.class);
 		UserDemo u = new UserDemo().putField("userName", "Tom").insert();
-		ctx.eLoadById(UserDemo.class, u.getId());
+		ctx.entityLoadById(UserDemo.class, u.getId());
 	}
 
 }

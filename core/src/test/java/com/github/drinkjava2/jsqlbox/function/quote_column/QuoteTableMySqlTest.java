@@ -76,16 +76,16 @@ public class QuoteTableMySqlTest extends TestBase {
 		DbContext ctx1 = new DbContext(ctx.getDataSource());
 		ctx1.setIgnoreNull(true);
 		Order u = new Order("Name_u", "");
-		ctx1.eInsert(u);
+		ctx1.entityInsert(u);
 		ctx1.setIgnoreEmpty(true);
 		Order u2 = new Order("Name_u2", "");
-		ctx1.eInsert(u2);
+		ctx1.entityInsert(u2);
 		ctx1.setIgnoreNull(false);
 		ctx1.setIgnoreEmpty(false);
 		Order u3 = new Order("Name_u3", "");
-		ctx1.eInsert(u3);
+		ctx1.entityInsert(u3);
 		Order u4 = new Order("Name_u4", "");
-		ctx1.eInsert(u4, IGNORE_EMPTY);
+		ctx1.entityInsert(u4, IGNORE_EMPTY);
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class QuoteTableMySqlTest extends TestBase {
 		Order u2 = new Order("Name2", "");
 		Order u3 = new Order("Name3", "");
 		Order u4 = new Order().putField("name", "Name4", "address", "Address4");
-		ctx.eInsert(u1);
+		ctx.entityInsert(u1);
 		u2.insert(IGNORE_NULL);
 		u3.insert(IGNORE_EMPTY);
 		u4.insert(IGNORE_NULL);
@@ -115,67 +115,67 @@ public class QuoteTableMySqlTest extends TestBase {
 		u2.setAddress("NewAddress2");
 		u3.setAddress("NewAddress3");
 		u4.setAddress("NewAddress4");
-		ctx.eUpdate(u1);
+		ctx.entityUpdate(u1);
 		u2.update();
-		Assert.assertEquals(1, ctx.eUpdateTry(u3));
+		Assert.assertEquals(1, ctx.entityUpdateTry(u3));
 		Assert.assertEquals(1, u4.updateTry());
 
 		// =======load
-		Assert.assertEquals("NewAddress1", ctx.eLoad(u1).getAddress());
+		Assert.assertEquals("NewAddress1", ctx.entityLoad(u1).getAddress());
 		Assert.assertEquals("NewAddress2", u2.load().getAddress());
-		Assert.assertEquals(1, ctx.eLoadTry(u3));
+		Assert.assertEquals(1, ctx.entityLoadTry(u3));
 		Assert.assertEquals("NewAddress3", u3.getAddress());
 		Assert.assertEquals(1, u4.loadTry());
 		Assert.assertEquals("NewAddress4", u4.getAddress());
 
 		// =======load by id (id is basic value)
-		Assert.assertEquals("NewAddress1", ctx.eLoadById(Order.class, "Name1").getAddress());
+		Assert.assertEquals("NewAddress1", ctx.entityLoadById(Order.class, "Name1").getAddress());
 		Assert.assertEquals("NewAddress2", u2.loadById("Name2").getAddress());
-		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(Order.class, "Name3").getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(Order.class, "Name3").getAddress());
 		Assert.assertEquals("NewAddress4", u4.loadByIdTry("Name4").getAddress());
 
 		// =======load by id (id is map)
 		Map<String, Object> mp = new HashMap<String, Object>();
 		mp.put("name", "Name1");
-		Assert.assertEquals("NewAddress1", ctx.eLoadById(Order.class, mp).getAddress());
+		Assert.assertEquals("NewAddress1", ctx.entityLoadById(Order.class, mp).getAddress());
 		mp.put("name", "Name2");
 		Assert.assertEquals("NewAddress2", u2.loadById(mp).getAddress());
 		mp.put("name", "Name3");
-		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(Order.class, mp).getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(Order.class, mp).getAddress());
 		mp.put("name", "Name4");
 		Assert.assertEquals("NewAddress4", u4.loadByIdTry(mp).getAddress());
 
 		// =======load by id (id is Tail)
 		Order tail = new Order().putTail("name", "Name1");
-		Assert.assertEquals("NewAddress1", ctx.eLoadById(Order.class, tail, TAIL).getAddress());
+		Assert.assertEquals("NewAddress1", ctx.entityLoadById(Order.class, tail, TAIL).getAddress());
 		tail.putTail("name", "Name2");
 		Assert.assertEquals("NewAddress2", u2.loadById(tail, TAIL).getAddress());
 		tail.putTail("name", "Name3");
-		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(Order.class, tail, TAIL).getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(Order.class, tail, TAIL).getAddress());
 		tail.putTail("name", "Name4");
 		Assert.assertEquals("NewAddress4", u4.loadByIdTry(tail, TAIL).getAddress());
 
 		// =======load by id (id is Entity bean)
-		Assert.assertEquals("NewAddress1", ctx.eLoadById(Order.class, u1).getAddress());
+		Assert.assertEquals("NewAddress1", ctx.entityLoadById(Order.class, u1).getAddress());
 		Assert.assertEquals("NewAddress2", u1.loadById(u2).getAddress());
-		Assert.assertEquals("NewAddress3", ctx.eLoadByIdTry(Order.class, u3).getAddress());
+		Assert.assertEquals("NewAddress3", ctx.entityLoadByIdTry(Order.class, u3).getAddress());
 		Assert.assertEquals("NewAddress4", u1.loadByIdTry(u4).getAddress());
 
 		// =======findAll
-		Assert.assertEquals(4, ctx.eFindAll(Order.class).size());
+		Assert.assertEquals(4, ctx.entityFind(Order.class).size());
 		Assert.assertEquals(4, new Order().findAll().size());
 
 		// ========fidnBySql
-		Assert.assertEquals(4, ctx.eFindBySQL(Order.class, "select * from `Order`").size());
+		Assert.assertEquals(4, ctx.beanFindBySql(Order.class, "select * from `Order`").size());
 		Assert.assertEquals(4, u1.findBySQL("select * from `Order`").size());
 
 		// ========findBySample
-		Assert.assertEquals(1, ctx.eFindBySample(u1).size());
-		Assert.assertEquals(1, ctx.eFindAll(Order.class, new SampleItem(u2).sql(" where  ").notNullFields()).size());
+		Assert.assertEquals(1, ctx.entityFindBySample(u1).size());
+		Assert.assertEquals(1, ctx.entityFind(Order.class, new SampleItem(u2).sql(" where  ").notNullFields()).size());
 		Order sample = new Order("Nam", "addr");
-		Assert.assertEquals(4, ctx.eFindAll(Order.class, new SampleItem(sample).sql(" where (").allFields()
+		Assert.assertEquals(4, ctx.entityFind(Order.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param(":name%").sql(" order by name")).size());
-		Assert.assertEquals(4, ctx.eFindBySQL(Order.class, new SampleItem(sample).sql("select * from `Order` where (")
+		Assert.assertEquals(4, ctx.beanFindBySql(Order.class, new SampleItem(sample).sql("select * from `Order` where (")
 				.nullFields().sql(") or name like ?").param(":name%").sql(" order by name")).size());
 
 		Assert.assertEquals(1, u2.findBySample().size());
@@ -189,11 +189,11 @@ public class QuoteTableMySqlTest extends TestBase {
 						" order by name").size());
 
 		// =======countAll
-		Assert.assertEquals(4, ctx.eCountAll(Order.class));
+		Assert.assertEquals(4, ctx.entityCount(Order.class));
 		Assert.assertEquals(4, new Order().countAll());
 
 		// =======exist
-		Assert.assertEquals(true, ctx.eExist(u1));
+		Assert.assertEquals(true, ctx.entityExist(u1));
 		Assert.assertEquals(true, u2.existId());
 
 		// =======existStrict
@@ -202,7 +202,7 @@ public class QuoteTableMySqlTest extends TestBase {
 		Assert.assertFalse(u1.existStrict());
 
 		// =======existById (id is basic value)
-		Assert.assertEquals(true, ctx.eExistById(Order.class, "Name1"));
+		Assert.assertEquals(true, ctx.entityExistById(Order.class, "Name1"));
 		Assert.assertEquals(true, u1.existById("Name2"));
 
 		// =======existById (id is Map)
@@ -210,24 +210,24 @@ public class QuoteTableMySqlTest extends TestBase {
 		m1.put("name", "Name1");
 		Map<String, Object> m2 = new HashMap<String, Object>();
 		m2.put("name", "Name2");
-		Assert.assertEquals(true, ctx.eExistById(Order.class, m1));
+		Assert.assertEquals(true, ctx.entityExistById(Order.class, m1));
 		Assert.assertEquals(true, u1.existById(m2));
 
 		// =======existById (id is tail)
 		Order t1 = new Order().putTail("name", "Name1");
 		Order t2 = new Order().putTail("name", "Name2");
-		Assert.assertEquals(true, ctx.eExistById(Order.class, t1, TAIL));
+		Assert.assertEquals(true, ctx.entityExistById(Order.class, t1, TAIL));
 		Assert.assertEquals(true, u1.existById(t2, TAIL));
 
 		// =======existById (id is entity bean)
-		Assert.assertEquals(true, ctx.eExistById(Order.class, u1));
+		Assert.assertEquals(true, ctx.entityExistById(Order.class, u1));
 		Assert.assertEquals(true, u1.existById(u2));
 
 		// =======delete
-		ctx.eDelete(u1);
+		ctx.entityDelete(u1);
 		u2.delete();
-		Assert.assertEquals(1, ctx.eDeleteTry(u3));
-		Assert.assertEquals(0, ctx.eDeleteTry(u3));
+		Assert.assertEquals(1, ctx.entityDeleteTry(u3));
+		Assert.assertEquals(0, ctx.entityDeleteTry(u3));
 		Assert.assertEquals(1, u4.deleteTry());
 		Assert.assertEquals(0, u4.deleteTry());
 		Assert.assertEquals(0, u1.countAll());
@@ -237,10 +237,10 @@ public class QuoteTableMySqlTest extends TestBase {
 		new Order("Name2", "Address2").insert();
 		new Order("Name3", "Address3").insert();
 		new Order("Name4", "Address4").insert();
-		ctx.eDeleteById(Order.class, "Name1");
+		ctx.entityDeleteById(Order.class, "Name1");
 		u1.deleteById("Name2");
-		Assert.assertEquals(1, ctx.eDeleteByIdTry(Order.class, "Name3"));
-		Assert.assertEquals(0, ctx.eDeleteByIdTry(Order.class, "Name3"));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(Order.class, "Name3"));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(Order.class, "Name3"));
 		Assert.assertEquals(1, u1.deleteByIdTry("Name4"));
 		Assert.assertEquals(0, u1.deleteByIdTry("Name4"));
 		Assert.assertEquals(0, u1.countAll());
@@ -252,12 +252,12 @@ public class QuoteTableMySqlTest extends TestBase {
 		new Order("Name4", "Address4").insert();
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("name", "Name1");
-		ctx.eDeleteById(Order.class, m);
+		ctx.entityDeleteById(Order.class, m);
 		m.put("name", "Name2");
 		u1.deleteById(m);
 		m.put("name", "Name3");
-		Assert.assertEquals(1, ctx.eDeleteByIdTry(Order.class, m));
-		Assert.assertEquals(0, ctx.eDeleteByIdTry(Order.class, m));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(Order.class, m));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(Order.class, m));
 		m.put("name", "Name4");
 		Assert.assertEquals(1, u1.deleteByIdTry(m));
 		Assert.assertEquals(0, u1.deleteByIdTry(m));
@@ -268,10 +268,10 @@ public class QuoteTableMySqlTest extends TestBase {
 		u2 = new Order("Name2", "Address2").insert();
 		u3 = new Order("Name3", "Address3").insert();
 		u4 = new Order("Name4", "Address4").insert();
-		ctx.eDeleteById(Order.class, u1);
+		ctx.entityDeleteById(Order.class, u1);
 		u1.deleteById(u2);
-		Assert.assertEquals(1, ctx.eDeleteByIdTry(Order.class, u3));
-		Assert.assertEquals(0, ctx.eDeleteByIdTry(Order.class, u3));
+		Assert.assertEquals(1, ctx.entityDeleteByIdTry(Order.class, u3));
+		Assert.assertEquals(0, ctx.entityDeleteByIdTry(Order.class, u3));
 		Assert.assertEquals(1, u1.deleteByIdTry(u4));
 		Assert.assertEquals(0, u1.deleteByIdTry(u4));
 		Assert.assertEquals(0, u1.countAll());

@@ -78,13 +78,13 @@ public class GtxUnlockServTest {
 		GtxUnlockServTest t = new GtxUnlockServTest();
 		t.init();
 		t.commitFail();
-		Assert.assertEquals(1, t.ctx[0].eCountAll(Usr.class));
-		Assert.assertEquals(2, t.ctx[1].eCountAll(Usr.class));
-		Assert.assertEquals(0, t.ctx[2].eCountAll(Usr.class));
+		Assert.assertEquals(1, t.ctx[0].entityCount(Usr.class));
+		Assert.assertEquals(2, t.ctx[1].entityCount(Usr.class));
+		Assert.assertEquals(0, t.ctx[2].entityCount(Usr.class));
 		GtxUnlockServ.start(t.ctx[0], 1, 2);
-		Assert.assertEquals(0, t.ctx[0].eCountAll(Usr.class));
-		Assert.assertEquals(0, t.ctx[1].eCountAll(Usr.class));
-		Assert.assertEquals(0, t.ctx[2].eCountAll(Usr.class));
+		Assert.assertEquals(0, t.ctx[0].entityCount(Usr.class));
+		Assert.assertEquals(0, t.ctx[1].entityCount(Usr.class));
+		Assert.assertEquals(0, t.ctx[2].entityCount(Usr.class));
 	}
 
 }

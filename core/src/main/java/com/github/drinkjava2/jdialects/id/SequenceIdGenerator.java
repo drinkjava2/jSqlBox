@@ -67,7 +67,7 @@ public class SequenceIdGenerator implements IdGenerator {
 		DialectException.assureNotEmpty(sequenceName, "sequenceName can not be empty");
 		String sequenctSQL = dialect.ddlFeatures.getSequenceNextValString();
 		sequenctSQL = StrUtils.replace(sequenctSQL, "_SEQNAME", sequenceName);
-		return jdbc.nQueryForObject(sequenctSQL);
+		return jdbc.jdbcQueryForObject(sequenctSQL);
 	}
 	 
 	@Override

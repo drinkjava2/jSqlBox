@@ -11,6 +11,9 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.shardDB;
+
 import java.sql.Connection;
 import java.util.HashSet;
 import java.util.List;
@@ -110,7 +113,7 @@ public abstract class GtxUtils {// NOSONAR
 
 		locker.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
-			locker.eInsert(gtxInfo.getGtxId());
+			locker.entityInsert(gtxInfo.getGtxId());
 			Long logNo = 1L;
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
@@ -121,10 +124,10 @@ public abstract class GtxUtils {// NOSONAR
 				md.getColumnByColName(GtxUtils.GTXDB).setValue(gtxLog.getGtxDB());
 				md.getColumnByColName(GtxUtils.GTXTB).setValue(gtxLog.getGtxTB());
 				md.getColumnByColName(GtxUtils.GTXENTITY).setValue(entity.getClass().getName());
-				locker.eInsert(entity, md);
+				locker.entityInsert(entity, md);
 			}
 			for (GtxLock lock : gtxInfo.getGtxLockList())
-				locker.eInsert(lock);
+				locker.entityInsert(lock);
 			locker.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			locker.getConnectionManager().rollbackTransaction();
@@ -140,8 +143,8 @@ public abstract class GtxUtils {// NOSONAR
 		locker.getConnectionManager().startTransaction(Connection.TRANSACTION_READ_COMMITTED);
 		try {
 			String gid = gtxInfo.getGtxId().getGid();
-			locker.eDelete(gtxInfo.getGtxId());// delete GtxID! here will auto sharding
-			locker.pExecute("delete from gtxlock where gid=?", gid, DB.shardDB(gid));
+			locker.entityDelete(gtxInfo.getGtxId());// delete GtxID! here will auto sharding
+			locker.exe("delete from gtxlock where gid=?",  param(gid), DB.shardDB(gid));
 			Set<String> tableSet = new HashSet<String>();
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
@@ -149,7 +152,7 @@ public abstract class GtxUtils {// NOSONAR
 				tableSet.add(md.getTableName().toLowerCase());
 			}
 			for (String table : tableSet)
-				locker.iExecute("delete from ", table, " where ", GTXID, "=?", DB.param(gid), DB.shardDB(gid));
+				locker.exe("delete from ", table, " where ", GTXID, "=?", param(gid), shardDB(gid));
 			locker.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			locker.getConnectionManager().rollbackTransaction();

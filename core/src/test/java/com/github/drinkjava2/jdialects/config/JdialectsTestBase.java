@@ -51,7 +51,7 @@ public class JdialectsTestBase {
 	protected void quietExecuteDDLs(String... ddls) {
 		for (String sql : ddls) {
 			try {
-				dbPro.nExecute(sql);
+				dbPro.jdbcExecute(sql);
 			} catch (Exception e) {
 			}
 		}
@@ -59,7 +59,7 @@ public class JdialectsTestBase {
 
 	protected void executeDDLs(String... sqls) {
 		for (String sql : sqls)
-			dbPro.nExecute(sql);
+			dbPro.jdbcExecute(sql);
 	}
 
 	public void reBuildDB(TableModel... tables) {

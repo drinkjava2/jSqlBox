@@ -90,7 +90,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testAutoAlias() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(targets, "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
+		EntityNet net = ctx.qry(targets, "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ", //
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
@@ -152,7 +152,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testLeftJoinSQL() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(targets, AUTO_SQL);
+		EntityNet net = ctx.qry(targets, AUTO_SQL);
 		List<User> userList = net.pickEntityList("u");
 		for (User u : userList) {
 			Systemout.println("User:" + u.getId());
@@ -166,9 +166,9 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testJoinQuary() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(targets, AUTO_SQL);
-		ctx.iQuery(net, User.class, Email.class, give("e", "u"), AUTO_SQL);
-		ctx.iQuery(net, User.class, Address.class, giveBoth("a", "u"), AUTO_SQL);
+		EntityNet net = ctx.qry(targets, AUTO_SQL);
+		ctx.qry(net, User.class, Email.class, give("e", "u"), AUTO_SQL);
+		ctx.qry(net, User.class, Address.class, giveBoth("a", "u"), AUTO_SQL);
 		User u = net.pickOneEntity(User.class, "u2");
 		Systemout.println(u);
 
@@ -197,7 +197,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testGiveAlias() {// Assign alias name "t" to User, "tr" to UserRole, "r" to Role
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNet(), User.class, UserRole.class, Role.class, alias("t", "tr", "r"),
+		EntityNet net = ctx.qry(new EntityNet(), User.class, UserRole.class, Role.class, alias("t", "tr", "r"),
 				RolePrivilege.class, Privilege.class, giveBoth("r", "t"), giveBoth("p", "t"), AUTO_SQL, //
 				" order by t.id, tr.id, r.id, rp.id, p.id");
 		List<User> userList = net.pickEntityList(User.class);
@@ -218,7 +218,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testManualLoad() {
 		insertDemoData();
-		List<User> users = ctx.eFindAll(User.class);
+		List<User> users = ctx.entityFind(User.class);
 
 		for (User u : users) {
 			Systemout.println("User:" + u.getId());
@@ -256,13 +256,13 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testNoSqlQuery() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNet(), User.class, AUTO_SQL);
-		ctx.iQuery(net, UserRole.class, AUTO_SQL);
-		ctx.iQuery(net, Role.class, AUTO_SQL);
-		ctx.iQuery(net, RolePrivilege.class, AUTO_SQL);
-		ctx.iQuery(net, Privilege.class, AUTO_SQL);
-		ctx.iQuery(net, Address.class, AUTO_SQL);
-		ctx.iQuery(net, Email.class, AUTO_SQL);
+		EntityNet net = ctx.qry(new EntityNet(), User.class, AUTO_SQL);
+		ctx.qry(net, UserRole.class, AUTO_SQL);
+		ctx.qry(net, Role.class, AUTO_SQL);
+		ctx.qry(net, RolePrivilege.class, AUTO_SQL);
+		ctx.qry(net, Privilege.class, AUTO_SQL);
+		ctx.qry(net, Address.class, AUTO_SQL);
+		ctx.qry(net, Email.class, AUTO_SQL);
 		User u = net.pickOneEntity(User.class, "u2");
 		Systemout.println("User:" + u.getId());
 
@@ -314,15 +314,15 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testSharpSharp() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNet(), User.class, Address.class, giveBoth("u", "a"),
+		EntityNet net = ctx.qry(new EntityNet(), User.class, Address.class, giveBoth("u", "a"),
 				"select u.##, a.** from usertb u left join addresstb a on u.id=a.userId");
 		List<User> userList = net.pickEntityList("u");
 		Assert.assertTrue(null == userList.get(0).getUserName());// userName is null!
 
-		ctx.iQuery(net, User.class, Email.class, giveBoth("u", "e"), AUTO_SQL);
+		ctx.qry(net, User.class, Email.class, giveBoth("u", "e"), AUTO_SQL);
 		userList = net.pickEntityList("u");// userName is not null!
 
-		ctx.iQuery(net, User.class, UserRole.class, giveBoth("u", "ur"),
+		ctx.qry(net, User.class, UserRole.class, giveBoth("u", "ur"),
 				"select u.##, ur.** from usertb u left join userroletb ur on u.id=ur.userId");
 		userList = net.pickEntityList("u");// userName is still not null!
 		Assert.assertTrue(null != userList.get(0).getUserName());
@@ -339,7 +339,7 @@ public class EntityNetTest extends TestBase {
 	@Test
 	public void testTail() {
 		insertDemoData();
-		EntityNet net = ctx.iQuery(new EntityNetHandler(), User.class, UserRole.class, Role.class, giveBoth("r", "u"), //
+		EntityNet net = ctx.qry(new EntityNetHandler(), User.class, UserRole.class, Role.class, giveBoth("r", "u"), //
 				"select u.**, u.username as u_name2, ur.**, r.**, r.id as r_id2 from usertb u ", //
 				" left join userroletb ur on u.id=ur.userid ", //
 				" left join roletb r on ur.rid=r.id ");

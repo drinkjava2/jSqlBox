@@ -60,7 +60,7 @@ public class AnnotationTxDemoTest {
 
 	@TX
 	public void txInsert() {
-		ctx.nExecute("insert into user_tb (id) values('123')");
+		ctx.jdbcExecute("insert into user_tb (id) values('123')");
 		Systemout.println(1 / 0); // DIV 0!
 	}
 
@@ -71,13 +71,13 @@ public class AnnotationTxDemoTest {
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
-		ctx.nExecute(ddl);
+		ctx.jdbcExecute(ddl);
 		try {
 			tester.txInsert();// this one did not insert, rolled back
 		} catch (Exception e) {
 			Systemout.println("Exception found: " + e.getMessage());
 		}
-		ctx.nExecute("drop table user_tb");
+		ctx.jdbcExecute("drop table user_tb");
 		JBEANBOX.close();// Close DataSource Pool
 	}
 

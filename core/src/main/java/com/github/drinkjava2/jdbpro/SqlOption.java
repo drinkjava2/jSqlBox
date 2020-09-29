@@ -65,9 +65,6 @@ public enum SqlOption {
 	/** Mark a ENABLE_HANDLERS SqlOption, enable given handlers */
 	ENABLE_HANDLERS,
 
-	/** Mark a USE_TEMPLATE SqlOption, Force use template style */
-	USE_TEMPLATE,
-
 	// ------Sql Operation type--------
 	/** Mark a EXECUTE SqlOption */
 	EXECUTE,

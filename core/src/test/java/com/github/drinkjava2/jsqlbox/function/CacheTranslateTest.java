@@ -152,11 +152,11 @@ public class CacheTranslateTest extends TestBase {
 		for (int i = 0; i < n; i++)
 			new Order().putField("id", "o" + i, "orderNO", "order" + i, "userId", i, "groupId", i).insert();
 		ctx.nBatchEnd();
-		Map<Integer, Map<String, Object>> users = ctx.iQuery("select * from users", new KeyedHandler<Integer>("id"));
-		Map<Integer, Map<String, Object>> groupnm = ctx.iQuery("select * from groupnm", new KeyedHandler<Integer>("id"));
+		Map<Integer, Map<String, Object>> users = ctx.qry("select * from users", new KeyedHandler<Integer>("id"));
+		Map<Integer, Map<String, Object>> groupnm = ctx.qry("select * from groupnm", new KeyedHandler<Integer>("id"));
 		long oldTime = System.currentTimeMillis();
 		List<Map<String, Object>> orders = ctx
-				.iQueryForMapList("select id,orderNo,userId,groupId from orders where id>'10' ");
+				.qryMapList("select id,orderNo,userId,groupId from orders where id>'10' ");
 		CacheTransUtils.translate(orders, users, "userID", "name", "userName", "age", "userAge", groupnm, "groupId",
 				"groupName", "groupName");
 		Systemout.println("Cache Translate, Time used(ms):" + (System.currentTimeMillis() - oldTime));
@@ -175,7 +175,7 @@ public class CacheTranslateTest extends TestBase {
 			new Order().putField("id", "o" + i, "orderNO", "order" + i, "userId", i, "groupId", i).insert();
 		ctx.nBatchEnd();
 		long oldTime = System.currentTimeMillis();
-		List<Map<String, Object>> orders = ctx.iQueryForMapList("select o.*, u.*, g.* from orders o  "
+		List<Map<String, Object>> orders = ctx.qryMapList("select o.*, u.*, g.* from orders o  "
 				+ " left join users u on o.userId=u.id left join groupnm g on o.groupId=g.id where o.id>'10' ");
 		Systemout.println("No Cache Translate, Time used(ms):" + (System.currentTimeMillis() - oldTime));
 		Assert.assertEquals(7, orders.get(0).size());

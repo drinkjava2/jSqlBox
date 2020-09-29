@@ -13,6 +13,7 @@ package com.github.drinkjava2.jdialects;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -923,10 +924,8 @@ public class StrUtils {
 	 */
 	public static String[] joinStringArray(String[] array1, String[] array2) {
 		List<String> l = new ArrayList<String>();
-		for (String string : array1)
-			l.add(string);
-		for (String string : array2)
-			l.add(string);
+		Collections.addAll(l, array1);
+		Collections.addAll(l, array2);
 		return l.toArray(new String[l.size()]);
 	}
 
@@ -1012,8 +1011,8 @@ public class StrUtils {
 
 	/** Simple replace danderous chars in String to avoid SQL injection attack */
 	public static String simpleReplaceDangerous(String str) {
-		str = str.replaceAll(";", "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-				.replaceAll("'", "''").replaceAll("--", "").replaceAll("/", "").replaceAll("%", "");
+		str = str.replace(";", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+				.replace("'", "''").replace("--", "").replace("/", "").replace("%", "");
 		return str;
 	}
 
@@ -1022,10 +1021,11 @@ public class StrUtils {
 	 * usually used for an "in" condition SQL String, for example: <br/>
 	 * 
 	 * array("a","b",1,2) return String ('a','b',1,2)
+	 * array() return String (null)
 	 */
 	public static String array(Object... arr) {
-		if (arr.length == 0) {
-			return "";
+		if (arr==null || arr.length == 0) {
+			return "(null)";
 		}
 		StringBuilder builder = new StringBuilder(200);
 		builder.append("(");
@@ -1045,6 +1045,7 @@ public class StrUtils {
 			builder.setLength(builder.length() - 1);
 			return builder.append(")").toString();
 		}
-		return "";
+		return "(null)";
 	}
+
 }

@@ -38,7 +38,7 @@ public class ActiveEntityTest  extends TestBase implements ActiveEntity<ActiveEn
 		createAndRegTables(ActiveEntityTest.class);
 		for (int i = 0; i < 100; i++)
 			new ActiveEntityTest().putField("name", "name" + i, "age", i).insert();
-		Assert.assertEquals(100, iQueryForLongValue("select count(*) from ActiveEntityTest"));
+		Assert.assertEquals(100, qryLongValue("select count(*) from ActiveEntityTest"));
 		List<ActiveEntityTest> userList = new ActiveEntityTest()
 				.findBySQL("select * from ActiveEntityTest where age>=?", param(50));
 		Assert.assertEquals(50, userList.size());

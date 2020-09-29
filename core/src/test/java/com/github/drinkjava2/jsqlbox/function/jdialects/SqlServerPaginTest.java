@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects;
 
-import static com.github.drinkjava2.jsqlbox.DB.iQueryForEntityList;
+import static com.github.drinkjava2.jsqlbox.DB.qryEntityList;
 import static com.github.drinkjava2.jsqlbox.DB.pagin;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class SqlServerPaginTest extends TestBase {
 			return;
 		Systemout.println("========================sqlServerPaginTest===========");
 		// ctx.setDialect(Dialect.SQLServerDialect);
-		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
+		demos = qryEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
 		for (Demo demo : demos)
 			Systemout.print(demo.getAge() + ", ");
 		Systemout.println();
@@ -52,17 +52,17 @@ public class SqlServerPaginTest extends TestBase {
 			return;
 		Systemout.println("========================sqlServer2012PaginTest===========");
 		// ctx.setDialect(Dialect.SQLServer2005Dialect);
-		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
+		demos = qryEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
 		for (Demo demo : demos)
 			Systemout.print(demo.getAge() + ", ");
 		Systemout.println();
 
-		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(3, 10), new PrintSqlHandler());
+		demos = qryEntityList(Demo.class, "select * from demo order by age", pagin(3, 10), new PrintSqlHandler());
 		for (Demo demo : demos)
 			Systemout.print(demo.getAge() + ", ");
 		Systemout.println();
 
-		demos = iQueryForEntityList(Demo.class, "select * from demo ", pagin(3, 10), new PrintSqlHandler());
+		demos = qryEntityList(Demo.class, "select * from demo ", pagin(3, 10), new PrintSqlHandler());
 		for (Demo demo : demos)
 			Systemout.print(demo.getAge() + ", ");
 		Systemout.println();
@@ -74,12 +74,12 @@ public class SqlServerPaginTest extends TestBase {
 			return;
 		Systemout.println("========================sqlServer2012PaginTest===========");
 		// ctx.setDialect(Dialect.SQLServer2012Dialect);
-		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
+		demos = qryEntityList(Demo.class, "select * from demo order by age", pagin(1, 10), new PrintSqlHandler());
 		for (Demo demo : demos)
 			Systemout.print(demo.getAge() + ", ");
 		Systemout.println();
 
-		demos = iQueryForEntityList(Demo.class, "select * from demo order by age", pagin(3, 10), new PrintSqlHandler());
+		demos = qryEntityList(Demo.class, "select * from demo order by age", pagin(3, 10), new PrintSqlHandler());
 		for (Demo demo : demos)
 			Systemout.print(demo.getAge() + ", ");
 		Systemout.println();

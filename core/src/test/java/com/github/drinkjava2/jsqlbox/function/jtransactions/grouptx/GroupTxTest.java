@@ -48,16 +48,16 @@ public class GroupTxTest {
 
 		String[] ddlArray = ctx1.toDropAndCreateDDL(Usr.class);
 		for (String ddl : ddlArray) {
-			ctx1.nExecute(ddl);
-			ctx2.nExecute(ddl);
+			ctx1.jdbcExecute(ddl);
+			ctx2.jdbcExecute(ddl);
 		}
 
 		for (int i = 1; i <= 100; i++)
 			new Usr().setFirstName("Foo" + i).setLastName("Bar" + i).setAge(i).insert(ctx1);
 		for (int i = 1; i <= 100; i++)
 			new Usr().setFirstName("FOO" + i).setLastName("BAR" + i).setAge(i).insert(ctx2);
-		Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(100, ctx1.entityCount(Usr.class));
+		Assert.assertEquals(100, ctx2.entityCount(Usr.class));
 	}
 
 	@After
@@ -71,20 +71,20 @@ public class GroupTxTest {
 		for (int i = 0; i < 100; i++) {
 			ctx1.startTrans();
 			try {
-				Assert.assertEquals(100, ctx1.eCountAll(Usr.class));
+				Assert.assertEquals(100, ctx1.entityCount(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx1);
-				Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));
+				Assert.assertEquals(101, ctx1.entityCount(Tail.class, tail("users")));
 
-				Assert.assertEquals(100, ctx2.eCountAll(Usr.class));
+				Assert.assertEquals(100, ctx2.entityCount(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx2);
-				Assert.assertEquals(101, ctx2.eCountAll(Tail.class, tail("users")));
+				Assert.assertEquals(101, ctx2.entityCount(Tail.class, tail("users")));
 				Systemout.println(1 / 0); // Div 0!
 				ctx1.commitTrans();
 			} catch (Exception e) {
 				ctx1.rollbackTrans();
 			}
-			Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
-			Assert.assertEquals(100, ctx2.eCountAll(Tail.class, tail("users")));
+			Assert.assertEquals(100, ctx1.entityCount(Tail.class, tail("users")));
+			Assert.assertEquals(100, ctx2.entityCount(Tail.class, tail("users")));
 		}
 	}
 
@@ -94,24 +94,24 @@ public class GroupTxTest {
 			ctx1.startTrans();
 			try {
 				new Usr().putField("firstName", "Foo").insert(ctx1);
-				ctx1.eInsert(new Usr().setFirstName("Foo"), ctx2);
+				ctx1.entityInsert(new Usr().setFirstName("Foo"), ctx2);
 				new Usr().putField("firstName", "Bar").insert(ctx2);
 				ctx1.commitTrans();
 			} catch (Exception e) {
 				ctx1.rollbackTrans();
 			}
 		}
-		Assert.assertEquals(200, ctx1.eCountAll(Tail.class, tail("users")));
-		Assert.assertEquals(300, ctx2.eCountAll(Tail.class, tail("users")));
+		Assert.assertEquals(200, ctx1.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(300, ctx2.entityCount(Tail.class, tail("users")));
 
-		Assert.assertEquals(200, ctx1.eCountAll(Usr.class));
-		Assert.assertEquals(300, ctx2.eCountAll(Usr.class));
+		Assert.assertEquals(200, ctx1.entityCount(Usr.class));
+		Assert.assertEquals(300, ctx2.entityCount(Usr.class));
 
 	}
 
 	@Test
 	public void groupPartialCommitTest() { // simulate partial commit test
-		Assert.assertEquals(100, ctx1.eCountAll(Tail.class, tail("users")));
+		Assert.assertEquals(100, ctx1.entityCount(Tail.class, tail("users")));
 		ctx1.startTrans();
 		try {
 			new Usr().putField("firstName", "Foo").insert(ctx1);
@@ -125,7 +125,7 @@ public class GroupTxTest {
 				//e1.printStackTrace();
 			}
 		}
-		Assert.assertEquals(101, ctx1.eCountAll(Tail.class, tail("users")));
+		Assert.assertEquals(101, ctx1.entityCount(Tail.class, tail("users")));
 	}
 
 }

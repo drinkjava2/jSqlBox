@@ -67,6 +67,6 @@ public class BatchInsertTest extends TestBase {
 		params.add(new Object[] { "test1", 1 });
 		params.add(new Object[] { "test2", 2 });
 		ctx.nBatch("INSERT INTO DummyUser(name, age) VALUES(?,?)", params);
-		Assert.assertEquals(2L, ctx.pQueryForLongValue("select count(*) from DummyUser"));
+		Assert.assertEquals(2L, ctx.qryLongValue("select count(*) from DummyUser"));
 	}
 }

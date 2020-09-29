@@ -15,7 +15,7 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 import static com.github.drinkjava2.jsqlbox.DB.shardTB;
 
@@ -90,7 +90,7 @@ public class ShardingRangeToolTest {
 			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
 				model.setTableName("TheUser" + "_" + j);
 				for (String ddl : masters[i].getDialect().toCreateDDL(model))
-					masters[i].iExecute(ddl, USE_BOTH);
+					masters[i].exe(ddl, USE_BOTH);
 			}
 		}
 	}
@@ -102,7 +102,7 @@ public class ShardingRangeToolTest {
 			for (int j = 0; j < TABLE_QTY; j++) {
 				model.setTableName("TheUser" + "_" + j);
 				for (String ddl : masters[i].getDialect().toDropDDL(model))
-					masters[i].iExecute(ddl, USE_BOTH);
+					masters[i].exe(ddl, USE_BOTH);
 			}
 		}
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
@@ -117,12 +117,12 @@ public class ShardingRangeToolTest {
 
 	@Test
 	public void testInsertSQLs() {
-		masters[2].iExecute(TheUser.class, "insert into ", shardTB(tbID), shardDB(dbID),
+		masters[2].exe(TheUser.class, "insert into ", shardTB(tbID), shardDB(dbID),
 				" (id, name, databaseId) values(?,?,?)", param(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
-		Assert.assertEquals(1, masters[0].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(tbID),
+		Assert.assertEquals(1, masters[0].qryLongValue(TheUser.class, "select count(*) from ", shardTB(tbID),
 				shardDB(dbID), USE_SLAVE, new PrintSqlHandler()));
 		Assert.assertEquals(1,
-				masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(tbID), shardDB(dbID)));
+				masters[2].qryLongValue(TheUser.class, "select count(*) from ", shardTB(tbID), shardDB(dbID)));
 	}
 
 	@Test
@@ -144,8 +144,8 @@ public class ShardingRangeToolTest {
 
 		// only deleted master, if want delete slaves at same time, use "USE_BOTH"
 		u2.delete(new PrintSqlHandler());
-		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shard(), USE_MASTER));
-		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shard()));
+		Assert.assertEquals(0, qryLongValue("select count(*) from ", u2.shard(), USE_MASTER));
+		Assert.assertEquals(1, qryLongValue("select count(*) from ", u2.shard()));
 	}
 
 }

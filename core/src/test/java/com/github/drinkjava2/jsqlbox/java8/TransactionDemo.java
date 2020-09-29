@@ -71,7 +71,7 @@ public class TransactionDemo {
 	@TX
 	public void save() {
 		new User().putField("name", "Tom").insert();
-		Systemout.println(DbContext.gctx().iQueryForString("select name from usertb"));
+		Systemout.println(DbContext.gctx().qryString("select name from usertb"));
 		Systemout.println(1 / 0); // force roll back
 	}
 
@@ -81,7 +81,7 @@ public class TransactionDemo {
 		DbContext.setGlobalDbContext(ctx);
 		String[] ddls = ctx.toCreateDDL(User.class);
 		for (String ddl : ddls)
-			ctx.nExecute(ddl);
+			ctx.jdbcExecute(ddl);
 		TransactionDemo demo = JBEANBOX.getBean(TransactionDemo.class);
 		demo.save();
 		JBEANBOX.close();

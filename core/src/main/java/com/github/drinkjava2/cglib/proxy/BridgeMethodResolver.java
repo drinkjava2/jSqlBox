@@ -84,7 +84,8 @@ class BridgeMethodResolver {
             if (eligableMethods.remove(sig)) {
                 currentMethod = sig;
                 return new MethodVisitor(Opcodes.ASM5) {
-                    public void visitMethodInsn(int opcode, String owner, String name,
+                    @SuppressWarnings("unchecked")
+					public void visitMethodInsn(int opcode, String owner, String name,
                                                 String desc, boolean itf) {
                         if (opcode == Opcodes.INVOKESPECIAL && currentMethod != null) {
                             Signature target = new Signature(name, desc);

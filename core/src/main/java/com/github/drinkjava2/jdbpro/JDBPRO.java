@@ -15,7 +15,8 @@
  */
 package com.github.drinkjava2.jdbpro;
 
-import java.util.ArrayList;
+import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
+import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 
 /**
  * JDBPRO store some public static methods, usually used for static import to
@@ -29,83 +30,7 @@ public abstract class JDBPRO {
 	public static final SqlOption USE_SLAVE = SqlOption.USE_SLAVE;
 	public static final SqlOption USE_BOTH = SqlOption.USE_BOTH;
 	public static final SqlOption USE_AUTO = SqlOption.USE_AUTO;
-	public static final SqlOption USE_TEMPLATE = SqlOption.USE_TEMPLATE;
-
-	protected void ________INLINE_Methods________() {// NOSONAR
-	}
-
-	/** ThreadLocal variant cache INLINE methods */
-	private static ThreadLocal<ArrayList<Object>> INLINE_PARAM_CACHE = new ThreadLocal<ArrayList<Object>>() {// NOSONAR
-		@Override
-		protected ArrayList<Object> initialValue() {
-			return new ArrayList<Object>();
-		}
-	};
-
-	/**
-	 * Clear all ThreadLocal parameters first, then cache parameters in ThreadLocal
-	 * and return an empty String, a non parameter param0() call equal to
-	 * clearAllInlineThreadlocalParams()
-	 */
-	public static String PARA0(Object... params) {// NOSONAR
-		INLINE_PARAM_CACHE.get().clear();
-		return PARA(params);
-	}
-
-	/** Cache parameters in ThreadLocal and return an empty String */
-	public static String PARA(Object... params) {// NOSONAR
-		for (Object o : params)
-			INLINE_PARAM_CACHE.get().add(o);
-		return "";
-	}
-
-	/**
-	 * Build a PreparedSQL instance by given in-line style SQL and parameters stored
-	 * in ThreadLocal
-	 * 
-	 * @param inlineSQL
-	 * @return PreparedSQL instance
-	 */
-	public static Object[] PARAMS() {// NOSONAR
-		try {
-			return INLINE_PARAM_CACHE.get().toArray();
-		} finally {
-			INLINE_PARAM_CACHE.get().clear();
-		}
-	}
-
-	/**
-	 * Clear all ThreadLocal parameters first, then cache parameters in ThreadLocal,
-	 * then return a "?" String
-	 */
-	public static String QUES0(Object... params) {// NOSONAR
-		INLINE_PARAM_CACHE.get().clear();
-		return QUES(params);
-	}
-
-	/** Cache parameters in ThreadLocal and return a "?" String */
-	public static String QUES(Object... params) {// NOSONAR
-		for (Object o : params)
-			INLINE_PARAM_CACHE.get().add(o);
-		return "?";
-	}
-
-	/**
-	 * Create "values(?,?,?...,?)" String according how many SQL parameters be
-	 * cached in ThreadLocal
-	 */
-	public static String VALUESQUES() {// NOSONAR
-		int howManyQuestionMarks = INLINE_PARAM_CACHE.get().size();
-		StringBuilder sb = new StringBuilder("values(");
-		for (int i = 0; i < howManyQuestionMarks; i++) {
-			if (i != howManyQuestionMarks - 1)
-				sb.append("?,");
-			else
-				sb.append("?");
-		}
-		sb.append(")");
-		return sb.toString();
-	}
+	public static final SqlTemplateEngine TEMPLATE = BasicSqlTemplate.instance();
 
 	protected void ________SqlItem_Methods________() {// NOSONAR
 	}

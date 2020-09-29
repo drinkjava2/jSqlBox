@@ -103,17 +103,17 @@ public class TableIdGenerator implements IdGenerator {
 	@Override
 	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
 		int countOfRec = ((Number) jdbc // NOSONAR
-				.nQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?", pkColumnValue))
+				.jdbcQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?", pkColumnValue))
 						.intValue();
 		if (countOfRec == 0) {
-			jdbc.nUpdate("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
+			jdbc.jdbcUpdate("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
 					pkColumnValue, initialValue);
 			return initialValue;
 		} else {
-			jdbc.nUpdate("update " + table + " set " + valueColumnName + "=" + valueColumnName + "+" + allocationSize
+			jdbc.jdbcUpdate("update " + table + " set " + valueColumnName + "=" + valueColumnName + "+" + allocationSize
 					+ "  where " + pkColumnName + " =?", pkColumnValue);
 
-			int last = ((Number) jdbc.nQueryForObject( // NOSONAR
+			int last = ((Number) jdbc.jdbcQueryForObject( // NOSONAR
 					"select " + valueColumnName + " from " + table + " where " + pkColumnName + "=?", pkColumnValue))
 							.intValue();
 			return last;

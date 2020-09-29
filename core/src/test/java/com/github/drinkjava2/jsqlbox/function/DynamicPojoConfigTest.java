@@ -59,7 +59,7 @@ public class DynamicPojoConfigTest extends TestBase {
 
 		PojoDemo pojo = new PojoDemo();
 		pojo.setName("Tom"); 
-		ctx.eInsert(pojo);
-		ctx.eDelete(pojo);
+		ctx.entityInsert(pojo);
+		ctx.entityDelete(pojo);
 	} 
 }

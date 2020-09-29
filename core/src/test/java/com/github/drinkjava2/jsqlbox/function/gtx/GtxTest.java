@@ -73,16 +73,16 @@ public class GtxTest {
 			new Usr().insert(ctx[1]);
 			new Usr().insert(ctx[1]);
 			new Usr().insert(ctx[2]);
-			Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
-			Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
-			Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
+			Assert.assertEquals(1, ctx[0].entityCount(Usr.class));
+			Assert.assertEquals(2, ctx[1].entityCount(Usr.class));
+			Assert.assertEquals(1, ctx[2].entityCount(Usr.class));
 			ctx[0].commitTrans();
 		} catch (Exception e) {
 			ctx[0].rollbackTrans(); // All transactions sucess, will not run to here
 		}
-		Assert.assertEquals(1, ctx[0].eCountAll(Usr.class));
-		Assert.assertEquals(2, ctx[1].eCountAll(Usr.class));
-		Assert.assertEquals(1, ctx[2].eCountAll(Usr.class));
+		Assert.assertEquals(1, ctx[0].entityCount(Usr.class));
+		Assert.assertEquals(2, ctx[1].entityCount(Usr.class));
+		Assert.assertEquals(1, ctx[2].entityCount(Usr.class));
 	}
 
 	@Test
@@ -100,9 +100,9 @@ public class GtxTest {
 			// A log waring will throw because in fact no any transaction committed
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Unit test only, production not use forceUnlock
 		}
-		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx[1].eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx[2].eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx[0].entityCount(Usr.class));
+		Assert.assertEquals(0, ctx[1].entityCount(Usr.class));
+		Assert.assertEquals(0, ctx[2].entityCount(Usr.class));
 	}
 
 	@Test
@@ -118,8 +118,8 @@ public class GtxTest {
 		} catch (Exception e) {
 			ctx[0].rollbackTrans();
 		}
-		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx[2].eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx[0].entityCount(Usr.class));
+		Assert.assertEquals(0, ctx[2].entityCount(Usr.class));
 	}
 
 	@Test
@@ -142,9 +142,9 @@ public class GtxTest {
 			TxResult result = ctx[0].rollbackTrans();
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Unit test only, production not use forceUnlock
 		}
-		Assert.assertEquals(0, ctx[0].eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx[1].eCountAll(Usr.class));
-		Assert.assertEquals(0, ctx[2].eCountAll(Usr.class));
+		Assert.assertEquals(0, ctx[0].entityCount(Usr.class));
+		Assert.assertEquals(0, ctx[1].entityCount(Usr.class));
+		Assert.assertEquals(0, ctx[2].entityCount(Usr.class));
 	}
 
 }

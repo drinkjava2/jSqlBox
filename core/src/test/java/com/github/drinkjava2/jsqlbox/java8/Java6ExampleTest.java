@@ -8,10 +8,10 @@ import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.col;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
-import static com.github.drinkjava2.jsqlbox.DB.iExecute;
-import static com.github.drinkjava2.jsqlbox.DB.iQuery;
-import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
-import static com.github.drinkjava2.jsqlbox.DB.iQueryForMapList;
+import static com.github.drinkjava2.jsqlbox.DB.exe;
+import static com.github.drinkjava2.jsqlbox.DB.qry;
+import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.qryMapList;
 
 import java.util.List;
 import java.util.Map;
@@ -36,26 +36,26 @@ public class Java6ExampleTest {
 				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", ""));
 		DbContext.setGlobalDbContext(ctx);
 		for (String ddl : ctx.toCreateDDL(User.class))
-			iExecute(ddl);
+			exe(ddl);
 		for (int i = 0; i < 100; i++)
 			new User().putField("name", "Foo" + i, "age", i).insert();
-		Assert.assertEquals(100, iQueryForLongValue("select count(*) from usertb"));
+		Assert.assertEquals(100, qryLongValue("select count(*) from usertb"));
 	}
 
 	@After
 	public void cleanup() {
 		for (String ddl : gctx().toDropDDL(User.class))
-			gctx().iExecute(ddl);
+			gctx().exe(ddl);
 	}
 
 	@Test
 	public void normalTest() {
 		// ctx.setAllowShowSQL(true);
-		List<User> totalUsers = iQuery(new EntityListHandler(), User.class, "select * from usertb");
+		List<User> totalUsers = qry(new EntityListHandler(), User.class, "select * from usertb");
 		Assert.assertEquals(100, totalUsers.size());
 
 		User u = createAliasProxy(User.class);
-		List<Map<String, Object>> list = iQueryForMapList(clean(), //
+		List<Map<String, Object>> list = qryMapList(clean(), //
 				"select "//
 				, alias(u.getId())//
 				, c_alias(u.getAddress())//
@@ -67,7 +67,7 @@ public class Java6ExampleTest {
 		Assert.assertEquals(10, list.size());
 
 		u = createAliasProxy(User.class, "u");
-		List<User> list2 = iQuery(new EntityListHandler(), User.class, clean(), //
+		List<User> list2 = qry(new EntityListHandler(), User.class, clean(), //
 				"select * from ", table(u), " where "//
 				, col(u.getName()), ">=?", param("Foo90") //
 				, " and ", col(u.getAge()), ">?", param(1) //

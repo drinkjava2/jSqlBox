@@ -11,13 +11,10 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.github.drinkjava2.jdialects.ArrayUtils;
 import com.github.drinkjava2.jdialects.ClassCacheUtils;
@@ -145,7 +142,7 @@ public class ActiveRecord<T> implements TailType, EntityType {
 		if (values.length != fields.length)
 			throw new DbException("putValues quantity does not match forFields or forColumns");
 		for (int i = 0; i < fields.length; i++)
-			if (isForfield.get())
+			if (Boolean.TRUE.equals(isForfield.get()))
 				ClassCacheUtils.writeValueToBeanField(this, fields[i], values[i]);
 			else
 				tails().put(fields[i], values[i]);
@@ -199,108 +196,66 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	}
 
 	//@formatter:off
-	public T insert(Object... items) {return (T) ctx().eInsert(this, items);}
-	public T update(Object... items) {return ctx().eUpdate(this, items);}
-	public int updateTry(Object... items) {return ctx().eUpdateTry(this, items);}
-	public void delete(Object... items) {ctx().eDelete(this, items);}
-	public int deleteTry(Object... items) {return ctx().eDeleteTry(this, items);}
-	public void deleteById(Object id, Object... items) {ctx().eDeleteById(this.getClass(), id, items);}
-	public int deleteByIdTry(Object id, Object... items) {return ctx().eDeleteByIdTry(this.getClass(), id, items);}
-	public boolean existStrict(Object... items) {return ctx().eExistStrict(this, items);}
-	public boolean existId(Object... items) {return ctx().eExist(this, items);}
-	public boolean existById(Object id, Object... items) {return ctx().eExistById(this.getClass(), id, items);}
-	public int countAll(Object... items) {return ctx().eCountAll(this.getClass(), items);} 
-	public T load(Object... items) {return (T) ctx().eLoad(this, items);}
-	public int loadTry(Object... items) {return ctx().eLoadTry(this, items);}
-	public T loadById(Object id, Object... items) {return (T) ctx().eLoadById(this.getClass(), id, items);}
-	public T loadByIdTry(Object id, Object... items) {return (T) ctx().eLoadByIdTry(this.getClass(), id, items);}
-	public T loadBySQL(Object... items) {return  ctx().eLoadBySQL(items);}
+	public T insert(Object... items) {return (T) ctx().entityInsert(this, items);}
+	public T update(Object... items) {return ctx().entityUpdate(this, items);}
+	public int updateTry(Object... items) {return ctx().entityUpdateTry(this, items);}
+	public void delete(Object... items) {ctx().entityDelete(this, items);}
+	public int deleteTry(Object... items) {return ctx().entityDeleteTry(this, items);}
+	public void deleteById(Object id, Object... items) {ctx().entityDeleteById(this.getClass(), id, items);}
+	public int deleteByIdTry(Object id, Object... items) {return ctx().entityDeleteByIdTry(this.getClass(), id, items);}
+	public boolean existStrict(Object... items) {return ctx().entityExistStrict(this, items);}
+	public boolean existId(Object... items) {return ctx().entityExist(this, items);}
+	public boolean existById(Object id, Object... items) {return ctx().entityExistById(this.getClass(), id, items);}
+	public int countAll(Object... items) {return ctx().entityCount(this.getClass(), items);} 
+	public T load(Object... items) {return (T) ctx().entityLoad(this, items);}
+	public int loadTry(Object... items) {return ctx().entityLoadTry(this, items);}
+	public T loadById(Object id, Object... items) {return (T) ctx().entityLoadById(this.getClass(), id, items);}
+	public T loadByIdTry(Object id, Object... items) {return (T) ctx().entityLoadByIdTry(this.getClass(), id, items);}
+	public T loadBySQL(Object... items) {return  ctx().entityLoadBySql(items);}
 	
 	
-	public List<T> findAll(Object... items) {return (List<T>) ctx().eFindAll(this.getClass(), items);}
-	public List<T> findBySQL(Object... items) {return ctx().eFindBySQL(this.getClass(), items);}
-	public List<T> findBySample(Object... items) {return ctx().eFindBySample(this, items);} 
+	public List<T> findAll(Object... items) {return (List<T>) ctx().entityFind(this.getClass(), items);}
+	public List<T> findBySQL(Object... items) {return ctx().beanFindBySql(this.getClass(), items);}
+	public List<T> findBySample(Object... items) {return ctx().entityFindBySample(this, items);} 
 	public EntityNet autoNet(Class<?>... entityClass) {return  ctx().autoNet(entityClass);}
-	public <E> E findRelatedOne(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().eFindRelatedOne(this, newItems);}
-	public <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().eFindRelatedList(this, newItems);}
-	public <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().eFindRelatedSet(this, newItems);}
-	public <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().eFindRelatedMap(this, newItems);}
+	public <E> E findRelatedOne(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedOne(this, newItems);}
+	public <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedList(this, newItems);}
+	public <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedSet(this, newItems);}
+	public <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedMap(this, newItems);}
  
-	public <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx().eFindAll(entityClass, items);}
-	public <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx().eFindBySample(sampleBean, items);}
-	public <E> List<E> eFindBySQL(Object... items) {return ctx().eFindBySQL(items);}   
-	public <E> E eInsert(E entity, Object... items) {return ctx().eInsert(entity, items);} 
-	public <E> E eLoad(E entity, Object... items) {return ctx().eLoad(entity, items);} 
-	public <E> E eLoadById(Class<E> entityClass, Object entityId, Object... items) {return ctx().eLoadById(entityClass, entityId, items);}
-    public <E> E eLoadByIdTry(Class<E> entityClass, Object entityId, Object... items) {return ctx().eLoadByIdTry(entityClass, entityId, items);}
-	public <E> E eUpdate(Object entity, Object... items) {return ctx().eUpdate(entity, items);}
-	public boolean eExist(Object entity, Object... items) {return ctx().eExist(entity, items);}
-	public boolean eExistById(Class<?> entityClass, Object id, Object... items) {return ctx().eExistById(entityClass, id, items);}
-	public int eCountAll(Class<?> entityClass, Object... items) {return ctx().eCountAll(entityClass, items);}
-	public int eDeleteByIdTry(Class<?> entityClass, Object id, Object... items) {return ctx().eDeleteByIdTry(entityClass, id, items);}
-	public int eDeleteTry(Object entity, Object... items) {return ctx().eDeleteTry(entity, items);}
-	public int eLoadTry(Object entity, Object... items) {return ctx().eLoadTry(entity, items);}
-	public int eUpdateTry(Object entity, Object... items) {return ctx().eUpdateTry(entity, items);}
-	public void eDelete(Object entity, Object... items) { ctx().eDelete(entity, items);}
-	public void eDeleteById(Class<?> entityClass, Object id, Object... items) {ctx().eDeleteById(entityClass, id, items);}
-	public <E> E eFindRelatedOne(Object entity, Object... items) {return  ctx().eFindRelatedOne(entity, items);}
-	public <E> List<E> eFindRelatedList(Object entityOrIterable, Object... items) {return  ctx().eFindRelatedList(entityOrIterable, items);}
-	public <E> Set<E> eFindRelatedSet(Object entity, Object... items) {return  ctx().eFindRelatedSet(entity, items);}
-	public <E> Map<Object, E> eFindRelatedMap(Object entity, Object... items) {return  ctx().eFindRelatedMap(entity, items);}
+	public <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx().entityFind(entityClass, items);}
+	public <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx().entityFindBySample(sampleBean, items);}
+	public <E> List<E> eFindBySQL(Object... items) {return ctx().beanFindBySql(items);}   
+	public <E> E eInsert(E entity, Object... items) {return ctx().entityInsert(entity, items);} 
+	public <E> E eLoad(E entity, Object... items) {return ctx().entityLoad(entity, items);} 
+	public <E> E eLoadById(Class<E> entityClass, Object entityId, Object... items) {return ctx().entityLoadById(entityClass, entityId, items);}
+    public <E> E eLoadByIdTry(Class<E> entityClass, Object entityId, Object... items) {return ctx().entityLoadByIdTry(entityClass, entityId, items);}
+	public <E> E eUpdate(Object entity, Object... items) {return ctx().entityUpdate(entity, items);}
+	public boolean eExist(Object entity, Object... items) {return ctx().entityExist(entity, items);}
+	public boolean eExistById(Class<?> entityClass, Object id, Object... items) {return ctx().entityExistById(entityClass, id, items);}
+	public int eCountAll(Class<?> entityClass, Object... items) {return ctx().entityCount(entityClass, items);}
+	public int eDeleteByIdTry(Class<?> entityClass, Object id, Object... items) {return ctx().entityDeleteByIdTry(entityClass, id, items);}
+	public int eDeleteTry(Object entity, Object... items) {return ctx().entityDeleteTry(entity, items);}
+	public int eLoadTry(Object entity, Object... items) {return ctx().entityLoadTry(entity, items);}
+	public int eUpdateTry(Object entity, Object... items) {return ctx().entityUpdateTry(entity, items);}
+	public void eDelete(Object entity, Object... items) { ctx().entityDelete(entity, items);}
+	public void eDeleteById(Class<?> entityClass, Object id, Object... items) {ctx().entityDeleteById(entityClass, id, items);}
+	public <E> E eFindRelatedOne(Object entity, Object... items) {return  ctx().entityFindRelatedOne(entity, items);}
+	public <E> List<E> eFindRelatedList(Object entityOrIterable, Object... items) {return  ctx().entityFindRelatedList(entityOrIterable, items);}
+	public <E> Set<E> eFindRelatedSet(Object entity, Object... items) {return  ctx().entityFindRelatedSet(entity, items);}
+	public <E> Map<Object, E> eFindRelatedMap(Object entity, Object... items) {return  ctx().entityFindRelatedMap(entity, items);}
   
-	// PINT series methods from jDbPro
-	public <E> E pQuery(Object... items) {return ctx().pQuery(items);}
-	public <E> E pQueryForObject(Object... items) {return ctx().pQueryForObject(items);}
-	public long pQueryForLongValue(Object... items) {return ctx().pQueryForLongValue(items);}
-	public int pQueryForIntValue(Object... items) {return ctx().pQueryForIntValue(items);}
-	public String pQueryForString(Object... items) {return ctx().pQueryForString(items);}
-	public List<Map<String, Object>> pQueryForMapList(Object... items) {return ctx().pQueryForMapList(items);}
-	public int pUpdate(Object... items) {return ctx().pUpdate(items);}
-	public <E> E pInsert(Object... items) {return ctx().pInsert(items);}
-	public <E> E pExecute(Object... items) {return ctx().pExecute(items); }  
-	public <E> List<E> pQueryForEntityList(Object... items) {return ctx().pQueryForEntityList(items);} 
-	
-	public <E> E iQuery(Object... items) {return  ctx().iQuery(items);}
-	public <E> E iQueryForObject(Object... items) {return ctx().iQueryForObject(items);}
-	public long iQueryForLongValue(Object... items) {return ctx().iQueryForLongValue(items);}
-	public int iQueryForIntgValue(Object... items) {return ctx().iQueryForIntValue(items);}
-	public String iQueryForString(Object... items) {return ctx().iQueryForString(items);}
-	public List<Map<String, Object>> iQueryForMapList(Object... items) {return ctx().iQueryForMapList(items);}
-	public int iUpdate(Object... items) {return ctx().iUpdate(items);}
-	public <E> E iInsert(Object... items) {return ctx().iInsert(items);}
-	public <E> E iExecute(Object... items) {return ctx().iExecute(items); }
-	public <E> List<E> iQueryForEntityList(Object... items) {return ctx().iQueryForEntityList(items);}
-	   
-	public <E> E nQuery(Connection conn, ResultSetHandler<E> rsh, String sql, Object... items) {return ctx().nQuery(conn, rsh, sql, items);}
-	public <E> E nQueryForObject(Connection conn, String sql, Object... items) {return ctx().nQueryForObject(conn, sql, items);}
-	public String nQueryForString(Connection conn, String sql, Object... items) {return ctx().nQueryForString(conn, sql, items);}
-	public long nQueryForLongValue(Connection conn, String sql, Object... items) {return ctx().nQueryForLongValue(conn, sql, items);}
-	public int nQueryForIntValue(Connection conn, String sql, Object... items) {return ctx().nQueryForIntValue(conn, sql, items);}
-	public List<Map<String, Object>> nQueryForMapList(Connection conn, String sql, Object... items) {return ctx().nQueryForMapList(conn, sql, items);}
-	public int nUpdate(Connection conn, String sql, Object... items) {return ctx().nUpdate(conn, sql, items);}
-	public <E> E nInsert(Connection conn, ResultSetHandler<E> rsh, String sql, Object... items) {return ctx().nInsert(conn, rsh, sql, items);}
-	public int nExecute(Connection conn, String sql, Object... items) {return ctx().nExecute(conn, sql, items);}
-	public <E> List<E> nExecute(Connection conn, ResultSetHandler<E> rsh, String sql, Object... items) {return ctx().nExecute(conn, rsh, sql, items);}
-	public <E> E nQuery(ResultSetHandler<E> rsh, String sql, Object... items) {return ctx().nQuery(rsh, sql, items);}
-	public <E> E nQueryForObject(String sql, Object... items) {return ctx().nQueryForObject(sql, items);}
-	public String nQueryForString(String sql, Object... items) {return ctx().nQueryForString(sql, items);}
-	public long nQueryForLongValue(String sql, Object... items) {return ctx().nQueryForLongValue(sql, items);}
-	public int nQueryForIntValue(String sql, Object... items) {return ctx().nQueryForIntValue(sql, items);}
-	public List<Map<String, Object>> nQueryForMapList(String sql, Object... items) {return ctx().nQueryForMapList(sql, items);}
-	public int nUpdate(String sql, Object... items) {return ctx().nUpdate(sql, items);}
-	public <E> E nInsert(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... items) {return ctx().nInsert(rsh, sql, items);}
-	public int nExecute(String sql, Object... items) {return ctx().nExecute(sql, items);}
-	public <E> List<E> nExecute(@SuppressWarnings("rawtypes") ResultSetHandler rsh, String sql, Object... items) {return ctx().nExecute(rsh, sql, items);}
-			
-	public <E> E tQuery(Object... items) {return ctx().tQuery(items);}
-	public <E> E tQueryForObject(Object... items) {return ctx().tQueryForObject(items);}
-	public long tQueryForLongValue(Object... items) {return ctx().tQueryForLongValue(items);}
-	public int tQueryForIntValue(Object... items) {return ctx().tQueryForIntValue(items);}
-	public String tQueryForString(Object... items) {return ctx().tQueryForString(items);}
-	public List<Map<String, Object>> tQueryForMapList(Object... items) {return ctx().tQueryForMapList(items);}
-	public int tUpdate(Object... items) {return ctx().tUpdate(items);}
-	public <E> E tInsert(Object... items) {return ctx().tInsert(items);}
-	public <E> E tExecute(Object... items) {return ctx().tExecute(items);}
-	public <E> List<E> tQueryForEntityList(Class<E> entityClass, Object... items) {return ctx().tQueryForEntityList(entityClass, items); }
+	// simplilfied SQL methods 
+	public <E> E qry(Object... items) {return  ctx().qry(items);}
+	public <E> E qryObject(Object... items) {return ctx().qryObject(items);}
+	public long qryLongValue(Object... items) {return ctx().qryLongValue(items);}
+	public int qryIntValue(Object... items) {return ctx().qryIntValue(items);}
+	public String qryString(Object... items) {return ctx().qryString(items);}
+	public List<Map<String, Object>> qryMapList(Object... items) {return ctx().qryMapList(items);}
+	public Map<String, Object> qryMap(Object... items) {return ctx().qryMap(items);}
+	public int upd(Object... items) {return ctx().upd(items);}
+	public <E> E ins(Object... items) {return ctx().ins(items);}
+	public <E> E exe(Object... items) {return ctx().exe(items); }
+	public <E> List<E> qryEntityList(Object... items) {return ctx().qryEntityList(items);} 
   
 }

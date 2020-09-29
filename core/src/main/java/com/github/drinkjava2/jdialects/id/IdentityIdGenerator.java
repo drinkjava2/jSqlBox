@@ -57,7 +57,7 @@ public class IdentityIdGenerator implements IdGenerator {
 			sql = dialect.ddlFeatures.getIdentitySelectString();
 		if (StrUtils.isEmpty(sql) || DDLFeatures.NOT_SUPPORT.equals(sql))
 			throw new DialectException("Dialect '" + dialect + "' does not support identity type");
-		return jdbc.nQueryForObject(sql);
+		return jdbc.jdbcQueryForObject(sql);
 	}
 
 	@Override

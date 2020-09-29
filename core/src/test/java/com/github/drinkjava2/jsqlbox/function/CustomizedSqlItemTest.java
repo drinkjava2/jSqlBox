@@ -63,6 +63,6 @@ public class CustomizedSqlItemTest extends TestBase {
 
 	@Test
 	public void testSpecialSqlItemPreparer() throws SQLException {
-		Assert.assertEquals(0, ctx.iQueryForLongValue(new PrintSqlHandler(), new SelectCount(), "CustUser"));
+		Assert.assertEquals(0, ctx.qryLongValue(new PrintSqlHandler(), new SelectCount(), "CustUser"));
 	}
 }

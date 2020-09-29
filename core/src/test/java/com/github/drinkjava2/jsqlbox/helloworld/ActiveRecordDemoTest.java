@@ -1,5 +1,7 @@
 package com.github.drinkjava2.jsqlbox.helloworld;
 
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+
 import java.util.List;
 import java.util.Map;
 
@@ -109,11 +111,11 @@ public class ActiveRecordDemoTest {
 			u.insert();
 		}
 
-		Assert.assertEquals(100L, ((Number) ctx.nQueryForObject("select count(*) from users")).longValue());
+		Assert.assertEquals(100L, ((Number) ctx.jdbcQueryForObject("select count(*) from users")).longValue());
 
-		List<Map<String, Object>> users = ctx.pQuery(new MapListHandler(),
+		List<Map<String, Object>> users = ctx.qry(new MapListHandler(),
 				ctx.pagin(2, 10, "select concat(firstName, ' ', lastName) as UserName, age from users where age>?"),
-				50);
+				param(50));
 
 		Assert.assertEquals(10, users.size());
 

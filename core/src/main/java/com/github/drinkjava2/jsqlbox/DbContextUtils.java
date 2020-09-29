@@ -777,7 +777,7 @@ public abstract class DbContextUtils {// NOSONAR
 		if (optionModel == null)// No optional model, force use entity's
 			sqlBody.frontAdd(model);
 
-		int result = ctx.iUpdate(sqlBody.toArray());
+		int result = ctx.upd(sqlBody.toArray());
 		if (ctx.isBatchEnabled())
 			return 1; // in batch mode, direct return 1
 		if (identityCol != null) {// write identity id to Bean field
@@ -890,7 +890,7 @@ public abstract class DbContextUtils {// NOSONAR
 
 		if (optionModel == null)
 			sqlBody.frontAdd(model);
-		int rowAffected = ctx.iUpdate(sqlBody.toObjectArray());
+		int rowAffected = ctx.upd(sqlBody.toObjectArray());
 		if (ctx.isBatchEnabled())
 			return 1; // in batch mode, direct return 1
 		return rowAffected;
@@ -995,7 +995,7 @@ public abstract class DbContextUtils {// NOSONAR
 			sqlBody.frontAdd(model);
 
 		sqlBody.append(SingleTonHandlers.arrayHandler);
-		int rowAffected = ctx.iUpdate(sqlBody.toObjectArray());
+		int rowAffected = ctx.upd(sqlBody.toObjectArray());
 		if (ctx.isBatchEnabled())
 			return 1; // in batch mode, direct return 1
 		return rowAffected;
@@ -1079,7 +1079,7 @@ public abstract class DbContextUtils {// NOSONAR
 			sqlBody.frontAdd(model);
 
 		sqlBody.append(SingleTonHandlers.arrayListHandler);
-		List<Object[]> valuesList = ctx.iQuery(sqlBody.toObjectArray());
+		List<Object[]> valuesList = ctx.qry(sqlBody.toObjectArray());
 
 		if (valuesList == null || valuesList.isEmpty())
 			return 0;
@@ -1236,7 +1236,7 @@ public abstract class DbContextUtils {// NOSONAR
 		if (optionModel == null)
 			sqlBody.frontAdd(model);
 
-		long result = ctx.iQueryForLongValue(sqlBody.toObjectArray());
+		long result = ctx.qryLongValue(sqlBody.toObjectArray());
 		if (result == 1)
 			return true;
 		else if (result == 0)
@@ -1246,11 +1246,11 @@ public abstract class DbContextUtils {// NOSONAR
 	}
 
 	/** Count quantity of all entity, this method does not support sharding */
-	public static int entityCountAll(DbContext ctx, Class<?> entityClass, Object... optionItems) {// NOSONAR
+	public static int entityCount(DbContext ctx, Class<?> entityClass, Object... optionItems) {// NOSONAR
 		DbContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
 			Object[] newParams = cleanUpParam(optionItems);
-			return entityCountAll(paramCtx, entityClass, newParams);
+			return entityCount(paramCtx, entityClass, newParams);
 		}
 		TableModel optionModel = DbContextUtils.findFirstModel(optionItems);
 		TableModel model = optionModel;
@@ -1282,7 +1282,7 @@ public abstract class DbContextUtils {// NOSONAR
 				sqlBody.append(item);
 		if (optionModel == null)
 			sqlBody.frontAdd(model);
-		return ctx.iQueryForIntValue(sqlBody.toObjectArray());// NOSONAR
+		return ctx.qryIntValue(sqlBody.toObjectArray());// NOSONAR
 	}
 
 	public static <T> List<T> entityFindAll(DbContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
@@ -1329,7 +1329,7 @@ public abstract class DbContextUtils {// NOSONAR
 			sqlBody.frontAdd(model);
 
 		sqlBody.append(SingleTonHandlers.arrayListHandler);
-		List<Object[]> valuesList = ctx.iQuery(sqlBody.toObjectArray());
+		List<Object[]> valuesList = ctx.qry(sqlBody.toObjectArray());
 
 		List<T> result = new ArrayList<T>();
 		if (valuesList == null || valuesList.isEmpty())
@@ -1355,7 +1355,7 @@ public abstract class DbContextUtils {// NOSONAR
 
 	public static EntityNet entityAutoNet(DbContext ctx, Class<?>... entityClasses) {
 		TableModel[] models = findAllModels((Object[]) entityClasses);
-		PreparedSQL ps = ctx.iPrepare(SqlOption.QUERY, new EntityNetHandler(), models, AUTO_SQL);
+		PreparedSQL ps = ctx.prepare(SqlOption.QUERY, new EntityNetHandler(), models, AUTO_SQL);
 		DbException.assureTrue(ps.getAliases() != null && ps.getAliases().length > 1);
 		String firstAlias = ps.getAliases()[0];
 		for (int i = 1; i < entityClasses.length; i++)
@@ -1382,7 +1382,7 @@ public abstract class DbContextUtils {// NOSONAR
 		TableModel[] models = findAllModels(sqlItems);
 		Object[] modelsAlias = findModelAlias(sqlItems);
 		Object[] notModelAlias = findNotModelAlias(sqlItems);
-		EntityNet net = ctx.iQuery(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
+		EntityNet net = ctx.qry(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
 				new EntityKeyItem(entity), notModelAlias);
 		return (List<E>) net.pickEntityList(models[models.length - 1].getEntityClass());
 	}
@@ -1397,7 +1397,7 @@ public abstract class DbContextUtils {// NOSONAR
 		TableModel[] models = findAllModels(sqlItems);
 		Object[] modelsAlias = findModelAlias(sqlItems);
 		Object[] notModelAlias = findNotModelAlias(sqlItems);
-		EntityNet net = ctx.iQuery(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
+		EntityNet net = ctx.qry(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
 				new EntityKeyItem(entity), notModelAlias);
 		return (Set<E>) net.pickEntitySet(models[models.length - 1].getEntityClass());
 	}
@@ -1412,7 +1412,7 @@ public abstract class DbContextUtils {// NOSONAR
 		TableModel[] models = findAllModels(sqlItems);
 		Object[] modelsAlias = findModelAlias(sqlItems);
 		Object[] notModelAlias = findNotModelAlias(sqlItems);
-		EntityNet net = ctx.iQuery(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
+		EntityNet net = ctx.qry(SqlOption.QUERY, new EntityNetHandler(), modelsAlias, AUTO_SQL, " where ",
 				new EntityKeyItem(entity), notModelAlias);
 		return (Map<Object, E>) net.pickEntityMap(models[models.length - 1].getEntityClass());
 	}

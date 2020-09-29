@@ -90,7 +90,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 					lockDb = 0;
 			}
 
-			List<GtxId> gtxIdList = locker.eFindAll(GtxId.class);
+			List<GtxId> gtxIdList = locker.entityFind(GtxId.class);
 			for (GtxId gtxId : gtxIdList) {
 				String id = gtxId.getGid();
 				if (gtxIdCache.containsKey(id)) {
@@ -178,12 +178,12 @@ public abstract class GtxUnlockServ {// NOSONAR
 			locker = (DbContext) lockCtx.getMasters()[lockNo];
 
 		GtxId lockGid = null; // First check and read if gtxId exist on Lock Server
-		lockGid = locker.eLoadByIdTry(GtxId.class, gid);
+		lockGid = locker.entityLoadByIdTry(GtxId.class, gid);
 		if (lockGid == null) {
 			log.warn("Not found gtxId '" + gid + "' on gtx Locker server:" + locker.getName() + locker.getDbCode());
 			return false;
 		}
-		List<List<Integer>> dbLstLst = locker.iExecute("select distinct(db) from gtxlock where gid=?", param(gid),
+		List<List<Integer>> dbLstLst = locker.exe("select distinct(db) from gtxlock where gid=?", param(gid),
 				new ColumnListHandler<Integer>());
 		List<Integer> dbList = dbLstLst.get(0);
 
@@ -191,7 +191,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 			executeUndo(lockNo, db, gid);
 		}
 
-		locker.eDeleteById(GtxId.class, gid); // if no error, means all unlocked, can remove gid
+		locker.entityDeleteById(GtxId.class, gid); // if no error, means all unlocked, can remove gid
 		log.info("Unlocked sucess for gtxId '" + gid + "' on gtx Locker server:" + locker.getName() + locker.getDbCode());
 		return true;// So far, all databases are OK
 	}
@@ -201,22 +201,22 @@ public abstract class GtxUnlockServ {// NOSONAR
 		if (lockNo != null)
 			locker = (DbContext) lockCtx.getMasters()[lockNo];
 
-		String _gid = ctxs[db].nQueryForString("select gid from gtxtag where gid=?", gid);
+		String _gid = ctxs[db].qryString("select gid from gtxtag where gid=?", param(gid));
 		if (!gid.equals(_gid))
 			return;// no undo log or undo log already executed
-		List<List<String>> tmp = locker.iExecute("select distinct(entityTb) from gtxlock where gid=?", param(gid),
+		List<List<String>> tmp = locker.exe("select distinct(entityTb) from gtxlock where gid=?", param(gid),
 				" and db=?", param(db), new ColumnListHandler<String>());
 		List<String> tbList = tmp.get(0);
 		ctxs[db].startTrans();
 		try {
 			for (String tb : tbList) {
-				List<Tail> oneRecord = locker.eFindBySQL(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
+				List<Tail> oneRecord = locker.beanFindBySql(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
 						" and gtxid=?", param(gid), " order by GTXLOGNO desc");
 				for (Tail tail : oneRecord) {
-					undo(db, tb, tail);
+					undo(db, tail);
 				}
 			}
-			ctxs[db].eDelete(new GtxTag(gid));
+			ctxs[db].entityDelete(new GtxTag(gid));
 			ctxs[db].commitTrans();
 		} catch (Exception e) {
 			ctxs[db].rollbackTrans();
@@ -224,7 +224,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 		}
 	}
 
-	private static void undo(Integer db, String tb, Tail tail)
+	private static void undo(Integer db, Tail tail)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		String gtxtyp = tail.getTail(GtxUtils.GTXTYPE);
 		String entityClassName = tail.getTail(GtxUtils.GTXENTITY);
@@ -232,17 +232,17 @@ public abstract class GtxUnlockServ {// NOSONAR
 		Object entity = tailToEntityBean(tail, entityClass);
 
 		if (GtxUtils.INSERT.equals(gtxtyp))
-			ctxs[db].eDelete(entity);
+			ctxs[db].entityDelete(entity);
 		else if (GtxUtils.DELETE.equals(gtxtyp))
-			ctxs[db].eInsert(entity);
+			ctxs[db].entityInsert(entity);
 		else if (GtxUtils.AFTER.equals(gtxtyp))
-			ctxs[db].eExistStrict(entity);
+			ctxs[db].entityExistStrict(entity);
 		else if (GtxUtils.BEFORE.equals(gtxtyp))
-			ctxs[db].eUpdate(entity);
+			ctxs[db].entityUpdate(entity);
 		else if (GtxUtils.EXISTID.equals(gtxtyp))
-			ctxs[db].eExist(entity);
+			ctxs[db].entityExist(entity);
 		else if (GtxUtils.EXISTSTRICT.equals(gtxtyp))
-			ctxs[db].eExistStrict(entity);
+			ctxs[db].entityExistStrict(entity);
 	}
 
 	private static Object tailToEntityBean(Tail tail, Class<?> entityClass)

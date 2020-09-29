@@ -73,7 +73,7 @@ public class UUIDGeneratorsTest extends TestBase {
 	public void testUUID25() {
 		createAndRegTables(UUID25Entity.class);
 		UUID25Entity entity = new UUID25Entity();
-		ctx.eInsert(entity);
+		ctx.entityInsert(entity);
 	}
 
 	public static class UUID32Entity {
@@ -118,7 +118,7 @@ public class UUIDGeneratorsTest extends TestBase {
 	public void testUUID32() {
 		createAndRegTables(UUID32Entity.class);
 		UUID32Entity entity = new UUID32Entity();
-		ctx.eInsert(entity);
+		ctx.entityInsert(entity);
 	}
 
 	public static class UUID36Entity {
@@ -163,7 +163,7 @@ public class UUIDGeneratorsTest extends TestBase {
 	public void testUUID36() {
 		createAndRegTables(UUID36Entity.class);
 		UUID36Entity entity = new UUID36Entity();
-		ctx.eInsert(entity);
+		ctx.entityInsert(entity);
 	}
 
 	@UUIDAny(name = "uuidany10", length = 10)
@@ -210,6 +210,6 @@ public class UUIDGeneratorsTest extends TestBase {
 	public void testUUIDAny() {
 		createAndRegTables(UUIDAnyEntity.class);
 		UUIDAnyEntity entity = new UUIDAnyEntity();
-		ctx.eInsert(entity);
+		ctx.entityInsert(entity);
 	}
 }

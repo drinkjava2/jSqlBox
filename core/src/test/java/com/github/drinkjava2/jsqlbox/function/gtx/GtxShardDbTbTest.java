@@ -81,9 +81,9 @@ public class GtxShardDbTbTest {
 		} catch (Exception e) {
 			ctx[0].rollbackTrans();
 		}
-		Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
-		Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-		Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
+		Assert.assertEquals(1, ctx[0].qryIntValue("select count(1) from DemoUsr_0"));
+		Assert.assertEquals(2, ctx[1].qryIntValue("select count(1) from DemoUsr_1"));
+		Assert.assertEquals(1, ctx[2].qryIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	@Test
@@ -94,9 +94,9 @@ public class GtxShardDbTbTest {
 			new DemoUsr().setId(1).setAge(10).insert(); // db1, tb1
 			new DemoUsr().setId(4).setAge(11).insert(); // db1, tb1
 			new DemoUsr().setId(2).setAge(40).insert(); // db2, tb4
-			Assert.assertEquals(1, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
-			Assert.assertEquals(2, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-			Assert.assertEquals(1, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
+			Assert.assertEquals(1, ctx[0].qryIntValue("select count(1) from DemoUsr_0"));
+			Assert.assertEquals(2, ctx[1].qryIntValue("select count(1) from DemoUsr_1"));
+			Assert.assertEquals(1, ctx[2].qryIntValue("select count(1) from DemoUsr_4"));
 			ctx[2].setForceCommitFail(); // force db2 commit fail
 			ctx[0].commitTrans(); // exception will throw
 		} catch (Exception e) {
@@ -104,9 +104,9 @@ public class GtxShardDbTbTest {
 			TxResult result = ctx[0].rollbackTrans();
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
 		}
-		Assert.assertEquals(0, ctx[0].iQueryForIntValue("select count(1) from DemoUsr_0"));
-		Assert.assertEquals(0, ctx[1].iQueryForIntValue("select count(1) from DemoUsr_1"));
-		Assert.assertEquals(0, ctx[2].iQueryForIntValue("select count(1) from DemoUsr_4"));
+		Assert.assertEquals(0, ctx[0].qryIntValue("select count(1) from DemoUsr_0"));
+		Assert.assertEquals(0, ctx[1].qryIntValue("select count(1) from DemoUsr_1"));
+		Assert.assertEquals(0, ctx[2].qryIntValue("select count(1) from DemoUsr_4"));
 	}
 
 	public static class DemoUsr extends ActiveRecord<DemoUsr> {

@@ -30,12 +30,12 @@ public class JavaTxTest {
 	}
 
 	public void tx_Insert1() {
-		ctx.nExecute("insert into user_tb (id) values('123')");
+		ctx.jdbcExecute("insert into user_tb (id) values('123')");
 	}
 
 	public void tx_Insert2() {
-		ctx.nExecute("insert into user_tb (id) values('456')");
-		Assert.assertEquals(2, ctx.nQueryForLongValue("select count(*) from user_tb "));
+		ctx.jdbcExecute("insert into user_tb (id) values('456')");
+		Assert.assertEquals(2, ctx.qryLongValue("select count(*) from user_tb "));
 		Systemout.println("Now have 2 records in user_tb, but will roll back to 1");
 		Systemout.println(1 / 0);
 	}
@@ -47,23 +47,23 @@ public class JavaTxTest {
 		String ddl = "create table user_tb (id varchar(40))";
 		if (ctx.getDialect().isMySqlFamily())
 			ddl += "engine=InnoDB";
-		ctx.nExecute(ddl);
+		ctx.jdbcExecute(ddl);
 
-		Assert.assertEquals(0L, ctx.nQueryForLongValue("select count(*) from user_tb "));
+		Assert.assertEquals(0L, ctx.qryLongValue("select count(*) from user_tb "));
 
 		try {
 			tester.tx_Insert1();// this one inserted 1 record
-			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
+			Assert.assertEquals(1L, ctx.qryLongValue("select count(*) from user_tb "));
 			tester.tx_Insert2();// this one did not insert, roll back
 		} catch (Exception e) {
 			Systemout.println("Exception found: ");
 			//e.printStackTrace();
-			Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
+			Assert.assertEquals(1L, ctx.qryLongValue("select count(*) from user_tb "));
 			Systemout.println("div/0 exception found, tx_Insert2 should roll back");
 		}
-		Assert.assertEquals(1L, ctx.nQueryForLongValue("select count(*) from user_tb "));
+		Assert.assertEquals(1L, ctx.qryLongValue("select count(*) from user_tb "));
 
-		ctx.nExecute("drop table user_tb");
+		ctx.jdbcExecute("drop table user_tb");
 		JBEANBOX.close();// Release DataSource Pool
 	}
 }

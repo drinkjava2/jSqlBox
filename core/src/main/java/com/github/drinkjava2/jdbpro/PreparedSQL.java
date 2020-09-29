@@ -58,9 +58,6 @@ public class PreparedSQL {
 	/** Optional,The SQL parameters */
 	private Object[] params;
 
-	/** If set true, will use templateEngine to render SQL */
-	private Boolean useTemplate = null;
-
 	/** Optional, store a SqlTemplateEngine used only for this PreparedSQL */
 	private SqlTemplateEngine templateEngine;
 
@@ -126,7 +123,6 @@ public class PreparedSQL {
 		sb.append("\nconnection=").append(connection);
 		sb.append("\nresultSetHandler=").append(resultSetHandler);
 		sb.append("\nsqlHandlers=").append(sqlHandlers);
-		sb.append("\nuseTemplate=").append(useTemplate);
 		sb.append("\ntemplateEngine=").append(templateEngine);
 		sb.append("\ntemplateParams=").append(templateParamMap);
 		sb.append("\ndisabledHandlers=").append(disabledHandlers);
@@ -309,12 +305,6 @@ public class PreparedSQL {
 			this.operationType = type;
 	}
 
-	/** If current type is null, set with new type value */
-	public void ifNullSetUseTemplate(Boolean useTemplate) {
-		if (this.useTemplate == null)
-			this.useTemplate = useTemplate;
-	}
-
 	public void addOther(SqlItem obj) {
 		if (others == null)
 			others = new ArrayList<SqlItem>();
@@ -357,14 +347,6 @@ public class PreparedSQL {
 
 	public void setSql(String sql) {
 		this.sql = sql;
-	}
-
-	public Boolean getUseTemplate() {
-		return useTemplate;
-	}
-
-	public void setUseTemplate(Boolean useTemplate) {
-		this.useTemplate = useTemplate;
 	}
 
 	public SqlTemplateEngine getTemplateEngine() {

@@ -15,7 +15,7 @@ import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
 import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 import static com.github.drinkjava2.jsqlbox.DB.shardTB;
 
@@ -93,7 +93,7 @@ public class ShardingModToolTest {
 			for (int j = 0; j < TABLE_QTY; j++) {// Create master/salve tables
 				model.setTableName("TheUser" + "_" + j);
 				for (String ddl : masters[i].getDialect().toCreateDDL(model))
-					masters[i].iExecute(ddl, USE_BOTH);
+					masters[i].exe(ddl, USE_BOTH);
 			}
 		}
 	}
@@ -105,7 +105,7 @@ public class ShardingModToolTest {
 			for (int j = 0; j < TABLE_QTY; j++) {
 				model.setTableName("TheUser" + "_" + j);
 				for (String ddl : masters[i].getDialect().toDropDDL(model))
-					masters[i].iExecute(ddl, USE_BOTH);
+					masters[i].exe(ddl, USE_BOTH);
 			}
 		}
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++) {
@@ -117,12 +117,12 @@ public class ShardingModToolTest {
 
 	@Test
 	public void testInsertSQLs() {
-		masters[2].iExecute(TheUser.class, "insert into ", shardTB(10), shardDB(3),
+		masters[2].exe(TheUser.class, "insert into ", shardTB(10), shardDB(3),
 				" (id, name, databaseId) values(?,?,?)", param(10, "u1", 3), USE_BOTH, new PrintSqlHandler());
-		Assert.assertEquals(1, masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(10),
+		Assert.assertEquals(1, masters[2].qryLongValue(TheUser.class, "select count(*) from ", shardTB(10),
 				shardDB(3), USE_SLAVE, new PrintSqlHandler()));
 		Assert.assertEquals(1,
-				masters[2].iQueryForLongValue(TheUser.class, "select count(*) from ", shardTB(10), shardDB(3)));
+				masters[2].qryLongValue(TheUser.class, "select count(*) from ", shardTB(10), shardDB(3)));
 	}
 
 	@Test
@@ -144,8 +144,8 @@ public class ShardingModToolTest {
 		Assert.assertEquals("Sam", u2.getName());
 
 		u2.delete(new PrintSqlHandler());// only deleted master
-		Assert.assertEquals(0, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
-		Assert.assertEquals(1, iQueryForLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist
+		Assert.assertEquals(0, qryLongValue("select count(*) from ", u2.shardTB(), u2.shardDB(), USE_MASTER));
+		Assert.assertEquals(1, qryLongValue("select count(*) from ", u2.shardTB(), u2.shardDB()));// slave exist
 	}
 
 }

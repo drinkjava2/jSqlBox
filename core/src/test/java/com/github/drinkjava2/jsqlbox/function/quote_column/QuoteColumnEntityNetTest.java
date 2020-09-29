@@ -97,7 +97,7 @@ public class QuoteColumnEntityNetTest extends TestBase {
 		new Bdemo().putValues("w2", "o1").insert();
 		new Bdemo().putValues("w3", "o2").insert();
 
-		EntityNet net = ctx.iQuery(targets, AUTO_SQL);
+		EntityNet net = ctx.qry(targets, AUTO_SQL);
 		List<Ademo> a = net.pickEntityList("a");
 		List<Bdemo> b = net.pickEntityList("b");
 		Assert.assertEquals(2, (int) a.size());

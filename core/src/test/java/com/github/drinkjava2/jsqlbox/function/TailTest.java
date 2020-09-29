@@ -3,7 +3,7 @@ package com.github.drinkjava2.jsqlbox.function;
 import static com.github.drinkjava2.jsqlbox.DB.TAIL;
 import static com.github.drinkjava2.jsqlbox.DB.eLoadBySQL;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
-import static com.github.drinkjava2.jsqlbox.DB.iExecute;
+import static com.github.drinkjava2.jsqlbox.DB.exe;
 import static com.github.drinkjava2.jsqlbox.DB.tail;
 
 import java.util.Date;
@@ -79,7 +79,7 @@ public class TailTest extends TestBase {
 		t.putField("age", 10);
 		t.update();
 
-		iExecute("alter table tail_demo add address varchar(10)");
+		exe("alter table tail_demo add address varchar(10)");
 		gctx().reloadTailModels();
 		t.putTail("address", "Canada");
 		t.update(TAIL);
@@ -96,7 +96,7 @@ public class TailTest extends TestBase {
 		Assert.assertEquals("Tom", t.getTail("user_name"));
 		t.update(tail("tail_demo"));
 
-		iExecute("alter table tail_demo add address varchar(10)");
+		exe("alter table tail_demo add address varchar(10)");
 		gctx().reloadTailModels();
 		t.putTail("address", "Canada");
 		t.update(tail("tail_demo"));
@@ -110,20 +110,20 @@ public class TailTest extends TestBase {
 	@Test
 	public void putValuesTest() {
 		TailDemo t = new TailDemo();
-		t.iExecute("delete from tail_demo");
+		t.exe("delete from tail_demo");
 		t.forFields("userName", "age", "birthDay");
 		t.putValues("Foo", 10, new Date()).insert();
 		t.putValues("Bar", 20, new Date()).insert();
 		Assert.assertEquals(2, t.countAll());
 
-		t.iExecute("delete from tail_demo");
+		t.exe("delete from tail_demo");
 		t.forTails("user_name", "age", "birth_Day");
 		t.putValues("Foo", 30, new Date()).insert(TAIL);
 		t.putValues("Bar", 40, new Date()).insert(TAIL);
 		Assert.assertEquals(2, t.countAll());
 
 		Tail tail = new Tail();
-		tail.iExecute("delete from tail_demo");
+		tail.exe("delete from tail_demo");
 		tail.forTails("user_name", "age", "birth_Day");
 		tail.putValues("Foo", 30, new Date()).insert(tail("tail_demo"));
 		tail.putValues("Bar", 40, new Date()).insert(tail("tail_demo"));

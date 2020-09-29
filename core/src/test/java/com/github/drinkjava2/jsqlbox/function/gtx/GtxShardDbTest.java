@@ -70,17 +70,17 @@ public class GtxShardDbTest {
 			new DemoUsr().setId(1).insert(); // db1
 			new DemoUsr().setId(4).insert(); // db1
 			new DemoUsr().setId(2).insert(); // db2
-			Assert.assertEquals(1, ctx[0].eCountAll(DemoUsr.class));
-			Assert.assertEquals(2, ctx[1].eCountAll(DemoUsr.class));
-			Assert.assertEquals(1, ctx[2].eCountAll(DemoUsr.class));
+			Assert.assertEquals(1, ctx[0].entityCount(DemoUsr.class));
+			Assert.assertEquals(2, ctx[1].entityCount(DemoUsr.class));
+			Assert.assertEquals(1, ctx[2].entityCount(DemoUsr.class));
 			ctx[0].commitTrans();
 		} catch (Exception e) {
 			//e.printStackTrace();
 			ctx[0].rollbackTrans();
 		}
-		Assert.assertEquals(1, ctx[0].eCountAll(DemoUsr.class));
-		Assert.assertEquals(2, ctx[1].eCountAll(DemoUsr.class));
-		Assert.assertEquals(1, ctx[2].eCountAll(DemoUsr.class));
+		Assert.assertEquals(1, ctx[0].entityCount(DemoUsr.class));
+		Assert.assertEquals(2, ctx[1].entityCount(DemoUsr.class));
+		Assert.assertEquals(1, ctx[2].entityCount(DemoUsr.class));
 	}
 
 	@Test
@@ -97,9 +97,9 @@ public class GtxShardDbTest {
 			TxResult result = ctx[0].rollbackTrans();
 			GtxUnlockServ.forceUnlock(ctx[0], result);// Force unlock for unit test only
 		}
-		Assert.assertEquals(0, ctx[0].eCountAll(DemoUsr.class));
-		Assert.assertEquals(0, ctx[1].eCountAll(DemoUsr.class));
-		Assert.assertEquals(0, ctx[2].eCountAll(DemoUsr.class));
+		Assert.assertEquals(0, ctx[0].entityCount(DemoUsr.class));
+		Assert.assertEquals(0, ctx[1].entityCount(DemoUsr.class));
+		Assert.assertEquals(0, ctx[2].entityCount(DemoUsr.class));
 	}
 
 	public static class DemoUsr extends ActiveRecord<DemoUsr> {

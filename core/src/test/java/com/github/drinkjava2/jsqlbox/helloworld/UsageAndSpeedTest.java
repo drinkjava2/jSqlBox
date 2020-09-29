@@ -1,10 +1,6 @@
 package com.github.drinkjava2.jsqlbox.helloworld;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.PARA;
-import static com.github.drinkjava2.jdbpro.JDBPRO.PARA0;
-import static com.github.drinkjava2.jdbpro.JDBPRO.PARAMS;
-import static com.github.drinkjava2.jdbpro.JDBPRO.QUES;
-import static com.github.drinkjava2.jdbpro.JDBPRO.VALUESQUES;
+import static com.github.drinkjava2.jdbpro.JDBPRO.TEMPLATE;
 import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
 import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
 import static com.github.drinkjava2.jdbpro.JDBPRO.param;
@@ -20,8 +16,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,6 +29,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -61,7 +56,7 @@ public class UsageAndSpeedTest {
 		DbContext.resetGlobalVariants();
 		for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
 			try {
-				ctx.nExecute(ddl);
+				ctx.jdbcExecute(ddl);
 			} catch (Exception e) {
 			}
 	}
@@ -78,8 +73,8 @@ public class UsageAndSpeedTest {
 			REPEAT_TIMES = 1;// warm up
 			runTestMethods();
 			PRINT_TIMEUSED = true;
-			REPEAT_TIMES = 1;// Change to 10000 to do speed test
-			Systemout.println("Compare method execute time for repeat " + REPEAT_TIMES + " times:");
+			REPEAT_TIMES = 1000;// Change to 10000 to do speed test
+			System.out.println("Speed test, compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
 			PRINT_TIMEUSED = false;
@@ -89,26 +84,22 @@ public class UsageAndSpeedTest {
 
 	private void runTestMethods() throws Exception {
 		runMethod("pureJdbc");
-		runMethod("xxxxStyleWithConnection");
-		runMethod("xxxxStyle");
-		runMethod("nXxxStyle");
-		runMethod("iXxxStyle");
-		runMethod("pXxxStyle");
-		runMethod("INLINEmethods");
-		runMethod("tXxxStyle");
+		runMethod("withConnection");
+		runMethod("simpleMethods");
+		runMethod("templateStyle");		
 		runMethod("dataMapperStyle");
 		runMethod("activeRecordStyle");
 		runMethod("activeRecordDefaultContext");
 	}
 
 	public void runMethod(String methodName) throws Exception {
-		Method m = ClassUtils.getMethod(this.getClass(), methodName);
 		long start = System.currentTimeMillis();
+		Method m = ClassUtils.getMethod(this.getClass(), methodName);
 		m.invoke(this);
 		long end = System.currentTimeMillis();
 		String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
 		if (PRINT_TIMEUSED)
-			Systemout.println(String.format("%35s: %6s s", methodName, timeused));
+			System.out.println(String.format("%35s: %6s s", methodName, timeused));
 	}
 
 	@Table(name = "users")
@@ -242,7 +233,7 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void xxxxStyleWithConnection() {
+	public void withConnection() {
 		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			Connection conn = null;
@@ -266,7 +257,7 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void xxxxStyle() {
+	public void simpleMethods() {
 		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			try {
@@ -280,92 +271,37 @@ public class UsageAndSpeedTest {
 			}
 		}
 	}
-
-	/**
-	 * INLINE Methods are designed for old DAO tools which only allow 1 SQL string
-	 * in parameter list
-	 */
+   
 	@Test
-	public void INLINEmethods() {
-		QueryRunner runner = new QueryRunner(dataSource);
-		final String name = "Tom";
-		final String age = null;
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			try {
-				runner.execute("insert into users (" //
-						+ " name " + PARA0("Sam") //
-						+ " ,address" + PARA("Canada") //
-						+ ")"//
-						+ VALUESQUES(), PARAMS());
-				runner.execute("update users set " + PARA0() //
-						+ (name == null ? "" : "name=" + QUES("Tom")) //
-						+ (age == null ? "" : "age=" + QUES(age)) //
-						+ ", address=" + QUES("China")//
-						, PARAMS());
-				PARA0("Tom", "China");
-				Assert.assertEquals(1L, (long) runner.query("select count(*) from users where name=? and address=?",
-						new ScalarHandler<Long>(), PARAMS()));
-				runner.execute("delete from users where name=? or address=?" + PARA0("Tom", "China"), PARAMS());
-			} catch (SQLException e) {
-				Systemout.println("Exception found: " + e.getMessage());
-			}
-		}
-	}
-
-	@Test
-	public void nXxxStyle() {
+	public void xxxStyle() {
 		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.nExecute("insert into users (name,address) values(?,?)", "Sam", "Canada");
-			ctx.nExecute("update users set name=?, address=?", "Tom", "China");
-			Assert.assertEquals(1L,
-					ctx.nQueryForLongValue("select count(*) from users where name=? and address=?", "Tom", "China"));
-			ctx.nExecute("delete from users where name=? or address=?", "Tom", "China");
-		}
-	}
-
-	@Test
-	public void iXxxStyle() {
-		DbContext ctx = new DbContext(dataSource);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.iExecute("insert into users (", //
+			ctx.exe("insert into users (", //
 					notNull(" name ,", "Sam"), //
 					notNull(" someother ,", null), //
 					" address ", param("Canada"), //
 					") ", valuesQuestions());
-			ctx.iExecute("update users set name=?,address=?", param("Tom", "China"));
-			Assert.assertEquals(1L, ctx.iQueryForLongValue("select count(*) from users where name=? and address=?",
+			ctx.exe("update users set name=?,address=?", param("Tom", "China"));
+			Assert.assertEquals(1L, ctx.qryLongValue("select count(*) from users where name=? and address=?",
 					param("Tom", "China")));
-			ctx.iExecute("delete from users where name=", ques("Tom"), " or address=", ques("China"));
+			ctx.exe("delete from users where name=", ques("Tom"), " or address=", ques("China"));
 		}
 	}
-
+ 
 	@Test
-	public void pXxxStyle() {
-		DbContext ctx = new DbContext(dataSource);
-		for (int i = 0; i < REPEAT_TIMES; i++) {
-			ctx.pExecute("insert into users (name,address,age) ", "Sam", "Canada", 10, valuesQuestions());
-			ctx.pExecute("update users set name=?", "Tom", sql(", address=?"), "China", sql(", age=?"), null);
-			Assert.assertEquals(1L, ctx.pQueryForLongValue(
-					"select count(*) from users where name=? and address=? and age is ?", "Tom", "China", null));
-			ctx.pExecute("delete from users where name=? or address=?", "Tom", "China");
-		}
-	}
-
-	@Test
-	public void tXxxStyle() {
+	public void templateStyle() {
 		DbContext ctx2 = new DbContext(dataSource);
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			UserAR sam = new UserAR("Sam", "Canada");
 			UserAR tom = new UserAR("Tom", "China");
 			paramMap.put("user", sam);
-			ctx2.tExecute("insert into users (name, address) values(#{user.name},:user.address)", paramMap);
-			ctx2.tExecute("update users set name=#{user.name}, address=:user.address", bind("user", tom));
+			ctx2.exe(TEMPLATE,  "insert into users (name, address) values(#{user.name},:user.address)", paramMap);
+			ctx2.exe(TEMPLATE,"update users set name=#{user.name}, address=:user.address", bind("user", tom));
 			Assert.assertEquals(1L,
-					ctx2.tQueryForLongValue("select count(*) from users where name=#{name} and address=:addr",
+					ctx2.qryLongValue(TEMPLATE,"select count(*) from users where name=#{name} and address=:addr",
 							bind("name", "Tom", "addr", "China")));
-			ctx2.tExecute("delete from users where "//
+			ctx2.exe(TEMPLATE,"delete from users where "//
 					, " name=:name ", bind("name", "Tom")//
 					, " or address=#{address}", bind("address", "China")//
 			);
@@ -379,11 +315,11 @@ public class UsageAndSpeedTest {
 			UserPOJO user = new UserPOJO();
 			user.setName("Sam");
 			user.setAddress("Canada");
-			ctx.eInsert(user);
+			ctx.entityInsert(user);
 			user.setAddress("China");
-			ctx.eUpdateTry(user);
-			UserPOJO sam2 = ctx.eLoadById(UserPOJO.class, "Sam");
-			ctx.eDeleteTry(sam2);
+			ctx.entityUpdateTry(user);
+			UserPOJO sam2 = ctx.entityLoadById(UserPOJO.class, "Sam");
+			ctx.entityDeleteTry(sam2);
 		}
 	}
 
@@ -413,7 +349,7 @@ public class UsageAndSpeedTest {
 			user.insert();
 			user.setAddress("China");
 			user.update();
-			UserAR user2 = ctx.eLoadById(UserAR.class, "Sam");
+			UserAR user2 = ctx.entityLoadById(UserAR.class, "Sam");
 			user2.delete();
 		}
 	}
@@ -423,45 +359,46 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void tXxxUseAnotherSqlTemplateEngine() {
+	public void useAnotherSqlTemplateEngine() {
 		DbContext ctx = new DbContext(dataSource);
-		ctx.setSqlTemplateEngine(new BasicSqlTemplate("[", "]", true, true));
-
+		SqlTemplateEngine engine=new BasicSqlTemplate("[", "]", true, true);//default engine, change to use [] for param
 		UserAR user = new UserAR("Sam", "Canada");
 		UserAR tom = new UserAR("Tom", "China");
-		ctx.tExecute("insert into users (name, address) values([user.name], [user.address])", bind("user", user));
-		ctx.tExecute("update users set name=[user.name], address=[user.address]", bind("user", tom));
+		ctx.exe(engine,"insert into users (name, address) values([user.name], [user.address])", bind("user", user));
+		ctx.exe(engine,"update users set name=[user.name], address=[user.address]", bind("user", tom));
 		Assert.assertEquals(1L,
-				ctx.tQueryForLongValue("select count(*) from users where ${col}= [name] and address=[addr]",
+				ctx.qryLongValue(engine,"select count(*) from users where ${col}= [name] and address=[addr]",
 						bind("name", "Tom"), bind("addr", "China"), bind("$col", "name")));
-		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
+		ctx.exe(engine,"delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
 				bind("$nm", "name"));
 	}
 
 	@Test
-	public void tXxxDynamicChangeTemplateEngine() {
+	public void changeTemplateEngine() {
 		DbContext ctx = new DbContext(dataSource);
-		SqlTemplateEngine engine = new BasicSqlTemplate("[", "]", true, true);
+		SqlTemplateEngine customizedEngine = new BasicSqlTemplate("[", "]", true, true);//customized sql engine
 		UserAR user = new UserAR("Sam", "Canada");
 		UserAR tom = new UserAR("Tom", "China");
-		ctx.tExecute("insert into users (name, address) values(#{user.name}, #{user.address})", bind("user", user));
-		ctx.tExecute(engine, "update users set name=[user.name], address=[user.address]", bind("user", tom));
+		//default template
+		ctx.exe(DB.TEMPLATE,"insert into users (name, address) values(#{user.name}, #{user.address})", bind("user", user));
+		//below are customized engine
+		ctx.exe(customizedEngine, "update users set name=[user.name], address=[user.address]", bind("user", tom));
 		Assert.assertEquals(1L,
-				ctx.tQueryForLongValue(engine, "select count(*) from users where ${col}= [name] and address=[addr]",
+				ctx.qryLongValue(customizedEngine, "select count(*) from users where ${col}= [name] and address=[addr]",
 						bind("name", "Tom"), bind("addr", "China"), bind("$col", "name")));
-		ctx.tExecute("delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
-				bind("$nm", "name"), engine);
+		ctx.exe("delete from users where ${nm}='${t.name}' or address=:u.address", bind("u", tom), bind("$t", tom),
+				bind("$nm", "name"),customizedEngine);
 	}
 
 	/** Use const String can make SQL support Java Bean field refactoring */
 	@Test
-	public void iXxxxSupportRefactor() {
+	public void supportRefactor() {
 		DbContext ctx = new DbContext(dataSource);
-		ctx.iExecute("insert into ", UserAR.TABLE, " ( ", //
+		ctx.exe("insert into ", UserAR.TABLE, " ( ", //
 				UserAR.NAME, ",", param("Sam"), //
 				UserAR.ADDRESS, " ", param("Canada"), //
 				") ", valuesQuestions());
-		ctx.iExecute("delete from users where ", //
+		ctx.exe("delete from users where ", //
 				UserAR.NAME, "=", ques("Sam"), //
 				" or ", UserAR.ADDRESS, "=", ques("Canada")//
 		);
@@ -503,24 +440,24 @@ public class UsageAndSpeedTest {
 		for (int i = 1; i <= 10; i++) {
 			user.setName("Tom" + i);
 			user.setAddress("China" + i);
-			ctx.eInsert(user);
+			ctx.entityInsert(user);
 		}
 		user = new UserAR();
 		user.setName("Tom8");
-		ctx.eLoad(user);
+		ctx.entityLoad(user);
 		Assert.assertEquals("China8", user.getAddress());
 
-		user = ctx.eLoadById(UserAR.class, "Tom7");
+		user = ctx.entityLoadById(UserAR.class, "Tom7");
 		Assert.assertEquals("China7", user.getAddress());
 
 		user.setAddress("Canada");
-		ctx.eUpdateTry(user);
-		Assert.assertEquals("Canada", ctx.eLoadById(UserAR.class, "Tom7").getAddress());
+		ctx.entityUpdateTry(user);
+		Assert.assertEquals("Canada", ctx.entityLoadById(UserAR.class, "Tom7").getAddress());
 
-		ctx.eDeleteTry(user);
-		ctx.eDeleteTry(user, " or name=?", param("Tom2"));
+		ctx.entityDeleteTry(user);
+		ctx.entityDeleteTry(user, " or name=?", param("Tom2"));
 
-		Assert.assertEquals(7, ctx.eFindAll(UserAR.class, " where name>?", param("Tom1")).size());
+		Assert.assertEquals(7, ctx.entityFind(UserAR.class, " where name>?", param("Tom1")).size());
 	}
 
 	@Test
@@ -529,23 +466,23 @@ public class UsageAndSpeedTest {
 		final String name = "Tom";
 		final String age = null;
 		final String address = "China";
-		ctx.iExecute("insert into users (", //
+		ctx.exe("insert into users (", //
 				notNull(" name", name), //
 				notNull(" ,age ", age), //
 				" ,address ", param(address), //
 				") ", valuesQuestions());
-		ctx.pExecute("update users set ", //
+		ctx.exe("update users set ", //
 				notNull(" name", "=", "?, ", name), //
 				notNull(" age=?,", age), //
-				sql(" address=? "), address //
+				sql(" address=? "), param(address) //
 		);
-		Assert.assertEquals(1L, ctx.iQueryForLongValue(//
+		Assert.assertEquals(1L, ctx.qryLongValue(//
 				"select count(*) from users where 1=1 ", //
 				notNull(" and name=? ", name), //
-				"Someother".equals(name) ? ctx.iPrepare(" and Someother>?  ", param(name)) : "", //
+				"Someother".equals(name) ? ctx.prepare(" and Someother>?  ", param(name)) : "", //
 				"China".equals(address) ? ctx.pPrepare(" and address=?  ", address) : ""//
 		));
-		ctx.nExecute("delete from users");
+		ctx.jdbcExecute("delete from users");
 	}
 
 }

@@ -129,12 +129,7 @@ public abstract class TypeUtils {// NOSONAR
 		TYPE_TO_JAVA_MAP.put(Type.TIME, java.sql.Time.class);
 		TYPE_TO_JAVA_MAP.put(Type.TIMESTAMP, java.sql.Timestamp.class);
 	}
-
-	/** @deprecated use canMapToDialectType */
-	@Deprecated
-	public static boolean canMapToSqlType(Class<?> clazz) {
-		return canMapToDialectType(clazz);
-	}
+ 
 
 	/** Check if a Java class type can map to a Dialect type */
 	public static boolean canMapToDialectType(Class<?> clazz) {// NOSONAR
@@ -145,22 +140,11 @@ public abstract class TypeUtils {// NOSONAR
 		return TYPE_TO_JAVA_MAP.get(type);
 	}
 
-	/** @deprecated use javaType2DialectType */
-	@Deprecated
-	public static Type toType(Class<?> clazz) {
-		return javaType2DialectType(clazz);
-	}
-
 	/** Convert a Class type to Dialect's Type */
 	public static Type javaType2DialectType(Class<?> clazz) {
 		return JAVA_TO_TYPE_MAP.get(clazz);
 	}
 
-	/** @deprecated use colDef2DialectType */
-	@Deprecated
-	public static Type toType(String columnDef) {
-		return colDef2DialectType(columnDef);
-	}
 
 	/**
 	 * Convert column definition String to Dialect's Type

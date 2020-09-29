@@ -62,7 +62,7 @@ public class DbProLogTest {
 			ctx.quiteExecute(ddl);
 		DbProLogTest t = new DbProLogTest();
 		t.setName("Tom");
-		ctx.eInsert(t);
+		ctx.entityInsert(t);
 		log.info("Logger test ok");
 		Systemout.println(log);
 	}

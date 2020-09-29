@@ -44,7 +44,7 @@ public class BasicSqlTemplate implements SqlTemplateEngine {
 	 * If set true, ${placeHolder} can write as :placeHolder <br/>
 	 * Default is true
 	 */
-	protected Boolean allowColonAsDelimiter = true;
+	private boolean allowColonAsDelimiter = true;
 
 	private String startDelimiter = "#{";
 	private String endDelimiter = "}";

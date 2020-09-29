@@ -1,14 +1,13 @@
 package text;
 
 import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
-import static com.github.drinkjava2.jsqlbox.DB.pExecute;
-import static com.github.drinkjava2.jsqlbox.DB.pQueryForString;
-import static com.github.drinkjava2.jsqlbox.DB.tExecute;
+import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.jdbpro.Text;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 /**
@@ -54,12 +53,12 @@ public class TextTest extends TestBase {
 
 	@Test
 	public void test() {
-		pExecute(new InsertDemoSQL(), "1", "Foo");
+		DB.exe(new InsertDemoSQL(), param("1", "Foo"));
 
 		Demo d = new Demo().putField("id", "1", "name", "Bar");
-		tExecute(UpdateDemoSQL.class, bind("d", d));
+		DB.exe(DB.TEMPLATE, UpdateDemoSQL.class, bind("d", d));
 
-		Assert.assertEquals("Bar", pQueryForString(SelectNameByIdSQL.class, "1"));
+		Assert.assertEquals("Bar", DB.qryString(SelectNameByIdSQL.class, param("1")));
 	}
 
 }
