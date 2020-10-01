@@ -166,7 +166,7 @@ public class QuoteTableMySqlTest extends TestBase {
 		Assert.assertEquals(4, new Order().findAll().size());
 
 		// ========fidnBySql
-		Assert.assertEquals(4, ctx.beanFindBySql(Order.class, "select * from `Order`").size());
+		Assert.assertEquals(4, ctx.entityFindBySql(Order.class, "select * from `Order`").size());
 		Assert.assertEquals(4, u1.findBySQL("select * from `Order`").size());
 
 		// ========findBySample
@@ -175,11 +175,10 @@ public class QuoteTableMySqlTest extends TestBase {
 		Order sample = new Order("Nam", "addr");
 		Assert.assertEquals(4, ctx.entityFind(Order.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param(":name%").sql(" order by name")).size());
-		Assert.assertEquals(4, ctx.beanFindBySql(Order.class, new SampleItem(sample).sql("select * from `Order` where (")
+		Assert.assertEquals(4, ctx.entityFindBySql(Order.class, new SampleItem(sample).sql("select * from `Order` where (")
 				.nullFields().sql(") or name like ?").param(":name%").sql(" order by name")).size());
 
 		Assert.assertEquals(1, u2.findBySample().size());
-		Assert.assertEquals(1, u1.eFindBySample(u2).size());
 		Assert.assertEquals(1, u1.findAll(new SampleItem(u3).sql(" where  ").notNullFields()).size());
 		Assert.assertEquals(4, u1.findAll(Order.class, new SampleItem(sample).sql(" where (").allFields()
 				.sql(") or name like ?").param("%:name%").sql(" order by name")).size());

@@ -15,10 +15,9 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.DB.alias;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -1,7 +1,7 @@
 package text;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.bind;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import org.junit.Assert;
 import org.junit.Test;

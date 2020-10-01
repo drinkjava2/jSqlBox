@@ -11,11 +11,11 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.USE_BOTH;
+import static com.github.drinkjava2.jsqlbox.DB.USE_MASTER;
+import static com.github.drinkjava2.jsqlbox.DB.USE_SLAVE;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.shard;
 

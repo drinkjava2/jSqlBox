@@ -1,8 +1,8 @@
 package com.github.drinkjava2.jsqlbox.function.entitynet;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.DB.alias;
 import static com.github.drinkjava2.jsqlbox.DB.give;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import org.junit.Before;
 import org.junit.Test;

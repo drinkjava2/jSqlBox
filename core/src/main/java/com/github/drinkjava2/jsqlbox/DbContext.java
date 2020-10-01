@@ -443,14 +443,14 @@ public class DbContext extends DbPro {// NOSONAR
 	 * list
 	 */
 	public <T> List<T> entityFind(Class<T> entityClass, Object... optionItems) {
-		return DbContextUtils.entityFindAll(this, entityClass, optionItems);
+		return DbContextUtils.entityFind(this, entityClass, optionItems);
 	}
 
 	/**
 	 * Find entity according SQL, entityClass usually is first param, if not found,
 	 * return empty list
 	 */
-	public <T> List<T> beanFindBySql(Object... optionItems) {
+	public <T> List<T> entityFindBySql(Object... optionItems) {
 		return qryEntityList(optionItems);
 	}
 

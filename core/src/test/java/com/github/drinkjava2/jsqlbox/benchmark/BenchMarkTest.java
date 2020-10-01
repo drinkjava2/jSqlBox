@@ -1,12 +1,12 @@
 package com.github.drinkjava2.jsqlbox.benchmark;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.DB.AUTO_SQL;
 import static com.github.drinkjava2.jsqlbox.DB.alias;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.give;
+import static com.github.drinkjava2.jsqlbox.DB.notNull;
 import static com.github.drinkjava2.jsqlbox.DB.pagin;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import java.util.List;
 

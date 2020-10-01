@@ -16,6 +16,7 @@
 package com.github.drinkjava2.jdbpro;
 
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -336,12 +337,12 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	
 	/**
 	 * In-Line style execute query and force return a Map<String, Object> type
-	 * result, if no record found, return null;
+	 * result, if no record found, return empty HashMap<String, Object> instance;
 	 */
 	public Map<String, Object> qryMap(Object... items) {
 		List<Map<String, Object>> list = qryMapList(items);
 		if (list.isEmpty())
-			return null;
+			return new HashMap<String, Object>();
 		return list.get(0);
 	}
 

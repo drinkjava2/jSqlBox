@@ -11,7 +11,8 @@
  */
 package com.github.drinkjava2.jsqlbox.converter;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
@@ -70,7 +71,7 @@ public class VersionFieldConverter extends BaseFieldConverter {
 			DbContextUtils.writeValueToBeanFieldOrTail(col, entity, nextVersion);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
-			sqlBody.append(col.getColumnName()).append("=?").append(param(nextVersion));
+			sqlBody.append(col.getColumnName()).append("=?").append( param(nextVersion));
 
 			if (!sqlWhere.isEmpty())
 				sqlWhere.append(" and ");// NOSONAR

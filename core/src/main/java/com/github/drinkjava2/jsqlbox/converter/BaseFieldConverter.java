@@ -11,7 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.converter;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;

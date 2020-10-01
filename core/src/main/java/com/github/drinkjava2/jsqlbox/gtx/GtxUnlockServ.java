@@ -15,8 +15,7 @@
  * the License.
  */
 package com.github.drinkjava2.jsqlbox.gtx;
-
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import java.util.HashMap;
 import java.util.List;
@@ -210,7 +209,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 		ctxs[db].startTrans();
 		try {
 			for (String tb : tbList) {
-				List<Tail> oneRecord = locker.beanFindBySql(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
+				List<Tail> oneRecord = locker.entityFindBySql(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
 						" and gtxid=?", param(gid), " order by GTXLOGNO desc");
 				for (Tail tail : oneRecord) {
 					undo(db, tail);

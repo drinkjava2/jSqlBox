@@ -1,14 +1,14 @@
 package com.github.drinkjava2.jsqlbox.java8;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.alias;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.c_alias;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.clean;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.col;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
-import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.exe;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 import static com.github.drinkjava2.jsqlbox.DB.qry;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.qryMapList;

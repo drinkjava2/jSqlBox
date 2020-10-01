@@ -11,11 +11,11 @@
  */
 package com.github.drinkjava2.jsqlbox;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
 import static com.github.drinkjava2.jsqlbox.DB.AUTO_SQL;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 import static com.github.drinkjava2.jsqlbox.DB.shardTB;
+import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -1285,11 +1285,11 @@ public abstract class DbContextUtils {// NOSONAR
 		return ctx.qryIntValue(sqlBody.toObjectArray());// NOSONAR
 	}
 
-	public static <T> List<T> entityFindAll(DbContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
+	public static <T> List<T> entityFind(DbContext ctx, Class<T> entityClass, Object... optionItems) {// NOSONAR
 		DbContext paramCtx = extractCtx(optionItems);
 		if (paramCtx != null) {
 			Object[] newParams = cleanUpParam(optionItems);
-			return entityFindAll(paramCtx, entityClass, newParams);
+			return entityFind(paramCtx, entityClass, newParams);
 		}
 
 		TableModel optionModel = DbContextUtils.findFirstModel(optionItems);
@@ -1345,7 +1345,7 @@ public abstract class DbContextUtils {// NOSONAR
 
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> entityFindBySample(DbContext ctx, Object sampleBean, Object... sqlItems) {
-		return (List<T>) entityFindAll(ctx, sampleBean.getClass(),
+		return (List<T>) entityFind(ctx, sampleBean.getClass(),
 				new SampleItem(sampleBean).sql(" where ").notNullFields(), sqlItems);
 	}
 

@@ -11,7 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 
 import java.sql.Connection;

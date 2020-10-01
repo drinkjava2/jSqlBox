@@ -137,44 +137,21 @@ public interface ActiveEntity<T> extends EntityType {
 	public default int loadTry(Object... items) {return ctx(items).entityLoadTry(this, items);}
 	public default T loadById(Object id, Object... items) {return (T) ctx(items).entityLoadById(this.getClass(), id, items);}
 	public default T loadByIdTry(Object id, Object... items) {return (T) ctx(items).entityLoadByIdTry(this.getClass(), id, items);}
-	public default T loadBySQL(Object... items) {return ctx(items).entityLoadBySql(items);}
-	
-	
+	public default T loadBySQL(Object... items) {return ctx(items).entityLoadBySql(items);}	
 	public default List<T> findAll(Object... items) {return (List<T>) ctx(items).entityFind(this.getClass(), items);}
-	public default List<T> findBySQL(Object... items) {return ctx(items).beanFindBySql(this.getClass(), items);}
+	public default List<T> findBySQL(Object... items) {return ctx(items).entityFindBySql(this.getClass(), items);}
 	public default List<T> findBySample(Object sampleBean, Object... items) {return ctx(items).entityFindBySample(sampleBean, items);} 
 	public default EntityNet autoNet(Class<?>... entityClass) {return  ctx().autoNet(entityClass);}
 	public default <E> E findRelatedOne(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).entityFindRelatedOne(this, newItems);}
 	public default <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).entityFindRelatedList(this, newItems);}
 	public default <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).entityFindRelatedSet(this, newItems);}
 	public default <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).entityFindRelatedMap(this, newItems);}
- 
-	public default <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx(items).entityFind(entityClass, items);}
-	public default <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx(items).entityFindBySample(sampleBean, items);}
-	public default <E> List<E> eFindBySQL(Object... items) {return ctx(items).beanFindBySql(items);}   
-	public default <E> E eInsert(E entity, Object... items) {return ctx(items).entityInsert(entity, items);} 
-	public default <E> E eLoad(E entity, Object... items) {return ctx(items).entityLoad(entity, items);} 
-	public default <E> E eLoadById(Class<E> entityClass, Object entityId, Object... items) {return ctx(items).entityLoadById(entityClass, entityId, items);}
-    public default <E> E eLoadByIdTry(Class<E> entityClass, Object entityId, Object... items) {return ctx(items).entityLoadByIdTry(entityClass, entityId, items);}
-	public default <E> E eUpdate(Object entity, Object... items) {return ctx(items).entityUpdate(entity, items);}
-	public default boolean eExist(Object entity, Object... items) {return ctx(items).entityExist(entity, items);}
-	public default boolean eExistById(Class<?> entityClass, Object id, Object... items) {return ctx(items).entityExistById(entityClass, id, items);}
-	public default int eCountAll(Class<?> entityClass, Object... items) {return ctx(items).entityCount(entityClass, items);}
-	public default int eDeleteByIdTry(Class<?> entityClass, Object id, Object... items) {return ctx(items).entityDeleteByIdTry(entityClass, id, items);}
-	public default int eDeleteTry(Object entity, Object... items) {return ctx(items).entityDeleteTry(entity, items);}
-	public default int eLoadTry(Object entity, Object... items) {return ctx(items).entityLoadTry(entity, items);}
-	public default int eUpdateTry(Object entity, Object... items) {return ctx(items).entityUpdateTry(entity, items);}
-	public default void eDelete(Object entity, Object... items) { ctx(items).entityDelete(entity, items);}
-	public default void eDeleteById(Class<?> entityClass, Object id, Object... items) {ctx(items).entityDeleteById(entityClass, id, items);}
-	public default <E> E eFindRelatedOne(Object entity, Object... items) {return  ctx(items).entityFindRelatedOne(entity, items);}
-	public default <E> List<E> eFindRelatedList(Object entityOrIterable, Object... items) {return  ctx(items).entityFindRelatedList(entityOrIterable, items);}
-	public default <E> Set<E> eFindRelatedSet(Object entity, Object... items) {return  ctx(items).entityFindRelatedSet(entity, items);}
-	public default <E> Map<Object, E> eFindRelatedMap(Object entity, Object... items) {return  ctx(items).entityFindRelatedMap(entity, items);}
   
 	// simplilfied SQL methods 
 	public default <E> E qry(Object... items) {return  ctx(items).qry(items);}
 	public default <E> E qryObject(Object... items) {return ctx(items).qryObject(items);}
 	public default long qryLongValue(Object... items) {return ctx(items).qryLongValue(items);}
+	public default int qryIntValue(Object... items) {return ctx(items).qryIntValue(items);}
 	public default String qryString(Object... items) {return ctx(items).qryString(items);}
 	public default List<Map<String, Object>> qryMapList(Object... items) {return ctx(items).qryMapList(items);}
 	public default Map<String, Object> qryMap(Object... items) {return ctx(items).qryMap(items);}

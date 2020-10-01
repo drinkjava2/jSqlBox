@@ -1,7 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function;
 
 import static com.github.drinkjava2.jsqlbox.DB.TAIL;
-import static com.github.drinkjava2.jsqlbox.DB.eLoadBySQL;
+import static com.github.drinkjava2.jsqlbox.DB.entityLoadBySql;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.exe;
 import static com.github.drinkjava2.jsqlbox.DB.tail;
@@ -72,7 +72,7 @@ public class TailTest extends TestBase {
 	@Test
 	public void mixTailTest() {
 		new TailDemo().setUserName("Tom").putTail("age", 10).insert(TAIL);
-		TailDemo t = eLoadBySQL(TailDemo.class, "select 'China' as address, tail_demo.* from tail_demo");
+		TailDemo t = entityLoadBySql(TailDemo.class, "select 'China' as address, tail_demo.* from tail_demo");
 		Assert.assertEquals("China", t.getTail("address"));
 		Assert.assertEquals("Tom", t.getUserName());
 		t.putField("birthDay", new Date());
@@ -84,14 +84,14 @@ public class TailTest extends TestBase {
 		t.putTail("address", "Canada");
 		t.update(TAIL);
 
-		t = eLoadBySQL(TailDemo.class, "select * from tail_demo");
+		t = entityLoadBySql(TailDemo.class, "select * from tail_demo");
 		Assert.assertEquals("Canada", t.getTail("address"));
 	}
 
 	@Test
 	public void tailTest() {
 		new Tail().putTail("user_name", "Tom", "age", 10).insert(tail("tail_demo"));
-		Tail t = eLoadBySQL(Tail.class, "select 'China' as address, tail_demo.* from tail_demo");
+		Tail t = entityLoadBySql(Tail.class, "select 'China' as address, tail_demo.* from tail_demo");
 		Assert.assertEquals("China", t.getTail("address"));
 		Assert.assertEquals("Tom", t.getTail("user_name"));
 		t.update(tail("tail_demo"));
@@ -101,7 +101,7 @@ public class TailTest extends TestBase {
 		t.putTail("address", "Canada");
 		t.update(tail("tail_demo"));
 
-		t = eLoadBySQL(Tail.class, "select * from tail_demo");
+		t = entityLoadBySql(Tail.class, "select * from tail_demo");
 		Assert.assertEquals("Canada", t.getTail("address"));
 
 		Assert.assertEquals(1, t.deleteTry(tail("tail_demo")));

@@ -11,10 +11,10 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_BOTH;
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_MASTER;
-import static com.github.drinkjava2.jdbpro.JDBPRO.USE_SLAVE;
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.USE_BOTH;
+import static com.github.drinkjava2.jsqlbox.DB.USE_MASTER;
+import static com.github.drinkjava2.jsqlbox.DB.USE_SLAVE;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -114,8 +114,7 @@ public class MasterSlaveTest {
 	public void testCreateTables() {
 		Assert.assertEquals(10L, master.qryLongValue("select count(*) from TheUser", USE_MASTER));
 		Assert.assertEquals(5L, master.qryLongValue("select count(*) from TheUser", USE_SLAVE));
-		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", param("Tom"), USE_MASTER,
-				new PrintSqlHandler());
+		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", param("Tom"), USE_MASTER, new PrintSqlHandler());
 		Systemout.println(u.getName());
 	}
 
@@ -145,8 +144,7 @@ public class MasterSlaveTest {
 		Assert.assertEquals("Master_Row1", u2.getName());
 
 		// Force use slave
-		Assert.assertEquals(SLAVE_RECORD_ROWS,
-				master.qryLongValue("select count(*)", USE_SLAVE, " from TheUser"));
+		Assert.assertEquals(SLAVE_RECORD_ROWS, master.qryLongValue("select count(*)", USE_SLAVE, " from TheUser"));
 		TheUser u3 = master.entityLoadById(TheUser.class, 1L, USE_SLAVE);
 		Assert.assertEquals("Slave_Row1", u3.getName());
 	}

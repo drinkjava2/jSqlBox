@@ -1,12 +1,12 @@
 package com.github.drinkjava2.jsqlbox.helloworld;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.TEMPLATE;
-import static com.github.drinkjava2.jdbpro.JDBPRO.bind;
-import static com.github.drinkjava2.jdbpro.JDBPRO.notNull;
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jdbpro.JDBPRO.ques;
-import static com.github.drinkjava2.jdbpro.JDBPRO.sql;
-import static com.github.drinkjava2.jdbpro.JDBPRO.valuesQuestions;
+import static com.github.drinkjava2.jsqlbox.DB.TEMPLATE;
+import static com.github.drinkjava2.jsqlbox.DB.bind;
+import static com.github.drinkjava2.jsqlbox.DB.notNull;
+import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.ques;
+import static com.github.drinkjava2.jsqlbox.DB.sql;
+import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;

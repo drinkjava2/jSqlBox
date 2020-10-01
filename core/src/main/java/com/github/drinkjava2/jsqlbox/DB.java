@@ -15,11 +15,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
-import com.github.drinkjava2.jdbpro.JDBPRO;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
+import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.github.drinkjava2.jtransactions.TxResult;
@@ -31,7 +33,7 @@ import com.github.drinkjava2.jtransactions.TxResult;
  * @author Yong Zhu
  * @since 1.0.8
  */
-public abstract class DB extends JDBPRO {// NOSONAR
+public abstract class DB  {// NOSONAR
 	public static final SqlOption EXECUTE = SqlOption.EXECUTE;
 	public static final SqlOption UPDATE = SqlOption.UPDATE;
 	public static final SqlOption INSERT = SqlOption.INSERT;
@@ -44,7 +46,106 @@ public abstract class DB extends JDBPRO {// NOSONAR
 	public static final SqlOption IGNORE_EMPTY = SqlOption.IGNORE_EMPTY;
 	public static final SqlOption AUTO_SQL = SqlOption.AUTO_SQL;
 	public static final SqlItem TAIL = new SqlItem(SqlOption.TAIL);
+	public static final SqlTemplateEngine TEMPLATE = BasicSqlTemplate.instance();
+	//======================
 
+	protected void ________SqlItem_Methods________() {// NOSONAR
+	}
+
+	/** Return a SqlItemType.PARAM type SqlItem instance */
+	public static SqlItem param(Object... parameters) {
+		return new SqlItem(SqlOption.PARAM, parameters);
+	}
+
+	/**
+	 * Cache parameters and return an empty String
+	 */
+	public static SqlItem sql(Object... parameters) {
+		return new SqlItem(SqlOption.SQL, parameters);
+	}
+
+	/**
+	 * Cache parameters and return a "?" String
+	 */
+	public static SqlItem ques(Object... parameters) {// NOSONAR
+		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
+	}
+
+	/**
+	 * Cache parameters and return a "?" String
+	 */
+	public static SqlItem question(Object... parameters) {
+		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
+	}
+
+	/**
+	 * If last param is not null, then add all items in SQL<br/>
+	 * Example: query("select * from a where 1=1",notNull(" and name=?",name));
+	 */
+	public static SqlItem notNull(Object... items) {
+		return new SqlItem(SqlOption.NOT_NULL, items);
+	}
+
+	/**
+	 * If no any param is null, then add all items in SQL<br/>
+	 * Example: query("select * from a where 1=1",noNull("and name like
+	 * ?","%",name,"%"));
+	 */
+	public static SqlItem noNull(Object... args) {
+		if (args.length <= 2)
+			return notNull(args);
+		for (int i = 1; i <= args.length - 1; i++)
+			if (args[i] == null)
+				return notNull(null, null);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 1; i <= args.length - 1; i++)
+			sb.append(args[i]);
+		return notNull(args[0], sb.toString());
+	}
+
+	/**
+	 * Create "values(?,?,?...,?)" String according how many SQL parameters be
+	 * cached
+	 */
+	public static SqlItem valuesQuestions() {
+		return new SqlItem(SqlOption.VALUES_QUESTIONS);
+	}
+
+	/**
+	 * Switch to another DbPro
+	 */
+	public static SqlItem switchTo(DbPro dpPro) {
+		return new SqlItem(SqlOption.SWITCHTO, dpPro);
+	}
+
+	/**
+	 * For tXxxx style templateEngine use, return a SqlItemType.PUT type SqlItem
+	 * instance,
+	 * 
+	 * Usage: put("key1",value1,"key2",value2...);
+	 */
+	public static SqlItem bind(Object... parameters) {
+		return new SqlItem(SqlOption.BIND, parameters);
+	}
+
+	/**
+	 * Create a SqlOption.IOC_OBJECT type SqlItem instance, args will create
+	 * instance by IocTool
+	 */
+	public static SqlItem disableHandlers(Class<?>... args) {
+		return new SqlItem(SqlOption.DISABLE_HANDLERS, (Object[]) args);
+	}
+	
+	//======================
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/** Shortcut method equal to DbContext.getGlobalDbContext() */
 	public static DbContext gctx() {
 		return DbContext.getGlobalDbContext();
@@ -78,6 +179,14 @@ public abstract class DB extends JDBPRO {// NOSONAR
 		return new SqlItem(SqlOption.GIVE, from, to, fieldName);
 	}
 
+	/** if condition true, return items  array, else return "" */
+	public static Object when(boolean condition, Object... items) {
+		if (condition)
+			return items;
+		else
+			return "";
+	}
+	
 	/** For EntityNet Query use, see user manual */
 	public static SqlItem give(String from, String to) {
 		return new SqlItem(SqlOption.GIVE, from, to);
@@ -120,44 +229,40 @@ public abstract class DB extends JDBPRO {// NOSONAR
 		return new Object[] { shardTB(shardvalues), shardDB(shardvalues) };
 	}
 
-	//@formatter:off
-	
+	protected void ________Entity_Methods________() {// NOSONAR
+	}
+	//@formatter:off 
 	//Entity series methods from DbContext
-	
-	//eFindXxxx method if not found any entity, will return empty List or null value
-	public static <T> List<T> eFindAll(Class<T> entityClass, Object... items) {return gctx().entityFind(entityClass, items);}
-	public static <T> List<T> eFindBySample(Object sampleBean, Object... items) {return gctx().entityFindBySample(sampleBean, items);}
-	public static <T> List<T> eFindBySQL(Object... items) {return gctx().beanFindBySql(items);}
-	public static <T> T eFindOneBySQL(Object... items) {return gctx().entityFindOneBySQL(items);} 
-	 
- 	//eLoadXxx method if load fail, will throw DbException
-	public static <T> T eLoad(T entity, Object... items) {return gctx().entityLoad(entity, items);} 
-	public static <T> T eLoadById(Class<T> entityClass, Object entityId, Object... items) {return gctx().entityLoadById(entityClass, entityId, items);}
-    public static <T> T eLoadByIdTry(Class<T> entityClass, Object entityId, Object... items) {return gctx().entityLoadByIdTry(entityClass, entityId, items);}
-    public static <T> T eLoadBySQL(Object... items) {return gctx().entityLoadBySql(items);}
-
-	public static <T> T eInsert(T entity, Object... items) {return gctx().entityInsert(entity, items);} 
-    public static <T> T eUpdate(Object entity, Object... items) {return gctx().entityUpdate(entity, items);}
-	public static boolean eExist(Object entity, Object... items) {return gctx().entityExist(entity, items);}
-	public static boolean eExistById(Class<?> entityClass, Object id, Object... items) {return gctx().entityExistById(entityClass, id, items);}
-	public static int eCountAll(Class<?> entityClass, Object... items) {return gctx().entityCount(entityClass, items);}
-	public static int eDeleteByIdTry(Class<?> entityClass, Object id, Object... items) {return gctx().entityDeleteByIdTry(entityClass, id, items);}
-	public static int eDeleteTry(Object entity, Object... items) {return gctx().entityDeleteTry(entity, items);}
-	public static int eLoadTry(Object entity, Object... items) {return gctx().entityLoadTry(entity, items);}
-	public static int eUpdateTry(Object entity, Object... items) {return gctx().entityUpdateTry(entity, items);}
-	public static void eDelete(Object entity, Object... items) { gctx().entityDelete(entity, items);}
-	public static void eDeleteById(Class<?> entityClass, Object id, Object... items) {gctx().entityDeleteById(entityClass, id, items);}
-	public static EntityNet eAutoNet(Class<?>... entityClass) {return  gctx().autoNet(entityClass);}
-	public static <T> T eFindRelatedOne(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedOne(entity, sqlItems);}
-	public static <T> List<T> eFindRelatedList(Object entityOrIterable, Object... sqlItems) {return  gctx().entityFindRelatedList(entityOrIterable, sqlItems);}
-	public static <T> Set<T> eFindRelatedSet(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedSet(entity, sqlItems);}
-	public static <T> Map<Object, T> eFindRelatedMap(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedMap(entity, sqlItems);}
-	
-	
  
+	public static <T> List<T> entityFind(Class<T> entityClass, Object... items) {return gctx().entityFind(entityClass, items);}
+	public static <T> List<T> entityFindBySample(Object sampleBean, Object... items) {return gctx().entityFindBySample(sampleBean, items);}
+	public static <T> List<T> entityFindBySql(Object... items) {return gctx().entityFindBySql(items);}
+	public static <T> T entityFindOneBySQL(Object... items) {return gctx().entityFindOneBySQL(items);} 
+	public static <T> T entityLoad(T entity, Object... items) {return gctx().entityLoad(entity, items);} 
+	public static <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... items) {return gctx().entityLoadById(entityClass, entityId, items);}
+    public static <T> T entityLoadByIdTry(Class<T> entityClass, Object entityId, Object... items) {return gctx().entityLoadByIdTry(entityClass, entityId, items);}
+    public static <T> T entityLoadBySql(Object... items) {return gctx().entityLoadBySql(items);}
+	public static <T> T entityInsert(T entity, Object... items) {return gctx().entityInsert(entity, items);} 
+    public static <T> T entityUpdate(Object entity, Object... items) {return gctx().entityUpdate(entity, items);}
+	public static boolean entityExist(Object entity, Object... items) {return gctx().entityExist(entity, items);}
+	public static boolean entityExistById(Class<?> entityClass, Object id, Object... items) {return gctx().entityExistById(entityClass, id, items);}
+	public static int entityCount(Class<?> entityClass, Object... items) {return gctx().entityCount(entityClass, items);}
+	public static int entityDeleteByIdTry(Class<?> entityClass, Object id, Object... items) {return gctx().entityDeleteByIdTry(entityClass, id, items);}
+	public static int entityDeleteTry(Object entity, Object... items) {return gctx().entityDeleteTry(entity, items);}
+	public static int entityLoadTry(Object entity, Object... items) {return gctx().entityLoadTry(entity, items);}
+	public static int entityUpdateTry(Object entity, Object... items) {return gctx().entityUpdateTry(entity, items);}
+	public static void entityDelete(Object entity, Object... items) { gctx().entityDelete(entity, items);}
+	public static void entityDeleteById(Class<?> entityClass, Object id, Object... items) {gctx().entityDeleteById(entityClass, id, items);}
+	public static <T> T entityFindRelatedOne(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedOne(entity, sqlItems);}
+	public static <T> List<T> entityFindRelatedList(Object entityOrIterable, Object... sqlItems) {return  gctx().entityFindRelatedList(entityOrIterable, sqlItems);}
+	public static <T> Set<T> entityFindRelatedSet(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedSet(entity, sqlItems);}
+	public static <T> Map<Object, T> entityFindRelatedMap(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedMap(entity, sqlItems);}
+	public static EntityNet autoNet(Class<?>... entityClass) {return  gctx().autoNet(entityClass);}	 
 	
 	
 	// simplilfied SQL methods 
+	protected void ________SQL_Methods________() {}// NOSONAR
+	
 	public static <T> T qry(Object... items) {return  gctx().qry(items);}
 	public static <T> T iQueryForObject(Object... items) {return gctx().qryObject(items);}
 	public static long qryLongValue(Object... items) {return gctx().qryLongValue(items);}

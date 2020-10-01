@@ -15,11 +15,12 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
 import static com.github.drinkjava2.jsqlbox.DB.alias;
-import static com.github.drinkjava2.jsqlbox.DB.eFindAll;
+import static com.github.drinkjava2.jsqlbox.DB.entityFind;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
-import static com.github.drinkjava2.jsqlbox.DB.*;
+import static com.github.drinkjava2.jsqlbox.DB.pagin;
+import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.qry;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -177,7 +178,7 @@ public class SqlHandlersTest extends TestBase {
 				"select u.* from DemoUser u where u.age>?", param(0), pagin(2, 5));
 		Assert.assertTrue(users2.size() == 5);
 
-		List<DemoUser> users3 = eFindAll(DemoUser.class, " where age>?", param(0), pagin(2, 5));
+		List<DemoUser> users3 = entityFind(DemoUser.class, " where age>?", param(0), pagin(2, 5));
 		Assert.assertTrue(users3.size() == 5);
 
 		DbContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));

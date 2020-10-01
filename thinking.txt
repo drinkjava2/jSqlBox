@@ -1,0 +1,10 @@
+﻿备忘：
+* 大写的param/valuesquestion去掉
+* pintea 去除这种命名，i改为qry/ins等三字方法，p,n, t 去除, e改为entity前缀
+* 类型转换做成可配置的接口
+* in array 如空改为 (null)
+* aryArray代替 scarlar 获取一组ids
+* 添加when语法
+* 去除JDBPRO，只保留DB
+* jpaQuery支持?
+ 

@@ -212,38 +212,14 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public T loadById(Object id, Object... items) {return (T) ctx().entityLoadById(this.getClass(), id, items);}
 	public T loadByIdTry(Object id, Object... items) {return (T) ctx().entityLoadByIdTry(this.getClass(), id, items);}
 	public T loadBySQL(Object... items) {return  ctx().entityLoadBySql(items);}
-	
-	
 	public List<T> findAll(Object... items) {return (List<T>) ctx().entityFind(this.getClass(), items);}
-	public List<T> findBySQL(Object... items) {return ctx().beanFindBySql(this.getClass(), items);}
+	public List<T> findBySQL(Object... items) {return ctx().entityFindBySql(this.getClass(), items);}
 	public List<T> findBySample(Object... items) {return ctx().entityFindBySample(this, items);} 
 	public EntityNet autoNet(Class<?>... entityClass) {return  ctx().autoNet(entityClass);}
 	public <E> E findRelatedOne(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedOne(this, newItems);}
 	public <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedList(this, newItems);}
 	public <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedSet(this, newItems);}
 	public <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedMap(this, newItems);}
- 
-	public <E> List<E> eFindAll(Class<E> entityClass, Object... items) {return ctx().entityFind(entityClass, items);}
-	public <E> List<E> eFindBySample(Object sampleBean, Object... items) {return ctx().entityFindBySample(sampleBean, items);}
-	public <E> List<E> eFindBySQL(Object... items) {return ctx().beanFindBySql(items);}   
-	public <E> E eInsert(E entity, Object... items) {return ctx().entityInsert(entity, items);} 
-	public <E> E eLoad(E entity, Object... items) {return ctx().entityLoad(entity, items);} 
-	public <E> E eLoadById(Class<E> entityClass, Object entityId, Object... items) {return ctx().entityLoadById(entityClass, entityId, items);}
-    public <E> E eLoadByIdTry(Class<E> entityClass, Object entityId, Object... items) {return ctx().entityLoadByIdTry(entityClass, entityId, items);}
-	public <E> E eUpdate(Object entity, Object... items) {return ctx().entityUpdate(entity, items);}
-	public boolean eExist(Object entity, Object... items) {return ctx().entityExist(entity, items);}
-	public boolean eExistById(Class<?> entityClass, Object id, Object... items) {return ctx().entityExistById(entityClass, id, items);}
-	public int eCountAll(Class<?> entityClass, Object... items) {return ctx().entityCount(entityClass, items);}
-	public int eDeleteByIdTry(Class<?> entityClass, Object id, Object... items) {return ctx().entityDeleteByIdTry(entityClass, id, items);}
-	public int eDeleteTry(Object entity, Object... items) {return ctx().entityDeleteTry(entity, items);}
-	public int eLoadTry(Object entity, Object... items) {return ctx().entityLoadTry(entity, items);}
-	public int eUpdateTry(Object entity, Object... items) {return ctx().entityUpdateTry(entity, items);}
-	public void eDelete(Object entity, Object... items) { ctx().entityDelete(entity, items);}
-	public void eDeleteById(Class<?> entityClass, Object id, Object... items) {ctx().entityDeleteById(entityClass, id, items);}
-	public <E> E eFindRelatedOne(Object entity, Object... items) {return  ctx().entityFindRelatedOne(entity, items);}
-	public <E> List<E> eFindRelatedList(Object entityOrIterable, Object... items) {return  ctx().entityFindRelatedList(entityOrIterable, items);}
-	public <E> Set<E> eFindRelatedSet(Object entity, Object... items) {return  ctx().entityFindRelatedSet(entity, items);}
-	public <E> Map<Object, E> eFindRelatedMap(Object entity, Object... items) {return  ctx().entityFindRelatedMap(entity, items);}
   
 	// simplilfied SQL methods 
 	public <E> E qry(Object... items) {return  ctx().qry(items);}

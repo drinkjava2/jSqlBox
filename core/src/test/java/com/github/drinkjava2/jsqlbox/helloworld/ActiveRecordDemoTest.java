@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox.helloworld;
 
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 
 import java.util.List;
 import java.util.Map;

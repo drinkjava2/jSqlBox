@@ -1,14 +1,15 @@
 package com.github.drinkjava2.jsqlbox.java8;
-/*- JAVA8_BEGIN */
-import static com.github.drinkjava2.jdbpro.JDBPRO.param;
-import static com.github.drinkjava2.jsqlbox.JAVA8.*;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
-import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.exe;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
+import static com.github.drinkjava2.jsqlbox.DB.param;
 import static com.github.drinkjava2.jsqlbox.DB.qry;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.qryMapList;
+import static com.github.drinkjava2.jsqlbox.JAVA8.$;
+import static com.github.drinkjava2.jsqlbox.JAVA8.c$;
+import static com.github.drinkjava2.jsqlbox.JAVA8.proxy;
 
 import java.util.List;
 
@@ -18,10 +19,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.ALIAS;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.COL;
 import com.github.drinkjava2.jsqlbox.LambdSqlItem.C_ALIAS;
-import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
  
 
