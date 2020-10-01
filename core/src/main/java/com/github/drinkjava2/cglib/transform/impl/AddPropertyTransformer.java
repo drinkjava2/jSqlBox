@@ -26,6 +26,7 @@ public class AddPropertyTransformer extends ClassEmitterTransformer {
     private final String[] names;
     private final Type[] types;
 
+	@SuppressWarnings("unchecked")
 	public AddPropertyTransformer(Map props) {
         int size = props.size();
         names = (String[])props.keySet().toArray(new String[size]);

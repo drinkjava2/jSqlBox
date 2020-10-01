@@ -13,6 +13,7 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID26;
 import com.github.drinkjava2.jdialects.annotation.jpa.GeneratedValue;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -21,6 +22,7 @@ import com.github.drinkjava2.jdialects.id.AutoIdGenerator;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.SortedUUIDGenerator;
 import com.github.drinkjava2.jdialects.id.UUID25Generator;
+import com.github.drinkjava2.jdialects.id.UUID26Generator;
 import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jdialects.id.UUID36Generator;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -50,12 +52,14 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		executeDDLs(ddls);
 		for (int i = 0; i < 10; i++) {
 			Object id1 = guessedDialect.getNexID(UUID25Generator.INSTANCE, dbPro, null);
+			Object id26 = guessedDialect.getNexID(UUID26Generator.INSTANCE, dbPro, null);			
 			Object id2 = guessedDialect.getNexID(UUID32Generator.INSTANCE, dbPro, null);
 			Object id3 = guessedDialect.getNexID(UUID36Generator.INSTANCE, dbPro, null);
 			Systemout.println(id1);
 			Systemout.println(id2);
 			Systemout.println(id3);
 			Assert.assertTrue(("" + id1).length() == 25);
+			Assert.assertTrue(("" + id26).length() == 26);
 			Assert.assertTrue(("" + id2).length() == 32);
 			Assert.assertTrue(("" + id3).length() == 36);
 			dbPro.jdbcExecute("insert into testNextIdTable (id1,id2,id3) values(?,?,?) ", id1, id2, id3);
@@ -254,5 +258,49 @@ public class IdgeneratorTest extends JdialectsTestBase {
 	public void testUUID25() {
 		reBuildDB(TableModelUtils.entity2Models(uuid25Entity.class));
 		testOnCurrentRealDatabase(TableModelUtils.entity2Models(uuid25Entity.class));
+	}
+	
+	public static class uuid26Entity {
+		@GeneratedValue(strategy = GenerationType.UUID25)
+		private String id1;
+		@UUID26
+		private String id2;
+
+		private String id3;
+
+		public static void config(TableModel t) {
+			t.getColumn("id3").uuid25();
+		}
+
+		public String getId1() {
+			return id1;
+		}
+
+		public void setId1(String id1) {
+			this.id1 = id1;
+		}
+
+		public String getId2() {
+			return id2;
+		}
+
+		public void setId2(String id2) {
+			this.id2 = id2;
+		}
+
+		public String getId3() {
+			return id3;
+		}
+
+		public void setId3(String id3) {
+			this.id3 = id3;
+		}
+
+	}
+
+	@Test
+	public void testUUID26() {
+		reBuildDB(TableModelUtils.entity2Models(uuid26Entity.class));
+		testOnCurrentRealDatabase(TableModelUtils.entity2Models(uuid26Entity.class));
 	}
 }

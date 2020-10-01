@@ -49,7 +49,10 @@ public enum GenerationType {
 	AUTO,
 
 	/** A 25 character length UUID */
-	UUID25,
+	UUID25,	
+
+	/** A 26 character length UUID */
+	UUID26,
 
 	/** A 32 character length UUID */
 	UUID32,

@@ -836,6 +836,10 @@ public class StrUtils {
 
 	private static final SecureRandom random = new SecureRandom();
 	private static final char[] ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
+	
+	public static char getRandomChar() {
+		return ALPHABET[random.nextInt(32)];
+	}
 
 	public static String getRandomString(int length) {
 		StringBuilder sb = new StringBuilder();

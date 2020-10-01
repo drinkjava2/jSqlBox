@@ -11,41 +11,39 @@
  */
 package com.github.drinkjava2.jdialects.id;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 import com.github.drinkjava2.jdbpro.NormalJdbcTool;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 
 /**
- * Generate a JDK 32 letters random UUID based on Base16 encoding, example:
- * bca5414e9b1b4bdfa257125e05428b92
+ * Compress JDK UUID to 26 letters based on radix 36, use 0-9 a-z characters,
+ * example: pbicz3grgu0zk3ipe1yur03h7a
  * 
  * @author Yong Zhu
  * @version 1.0.0
  * @since 1.0.0
  */
-public class UUID32Generator implements IdGenerator {
-	public static final UUID32Generator INSTANCE = new UUID32Generator();
+public class UUID26Generator implements IdGenerator {
+	public static final UUID26Generator INSTANCE = new UUID26Generator();
 
 	@Override
 	public GenerationType getGenerationType() {
-		return GenerationType.UUID32;
+		return GenerationType.UUID26;
 	}
 
 	@Override
 	public String getIdGenName() {
-		return "UUID32";
+		return "UUID26";
 	}
 
 	@Override
 	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		return getUUID32();
-	}
-
-	public static String getUUID32() {
-		return UUID.randomUUID().toString().replace("-", "");
+		return getUUID26();
 	}
 
 	@Override
@@ -57,4 +55,14 @@ public class UUID32Generator implements IdGenerator {
 	public IdGenerator newCopy() {
 		return INSTANCE;
 	}
+
+	public static String getUUID26() {
+		String uuidHex = UUID.randomUUID().toString().replace("-", "");
+		BigInteger b = new BigInteger(uuidHex, 16);
+		String s = b.toString(36);
+		while (s.length() < 26)
+			s = s + StrUtils.getRandomChar(); //NOSONAR
+		return s;
+	}
+
 }

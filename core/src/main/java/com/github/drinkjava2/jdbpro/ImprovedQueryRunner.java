@@ -433,7 +433,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		}
 		if (ps.getParams().length > 0) {
 			for (int i = 0; i < ps.getParams().length; i++) {
-				ps.getParams()[i] = TypeUtils.javaParam2JdbcParam(ps.getParams()[i]);
+				ps.getParams()[i] = TypeUtils.javaValue2JdbcValue(ps.getParams()[i]);
 			}
 		}
 		if (ps.getMasterSlaveOption() == null)

@@ -280,6 +280,13 @@ public class ColumnModel {
 		this.idGeneratorName = null;
 		return this;
 	}
+	
+	public ColumnModel uuid26() {
+		makeSureTableModelExist();
+		this.idGenerationType = GenerationType.UUID26;
+		this.idGeneratorName = null;
+		return this;
+	}
 
 	public ColumnModel uuid32() {
 		makeSureTableModelExist();

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -13,16 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdbpro;
+package com.github.drinkjava2.jdialects;
 
 /**
- * JDBPRO is deprecated from 5.xx version and may be deleted in future version,
- * Keep this this class is for compatible purpose only
+ * JdbcTypeConverter, used to conver jdbc value to java, or java value to jdbc
+ * parameter for SQL
  * 
- * @deprecated use DB instead
- * @author Yong Zhu
+ * @author yongz
+ * @since 5.0.0
+ *
  */
-@Deprecated
-public abstract class JDBPRO {//NOSONAR
-	// do not change this file
+public interface JdbcTypeConverter {
+
+	public Object jdbcValue2JavaValue(Object value, Class<?> javaType);
+
+	public Object javaValue2JdbcValue(Object value);
+
 }

@@ -73,7 +73,7 @@ public class UsageAndSpeedTest {
 			REPEAT_TIMES = 1;// warm up
 			runTestMethods();
 			PRINT_TIMEUSED = true;
-			REPEAT_TIMES = 1000;// Change to 10000 to do speed test
+			REPEAT_TIMES = 5000;// Change to 10000 to do speed test
 			System.out.println("Speed test, compare method execute time for repeat " + REPEAT_TIMES + " times:");
 			runTestMethods();
 		} finally {
@@ -85,6 +85,7 @@ public class UsageAndSpeedTest {
 	private void runTestMethods() throws Exception {
 		runMethod("pureJdbc");
 		runMethod("withConnection");
+		runMethod("oldDbutilsMethods"); 
 		runMethod("simpleMethods");
 		runMethod("templateStyle");		
 		runMethod("dataMapperStyle");
@@ -257,7 +258,7 @@ public class UsageAndSpeedTest {
 	}
 
 	@Test
-	public void simpleMethods() {
+	public void oldDbutilsMethods() {
 		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			try {
@@ -273,7 +274,7 @@ public class UsageAndSpeedTest {
 	}
    
 	@Test
-	public void xxxStyle() {
+	public void simpleMethods() {
 		DbContext ctx = new DbContext(dataSource);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.exe("insert into users (", //

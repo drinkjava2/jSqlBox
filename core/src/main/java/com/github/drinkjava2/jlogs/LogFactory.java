@@ -64,7 +64,7 @@ public abstract class LogFactory {// NOSONAR
 		InputStream is = Log.class.getClassLoader().getResourceAsStream("jlogs.properties");
 		if (is == null) {
 			if (!printed())
-				System.out.println("Not found jlogs.properties,  will use ConsoleLog as JLog logger.");// NOSONAR
+				System.out.println("Not found jlogs.properties for jSqlBox,  will use ConsoleLog as default logger.");// NOSONAR
 			dbProLogClass = void.class;
 			return new ConsoleLog(clazz);
 		}

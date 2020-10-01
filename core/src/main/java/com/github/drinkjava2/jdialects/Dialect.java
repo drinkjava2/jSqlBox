@@ -152,6 +152,8 @@ public class Dialect {
 
 	/** If disable, will use same SqlTemplate for first page pagination query */
 	private static Boolean globalEnableTopLimitPagin = true;
+	
+	protected static JdbcTypeConverter globalJdbcTypeConverter=new BasicJdbcTypeConverter();
 
 	public static final String NOT_SUPPORT = "NOT_SUPPORT";
 	private static final String SKIP_ROWS = "$SKIP_ROWS";
@@ -610,5 +612,14 @@ public class Dialect {
 	public static void setGlobalEnableTopLimitPagin(Boolean globalEnableTopLimitPagin) {
 		Dialect.globalEnableTopLimitPagin = globalEnableTopLimitPagin;
 	}
+
+	public static JdbcTypeConverter getGlobalJdbcTypeConverter() {
+		return globalJdbcTypeConverter;
+	}
+
+	/** Note! this is a global method to set globalJdbcTypeConverter */
+	public static void setGlobalJdbcTypeConverter(JdbcTypeConverter globalJdbcTypeConverter) {
+		Dialect.globalJdbcTypeConverter = globalJdbcTypeConverter;
+	} 
 
 }

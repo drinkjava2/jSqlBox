@@ -30,6 +30,7 @@ import com.github.drinkjava2.jdialects.id.SortedUUIDGenerator;
 import com.github.drinkjava2.jdialects.id.TableIdGenerator;
 import com.github.drinkjava2.jdialects.id.TimeStampIdGenerator;
 import com.github.drinkjava2.jdialects.id.UUID25Generator;
+import com.github.drinkjava2.jdialects.id.UUID26Generator;
 import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jdialects.id.UUID36Generator;
 import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
@@ -440,7 +441,7 @@ public class TableModel {
 
 	/**
 	 * Get one of these IdGenerator instance by generationType:
-	 * IDENTITY,AUTO,UUID25,UUID32,UUID36,TIMESTAMP
+	 * IDENTITY,AUTO,UUID25,UUID26,UUID32,UUID36,TIMESTAMP
 	 */
 	public IdGenerator getIdGenerator(GenerationType generationType) {
 		return getIdGeneratorByType(generationType);
@@ -467,6 +468,8 @@ public class TableModel {
 			return AutoIdGenerator.INSTANCE;
 		case UUID25:
 			return UUID25Generator.INSTANCE;
+		case UUID26:
+			return UUID26Generator.INSTANCE;			
 		case UUID32:
 			return UUID32Generator.INSTANCE;
 		case UUID36:
