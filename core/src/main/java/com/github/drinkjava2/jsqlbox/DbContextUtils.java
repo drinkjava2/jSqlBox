@@ -39,7 +39,6 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
-import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
@@ -601,7 +600,7 @@ public abstract class DbContextUtils {// NOSONAR
 			try {
 				Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
 				if (value != null && value.getClass() != writeMethod.getParameterTypes()[0])
-					value = TypeUtils.jdbcValue2JavaValue(value, writeMethod.getParameterTypes()[0]);
+					value = Dialect.globalJdbcTypeConverter.jdbcValue2JavaValue(value, writeMethod.getParameterTypes()[0]);
 				writeMethod.invoke(entityBean, value);
 			} catch (Exception e) {
 				throw new DbException("Field '" + fieldName + "' can not write with "

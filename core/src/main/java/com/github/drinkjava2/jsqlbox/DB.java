@@ -103,6 +103,14 @@ public abstract class DB  {// NOSONAR
 		return notNull(args[0], sb.toString());
 	}
 
+	/** if condition true, return items  array, else return "" */
+	public static Object when(boolean condition, Object... items) {
+		if (condition)
+			return items;
+		else
+			return "";
+	}
+
 	/**
 	 * Create "values(?,?,?...,?)" String according how many SQL parameters be
 	 * cached
@@ -169,6 +177,11 @@ public abstract class DB  {// NOSONAR
 		return new PaginHandler(pageNumber, pageSize);
 	}
 
+	/** Disable PaginHandler */
+	public static SqlItem noPagin() {
+		return new SqlItem(SqlOption.DISABLE_HANDLERS, PaginHandler.class);
+	}
+
 	/** Create a model configurations with iven alias name */
 	public static SqlItem alias(String... alias) {
 		return new SqlItem(SqlOption.ALIAS, (Object[]) alias);
@@ -179,14 +192,6 @@ public abstract class DB  {// NOSONAR
 		return new SqlItem(SqlOption.GIVE, from, to, fieldName);
 	}
 
-	/** if condition true, return items  array, else return "" */
-	public static Object when(boolean condition, Object... items) {
-		if (condition)
-			return items;
-		else
-			return "";
-	}
-	
 	/** For EntityNet Query use, see user manual */
 	public static SqlItem give(String from, String to) {
 		return new SqlItem(SqlOption.GIVE, from, to);
@@ -195,11 +200,6 @@ public abstract class DB  {// NOSONAR
 	/** For EntityNet Query use, see user manual */
 	public static SqlItem giveBoth(String from, String to) {
 		return new SqlItem(SqlOption.GIVE_BOTH, from, to);
-	}
-
-	/** Disable PaginHandler */
-	public static SqlItem noPagin() {
-		return new SqlItem(SqlOption.DISABLE_HANDLERS, PaginHandler.class);
 	}
 
 	/** Build a SHARD_TABLE type sqlItem */
@@ -264,12 +264,13 @@ public abstract class DB  {// NOSONAR
 	protected void ________SQL_Methods________() {}// NOSONAR
 	
 	public static <T> T qry(Object... items) {return  gctx().qry(items);}
-	public static <T> T iQueryForObject(Object... items) {return gctx().qryObject(items);}
+	public static <T> T qryObject(Object... items) {return gctx().qryObject(items);}
 	public static long qryLongValue(Object... items) {return gctx().qryLongValue(items);}
 	public static int qryIntValue(Object... items) {return gctx().qryIntValue(items);}
 	public static String qryString(Object... items) {return gctx().qryString(items);}
 	public static List<Map<String, Object>> qryMapList(Object... items) {return gctx().qryMapList(items);}
 	public static Map<String, Object> qryMap(Object... items) {return gctx().qryMap(items);}
+	public static <T> List<T> qryList(Object... items) {return gctx().qryList(items);}
 	public static int upd(Object... items) {return gctx().upd(items);}
 	public static <T> T ins(Object... items) {return gctx().ins(items);}
 	public static <T> T exe(Object... items) {return gctx().exe(items); }

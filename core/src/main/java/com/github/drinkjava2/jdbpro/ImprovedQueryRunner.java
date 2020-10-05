@@ -32,7 +32,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdialects.Dialect;
-import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jlogs.Log;
 import com.github.drinkjava2.jlogs.LogFactory;
 import com.github.drinkjava2.jsqlbox.DbException;
@@ -433,7 +432,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		}
 		if (ps.getParams().length > 0) {
 			for (int i = 0; i < ps.getParams().length; i++) {
-				ps.getParams()[i] = TypeUtils.javaValue2JdbcValue(ps.getParams()[i]);
+				ps.getParams()[i] = Dialect.globalJdbcTypeConverter.javaValue2JdbcValue(ps.getParams()[i]);
 			}
 		}
 		if (ps.getMasterSlaveOption() == null)

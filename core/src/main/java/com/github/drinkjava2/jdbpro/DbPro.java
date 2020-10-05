@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.OutParameter;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
@@ -346,6 +347,15 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		return list.get(0);
 	}
 
+	/**
+	 * In-Line style execute query and force return a Map<String, Object> type
+	 * result, if no record found, return empty HashMap<String, Object> instance;
+	 */
+	public <T> List<T> qryList(Object... items) {
+		return this.qry(new ColumnListHandler<T>(1), items); 
+	}
+	
+	
 	/**
 	 * Executes the in-line style INSERT, UPDATE, or DELETE statement
 	 * 

@@ -26,6 +26,8 @@ import com.github.drinkjava2.jsqlbox.DbContextUtils;
  * @since 2.0.4
  */
 public class BaseFieldConverter implements FieldConverter {
+	
+	public static final BaseFieldConverter instance=new BaseFieldConverter();
 
 	@Override
 	public void handleSQL(SqlOption sqlOption, DbContext ctx, ColumnModel col, Object entity,
@@ -43,11 +45,14 @@ public class BaseFieldConverter implements FieldConverter {
 		}
 	}
 
+	
+	
 	@Override
 	public Object entityFieldToDbValue(ColumnModel col, Object entity) {
 		return DbContextUtils.doReadFromFieldOrTail(col, entity);
 	}
 
+	
 	@Override
 	public void writeDbValueToEntityField(Object entityBean, ColumnModel col, Object value) {
 		DbContextUtils.doWriteToFieldOrTail(col, entityBean, value);

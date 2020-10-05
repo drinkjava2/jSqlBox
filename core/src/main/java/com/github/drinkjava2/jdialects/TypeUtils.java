@@ -274,19 +274,5 @@ public abstract class TypeUtils {// NOSONAR
 			throw new DialectException("Unsupported java.sql.Types:" + javaSqlType);
 		}
 	}
-
-	
- 	/** Convert a JDBC value to Java type value */
-	public static Object jdbcValue2JavaValue(Object value, Class<?> javaType) {
-		return Dialect.globalJdbcTypeConverter.jdbcValue2JavaValue(value, javaType);
-	}
-
-	/**
-	 * Convert java value to JDBC Sql parameter value according Dialect, dialect is
-	 * optional, if dialect is null params will not be converted
-	 */
-	public static Object javaValue2JdbcValue(Object value) { 
-		return Dialect.globalJdbcTypeConverter.javaValue2JdbcValue(value);
-	}
-
+ 
 }

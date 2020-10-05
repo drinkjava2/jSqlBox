@@ -153,7 +153,7 @@ public class Dialect {
 	/** If disable, will use same SqlTemplate for first page pagination query */
 	private static Boolean globalEnableTopLimitPagin = true;
 	
-	protected static JdbcTypeConverter globalJdbcTypeConverter=new BasicJdbcTypeConverter();
+	public static JdbcTypeConverter globalJdbcTypeConverter=new BasicJdbcTypeConverter();
 
 	public static final String NOT_SUPPORT = "NOT_SUPPORT";
 	private static final String SKIP_ROWS = "$SKIP_ROWS";
