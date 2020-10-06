@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox.function;
 import static com.github.drinkjava2.jsqlbox.DB.USE_BOTH;
 import static com.github.drinkjava2.jsqlbox.DB.USE_MASTER;
 import static com.github.drinkjava2.jsqlbox.DB.USE_SLAVE;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 import static com.github.drinkjava2.jsqlbox.DB.shardTB;
@@ -118,7 +118,7 @@ public class ShardingModToolTest {
 	@Test
 	public void testInsertSQLs() {
 		masters[2].exe(TheUser.class, "insert into ", shardTB(10), shardDB(3),
-				" (id, name, databaseId) values(?,?,?)", param(10, "u1", 3), USE_BOTH, new PrintSqlHandler());
+				" (id, name, databaseId) values(?,?,?)", par(10, "u1", 3), USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[2].qryLongValue(TheUser.class, "select count(*) from ", shardTB(10),
 				shardDB(3), USE_SLAVE, new PrintSqlHandler()));
 		Assert.assertEquals(1,
@@ -140,7 +140,7 @@ public class ShardingModToolTest {
 		TheUser u2 = new TheUser();
 		u2.setId(u1.getId());
 		u2.setDatabaseId(u1.getDatabaseId());
-		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use slave
+		u2.load(new PrintSqlHandler(), " and name=?", par("Sam")); // use slave
 		Assert.assertEquals("Sam", u2.getName());
 
 		u2.delete(new PrintSqlHandler());// only deleted master

@@ -1,7 +1,7 @@
 package text;
 
 import static com.github.drinkjava2.jsqlbox.DB.bind;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -53,12 +53,12 @@ public class TextTest extends TestBase {
 
 	@Test
 	public void test() {
-		DB.exe(new InsertDemoSQL(), param("1", "Foo"));
+		DB.exe(new InsertDemoSQL(), par("1", "Foo"));
 
 		Demo d = new Demo().putField("id", "1", "name", "Bar");
 		DB.exe(DB.TEMPLATE, UpdateDemoSQL.class, bind("d", d));
 
-		Assert.assertEquals("Bar", DB.qryString(SelectNameByIdSQL.class, param("1")));
+		Assert.assertEquals("Bar", DB.qryString(SelectNameByIdSQL.class, par("1")));
 	}
 
 }

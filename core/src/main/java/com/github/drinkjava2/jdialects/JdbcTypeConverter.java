@@ -25,8 +25,20 @@ package com.github.drinkjava2.jdialects;
  */
 public interface JdbcTypeConverter {
 
+	/**
+	 * Convert jdbc result to java value
+	 * @param value
+	 * @param javaType
+	 * @return java value
+	 */
 	public Object jdbcValue2JavaValue(Object value, Class<?> javaType);
 
+	/**
+	 * Convert java value to jdbc value
+	 * 
+	 * @param value
+	 * @return jdbc value
+	 */
 	public Object javaValue2JdbcValue(Object value);
 
 }

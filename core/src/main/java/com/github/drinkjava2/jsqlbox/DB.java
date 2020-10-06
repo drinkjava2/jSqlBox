@@ -53,24 +53,29 @@ public abstract class DB  {// NOSONAR
 	}
 
 	/** Return a SqlItemType.PARAM type SqlItem instance */
+	public static SqlItem par(Object... parameters) {
+		return new SqlItem(SqlOption.PARAM, parameters);
+	}
+ 
+	/**
+	 * Cache parameters and return a "?" String
+	 */
+	public static SqlItem que(Object... parameters) {// NOSONAR
+		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
+	}
+
+	/** Return a SqlItemType.PARAM type SqlItem instance */
 	public static SqlItem param(Object... parameters) {
 		return new SqlItem(SqlOption.PARAM, parameters);
 	}
-
-	/**
-	 * Cache parameters and return an empty String
-	 */
-	public static SqlItem sql(Object... parameters) {
-		return new SqlItem(SqlOption.SQL, parameters);
-	}
-
+ 
 	/**
 	 * Cache parameters and return a "?" String
 	 */
 	public static SqlItem ques(Object... parameters) {// NOSONAR
 		return new SqlItem(SqlOption.QUESTION_PARAM, parameters);
 	}
-
+	
 	/**
 	 * Cache parameters and return a "?" String
 	 */

@@ -8,7 +8,7 @@ import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
 import static com.github.drinkjava2.jsqlbox.DB.exe;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.qry;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.qryMapList;
@@ -61,16 +61,16 @@ public class Java6ExampleTest {
 				, c_alias(u.getAddress())//
 				, c_alias(u.getName())//
 				, " from ", table(u), " where "//
-				, col(u.getName()), ">=?", param("Foo90") //
-				, " and ", col(u.getAge()), ">?", param(1) //
+				, col(u.getName()), ">=?", par("Foo90") //
+				, " and ", col(u.getAge()), ">?", par(1) //
 		);
 		Assert.assertEquals(10, list.size());
 
 		u = createAliasProxy(User.class, "u");
 		List<User> list2 = qry(new EntityListHandler(), User.class, clean(), //
 				"select * from ", table(u), " where "//
-				, col(u.getName()), ">=?", param("Foo90") //
-				, " and ", col(u.getAge()), ">?", param(1) //
+				, col(u.getName()), ">=?", par("Foo90") //
+				, " and ", col(u.getAge()), ">?", par(1) //
 		);
 		Assert.assertEquals(10, list2.size());
 	}

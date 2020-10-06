@@ -12,7 +12,7 @@
 package com.github.drinkjava2.jsqlbox;
 
 import static com.github.drinkjava2.jsqlbox.DB.AUTO_SQL;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 import static com.github.drinkjava2.jsqlbox.DB.shardTB;
 import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
@@ -727,14 +727,14 @@ public abstract class DbContextUtils {// NOSONAR
 						throw new DbException(
 								"Current DbContext no SnowflakeCreator found when try to create a Snowflake value");
 					Object id = snow.nextId();
-					sqlBody.append(param(id));
+					sqlBody.append(par(id));
 					sqlBody.append(", ");
 					foundColumnToInsert = true;
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				} else {// Normal Id Generator
 					sqlBody.append(col.getColumnName());
 					Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
-					sqlBody.append(param(id));
+					sqlBody.append(par(id));
 					sqlBody.append(", ");
 					foundColumnToInsert = true;
 					writeValueToBeanFieldOrTail(col, entityBean, id);
@@ -857,13 +857,13 @@ public abstract class DbContextUtils {// NOSONAR
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");// NOSONAR
 				sqlWhere.append(col.getColumnName()).append("=?");
-				sqlWhere.append(param(value));
+				sqlWhere.append(par(value));
 			} else {
 				if (!(((ignoreNull || ignoreEmpty) && value == null) || (ignoreEmpty && StrUtils.isEmpty(value)))) {
 					if (!sqlBody.isEmpty())
 						sqlBody.append(", ");
 					sqlBody.append(col.getColumnName()).append("=? ");
-					sqlBody.append(param(value));
+					sqlBody.append(par(value));
 				}
 			}
 			if (col.getShardTable() != null) // Sharding Table?
@@ -966,7 +966,7 @@ public abstract class DbContextUtils {// NOSONAR
 				Object value = EntityIdUtils.readFeidlValueFromEntityId(id, col);
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");
-				sqlWhere.append(param(value));
+				sqlWhere.append(par(value));
 				sqlWhere.append(col.getColumnName()).append("=? ");
 			}
 			if (col.getShardTable() != null) // Sharding Table?
@@ -1047,7 +1047,7 @@ public abstract class DbContextUtils {// NOSONAR
 				continue;
 			if (col.getPkey()) {
 				sqlWhere.append(col.getColumnName()).append("=?")
-						.append(param(readValueFromBeanFieldOrTail(col, entityBean, false, false))).append(" and ");
+						.append(par(readValueFromBeanFieldOrTail(col, entityBean, false, false))).append(" and ");
 			}
 			if (col.getShardTable() != null) // Sharding Table?
 				shardTableItem = shardTB(readValueFromBeanFieldOrTail(col, entityBean, false, false));
@@ -1208,7 +1208,7 @@ public abstract class DbContextUtils {// NOSONAR
 				Object value = EntityIdUtils.readFeidlValueFromEntityId(id, col);
 				if (!sqlWhere.isEmpty())
 					sqlWhere.append(" and ");
-				sqlWhere.append(param(value));
+				sqlWhere.append(par(value));
 				sqlWhere.append(col.getColumnName()).append("=? ");
 			}
 			if (col.getShardTable() != null) // Sharding Table?

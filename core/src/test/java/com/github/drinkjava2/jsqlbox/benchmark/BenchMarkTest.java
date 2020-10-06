@@ -6,7 +6,7 @@ import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.give;
 import static com.github.drinkjava2.jsqlbox.DB.notNull;
 import static com.github.drinkjava2.jsqlbox.DB.pagin;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.util.List;
 
@@ -102,7 +102,7 @@ public class BenchMarkTest extends TestBase implements TestServiceInterface {
 	@Override
 	public void testExampleQuery() {
 		List<DemoUser> result = gctx().entityFindBySample(new DemoUser().putField("id", 1, "code", "abc"), " or code=?",
-				param("efg"));
+				par("efg"));
 		if (result.get(0) == null)
 			throw new RuntimeException("Example query error");
 	}

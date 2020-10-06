@@ -3,10 +3,10 @@ package com.github.drinkjava2.jsqlbox.helloworld;
 import static com.github.drinkjava2.jsqlbox.DB.TEMPLATE;
 import static com.github.drinkjava2.jsqlbox.DB.bind;
 import static com.github.drinkjava2.jsqlbox.DB.notNull;
-import static com.github.drinkjava2.jsqlbox.DB.param;
-import static com.github.drinkjava2.jsqlbox.DB.ques;
-import static com.github.drinkjava2.jsqlbox.DB.sql;
+import static com.github.drinkjava2.jsqlbox.DB.par;
+import static com.github.drinkjava2.jsqlbox.DB.que;
 import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
+import static com.github.drinkjava2.jsqlbox.DB.when;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -280,12 +280,12 @@ public class UsageAndSpeedTest {
 			ctx.exe("insert into users (", //
 					notNull(" name ,", "Sam"), //
 					notNull(" someother ,", null), //
-					" address ", param("Canada"), //
+					" address ", par("Canada"), //
 					") ", valuesQuestions());
-			ctx.exe("update users set name=?,address=?", param("Tom", "China"));
+			ctx.exe("update users set name=?,address=?", par("Tom", "China"));
 			Assert.assertEquals(1L, ctx.qryLongValue("select count(*) from users where name=? and address=?",
-					param("Tom", "China")));
-			ctx.exe("delete from users where name=", ques("Tom"), " or address=", ques("China"));
+					par("Tom", "China")));
+			ctx.exe("delete from users where name=", que("Tom"), " or address=", que("China"));
 		}
 	}
  
@@ -396,12 +396,12 @@ public class UsageAndSpeedTest {
 	public void supportRefactor() {
 		DbContext ctx = new DbContext(dataSource);
 		ctx.exe("insert into ", UserAR.TABLE, " ( ", //
-				UserAR.NAME, ",", param("Sam"), //
-				UserAR.ADDRESS, " ", param("Canada"), //
+				UserAR.NAME, ",", par("Sam"), //
+				UserAR.ADDRESS, " ", par("Canada"), //
 				") ", valuesQuestions());
 		ctx.exe("delete from users where ", //
-				UserAR.NAME, "=", ques("Sam"), //
-				" or ", UserAR.ADDRESS, "=", ques("Canada")//
+				UserAR.NAME, "=", que("Sam"), //
+				" or ", UserAR.ADDRESS, "=", que("Canada")//
 		);
 	}
 
@@ -456,32 +456,63 @@ public class UsageAndSpeedTest {
 		Assert.assertEquals("Canada", ctx.entityLoadById(UserAR.class, "Tom7").getAddress());
 
 		ctx.entityDeleteTry(user);
-		ctx.entityDeleteTry(user, " or name=?", param("Tom2"));
+		ctx.entityDeleteTry(user, " or name=?", par("Tom2"));
 
-		Assert.assertEquals(7, ctx.entityFind(UserAR.class, " where name>?", param("Tom1")).size());
+		Assert.assertEquals(7, ctx.entityFind(UserAR.class, " where name>?", par("Tom1")).size());
 	}
 
 	@Test
 	public void conditionsQuery() {
 		DbContext ctx = new DbContext(dataSource);
+		ctx.setAllowShowSQL(true);
 		final String name = "Tom";
 		final String age = null;
 		final String address = "China";
 		ctx.exe("insert into users (", //
 				notNull(" name", name), //
 				notNull(" ,age ", age), //
-				" ,address ", param(address), //
+				" ,address ", par(address), //
 				") ", valuesQuestions());
 		ctx.exe("update users set ", //
 				notNull(" name", "=", "?, ", name), //
 				notNull(" age=?,", age), //
-				sql(" address=? "), param(address) //
+				" address=? ", par(address), //
+				" where name is not null"//
 		);
 		Assert.assertEquals(1L, ctx.qryLongValue(//
 				"select count(*) from users where 1=1 ", //
 				notNull(" and name=? ", name), //
-				"Someother".equals(name) ? ctx.prepare(" and Someother>?  ", param(name)) : "", //
-				"China".equals(address) ? ctx.pPrepare(" and address=?  ", address) : ""//
+				"Tom".equals(name) ? ctx.prepare(" and name=?  ", par(name)) : "", //
+				"China".equals(address) ? new Object[] {" and address=  ", que(address)} : "",//
+				" order by name"
+		));
+		ctx.jdbcExecute("delete from users");
+	}
+	
+	@Test
+	public void conditionsQuery2() { //use "when" method to test
+		DbContext ctx = new DbContext(dataSource);
+		ctx.setAllowShowSQL(true);
+		final String name = "Tom";
+		final String age = null;
+		final String address = "China";
+		ctx.exe("insert into users (", //
+			 " name", par(name), //
+			   when(age!=null," ,age ", par(age)), //
+				" ,address ", par(address), //
+				") ", valuesQuestions());
+		ctx.exe("update users set ", //
+				" name=", que(name), //
+				when(age!=null, ", age=", que(age)), //
+				when(address!=null, ", address=",  que(address)), //
+				" where name is not null"
+		);
+		Assert.assertEquals(1L, ctx.qryLongValue(//
+				"select count(*) from users where 1=1 ", //
+				when(name!=null," and name=", que(name)),//
+				when("Tom".equals(name)," and name=", que(name)),//
+				when("China".equals(address)," and address=", que(address)),//
+				" order by name"
 		));
 		ctx.jdbcExecute("delete from users");
 	}

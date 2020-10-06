@@ -16,7 +16,7 @@
 package com.github.drinkjava2.jsqlbox.function;
 
 import static com.github.drinkjava2.jsqlbox.DB.alias;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +110,7 @@ public class CompoundPKeyTest extends TestBase {
 	@Test
 	public void testOrmQry() {
 		EntityNet net = ctx.qry(new EntityNetHandler(), "select u.** from CmpEntity u", CmpEntity.class, alias("u"),
-				" where age>?", param(5));
+				" where age>?", par(5));
 		List<CmpEntity> entities = net.pickEntityList(CmpEntity.class);
 		Assert.assertEquals(5, entities.size());
 

@@ -12,7 +12,7 @@
 package com.github.drinkjava2.jsqlbox.converter;
 
 
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
@@ -71,21 +71,21 @@ public class VersionFieldConverter extends BaseFieldConverter {
 			DbContextUtils.writeValueToBeanFieldOrTail(col, entity, nextVersion);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
-			sqlBody.append(col.getColumnName()).append("=?").append( param(nextVersion));
+			sqlBody.append(col.getColumnName()).append("=?").append( par(nextVersion));
 
 			if (!sqlWhere.isEmpty())
 				sqlWhere.append(" and ");// NOSONAR
-			sqlWhere.append(col.getColumnName()).append("=?").append(param(firstOrOldVersion));
+			sqlWhere.append(col.getColumnName()).append("=?").append(par(firstOrOldVersion));
 		} else if (SqlOption.DELETE.equals(sqlOption)) {
 			if (!sqlWhere.isEmpty())
 				sqlWhere.append(" and ");// NOSONAR
 			sqlWhere.append(col.getColumnName()).append("=?");
-			sqlWhere.append(param(firstOrOldVersion));
+			sqlWhere.append(par(firstOrOldVersion));
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
 			if (oldVersion != firstOrOldVersion)
 				DbContextUtils.writeValueToBeanFieldOrTail(col, entity, firstOrOldVersion);
 			sqlBody.append(col.getColumnName());
-			sqlBody.append(param(firstOrOldVersion)).append(",");
+			sqlBody.append(par(firstOrOldVersion)).append(",");
 		}
 	}
 

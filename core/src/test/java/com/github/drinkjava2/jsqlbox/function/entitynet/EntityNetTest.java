@@ -4,7 +4,7 @@ import static com.github.drinkjava2.jsqlbox.DB.AUTO_SQL;
 import static com.github.drinkjava2.jsqlbox.DB.alias;
 import static com.github.drinkjava2.jsqlbox.DB.give;
 import static com.github.drinkjava2.jsqlbox.DB.giveBoth;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.util.HashMap;
 import java.util.List;
@@ -223,7 +223,7 @@ public class EntityNetTest extends TestBase {
 		for (User u : users) {
 			Systemout.println("User:" + u.getId());
 
-			Address addr = u.findRelatedOne(Address.class, " or u.id like ?", param("abcd%"));
+			Address addr = u.findRelatedOne(Address.class, " or u.id like ?", par("abcd%"));
 			Systemout.println("  Address:" + addr.getId());
 
 			List<UserRole> userRoles = u.findRelatedList(UserRole.class);

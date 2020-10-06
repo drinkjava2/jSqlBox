@@ -15,7 +15,7 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.util.List;
 
@@ -78,7 +78,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 	@Test
 	public void testHandlers() {
 		List<DemoUser> result = ctx.qry(new EntityListHandler(), DemoUser.class, new PrintSqlHandler(),
-				"select u.* from DemoUser u where u.age>?", param(10));
+				"select u.* from DemoUser u where u.age>?", par(10));
 		Assert.assertEquals(90l, result.size());
 
 		DbContext.setGlobalNextSqlHandlers(new FirstPrintHandler(), new LastPrintHandler(),
@@ -86,7 +86,7 @@ public class SqlHandlerGlobalAndThreadedTest extends TestBase {
 		DbContext.setThreadLocalSqlHandlers(new EntityListHandler());
 		try {
 			DbContext newCtx = new DbContext(ctx.getDataSource());
-			List<DemoUser> result2 = newCtx.qry("select u.* from DemoUser u where u.age>?", param(10), DemoUser.class);
+			List<DemoUser> result2 = newCtx.qry("select u.* from DemoUser u where u.age>?", par(10), DemoUser.class);
 			Assert.assertEquals(5l, result2.size());
 		} finally {
 			DbContext.resetGlobalVariants();

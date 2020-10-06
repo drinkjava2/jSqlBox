@@ -15,7 +15,7 @@
  */
 package com.github.drinkjava2.jsqlbox.function;
 
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
 
 import org.junit.Assert;
@@ -138,7 +138,7 @@ public class IdGeneratorTest extends TestBase {
 			Assert.assertTrue(("" + id1).length() == 25);
 			Assert.assertTrue(("" + id2).length() == 32);
 			Assert.assertTrue(("" + id3).length() == 36);
-			ctx.exe("insert into testNextIdTable (id1,id2,id3) ", param(id1, id2, id3), valuesQuestions());
+			ctx.exe("insert into testNextIdTable (id1,id2,id3) ", par(id1, id2, id3), valuesQuestions());
 		}
 	}
 

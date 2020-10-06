@@ -3,7 +3,7 @@ import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.createAliasProxy;
 import static com.github.drinkjava2.jsqlbox.AliasProxyUtil.table;
 import static com.github.drinkjava2.jsqlbox.DB.exe;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.qry;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.qryMapList;
@@ -59,16 +59,16 @@ public class Java8EampleTest {
 				, (C_ALIAS) u::getAddress //
 				, (C_ALIAS) u::getName //
 				, " from ", table(u), " where "//
-				, (COL) u::getName, ">=?", param("Foo90") //
-				, " and ", (COL) u::getAge, ">?", param(1) //
+				, (COL) u::getName, ">=?", par("Foo90") //
+				, " and ", (COL) u::getAge, ">?", par(1) //
 		);
 		Assert.assertEquals(10, list1.size());
 
 		u = proxy(User.class, "u");
 		List<User> list2 = qry(new EntityListHandler(), User.class //
 				, "select * from ", table(u), " where "//
-				, (COL) u::getName, ">=?", param("Foo90") //
-				, " and ", (COL) u::getAge, ">?", param(1) //
+				, (COL) u::getName, ">=?", par("Foo90") //
+				, " and ", (COL) u::getAge, ">?", par(1) //
 		);
 		Assert.assertEquals(10, list2.size());
 	}
@@ -87,16 +87,16 @@ public class Java8EampleTest {
 				, c$(u::getAddress) //
 				, c$(u::getName) //
 				, " from ", table(u), " where "//
-				, $(u::getName), ">=?", param("Foo90") //
-				, " and ", $(u::getAge), ">?", param(1) //
+				, $(u::getName), ">=?", par("Foo90") //
+				, " and ", $(u::getAge), ">?", par(1) //
 		);
 		Assert.assertEquals(10, list1.size());
 
 		u = createAliasProxy(User.class, "u");
 		List<User> list2 = qry(new EntityListHandler(), User.class //
 				, "select * from ", table(u), " where "//
-				, $(u::getName), ">=?", param("Foo90") //
-				, " and ", $(u::getAge), ">?", param(1) //
+				, $(u::getName), ">=?", par("Foo90") //
+				, " and ", $(u::getAge), ">?", par(1) //
 		);
 		Assert.assertEquals(10, list2.size());
 	}

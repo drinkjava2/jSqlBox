@@ -55,8 +55,8 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
 		ctx.tx(() -> {
 			HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
-			System.out.println(DB.qryString("select name from HelloWorld where name like", ques("H%"),
-					" or name=", ques("1"), " or name =", ques("2")));
+			System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"),
+					" or name=", que("1"), " or name =", que("2")));
 			h.delete();
 		});
 		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));

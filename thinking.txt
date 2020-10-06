@@ -6,6 +6,7 @@ Done * in array 如空改为 (null)
 Done * aryArray代替 scarlar 获取一组ids
 Done * 添加when语法
 Done * 去除JDBPRO，只保留DB
+Done * 去除sql()方法
 * jpaQuery支持?
 * entity build from map/ mapList
  

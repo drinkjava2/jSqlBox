@@ -1,7 +1,7 @@
 package com.github.drinkjava2.jsqlbox.java8;
 
 /*- JAVA8_BEGIN */
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class ActiveEntityTest extends TestBase implements ActiveEntity<ActiveEnt
 		for (int i = 0; i < 100; i++)
 			new ActiveEntityTest().putField("name", "name" + i, "age", i).insert();
 		Assert.assertEquals(100, qryLongValue("select count(*) from ActiveEntityTest"));
-		List<ActiveEntityTest> userList = new ActiveEntityTest().findBySQL("select * from ActiveEntityTest where age>=?", param(50));
+		List<ActiveEntityTest> userList = new ActiveEntityTest().findBySQL("select * from ActiveEntityTest where age>=?", par(50));
 		Assert.assertEquals(50, userList.size());
 	}
 

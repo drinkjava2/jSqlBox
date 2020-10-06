@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox.function;
 import static com.github.drinkjava2.jsqlbox.DB.USE_BOTH;
 import static com.github.drinkjava2.jsqlbox.DB.USE_MASTER;
 import static com.github.drinkjava2.jsqlbox.DB.USE_SLAVE;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 import static com.github.drinkjava2.jsqlbox.DB.shardTB;
@@ -118,7 +118,7 @@ public class ShardingRangeToolTest {
 	@Test
 	public void testInsertSQLs() {
 		masters[2].exe(TheUser.class, "insert into ", shardTB(tbID), shardDB(dbID),
-				" (id, name, databaseId) values(?,?,?)", param(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
+				" (id, name, databaseId) values(?,?,?)", par(tbID, "u1", dbID), USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[0].qryLongValue(TheUser.class, "select count(*) from ", shardTB(tbID),
 				shardDB(dbID), USE_SLAVE, new PrintSqlHandler()));
 		Assert.assertEquals(1,
@@ -139,7 +139,7 @@ public class ShardingRangeToolTest {
 		TheUser u2 = new TheUser();
 		u2.setId(u1.getId());
 		u2.setDatabaseId(u1.getDatabaseId());
-		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use slave
+		u2.load(new PrintSqlHandler(), " and name=?", par("Sam")); // use slave
 		Assert.assertEquals("Sam", u2.getName());
 
 		// only deleted master, if want delete slaves at same time, use "USE_BOTH"

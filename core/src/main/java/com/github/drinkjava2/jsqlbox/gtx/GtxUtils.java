@@ -11,7 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.gtx;
 
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.shardDB;
 
 import java.sql.Connection;
@@ -144,7 +144,7 @@ public abstract class GtxUtils {// NOSONAR
 		try {
 			String gid = gtxInfo.getGtxId().getGid();
 			locker.entityDelete(gtxInfo.getGtxId());// delete GtxID! here will auto sharding
-			locker.exe("delete from gtxlock where gid=?",  param(gid), DB.shardDB(gid));
+			locker.exe("delete from gtxlock where gid=?",  par(gid), DB.shardDB(gid));
 			Set<String> tableSet = new HashSet<String>();
 			for (GtxLog gtxLog : gtxInfo.getGtxLogList()) {
 				Object entity = gtxLog.getEntity();
@@ -152,7 +152,7 @@ public abstract class GtxUtils {// NOSONAR
 				tableSet.add(md.getTableName().toLowerCase());
 			}
 			for (String table : tableSet)
-				locker.exe("delete from ", table, " where ", GTXID, "=?", param(gid), shardDB(gid));
+				locker.exe("delete from ", table, " where ", GTXID, "=?", par(gid), shardDB(gid));
 			locker.getConnectionManager().commitTransaction();
 		} catch (Exception e) {
 			locker.getConnectionManager().rollbackTransaction();

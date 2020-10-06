@@ -19,7 +19,7 @@ import static com.github.drinkjava2.jsqlbox.DB.alias;
 import static com.github.drinkjava2.jsqlbox.DB.entityFind;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.pagin;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.qry;
 
 import java.sql.SQLException;
@@ -107,19 +107,19 @@ public class SqlHandlersTest extends TestBase {
 	@Test
 	public void testEntityListHandler2() {
 		List<DemoUser> result = qry(new PrintSqlHandler(), new EntityListHandler(), DemoUser.class,
-				"select * from DemoUser where age>=?", param(90));
+				"select * from DemoUser where age>=?", par(90));
 		Assert.assertTrue(result.size() == 10);
 
-		result = qry(new EntityListHandler(), DemoUser.class, "select * from DemoUser where age>=?", param(90));
+		result = qry(new EntityListHandler(), DemoUser.class, "select * from DemoUser where age>=?", par(90));
 		Assert.assertTrue(result.size() == 10);
 
-		result = qry(new EntityListHandler(), DemoUser.class, "select * from DemoUser u where age>=?", param(90));
+		result = qry(new EntityListHandler(), DemoUser.class, "select * from DemoUser u where age>=?", par(90));
 		Assert.assertTrue(result.size() == 10);
 
-		result = qry(new EntityListHandler(), DemoUser.class, "select * from DemoUser where  age>=?", param(90));
+		result = qry(new EntityListHandler(), DemoUser.class, "select * from DemoUser where  age>=?", par(90));
 		Assert.assertTrue(result.size() == 10);
 
-		result = qry(new EntityListHandler(), DemoUser.class, "select u.* from DemoUser u where u.age>=?", param(90));
+		result = qry(new EntityListHandler(), DemoUser.class, "select u.* from DemoUser u where u.age>=?", par(90));
 		Assert.assertTrue(result.size() == 10);
 	}
 
@@ -128,13 +128,13 @@ public class SqlHandlersTest extends TestBase {
 		int repeatTimes = 20;// Change to 10000 to test!
 		SimpleCacheHandler cache = new SimpleCacheHandler();
 		for (int i = 0; i < 10; i++) {// warm up
-			qry(cache, new EntityListHandler(), DemoUser.class, "select u.* from DemoUser u where u.age>?", param(0));
+			qry(cache, new EntityListHandler(), DemoUser.class, "select u.* from DemoUser u where u.age>?", par(0));
 		}
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
 			List<DemoUser> result = qry(cache, new EntityListHandler(), DemoUser.class,
-					"select u.* from DemoUser u where u.age>?", param(0));
+					"select u.* from DemoUser u where u.age>?", par(0));
 			Assert.assertTrue(result.size() == 99);
 		}
 		long end = System.currentTimeMillis();
@@ -144,7 +144,7 @@ public class SqlHandlersTest extends TestBase {
 		start = System.currentTimeMillis();
 		for (int i = 0; i < repeatTimes; i++) {
 			List<DemoUser> result = qry(new EntityListHandler(), DemoUser.class,
-					"select u.* from DemoUser u where u.age>?", param(0));
+					"select u.* from DemoUser u where u.age>?", par(0));
 			Assert.assertTrue(result.size() == 99);
 		}
 		end = System.currentTimeMillis();
@@ -156,52 +156,52 @@ public class SqlHandlersTest extends TestBase {
 	@Test
 	public void testEntityMapListHandler() {
 		List<Map<String, Object>> result = qry(new SSMapListHandler(), DemoUser.class, alias("u"),
-				"select u.** from DemoUser u where u.age>?", param(0));
+				"select u.** from DemoUser u where u.age>?", par(0));
 		Assert.assertTrue(result.size() == 99);
 	}
 
 	@Test
 	public void testPaginHandler() {
 		List<Map<String, Object>> result1 = qry(new MapListHandler(),
-				gctx().getDialect().pagin(2, 5, "select u.* from DemoUser u where u.age>?"), param(0));
+				gctx().getDialect().pagin(2, 5, "select u.* from DemoUser u where u.age>?"), par(0));
 		Assert.assertTrue(result1.size() == 5);
 
 		List<Map<String, Object>> result2 = qry(new MapListHandler(),
-				gctx().pagin(2, 5, "select u.* from DemoUser u where u.age>?"), param(0));
+				gctx().pagin(2, 5, "select u.* from DemoUser u where u.age>?"), par(0));
 		Assert.assertTrue(result2.size() == 5);
 
 		List<DemoUser> users1 = qry(new EntityListHandler(), DemoUser.class, new PaginHandler(2, 5),
-				"select u.* from DemoUser u where u.age>?", param(0));
+				"select u.* from DemoUser u where u.age>?", par(0));
 		Assert.assertTrue(users1.size() == 5);
 
 		List<DemoUser> users2 = qry(new EntityListHandler(), DemoUser.class,
-				"select u.* from DemoUser u where u.age>?", param(0), pagin(2, 5));
+				"select u.* from DemoUser u where u.age>?", par(0), pagin(2, 5));
 		Assert.assertTrue(users2.size() == 5);
 
-		List<DemoUser> users3 = entityFind(DemoUser.class, " where age>?", param(0), pagin(2, 5));
+		List<DemoUser> users3 = entityFind(DemoUser.class, " where age>?", par(0), pagin(2, 5));
 		Assert.assertTrue(users3.size() == 5);
 
 		DbContext.setThreadLocalSqlHandlers(new PaginHandler(2, 5));
 		List<DemoUser> users4 = qry(new EntityListHandler(), DemoUser.class,
-				"select u.* from DemoUser u where u.age>?", param(0));
+				"select u.* from DemoUser u where u.age>?", par(0));
 		Assert.assertTrue(users4.size() == 5);
 		DbContext.setThreadLocalSqlHandlers(null);
 	}
 
 	@Test
 	public void testPrintSqlHandler() throws SQLException {
-		List<Map<String, Object>> result = qry(new MapListHandler(), "select u.* from DemoUser u where u.age>?", param(0));
+		List<Map<String, Object>> result = qry(new MapListHandler(), "select u.* from DemoUser u where u.age>?", par(0));
 		Assert.assertTrue(result.size() == 99);
 
 		List<Map<String, Object>> result2 = qry(new MapListHandler(), new PrintSqlHandler(),
-				"select u.* from DemoUser u where u.age>?", param(0));
+				"select u.* from DemoUser u where u.age>?", par(0));
 		Assert.assertTrue(result2.size() == 99);
 	}
 
 	@Test
 	public void testEnableDisableSqlHandler() throws SQLException {
 		List<Map<String, Object>> result2 = qry(new MapListHandler(), new PrintSqlHandler(),
-				new SqlItem(SqlOption.ENABLE_HANDLERS), "select u.* from DemoUser u where u.age>?", param(0),
+				new SqlItem(SqlOption.ENABLE_HANDLERS), "select u.* from DemoUser u where u.age>?", par(0),
 				new SqlItem(SqlOption.DISABLE_HANDLERS, PrintSqlHandler.class));
 	}
 
@@ -218,7 +218,7 @@ public class SqlHandlersTest extends TestBase {
 	@Test
 	public void testMyAroundSqlHandler() throws SQLException {
 		List<Map<String, Object>> result2 = qry(new MyDemoAroundSqlHandler(), new MapListHandler(),
-				new PrintSqlHandler(), new MyDemoAroundSqlHandler(), "select u.* from DemoUser u where u.age>?", param(50));
+				new PrintSqlHandler(), new MyDemoAroundSqlHandler(), "select u.* from DemoUser u where u.age>?", par(50));
 		Assert.assertEquals(49, result2.size());
 	}
 

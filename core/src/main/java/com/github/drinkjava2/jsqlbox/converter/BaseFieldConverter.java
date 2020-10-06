@@ -11,7 +11,7 @@
  */
 package com.github.drinkjava2.jsqlbox.converter;
 
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.SqlOption;
@@ -36,12 +36,12 @@ public class BaseFieldConverter implements FieldConverter {
 			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
 			if (!sqlBody.isEmpty())
 				sqlBody.append(", ");
-			sqlBody.append(col.getColumnName()).append("=?").append(param(value));
+			sqlBody.append(col.getColumnName()).append("=?").append(par(value));
 		} else if (SqlOption.DELETE.equals(sqlOption)) {// NOSONAR
 		} else if (SqlOption.INSERT.equals(sqlOption)) {
 			Object value = DbContextUtils.readValueFromBeanFieldOrTail(col, entity, false, false);
 			sqlBody.append(col.getColumnName());
-			sqlBody.append(param(value)).append(",");
+			sqlBody.append(par(value)).append(",");
 		}
 	}
 

@@ -14,7 +14,7 @@ package com.github.drinkjava2.jsqlbox.function;
 import static com.github.drinkjava2.jsqlbox.DB.USE_BOTH;
 import static com.github.drinkjava2.jsqlbox.DB.USE_MASTER;
 import static com.github.drinkjava2.jsqlbox.DB.USE_SLAVE;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -114,7 +114,7 @@ public class MasterSlaveTest {
 	public void testCreateTables() {
 		Assert.assertEquals(10L, master.qryLongValue("select count(*) from TheUser", USE_MASTER));
 		Assert.assertEquals(5L, master.qryLongValue("select count(*) from TheUser", USE_SLAVE));
-		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", param("Tom"), USE_MASTER, new PrintSqlHandler());
+		TheUser u = new TheUser().useContext(master).loadById(0L, " or name=?", par("Tom"), USE_MASTER, new PrintSqlHandler());
 		Systemout.println(u.getName());
 	}
 
@@ -122,7 +122,7 @@ public class MasterSlaveTest {
 	public void testMasterSlaveUpdate() {
 		Systemout.println("============Test testMasterSlaveUpdate==================");
 		// AutoChoose, not in Transaction, should use Master
-		master.upd("update TheUser set name=? where id=3", param("NewValue"));
+		master.upd("update TheUser set name=? where id=3", par("NewValue"));
 		// TheUser u1 = master.loadById(TheUser.class, 3L, USE_MASTER);
 		TheUser u1 = new TheUser().useContext(master).putField("id", 3L).load(USE_MASTER);
 		Assert.assertEquals("NewValue", u1.getName());

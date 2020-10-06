@@ -15,7 +15,7 @@
  * the License.
  */
 package com.github.drinkjava2.jsqlbox.gtx;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.util.HashMap;
 import java.util.List;
@@ -182,7 +182,7 @@ public abstract class GtxUnlockServ {// NOSONAR
 			log.warn("Not found gtxId '" + gid + "' on gtx Locker server:" + locker.getName() + locker.getDbCode());
 			return false;
 		}
-		List<List<Integer>> dbLstLst = locker.exe("select distinct(db) from gtxlock where gid=?", param(gid),
+		List<List<Integer>> dbLstLst = locker.exe("select distinct(db) from gtxlock where gid=?", par(gid),
 				new ColumnListHandler<Integer>());
 		List<Integer> dbList = dbLstLst.get(0);
 
@@ -200,17 +200,17 @@ public abstract class GtxUnlockServ {// NOSONAR
 		if (lockNo != null)
 			locker = (DbContext) lockCtx.getMasters()[lockNo];
 
-		String _gid = ctxs[db].qryString("select gid from gtxtag where gid=?", param(gid));
+		String _gid = ctxs[db].qryString("select gid from gtxtag where gid=?", par(gid));
 		if (!gid.equals(_gid))
 			return;// no undo log or undo log already executed
-		List<List<String>> tmp = locker.exe("select distinct(entityTb) from gtxlock where gid=?", param(gid),
-				" and db=?", param(db), new ColumnListHandler<String>());
+		List<List<String>> tmp = locker.exe("select distinct(entityTb) from gtxlock where gid=?", par(gid),
+				" and db=?", par(db), new ColumnListHandler<String>());
 		List<String> tbList = tmp.get(0);
 		ctxs[db].startTrans();
 		try {
 			for (String tb : tbList) {
-				List<Tail> oneRecord = locker.entityFindBySql(Tail.class, "select * from ", tb, " where gtxdb=?", param(db),
-						" and gtxid=?", param(gid), " order by GTXLOGNO desc");
+				List<Tail> oneRecord = locker.entityFindBySql(Tail.class, "select * from ", tb, " where gtxdb=?", par(db),
+						" and gtxid=?", par(gid), " order by GTXLOGNO desc");
 				for (Tail tail : oneRecord) {
 					undo(db, tail);
 				}

@@ -87,15 +87,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	}
 
 	/**
-	 * Prepare a PreparedSQL for pXxxx (Single SQL) style, pXxxx style only allow
-	 * single String (The first appeared) as SQL, unknown objects (include null)
-	 * will automatically looked as SQL parameters, more detail see doPrepare method
-	 */
-	public PreparedSQL pPrepare(Object... items) {
-		return doPrepare(false, items);
-	}
-
-	/**
 	 * Prepare a PreparedSQL for iXxxx (In-line) style or pXxxx style, For in-line
 	 * style, unknown items be treated as String, SQL parameters must written in
 	 * param() method, for example:

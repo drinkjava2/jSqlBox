@@ -15,7 +15,7 @@ import static com.github.drinkjava2.jsqlbox.DB.USE_BOTH;
 import static com.github.drinkjava2.jsqlbox.DB.USE_MASTER;
 import static com.github.drinkjava2.jsqlbox.DB.USE_SLAVE;
 import static com.github.drinkjava2.jsqlbox.DB.gctx;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 import static com.github.drinkjava2.jsqlbox.DB.shard;
 
@@ -114,7 +114,7 @@ public class ShardingShardMethodTest {
 	@Test
 	public void testInsertSQLs() {
 		Systemout.println("=========================================================");
-		masters[2].exe(TheUser.class, "insert into ", shard(3), " (id, name) values(?,?)", param(10, "u1"),
+		masters[2].exe(TheUser.class, "insert into ", shard(3), " (id, name) values(?,?)", par(10, "u1"),
 				USE_BOTH, new PrintSqlHandler());
 		Assert.assertEquals(1, masters[2].qryLongValue(TheUser.class, "select count(*) from ", shard(3),
 				USE_SLAVE, new PrintSqlHandler()));
@@ -133,7 +133,7 @@ public class ShardingShardMethodTest {
 
 		TheUser u2 = new TheUser();
 		u2.setId(u1.getId());
-		u2.load(new PrintSqlHandler(), " and name=?", param("Sam")); // use slave
+		u2.load(new PrintSqlHandler(), " and name=?", par("Sam")); // use slave
 		Assert.assertEquals("Sam", u2.getName());
 
 		u2.delete(new PrintSqlHandler());// only deleted master

@@ -1,6 +1,6 @@
 package com.github.drinkjava2.jsqlbox.helloworld;
 
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import java.util.List;
 import java.util.Map;
@@ -115,7 +115,7 @@ public class ActiveRecordDemoTest {
 
 		List<Map<String, Object>> users = ctx.qry(new MapListHandler(),
 				ctx.pagin(2, 10, "select concat(firstName, ' ', lastName) as UserName, age from users where age>?"),
-				param(50));
+				par(50));
 
 		Assert.assertEquals(10, users.size());
 

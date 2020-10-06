@@ -2,7 +2,7 @@ package com.github.drinkjava2.jsqlbox.function.entitynet;
 
 import static com.github.drinkjava2.jsqlbox.DB.alias;
 import static com.github.drinkjava2.jsqlbox.DB.give;
-import static com.github.drinkjava2.jsqlbox.DB.param;
+import static com.github.drinkjava2.jsqlbox.DB.par;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class EntityNetTreeTest extends TestBase {
 	public void loadSubTreeByGivenNode(TreeNode d) {
 		EntityNet net = ctx.qry(targets,
 				"select t.**, t.pid as p_id from treenodetb t where t.line>=? and t.line< (select min(line) from treenodetb where line>? and lvl<=?) ",
-				param(d.getLine(), d.getLine(), d.getLvl()));
+				par(d.getLine(), d.getLine(), d.getLvl()));
 		TreeNode node = net.pickOneEntity("t", d.getId());
 		printTree(node, 0);
 	}
