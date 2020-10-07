@@ -46,7 +46,7 @@ public class EntityListHandler extends DefaultOrderSqlHandler {
 		List<Map<String, Object>> maps = (List<Map<String, Object>>) runner.runPreparedSQL(ps);
 		List<Object> entityList = new ArrayList<Object>();
 		for (Map<String, Object> row : maps) {
-			Object entity = DbContextUtils.mapToEntityBean( model, row);
+			Object entity = DbContextUtils.mapToEntityBean(model, row);
 			entityList.add(entity);
 		}
 		return entityList;

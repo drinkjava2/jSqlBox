@@ -27,7 +27,7 @@ public abstract class DefaultOrderSqlHandler implements SqlHandler {// NOSONAR
 
 	@Override
 	public Integer getOrder() {
-		return order;
+		return 1;
 	}
 
 	@Override

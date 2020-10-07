@@ -2,8 +2,8 @@ package com.github.drinkjava2.jsqlbox.function;
 
 import static com.github.drinkjava2.jsqlbox.DB.TAIL;
 import static com.github.drinkjava2.jsqlbox.DB.entityLoadBySql;
-import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.exe;
+import static com.github.drinkjava2.jsqlbox.DB.gctx;
 import static com.github.drinkjava2.jsqlbox.DB.tail;
 
 import java.util.Date;
@@ -15,6 +15,7 @@ import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.Tail;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
@@ -110,20 +111,20 @@ public class TailTest extends TestBase {
 	@Test
 	public void putValuesTest() {
 		TailDemo t = new TailDemo();
-		t.exe("delete from tail_demo");
+		DB.exe("delete from tail_demo");
 		t.forFields("userName", "age", "birthDay");
 		t.putValues("Foo", 10, new Date()).insert();
 		t.putValues("Bar", 20, new Date()).insert();
 		Assert.assertEquals(2, t.countAll());
 
-		t.exe("delete from tail_demo");
+		DB.exe("delete from tail_demo");
 		t.forTails("user_name", "age", "birth_Day");
 		t.putValues("Foo", 30, new Date()).insert(TAIL);
 		t.putValues("Bar", 40, new Date()).insert(TAIL);
 		Assert.assertEquals(2, t.countAll());
 
 		Tail tail = new Tail();
-		tail.exe("delete from tail_demo");
+		DB.exe("delete from tail_demo");
 		tail.forTails("user_name", "age", "birth_Day");
 		tail.putValues("Foo", 30, new Date()).insert(tail("tail_demo"));
 		tail.putValues("Bar", 40, new Date()).insert(tail("tail_demo"));

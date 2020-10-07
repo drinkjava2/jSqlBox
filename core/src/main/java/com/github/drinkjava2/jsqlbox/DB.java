@@ -110,10 +110,7 @@ public abstract class DB  {// NOSONAR
 
 	/** if condition true, return items  array, else return "" */
 	public static Object when(boolean condition, Object... items) {
-		if (condition)
-			return items;
-		else
-			return "";
+		return condition ? items : "";
 	}
 
 	/**
@@ -122,6 +119,14 @@ public abstract class DB  {// NOSONAR
 	 */
 	public static SqlItem valuesQuestions() {
 		return new SqlItem(SqlOption.VALUES_QUESTIONS);
+	}
+	
+	public static SqlItem other(Object... otherInfos) {
+		return new SqlItem(SqlOption.OTHER, otherInfos);
+	}
+	
+	public static List<Object[]> getOthers() {
+		return gctx().getOthers();
 	}
 
 	/**

@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 public class ActiveEntityTest extends TestBase implements ActiveEntity<ActiveEntityTest> {
@@ -39,7 +40,7 @@ public class ActiveEntityTest extends TestBase implements ActiveEntity<ActiveEnt
 		createAndRegTables(ActiveEntityTest.class);
 		for (int i = 0; i < 100; i++)
 			new ActiveEntityTest().putField("name", "name" + i, "age", i).insert();
-		Assert.assertEquals(100, qryLongValue("select count(*) from ActiveEntityTest"));
+		Assert.assertEquals(100, DB.qryLongValue("select count(*) from ActiveEntityTest"));
 		List<ActiveEntityTest> userList = new ActiveEntityTest().findBySQL("select * from ActiveEntityTest where age>=?", par(50));
 		Assert.assertEquals(50, userList.size());
 	}

@@ -221,17 +221,4 @@ public class ActiveRecord<T> implements TailType, EntityType {
 	public <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedSet(this, newItems);}
 	public <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx().entityFindRelatedMap(this, newItems);}
   
-	// simplilfied SQL methods 
-	public <E> E qry(Object... items) {return  ctx().qry(items);}
-	public <E> E qryObject(Object... items) {return ctx().qryObject(items);}
-	public long qryLongValue(Object... items) {return ctx().qryLongValue(items);}
-	public int qryIntValue(Object... items) {return ctx().qryIntValue(items);}
-	public String qryString(Object... items) {return ctx().qryString(items);}
-	public List<Map<String, Object>> qryMapList(Object... items) {return ctx().qryMapList(items);}
-	public Map<String, Object> qryMap(Object... items) {return ctx().qryMap(items);}
-	public int upd(Object... items) {return ctx().upd(items);}
-	public <E> E ins(Object... items) {return ctx().ins(items);}
-	public <E> E exe(Object... items) {return ctx().exe(items); }
-	public <E> List<E> qryEntityList(Object... items) {return ctx().qryEntityList(items);} 
-  
 }

@@ -146,19 +146,6 @@ public interface ActiveEntity<T> extends EntityType {
 	public default <E> List<E> findRelatedList(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).entityFindRelatedList(this, newItems);}
 	public default <E> Set<E> findRelatedSet(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).entityFindRelatedSet(this, newItems);}
 	public default <E> Map<Object, E> findRelatedMap(Object... items) {Object[] newItems = insertThisClassIfNotHave(this, items);return ctx(items).entityFindRelatedMap(this, newItems);}
-  
-	// simplilfied SQL methods 
-	public default <E> E qry(Object... items) {return  ctx(items).qry(items);}
-	public default <E> E qryObject(Object... items) {return ctx(items).qryObject(items);}
-	public default long qryLongValue(Object... items) {return ctx(items).qryLongValue(items);}
-	public default int qryIntValue(Object... items) {return ctx(items).qryIntValue(items);}
-	public default String qryString(Object... items) {return ctx(items).qryString(items);}
-	public default List<Map<String, Object>> qryMapList(Object... items) {return ctx(items).qryMapList(items);}
-	public default Map<String, Object> qryMap(Object... items) {return ctx(items).qryMap(items);}
-	public default int upd(Object... items) {return ctx(items).upd(items);}
-	public default <E> E ins(Object... items) {return ctx(items).ins(items);}
-	public default <E> E exe(Object... items) {return ctx(items).exe(items); }
-	public default <E> List<E> qryEntityList(Object... items) {return ctx(items).qryEntityList(items);}
-   
+
 }
 /* JAVA8_END */

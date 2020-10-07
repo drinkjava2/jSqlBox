@@ -19,6 +19,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.github.drinkjava2.jdbpro.NormalJdbcTool;
+import com.github.drinkjava2.jdialects.converter.BasicJavaConverter;
+import com.github.drinkjava2.jdialects.converter.JavaConverter;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
@@ -153,7 +155,7 @@ public class Dialect {
 	/** If disable, will use same SqlTemplate for first page pagination query */
 	private static Boolean globalEnableTopLimitPagin = true;
 	
-	public static JdbcTypeConverter globalJdbcTypeConverter=new BasicJdbcTypeConverter();
+	public static JavaConverter globalJdbcTypeConverter=new BasicJavaConverter();
 
 	public static final String NOT_SUPPORT = "NOT_SUPPORT";
 	private static final String SKIP_ROWS = "$SKIP_ROWS";
@@ -613,12 +615,12 @@ public class Dialect {
 		Dialect.globalEnableTopLimitPagin = globalEnableTopLimitPagin;
 	}
 
-	public static JdbcTypeConverter getGlobalJdbcTypeConverter() {
+	public static JavaConverter getGlobalJdbcTypeConverter() {
 		return globalJdbcTypeConverter;
 	}
 
 	/** Note! this is a global method to set globalJdbcTypeConverter */
-	public static void setGlobalJdbcTypeConverter(JdbcTypeConverter globalJdbcTypeConverter) {
+	public static void setGlobalJdbcTypeConverter(JavaConverter globalJdbcTypeConverter) {
 		Dialect.globalJdbcTypeConverter = globalJdbcTypeConverter;
 	} 
 

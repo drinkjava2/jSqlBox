@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.drinkjava2.jdialects;
+package com.github.drinkjava2.jdialects.converter;
 
 /**
  * JdbcTypeConverter, used to conver jdbc value to java, or java value to jdbc
@@ -23,22 +23,14 @@ package com.github.drinkjava2.jdialects;
  * @since 5.0.0
  *
  */
-public interface JdbcTypeConverter {
+public interface JavaConverter {
 
 	/**
-	 * Convert jdbc result to java value
+	 * Convert java value to targetType java value
 	 * @param value
-	 * @param javaType
-	 * @return java value
+	 * @param targetType
+	 * @return new value
 	 */
-	public Object jdbcValue2JavaValue(Object value, Class<?> javaType);
-
-	/**
-	 * Convert java value to jdbc value
-	 * 
-	 * @param value
-	 * @return jdbc value
-	 */
-	public Object javaValue2JdbcValue(Object value);
+	public Object convert(Object value, Class<?> targetType);
 
 }

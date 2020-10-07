@@ -26,12 +26,12 @@ import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlHandler;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
-import com.github.drinkjava2.jdialects.BasicJdbcTypeConverter;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
-import com.github.drinkjava2.jdialects.JdbcTypeConverter;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.TableModelUtilsOfDb;
+import com.github.drinkjava2.jdialects.converter.BasicJavaConverter;
+import com.github.drinkjava2.jdialects.converter.JavaConverter;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jdialects.springsrc.utils.ClassUtils;
@@ -126,7 +126,7 @@ public class DbContext extends DbPro {// NOSONAR
 		setGlobalNextIgnoreEmpty(false);
 		setGlobalNextAuditorGetter(null);
 		globalDbContext = new DbContext();
-		Dialect.setGlobalJdbcTypeConverter(new BasicJdbcTypeConverter());
+		Dialect.setGlobalJdbcTypeConverter(new BasicJavaConverter());
 	}
 
 	/** Shortcut method equal to getGlobalDbContext() */
@@ -612,7 +612,7 @@ public class DbContext extends DbPro {// NOSONAR
 		DbContext.globalDbContext = globalDbContext;
 	}
 
-	public static void setGlobalJdbcTypeConverter(JdbcTypeConverter jdbcTypeConverter) {
+	public static void setGlobalJdbcTypeConverter(JavaConverter jdbcTypeConverter) {
 		Dialect.setGlobalJdbcTypeConverter(jdbcTypeConverter);
 	}
 	

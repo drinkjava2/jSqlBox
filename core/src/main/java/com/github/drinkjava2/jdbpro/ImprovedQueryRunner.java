@@ -32,6 +32,10 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.converter.BasicJavaToJdbcConverter;
+import com.github.drinkjava2.jdialects.converter.BasicJdbcToJavaConverter;
+import com.github.drinkjava2.jdialects.converter.JavaToJdbcConverter;
+import com.github.drinkjava2.jdialects.converter.JdbcToJavaConverter;
 import com.github.drinkjava2.jlogs.Log;
 import com.github.drinkjava2.jlogs.LogFactory;
 import com.github.drinkjava2.jsqlbox.DbException;
@@ -64,6 +68,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected static Boolean globalNextAllowShowSql = false;
 	protected static SqlOption globalNextMasterSlaveOption = SqlOption.USE_AUTO;
 	protected static ConnectionManager globalNextConnectionManager = TinyTxConnectionManager.instance();
+	protected static JavaToJdbcConverter globalNextJavaToJdbcConverter = BasicJavaToJdbcConverter.instance;
+	protected static JdbcToJavaConverter globalNextJdbcToJavaConverter = BasicJdbcToJavaConverter.instance;
 
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlHandler[] globalNextSqlHandlers = null;
@@ -74,6 +80,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected Integer batchSize = globalNextBatchSize;
 	protected SqlHandler[] sqlHandlers = globalNextSqlHandlers;
 	protected Dialect dialect = globalNextDialect;
+	protected JavaToJdbcConverter javaToJdbcConverter = globalNextJavaToJdbcConverter;
+	protected JdbcToJavaConverter jdbcToJavaConverter = globalNextJdbcToJavaConverter;
 
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
@@ -114,6 +122,9 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 			return new ArrayList<PreparedSQL>();
 		}
 	};
+	
+	/** others store other infos writen in in-line sql */
+	private ThreadLocal<List<Object[]>> others = new ThreadLocal<List<Object[]>>();
 
 	public ImprovedQueryRunner() {
 		super();
@@ -432,7 +443,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		}
 		if (ps.getParams().length > 0) {
 			for (int i = 0; i < ps.getParams().length; i++) {
-				ps.getParams()[i] = Dialect.globalJdbcTypeConverter.javaValue2JdbcValue(ps.getParams()[i]);
+				ps.getParams()[i] = javaToJdbcConverter.convert(ps.getParams()[i]);
 			}
 		}
 		if (ps.getMasterSlaveOption() == null)
@@ -447,10 +458,16 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		while (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty()) {
 			SqlHandler handler = ps.getSqlHandlers().get(0);
 			ps.getSqlHandlers().remove(0);
-			if (!ps.isDisabledHandler(handler))
-				return handler.handle(this, ps);
+			if (!ps.isDisabledHandler(handler)) { 
+				return jdbcToJavaConverter.convert(handler.handle(this, ps));
+			}
 		}
-		return runRealSqlMethod(ps);
+		
+		others.remove();
+		if(ps.getOthers()!=null) { //has other info? store in threadLocal for user fetch
+			others.set(ps.getOthers());
+		}
+		return jdbcToJavaConverter.convert(runRealSqlMethod(ps)); 
 	}
 
 	/** Execute real SQL operation according PreparedSql's SqlType */
@@ -779,7 +796,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		}
 	}
 
-	private void specialStaticMethods_____________________() {// NOSONAR
+	private void specialMethods_____________________() {// NOSONAR
 	}
 
 	// ===override execute/insert/update methods to support batch and explainSql
@@ -815,6 +832,12 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	public static SqlHandler[] getThreadLocalSqlHandlers() {
 		return threadLocalSqlHandlers.get();
 	}
+ 
+	
+	/** Get current thread's ThreadLocal SqlOption.Other type SqlItems */
+	public List<Object[]> getOthers() {
+		return others.get();
+	} 
 
 	/**
 	 * Set current thread's ThreadLocal SqlHandler
@@ -968,6 +991,22 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		globalNextSqlHandlers = sqlHandlers;
 	}
 
+	public static JavaToJdbcConverter getGlobalNextJavaToJdbcConverter() {
+		return globalNextJavaToJdbcConverter;
+	}
+
+	public static void setGlobalNextJavaToJdbcConverter(JavaToJdbcConverter globalNextJavaToJdbcConverter) {
+		ImprovedQueryRunner.globalNextJavaToJdbcConverter = globalNextJavaToJdbcConverter;
+	}
+
+	public static JdbcToJavaConverter getGlobalNextJdbcToJavaConverter() {
+		return globalNextJdbcToJavaConverter;
+	}
+
+	public static void setGlobalNextJdbcToJavaConverter(JdbcToJavaConverter globalNextJdbcToJavaConverter) {
+		ImprovedQueryRunner.globalNextJdbcToJavaConverter = globalNextJdbcToJavaConverter;
+	}
+
 	private void normalGetterSetters_____________________() {// NOSONAR
 	}
 
@@ -1053,6 +1092,24 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	/** This method is not thread safe, suggest only use at program starting */
 	public void setName(String name) {
 		this.name = name;
+	} 
+	
+	public JavaToJdbcConverter getJavaToJdbcConverter() {
+		return javaToJdbcConverter;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setJavaToJdbcConverter(JavaToJdbcConverter javaToJdbcConverter) {
+		this.javaToJdbcConverter = javaToJdbcConverter;
+	}
+
+	public JdbcToJavaConverter getJdbcToJavaConverter() {
+		return jdbcToJavaConverter;
+	}
+
+	/** This method is not thread safe, suggest only use at program starting */
+	public void setJdbcToJavaConverter(JdbcToJavaConverter jdbcToJavaConverter) {
+		this.jdbcToJavaConverter = jdbcToJavaConverter;
 	}
 
 	public boolean isBatchEnabled() {

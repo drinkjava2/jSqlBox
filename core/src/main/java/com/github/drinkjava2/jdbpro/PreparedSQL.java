@@ -74,7 +74,7 @@ public class PreparedSQL {
 	private List<Class<?>> disabledHandlers;
 
 	/** Store "SqlOption.Other" type SqlItem */
-	private List<SqlItem> others = null;
+	private List<Object[]> others = null;
 
 	/**
 	 * Designed for ORM program, if set true will ignore fields with null value in
@@ -305,10 +305,10 @@ public class PreparedSQL {
 			this.operationType = type;
 	}
 
-	public void addOther(SqlItem obj) {
+	public void addOther(SqlItem item) {
 		if (others == null)
-			others = new ArrayList<SqlItem>();
-		others.add(obj);
+			others = new ArrayList<Object[]>();
+		others.add(item.getParameters());
 	}
 
 	/** if InlineStyle=true or SQL is empty, add as SQL, else add as parameter */
@@ -439,11 +439,11 @@ public class PreparedSQL {
 		this.entityNet = entityNet;
 	}
 
-	public List<SqlItem> getOthers() {
+	public List<Object[]> getOthers() {
 		return others;
 	}
 
-	public void setOthers(List<SqlItem> others) {
+	public void setOthers(List<Object[]> others) {
 		this.others = others;
 	}
 
