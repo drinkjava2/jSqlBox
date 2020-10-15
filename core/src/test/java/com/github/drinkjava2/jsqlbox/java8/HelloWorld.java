@@ -48,7 +48,7 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 
 	public static void main(String[] args) {
 		DataSource ds = JdbcConnectionPool
-				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+				.create("jdbc:h2:mem:demo;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
 		DbContext ctx = new DbContext(ds);
 		ctx.setAllowShowSQL(true);
 		DbContext.setGlobalDbContext(ctx);

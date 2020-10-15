@@ -17,16 +17,16 @@ public class ToExcelTest extends JdialectsTestBase {
 
     @Test
     public void doTestPackage2Excel() {
-        TableModelUtils.entityPackage2Excel("com.github.drinkjava2.jdialects.entity", "d:/packageOutput.csv");
+        TableModelUtils.entityPackage2Excel("com.github.drinkjava2.jdialects.entity", "e:/packageOutput.csv");
     }
 
     @Test
     public void doTestEntity2Excel() {
-        TableModelUtils.entity2Excel("d:/entitiesOutput.csv", RoleTB.class, UserTB.class);
+        TableModelUtils.entity2Excel("e:/entitiesOutput.csv", RoleTB.class, UserTB.class);
     }
 
     @Test
     public void doTestDb2Excel() throws SQLException {
-        TableModelUtils.db2Excel(ds.getConnection(), Dialect.MySQL57Dialect, "d:/dbOutput.csv");
+        TableModelUtils.db2Excel(ds.getConnection(), Dialect.MySQL57Dialect, "e:/dbOutput.csv");
     }
 }
