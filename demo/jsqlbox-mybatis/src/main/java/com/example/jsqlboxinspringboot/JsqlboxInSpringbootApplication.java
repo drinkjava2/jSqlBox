@@ -36,7 +36,7 @@ public class JsqlboxInSpringbootApplication {
 
 		// 第一次运行要建表，利用jSqlBox来做，自已动手更踏实
 		for (String ddl : ctx.toCreateDDL(Customer.class))
-			gctx().iExecute(ddl);
+			gctx().exe(ddl);
 
 		return ctx;
 	}

@@ -1,0 +1,339 @@
+[2020-10-15 09:38:36.399] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-0 is starting.
+[2020-10-15 09:38:36.587] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 09:38:36.594] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.594] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 09:38:36.594] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.636] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.637] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 4k7xyhbu2s3kosbbgstfmjsst]
+[2020-10-15 09:38:36.638] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.639] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 444x6phcvbhvyu7986wdxaw5l]
+[2020-10-15 09:38:36.639] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.639] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, f3gtxb8zzfe4tzefb846d08ab]
+[2020-10-15 09:38:36.639] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.639] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, b82w2w9s6vlld5snzjzdewx9a]
+[2020-10-15 09:38:36.639] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.640] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 3cxmz1pje0oetwd057avk85sc]
+[2020-10-15 09:38:36.640] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 09:38:36.640] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.702] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select name, rating, id from teams
+[2020-10-15 09:38:36.703] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.704] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-0 is shutting down.
+[2020-10-15 09:38:36.708] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-1 is starting.
+[2020-10-15 09:38:36.708] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 09:38:36.709] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.710] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 09:38:36.710] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.711] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.711] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, dnrwujnlvxqupfsa4fpztnp4p]
+[2020-10-15 09:38:36.711] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.711] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, d61bdhg8rupko4ihzltpcckk0]
+[2020-10-15 09:38:36.711] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.712] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, n621acvrkqm0baia82a9f1vxo]
+[2020-10-15 09:38:36.712] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.712] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, df8ap05ld4iqd65kq3uk81u1d]
+[2020-10-15 09:38:36.712] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.712] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 612q87olkg6ia6fekle75nwi6]
+[2020-10-15 09:38:36.712] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 09:38:36.712] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.715] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-1 is shutting down.
+[2020-10-15 09:38:36.718] [main] INFO  com.jsqlboxdemo.log.LogTest : Log test
+[2020-10-15 09:38:36.722] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-2 is starting.
+[2020-10-15 09:38:36.723] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 09:38:36.723] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.723] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 09:38:36.723] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.726] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.726] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 3texujf6rik3yq5t13y3wa9x6]
+[2020-10-15 09:38:36.726] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.726] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, bxwsb0xdw3zrrrbej7cag3o6f]
+[2020-10-15 09:38:36.726] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.727] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, dovg8f701kgqhj2q2gljk2072]
+[2020-10-15 09:38:36.727] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.727] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, 4vyat82vsovbi689r22kiog43]
+[2020-10-15 09:38:36.727] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.727] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 1jfq0uppex5goi5xyduhk0nrn]
+[2020-10-15 09:38:36.728] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 09:38:36.728] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.751] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.751] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Tom, 123, d8b942926wmcy80mvmmsdilbt]
+[2020-10-15 09:38:36.752] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-2 is shutting down.
+[2020-10-15 09:38:36.756] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-3 is starting.
+[2020-10-15 09:38:36.757] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 09:38:36.757] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.757] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 09:38:36.757] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.758] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.758] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 5lpi2f64ek81xrckfa8yzfam4]
+[2020-10-15 09:38:36.758] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.758] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 4y9ccbqbu5ozp9jo58k0t4wt0]
+[2020-10-15 09:38:36.759] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.759] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, 99zd992zha9m0fxn8cr6otncx]
+[2020-10-15 09:38:36.759] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.759] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, 768sejgo1buwxjaxkyq01yh8y]
+[2020-10-15 09:38:36.760] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.760] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, dbtk09qxh3gmobu8ev2fqgrru]
+[2020-10-15 09:38:36.760] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 09:38:36.760] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.761] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-3 is shutting down.
+[2020-10-15 09:38:36.763] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-4 is starting.
+[2020-10-15 09:38:36.764] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 09:38:36.764] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.764] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 09:38:36.764] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.765] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.765] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, elw4tuwfcp9zxz0h80g3qg3wo]
+[2020-10-15 09:38:36.765] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.765] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, e04k99e9wjzofrtz8w8oueoqq]
+[2020-10-15 09:38:36.766] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.766] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, aou9ultcal9nt0rhfm7crdki2]
+[2020-10-15 09:38:36.766] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.766] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, 84u2trjwx2h7s8dobkjtnz138]
+[2020-10-15 09:38:36.766] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:38:36.766] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, bkyp2b5dii3vo53rxdhd1jtgr]
+[2020-10-15 09:38:36.767] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 09:38:36.767] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:38:36.771] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-4 is shutting down.
+[2020-10-15 09:40:58.570] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-0 is starting.
+[2020-10-15 09:40:58.755] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 09:40:58.762] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:40:58.763] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 09:40:58.763] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:40:58.807] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:40:58.808] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, cef1o9jqt2kp8ipnqajx9vpzx]
+[2020-10-15 09:40:58.809] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:40:58.809] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 2slpl0symp241u073ab7of286]
+[2020-10-15 09:40:58.809] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:40:58.809] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, 4pcigmqviiatoy0imntx2d4vb]
+[2020-10-15 09:40:58.810] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:40:58.810] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, 92x30kvx33acozv41udr5z61i]
+[2020-10-15 09:40:58.810] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 09:40:58.810] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 8k7ix4tsg13f75q9o0pf3anuy]
+[2020-10-15 09:40:58.811] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 09:40:58.811] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 09:40:58.875] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-0 is shutting down.
+[2020-10-15 12:45:26.583] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-0 is starting.
+[2020-10-15 12:45:26.768] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 12:45:26.775] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.775] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 12:45:26.775] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.818] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.819] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 17dp47or38nd2cq0nuv9nej9w]
+[2020-10-15 12:45:26.820] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.821] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, b99zsqogupmgxt8wbaj51gujw]
+[2020-10-15 12:45:26.821] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.821] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, 492yuccyiu30d3u53fa3iilh6]
+[2020-10-15 12:45:26.821] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.821] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, ack9gium5j1occjqlml2lpu3i]
+[2020-10-15 12:45:26.822] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.822] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, bjjt6491a8q2t92xczn77kkdp]
+[2020-10-15 12:45:26.822] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 12:45:26.822] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.885] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select name, rating, id from teams
+[2020-10-15 12:45:26.885] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.886] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-0 is shutting down.
+[2020-10-15 12:45:26.890] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-1 is starting.
+[2020-10-15 12:45:26.891] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 12:45:26.891] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.892] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 12:45:26.892] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.893] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.893] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 821eucwnfahap5otfm5hkgcs8]
+[2020-10-15 12:45:26.893] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.893] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 6gofb1c6tw4c04r6sre5dd5to]
+[2020-10-15 12:45:26.894] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.894] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, a39snh75sxx5wztebv77szz48]
+[2020-10-15 12:45:26.894] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.894] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, b4cdy6mm66vpehp6vwfi8ixbc]
+[2020-10-15 12:45:26.894] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.894] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 8cy8nlvbegu6hg1idzbmaqqb1]
+[2020-10-15 12:45:26.894] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 12:45:26.895] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.897] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL:  
+		 select t.*
+		    from teams t
+		    where t.rating=?
+		
+[2020-10-15 12:45:26.898] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [10]
+[2020-10-15 12:45:26.900] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-1 is shutting down.
+[2020-10-15 12:45:26.902] [main] INFO  com.jsqlboxdemo.log.LogTest : Log test
+[2020-10-15 12:45:26.905] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-2 is starting.
+[2020-10-15 12:45:26.906] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 12:45:26.906] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.906] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 12:45:26.906] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.907] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.907] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 3gmelfjc2qpfxw9pppwhhkv20]
+[2020-10-15 12:45:26.907] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.907] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, bjs7p6phetqd4xhoc7t1n4igm]
+[2020-10-15 12:45:26.908] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.908] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, 7hvbp4xir2996n41u6ty7vp6s]
+[2020-10-15 12:45:26.908] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.908] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, 97edgp0wt416epzy25c6slvjo]
+[2020-10-15 12:45:26.908] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.908] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, adzwoiske4x9tc4usfeu6uj2s]
+[2020-10-15 12:45:26.908] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 12:45:26.909] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.932] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.932] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Tom, 123, ch8tj2a8mpjehxh1jdc0oej69]
+[2020-10-15 12:45:26.933] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-2 is shutting down.
+[2020-10-15 12:45:26.935] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-3 is starting.
+[2020-10-15 12:45:26.938] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 12:45:26.938] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.938] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 12:45:26.938] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.939] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.939] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, ehk83unra7besq0tp8w1y0g47]
+[2020-10-15 12:45:26.939] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.939] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 8mg6lu88e25db2q13x4rrb3e6]
+[2020-10-15 12:45:26.939] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.940] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, def909cs4um0ebbbouuh7qc88]
+[2020-10-15 12:45:26.940] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.940] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, d150ys7sopf0g02do9p2136yd]
+[2020-10-15 12:45:26.940] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.940] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 49zqf15qywmfmfnz8z6tu0zid]
+[2020-10-15 12:45:26.940] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 12:45:26.940] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.941] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL:  
+		 select t.*
+		from teams t
+		where t.rating>?
+		
+[2020-10-15 12:45:26.942] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [10]
+[2020-10-15 12:45:26.942] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-3 is shutting down.
+[2020-10-15 12:45:26.944] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-4 is starting.
+[2020-10-15 12:45:26.945] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 12:45:26.945] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.945] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 12:45:26.945] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.945] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.946] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, exjdvuch8gdw5i37s6612pel1]
+[2020-10-15 12:45:26.946] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.946] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 40ixliplp809d5o742f684ak1]
+[2020-10-15 12:45:26.946] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.946] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, eypbo602iv4ia4niv5e0gl31x]
+[2020-10-15 12:45:26.947] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.947] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, dwdtjlmm8dxbrhs3qh8j6mj5x]
+[2020-10-15 12:45:26.947] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 12:45:26.947] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, cazflfbojcbtf0tq88fmkm74e]
+[2020-10-15 12:45:26.947] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 12:45:26.947] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 12:45:26.951] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL:  
+		 select t.*
+		    from teams t
+		    where t.rating=?
+		
+[2020-10-15 12:45:26.952] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [10]
+[2020-10-15 12:45:26.952] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-4 is shutting down.
+[2020-10-15 16:36:57.215] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-0 is starting.
+[2020-10-15 16:36:57.434] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 16:36:57.441] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.442] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 16:36:57.442] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.488] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.489] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 7cijv4gtsptl9ss0q2zby5jao]
+[2020-10-15 16:36:57.490] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.490] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 3cejnrtkbom5d4hsovo7l77gd]
+[2020-10-15 16:36:57.491] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.491] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, dk56nih0penqs003jwo3etezu]
+[2020-10-15 16:36:57.491] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.491] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, c5cbe9xl1pzib2dwkychid1wh]
+[2020-10-15 16:36:57.491] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.491] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 70srtdrsslvuvld9jalaw6fdd]
+[2020-10-15 16:36:57.492] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 16:36:57.492] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.552] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select name, rating, id from teams
+[2020-10-15 16:36:57.552] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.553] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-0 is shutting down.
+[2020-10-15 16:36:57.557] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-1 is starting.
+[2020-10-15 16:36:57.558] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 16:36:57.558] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.560] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 16:36:57.560] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.560] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.560] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 6uzepz2zcoyctcp6vymhxcoiz]
+[2020-10-15 16:36:57.561] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.561] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, acg0ypggvw8wj65l10jicyq7p]
+[2020-10-15 16:36:57.561] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.562] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, cbhiltumxfxihy2qju1qq59wf]
+[2020-10-15 16:36:57.562] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.562] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, apvbnn2c2kwy579w0alonvmr2]
+[2020-10-15 16:36:57.562] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.562] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, 5m5kjumdv0s61pmxnkpnpu4h1]
+[2020-10-15 16:36:57.563] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 16:36:57.563] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.565] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL:  
+		 select t.*
+		    from teams t
+		    where t.rating=?
+		
+[2020-10-15 16:36:57.566] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [10]
+[2020-10-15 16:36:57.569] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-1 is shutting down.
+[2020-10-15 16:36:57.570] [main] INFO  com.jsqlboxdemo.log.LogTest : Log test
+[2020-10-15 16:36:57.574] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-2 is starting.
+[2020-10-15 16:36:57.575] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 16:36:57.575] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.575] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 16:36:57.575] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.576] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.576] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 9rey9kmorw95ppa92b693lxok]
+[2020-10-15 16:36:57.576] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.576] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, avrvy6cbce6bzs5isqucyml93]
+[2020-10-15 16:36:57.576] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.576] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, as870jqjumwy7ao94k4i17dnp]
+[2020-10-15 16:36:57.577] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.577] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, d4xf3o6brsl7bkhss9l27t4fx]
+[2020-10-15 16:36:57.577] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.577] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, cth5ktvseedg41zhua65anwxa]
+[2020-10-15 16:36:57.577] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 16:36:57.577] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.600] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.600] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Tom, 123, bi6s089oa3ey1ok2292l1qlwe]
+[2020-10-15 16:36:57.601] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-2 is shutting down.
+[2020-10-15 16:36:57.605] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-3 is starting.
+[2020-10-15 16:36:57.606] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 16:36:57.606] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.606] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 16:36:57.606] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.607] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.607] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 389koososq0yhzhzmpi1sa099]
+[2020-10-15 16:36:57.607] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.607] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, cpvvrfjzmk2dtv0c53iojrffv]
+[2020-10-15 16:36:57.608] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.608] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, 79vxb1o66opjbv320do5rh9pf]
+[2020-10-15 16:36:57.608] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.608] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, f03mb7wboexs2rfxhaemxduiv]
+[2020-10-15 16:36:57.608] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.609] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, xppt5t7plrv9mhb61gogzbze1]
+[2020-10-15 16:36:57.609] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 16:36:57.609] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.610] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL:  
+		 select t.*
+		from teams t
+		where t.rating>?
+		
+[2020-10-15 16:36:57.610] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [10]
+[2020-10-15 16:36:57.611] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-3 is shutting down.
+[2020-10-15 16:36:57.613] [main] INFO  com.zaxxer.hikari.HikariDataSource : HikariCP pool HikariPool-4 is starting.
+[2020-10-15 16:36:57.614] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: drop table teams if exists
+[2020-10-15 16:36:57.614] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.615] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: create table teams ( id varchar(255),name varchar(255),rating integer, primary key (id))
+[2020-10-15 16:36:57.615] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.615] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.615] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team0, 0, 72bbqspiilshj02c0ooqrf1qr]
+[2020-10-15 16:36:57.615] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.616] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team1, 10, 4ss76qizulou0c3dpa2j0oo8t]
+[2020-10-15 16:36:57.616] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.616] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team2, 20, 8o4k9xnca9wn571kzqopqfg6e]
+[2020-10-15 16:36:57.616] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.616] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team3, 30, 5yjvyk4cacdi6gyxbglmap7i2]
+[2020-10-15 16:36:57.617] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: insert into teams (name, rating, id)  values(?,?,?)
+[2020-10-15 16:36:57.617] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [Team4, 40, d16yejxp18jhl1pgfue16g0on]
+[2020-10-15 16:36:57.617] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL: select count(*) from teams
+[2020-10-15 16:36:57.617] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: []
+[2020-10-15 16:36:57.621] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : SQL:  
+		 select t.*
+		    from teams t
+		    where t.rating=?
+		
+[2020-10-15 16:36:57.621] [main] INFO  c.g.d.jdbpro.ImprovedQueryRunner : PAR: [10]
+[2020-10-15 16:36:57.622] [main] INFO  com.zaxxer.hikari.pool.HikariPool : HikariCP pool HikariPool-4 is shutting down.

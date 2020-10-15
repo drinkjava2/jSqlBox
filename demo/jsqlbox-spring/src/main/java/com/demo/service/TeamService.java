@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.demo.model.Team;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.JSQLBOX;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
 
@@ -34,7 +35,7 @@ public class TeamService {
 	}
 
 	public List<Team> getTeamByName(String name) {
-		return JSQLBOX.pQuery(new EntityListHandler(), Team.class, "select t.* from teams t where t.name=?", name);
+		return JSQLBOX.qry(new EntityListHandler(), Team.class, "select t.* from teams t where t.name=?", DB.par(name));
 	}
 
 }

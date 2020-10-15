@@ -45,7 +45,7 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>
-   <version>4.0.7.jre8</version> <!--Or newest version-->
+   <version>5.0.1.jre8</version> <!--Or newest version-->
 </dependency> 
 ```
 
@@ -55,7 +55,7 @@ pom.xml：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>4.0.8.jre8</version> <!-- Java8 -->
+       <version>5.0.1.jre8</version> <!-- Java8 -->
     </dependency>
 
     <dependency>
@@ -71,46 +71,35 @@ import org.h2.jdbcx.JdbcConnectionPool;
 import static com.github.drinkjava2.jsqlbox.DB.*;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jsqlbox.*; 
+import com.github.drinkjava2.jsqlbox.ActiveEntity;
+import com.github.drinkjava2.jsqlbox.DB;
+import com.github.drinkjava2.jsqlbox.DbContext;
+
 public class HelloWorld implements ActiveEntity<HelloWorld> {
-	@Id
-	@UUID25
-	private String id;
+  @Id
+  @UUID25
+  private String id;
+  private String name;
+  public String getId() {return id;}
+  public void setId(String id) {this.id = id;}
+  public String getName() {return name;}
+  public HelloWorld setName(String name) {this.name = name;return this;}
 
-	private String name;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public HelloWorld setName(String name) {
-		this.name = name;
-		return this;
-	}
-
-	public static void main(String[] args) {
-		DataSource ds = JdbcConnectionPool //user H2
-				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-		DbContext ctx = new DbContext(ds);
-		ctx.setAllowShowSQL(true); //Sql Log
-		DbContext.setGlobalDbContext(ctx);  
-		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class)); //create DDL and create table
-		ctx.tx(() -> {//Open transaction
-			HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
-			System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"),
-					" or name=", ques("1"), " or name =", ques("2")));
-			h.delete();
-		});
-		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));//drop table
-	}
+    public static void main(String[] args) {
+     DataSource ds = JdbcConnectionPool  
+                     .create("jdbc:h2:mem:demo;MODE=MYSQL;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+     DbContext ctx = new DbContext(ds);
+     ctx.setAllowShowSQL(true); 
+     DbContext.setGlobalDbContext(ctx);  
+     ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));  
+     ctx.tx(() -> { 
+        HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+        System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"),
+					" or name=", que("1"), " or name =", que("2")));
+        h.delete(); 
+     });
+     ctx.executeDDL(ctx.toDropDDL(HelloWorld.class)); 
+   }
 }
 ```
 Below is the log output:

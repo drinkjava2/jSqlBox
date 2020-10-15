@@ -64,7 +64,7 @@ public class Initializer implements ServletContextListener {
 
 		for (int i = 0; i < 5; i++)
 			new Team().putField("name", "Team" + i, "rating", i * 10).insert();
-		Assert.assertEquals(5, ctx.nQueryForLongValue("select count(*) from teams"));
+		Assert.assertEquals(5, ctx.qryLongValue("select count(*) from teams"));
 		System.out.println("========== com.jsqlboxdemo.init.Initializer initialized=====");
 	}
 

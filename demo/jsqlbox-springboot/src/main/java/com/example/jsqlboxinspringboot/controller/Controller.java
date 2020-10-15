@@ -1,13 +1,12 @@
 package com.example.jsqlboxinspringboot.controller;
  
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jsqlboxinspringboot.entity.Customer;
 import com.example.jsqlboxinspringboot.services.Services;
+import com.github.drinkjava2.jsqlbox.DB;
 
 @RestController
 public class Controller {
@@ -17,7 +16,7 @@ public class Controller {
 
 	@RequestMapping("/")
 	public String home() {
-		return toHtml("Now have " + eCountAll(Customer.class) + " records in database.");
+		return toHtml("Now have " + DB.entityCount(Customer.class) + " records in database.");
 	}
 
 	@RequestMapping("/insert")
@@ -33,7 +32,7 @@ public class Controller {
 		} catch (Exception e) {
 			System.out.println("Div 0 Exception found.");
 		}
-		return toHtml("Still have " + nQueryForLongValue("Select count(1) from Customer")
+		return toHtml("Still have " + DB.qryLongValue("Select count(1) from Customer")
 				+ " records in database, because transaction rolled back.");
 	}
 

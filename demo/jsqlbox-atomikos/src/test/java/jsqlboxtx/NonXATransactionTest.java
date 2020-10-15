@@ -11,7 +11,7 @@
  */
 package jsqlboxtx;
 
-import static com.github.drinkjava2.jsqlbox.DB.iQueryForLongValue;
+import static com.github.drinkjava2.jsqlbox.DB.qryLongValue;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
@@ -55,7 +55,7 @@ public class NonXATransactionTest {
 		TableModel model = TableModelUtils.entity2Model(Bank.class);
 		for (int i = 0; i < MASTER_DATABASE_QTY; i++)
 			for (String ddl : masters[i].toCreateDDL(model))
-				masters[i].iExecute(ddl);
+				masters[i].exe(ddl);
 	}
 
 	@After
@@ -81,8 +81,8 @@ public class NonXATransactionTest {
 			e.printStackTrace();
 			System.out.println("Div 0 RuntimeException happened, but 1 database did not rollback ");
 		}
-		Assert.assertEquals(1L, iQueryForLongValue("select count(*) from bank", masters[0]));
-		Assert.assertEquals(0L, iQueryForLongValue("select count(*) from bank", masters[1]));
+		Assert.assertEquals(1L, qryLongValue("select count(*) from bank", masters[0]));
+		Assert.assertEquals(0L, qryLongValue("select count(*) from bank", masters[1]));
 	}
 
 	public static class Bank extends ActiveRecord<Bank> {

@@ -57,10 +57,10 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>4.0.8.jre8</version> <!-- 或最新版 -->
+   <version>5.0.1.jre8</version> <!-- 或最新版jre6/jre8版 -->
 </dependency> 
 ```
-jSqlBox分为Java8和Java6两个版本发布，如果是Java6或7环境下，请将版本号改为4.0.1.jre6，Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。对于新项目开发，请尽量使用Java8版本。
+jSqlBox分为Java8和Java6两个版本发布，Java8和Java6版本的主要区别是Java8版的实体类可以只声明ActiveEntity接口就可以进行CRUD操作了，并且Java8版提供了利用Lambda写支持重构的SQL的功能。对于新项目开发，请尽量使用Java8版本。
 另一种使用jSqlBox的方式是：因为它没有用到第三方依赖，对于需要学习或更改它的源码的场合，也可以直接将jSqlBox的源码拷到项目目录里就可以直接使用它了。  
 
 ## 入门 | First Example
@@ -70,7 +70,7 @@ pom.xml中引入：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>4.0.8.jre8</version> <!-- Java8版 -->
+       <version>5.0.1.jre8</version> <!-- Java8版 -->
     </dependency>
 
     <dependency>
@@ -86,46 +86,35 @@ import org.h2.jdbcx.JdbcConnectionPool;
 import static com.github.drinkjava2.jsqlbox.DB.*;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
-import com.github.drinkjava2.jsqlbox.*; 
+import com.github.drinkjava2.jsqlbox.ActiveEntity;
+import com.github.drinkjava2.jsqlbox.DB;
+import com.github.drinkjava2.jsqlbox.DbContext;
+
 public class HelloWorld implements ActiveEntity<HelloWorld> {
-	@Id
-	@UUID25
-	private String id;
+  @Id
+  @UUID25
+  private String id;
+  private String name;
+  public String getId() {return id;}
+  public void setId(String id) {this.id = id;}
+  public String getName() {return name;}
+  public HelloWorld setName(String name) {this.name = name;return this;}
 
-	private String name;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public HelloWorld setName(String name) {
-		this.name = name;
-		return this;
-	}
-
-	public static void main(String[] args) {
-		DataSource ds = JdbcConnectionPool //这个示例使用h2内存数据库
-				.create("jdbc:h2:mem:DBNameJava8;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-		DbContext ctx = new DbContext(ds);
-		ctx.setAllowShowSQL(true); //开启SQL日志输出
-		DbContext.setGlobalDbContext(ctx); //设定全局DbContext
-		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class)); //从实体创建DDL，创建表格
-		ctx.tx(() -> {//开启事务
-			HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
-			System.out.println(DB.iQueryForString("select name from HelloWorld where name like", ques("H%"),
-					" or name=", ques("1"), " or name =", ques("2")));
-			h.delete();//删除实体
-		});
-		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));//删除表格
-	}
+    public static void main(String[] args) {
+     DataSource ds = JdbcConnectionPool  //这个示例使用h2内存数据库
+                     .create("jdbc:h2:mem:demo;MODE=MYSQL;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+     DbContext ctx = new DbContext(ds);
+     ctx.setAllowShowSQL(true);  //开启SQL日志输出
+     DbContext.setGlobalDbContext(ctx);  //设定全局上下文
+     ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));  //生成DDL,建数据库表
+     ctx.tx(() -> {  //开启事务
+        HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+        System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"),
+					" or name=", que("1"), " or name =", que("2")));
+        h.delete();  //删除实体
+     });
+     ctx.executeDDL(ctx.toDropDDL(HelloWorld.class)); //删除数据库表
+   }
 }
 ```
 上面这个演示包括了根据实体类生成DDL并执行、插入实体到数据库、执行更新、查询出结果、即打印出"Hello jSqlBox"、删除实体、删除数据库。

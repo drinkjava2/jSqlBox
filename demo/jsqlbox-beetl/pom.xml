@@ -45,19 +45,19 @@
  
 
  <dependencies>
-    <!-- jSqlBox is a Dao tool  -->
-    <dependency>
-      <groupId>com.github.drinkjava2</groupId>
-      <artifactId>jsqlbox</artifactId>
-      <version>4.0.8.jre8</version><!--Or newest jSqlBox -->
-    </dependency>
-
-    <dependency>
+     <dependency>
       <groupId>com.ibeetl</groupId>
       <artifactId>beetl</artifactId>
       <version>3.0.11.RELEASE</version>
     </dependency>
-   
+ 
+    <!-- jSqlBox is a Dao tool  -->
+    <dependency>
+      <groupId>com.github.drinkjava2</groupId>
+      <artifactId>jsqlbox</artifactId>
+      <version>5.0.1.jre8</version><!--Or newest jSqlBox -->
+    </dependency>
+  
    <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
    <dependency>
      <groupId>commons-lang</groupId>

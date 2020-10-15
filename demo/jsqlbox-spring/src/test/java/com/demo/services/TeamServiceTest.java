@@ -39,7 +39,7 @@ public class TeamServiceTest {
 	public void createDB() {
 		String[] ddls = ctx.toCreateDDL(Team.class);
 		for (String ddl : ddls)
-			ctx.nExecute(ddl);
+			ctx.exe(ddl);
 		for (int i = 0; i < 5; i++)
 			new Team().putField("name", "Team" + i, "rating", i * 10).insert(new PrintSqlHandler());
 		System.out.println("========== TeamServiceTest initialized=====");
@@ -49,7 +49,7 @@ public class TeamServiceTest {
 	public void cleanUp() {
 		String[] ddls = JSQLBOX.gctx().toDropDDL(Team.class);
 		for (String ddl : ddls)
-			JSQLBOX.gctx().nExecute(ddl);
+			JSQLBOX.gctx().exe(ddl);
 		System.out.println("========== TeamServiceTest clean up done=====");
 	}
 

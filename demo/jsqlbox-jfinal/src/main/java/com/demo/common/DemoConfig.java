@@ -54,7 +54,7 @@ public class DemoConfig extends JFinalConfig {
 		// 第一次运行，手工建一个H2数据库表
 		String[] ddls = ctx.toCreateDDL(Blog.class);
 		for (String ddl : ddls)
-			ctx.nExecute(ddl);
+			ctx.exe(ddl);
 
 		// 第一次运行，插入数据
 		new Blog().forFields("id", "title", "content");

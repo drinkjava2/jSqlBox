@@ -1,9 +1,8 @@
 package com.jsqlboxdemo.service;
 
-import static com.github.drinkjava2.jsqlbox.JSQLBOX.eFindAll;
-
 import java.util.List;
 
+import com.github.drinkjava2.jsqlbox.DB;
 import com.jsqlboxdemo.init.Initializer.TX;
 
 import model.Team;
@@ -18,7 +17,7 @@ import model.Team;
 public class TeamService {
 
 	public List<Team> listAll() {
-		return eFindAll(Team.class);
+		return DB.entityFind(Team.class);
 	}
 
 	@TX

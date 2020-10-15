@@ -453,6 +453,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 			PreparedSQL rendered = ps.getTemplateEngine().render(ps.getSql(), ps.getTemplateParamMap(), ps.getParams());
 			ps.setSql(rendered.getSql());
 			ps.setParams(rendered.getParams());
+			ps.setTemplateEngine(null);
 		}
 
 		while (ps.getSqlHandlers() != null && !ps.getSqlHandlers().isEmpty()) {

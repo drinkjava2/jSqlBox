@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -382,6 +383,9 @@ public class UsageAndSpeedTest {
 		UserAR tom = new UserAR("Tom", "China");
 		//default template
 		ctx.exe(DB.TEMPLATE,"insert into users (name, address) values(#{user.name}, #{user.address})", bind("user", user));
+		List<UserPOJO> lst=ctx.qryEntityList(TEMPLATE, UserPOJO.class, "select t.* from users t where t.name=:name", bind("name", "Sam"));
+		Assert.assertEquals(1, lst.size());
+		
 		//below are customized engine
 		ctx.exe(customizedEngine, "update users set name=[user.name], address=[user.address]", bind("user", tom));
 		Assert.assertEquals(1L,

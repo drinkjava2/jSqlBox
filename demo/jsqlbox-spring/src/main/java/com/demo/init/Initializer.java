@@ -32,7 +32,7 @@ public class Initializer implements WebApplicationInitializer {
 
 		String[] ddls = sbCtx.toCreateDDL(Team.class);
 		for (String ddl : ddls)
-			sbCtx.nExecute(ddl);
+			sbCtx.exe(ddl);
 		for (int i = 0; i < 5; i++)
 			new Team().putField("name", "Team" + i, "rating", i * 10).insert();
 		System.out.println("========== com.jsqlboxdemo.init.Initializer initialized=====");
