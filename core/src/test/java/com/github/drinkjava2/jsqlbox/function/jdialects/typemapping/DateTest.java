@@ -250,6 +250,21 @@ public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 		Assert.assertNotNull(out.getD15());
 		Systemout.println(out.getD15());
 	}
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	//@Column(columnDefinition = "datetime") //TODO:to fix, datetime or datetime(6) should support
+	java.util.Date d16;
+
+	@Test
+	public void testD16() {
+		useField(16);
+		DateTest in = new DateTest();
+		in.setD16(D3000);
+		in.insert();
+		DateTest out = new DateTest().setId(in.getId()).load();
+		Assert.assertNotNull(out.getD16());
+		Systemout.println(out.getD16());
+	}
 
 	public void getterSetters______________________() {
 	}
@@ -385,6 +400,14 @@ public class DateTest extends TestBase implements ActiveEntity<DateTest> {
 
 	public void setD15(java.sql.Date d15) {
 		this.d15 = d15;
+	}
+
+	public java.util.Date getD16() {
+		return d16;
+	}
+
+	public void setD16(java.util.Date d16) {
+		this.d16 = d16;
 	}
 
 }
