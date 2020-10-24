@@ -195,7 +195,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 			if (SqlOption.OTHER.equals(sqlItemType))
 				predSQL.addOther(sqItem);
 			else if (SqlOption.PARAM.equals(sqlItemType)) {
-				for (Object pm : sqItem.getParameters())
+				if(sqItem.getParameters()==null )
+					predSQL.addParam(null);
+				else for (Object pm : sqItem.getParameters())
 					predSQL.addParam(pm);
 			} else if (SqlOption.BIND.equals(sqlItemType)) {
 				predSQL.addTemplateParam(sqItem);
@@ -203,13 +205,18 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				for (Object pm : sqItem.getParameters())
 					predSQL.addSql(pm);
 			} else if (SqlOption.QUESTION_PARAM.equals(sqlItemType)) {
-				int i = 0;
-				for (Object pm : sqItem.getParameters()) {
-					predSQL.addParam(pm);
-					if (i > 0)
-						predSQL.addSql(",");
+				if (sqItem.getParameters() == null) {
+					predSQL.addParam(null);
 					predSQL.addSql("?");
-					i++;
+				} else {
+					int i = 0;
+					for (Object pm : sqItem.getParameters()) {
+						predSQL.addParam(pm);
+						if (i > 0)
+							predSQL.addSql(",");
+						predSQL.addSql("?");
+						i++;
+					}
 				}
 			} else if (SqlOption.NOT_NULL.equals(sqlItemType)) {
 				Object[] args = sqItem.getParameters();

@@ -45,8 +45,8 @@ public class TestBase {
 	public void init() {
 		System.getProperties().setProperty("oracle.jdbc.J2EE13Compliant", "true");
 		DbContext.resetGlobalVariants();
-		Systemout.setAllowPrint(true); // debug only, allow Systemout.print
-		DbContext.setGlobalNextAllowShowSql(true); // disable sql log		
+		Systemout.setAllowPrint(false); // debug only, allow Systemout.print
+		DbContext.setGlobalNextAllowShowSql(false); // disable sql log		
 		ConsoleLog.setLogHead(false);// print log head
 		ConsoleLog.setLogLevel(ConsoleLog.INFO); // INFO/DEBUG/WARNING/OFF
 		dataSource = JBEANBOX.getBean(DataSourceBox.class);
