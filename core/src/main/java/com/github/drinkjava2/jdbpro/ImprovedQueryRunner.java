@@ -16,9 +16,7 @@
  */
 package com.github.drinkjava2.jdbpro;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +68,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected static ConnectionManager globalNextConnectionManager = TinyTxConnectionManager.instance();
 	protected static JavaToJdbcConverter globalNextJavaToJdbcConverter = BasicJavaToJdbcConverter.instance;
 	protected static JdbcToJavaConverter globalNextJdbcToJavaConverter = BasicJdbcToJavaConverter.instance;
+	protected static TenantGetter globalNextTenantGetter = null;
+	
 
 	protected static Integer globalNextBatchSize = 300;
 	protected static SqlHandler[] globalNextSqlHandlers = null;
@@ -82,6 +82,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected Dialect dialect = globalNextDialect;
 	protected JavaToJdbcConverter javaToJdbcConverter = globalNextJavaToJdbcConverter;
 	protected JdbcToJavaConverter jdbcToJavaConverter = globalNextJdbcToJavaConverter;
+	protected TenantGetter tenantGetter = globalNextTenantGetter;
 
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
@@ -168,26 +169,6 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 			return connectionManager.getConnection(this);
 	}
 
-	@Override
-	protected CallableStatement prepareCall(Connection conn, String sql) throws SQLException {
-		if (this.getAllowShowSQL() && !batchEnabled.get())
-			logger.info(formatSqlForLoggerOutput(sql));
-		return super.prepareCall(conn, sql);
-	}
-
-	@Override
-	protected PreparedStatement prepareStatement(Connection conn, String sql) throws SQLException {
-		if (this.getAllowShowSQL() && !batchEnabled.get())
-			logger.info(formatSqlForLoggerOutput(sql));
-		return super.prepareStatement(conn, sql);
-	}
-
-	@Override
-	public void fillStatement(PreparedStatement stmt, Object... params) throws SQLException {
-		if (this.getAllowShowSQL() && !batchEnabled.get())
-			logger.info(formatParametersForLoggerOutput(params));
-		super.fillStatement(stmt, params);
-	}
 
 	// =========== Explain SQL about methods========================
 	/**
@@ -432,15 +413,17 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * return a result
 	 */
 	public Object runPreparedSQL(PreparedSQL ps) {
-		if (allowShowSQL) {
-			logger.debug("DEBUG SQL>>" + ps.getSql());
-			logger.debug("DEBUG PAR>>" + Arrays.toString(ps.getParams()));
-		}
-		if (ps.getSwitchTo() != null) {
-			DbPro pro = ps.getSwitchTo();
-			ps.setSwitchTo(null);
-			return pro.runPreparedSQL(ps);// SwitchTo run
-		}
+	    if(this.tenantGetter!=null) {
+	        ImprovedQueryRunner runner=tenantGetter.getTenant();
+	        if(runner==null)
+	            throw new DbException("tenantGetter can not return a null Object");
+	        return runner.runPreparedSQL(ps);
+	    }
+        if(ps.getSwitchTo() != null){
+            DbPro pro = ps.getSwitchTo();
+            ps.setSwitchTo(null);
+            return pro.runPreparedSQL(ps);// SwitchTo run
+        }
 		if (ps.getParams().length > 0) {
 			for (int i = 0; i < ps.getParams().length; i++) {
 				ps.getParams()[i] = javaToJdbcConverter.convert(ps.getParams()[i]);
@@ -475,6 +458,11 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	public Object runRealSqlMethod(PreparedSQL ps) {
 		if (ps.getOperationType() == null)
 			throw new DbProException("PreparedSQL's type not set");
+		
+	      if (this.getAllowShowSQL() && !batchEnabled.get()) {
+	            logger.info(formatSqlForLoggerOutput(ps.getSql()));
+	            logger.info(formatParametersForLoggerOutput(ps.getParams()));
+	      }
 
 		if (batchEnabled.get()) {
 			switch (ps.getOperationType()) {
@@ -1008,6 +996,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		ImprovedQueryRunner.globalNextJdbcToJavaConverter = globalNextJdbcToJavaConverter;
 	}
 
+    public static TenantGetter getGlobalNextTenantGetter() {
+        return globalNextTenantGetter;
+    }
+
+    public static void setGlobalNextTenantGetter(TenantGetter globalNextTenantGetter) {
+        ImprovedQueryRunner.globalNextTenantGetter = globalNextTenantGetter;
+    }
+
 	private void normalGetterSetters_____________________() {// NOSONAR
 	}
 
@@ -1113,7 +1109,17 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		this.jdbcToJavaConverter = jdbcToJavaConverter;
 	}
 
-	public boolean isBatchEnabled() {
+	/** This method is not thread safe, suggest only use at program starting */
+    public TenantGetter getTenantGetter() {
+        return tenantGetter;
+    }
+
+    /** This method is not thread safe, suggest only use at program starting */
+    public void setTenantGetter(TenantGetter tenantGetter) {
+        this.tenantGetter = tenantGetter;
+    }
+
+    public boolean isBatchEnabled() {
 		return batchEnabled.get();
 	}
 

@@ -25,12 +25,12 @@ import com.github.drinkjava2.jsqlbox.config.TestBase;
  */
 public class OthersTest extends TestBase {
 	{
-		regTables(TitleDemoEntity.class);
+		regTables(OthersDemo.class);
 	}
 
 	@Test
 	public void doTest() {
-		TitleDemoEntity demo = new TitleDemoEntity();
+		OthersDemo demo = new OthersDemo();
 		demo.setName("Sam");
 		demo.insert();
 		String name = "a";
@@ -38,7 +38,7 @@ public class OthersTest extends TestBase {
 				" id", other("id", 10), //
 				when(false, ", name as name1 ", other("name1", "age=5")), //
 				when(true, ", name as name2 ", other("name2", "displayWidth=10")), //
-				" from TitleDemoEntity", //
+				" from OthersDemo", //
 				" where id<>", que("a"), //
 				when(name != null, " and name like ", que("%" + name + "%")), //
 				new PrintSqlHandler() //
@@ -48,7 +48,7 @@ public class OthersTest extends TestBase {
 			System.out.println(Arrays.deepToString(titles));
 	}
 
-	public static class TitleDemoEntity implements ActiveEntity<TitleDemoEntity> {
+	public static class OthersDemo implements ActiveEntity<OthersDemo> {
 		@PKey
 		@UUID26
 		private String id;

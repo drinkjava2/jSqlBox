@@ -66,19 +66,6 @@ public class PrintSqlHandler extends DefaultOrderSqlHandler {
 		long start = System.currentTimeMillis();		
 		Object obj = runner.runPreparedSQL(ps);
 		long end = System.currentTimeMillis();
-		StackTraceElement[] steArray = Thread.currentThread().getStackTrace();
-		for (StackTraceElement st : steArray) {
-			if (st.getClassName().contains("lang.Thread"))
-				continue;
-			if (st.getClassName().contains(".drinkjava2.jdbpro"))
-				continue;
-			if (st.getClassName().contains(".drinkjava2.jsqlbox"))
-				continue;
-			sb.append("| Location:  " + st.getClassName() + "." + st.getMethodName() + "(" + st.getFileName() + ":"
-					+ st.getLineNumber() + ")").append("\n");
-			break;
-		}
-
 		sb.append("| TimeUsed:  " + (end - start) + "ms\n");
 		if (runner.getName() != null && runner.getName().length() > 0)
 			sb.append("| DB:        " + runner.getName()).append("\n");
