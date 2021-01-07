@@ -1,6 +1,9 @@
 package com.github.drinkjava2.jsqlbox.function.jdialects;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -118,6 +121,20 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 	@Test
 	public void doDbToModelTest() throws Exception {
+		Map<String, Object> setting = new HashMap<String, Object>();
+		setting.put(TableModelUtils.OPT_EXCLUDE_TABLES, Arrays.asList("Dbsample")); // 排除表名
+		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");// 包名
+		setting.put(TableModelUtils.OPT_IMPORTS, "import java.util.Map;\n"); // 追加新的imports
+		setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, false); // 不去除自带的imports
+		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");// 类定义
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, true); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_FIELDS, true); // 属性
+		setting.put(TableModelUtils.OPT_GETTER_SETTERS, true); // getter setter
+		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); // 属性定义成public
+		setting.put(TableModelUtils.OPT_LINK_STYLE, true); // 链式getter/setter风格
+
 		quietDropTables(DbSample.class, studentSample.class);
 		createTables(studentSample.class, DbSample.class);
 		DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
@@ -127,7 +144,7 @@ public class TableModelUtilsOfDbTest extends TestBase {
 		TableModel[] models = TableModelUtils.db2Models(conn, dialect);
 		for (TableModel model : models) {
 			Systemout.println("\n\n\n\n");
-			Systemout.println(TableModelUtils.model2JavaSrc(model, TableModelUtilsOfJavaSrcTest.setting));
+			Systemout.println(TableModelUtils.model2JavaSrc(model, setting));
 		}
 		conn.close();
 		dropTables(DbSample.class, studentSample.class);
@@ -135,10 +152,23 @@ public class TableModelUtilsOfDbTest extends TestBase {
 
 	@Test
 	public void doDbToJavaSrcFiles() {
+		Map<String, Object> setting = new HashMap<String, Object>();
+		setting.put(TableModelUtils.OPT_EXCLUDE_TABLES, Arrays.asList("Dbsample")); // 排除表名
+		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");// 包名
+		setting.put(TableModelUtils.OPT_IMPORTS, "import java.util.Map;\n"); // 追加新的imports
+		setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, false); // 不去除自带的imports
+		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");// 类定义
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, true); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_FIELDS, true); // 属性
+		setting.put(TableModelUtils.OPT_GETTER_SETTERS, true); // getter setter
+		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); // 属性定义成public
+		setting.put(TableModelUtils.OPT_LINK_STYLE, true); // 链式getter/setter风格
+
 		quietDropTables(DbSample.class, studentSample.class);
 		createTables(studentSample.class, DbSample.class);
-		TableModelUtils.db2JavaSrcFiles(ctx.getDataSource(), ctx.getDialect(), "c:/temp",
-				TableModelUtilsOfJavaSrcTest.setting);
+		TableModelUtils.db2JavaSrcFiles(ctx.getDataSource(), ctx.getDialect(), "c:/temp", setting);
 		dropTables(DbSample.class, studentSample.class);
 	}
 

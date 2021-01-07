@@ -102,7 +102,8 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 	}
 
 	/**
-	 * Convert a TablemModel instance to Java entity class source code
+	 * Convert a TablemModel instance to Java entity class source code, example can
+	 * see TableModelUtilsOfJavaSrcTest
 	 *
 	 * @param model
 	 *            The TableModel instance
@@ -144,21 +145,12 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 			String className) {
 		boolean fieldFlags = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELD_FLAGS));
 		StringBuilder fieldSB = new StringBuilder();
-		// fieldStaticNames
-		// 不知道为什么有些表的column 定义信息是重复的，我不是DBA不清楚原因。
-		// 也需要还有什么废弃的标志，但前面的处理没有过滤，这里先临时处理一下。
-		Set<String> processed = new HashSet<>();
 		if (fieldFlags) {
 			fieldSB.append("\tpublic static final String TABLE_NAME = \"").append(model.getTableName())
 					.append("\";\n\n");
 			for (ColumnModel col : model.getColumns()) {
 				String columnName = col.getColumnName();
-				if (processed.contains(columnName)) {
-					continue;
-				}
 				String rawColName = clearQuote(columnName);
-				processed.add(columnName);
-
 				fieldSB.append("\tpublic static final String ").append(rawColName.toUpperCase()).append(" = \"")
 						.append(columnName).append("\";\n\n");
 			}
@@ -242,16 +234,9 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		boolean enablePublicField = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_PUBLIC_FIELD));
 		StringBuilder pkeySB = new StringBuilder();
 		StringBuilder normalSB = new StringBuilder();
-		// 不知道为什么有些表的column 定义信息是重复的，我不是DBA不清楚原因。
-		// 也需要还有什么废弃的标志，但前面的处理没有过滤，这里先临时处理一下。
-		Set<String> processed = new HashSet<>();
 		StringBuilder sb;
 		for (ColumnModel col : model.getColumns()) {
 			String columnName = col.getColumnName();
-			if (processed.contains(columnName)) {
-				continue;
-			}
-			processed.add(columnName);
 			Class<?> javaType = TypeUtils.dialectTypeToJavaType(col.getColumnType());
 
 			if (javaType == null) {
@@ -329,16 +314,8 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		boolean linkStyle = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_LINK_STYLE));
 		StringBuilder pkeySB = new StringBuilder();
 		StringBuilder normalSB = new StringBuilder();
-		// 不知道为什么有些表的column 定义信息是重复的，我不是DBA不清楚原因。
-		// 也需要还有什么废弃的标志，但前面的处理没有过滤，这里先临时处理一下。
-		Set<String> processed = new HashSet<>();
 		StringBuilder sb;
 		for (ColumnModel col : model.getColumns()) {
-			if (processed.contains(col.getColumnName())) {
-				continue;
-			}
-
-			processed.add(col.getColumnName());
 			// getter
 			Class<?> javaType = TypeUtils.dialectTypeToJavaType(col.getColumnType());
 

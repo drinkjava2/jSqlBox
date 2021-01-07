@@ -78,20 +78,37 @@ public class TableModelUtilsOfJavaSrcTest {
 		}
 	}
 
-	public static Map<String, Object> setting = new HashMap<String, Object>();
-	static {
-		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");//包名
-		setting.put(TableModelUtils.OPT_IMPORTS, "import java.util.Map;\n"); //追加新的imports
-		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");//类定义
-		setting.put(TableModelUtils.OPT_LINK_STYLE, true); //链式风格
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); //全局静态属性字段标记
-		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); //全局属性
-		setting.put(TableModelUtils.OPT_EXCLUDE_TABLES, Arrays.asList("Dbsample")); //排除表名
-		setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, false); //是要否去掉自带的imports
+	@Test
+	public void modelToJavaSrcTest() {
+		Map<String, Object> setting = new HashMap<String, Object>();
+		setting.put(TableModelUtils.OPT_EXCLUDE_TABLES, Arrays.asList("Dbsample")); // 排除表名
+		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");// 包名
+		setting.put(TableModelUtils.OPT_IMPORTS, "import java.util.Map;\n"); // 追加新的imports
+		setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, false); // 不去除自带的imports
+		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");// 类定义
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, true); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_FIELDS, true); // 属性
+		setting.put(TableModelUtils.OPT_GETTER_SETTERS, true); // getter setter
+		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); // 属性定义成public
+		setting.put(TableModelUtils.OPT_LINK_STYLE, true); // 链式getter/setter风格
+
+		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
+		//Systemout.allowPrint = true;
+		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));
 	}
 
 	@Test
-	public void modelToJavaSrcTest() {
+	public void modelToJavaSrcTest2() {
+		Map<String, Object> setting = new HashMap<String, Object>();
+		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");// 包名
+		setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, true); // 不去除自带的imports
+		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1");// 类定义
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, false); // 全局静态属性字段标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_FIELDS, false); // 属性
 		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
 		//Systemout.allowPrint = true;
 		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));

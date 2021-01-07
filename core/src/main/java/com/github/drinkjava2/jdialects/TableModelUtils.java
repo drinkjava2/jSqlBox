@@ -33,15 +33,19 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.5
  */
 public abstract class TableModelUtils {// NOSONAR
-    public static final String OPT_LINK_STYLE = "linkStyle";
-    public static final String OPT_FIELD_FLAGS = "fieldFlags";
+	public static final String OPT_EXCLUDE_TABLES = "excludeTables";
     public static final String OPT_PACKAGE_NAME = "packageName";
-    public static final String OPT_IMPORTS = "imports";
-    public static final String OPT_REMOVE_DEFAULT_IMPORTS = "removeDefaultImports";
+    public static final String OPT_IMPORTS = "imports"; 
+    public static final String OPT_REMOVE_DEFAULT_IMPORTS = "removeDefaultImports";//true, false
     public static final String OPT_CLASS_DEFINITION = "classDefinition";
-    public static final String OPT_PUBLIC_FIELD = "enablePublicField";
-    public static final String OPT_EXCLUDE_TABLES = "excludeTables";
-
+    public static final String OPT_FIELD_FLAGS = "fieldFlags"; //true, false
+    public static final String OPT_FIELD_FLAGS_STATIC = "fieldFlagsStatic"; //true, false    
+    public static final String OPT_FIELD_FLAGS_CASE = "fieldFlagsCase"; //upper, lower, origin, camel
+    public static final String OPT_PUBLIC_FIELD = "enablePublicField";//true, false
+    public static final String OPT_FIELDS = "fields"; //true, false
+    public static final String OPT_GETTER_SETTERS = "getterSetters"; //true, false
+    public static final String OPT_LINK_STYLE = "linkStyle"; //true, false
+    
     /**
      * Convert tableName to entity class, note: before use this method
      * entity2Models() method should be called first to cache talbeModels in memory
