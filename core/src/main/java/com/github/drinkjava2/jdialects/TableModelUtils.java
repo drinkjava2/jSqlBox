@@ -37,6 +37,7 @@ public abstract class TableModelUtils {// NOSONAR
     public static final String OPT_PACKAGE_NAME = "packageName";
     public static final String OPT_IMPORTS = "imports"; 
     public static final String OPT_REMOVE_DEFAULT_IMPORTS = "removeDefaultImports";//true, false
+    public static final String OPT_CLASS_ANNOTATION = "classAnnotationn";
     public static final String OPT_CLASS_DEFINITION = "classDefinition";
     public static final String OPT_FIELD_FLAGS = "fieldFlags"; //true, false
     public static final String OPT_FIELD_FLAGS_STATIC = "fieldFlagsStatic"; //true, false    

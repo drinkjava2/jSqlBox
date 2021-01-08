@@ -129,7 +129,8 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 
 		// @table
 		String className = getClassNameFromTableModel(model);
-		int fkeyCount = generateAnnotationForClass(model, body, className);
+
+		int fkeyCount = generateAnnotationForClass(model, body, className, setting);
 
 		// class
 		generateClassBegin(setting, body, className);
@@ -144,6 +145,9 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 	private static void generateStaticFields(TableModel model, Map<String, Object> setting, StringBuilder body,
 			String className) {
 		boolean fieldFlags = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELD_FLAGS));
+//		boolean fieldFlags = Boolean.TRUE.equals(setting.get(TableModelUtils.));
+//		boolean fieldFlags = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELD_FLAGS));
+		
 		StringBuilder fieldSB = new StringBuilder();
 		if (fieldFlags) {
 			fieldSB.append("\tpublic static final String TABLE_NAME = \"").append(model.getTableName())
@@ -167,12 +171,14 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		body.append(StrUtils.replace(classDefinition, "$1", className)).append(" {\n\n");
 	}
 
-	private static int generateAnnotationForClass(TableModel model, StringBuilder body, String className) {
+	private static int generateAnnotationForClass(TableModel model, StringBuilder body, String className,
+			Map<String, Object> setting) {
+		StringBuilder ClassAnno = new StringBuilder();
 		if (!StringUtils.isEmpty(model.getComment())) {
-			body.append("/**\n * ").append(model.getComment()).append("\n */\n");
+			ClassAnno.append("/**\n * ").append(model.getComment()).append("\n */\n");
 		}
 		if (!className.equals(model.getTableName())) {
-			body.append("@Table").append("(name=\"").append(model.getTableName()).append("\")\n");
+			ClassAnno.append("@Table").append("(name=\"").append(model.getTableName()).append("\")\n");
 		}
 
 		// Compound FKEY
@@ -181,25 +187,27 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 			if (fkey.getColumnNames().size() <= 1)/* Not compound Fkey */ {
 				continue;
 			}
-			body.append("@FKey");
+			ClassAnno.append("@FKey");
 			if (fkeyCount > 0) {
-				body.append(fkeyCount);
+				ClassAnno.append(fkeyCount);
 			}
-			body.append("(");
+			ClassAnno.append("(");
 			fkeyCount++;
 			if (!StrUtils.isEmpty(fkey.getFkeyName())) {
-				body.append("name=\"").append(fkey.getFkeyName()).append("\", ");
+				ClassAnno.append("name=\"").append(fkey.getFkeyName()).append("\", ");
 			}
 			if (!fkey.getDdl()) {
-				body.append("ddl=false, ");
+				ClassAnno.append("ddl=false, ");
 			}
 			String fkeyCols = StrUtils.listToString(fkey.getColumnNames());
 			fkeyCols = StrUtils.replace(fkeyCols, ",", "\",\"");
 			String refCols = StrUtils.arrayToString(fkey.getRefTableAndColumns());
 			refCols = StrUtils.replace(refCols, ",", "\",\"");
-			body.append("columns={\"").append(fkeyCols).append("\"}, refs={\"").append(refCols).append("\"}");
-			body.append(")\n");
+			ClassAnno.append("columns={\"").append(fkeyCols).append("\"}, refs={\"").append(refCols).append("\"}");
+			ClassAnno.append(")\n");
 		}
+		if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_CLASS_ANNOTATION)))
+			body.append(ClassAnno);
 		return fkeyCount;
 	}
 
