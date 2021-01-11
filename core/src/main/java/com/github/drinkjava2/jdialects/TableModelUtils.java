@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -33,22 +34,20 @@ import com.github.drinkjava2.jdialects.model.TableModel;
  * @since 1.0.5
  */
 public abstract class TableModelUtils {// NOSONAR
-	public static final String OPT_EXCLUDE_TABLES = "excludeTables";
+    public static final String OPT_EXCLUDE_TABLES = "excludeTables";
     public static final String OPT_PACKAGE_NAME = "packageName";
-    public static final String OPT_IMPORTS = "imports"; 
+    public static final String OPT_IMPORTS = "imports";
     public static final String OPT_REMOVE_DEFAULT_IMPORTS = "removeDefaultImports";//true, false
     public static final String OPT_CLASS_ANNOTATION = "classAnnotationn";
     public static final String OPT_CLASS_DEFINITION = "classDefinition";
-    public static final String OPT_CLASS_INSTANCE = "classInstance";//true, false
-    public static final String OPT_FIELD_FLAGS = "fieldFlags"; //true, false
     public static final String OPT_FIELD_FLAGS_STATIC = "fieldFlagsStatic"; //true, false    
+    public static final String OPT_FIELD_FLAGS = "fieldFlags"; //true, false
     public static final String OPT_FIELD_FLAGS_STYLE = "fieldFlagsStyle"; //upper, normal, lower, camel
     public static final String OPT_PUBLIC_FIELD = "enablePublicField";//true, false
     public static final String OPT_FIELDS = "fields"; //true, false
     public static final String OPT_GETTER_SETTERS = "getterSetters"; //true, false
     public static final String OPT_LINK_STYLE = "linkStyle"; //true, false
-    public static final String OPT_TO_STRING_METHOD = "toStringMethod"; //true, false
-    
+
     /**
      * Convert tableName to entity class, note: before use this method
      * entity2Models() method should be called first to cache talbeModels in memory
@@ -98,8 +97,7 @@ public abstract class TableModelUtils {// NOSONAR
      * @param setting
      *            see TableModelUtilsOfJavaSrc.modelToJavaSourceCode() method
      */
-    public static void db2JavaSrcFiles(DataSource ds, Dialect dialect, String outputfolder,
-            Map<String, Object> setting) {
+    public static void db2JavaSrcFiles(DataSource ds, Dialect dialect, String outputfolder, Map<String, Object> setting) {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -122,7 +120,11 @@ public abstract class TableModelUtils {// NOSONAR
                 if (excludeTables != null && excludeTables.contains(tableName.toLowerCase())) {
                     continue;
                 }
-                File writename = new File(dir, TableModelUtilsOfJavaSrc.getClassNameFromTableModel(model) + ".java");
+
+                String filePrefix = (String) setting.get(TableModelUtils.OPT_CLASS_DEFINITION);
+                filePrefix = StrUtils.substringBefore(filePrefix, "$");
+                filePrefix = StrUtils.substringAfterLast(filePrefix, " ");
+                File writename = new File(dir, filePrefix + TableModelUtilsOfJavaSrc.getClassNameFromTableModel(model) + ".java");
 
                 writename.createNewFile();// NOSONAR
                 BufferedWriter out = new BufferedWriter(new FileWriter(writename));
@@ -140,6 +142,38 @@ public abstract class TableModelUtils {// NOSONAR
                     e1.printStackTrace();// NOSONAR
                 }
         }
+    }
+
+    /**
+     * Read database structure and write them to Java entity class source code
+     *
+     * @param ds
+     *            The DataSource instance
+     * @param dialect
+     *            The dialect of database
+     * @param outputfolder
+     *            the out put folder
+     * @param packageName
+     *            package name
+     * @param prefix
+     *            class prefix, for example: "Q" or "P" 
+     */
+    public static void db2QClassSrcFiles(DataSource ds, Dialect dialect, String outputFolder, String packageName, String prefix) {
+        Map<String, Object> setting = new HashMap<String, Object>();
+        setting.put(TableModelUtils.OPT_PACKAGE_NAME, packageName);// 包名
+        setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, true); // 去除自带的imports
+        setting.put(TableModelUtils.OPT_CLASS_ANNOTATION, false); // 类上的实体注解
+        setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "" + // 
+                "public class " + prefix + "$Class {\n" + //
+                "\tpublic static final " + prefix + "$Class $class = new " + prefix + "$Class();\n\n" + //
+                "\tpublic String toString(){\n" + //
+                "\t\treturn \"$table\";\n" + //
+                "\t}\n");// 类定义
+        setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 列名标记
+        setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, false); // 列名标记为静态
+        setting.put(TableModelUtils.OPT_FIELD_FLAGS_STYLE, "camel"); // 列名标记大写
+        setting.put(TableModelUtils.OPT_FIELDS, false); // 属性
+        TableModelUtils.db2JavaSrcFiles(ds, dialect, outputFolder, setting);
     }
 
     /**

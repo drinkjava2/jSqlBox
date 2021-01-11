@@ -59,7 +59,7 @@ public class QClassDemo {
         ctx.setSqlItemHandler(new QClassSqlItemHandle());
         ctx.setAllowShowSQL(true);
         DbContext.setGlobalDbContext(ctx);
-        ctx.quiteExecute(ctx.toCreateDDL(User.class));
+        ctx.quiteExecute(ctx.toCreateDDL(UserDemo.class));
 
         QUser u = QUser.user;
         for (int i = 1; i <= 10; i++) {

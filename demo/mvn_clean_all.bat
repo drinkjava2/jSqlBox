@@ -33,7 +33,7 @@ call mvn clean
 call mvn eclipse:clean
 cd..
 
-cd jsqlbox-querydsl
+cd jsqlbox-qclass
 call mvn clean
 call mvn eclipse:clean
 cd..

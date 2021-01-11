@@ -2,12 +2,12 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
- <artifactId>jsqlbox-querydsl</artifactId>
+ <artifactId>jsqlbox-qclass</artifactId>
  <packaging>jar</packaging>
  <version>1.0</version>
  
  <name>jsqlbox-helloworld</name>
- <description>This is a demo project to show jSqlBox use querydsl-maven-plugin</description> 
+ <description>This is a demo project to show jSqlBox use querydsl-maven-plugin to create Q-class, and also use jDialect's TableModelUtils's method to create P-Class</description> 
    
  <licenses>
    <license>

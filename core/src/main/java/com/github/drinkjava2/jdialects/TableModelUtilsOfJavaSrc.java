@@ -43,7 +43,7 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 	 *            setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");
 	 *            setting.put(TableModelUtils.OPT_FIELD_FLAGS, true);
 	 *            setting.put(TableModelUtils.OPT_IMPORTS, "some imports");
-	 *            setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");
+	 *            setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $ClassName extends ActiveRecord<$ClassName> {");
 	 *            </pre>
 	 *
 	 * @return Java Bean source code of entity
@@ -61,7 +61,7 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		int fkeyCount = generateAnnotationForClass(model, body, className, setting);
 
 		// class
-		generateClassBegin(setting, body, className);
+		generateClassBegin(setting, body, className, model);
 
 		generateFieldTags(model, setting, body, className);
 
@@ -71,7 +71,7 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELDS)))
 			generateGetterAndSetter(model, setting, className, body);
 
-		generateClassEnd(setting, model, body);
+		body.append("}\n");
 
 		return body.toString();
 	}
@@ -158,14 +158,6 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 
 		StringBuilder fieldSB = new StringBuilder();
 		if (fieldFlags) {
-
-			if (fieldStatic)
-				fieldSB.append("\tpublic static final String ");
-			else
-				fieldSB.append("\tpublic final String ");
-
-			fieldSB.append(upper ? "TABLE" : "table").append(" = \"").append(model.getTableName()).append("\";\n\n");
-
 			for (ColumnModel col : model.getColumns()) {
 				String columnName = col.getColumnName();
 				String rawColName = clearQuote(columnName);
@@ -185,26 +177,14 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		}
 		body.append(fieldSB.toString());
 	}
+ 
 
-	private static void generateClassEnd(Map<String, Object> setting, TableModel model, StringBuilder body) {
-		if(Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_TO_STRING_METHOD))) {
-			body.append("\tpublic String toString(){\n");
-			body.append("\t\treturn \"").append(model.getTableName()).append("\";\n");
-			body.append("\t}\n\n");
-		}
-		body.append("}\n");
-	}
-
-	private static void generateClassBegin(Map<String, Object> setting, StringBuilder body, String className) {
+	private static void generateClassBegin(Map<String, Object> setting, StringBuilder body, String className, TableModel model) {
 		String classDefinition = (String) setting.get(TableModelUtils.OPT_CLASS_DEFINITION);
-		boolean classInstance = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_CLASS_INSTANCE));
-		body.append(StrUtils.replace(classDefinition, "$1", className)).append(" {\n");
-		if(classInstance) {
-			body.append("\tpublic static final ").append(className).append(" ")//
-			.append(StrUtils.toLowerCaseFirstOne(className)).append(" = new ").append(className).append("();\n");
-		}
-			
-		body.append("\n");
+		classDefinition=StrUtils.replace(classDefinition, "$Class", className);
+		classDefinition=StrUtils.replace(classDefinition, "$class", StrUtils.toLowerCaseFirstOne(className));
+		classDefinition=StrUtils.replace(classDefinition, "$table", StrUtils.toLowerCaseFirstOne(model.getTableName()));
+		body.append(classDefinition).append("\n");
 	}
 
 	private static int generateAnnotationForClass(TableModel model, StringBuilder body, String className,
@@ -348,10 +328,10 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 				accessModifier = "public";
 			}
 			sb.append("\t").append(accessModifier).append(' ').append(javaType.getSimpleName()).append(' ')
-					.append(fieldName).append(";\n\n");
+					.append(fieldName).append(";\n");
 		}
 
-		body.append(pkeySB.toString()).append("\n\n").append(normalSB.toString()).append("\n\n");
+		body.append(pkeySB.toString()).append("\n").append(normalSB.toString()).append("\n");
 	}
 
 	private static void generateGetterAndSetter(TableModel model, Map<String, Object> setting, String className,

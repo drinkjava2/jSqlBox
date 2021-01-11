@@ -9,8 +9,8 @@ import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
 
 @Entity
-@Table(name = "user_table")
-public class User implements ActiveEntity<User> {
+@Table(name = "user_demo")
+public class UserDemo implements ActiveEntity<UserDemo> {
 
     @UUID25
     @Id
