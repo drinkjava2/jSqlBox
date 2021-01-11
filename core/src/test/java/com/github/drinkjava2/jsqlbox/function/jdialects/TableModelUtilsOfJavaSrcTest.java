@@ -89,30 +89,51 @@ public class TableModelUtilsOfJavaSrcTest {
 		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");// 类定义
 		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
 		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, true); // 全局静态属性字段标记
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STYLE, "upper"); // 大写
 		setting.put(TableModelUtils.OPT_FIELDS, true); // 属性
 		setting.put(TableModelUtils.OPT_GETTER_SETTERS, true); // getter setter
 		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); // 属性定义成public
 		setting.put(TableModelUtils.OPT_LINK_STYLE, true); // 链式getter/setter风格
 
 		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
-		//Systemout.allowPrint = true;
+		Systemout.allowPrint = true;
 		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));
 	}
 
+	public static class PEntity1 {
+		public static final PEntity1 instance = new PEntity1();
+
+		public final String custId = "cust_id";
+
+		public final String demoEntity = "demoEntity";
+
+		public final String id = "id";
+
+		public final String name = "name";
+
+		public String toString(){
+			return "entity1";
+		}
+
+	}
+	
 	@Test
 	public void modelToJavaSrcTest2() {
 		Map<String, Object> setting = new HashMap<String, Object>();
 		setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");// 包名
 		setting.put(TableModelUtils.OPT_REMOVE_DEFAULT_IMPORTS, true); // 去除自带的imports
 		setting.put(TableModelUtils.OPT_CLASS_ANNOTATION, false); // 类上的实体注解
-		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1");// 类定义
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, false); // 全局静态属性字段标记
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public static class P$1");// 类定义
+		setting.put(TableModelUtils.OPT_CLASS_INSTANCE, true);// 类定义
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 列名标记
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, false); // 列名标记为静态
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STYLE, "camel"); // 列名标记大写
 		setting.put(TableModelUtils.OPT_FIELDS, false); // 属性
+		setting.put(TableModelUtils.OPT_TO_STRING_METHOD, true); //生成toString方法
+		
 		TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
 		Systemout.allowPrint = true;
 		Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));
 	}
+
 }

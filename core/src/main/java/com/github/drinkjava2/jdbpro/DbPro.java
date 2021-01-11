@@ -132,7 +132,7 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		for (Object item : items) {
 			if (item == null) {
 				if (inlineStyle)
-					throw new DbProException("In in-line style,  null value can not append as SQL piece");
+					throw new DbProException("null value can not append as SQL piece");
 				else
 					predSQL.addParam(null);
 			} else if (!dealOneSqlItem(inlineStyle, predSQL, item)) {
@@ -218,15 +218,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 						i++;
 					}
 				}
-			} else if (SqlOption.NOT_NULL.equals(sqlItemType)) {
-				Object[] args = sqItem.getParameters();
-				if (args.length < 2)
-					throw new DbProException("NOT_NULL type SqlItem need at least 2 args");
-				if (args[args.length - 1] != null) {
-					for (int i = 0; i < args.length - 1; i++)
-						dealOneSqlItem(true, predSQL, args[i]);// in NOT_NULL type, force use i style
-					predSQL.addParam(args[args.length - 1]);
-				}
 			} else if (SqlOption.VALUES_QUESTIONS.equals(sqlItemType)) {
 				predSQL.addSql(" values(");
 				for (int i = 0; i < predSQL.getParamSize(); i++) {
@@ -262,7 +253,9 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 				return false;
 		} else if (item instanceof CustomizedSqlItem) {
 			((CustomizedSqlItem) item).doPrepare(predSQL);
-		} else
+		} else if(sqlItemHandler!=null)
+			return sqlItemHandler.handle(predSQL, item);
+		  else
 			return false;
 		return true;
 	}

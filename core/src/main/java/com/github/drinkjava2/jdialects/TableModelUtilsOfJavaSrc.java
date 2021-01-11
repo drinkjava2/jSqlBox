@@ -13,9 +13,7 @@ package com.github.drinkjava2.jdialects;
 
 import static com.github.drinkjava2.jdialects.StrUtils.clearQuote;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
@@ -29,6 +27,54 @@ import com.github.drinkjava2.jdialects.springsrc.utils.StringUtils;
  * @since 2.0.4
  */
 public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
+
+	/**
+	 * Convert a TablemModel instance to Java entity class source code, example can
+	 * see TableModelUtilsOfJavaSrcTest
+	 *
+	 * @param model
+	 *            The TableModel instance
+	 * @param setting
+	 *            The setting options, for example:
+	 *
+	 *            <pre>
+	 *            Map<String, Object> setting = new HashMap<String, Object>();
+	 *            setting.put(TableModelUtils.OPT_LINK_STYLE, false);
+	 *            setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");
+	 *            setting.put(TableModelUtils.OPT_FIELD_FLAGS, true);
+	 *            setting.put(TableModelUtils.OPT_IMPORTS, "some imports");
+	 *            setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");
+	 *            </pre>
+	 *
+	 * @return Java Bean source code of entity
+	 */
+	public static String modelToJavaSourceCode(TableModel model, Map<String, Object> setting) {
+		// head
+		StringBuilder body = new StringBuilder();
+		generatePackage(setting, body);
+
+		generateImports(setting, body);
+
+		// @table
+		String className = getClassNameFromTableModel(model);
+
+		int fkeyCount = generateAnnotationForClass(model, body, className, setting);
+
+		// class
+		generateClassBegin(setting, body, className);
+
+		generateFieldTags(model, setting, body, className);
+
+		if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELDS)))
+			generateFields(model, setting, fkeyCount, body);
+
+		if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELDS)))
+			generateGetterAndSetter(model, setting, className, body);
+
+		generateClassEnd(setting, model, body);
+
+		return body.toString();
+	}
 
 	/**
 	 * Map DB column name to entity field name, example: <br/>
@@ -101,74 +147,64 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 		return className;
 	}
 
-	/**
-	 * Convert a TablemModel instance to Java entity class source code, example can
-	 * see TableModelUtilsOfJavaSrcTest
-	 *
-	 * @param model
-	 *            The TableModel instance
-	 * @param setting
-	 *            The setting options, for example:
-	 *
-	 *            <pre>
-	 *            Map<String, Object> setting = new HashMap<String, Object>();
-	 *            setting.put(TableModelUtils.OPT_LINK_STYLE, false);
-	 *            setting.put(TableModelUtils.OPT_PACKAGE_NAME, "somepackage");
-	 *            setting.put(TableModelUtils.OPT_FIELD_FLAGS, true);
-	 *            setting.put(TableModelUtils.OPT_IMPORTS, "some imports");
-	 *            setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");
-	 *            </pre>
-	 *
-	 * @return Java Bean source code of entity
-	 */
-	public static String modelToJavaSourceCode(TableModel model, Map<String, Object> setting) {
-		// head
-		StringBuilder body = new StringBuilder();
-		generatePackage(setting, body);
-		generateImports(setting, body);
-
-		// @table
-		String className = getClassNameFromTableModel(model);
-
-		int fkeyCount = generateAnnotationForClass(model, body, className, setting);
-
-		// class
-		generateClassBegin(setting, body, className);
-		generateStaticFields(model, setting, body, className);
-		generateFields(model, setting, fkeyCount, body);
-		generateGetterAndSetter(model, setting, className, body);
-		generateClassEnd(body);
-
-		return body.toString();
-	}
-
-	private static void generateStaticFields(TableModel model, Map<String, Object> setting, StringBuilder body,
+	private static void generateFieldTags(TableModel model, Map<String, Object> setting, StringBuilder body,
 			String className) {
 		boolean fieldFlags = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELD_FLAGS));
-//		boolean fieldFlags = Boolean.TRUE.equals(setting.get(TableModelUtils.));
-//		boolean fieldFlags = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELD_FLAGS));
-		
+		boolean fieldStatic = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELD_FLAGS_STATIC));
+		String fieldCase = (String) setting.get(TableModelUtils.OPT_FIELD_FLAGS_STYLE);
+		boolean upper = "upper".equalsIgnoreCase(fieldCase);
+		boolean lower = "lower".equalsIgnoreCase(fieldCase);
+		boolean camel = "camel".equalsIgnoreCase(fieldCase);
+
 		StringBuilder fieldSB = new StringBuilder();
 		if (fieldFlags) {
-			fieldSB.append("\tpublic static final String TABLE_NAME = \"").append(model.getTableName())
-					.append("\";\n\n");
+
+			if (fieldStatic)
+				fieldSB.append("\tpublic static final String ");
+			else
+				fieldSB.append("\tpublic final String ");
+
+			fieldSB.append(upper ? "TABLE" : "table").append(" = \"").append(model.getTableName()).append("\";\n\n");
+
 			for (ColumnModel col : model.getColumns()) {
 				String columnName = col.getColumnName();
 				String rawColName = clearQuote(columnName);
-				fieldSB.append("\tpublic static final String ").append(rawColName.toUpperCase()).append(" = \"")
-						.append(columnName).append("\";\n\n");
+				if (fieldStatic)
+					fieldSB.append("\tpublic static final String ");
+				else
+					fieldSB.append("\tpublic final String ");
+				if (upper)
+					rawColName = rawColName.toUpperCase();
+				else if (lower)
+					rawColName = rawColName.toLowerCase();
+				else if(camel)
+					rawColName = StrUtils.underScoreToCamel(rawColName);
+
+				fieldSB.append(rawColName).append(" = \"").append(columnName).append("\";\n\n");
 			}
 		}
-		body.append(fieldSB.toString()).append("\n\n");
+		body.append(fieldSB.toString());
 	}
 
-	private static void generateClassEnd(StringBuilder body) {
+	private static void generateClassEnd(Map<String, Object> setting, TableModel model, StringBuilder body) {
+		if(Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_TO_STRING_METHOD))) {
+			body.append("\tpublic String toString(){\n");
+			body.append("\t\treturn \"").append(model.getTableName()).append("\";\n");
+			body.append("\t}\n\n");
+		}
 		body.append("}\n");
 	}
 
 	private static void generateClassBegin(Map<String, Object> setting, StringBuilder body, String className) {
 		String classDefinition = (String) setting.get(TableModelUtils.OPT_CLASS_DEFINITION);
-		body.append(StrUtils.replace(classDefinition, "$1", className)).append(" {\n\n");
+		boolean classInstance = Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_CLASS_INSTANCE));
+		body.append(StrUtils.replace(classDefinition, "$1", className)).append(" {\n");
+		if(classInstance) {
+			body.append("\tpublic static final ").append(className).append(" ")//
+			.append(StrUtils.toLowerCaseFirstOne(className)).append(" = new ").append(className).append("();\n");
+		}
+			
+		body.append("\n");
 	}
 
 	private static int generateAnnotationForClass(TableModel model, StringBuilder body, String className,
@@ -229,12 +265,13 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 			body.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
 			body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
 			body.append("import com.github.drinkjava2.jsqlbox.*;\n");
+			body.append("\n");
 		}
 		String imports = (String) setting.get(TableModelUtils.OPT_IMPORTS);
 		if (!StrUtils.isEmpty(imports)) {
 			body.append(imports);
+			body.append("\n");
 		}
-		body.append("\n");
 	}
 
 	private static void generateFields(TableModel model, Map<String, Object> setting, int fkeyCount,

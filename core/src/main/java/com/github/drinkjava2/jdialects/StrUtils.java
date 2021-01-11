@@ -37,6 +37,29 @@ public class StrUtils {
 		return str == null || "".equals(str);
 	}
 
+	/** Judge if is or not white space characters*/
+	public static boolean isBlank(String str) {
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0) {
+			return true;
+		}
+		for (int i = 0; i < strLen; i++) {
+			if ((Character.isWhitespace(str.charAt(i)) == false)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+    /** Return true if is null object or blank string */
+    public static boolean isBlankObject(Object obj) {
+        if (obj == null)
+            return true;
+        if (obj instanceof String)
+            return isBlank((String) obj);
+        return false;
+    }
+    
 	/**
 	 * Check that the given CharSequence is neither {@code null} nor of length 0.
 	 * Note: Will return {@code true} for a CharSequence that purely consists of
@@ -961,6 +984,30 @@ public class StrUtils {
 			return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
 	}
 
+	 
+	/**
+	 * underScore String convert to camel format, for example: HELLO_WORLD->HelloWorld
+	 */
+	public static String underScoreToCamel(String name) {
+		StringBuilder result = new StringBuilder();
+		if (name == null || name.isEmpty()) {
+			return "";
+		} else if (!name.contains("_")) // 不含下划线，仅将首字母小写
+			return name.substring(0, 1).toLowerCase() + name.substring(1);
+		String camels[] = name.split("_");
+		for (String camel : camels) {
+			if (camel.isEmpty()) // 跳过原始字符串中开头、结尾的下换线或双重下划线
+				continue;
+			if (result.length() == 0) {// 处理真正的驼峰片段
+				result.append(camel.toLowerCase());// 第一个驼峰片段，全部字母都小写
+			} else {
+				result.append(camel.substring(0, 1).toUpperCase());// 其他的驼峰片段，首字母大写
+				result.append(camel.substring(1).toLowerCase());
+			}
+		}
+		return result.toString();
+	}
+	
 	/**
 	 * Check if a String only have a-z,A-Z,0-9,"_" characters
 	 */

@@ -2,12 +2,12 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
- <artifactId>jsqlbox-beetl</artifactId>
+ <artifactId>jsqlbox-querydsl</artifactId>
  <packaging>jar</packaging>
  <version>1.0</version>
  
- <name>jsqlbox-beetl</name>
- <description>This is a demo project to show use beetl as SQL template engine in jSqlBox</description> 
+ <name>jsqlbox-helloworld</name>
+ <description>This is a demo project to show jSqlBox use querydsl-maven-plugin</description> 
    
  <licenses>
    <license>
@@ -42,15 +42,7 @@
         <version.gpg-plugin>1.6</version.gpg-plugin> 
  </properties> 
  
- 
-
- <dependencies>
-     <dependency>
-      <groupId>com.ibeetl</groupId>
-      <artifactId>beetl</artifactId>
-      <version>3.0.11.RELEASE</version>
-    </dependency>
- 
+ <dependencies> 
     <!-- jSqlBox is a Dao tool  -->
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
@@ -58,20 +50,14 @@
       <version>5.0.4.jre8</version><!--Or newest jSqlBox -->
     </dependency>
   
-   <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
-   <dependency>
-     <groupId>commons-lang</groupId>
-     <artifactId>commons-lang</artifactId>
-     <version>2.6</version>
-   </dependency>   
-   
+    <!-- jUnit test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
     </dependency>     
  
-   <!-- HikariCP is a dataSource pool quicker than c3p0 -->
+   <!-- HikariCP dataSource pool -->
     <dependency>
         <groupId>com.zaxxer</groupId>
         <artifactId>HikariCP-java6</artifactId>
@@ -84,57 +70,71 @@
       <artifactId>h2</artifactId>
       <version>1.3.176</version>
     </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api -->
+	<dependency>
+    	<groupId>javax.persistence</groupId>
+	    <artifactId>javax.persistence-api</artifactId>
+    	<version>2.2</version>
+	</dependency>
 
- </dependencies>
- 
-      
-      
-      
-      
-    <build>
+    
+    	 <!-- QueryDsl start-->
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-apt</artifactId>
+			<version>4.3.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-core</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-codegen</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-sql-spring</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-sql</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+		<!-- QueryDsl end-->
+
+ </dependencies>      
+
+ <build>
       <plugins>  
-	  
-	   
-		   <!-- Multiple string support for Text.java class -->
-		   <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.12</version>
-				<executions> 
-				 
-				  <execution>
-					<id>add-source</id>
-					<phase>generate-sources</phase>
-					<goals>
-					  <goal>add-source</goal>
-					</goals>
-					<configuration>
-					  <sources>
-						<source>src/main/resources</source>
-					  </sources>
-					</configuration>
-				  </execution>  
-					
+			<plugin>
+				<groupId>com.mysema.maven</groupId>
+				<artifactId>apt-maven-plugin</artifactId>
+				<version>1.1.3</version>
+				<executions>
 					<execution>
-					  <id>add-test-source</id>
-					  <phase>generate-sources</phase>
-					  <goals>
-						<goal>add-test-source</goal>
-					  </goals>
-					  <configuration>
-						<sources>
-							<source>src/test/resources</source>
-					  </sources>
-					  </configuration>
-					</execution> 
-			
+						<goals>
+							<goal>process</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/generated-sources/java</outputDirectory>
+							<processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+						</configuration>
+					</execution>
 				</executions>
-			  </plugin> 
-	  
-	  
-	  
-	  
-            <plugin>
+			</plugin>
+			
+		   <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${version.compiler-plugin}</version>
@@ -145,6 +145,6 @@
                 </configuration>
             </plugin>  
        </plugins>       
-    </build> 
+ </build> 
 
 </project>

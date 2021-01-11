@@ -69,6 +69,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected static JavaToJdbcConverter globalNextJavaToJdbcConverter = BasicJavaToJdbcConverter.instance;
 	protected static JdbcToJavaConverter globalNextJdbcToJavaConverter = BasicJdbcToJavaConverter.instance;
 	protected static TenantGetter globalNextTenantGetter = null;
+	protected static SqlItemHandler globalNextSqlItemHandler = null;
 	
 
 	protected static Integer globalNextBatchSize = 300;
@@ -83,6 +84,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	protected JavaToJdbcConverter javaToJdbcConverter = globalNextJavaToJdbcConverter;
 	protected JdbcToJavaConverter jdbcToJavaConverter = globalNextJdbcToJavaConverter;
 	protected TenantGetter tenantGetter = globalNextTenantGetter;
+	protected SqlItemHandler sqlItemHandler = globalNextSqlItemHandler;
 
 	protected DbPro[] slaves;
 	protected DbPro[] masters;
@@ -1003,6 +1005,10 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
     public static void setGlobalNextTenantGetter(TenantGetter globalNextTenantGetter) {
         ImprovedQueryRunner.globalNextTenantGetter = globalNextTenantGetter;
     }
+    
+    public static void setGlobalNextSqlItemHandler(SqlItemHandler globalNextSqlItemHandler) {
+        ImprovedQueryRunner.globalNextSqlItemHandler = globalNextSqlItemHandler;
+    }
 
 	private void normalGetterSetters_____________________() {// NOSONAR
 	}
@@ -1119,7 +1125,17 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
         this.tenantGetter = tenantGetter;
     }
 
-    public boolean isBatchEnabled() {
+    /** This method is not thread safe, suggest only use at program starting */
+    public SqlItemHandler getSqlItemHandler() {
+		return sqlItemHandler;
+	}
+
+    /** This method is not thread safe, suggest only use at program starting */
+	public void setSqlItemHandler(SqlItemHandler sqlItemHandler) {
+		this.sqlItemHandler = sqlItemHandler;
+	}
+
+	public boolean isBatchEnabled() {
 		return batchEnabled.get();
 	}
 

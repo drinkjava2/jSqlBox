@@ -16,12 +16,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.github.drinkjava2.jdbpro.DbPro;
+import com.github.drinkjava2.jdbpro.DbProException;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItem;
 import com.github.drinkjava2.jdbpro.SqlOption;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
+import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 import com.github.drinkjava2.jtransactions.TxResult;
@@ -87,8 +89,14 @@ public abstract class DB  {// NOSONAR
 	 * If last param is not null, then add all items in SQL<br/>
 	 * Example: query("select * from a where 1=1",notNull(" and name=?",name));
 	 */
-	public static SqlItem notNull(Object... items) {
-		return new SqlItem(SqlOption.NOT_NULL, items);
+	public static Object notNull(Object... items) {
+		if (items.length < 2)
+			throw new DbProException("notNull method need at least 2 args");
+		Object lastObj=items[items.length-1];
+		if(items[items.length-1]==null)
+				return "";
+		items[items.length-1]=par(lastObj);
+		return items;
 	}
 
 	/**
@@ -96,18 +104,47 @@ public abstract class DB  {// NOSONAR
 	 * Example: query("select * from a where 1=1",noNull("and name like
 	 * ?","%",name,"%"));
 	 */
-	public static SqlItem noNull(Object... args) {
-		if (args.length <= 2)
-			return notNull(args);
-		for (int i = 1; i <= args.length - 1; i++)
-			if (args[i] == null)
-				return notNull(null, null);
+	public static Object noNull(Object... items) {
+		if (items.length < 2)
+			throw new DbProException("noNull method need at least 2 args");
+		for (int i = 0; i <= items.length - 1; i++)
+			if (items[i] == null)
+				return "";
 		StringBuilder sb = new StringBuilder();
-		for (int i = 1; i <= args.length - 1; i++)
-			sb.append(args[i]);
-		return notNull(args[0], sb.toString());
+		for (int i = 1; i <= items.length - 1; i++)
+			sb.append(items[i]);
+		return new Object[] {items[0], par(sb.toString())};
 	}
 
+	/**
+	 * If last param is not blank, then add all items in SQL<br/>
+	 * Example: query("select * from a where 1=1", notBlank(" and name=?",name));
+	 */
+	public static Object notBlank(Object... items) {
+		Object lastObj=items[items.length-1];
+		if(StrUtils.isBlankObject(lastObj))
+				return "";
+		items[items.length-1]=par(lastObj);
+		return items;
+	}
+
+	/**
+	 * If no any param is null, then add all items in SQL<br/>
+	 * Example: query("select * from a where 1=1",noNull("and name like
+	 * ?","%",name,"%"));
+	 */
+	public static Object noBlank(Object... items) {
+		if (items.length < 2)
+			throw new DbProException("noBlank method need at least 2 args");
+		for (int i = 0; i <= items.length - 1; i++)
+			if (StrUtils.isBlankObject(items[i]))
+				return "";
+		StringBuilder sb = new StringBuilder();
+		for (int i = 1; i <= items.length - 1; i++)
+			sb.append(items[i]);
+		return new Object[] {items[0], par(sb.toString())};
+	}
+	
 	/** if condition true, return items  array, else return "" */
 	public static Object when(boolean condition, Object... items) {
 		return condition ? items : "";

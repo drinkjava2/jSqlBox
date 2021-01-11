@@ -40,13 +40,6 @@ public enum SqlOption {
 	BIND,
 
 	/**
-	 * Mark a NOT_NULL SqlItem, Usage: NOT_NUL("user_name=?", name), when name is
-	 * null, nothing will be appended into SQL and parameters, otherwise return a
-	 * "user_name=?" String and a SQL parameter
-	 */
-	NOT_NULL,
-
-	/**
 	 * Mark a VALUES_QUESTIONS SqlItem, append a " values(?,?,?....?)" String at end
 	 * of SQL
 	 */

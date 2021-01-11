@@ -277,10 +277,11 @@ public class UsageAndSpeedTest {
 	@Test
 	public void simpleMethods() {
 		DbContext ctx = new DbContext(dataSource);
+		ctx.setAllowShowSQL(true);
 		for (int i = 0; i < REPEAT_TIMES; i++) {
 			ctx.exe("insert into users (", //
-					notNull(" name ,", "Sam"), //
-					notNull(" someother ,", null), //
+					DB.notBlank(" name ,", "Sam"), //
+					DB.noNull(" someother ,", null), //
 					" address ", par("Canada"), //
 					") ", valuesQuestions());
 			ctx.exe("update users set name=?,address=?", par("Tom", "China"));

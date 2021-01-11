@@ -39,13 +39,15 @@ public abstract class TableModelUtils {// NOSONAR
     public static final String OPT_REMOVE_DEFAULT_IMPORTS = "removeDefaultImports";//true, false
     public static final String OPT_CLASS_ANNOTATION = "classAnnotationn";
     public static final String OPT_CLASS_DEFINITION = "classDefinition";
+    public static final String OPT_CLASS_INSTANCE = "classInstance";//true, false
     public static final String OPT_FIELD_FLAGS = "fieldFlags"; //true, false
     public static final String OPT_FIELD_FLAGS_STATIC = "fieldFlagsStatic"; //true, false    
-    public static final String OPT_FIELD_FLAGS_CASE = "fieldFlagsCase"; //upper, lower, origin, camel
+    public static final String OPT_FIELD_FLAGS_STYLE = "fieldFlagsStyle"; //upper, normal, lower, camel
     public static final String OPT_PUBLIC_FIELD = "enablePublicField";//true, false
     public static final String OPT_FIELDS = "fields"; //true, false
     public static final String OPT_GETTER_SETTERS = "getterSetters"; //true, false
     public static final String OPT_LINK_STYLE = "linkStyle"; //true, false
+    public static final String OPT_TO_STRING_METHOD = "toStringMethod"; //true, false
     
     /**
      * Convert tableName to entity class, note: before use this method

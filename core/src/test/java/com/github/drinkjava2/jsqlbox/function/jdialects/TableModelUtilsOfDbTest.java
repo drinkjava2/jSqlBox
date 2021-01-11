@@ -129,7 +129,7 @@ public class TableModelUtilsOfDbTest extends TestBase {
 		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");// 类定义
 		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
 		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, true); // 全局静态属性字段标记
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STYLE, "upper"); // 大写
 		setting.put(TableModelUtils.OPT_FIELDS, true); // 属性
 		setting.put(TableModelUtils.OPT_GETTER_SETTERS, true); // getter setter
 		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); // 属性定义成public
@@ -160,12 +160,12 @@ public class TableModelUtilsOfDbTest extends TestBase {
 		setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "public class $1 extends ActiveRecord<$1>");// 类定义
 		setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 全局静态属性字段标记
 		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, true); // 全局静态属性字段标记
-		setting.put(TableModelUtils.OPT_FIELD_FLAGS_CASE, "upper"); // 大写
+		setting.put(TableModelUtils.OPT_FIELD_FLAGS_STYLE, "upper"); // 大写
 		setting.put(TableModelUtils.OPT_FIELDS, true); // 属性
 		setting.put(TableModelUtils.OPT_GETTER_SETTERS, true); // getter setter
 		setting.put(TableModelUtils.OPT_PUBLIC_FIELD, false); // 属性定义成public
 		setting.put(TableModelUtils.OPT_LINK_STYLE, true); // 链式getter/setter风格
-
+		
 		quietDropTables(DbSample.class, studentSample.class);
 		createTables(studentSample.class, DbSample.class);
 		TableModelUtils.db2JavaSrcFiles(ctx.getDataSource(), ctx.getDialect(), "c:/temp", setting);
