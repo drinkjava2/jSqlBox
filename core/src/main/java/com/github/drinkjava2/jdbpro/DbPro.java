@@ -308,6 +308,15 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 		return ((Number) qryObject(inlineSQL)).intValue();// NOSONAR
 	}
 
+	 /**
+     * In-line style execute query and force return a boolean, runtime exception may
+     * throw if result can not be cast to boolean.
+     */
+    public boolean qryBooleanValue(Object... inlineSQL) {
+        return (Boolean) qryObject(inlineSQL);// NOSONAR
+    }
+    
+    
 	/**
 	 * In-line style execute query and force return a String object.
 	 */

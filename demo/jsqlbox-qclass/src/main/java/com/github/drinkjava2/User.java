@@ -1,4 +1,4 @@
-package com.github.drinkjava2.jsqlboxdemo;
+package com.github.drinkjava2;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +10,7 @@ import com.github.drinkjava2.jsqlbox.ActiveEntity;
 
 @Entity
 @Table(name = "user_demo")
-public class UserDemo implements ActiveEntity<UserDemo> {
+public class User implements ActiveEntity<User> {
 
     @UUID25
     @Id

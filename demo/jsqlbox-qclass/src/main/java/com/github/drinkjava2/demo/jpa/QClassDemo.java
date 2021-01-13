@@ -1,10 +1,12 @@
-package com.github.drinkjava2.jsqlboxdemo;
+package com.github.drinkjava2.demo.jpa;
 
 import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
 
 import org.junit.Assert;
 
+import com.github.drinkjava2.QUser;
+import com.github.drinkjava2.User;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SqlItemHandler;
 import com.github.drinkjava2.jdialects.StrUtils;
@@ -59,7 +61,7 @@ public class QClassDemo {
         ctx.setSqlItemHandler(new QClassSqlItemHandle());
         ctx.setAllowShowSQL(true);
         DbContext.setGlobalDbContext(ctx);
-        ctx.quiteExecute(ctx.toCreateDDL(UserDemo.class));
+        ctx.quiteExecute(ctx.toCreateDDL(User.class));
 
         QUser u = QUser.user;
         for (int i = 1; i <= 10; i++) {

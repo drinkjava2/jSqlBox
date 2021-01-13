@@ -165,14 +165,14 @@ public abstract class TableModelUtils {// NOSONAR
         setting.put(TableModelUtils.OPT_CLASS_ANNOTATION, false); // 类上的实体注解
         setting.put(TableModelUtils.OPT_CLASS_DEFINITION, "" + // 
                 "public class " + prefix + "$Class {\n" + //
-                "\tpublic static final " + prefix + "$Class $class = new " + prefix + "$Class();\n\n" + //
+                "\tpublic static final " + prefix + "$Class instance = new " + prefix + "$Class();\n\n" + //
                 "\tpublic String toString(){\n" + //
                 "\t\treturn \"$table\";\n" + //
                 "\t}\n");// 类定义
         setting.put(TableModelUtils.OPT_FIELD_FLAGS, true); // 列名标记
         setting.put(TableModelUtils.OPT_FIELD_FLAGS_STATIC, false); // 列名标记为静态
-        setting.put(TableModelUtils.OPT_FIELD_FLAGS_STYLE, "camel"); // 列名标记大写
-        setting.put(TableModelUtils.OPT_FIELDS, false); // 属性
+        setting.put(TableModelUtils.OPT_FIELD_FLAGS_STYLE, "normal"); // 列名可以有normal, upper, lower, camel四种格式
+        setting.put(TableModelUtils.OPT_FIELDS, false); // Bean属性这里不需要生成
         TableModelUtils.db2JavaSrcFiles(ds, dialect, outputFolder, setting);
     }
 
