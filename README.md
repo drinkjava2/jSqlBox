@@ -112,7 +112,7 @@ QTbPriceSetting p=QTbPriceSetting.instance;
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.4.jre8</version> <!-- 或最新版jre6/jre8版 -->
+   <version>5.0.4.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 jSqlBox没有用到第三方依赖，对于需要学习或更改它的源码的场合，甚至可以直接将jSqlBox的源码拷到项目目录里就可以使用它了。  
