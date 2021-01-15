@@ -57,23 +57,23 @@ insert into tb_price_setting (id,code,adult_price,child_price,total_price,adult_
 这种写法在不降低原生SQL的可读性的前提下，极大地提高了原生SQL的可维护性。利用jSqlBox的根据数据库生成Q类插件，还可以写出可重构的SQL来，进一步提高原生SQL的可维护性和开发效率:
 ```
 QTbPriceSetting p=QTbPriceSetting.instance;
- DB.exe("insert into ",p," (", //
-	p.id, par(1200), //
-	p.code, par("BJD837434"), //
-	p.adult_price, par(50), //
-	p.child_price, par(30), //
-	p.total_price, par(80), //
-	p.adult_note, par("15以上全价"), //
-	p.child_note, par("8-15半价"), //
-	p.currency, par("USD"), //
-	p.type, par(8), //
-	p.time_zone, par("UTC"), //
-	p.status, par("A"), //
-	p.include_tax, par(3.03), //
-	p.adult_discount, par(0), //
-	p.child_discount, par(0), //
-	p.total_discount, par(0), //
-	p.created_at, par("2019-09-17 04:07:55"), //
+DB.exe("insert into ",p," (", //
+	p.id, ",", par(1200), //
+	p.code, ",", par("BJD837434"), //
+	p.adult_price, ",", par(50), //
+	p.child_price, ",", par(30), //
+	p.total_price, ",", par(80), //
+	p.adult_note, ",", par("15以上全价"), //
+	p.child_note, ",", par("8-15半价"), //
+	p.currency, ",", par("USD"), //
+	p.type, ",", par(8), //
+	p.time_zone, ",", par("UTC"), //
+	p.status, ",", par("A"), //
+	p.include_tax, ",", par(3.03), //
+	p.adult_discount, ",", par(0), //
+	p.child_discount, ",", par(0), //
+	p.total_discount, ",", par(0), //
+	p.created_at, ",", par("2019-09-17 04:07:55"), //
 	p.updated_at, par("2020-03-10 22:43:00"), //
 	")", valuesQuestions());
 ```
