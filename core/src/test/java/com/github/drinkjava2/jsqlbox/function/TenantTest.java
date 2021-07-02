@@ -14,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 
 /**
- * This is unit test for test @Version annotation
+ * This is unit test for tenant test
  * 
  * @author Yong Zhu
  * @since 2.0.5

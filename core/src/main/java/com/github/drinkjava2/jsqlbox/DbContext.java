@@ -20,6 +20,8 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbutils.StatementConfiguration;
+
 import com.github.drinkjava2.jdbpro.DbPro;
 import com.github.drinkjava2.jdbpro.DbProException;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
@@ -90,6 +92,14 @@ public class DbContext extends DbPro {// NOSONAR
 
 	public DbContext(DataSource ds, Dialect dialect) {
 		super(ds, dialect);
+	}
+	
+	public DbContext(DataSource ds, StatementConfiguration stmtConfig) {
+		super(ds, stmtConfig);
+	}
+
+	public DbContext(DataSource ds, Dialect dialect, StatementConfiguration stmtConfig) {
+		super(ds, dialect, stmtConfig);
 	}
 
 	// ==========================Global Transaction about================

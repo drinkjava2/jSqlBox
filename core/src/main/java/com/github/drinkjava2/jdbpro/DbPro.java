@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.OutParameter;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -58,6 +59,15 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 	public DbPro(DataSource ds, Dialect dialect) {
 		super(ds, dialect);
 	}
+	
+	public DbPro(DataSource ds, StatementConfiguration stmtConfig) {
+		super(ds, stmtConfig); 
+	}
+
+	public DbPro(DataSource ds, Dialect dialect, StatementConfiguration stmtConfig) {
+		super(ds, dialect, stmtConfig); 
+	}
+	
 
 	/**
 	 * Quite execute a SQL, do not throw any exception, if any exception happen,

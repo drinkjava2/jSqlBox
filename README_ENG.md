@@ -45,7 +45,7 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>
-   <version>5.0.4.jre8</version> <!--Or newest version-->
+   <version>5.0.5.jre8</version> <!--Or newest version-->
 </dependency> 
 ```
 
@@ -55,7 +55,7 @@ pom.xml：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>5.0.4.jre8</version> <!-- Java8 -->
+       <version>5.0.5.jre8</version> <!-- Java8 -->
     </dependency>
 
     <dependency>
@@ -64,7 +64,7 @@ pom.xml：
       <version>1.3.176</version>
     </dependency>
 
-And create below java file in IDE:
+And create below java file in Eclipse or Idea:
 
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcConnectionPool;

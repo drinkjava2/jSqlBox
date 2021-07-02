@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.github.drinkjava2.jdialects.Dialect;
@@ -149,6 +150,22 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		this.dialect = dialect;
 		pmdKnownBroken = true; // MSSql Server newest JDBC driver doesnot support pmd
 	}
+	 
+	public ImprovedQueryRunner(DataSource ds, StatementConfiguration stmtConfig) {
+		super(ds, stmtConfig );
+		if (globalNextDialect != null)
+			dialect = globalNextDialect;
+		else
+			dialect = Dialect.guessDialect(ds);
+		pmdKnownBroken = true;
+	}
+
+	public ImprovedQueryRunner(DataSource ds, Dialect dialect, StatementConfiguration stmtConfig) {
+		super(ds, stmtConfig );
+		this.dialect = dialect;
+		pmdKnownBroken = true; 
+	}
+	
 
 	@Override
 	public Object getHolder() {// This is to implement DataSourceHolder interface

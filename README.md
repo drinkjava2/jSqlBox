@@ -32,7 +32,7 @@ jSqlBox的最大特点是拥抱SQL，提倡直接在Java里写出可维护的SQL
 ```
 insert into tb_price_setting (id,code,adult_price,child_price,total_price,adult_note,child_note,currency,type,time_zone,status,include_tax,adult_discount,child_discount,total_discount,created_at,updated_at,) values(1200, "BJD837434", 50, 30, 80, "15以上全价", "8-15半价", "USD, 8, "UTC", "A", 3.03, 0, 0, 0, "2019-09-17 04:07:55", "2020-03-10 22:43:00");
 ```
-而采用jSqlBox，写法是这样的:  
+而采用jSqlBox，写法如下，这种写法在不降低原生SQL的可读性的前提下，极大地提高了原生SQL的可维护性:  
 ```
  DB.exe("insert into tb_price_setting (", //
 	"id,", par(1200), //
@@ -53,11 +53,12 @@ insert into tb_price_setting (id,code,adult_price,child_price,total_price,adult_
 	"created_at,", par("2019-09-17 04:07:55"), //
 	"updated_at,", par("2020-03-10 22:43:00"), //
 	")", valuesQuestions());
+``` 
+
+再进一步，利用jSqlBox的根据数据库生成Q类插件(详见用户手册"支持重构的SQL"一节)，还可以写出可重构的SQL来，进一步提高原生SQL的可维护性:
 ```
-这种写法在不降低原生SQL的可读性的前提下，极大地提高了原生SQL的可维护性。利用jSqlBox的根据数据库生成Q类插件，还可以写出可重构的SQL来，进一步提高原生SQL的可维护性和开发效率:
-```
-QTbPriceSetting p=QTbPriceSetting.instance;
-DB.exe("insert into ",p," (", //
+ QTbPriceSetting p=QTbPriceSetting.instance;
+ DB.exe("insert into ",p," (", //
 	p.id, ",", par(1200), //
 	p.code, ",", par("BJD837434"), //
 	p.adult_price, ",", par(50), //
@@ -78,7 +79,6 @@ DB.exe("insert into ",p," (", //
 	")", valuesQuestions());
 ```
 
-
 ## jSqlBox与其它持久层工具对比
 请见[与其它DAO工具对比](https://gitee.com/drinkjava2/jsqlbox/wikis/pages?sort_id=1010925&doc_id=92178), 可以对jSqlBox的功能与特点有一个大概的了解。  
 
@@ -88,7 +88,7 @@ DB.exe("insert into ",p," (", //
 ## 主要优点 | Advantages
 
 - **不依赖任何第三方库**：jSqlBox只有一个约1M大小的单个Jar包，不依赖任何第三方库。  
-- **架构合理**：模块式架构，各个模块都可以脱离jSqlBox单独存在。  
+- **架构合理**：模块式架构，各个子模块(jBeanBox,jDbPro,jDialects,jTransaction)都可以脱离jSqlBox单独存在。  
 - **跨数据库**：基于jDialects模块，支持80多种数据库的分页、DDl脚本生成、从数据库生成实体源码、函数变换、主键生成等功能。  
 - **与DbUtils兼容**：内核基于DbUtils, 原有基于DbUtils的旧项目可以无缝升级到jSqlBox。  
 - **多种SQL写法**：Inline方法、模板方法、DataMapper、ActiveRecord、链式写法、缓存翻译等。  
@@ -112,7 +112,7 @@ DB.exe("insert into ",p," (", //
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.4.jre8</version> <!-- 或最新版 -->
+   <version>5.0.5.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 jSqlBox没有用到第三方依赖，对于需要学习或更改它的源码的场合，甚至可以直接将jSqlBox的源码拷到项目目录里就可以使用它了。  
@@ -124,7 +124,7 @@ pom.xml中引入：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>5.0.4.jre8</version> <!-- Java8版 -->
+       <version>5.0.5.jre8</version> <!-- Java8版 -->
     </dependency>
 
     <dependency>
