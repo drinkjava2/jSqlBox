@@ -65,11 +65,14 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 
 		generateFieldTags(model, setting, body, className);
 
-		if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELDS)))
-			generateFields(model, setting, fkeyCount, body);
+		//fields
+        if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELDS))) {
+            generateFields(model, setting, fkeyCount, body);
 
-		if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_FIELDS)))
-			generateGetterAndSetter(model, setting, className, body);
+            //getter & setters
+            if (Boolean.TRUE.equals(setting.get(TableModelUtils.OPT_GETTER_SETTERS)))
+                generateGetterAndSetter(model, setting, className, body);
+        }
 
 		body.append("}\n");
 

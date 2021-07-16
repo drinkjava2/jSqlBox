@@ -6,8 +6,8 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.Java8DateUtils;
-import com.github.drinkjava2.jsqlbox.DbException;
 
 public class BasicJavaConverter implements JavaConverter {
 
@@ -214,7 +214,7 @@ public class BasicJavaConverter implements JavaConverter {
 		String oracleTip = "oracle.sql.TIMESTAMP".equals(vType.getName()) // NOSONAR
 				? "\nBelow setting may solve this Oracle JDBC compliant issue:\n" + "System.getProperties().setProperty(\"oracle.jdbc.J2EE13Compliant\", \"true\");"
 				: "";
-		throw new DbException("Can not convert jdbc type: '" + value.getClass() + "' with value '" + value + "' to jave type:" + targetType + oracleTip);
+		throw new DialectException("Can not convert jdbc type: '" + value.getClass() + "' with value '" + value + "' to jave type:" + targetType + oracleTip);
 	}
 
 }
