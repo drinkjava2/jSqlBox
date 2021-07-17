@@ -78,6 +78,7 @@ insert into tb_price_setting (id,code,adult_price,child_price,total_price,adult_
 	p.updated_at, par("2020-03-10 22:43:00"), //
 	")", valuesQuestions());
 ```
+使用jSqlBox并不意味要使用它的所有功能，对于小项目来说，上述的SQL式写法就足够支撑普通CRUD开发了，不一定要引入复杂的ORM。  
 
 ## jSqlBox与其它持久层工具对比
 请见[与其它DAO工具对比](https://gitee.com/drinkjava2/jsqlbox/wikis/pages?sort_id=1010925&doc_id=92178), 可以对jSqlBox的功能与特点有一个大概的了解。  
@@ -112,7 +113,7 @@ insert into tb_price_setting (id,code,adult_price,child_price,total_price,adult_
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.5.jre8</version> <!-- 或最新版 -->
+   <version>5.0.6.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 jSqlBox没有用到第三方依赖，对于需要学习或更改它的源码的场合，甚至可以直接将jSqlBox的源码拷到项目目录里就可以使用它了。  
@@ -124,7 +125,7 @@ pom.xml中引入：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>5.0.5.jre8</version> <!-- Java8版 -->
+       <version>5.0.6.jre8</version> <!-- 或最新版 -->
     </dependency>
 
     <dependency>
