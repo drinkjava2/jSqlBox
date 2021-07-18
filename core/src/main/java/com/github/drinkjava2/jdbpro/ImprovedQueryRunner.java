@@ -37,8 +37,6 @@ import com.github.drinkjava2.jdialects.converter.JavaToJdbcConverter;
 import com.github.drinkjava2.jdialects.converter.JdbcToJavaConverter;
 import com.github.drinkjava2.jlogs.Log;
 import com.github.drinkjava2.jlogs.LogFactory;
-import com.github.drinkjava2.jsqlbox.DbException;
-import com.github.drinkjava2.jsqlbox.TxBody;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.DataSourceHolder;
 import com.github.drinkjava2.jtransactions.TxResult;
@@ -435,7 +433,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	    if(this.tenantGetter!=null) {
 	        ImprovedQueryRunner runner=tenantGetter.getTenant();
 	        if(runner==null)
-	            throw new DbException("tenantGetter can not return a null Object");
+	            throw new DbProException("tenantGetter can not return a null Object");
 	        return runner.runPreparedSQL(ps);
 	    }
         if(ps.getSwitchTo() != null){
@@ -940,7 +938,7 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 			lastTxResult.set(commitTrans());
 		} catch (Exception e) {
 			lastTxResult.set(rollbackTrans().addCommitEx(e));
-			throw new DbException(e);
+			throw new DbProException(e);
 		}
 	}
 

@@ -26,12 +26,12 @@ import org.junit.Test;
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
+import com.github.drinkjava2.jdbpro.handler.PaginHandler;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
 import com.github.drinkjava2.jsqlbox.function.SqlHandlersTest.DemoUser;
 import com.github.drinkjava2.jsqlbox.handler.EntityListHandler;
-import com.github.drinkjava2.jsqlbox.handler.PaginHandler;
 
 /**
  * This is function test for global SqlHandlers and ThreadLocaled SqlHandlers

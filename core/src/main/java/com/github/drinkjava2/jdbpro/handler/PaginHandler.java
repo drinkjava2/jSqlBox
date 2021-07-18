@@ -9,12 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox.handler;
+package com.github.drinkjava2.jdbpro.handler;
 
 import com.github.drinkjava2.jdbpro.DefaultOrderSqlHandler;
 import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
  * PaginHandler is a SqlHandler used to translate SQL to paginated SQL
@@ -33,7 +32,7 @@ public class PaginHandler extends DefaultOrderSqlHandler {
 
 	@Override
 	public void beforeExecute(ImprovedQueryRunner runner, PreparedSQL ps) {
-		ps.setSql(((DbContext) runner).getDialect().pagin(pageNumber, pageSize, ps.getSql()));
+		ps.setSql(runner.getDialect().pagin(pageNumber, pageSize, ps.getSql()));
 	}
 
 }

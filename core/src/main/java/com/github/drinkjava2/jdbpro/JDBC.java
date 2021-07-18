@@ -9,24 +9,15 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.github.drinkjava2.jsqlbox;
+package com.github.drinkjava2.jdbpro;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.github.drinkjava2.jdbpro.DbPro;
-import com.github.drinkjava2.jdbpro.DbProException;
-import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
-import com.github.drinkjava2.jdbpro.PreparedSQL;
-import com.github.drinkjava2.jdbpro.SqlItem;
-import com.github.drinkjava2.jdbpro.SqlOption;
-import com.github.drinkjava2.jdbpro.TxBody;
 import com.github.drinkjava2.jdbpro.handler.PaginHandler;
 import com.github.drinkjava2.jdbpro.template.BasicSqlTemplate;
 import com.github.drinkjava2.jdbpro.template.SqlTemplateEngine;
 import com.github.drinkjava2.jdialects.StrUtils;
-import com.github.drinkjava2.jsqlbox.entitynet.EntityNet;
 import com.github.drinkjava2.jtransactions.TxResult;
 
 /**
@@ -36,7 +27,7 @@ import com.github.drinkjava2.jtransactions.TxResult;
  * @author Yong Zhu
  * @since 1.0.8
  */
-public abstract class DB  {// NOSONAR
+public abstract class JDBC  {// NOSONAR
 	public static final SqlOption EXECUTE = SqlOption.EXECUTE;
 	public static final SqlOption UPDATE = SqlOption.UPDATE;
 	public static final SqlOption INSERT = SqlOption.INSERT;
@@ -162,10 +153,7 @@ public abstract class DB  {// NOSONAR
 	public static SqlItem other(Object... otherInfos) {
 		return new SqlItem(SqlOption.OTHER, otherInfos);
 	}
-	
-	public static List<Object[]> getOthers() {
-		return gctx().getOthers();
-	}
+	 
 
 	/**
 	 * Switch to another DbPro
@@ -203,12 +191,12 @@ public abstract class DB  {// NOSONAR
 	
 	
 	/** Shortcut method equal to DbContext.getGlobalDbContext() */
-	public static DbContext gctx() {
-		return DbContext.getGlobalDbContext();
+	public static JdbcContext gctx() {
+		return JdbcContext.getGlobalDbContext();
 	}
 
 	public static boolean tx(TxBody txBody) {
-		return DbContext.getGlobalDbContext().tryTx(txBody);
+		return JdbcContext.getGlobalDbContext().tryTx(txBody);
 	}
 
 	public static TxResult getLastTxResult() {
@@ -253,23 +241,23 @@ public abstract class DB  {// NOSONAR
 	/** Build a SHARD_TABLE type sqlItem */
 	public static SqlItem shardTB(Object... shardvalues) {
 		if (shardvalues.length == 0)
-			throw new DbException("shardTB() method need at least 1 parameter");
+			throw new DbProException("shardTB() method need at least 1 parameter");
 		else if (shardvalues.length == 1)
 			return new SqlItem(SqlOption.SHARD_TABLE, shardvalues[0]);
 		else if (shardvalues.length == 2)
 			return new SqlItem(SqlOption.SHARD_TABLE, shardvalues[0], shardvalues[1]);
-		throw new DbException("shardTB() method allow at most 2 parameter");
+		throw new DbProException("shardTB() method allow at most 2 parameter");
 	}
 
 	/** Build a SHARD_DATABASE type sqlItem */
 	public static SqlItem shardDB(Object... shardvalues) {
 		if (shardvalues.length == 0)
-			throw new DbException("shardDB() method need at least 1 parameter");
+			throw new DbProException("shardDB() method need at least 1 parameter");
 		else if (shardvalues.length == 1)
 			return new SqlItem(SqlOption.SHARD_DATABASE, shardvalues[0]);
 		else if (shardvalues.length == 2)
 			return new SqlItem(SqlOption.SHARD_DATABASE, shardvalues[0], shardvalues[1]);
-		throw new DbException("shardTB() method allow at most 2 parameter");
+		throw new DbProException("shardTB() method allow at most 2 parameter");
 	}
 
 	/** Build a SHARD_TABLE type sqlItem */
@@ -281,33 +269,7 @@ public abstract class DB  {// NOSONAR
 	}
 	//@formatter:off 
 	//Entity series methods from DbContext
- 
-	public static <T> List<T> entityFind(Class<T> entityClass, Object... items) {return gctx().entityFind(entityClass, items);}
-	public static <T> List<T> entityFindBySample(Object sampleBean, Object... items) {return gctx().entityFindBySample(sampleBean, items);}
-	public static <T> List<T> entityFindBySql(Object... items) {return gctx().entityFindBySql(items);}
-	public static <T> T entityFindOneBySQL(Object... items) {return gctx().entityFindOneBySQL(items);} 
-	public static <T> T entityLoad(T entity, Object... items) {return gctx().entityLoad(entity, items);} 
-	public static <T> T entityLoadById(Class<T> entityClass, Object entityId, Object... items) {return gctx().entityLoadById(entityClass, entityId, items);}
-    public static <T> T entityLoadByIdTry(Class<T> entityClass, Object entityId, Object... items) {return gctx().entityLoadByIdTry(entityClass, entityId, items);}
-    public static <T> T entityLoadBySql(Object... items) {return gctx().entityLoadBySql(items);}
-	public static <T> T entityInsert(T entity, Object... items) {return gctx().entityInsert(entity, items);} 
-    public static <T> T entityUpdate(Object entity, Object... items) {return gctx().entityUpdate(entity, items);}
-	public static boolean entityExist(Object entity, Object... items) {return gctx().entityExist(entity, items);}
-	public static boolean entityExistById(Class<?> entityClass, Object id, Object... items) {return gctx().entityExistById(entityClass, id, items);}
-	public static int entityCount(Class<?> entityClass, Object... items) {return gctx().entityCount(entityClass, items);}
-	public static int entityDeleteByIdTry(Class<?> entityClass, Object id, Object... items) {return gctx().entityDeleteByIdTry(entityClass, id, items);}
-	public static int entityDeleteTry(Object entity, Object... items) {return gctx().entityDeleteTry(entity, items);}
-	public static int entityLoadTry(Object entity, Object... items) {return gctx().entityLoadTry(entity, items);}
-	public static int entityUpdateTry(Object entity, Object... items) {return gctx().entityUpdateTry(entity, items);}
-	public static void entityDelete(Object entity, Object... items) { gctx().entityDelete(entity, items);}
-	public static void entityDeleteById(Class<?> entityClass, Object id, Object... items) {gctx().entityDeleteById(entityClass, id, items);}
-	public static <T> T entityFindRelatedOne(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedOne(entity, sqlItems);}
-	public static <T> List<T> entityFindRelatedList(Object entityOrIterable, Object... sqlItems) {return  gctx().entityFindRelatedList(entityOrIterable, sqlItems);}
-	public static <T> Set<T> entityFindRelatedSet(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedSet(entity, sqlItems);}
-	public static <T> Map<Object, T> entityFindRelatedMap(Object entity, Object... sqlItems) {return  gctx().entityFindRelatedMap(entity, sqlItems);}
-	public static EntityNet autoNet(Class<?>... entityClass) {return  gctx().autoNet(entityClass);}	 
-	
-	
+   
 	// simplilfied SQL methods 
 	protected void ________SQL_Methods________() {}// NOSONAR
 	
@@ -322,7 +284,6 @@ public abstract class DB  {// NOSONAR
 	public static int upd(Object... items) {return gctx().upd(items);}
 	public static <T> T ins(Object... items) {return gctx().ins(items);}
 	public static <T> T exe(Object... items) {return gctx().exe(items); }
-	public static <T> List<T> qryEntityList(Object... items) {return gctx().qryEntityList(items);}
 	public static PreparedSQL prepare(Object... items) { return gctx().prepare(items); }
 
   

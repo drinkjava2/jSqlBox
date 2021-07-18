@@ -24,13 +24,13 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.jdbpro.handler.CamelHander;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
-import com.github.drinkjava2.jsqlbox.handler.CamelHander;
 
 /**
  * This is function test for SqlHandlers
