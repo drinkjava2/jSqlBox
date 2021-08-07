@@ -78,6 +78,8 @@ public abstract class TableModelUtilsOfExcel {// NOSONAR
         BufferedWriter out = null;
         try {
             File writename = new File(fileName);
+            if (!writename.getParentFile().exists())
+                writename.getParentFile().mkdirs();            
             writename.createNewFile();// NOSONAR
             out = new BufferedWriter(new FileWriter(writename));
             out.write(sb.toString());

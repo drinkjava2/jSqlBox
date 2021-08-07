@@ -14,19 +14,29 @@ import com.github.drinkjava2.jdialects.entity.RoleTB;
 import com.github.drinkjava2.jdialects.entity.UserTB;
 
 public class ToExcelTest extends JdialectsTestBase {
+    
+    private static boolean isWindows() {
+    String os = System.getProperty("os.name");  
+    return os.toLowerCase().startsWith("win");
+    }
+
+
 
     @Test
     public void doTestPackage2Excel() {
-        TableModelUtils.entityPackage2Excel("com.github.drinkjava2.jdialects.entity", "e:/packageOutput.csv");
+        if (isWindows())
+            TableModelUtils.entityPackage2Excel("com.github.drinkjava2.jdialects.entity", "c:/tmp/jsqlbox_test_packageOutput.csv");
     }
 
     @Test
     public void doTestEntity2Excel() {
-        TableModelUtils.entity2Excel("e:/entitiesOutput.csv", RoleTB.class, UserTB.class);
+        if (isWindows())
+        TableModelUtils.entity2Excel("c:/tmp/jsqlbox_test_entitiesOutput.csv", RoleTB.class, UserTB.class);
     }
 
     @Test
     public void doTestDb2Excel() throws SQLException {
-        TableModelUtils.db2Excel(ds.getConnection(), Dialect.MySQL57Dialect, "e:/dbOutput.csv");
+        if (isWindows())
+        TableModelUtils.db2Excel(ds.getConnection(), Dialect.MySQL57Dialect, "c:/tmp/jsqlbox_test_dbOutput.csv");
     }
 }
