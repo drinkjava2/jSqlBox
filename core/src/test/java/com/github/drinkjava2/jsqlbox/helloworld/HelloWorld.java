@@ -29,28 +29,28 @@ import com.github.drinkjava2.jsqlbox.DbContext;
  */
 
 public class HelloWorld extends ActiveRecord<HelloWorld> {
-	@Id
-	@Column(length = 20)
-	private String name;
+    @Id
+    @Column(length = 20)
+    private String name;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public HelloWorld setName(String name) {
-		this.name = name;
-		return this;
-	}
+    public HelloWorld setName(String name) {
+        this.name = name;
+        return this;
+    }
 
-	public static void main(String[] args) {
-		DataSource ds = JdbcConnectionPool
-				.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-		DbContext.setGlobalNextAllowShowSql(true);
-		DbContext ctx = new DbContext(ds);
-		DbContext.setGlobalDbContext(ctx);
-		ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class)); 
-		new HelloWorld().setName("Hellow jSqlBox").insert();
-		System.out.println(DB.qryString("select name from HelloWorld"));
-		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
-	}
+    public static void main(String[] args) {
+        DataSource ds = JdbcConnectionPool
+                .create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+        DbContext.setGlobalNextAllowShowSql(true);
+        DbContext ctx = new DbContext(ds);
+        DbContext.setGlobalDbContext(ctx);
+        ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class)); 
+        new HelloWorld().setName("Hellow jSqlBox").insert();
+        System.out.println(DB.qryString("select name from HelloWorld"));
+        ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
+    }
 }

@@ -28,6 +28,13 @@ public class FunctionTranslateTest {
 	}
 
 	@Test
+    public void doExtraDialectFunctionTest() {
+	    Systemout.println(Dialect.H2Dialect.trans("select regexlike(name, 'a') from user_tb"));
+	    Systemout.println(Dialect.MySQL55Dialect.trans("select regexlike(name, 'a') from user_tb"));
+	    Systemout.println(Dialect.Oracle10gDialect.trans("select regexlike(name, 'a') from user_tb"));
+	}
+	
+	@Test
 	public void doDialectTest() {
 
 		Systemout.println(

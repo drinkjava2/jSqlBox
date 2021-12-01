@@ -170,38 +170,42 @@ public class Dialect {
 	public Map<String, String> functions = new HashMap<String, String>();
 	public DDLFeatures ddlFeatures = new DDLFeatures();// NOSONAR
 
-	static {
-		DialectTypeMappingTemplate.initTypeMappings();
-		DialectFunctionTemplate.initFunctionTemplates();
-	}
-
-	public Dialect(String name) {
-		this.name = name;
-		try {
-			this.type = DialectType.valueOf(name);
-		} catch (Exception e) {
-			this.type = DialectType.Customized;
-		}
-		this.sqlTemplate = DialectPaginationTemplate.initializePaginSQLTemplate(this);
-		this.topLimitTemplate = DialectPaginationTemplate.initializeTopLimitSqlTemplate(this);
-		DDLFeatures.initDDLFeatures(this);
-	}
+    static {
+        DialectTypeMappingTemplate.initTypeMappings();
+        DialectFunctionTemplate.initFunctionTemplates();
+    }
+	   
+    public Dialect(String name) {
+        this.name = name;
+        try {
+            this.type = DialectType.valueOf(name);
+        } catch (Exception e) {
+            this.type = DialectType.Customized;
+        }
+        this.sqlTemplate = DialectPaginationTemplate.initializePaginSQLTemplate(this);
+        this.topLimitTemplate = DialectPaginationTemplate.initializeTopLimitSqlTemplate(this);
+        DDLFeatures.initDDLFeatures(this);
+    }
 
 	public static Dialect[] dialects = new Dialect[] { DerbyDialect, OracleDialect, Oracle9Dialect, DamengDialect,
-			GBaseDialect, AccessDialect, CobolDialect, DbfDialect, ExcelDialect, ParadoxDialect, SQLiteDialect,
-			TextDialect, XMLDialect, Cache71Dialect, CUBRIDDialect, DataDirectOracle9Dialect, DB2390Dialect,
-			DB2390V8Dialect, DB2400Dialect, DB297Dialect, DB2Dialect, DerbyTenFiveDialect, DerbyTenSevenDialect,
-			DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect,
-			HANARowStoreDialect, HSQLDialect, Informix10Dialect, InformixDialect, Ingres10Dialect, Ingres9Dialect,
-			IngresDialect, InterbaseDialect, JDataStoreDialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect,
-			MariaDB53Dialect, MariaDBDialect, MckoiDialect, MimerSQLDialect, MySQL55Dialect, MySQL57Dialect,
-			MySQL57InnoDBDialect, MySQL5Dialect, MySQL5InnoDBDialect, MySQL8Dialect, MySQLDialect, MySQLInnoDBDialect,
-			MySQLMyISAMDialect, Oracle10gDialect, Oracle12cDialect, Oracle8iDialect, Oracle9iDialect, PointbaseDialect,
-			PostgresPlusDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect,
-			PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, PostgreSQL9Dialect, PostgreSQLDialect,
-			ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServer2005Dialect, SQLServer2008Dialect,
-			SQLServer2012Dialect, SQLServerDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE157Dialect,
-			SybaseASE15Dialect, SybaseDialect, Teradata14Dialect, TeradataDialect, TimesTenDialect };
+	            GBaseDialect, AccessDialect, CobolDialect, DbfDialect, ExcelDialect, ParadoxDialect, SQLiteDialect,
+	            TextDialect, XMLDialect, Cache71Dialect, CUBRIDDialect, DataDirectOracle9Dialect, DB2390Dialect,
+	            DB2390V8Dialect, DB2400Dialect, DB297Dialect, DB2Dialect, DerbyTenFiveDialect, DerbyTenSevenDialect,
+	            DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect,
+	            HANARowStoreDialect, HSQLDialect, Informix10Dialect, InformixDialect, Ingres10Dialect, Ingres9Dialect,
+	            IngresDialect, InterbaseDialect, JDataStoreDialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect,
+	            MariaDB53Dialect, MariaDBDialect, MckoiDialect, MimerSQLDialect, MySQL55Dialect, MySQL57Dialect,
+	            MySQL57InnoDBDialect, MySQL5Dialect, MySQL5InnoDBDialect, MySQL8Dialect, MySQLDialect, MySQLInnoDBDialect,
+	            MySQLMyISAMDialect, Oracle10gDialect, Oracle12cDialect, Oracle8iDialect, Oracle9iDialect, PointbaseDialect,
+	            PostgresPlusDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect,
+	            PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, PostgreSQL9Dialect, PostgreSQLDialect,
+	            ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServer2005Dialect, SQLServer2008Dialect,
+	            SQLServer2012Dialect, SQLServerDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE157Dialect,
+	            SybaseASE15Dialect, SybaseDialect, Teradata14Dialect, TeradataDialect, TimesTenDialect };
+	   
+    static {
+        DialectFunctionTemplate.initExtraFunctionTemplates();
+    } 
 
 	/** Use Dialect.dialects directly */
 	@Deprecated
@@ -419,66 +423,73 @@ public class Dialect {
 	}
 
 	/**
+     * @return true if is MySql family
+     */
+    public boolean isFamily(String databaseName) {
+        return StrUtils.startsWithIgnoreCase(this.toString(), databaseName);
+    }
+	
+	/**
 	 * @return true if is MySql family
 	 */
 	public boolean isMySqlFamily() {
-		return this.toString().startsWith("MySQL");
+		return isFamily("MySQL");
 	}
 
 	/**
 	 * @return true if is Infomix family
 	 */
 	public boolean isInfomixFamily() {
-		return this.toString().startsWith("Infomix");
+		return isFamily("Infomix");
 	}
 
 	/**
 	 * @return true if is Oracle family
 	 */
 	public boolean isOracleFamily() {
-		return this.toString().startsWith("Oracle");
+		return isFamily("Oracle");
 	}
 
 	/**
 	 * @return true if is SQL Server family
 	 */
 	public boolean isSQLServerFamily() {
-		return this.toString().startsWith("SQLServer");
+		return isFamily("SQLServer");
 	}
 
 	/**
 	 * @return true if is H2 family
 	 */
 	public boolean isH2Family() {
-		return H2Dialect.equals(this);
+		return isFamily("H2");
 	}
 
 	/**
 	 * @return true if is Postgres family
 	 */
 	public boolean isPostgresFamily() {
-		return this.toString().startsWith("Postgres");
+		return isFamily("Postgres");
 	}
 
 	/**
 	 * @return true if is Sybase family
 	 */
 	public boolean isSybaseFamily() {
-		return this.toString().startsWith("Sybase");
+		return isFamily("Sybase");
 	}
 
 	/**
 	 * @return true if is DB2 family
 	 */
 	public boolean isDB2Family() {
-		return this.toString().startsWith("DB2");
+		return isFamily("DB2");
 	}
 
 	/**
 	 * @return true if is Derby family
 	 */
 	public boolean isDerbyFamily() {
-		return this.toString().startsWith("Derby");
+		return isFamily("Derby");
 	}
 
 	// ===============================================

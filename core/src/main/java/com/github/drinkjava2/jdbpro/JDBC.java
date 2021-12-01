@@ -195,6 +195,21 @@ public abstract class JDBC  {// NOSONAR
 		return JdbcContext.getGlobalDbContext();
 	}
 
+	/** Shortcut call to dialect.pagin method */
+    public static String pagin(int pageNumber, int pageSize, String sql) {
+        return gctx().pagin(pageNumber, pageSize, sql);
+    }
+
+    /** Shortcut call to dialect.trans method */
+    public static String trans(String sql) {
+        return gctx().trans(sql);
+    }
+
+    /** Shortcut call to dialect.paginAndTrans method */
+    public static String paginAndTrans(int pageNumber, int pageSize, String sql) {
+        return gctx().paginAndTrans(pageNumber, pageSize, sql);
+    }
+    
 	public static boolean tx(TxBody txBody) {
 		return JdbcContext.getGlobalDbContext().tryTx(txBody);
 	}
