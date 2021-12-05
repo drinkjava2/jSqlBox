@@ -43,14 +43,15 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
     }
 
     public static void main(String[] args) {
-        DataSource ds = JdbcConnectionPool
-                .create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+        DataSource ds = JdbcConnectionPool.create("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
         DbContext.setGlobalNextAllowShowSql(true);
         DbContext ctx = new DbContext(ds);
         DbContext.setGlobalDbContext(ctx);
-        ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class)); 
+        ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class));
         new HelloWorld().setName("Hellow jSqlBox").insert();
-        System.out.println(DB.qryString("select name from HelloWorld"));
+        String sql = DB.trans("select qt(name) from qt(helloWorld) where qt(name) like ?");
+        String param = "He%";
+        System.out.println(DB.qryString(sql, DB.par(param)));
         ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
     }
 }

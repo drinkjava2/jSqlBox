@@ -31,6 +31,8 @@ public class DialectFunctionTemplate {
      * Initialize extra function templates
      */
     protected static void initExtraFunctionTemplates() {
+        for (Dialect d : Dialect.dialects)
+            DialectFunctionTemplate.registerFunction("qt", "1=" + d.ddlFeatures.getOpenQuote() + "$P1" + d.ddlFeatures.getCloseQuote(), d);
         registerFunction("regexlike", "2=$P1 regexp $P2", "MySQL", "H2");
         registerFunction("regexlike", "2=regex_like($P1, $P2)", "Oracle");
     }
@@ -50,6 +52,17 @@ public class DialectFunctionTemplate {
             } 
         }
     }
+    
+    public static void registerFunction(String function, String template, Dialect... dialects) {
+        DialectFunctionTranslator.instance.getFunctionMap().put(function.toUpperCase(), 0);
+        for (Dialect dialect : Dialect.dialects) {
+            for (Dialect d : dialects) {
+                if(dialect==d)
+                    dialect.functions.put(function, template);
+            } 
+        }
+    }
+    
     
     private static void copyTo(Map lastMap, Dialect d) {
         Map<String, String> target = d.functions;

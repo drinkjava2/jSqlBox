@@ -113,7 +113,7 @@ insert into tb_price_setting (id,code,adult_price,child_price,total_price,adult_
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.6.jre8</version> <!-- 或最新版 -->
+   <version>5.0.9.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 jSqlBox没有用到第三方依赖，对于需要学习或更改它的源码的场合，甚至可以直接将jSqlBox的源码拷到项目目录里就可以使用它了。  
@@ -125,7 +125,7 @@ pom.xml中引入：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>5.0.6.jre8</version> <!-- 或最新版 -->
+       <version>5.0.9.jre8</version> <!-- 或最新版 -->
     </dependency>
 
     <dependency>
