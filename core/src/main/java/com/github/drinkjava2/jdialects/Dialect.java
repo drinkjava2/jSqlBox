@@ -205,6 +205,9 @@ public class Dialect {
 	   
     static {
         DialectFunctionTemplate.initExtraFunctionTemplates();
+        
+        //Manual fix bugs some special dialect bugs
+        H2Dialect.ddlFeatures.supportsIdentityColumns=false; //H2 from 2.x version does not support Identity function
     } 
 
 	/** Use Dialect.dialects directly */

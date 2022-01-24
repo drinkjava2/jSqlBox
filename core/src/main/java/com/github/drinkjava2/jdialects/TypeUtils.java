@@ -270,6 +270,16 @@ public abstract class TypeUtils {// NOSONAR
 			return Type.LONGNVARCHAR;
 		case java.sql.Types.NCLOB:
 			return Type.NCLOB;
+			
+			/*- JAVA8_BEGIN */
+        case java.sql.Types.REF_CURSOR:
+            return Type.JAVA_OBJECT;
+        case java.sql.Types.TIME_WITH_TIMEZONE:
+            return Type.TIME;
+        case java.sql.Types.TIMESTAMP_WITH_TIMEZONE:
+            return Type.TIMESTAMP;            
+            /* JAVA8_END */    
+			
 		default:
 			throw new DialectException("Unsupported java.sql.Types:" + javaSqlType);
 		}

@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
  <packaging>jar</packaging>
- <version>5.0.9.jre8</version>
+ <version>5.0.10.jre8</version> <!-- not released -->
  
  <name>jSqlBox</name>
  <description>jSqlBox is a full function DAO tool</description>
@@ -61,7 +61,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
      
@@ -69,7 +69,7 @@
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>  <!-- Java6 release is HikariCP-java6 -->
-      <version>3.4.2</version>  <!-- Java6 relese is 2.3.13 -->
+      <version>4.0.3</version>  <!-- Java6 relese is 2.3.13 -->
       <scope>test</scope>
     </dependency>  
     
@@ -77,7 +77,7 @@
    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.3.176</version>
+      <version>2.1.210</version>
       <scope>test</scope>
    </dependency> 
     

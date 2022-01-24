@@ -34,17 +34,25 @@ public class DataSourceConfig {
 		}
 	}
 
-	// MySql connection URL
-	public static class MySqlDataSourceBox extends HikariCPBox {
+	// MySql connection URL with UTC
+	public static class MySqlDataSourceUtcTimeBox extends MySqlDataSourceBox {
 		{
 			injectValue("jdbcUrl",
-					"jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false");
-			injectValue("driverClassName", "com.mysql.jdbc.Driver");
-			injectValue("username", "root");// change to your user & password
-			injectValue("password", "root888");
+					"jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false&serverTimezone=UTC");
 		}
 	}
 
+	   // MySql connection URL
+    public static class MySqlDataSourceBox extends HikariCPBox {
+        {
+            injectValue("jdbcUrl",
+                    "jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false");
+            injectValue("driverClassName", "com.mysql.jdbc.Driver");
+            injectValue("username", "root");// change to your user & password
+            injectValue("password", "root888");
+        }
+    }
+    
 	// Oracle connection URL
 	public static class OracleDataSourceBox extends HikariCPBox {
 		{

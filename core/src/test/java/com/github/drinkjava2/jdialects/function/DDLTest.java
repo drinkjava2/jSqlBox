@@ -392,7 +392,7 @@ public class DDLTest extends JdialectsTestBase {
 		t3.column("id2").INTEGER().idGenerator("seq1");
 		t3.engineTail(" DEFAULT CHARSET=utf8");
 
-		String[] dropAndCreateDDL = Dialect.H2Dialect.toDropAndCreateDDL(t1, t2, t3);
+		String[] dropAndCreateDDL =guessedDialect.toDropAndCreateDDL(t1, t2, t3);
 		for (String ddl : dropAndCreateDDL)
 			Systemout.println(ddl);
 
