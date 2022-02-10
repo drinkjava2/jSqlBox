@@ -7,7 +7,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
-		<hibernate.version>4.2.0.Final</hibernate.version>
+		<hibernate.version>5.4.24.Final</hibernate.version>
 		<mysql.connector.version>5.1.21</mysql.connector.version>
 		<spring.version>3.2.2.RELEASE</spring.version>
 	</properties>
