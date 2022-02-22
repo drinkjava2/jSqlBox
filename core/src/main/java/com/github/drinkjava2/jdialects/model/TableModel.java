@@ -166,6 +166,14 @@ public class TableModel {
 		checkReadOnly();
 		this.addGenerator(new SequenceIdGenerator(name, sequenceName, initialValue, allocationSize));
 	}
+	
+    public void identityGenerator(String column) {
+        checkReadOnly();
+        DialectException.assureNotEmpty(tableName, "IdGenerator tableName can not be empty");
+        DialectException.assureNotEmpty(column, "IdGenerator column can not be empty");
+        this.addGenerator(new IdentityIdGenerator(tableName, column));
+    }
+	   
 
 	/**
 	 * Add a Sequence Generator, note: not all database support sequence
@@ -436,7 +444,7 @@ public class TableModel {
 	 * and name
 	 */
 	public IdGenerator getIdGenerator(GenerationType generationType, String name) {
-		return getIdGenerator(generationType, name, getIdGenerators());
+		return getIdGenerator(this, generationType, name, getIdGenerators());
 	}
 
 	/**
@@ -444,26 +452,30 @@ public class TableModel {
 	 * IDENTITY,AUTO,UUID25,UUID26,UUID32,UUID36,TIMESTAMP
 	 */
 	public IdGenerator getIdGenerator(GenerationType generationType) {
-		return getIdGeneratorByType(generationType);
+		return getIdGeneratorByType(this, generationType);
 	}
 
 	/**
 	 * Search and return the IdGenerator in this TableModel by its name
 	 */
 	public IdGenerator getIdGenerator(String name) {
-		return getIdGenerator(null, name, getIdGenerators());
+		return getIdGenerator(this, null, name, getIdGenerators());
 	}
 
 	/**
 	 * Get one of these IdGenerator instance by generationType:
 	 * IDENTITY,AUTO,UUID25,UUID32,UUID36,TIMESTAMP, if not found , return null;
 	 */
-	public static IdGenerator getIdGeneratorByType(GenerationType generationType) {
+	private static IdGenerator getIdGeneratorByType(TableModel model, GenerationType generationType) {
 		if (generationType == null)
 			return null;
 		switch (generationType) {
-		case IDENTITY:
-			return IdentityIdGenerator.INSTANCE;
+        case IDENTITY: {
+            for (IdGenerator idGen : model.getIdGenerators())  
+	            if ( generationType.equals(idGen.getGenerationType()))
+	                return idGen;//identity can only have 1, if found just return 
+            return null;
+		}
 		case AUTO:
 			return AutoIdGenerator.INSTANCE;
 		case UUID25:
@@ -479,17 +491,17 @@ public class TableModel {
 		case SNOWFLAKE:
 			return SnowflakeGenerator.INSTANCE;
 		default:
-			return null;
+			return null; //identity and sequence related to tableModel, by type search can only return null
 		}
 	}
 
 	/**
 	 * Get a IdGenerator by type, if not found, search by name
 	 */
-	public static IdGenerator getIdGenerator(GenerationType generationType, String name,
+	private static IdGenerator getIdGenerator(TableModel model, GenerationType generationType, String name,
 			List<IdGenerator> idGeneratorList) {
 		// fixed idGenerators
-		IdGenerator idGen = getIdGeneratorByType(generationType);
+		IdGenerator idGen = getIdGeneratorByType(model, generationType);
 		if (idGen != null)
 			return idGen;
 		if (StrUtils.isEmpty(name))

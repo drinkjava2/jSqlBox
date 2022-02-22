@@ -29,39 +29,64 @@ import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
  * @since 1.0.0
  */
 public class IdentityIdGenerator implements IdGenerator {
-	public static final IdentityIdGenerator INSTANCE = new IdentityIdGenerator();
+    private String table;
 
-	@Override
-	public GenerationType getGenerationType() {
-		return GenerationType.IDENTITY;
-	}
+    private String column;
 
-	@Override
-	public String getIdGenName() {
-		return "IDENTITY";
-	}
-	
-	@Override
-	public Boolean dependOnAutoIdGenerator() {
-		return false;
-	}
+    public IdentityIdGenerator(String table, String column) {
+        this.table = table;
+        this.column = column;
+    }
 
-	@Override
-	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		if (!dialect.ddlFeatures.getSupportsIdentityColumns())
-			throw new DialectException("Dialect '" + dialect + "' does not support identity type");
-		String sql = null;
-		if (Type.BIGINT.equals(dataType))
-			sql = dialect.ddlFeatures.getIdentitySelectStringBigINT();
-		else
-			sql = dialect.ddlFeatures.getIdentitySelectString();
-		if (StrUtils.isEmpty(sql) || DDLFeatures.NOT_SUPPORT.equals(sql))
-			throw new DialectException("Dialect '" + dialect + "' does not support identity type");
-		return jdbc.jdbcQueryForObject(sql);
-	}
+    @Override
+    public GenerationType getGenerationType() {
+        return GenerationType.IDENTITY;
+    }
 
-	@Override
-	public IdGenerator newCopy() {
-		return INSTANCE;
-	}
+    @Override
+    public String getIdGenName() {
+        return "IDENTITY";
+    }
+
+    @Override
+    public Boolean dependOnAutoIdGenerator() {
+        return false;
+    }
+
+    @Override
+    public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
+        if (!dialect.ddlFeatures.getSupportsIdentityColumns())
+            throw new DialectException("Dialect '" + dialect + "' does not support identity type");
+        String sql = null;
+        if (Type.BIGINT.equals(dataType))
+            sql = dialect.ddlFeatures.getIdentitySelectStringBigINT();
+        else
+            sql = dialect.ddlFeatures.getIdentitySelectString();
+        if (StrUtils.isEmpty(sql) || DDLFeatures.NOT_SUPPORT.equals(sql))
+            throw new DialectException("Dialect '" + dialect + "' does not support identity type");
+        sql=StrUtils.replaceFirst(sql, "_table__col", new StringBuffer(table).append("_").append(column).toString());
+        return jdbc.jdbcQueryForObject(sql);
+    }
+
+    @Override
+    public IdGenerator newCopy() {
+        return new IdentityIdGenerator(table, column);
+    }
+
+    // getter & setter==============
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    public String getColumn() {
+        return column;
+    }
+
+    public void setColumn(String column) {
+        this.column = column;
+    }
 }

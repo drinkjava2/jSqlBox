@@ -271,6 +271,7 @@ public class ColumnModel {
 		makeSureTableModelExist();
 		this.idGenerationType = GenerationType.IDENTITY;
 		this.idGeneratorName = null;
+		this.getTableModel().identityGenerator(columnName);
 		return this;
 	}
 

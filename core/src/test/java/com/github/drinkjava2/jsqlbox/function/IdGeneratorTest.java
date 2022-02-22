@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.drinkjava2.common.Systemout;
+import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
@@ -250,6 +251,7 @@ public class IdGeneratorTest extends TestBase {
 	public void testIdentityGenerator() {
 		if (!dialect.ddlFeatures.getSupportsIdentityColumns())
 			return;
+		dialect=Dialect.PostgreSQL82Dialect;
 		TableModel table = new TableModel("testIdentity");
 		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);

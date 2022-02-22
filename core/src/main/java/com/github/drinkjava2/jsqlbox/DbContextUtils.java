@@ -41,7 +41,6 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 import com.github.drinkjava2.jdialects.id.IdGenerator;
-import com.github.drinkjava2.jdialects.id.IdentityIdGenerator;
 import com.github.drinkjava2.jdialects.id.SnowflakeCreator;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.FKeyModel;
@@ -697,6 +696,7 @@ public abstract class DbContextUtils {// NOSONAR
 		boolean foundColumnToInsert = false;
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
+        IdGenerator identityGenerator=null; //identityGenerator can only have one
 		for (ColumnModel col : cols.values()) {// NOSONAR
 			if (col == null || col.getTransientable() || !col.getInsertable())
 				continue;
@@ -718,6 +718,7 @@ public abstract class DbContextUtils {// NOSONAR
 					if (identityCol != null)
 						throw new DbException(
 								"More than 1 identity field found for table '" + model.getTableName() + "'");
+					identityGenerator=idGen;
 					identityType = col.getColumnType();
 					identityCol = col;
 				} else if (GenerationType.SNOWFLAKE.equals(idGen.getGenerationType())) {// Snow
@@ -779,10 +780,10 @@ public abstract class DbContextUtils {// NOSONAR
 		int result = ctx.upd(sqlBody.toArray());
 		if (ctx.isBatchEnabled())
 			return 1; // in batch mode, direct return 1
-		if (identityCol != null) {// write identity id to Bean field
-			Object identityId = IdentityIdGenerator.INSTANCE.getNextID(ctx, ctx.getDialect(), identityType);
-			writeValueToBeanFieldOrTail(identityCol, entityBean, identityId);
-		}
+        if (identityGenerator != null) {// write identity id to Bean field
+            Object identityId = identityGenerator.getNextID(ctx, ctx.getDialect(), identityType);
+            writeValueToBeanFieldOrTail(identityCol, entityBean, identityId);
+        }
 		return result;
 	}
 
