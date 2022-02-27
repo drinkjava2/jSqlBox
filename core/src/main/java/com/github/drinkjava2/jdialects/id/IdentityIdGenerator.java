@@ -64,7 +64,7 @@ public class IdentityIdGenerator implements IdGenerator {
             sql = dialect.ddlFeatures.getIdentitySelectString();
         if (StrUtils.isEmpty(sql) || DDLFeatures.NOT_SUPPORT.equals(sql))
             throw new DialectException("Dialect '" + dialect + "' does not support identity type");
-        sql=StrUtils.replaceFirst(sql, "_table__col", new StringBuffer(table).append("_").append(column).toString());
+        sql=StrUtils.replaceFirst(sql, "_table__col", new StringBuilder(table).append("_").append(column).toString());
         return jdbc.jdbcQueryForObject(sql);
     }
 

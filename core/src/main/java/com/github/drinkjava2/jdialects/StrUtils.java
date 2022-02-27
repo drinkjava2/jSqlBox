@@ -1008,6 +1008,21 @@ public class StrUtils {
 		return result.toString();
 	}
 	
+	 /**
+     * Camel String convert to lower case underScore, for example: HelloWorld -> hello_world
+     */
+    public static String camelToLowerCaseUnderScore(String name) {
+        char[] chars = toLowerCaseFirstOne(name).toCharArray();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < chars.length; i++) {
+            if(Character.isUpperCase(chars[i])) 
+                sb.append("_"); 
+            sb.append(Character.toLowerCase(chars[i]));
+        }
+        return sb.toString();
+    }
+    
+	
 	/**
 	 * Check if a String only have a-z,A-Z,0-9,"_" characters
 	 */

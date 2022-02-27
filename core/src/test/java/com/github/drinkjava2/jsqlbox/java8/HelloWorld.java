@@ -11,11 +11,13 @@
  */
 package com.github.drinkjava2.jsqlbox.java8;
 
+import static com.github.drinkjava2.jsqlbox.DB.que;
+
 /*- JAVA8_BEGIN */
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
-import static com.github.drinkjava2.jsqlbox.DB.*;
+
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveEntity;
@@ -46,20 +48,29 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
 		return this;
 	}
 
-	public static void main(String[] args) {
-		DataSource ds = JdbcConnectionPool
-				.create("jdbc:h2:mem:demo;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
-		DbContext ctx = new DbContext(ds);
-		ctx.setAllowShowSQL(true);
-		DbContext.setGlobalDbContext(ctx);
-		ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
-		ctx.tx(() -> {
-			HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
-			System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"),
-					" or name=", que("1"), " or name =", que("2")));
-			h.delete();
-		});
-		ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
-	}
+    public static void main(String[] args) {
+        DataSource ds = JdbcConnectionPool.create("jdbc:h2:mem:demo;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
+        DbContext ctx = new DbContext(ds);
+        ctx.setAllowShowSQL(true);
+        DbContext.setGlobalDbContext(ctx);
+        ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
+
+        try {//传统事务写法
+            ctx.startTrans();
+            HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+            System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"), " or name=", que("1"), " or name =", que("2")));
+            h.delete(); 
+            ctx.commitTrans();
+        } catch (Exception e) { 
+            ctx.rollbackTrans();
+        }
+
+        ctx.tx(() -> {//简化事务写法
+            HelloWorld h = new HelloWorld().setName("Foo2").insert().putField("name", "Hello jSqlBox2").update();
+            System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"), " or name=", que("1"), " or name =", que("2")));
+            h.delete();
+        });
+        
+        ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
+    }
 }
-/* JAVA8_END */

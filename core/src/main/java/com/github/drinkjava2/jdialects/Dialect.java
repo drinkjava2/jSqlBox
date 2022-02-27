@@ -155,7 +155,11 @@ public class Dialect {
 	/** If disable, will use same SqlTemplate for first page pagination query */
 	private static Boolean globalEnableTopLimitPagin = true;
 	
+	/** if not null, will use this JavaConverter to convert jdbc type to Java type */
 	public static JavaConverter globalJdbcTypeConverter=new BasicJavaConverter();
+	
+	/** if not null, will use this NamingRule to convert entity name to database table and entity field to database column */
+    public static NamingConversion globalNamingConversion = null;	
 
 	public static final String NOT_SUPPORT = "NOT_SUPPORT";
 	private static final String SKIP_ROWS = "$SKIP_ROWS";
@@ -636,6 +640,15 @@ public class Dialect {
 	/** Note! this is a global method to set globalJdbcTypeConverter */
 	public static void setGlobalJdbcTypeConverter(JavaConverter globalJdbcTypeConverter) {
 		Dialect.globalJdbcTypeConverter = globalJdbcTypeConverter;
-	} 
+	}
+
+    public static NamingConversion getGlobalNamingConversion() {
+        return globalNamingConversion;
+    }
+
+    /** Note! this is a global method to set globalNamingConversion */
+    public static void setGlobalNamingConversion(NamingConversion globalNamingConversion) {
+        Dialect.globalNamingConversion = globalNamingConversion;
+    } 
 
 }

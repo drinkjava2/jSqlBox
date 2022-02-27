@@ -177,17 +177,25 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
     private static TableModel entity2ModelIgnoreConfigMethod(Class<?> entityClass) {
         DialectException.assureNotNull(entityClass, "entity2Model method does not accept a null class");
 
-        // Entity
+        // Entity annotation
         String tableName = null;
         Map<String, Object> entityMap = getFirstEntityAnno(entityClass, "Entity");
         tableName = (String) entityMap.get("name");
 
-        // Table
+        // Table annotation
         Map<String, Object> tableMap = getFirstEntityAnno(entityClass, "Table");
         if (!StrUtils.isEmpty(tableMap.get("name")))
             tableName = (String) tableMap.get("name");
-        if (StrUtils.isEmpty(tableName))
-            tableName = entityClass.getSimpleName();
+        
+        if (StrUtils.isEmpty(tableName)) {
+            if (Dialect.globalNamingConversion != null) //by namingConvention
+                tableName = Dialect.globalNamingConversion.getTableName(entityClass);
+            else
+                tableName = entityClass.getSimpleName();
+        }
+        
+        
+        
         TableModel model = new TableModel(tableName); // Build the tableModel
         model.setEntityClass(entityClass);
         if (!tableMap.isEmpty()) {
@@ -321,7 +329,10 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
                 }
 
                 // @Version annotation
-                ColumnModel col = new ColumnModel(entityfieldName);
+                String columnName=entityfieldName;
+                if(Dialect.globalNamingConversion!=null)
+                    columnName=Dialect.globalNamingConversion.getColumnName(columnName);
+                ColumnModel col = new ColumnModel(columnName);
                 col.entityField(entityfieldName);
                 col.setConverterClassOrName(convertClassOrName);// @Convert's value
 

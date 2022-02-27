@@ -11,11 +11,13 @@
  */
 package com.github.drinkjava2.jsqlbox.helloworld;
 
+import static com.github.drinkjava2.jsqlbox.DB.que;
+
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 
-import com.github.drinkjava2.jdialects.annotation.jpa.Column;
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.DB;
@@ -30,8 +32,18 @@ import com.github.drinkjava2.jsqlbox.DbContext;
 
 public class HelloWorld extends ActiveRecord<HelloWorld> {
     @Id
-    @Column(length = 20)
+    @UUID25
+    private String id;
+
     private String name;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -48,10 +60,24 @@ public class HelloWorld extends ActiveRecord<HelloWorld> {
         DbContext ctx = new DbContext(ds);
         DbContext.setGlobalDbContext(ctx);
         ctx.executeDDL(ctx.toCreateDDL(HelloWorld.class));
+        
+        try {//传统事务写法
+            ctx.startTrans();
+            HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+            System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"), " or name=", que("1"), " or name =", que("2")));
+            h.delete(); 
+            ctx.commitTrans();
+        } catch (Exception e) { 
+            ctx.rollbackTrans();
+        }
+ 
+        //qt引用函数的用法
         new HelloWorld().setName("Hellow jSqlBox").insert();
-        String sql = DB.trans("select qt(name) from qt(helloWorld) where qt(name) like ?");
-        String param = "He%";
-        System.out.println(DB.qryString(sql, DB.par(param)));
+        String sql = DB.trans("select qt(name) from qt(helloWorld) where qt(name) like ?"); 
+        String result=DB.qryString(sql, DB.par("He%"));
+        System.out.println(result);
+        
+        //删除表格
         ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
     }
 }
