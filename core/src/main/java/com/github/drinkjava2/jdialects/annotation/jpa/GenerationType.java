@@ -47,7 +47,10 @@ public enum GenerationType {
 	 * cannot create the schema resource at runtime.
 	 */
 	AUTO,
-
+	
+    /** A 32 character length UUID */
+    UUID,  
+    
 	/** A 25 character length UUID */
 	UUID25,	
 

@@ -274,7 +274,14 @@ public class ColumnModel {
 		this.getTableModel().identityGenerator(columnName);
 		return this;
 	}
-
+	
+    public ColumnModel uuid() {
+        makeSureTableModelExist();
+        this.idGenerationType = GenerationType.UUID;
+        this.idGeneratorName = null;
+        return this;
+    }
+    
 	public ColumnModel uuid25() {
 		makeSureTableModelExist();
 		this.idGenerationType = GenerationType.UUID25;

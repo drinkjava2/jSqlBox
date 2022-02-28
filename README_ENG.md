@@ -45,7 +45,7 @@ jSqlBox is a DAO tool based on Apache-commons-DbUtils core.
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>
-   <version>5.0.5.jre8</version> <!--Or newest version-->
+   <version>5.0.10.jre8</version> <!--Or newest version-->
 </dependency> 
 ```
 

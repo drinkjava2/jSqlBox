@@ -426,6 +426,8 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
                     col.identityId();
                 if (existEntityAnno(field, "TimeStampId"))
                     col.timeStampId();
+                if (existEntityAnno(field, "UUID"))
+                    col.uuid();                
                 if (existEntityAnno(field, "UUID25"))
                     col.uuid25();
                 if (existEntityAnno(field, "UUID26"))
@@ -447,6 +449,8 @@ public abstract class TableModelUtilsOfEntity {// NOSONAR
                             col.autoId();
                         else if ("IDENTITY".equals(strategyStr))
                             col.identityId();
+                        else if ("UUID".equals(strategyStr))
+                            col.uuid();
                         else if ("UUID25".equals(strategyStr))
                             col.uuid25();
                         else if ("UUID26".equals(strategyStr))

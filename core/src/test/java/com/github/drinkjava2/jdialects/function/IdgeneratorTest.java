@@ -12,6 +12,7 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
+import com.github.drinkjava2.jdialects.annotation.jdia.UUID;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID26;
 import com.github.drinkjava2.jdialects.annotation.jpa.GeneratedValue;
@@ -216,6 +217,51 @@ public class IdgeneratorTest extends JdialectsTestBase {
 		Assert.assertTrue(t.column("id2").getPkey());
 	}
 
+
+    public static class uuidEntity {
+        @GeneratedValue(strategy = GenerationType.UUID)
+        private String id1;
+        @UUID
+        private String id2;
+
+        private String id3;
+
+        public static void config(TableModel t) {
+            t.getColumn("id3").uuid();
+        }
+
+        public String getId1() {
+            return id1;
+        }
+
+        public void setId1(String id1) {
+            this.id1 = id1;
+        }
+
+        public String getId2() {
+            return id2;
+        }
+
+        public void setId2(String id2) {
+            this.id2 = id2;
+        }
+
+        public String getId3() {
+            return id3;
+        }
+
+        public void setId3(String id3) {
+            this.id3 = id3;
+        }
+
+    }
+
+    @Test
+    public void testUUID() {
+        reBuildDB(TableModelUtils.entity2Models(uuidEntity.class));
+        testOnCurrentRealDatabase(TableModelUtils.entity2Models(uuidEntity.class));
+    }
+    
 	public static class uuid25Entity {
 		@GeneratedValue(strategy = GenerationType.UUID25)
 		private String id1;

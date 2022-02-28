@@ -34,6 +34,7 @@ import com.github.drinkjava2.jdialects.id.UUID26Generator;
 import com.github.drinkjava2.jdialects.id.UUID32Generator;
 import com.github.drinkjava2.jdialects.id.UUID36Generator;
 import com.github.drinkjava2.jdialects.id.UUIDAnyGenerator;
+import com.github.drinkjava2.jdialects.id.UUIDGenerator;
 
 /**
  * A TableModel definition represents a platform dependent Database Table, from
@@ -449,7 +450,7 @@ public class TableModel {
 
 	/**
 	 * Get one of these IdGenerator instance by generationType:
-	 * IDENTITY,AUTO,UUID25,UUID26,UUID32,UUID36,TIMESTAMP
+	 * IDENTITY,AUTO, UUID25,UUID26,UUID,UUID32,UUID36,TIMESTAMP
 	 */
 	public IdGenerator getIdGenerator(GenerationType generationType) {
 		return getIdGeneratorByType(this, generationType);
@@ -478,6 +479,8 @@ public class TableModel {
 		}
 		case AUTO:
 			return AutoIdGenerator.INSTANCE;
+        case UUID:
+            return UUIDGenerator.INSTANCE;  
 		case UUID25:
 			return UUID25Generator.INSTANCE;
 		case UUID26:
