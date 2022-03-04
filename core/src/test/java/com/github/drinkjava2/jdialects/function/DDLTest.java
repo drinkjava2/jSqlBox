@@ -12,6 +12,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.DbContext;
 
 /**
  * This is unit test for DDL
@@ -370,6 +371,8 @@ public class DDLTest extends JdialectsTestBase {
 		t1.column("phoneNumber").VARCHAR(50).singleIndex("IDX2");
 		t1.column("age").INTEGER().notNull().check("'>0'");
 		t1.index("idx3").columns("address", "phoneNumber").unique();
+		t1.column("aaaaaaaaaaaaa").NUMERIC(5,2);
+		t1.column("bbbbbbbbbbb").DECIMAL(5, 2);
 
 		TableModel t2 = new TableModel("orders").comment("order comment");
 		t2.column("id").LONG().autoId().pkey();
@@ -398,4 +401,18 @@ public class DDLTest extends JdialectsTestBase {
 
 		testOnCurrentRealDatabase(t1, t2, t3);
 	}
+	
+	@Test
+    public void testNumericAndDecimal() {
+        DbContext db = new DbContext(ds);
+        db.setAllowShowSQL(true);
+        TableModel t1 = new TableModel("test");
+        t1.column("name").STRING(20).pkey();
+        t1.column("a").NUMERIC(4, 2);
+        t1.column("b").DECIMAL(4, 2);
+        db.quiteExecute(db.toDropAndCreateDDL(t1));
+        db.exe("insert into test (name,a, b) values('a', 12.345, 12.345)");
+        Systemout.println("a=" + db.qryObject("select a from test"));
+        Systemout.println("b=" + db.qryObject("select b from test"));
+    }
 }

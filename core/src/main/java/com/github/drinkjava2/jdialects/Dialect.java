@@ -209,10 +209,17 @@ public class Dialect {
 	   
     static {
         DialectFunctionTemplate.initExtraFunctionTemplates();
+
+        //=================Manual fix special bugs in dialects========================
         
-        //Manual fix bugs some special dialect bugs
-        H2Dialect.ddlFeatures.supportsIdentityColumns=false; //H2 from 2.x version does not support Identity function
-    } 
+        //H2 from 2.x version Identity column has problem 
+        H2Dialect.ddlFeatures.supportsIdentityColumns = false;
+
+        //Some dialects decimal template is N/A, set it same as numeric 
+        for (Dialect d : dialects)
+            if ("N/A".equals(d.typeMappings.get(Type.DECIMAL)))
+                d.typeMappings.put(Type.DECIMAL, d.typeMappings.get(Type.NUMERIC) );
+    }
 
 	/** Use Dialect.dialects directly */
 	@Deprecated
