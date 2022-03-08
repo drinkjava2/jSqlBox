@@ -25,28 +25,28 @@ import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
 
 public class HelloWorld implements ActiveEntity<HelloWorld> {
-	@Id
-	@UUID25
-	private String id;
+    @Id
+    @UUID25
+    private String id;
 
-	private String name;
+    private String name;
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public HelloWorld setName(String name) {
-		this.name = name;
-		return this;
-	}
+    public HelloWorld setName(String name) {
+        this.name = name;
+        return this;
+    }
 
     public static void main(String[] args) {
         DataSource ds = JdbcConnectionPool.create("jdbc:h2:mem:demo;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0", "sa", "");
@@ -55,13 +55,19 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
         DbContext.setGlobalDbContext(ctx);
         ctx.quiteExecute(ctx.toDropAndCreateDDL(HelloWorld.class));
 
-        try {//传统事务写法
+        {//无事务
+            HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
+            System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"), " or name=", que("1"), " or name =", que("2")));
+            h.delete();
+        }
+
+        try {//开启事务
             ctx.startTrans();
             HelloWorld h = new HelloWorld().setName("Foo").insert().putField("name", "Hello jSqlBox").update();
             System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"), " or name=", que("1"), " or name =", que("2")));
-            h.delete(); 
+            h.delete();
             ctx.commitTrans();
-        } catch (Exception e) { 
+        } catch (Exception e) {
             ctx.rollbackTrans();
         }
 
@@ -70,7 +76,7 @@ public class HelloWorld implements ActiveEntity<HelloWorld> {
             System.out.println(DB.qryString("select name from HelloWorld where name like", que("H%"), " or name=", que("1"), " or name =", que("2")));
             h.delete();
         });
-        
+
         ctx.executeDDL(ctx.toDropDDL(HelloWorld.class));
     }
 }

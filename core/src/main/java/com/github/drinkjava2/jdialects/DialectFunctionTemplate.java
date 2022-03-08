@@ -82,7 +82,7 @@ public class DialectFunctionTemplate {
         mp.put("sum", "*");
         mp.put("substring", "1=substring($P1)|2=substring($P1, $P2)|3=substring($P1, $P2, $P3)");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("random", "0=random()");
         mp.put("avg", "1=avg($P1)");
         mp.put("min", "*");
@@ -251,7 +251,7 @@ public class DialectFunctionTemplate {
         mp.put("atan", "*");
         mp.put("translate", "*");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("sysdate", "0=sysdate");
         mp.put("trim", "1=trim($P1)|2=trim($P1 $P2)|3=trim($P1 $P2 $P3)|4=trim($P1 $P2 $P3 $P4)");
         mp.put("sqrt", "*");
@@ -484,7 +484,7 @@ public class DialectFunctionTemplate {
         mp.put("atan", "*");
         mp.put("translate", "*");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("sysdate", "0=sysdate");
         mp.put("trim", "1=trim($P1)|2=trim($P1 $P2)|3=trim($P1 $P2 $P3)|4=trim($P1 $P2 $P3 $P4)");
         mp.put("sqrt", "*");
@@ -613,7 +613,7 @@ public class DialectFunctionTemplate {
         mp.put("sum", "*");
         mp.put("substring", "1=substring($P1)|2=substring($P1, $P2)|3=substring($P1, $P2, $P3)");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("avg", "1=avg($P1)");
         mp.put("min", "*");
         mp.put("hour", "1=extract(hour from $P1)");
@@ -785,7 +785,7 @@ public class DialectFunctionTemplate {
         mp.put("sum", "*");
         mp.put("substring", "1=substring($P1)|2=substring($P1 FROM $P2)|3=substring($P1 FROM $P2 FOR $P3)");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("avg", "1=avg($P1)");
         mp.put("min", "*");
         mp.put("hour", "1=extract(hour from $P1)");
@@ -999,7 +999,7 @@ public class DialectFunctionTemplate {
         mp.put("sum", "*");
         mp.put("substring", "1=substring($P1)|2=substring($P1, $P2)|3=substring($P1, $P2, $P3)");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("avg", "1=avg($P1)");
         mp.put("min", "*");
         mp.put("hour", "1=extract(hour from $P1)");
@@ -1167,7 +1167,7 @@ public class DialectFunctionTemplate {
         mp.put("atan", "*");
         mp.put("translate", "*");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("sysdate", "0=sysdate");
         mp.put("trim", "1=trim($P1)|2=trim($P1 $P2)|3=trim($P1 $P2 $P3)|4=trim($P1 $P2 $P3 $P4)");
         mp.put("sqrt", "*");
@@ -1239,7 +1239,7 @@ public class DialectFunctionTemplate {
         mp.put("sum", "*");
         mp.put("substring", "1=substring($P1)|2=substring($P1, $P2)|3=substring($P1, $P2, $P3)");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("avg", "1=avg($P1)");
         mp.put("min", "*");
         mp.put("hour", "1=extract(hour from $P1)");
@@ -1349,7 +1349,7 @@ public class DialectFunctionTemplate {
         mp.put("sum", "*");
         mp.put("substring", "1=substring($P1)|2=substring($P1, $P2)|3=substring($P1, $P2, $P3)");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("avg", "1=avg($P1)");
         mp.put("min", "*");
         mp.put("hour", "1=extract(hour from $P1)");
@@ -1574,7 +1574,7 @@ public class DialectFunctionTemplate {
         mp.put("sum", "*");
         mp.put("substring", "1=substring($P1)|2=substring($P1 from $P2)|3=substring($P1 from $P2 for $P3)");
         mp.put("second", "1=extract(second from $P1)");
-        mp.put("cast", "2=cast($P1, $P2)");
+        mp.put("cast", "1=cast($P1)|2=cast($P1 as $P2)");
         mp.put("avg", "1=avg($P1)");
         mp.put("min", "*");
         mp.put("hour", "1=extract(hour from $P1)");
@@ -1616,5 +1616,9 @@ public class DialectFunctionTemplate {
         mp.put("to_char", "*");
         copyTo(mp, Dialect.TimesTenDialect);
     }
+
+
+
+
  
 }
