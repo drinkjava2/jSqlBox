@@ -229,6 +229,9 @@ public class GuessDialectUtils {
 			return Dialect.FirebirdDialect;
 		if (StrUtils.containsIgnoreCase(databaseName, "sqlite"))
 			return Dialect.SQLiteDialect;
+
+		if (StrUtils.startsWithIgnoreCase(databaseName, "DM"))
+			return Dialect.DamengDialect;
 		return null;
 	}
 }
