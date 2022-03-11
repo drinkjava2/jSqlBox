@@ -19,15 +19,34 @@ package com.github.drinkjava2.jdialects;
  */
 @SuppressWarnings("all")
 public class SampleDialect extends Dialect {
-     
+
+    public void copyExistDialect(Dialect d) {
+        ddlFeatures = DDLFeatures.copyDDLFeatures(d);//复制已有的方言DDL属性
+        sqlTemplate = d.sqlTemplate; //从已有方言复制分页模板
+        topLimitTemplate = d.topLimitTemplate; //从已有方言复制Top分页模板
+        typeMappings.putAll(d.typeMappings); //从已有方言复制类型定义
+        functions.putAll(d.functions); //从已有方言复制函数模板
+    }
 
     public SampleDialect(String name) {
         super(name);
-        DDLFeatures.copyDDLFeatures(Dialect.MySQL55Dialect, this);
+        copyExistDialect(Dialect.MySQL55Dialect);
     }
-    
+
+    //可以覆盖父类方法实现自定义功能    
     @Override
-    public String pagin(int pageNumber, int pageSize, String sql) {
+    public String pagin(int pageNumber, int pageSize, String sql) {//分页
         return super.pagin(pageNumber, pageSize, sql);
     }
+
+    @Override
+    public String trans(String... sql) { //函数翻译
+        return super.trans(sql);
+    }
+
+    @Override
+    public String[] toCreateDDL(Class<?>... entityClasses) { //根据实体类生成DDL
+        return super.toCreateDDL(entityClasses);
+    }
+
 }

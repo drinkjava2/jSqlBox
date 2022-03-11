@@ -194,11 +194,11 @@ public class Dialect {
         DialectPaginationTemplate.initPaginTemplates();
         DDLFeatures.initDDLFeatures();
         
-        //=================Manual register extra functions templates ================
+        //=================Manual register extra functions in templates ================
         DialectFunctionTemplate.initExtraFunctionTemplates();
 
-        //=================Manual fix special bugs in dialects========================
-        H2Dialect.ddlFeatures.supportsIdentityColumns = false;
+        //=================Manual fix special bugs in DDL ========================
+        H2Dialect.ddlFeatures.supportsIdentityColumns = false; //H2 from 2.x Identity column has problem 
     }
 	   
     public Dialect(String name) {
