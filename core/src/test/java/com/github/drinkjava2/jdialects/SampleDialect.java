@@ -19,13 +19,11 @@ package com.github.drinkjava2.jdialects;
  */
 @SuppressWarnings("all")
 public class SampleDialect extends Dialect {
-    {
-        
-        
-    }
+     
 
     public SampleDialect(String name) {
         super(name);
+        DDLFeatures.copyDDLFeatures(Dialect.MySQL55Dialect, this);
     }
     
     @Override
