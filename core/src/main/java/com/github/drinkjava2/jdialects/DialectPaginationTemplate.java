@@ -20,11 +20,20 @@ package com.github.drinkjava2.jdialects;
  */
 @SuppressWarnings("all")
 public class DialectPaginationTemplate {
+    
+    protected static void initPaginTemplates() {
+        for (Dialect d : Dialect.dialects) {
+            d.sqlTemplate = initializePaginSQLTemplate(d);
+            d.topLimitTemplate = initializeTopLimitSqlTemplate(d);
+        }
+    }
+    
+    
     /**
-    * Return pagination template of this Dialect
+    * Return pagination template of this Dialect     
     */
     protected static String initializePaginSQLTemplate(Dialect d) {
-        switch (d.type){
+        switch (DialectType.getDialectType(d)){
         case Cache71Dialect:
         case DB2390Dialect:
         case DB2390V8Dialect:
@@ -133,7 +142,7 @@ public class DialectPaginationTemplate {
      * Return top limit sql template of this Dialect
     */
     protected static String initializeTopLimitSqlTemplate(Dialect d) {
-        switch (d.type){
+        switch (DialectType.getDialectType(d)){
         case FrontBaseDialect:
         case JDataStoreDialect:
         case MckoiDialect:

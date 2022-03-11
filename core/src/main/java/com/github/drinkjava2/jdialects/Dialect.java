@@ -136,6 +136,21 @@ public class Dialect {
 	public static final Dialect Teradata14Dialect = new Dialect("Teradata14Dialect");
 	public static final Dialect TeradataDialect = new Dialect("TeradataDialect");
 	public static final Dialect TimesTenDialect = new Dialect("TimesTenDialect");
+    public static Dialect[] dialects = new Dialect[] { DerbyDialect, OracleDialect, Oracle9Dialect, DamengDialect,
+           GBaseDialect, AccessDialect, CobolDialect, DbfDialect, ExcelDialect, ParadoxDialect, SQLiteDialect,
+           TextDialect, XMLDialect, Cache71Dialect, CUBRIDDialect, DataDirectOracle9Dialect, DB2390Dialect,
+           DB2390V8Dialect, DB2400Dialect, DB297Dialect, DB2Dialect, DerbyTenFiveDialect, DerbyTenSevenDialect,
+           DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect,
+           HANARowStoreDialect, HSQLDialect, Informix10Dialect, InformixDialect, Ingres10Dialect, Ingres9Dialect,
+           IngresDialect, InterbaseDialect, JDataStoreDialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect,
+           MariaDB53Dialect, MariaDBDialect, MckoiDialect, MimerSQLDialect, MySQL55Dialect, MySQL57Dialect,
+           MySQL57InnoDBDialect, MySQL5Dialect, MySQL5InnoDBDialect, MySQL8Dialect, MySQLDialect, MySQLInnoDBDialect,
+           MySQLMyISAMDialect, Oracle10gDialect, Oracle12cDialect, Oracle8iDialect, Oracle9iDialect, PointbaseDialect,
+           PostgresPlusDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect,
+           PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, PostgreSQL9Dialect, PostgreSQLDialect,
+           ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServer2005Dialect, SQLServer2008Dialect,
+           SQLServer2012Dialect, SQLServerDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE157Dialect,
+           SybaseASE15Dialect, SybaseDialect, Teradata14Dialect, TeradataDialect, TimesTenDialect };
 
 	/** If set true will allow use reserved words in DDL, default value is false */
 	private static Boolean globalAllowReservedWords = false;
@@ -169,59 +184,28 @@ public class Dialect {
 	public String sqlTemplate;
 	public String topLimitTemplate;
 	public String name;
-	public DialectType type; // To support java6 switch
 	public Map<Type, String> typeMappings = new EnumMap<Type, String>(Type.class);
 	public Map<String, String> functions = new HashMap<String, String>();
 	public DDLFeatures ddlFeatures = new DDLFeatures();// NOSONAR
 
-    static {
-        DialectTypeMappingTemplate.initTypeMappings();
+    static {//Initialize all dialects templates at one time
+        DialectTypeMappingTemplate.initTypeMappingTemplates();
         DialectFunctionTemplate.initFunctionTemplates();
+        DialectPaginationTemplate.initPaginTemplates();
+        DDLFeatures.initDDLFeatures();
+        
+        //=================Manual register extra functions templates ================
+        DialectFunctionTemplate.initExtraFunctionTemplates();
+
+        //=================Manual fix special bugs in dialects========================
+        H2Dialect.ddlFeatures.supportsIdentityColumns = false;
     }
 	   
     public Dialect(String name) {
         this.name = name;
-        try {
-            this.type = DialectType.valueOf(name);
-        } catch (Exception e) {
-            this.type = DialectType.Customized;
-        }
-        this.sqlTemplate = DialectPaginationTemplate.initializePaginSQLTemplate(this);
-        this.topLimitTemplate = DialectPaginationTemplate.initializeTopLimitSqlTemplate(this);
-        DDLFeatures.initDDLFeatures(this);
     }
 
-	public static Dialect[] dialects = new Dialect[] { DerbyDialect, OracleDialect, Oracle9Dialect, DamengDialect,
-	            GBaseDialect, AccessDialect, CobolDialect, DbfDialect, ExcelDialect, ParadoxDialect, SQLiteDialect,
-	            TextDialect, XMLDialect, Cache71Dialect, CUBRIDDialect, DataDirectOracle9Dialect, DB2390Dialect,
-	            DB2390V8Dialect, DB2400Dialect, DB297Dialect, DB2Dialect, DerbyTenFiveDialect, DerbyTenSevenDialect,
-	            DerbyTenSixDialect, FirebirdDialect, FrontBaseDialect, H2Dialect, HANAColumnStoreDialect,
-	            HANARowStoreDialect, HSQLDialect, Informix10Dialect, InformixDialect, Ingres10Dialect, Ingres9Dialect,
-	            IngresDialect, InterbaseDialect, JDataStoreDialect, MariaDB102Dialect, MariaDB103Dialect, MariaDB10Dialect,
-	            MariaDB53Dialect, MariaDBDialect, MckoiDialect, MimerSQLDialect, MySQL55Dialect, MySQL57Dialect,
-	            MySQL57InnoDBDialect, MySQL5Dialect, MySQL5InnoDBDialect, MySQL8Dialect, MySQLDialect, MySQLInnoDBDialect,
-	            MySQLMyISAMDialect, Oracle10gDialect, Oracle12cDialect, Oracle8iDialect, Oracle9iDialect, PointbaseDialect,
-	            PostgresPlusDialect, PostgreSQL81Dialect, PostgreSQL82Dialect, PostgreSQL91Dialect, PostgreSQL92Dialect,
-	            PostgreSQL93Dialect, PostgreSQL94Dialect, PostgreSQL95Dialect, PostgreSQL9Dialect, PostgreSQLDialect,
-	            ProgressDialect, RDMSOS2200Dialect, SAPDBDialect, SQLServer2005Dialect, SQLServer2008Dialect,
-	            SQLServer2012Dialect, SQLServerDialect, Sybase11Dialect, SybaseAnywhereDialect, SybaseASE157Dialect,
-	            SybaseASE15Dialect, SybaseDialect, Teradata14Dialect, TeradataDialect, TimesTenDialect };
-	   
-    static {
-        DialectFunctionTemplate.initExtraFunctionTemplates();
-
-        //=================Manual fix special bugs in dialects========================
-
-        //H2 from 2.x version Identity column has problem 
-        H2Dialect.ddlFeatures.supportsIdentityColumns = false;
-
-        //Some dialects decimal template is N/A, set it same as numeric 
-        for (Dialect d : dialects)
-            if ("N/A".equals(d.typeMappings.get(Type.DECIMAL)))
-                d.typeMappings.put(Type.DECIMAL, d.typeMappings.get(Type.NUMERIC));
-    } 
-
-	/** Use Dialect.dialects directly */
+	/** Use Dialect.dialects instead */
 	@Deprecated
 	public static Dialect[] values() {
 		return dialects;

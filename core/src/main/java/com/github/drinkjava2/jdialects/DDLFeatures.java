@@ -56,7 +56,12 @@ public class DDLFeatures {
     protected Boolean supportsIfExistsAfterConstraintName;
     protected String openQuote; // for quote column which used keywords
     protected String closeQuote; // for quote column which used keywords
-
+    
+    protected static void initDDLFeatures() {
+        for (Dialect d : Dialect.dialects) 
+            initDDLFeatures(d); 
+    }
+    
     public String getAddColumnString() {
         return addColumnString;
     }
@@ -298,7 +303,8 @@ public class DDLFeatures {
         ddl.supportsSequences = true;
         ddl.supportsTableCheck = true;
         ddl.tableTypeString = "";
-        switch (dia.type){
+        
+        switch (DialectType.getDialectType(dia)){
         case SQLiteDialect: {
             ddl.addColumnString = "add column";
             ddl.addFKeyRefPkeyString = NOT_SUPPORT;

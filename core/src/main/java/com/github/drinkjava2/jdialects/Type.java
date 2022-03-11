@@ -12,7 +12,7 @@
 package com.github.drinkjava2.jdialects;
 
 /**
- * SQL Type definitions
+ * Virtual SQL Type definitions
  * 
  * @author Yong Zhu
  * @since 1.0.0
