@@ -201,6 +201,10 @@ public class Dialect {
         H2Dialect.ddlFeatures.supportsIdentityColumns = false; //H2 from 2.x Identity column has problem 
     }
 	   
+    public Dialect() {
+        this.name=this.getClass().getSimpleName();
+    }
+    
     public Dialect(String name) {
         this.name = name;
     }

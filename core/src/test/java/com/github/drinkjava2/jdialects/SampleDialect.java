@@ -11,6 +11,10 @@
  */
 package com.github.drinkjava2.jdialects;
 
+import java.util.Arrays;
+
+import com.github.drinkjava2.jdialects.entity.UserTB;
+
 /**
  * SampleDialect is only a sample to show how to extend a existing dialect
  * 
@@ -20,17 +24,20 @@ package com.github.drinkjava2.jdialects;
 @SuppressWarnings("all")
 public class SampleDialect extends Dialect {
 
-    public void copyExistDialect(Dialect d) {
-        ddlFeatures = DDLFeatures.copyDDLFeatures(d);//复制已有的方言DDL属性
-        sqlTemplate = d.sqlTemplate; //从已有方言复制分页模板
-        topLimitTemplate = d.topLimitTemplate; //从已有方言复制Top分页模板
-        typeMappings.putAll(d.typeMappings); //从已有方言复制类型定义
-        functions.putAll(d.functions); //从已有方言复制函数模板
+    public static void copyDialect(Dialect from, Dialect to) {
+        ClassCacheUtils.copyBean(from.ddlFeatures, to.ddlFeatures);//从已有方言复制DDL属性
+
+        to.sqlTemplate = from.sqlTemplate; //从已有方言复制分页模板
+        to.topLimitTemplate = from.topLimitTemplate;
+
+        to.typeMappings.putAll(from.typeMappings); //从已有方言复制类型定义模板
+
+        to.functions.putAll(from.functions); //从已有方言复制函数定义模板
     }
 
-    public SampleDialect(String name) {
-        super(name);
-        copyExistDialect(Dialect.MySQL55Dialect);
+    public SampleDialect() {
+        super();
+        copyDialect(Dialect.MySQL55Dialect, this);
     }
 
     //可以覆盖父类方法实现自定义功能    
@@ -45,8 +52,12 @@ public class SampleDialect extends Dialect {
     }
 
     @Override
-    public String[] toCreateDDL(Class<?>... entityClasses) { //根据实体类生成DDL
+    public String[] toCreateDDL(Class<?>... entityClasses) { //生成DDL
         return super.toCreateDDL(entityClasses);
     }
 
+    public static void main(String[] args) {
+        SampleDialect d = new SampleDialect();
+        System.out.println(Arrays.deepToString(d.toCreateDDL(UserTB.class)));
+    }
 }

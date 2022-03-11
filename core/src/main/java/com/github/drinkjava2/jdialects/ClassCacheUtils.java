@@ -212,5 +212,23 @@ public abstract class ClassCacheUtils {// NOSONAR
 			throw new DialectException(e);
 		}
 	}
+	
+	/**
+	 * Shallow copy source bean's field to target bean's same name field
+	 */
+	public static void copyBean(Object from, Object to) {
+	    Map<String, Method> read=getClassReadMethods(from.getClass());
+	    Map<String, Method> write=getClassWriteMethods(to.getClass());
+	    for (Entry<String, Method> r : read.entrySet()) {
+            String field=r.getKey();
+            if(write.containsKey(field)){
+                try {
+                    Object value=readValueFromBeanField(from, field);
+                    writeValueToBeanField(to, field, value);
+                } catch (Exception e) {
+                }
+            }
+        } 
+	}
 
 }
