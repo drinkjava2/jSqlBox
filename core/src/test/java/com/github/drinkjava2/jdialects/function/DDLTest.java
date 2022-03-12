@@ -335,7 +335,7 @@ public class DDLTest extends JdialectsTestBase {
 	}
 
 	@Test
-	public void testEngineTailAndColumnTail() {// engineTail and column Tail
+	public void testEngineTailTableTailColumnTail() {// engineTail and tableTail and columnTail test
 		TableModel t = new TableModel("tailsTestTable");
 		t.engineTail(" DEFAULT CHARSET=utf8");
 		t.column("id").STRING(20).pkey();
@@ -345,7 +345,24 @@ public class DDLTest extends JdialectsTestBase {
 		printOneDialectsDDLs(Dialect.MySQL5InnoDBDialect, t);
 		printOneDialectsDDLs(Dialect.MariaDB53Dialect, t);
 		testOnCurrentRealDatabase(t);
+		
+		Systemout.println("\n\n Set tableTail with empty String to block engine and engineTail");
+		t.tableTail("");
+		printOneDialectsDDLs(Dialect.Oracle10gDialect, t);
+        printOneDialectsDDLs(Dialect.H2Dialect, t);
+        printOneDialectsDDLs(Dialect.MySQL5InnoDBDialect, t);
+        printOneDialectsDDLs(Dialect.MariaDB53Dialect, t);
+        testOnCurrentRealDatabase(t);
+        
+        Systemout.println("\n\n Set tableTail to override engine and engineTail and export on all dialect");
+        t.tableTail(" engine=innoDB DEFAULT CHARSET=utf8");
+        printOneDialectsDDLs(Dialect.Oracle10gDialect, t);
+        printOneDialectsDDLs(Dialect.H2Dialect, t);
+        printOneDialectsDDLs(Dialect.MySQL5InnoDBDialect, t);
+        printOneDialectsDDLs(Dialect.MariaDB53Dialect, t);
+        testOnCurrentRealDatabase(t); 
 	}
+	 
 
 	@Test
 	public void singleXxxMethodTest() {// Test singleXxx methods

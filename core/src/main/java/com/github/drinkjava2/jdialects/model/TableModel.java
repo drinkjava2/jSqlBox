@@ -56,10 +56,18 @@ public class TableModel {
 
 	/**
 	 * Optional, If support engine like MySQL or MariaDB, add engineTail at the end
-	 * of "create table..." DDL, usually used to set encode String like " DEFAULT
+	 * of "create table... engine=xxx" DDL, usually used to set encode String like " DEFAULT
 	 * CHARSET=utf8" for MySQL
+	 * engineTail only effect when dialect support engine
 	 */
 	private String engineTail;
+	
+    /**
+     * if set not null, tableTail will override engine and engineTail 
+     * and if not null, tableTail always be added at end of DDL no matter if dialect support engine
+     * Tips: if set tableTail="" can disable engine and engineTail
+     */
+    private String tableTail = null;
 
 	/** Columns in this table */
 	private List<ColumnModel> columns = new ArrayList<ColumnModel>();
@@ -100,6 +108,7 @@ public class TableModel {
 		tb.check = this.check;
 		tb.comment = this.comment;
 		tb.engineTail = this.engineTail;
+		tb.tableTail = this.tableTail;
 		tb.entityClass = this.entityClass;
 		if (!columns.isEmpty())
 			for (ColumnModel item : columns) {
@@ -439,6 +448,15 @@ public class TableModel {
 		this.engineTail = engineTail;
 		return this;
 	}
+	
+	 /**
+     * if not null, no matter if support engine, use this tableTail override engine and engineTail
+     */
+    public TableModel tableTail(String tableTail) {
+        checkReadOnly();
+        this.tableTail = tableTail;
+        return this;
+    }
 
 	/**
 	 * Search and return the IdGenerator in this TableModel by its generationType
@@ -612,7 +630,16 @@ public class TableModel {
 		this.engineTail = engineTail;
 	}
 
-	public List<IndexModel> getIndexConsts() {
+	public String getTableTail() {
+        return tableTail;
+    }
+
+    public void setTableTail(String tableTail) {
+        checkReadOnly();
+        this.tableTail = tableTail;
+    }
+
+    public List<IndexModel> getIndexConsts() {
 		if (indexConsts == null)
 			indexConsts = new ArrayList<IndexModel>();
 		return indexConsts;

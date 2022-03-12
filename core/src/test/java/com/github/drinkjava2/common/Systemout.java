@@ -8,7 +8,7 @@ package com.github.drinkjava2.common;
  */
 @SuppressWarnings("all")
 public class Systemout {
-	public static boolean allowPrint = false;
+	public static boolean allowPrint = false; //开发期打开好显示输出内容，提交时关闭以减少命令行输出
 
 	public static boolean isAllowPrint() {
 		return allowPrint;

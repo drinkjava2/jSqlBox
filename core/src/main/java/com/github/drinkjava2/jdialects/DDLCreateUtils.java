@@ -246,16 +246,20 @@ public class DDLCreateUtils {// NOSONAR
 		buf.setLength(buf.length() - 1);
 		buf.append(")");
 
-		// Engine for MariaDB & MySql only, for example "engine=innoDB"
-		String tableTypeString = features.tableTypeString;
-		if (!StrUtils.isEmpty(tableTypeString) && !DDLFeatures.NOT_SUPPORT.equals(tableTypeString)) {
-			buf.append(tableTypeString);
+		if(t.getTableTail()!=null) {//if tableTail!=null, always export tableTail and ignore engine and engineTail
+		    buf.append(t.getTableTail());
+        } else { //
+            // Engine for MariaDB & MySql only, for example "engine=innoDB"
+            String tableTypeString = features.tableTypeString; //tableTypeString determined if dialect support engine
+            if (!StrUtils.isEmpty(tableTypeString) && !DDLFeatures.NOT_SUPPORT.equals(tableTypeString)) {
+                buf.append(tableTypeString);
 
-			// EngineTail, for example:" DEFAULT CHARSET=utf8"
-			if (!StrUtils.isEmpty(t.getEngineTail()))
-				buf.append(t.getEngineTail());
-		}
-
+                // EngineTail, for example:" DEFAULT CHARSET=utf8"
+                if (!StrUtils.isEmpty(t.getEngineTail()))
+                    buf.append(t.getEngineTail());
+            }
+        }
+		
 		objectResultList.add(buf.toString());
 
 		// table comment on
