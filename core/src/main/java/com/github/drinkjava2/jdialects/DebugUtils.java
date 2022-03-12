@@ -33,6 +33,7 @@ public abstract class DebugUtils {//// NOSONAR
 		sb.append("columnName=" + c.getColumnName()).append(", ");
 		sb.append("transient=" + c.getTransientable()).append(", ");
 		sb.append("columnType=" + c.getColumnType()).append(", ");
+		sb.append("columnDefinition=" + c.getColumnDefinition()).append(", ");
 		sb.append("pkey=" + c.getPkey()).append(", ");
 		if (c.getShardTable() != null)
 			sb.append("shardTable=" + Arrays.deepToString(c.getShardTable())).append(", ");
@@ -77,7 +78,7 @@ public abstract class DebugUtils {//// NOSONAR
 	public static String getTableModelDebugInfo(TableModel model) {
 		StringBuilder sb = new StringBuilder("\r\n=======================================================\r\n");
 		sb.append("tableName=" + model.getTableName()).append("\r\n");
-		sb.append("getEntityClass=" + model.getEntityClass()).append("\r\n");
+		sb.append("entityClass=" + model.getEntityClass()).append("\r\n");
 		sb.append("readOnly=" + model.getReadOnly()).append("\r\n");
 		sb.append(getFkeyDebugInfo(model));
 		List<ColumnModel> columns = model.getColumns();

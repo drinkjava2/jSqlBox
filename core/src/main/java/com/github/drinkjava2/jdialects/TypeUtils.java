@@ -50,6 +50,7 @@ public abstract class TypeUtils {// NOSONAR
 	public static final String SMALLINT = "SMALLINT";
 	public static final String TIME = "TIME";
 	public static final String TIMESTAMP = "TIMESTAMP";
+    public static final String DATETIME = "DATETIME"; //DATETIME is only DB column type
 	public static final String TINYINT = "TINYINT";
 	public static final String VARBINARY = "VARBINARY";
 	public static final String VARCHAR = "VARCHAR";
@@ -197,8 +198,10 @@ public abstract class TypeUtils {// NOSONAR
 			return Type.SMALLINT;
 		if (TIME.equalsIgnoreCase(columnDef))
 			return Type.TIME;
-		if (TIMESTAMP.equalsIgnoreCase(columnDef))
-			return Type.TIMESTAMP;
+        if (TIMESTAMP.equalsIgnoreCase(columnDef))
+            return Type.TIMESTAMP;
+        if (DATETIME.equalsIgnoreCase(columnDef)) //DATETIME is only DB column type, no Java type 
+            return Type.TIMESTAMP;
 		if (TINYINT.equalsIgnoreCase(columnDef))
 			return Type.TINYINT;
 		if (VARBINARY.equalsIgnoreCase(columnDef))
@@ -207,7 +210,6 @@ public abstract class TypeUtils {// NOSONAR
 			return Type.VARCHAR;
 	      if ("TEXT".equalsIgnoreCase(columnDef))
 	            return Type.VARCHAR;
-		// @formatter:on
 		throw new DialectException("'" + columnDef + "' can not be map to a dialect type");
 	}
 
