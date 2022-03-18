@@ -38,6 +38,26 @@ import com.github.drinkjava2.jlogs.LogFactory;
 @SuppressWarnings("all")
 public class DDLCreateUtils {// NOSONAR
 	private static final Log logger = LogFactory.getLog(DDLCreateUtils.class);
+	
+    /**
+     * Transfer columnModels to add column DDL String array like: 
+     * "alter table xx_table add [column] xxx_column ... " by given dialect and columnModels
+     */
+    public static String[] toAddColumnDDL(Dialect dialect, ColumnModel... columnModels) {
+        DDLFeatures f = dialect.getDdlFeatures();
+        List<String> result = new ArrayList<>();
+        for (ColumnModel c : columnModels) {
+            DialectException.assureNotNull(c.getTableModel(), "columnModel's tableModel can not be null");
+            String tableName=c.getTableModel().getTableName();
+            DialectException.assureNotEmpty(tableName, "tableModel's tableName can not be null or empty");
+            StringBuilder sb = new StringBuilder();
+            sb.append("alter table ").append(tableName);//
+            sb.append(f.addColumnString).append(" ").append(c.getColumnName()); 
+            appendColumnDDLinBuf(dialect, sb, tableName, c);;
+            result.add(sb.toString());
+        }
+        return result.toArray(new String[result.size()]);
+    }
 
 	/**
 	 * Transfer tables to DDL by given dialect and without format it, if want get a
@@ -168,66 +188,9 @@ public class DDLCreateUtils {// NOSONAR
 		for (ColumnModel c : columns) {
 			if (c.getTransientable())
 				continue;
-			if (c.getColumnType() == null)
-				DialectException
-						.throwEX("Type not set on column \"" + c.getColumnName() + "\" at table \"" + tableName + "\"");
-
-			// column definition
-			buf.append(c.getColumnName()).append(" ");
-
-			// Identity
-			if (GenerationType.IDENTITY.equals(c.getIdGenerationType()) && !features.supportsIdentityColumns)
-				DialectException.throwEX("Unsupported identity setting for dialect \"" + dialect + "\" on column \""
-						+ c.getColumnName() + "\" at table \"" + tableName + "\"");
-
-			// Column type definition
-			if (!StrUtils.isEmpty(c.getColumnDefinition()))
-				buf.append(c.getColumnDefinition());
-			else if (GenerationType.IDENTITY.equals(c.getIdGenerationType())) {
-				if (features.hasDataTypeInIdentityColumn)
-					buf.append(dialect.translateToDDLType(c));
-				buf.append(' ');
-				if (Type.BIGINT.equals(c.getColumnType()))
-					buf.append(features.identityColumnStringBigINT);
-				else
-					buf.append(features.identityColumnString);
-			} else {
-				buf.append(dialect.translateToDDLType(c));
-				// Default
-				String defaultValue = c.getDefaultValue();
-				if (defaultValue != null) {
-					buf.append(" default ").append(defaultValue);
-				}
-				// Not null
-				if (!c.getNullable())
-					buf.append(" not null");
-				else
-					buf.append(features.nullColumnString);
-			}
-
-			// Check
-			if (!StrUtils.isEmpty(c.getCheck())) {
-				if (features.supportsColumnCheck)
-					buf.append(" check (").append(c.getCheck()).append(")");
-				else
-					logger.warn("Ignore unsupported check setting for dialect \"" + dialect + "\" on column \""
-							+ c.getColumnName() + "\" at table \"" + tableName + "\" with value: " + c.getCheck());
-			}
-
-			// Comments
-			if (!StrUtils.isEmpty(c.getComment())) {
-				if (StrUtils.isEmpty(features.columnComment) && !features.supportsCommentOn)
-					logger.warn("Ignore unsupported comment setting for dialect \"" + dialect + "\" on column \""
-							+ c.getColumnName() + "\" at table \"" + tableName + "\" with value: " + c.getComment());
-				else
-					buf.append(StrUtils.replace(features.columnComment, "_COMMENT", c.getComment()));
-			}
-
-			// tail String
-			if (!StrUtils.isEmpty(c.getTail()))
-				buf.append(c.getTail());
-
-			buf.append(",");
+			appendColumnDDLinBuf(dialect, buf, tableName, c);
+			
+			buf.append(","); //总是多加一个,号, 下面会去除
 		}
 		// PKEY
 		if (!StrUtils.isEmpty(pkeys)) {
@@ -285,6 +248,68 @@ public class DDLCreateUtils {// NOSONAR
 		// unique
 		buildUniqueDLL(dialect, objectResultList, t);
 	}
+
+    private static void appendColumnDDLinBuf(Dialect dialect,  StringBuilder buf, String tableName, ColumnModel c) {
+        DDLFeatures features=dialect.getDdlFeatures();
+        if (c.getColumnType() == null)
+        	DialectException
+        			.throwEX("Type not set on column \"" + c.getColumnName() + "\" at table \"" + tableName + "\"");
+
+        // column definition
+        buf.append(c.getColumnName()).append(" ");
+
+        // Identity
+        if (GenerationType.IDENTITY.equals(c.getIdGenerationType()) && !features.supportsIdentityColumns)
+        	DialectException.throwEX("Unsupported identity setting for dialect \"" + dialect + "\" on column \""
+        			+ c.getColumnName() + "\" at table \"" + tableName + "\"");
+
+        // Column type definition
+        if (!StrUtils.isEmpty(c.getColumnDefinition()))
+        	buf.append(c.getColumnDefinition());
+        else if (GenerationType.IDENTITY.equals(c.getIdGenerationType())) {
+        	if (features.hasDataTypeInIdentityColumn)
+        		buf.append(dialect.translateToDDLType(c));
+        	buf.append(' ');
+        	if (Type.BIGINT.equals(c.getColumnType()))
+        		buf.append(features.identityColumnStringBigINT);
+        	else
+        		buf.append(features.identityColumnString);
+        } else {
+        	buf.append(dialect.translateToDDLType(c));
+        	// Default
+        	String defaultValue = c.getDefaultValue();
+        	if (defaultValue != null) {
+        		buf.append(" default ").append(defaultValue);
+        	}
+        	// Not null
+        	if (!c.getNullable())
+        		buf.append(" not null");
+        	else
+        		buf.append(features.nullColumnString);
+        }
+
+        // Check
+        if (!StrUtils.isEmpty(c.getCheck())) {
+        	if (features.supportsColumnCheck)
+        		buf.append(" check (").append(c.getCheck()).append(")");
+        	else
+        		logger.warn("Ignore unsupported check setting for dialect \"" + dialect + "\" on column \""
+        				+ c.getColumnName() + "\" at table \"" + tableName + "\" with value: " + c.getCheck());
+        }
+
+        // Comments
+        if (!StrUtils.isEmpty(c.getComment())) {
+        	if (StrUtils.isEmpty(features.columnComment) && !features.supportsCommentOn)
+        		logger.warn("Ignore unsupported comment setting for dialect \"" + dialect + "\" on column \""
+        				+ c.getColumnName() + "\" at table \"" + tableName + "\" with value: " + c.getComment());
+        	else
+        		buf.append(StrUtils.replace(features.columnComment, "_COMMENT", c.getComment()));
+        }
+
+        // tail String
+        if (!StrUtils.isEmpty(c.getTail()))
+        	buf.append(c.getTail());
+    }
 
 	/**
 	 * if name not found, add <br/>

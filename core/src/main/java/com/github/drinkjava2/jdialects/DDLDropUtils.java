@@ -36,141 +36,149 @@ import com.github.drinkjava2.jlogs.LogFactory;
  * @since 1.0.2
  */
 @SuppressWarnings("all")
-public class DDLDropUtils { 
-	private static final Log logger = LogFactory.getLog(DDLDropUtils.class);
+public class DDLDropUtils {
+    private static final Log logger = LogFactory.getLog(DDLDropUtils.class);
 
-	/**
-	 * Transfer tables to drop DDL and without format it
-	 */
-	public static String[] toDropDDL(Dialect dialect, TableModel... tables) {
-		// resultList store mixed drop DDL + drop Ojbects
-		List<Object> objectResultList = new ArrayList<Object>();
+    /**
+     * Transfer columnModels to drop column DDL String array like: 
+     * "alter table xx_table drop [column] xxx_column ... " by given dialect and columnModels
+     */
+    public static String[] toDropColumnDDL(Dialect dialect, ColumnModel... columnModels) {
+        DDLFeatures f = dialect.getDdlFeatures();
+        List<String> result = new ArrayList<>();
+        for (ColumnModel c : columnModels) {
+            result.add(new StringBuilder("alter table ").append(c.getTableModel().getTableName())//TODO: drop index, constrains on this column...
+                    .append(f.dropColumnString).append(" ").append(c.getColumnName()).toString());
+        }
+        return result.toArray(new String[result.size()]);
+    }
 
-		for (TableModel table : tables)
-			transferTableToObjectList(dialect, table, objectResultList);
+    /**
+     * Transfer tables to drop DDL and without format it
+     */
+    public static String[] toDropDDL(Dialect dialect, TableModel... tables) {
+        // resultList store mixed drop DDL + drop Ojbects
+        List<Object> objectResultList = new ArrayList<Object>();
 
-		boolean hasAutoIdGenerator = false;
-		for (TableModel table : tables) {
-			for (ColumnModel column : table.getColumns())
-				if (GenerationType.AUTO.equals(column.getIdGenerationType())) {
-					hasAutoIdGenerator = true;
-					break;
-				}
-			for (IdGenerator idGens : table.getIdGenerators())
-				if (hasAutoIdGenerator || idGens.dependOnAutoIdGenerator()) {
-					hasAutoIdGenerator = true;
-					break;
-				}
-		}
+        for (TableModel table : tables)
+            transferTableToObjectList(dialect, table, objectResultList);
 
-		List<String> stringResultList = new ArrayList<String>();
-		List<TableIdGenerator> tbGeneratorList = new ArrayList<TableIdGenerator>();
-		List<SequenceIdGenerator> sequenceList = new ArrayList<SequenceIdGenerator>();
-		List<FKeyModel> fKeyConstraintList = new ArrayList<FKeyModel>();
+        boolean hasAutoIdGenerator = false;
+        for (TableModel table : tables) {
+            for (ColumnModel column : table.getColumns())
+                if (GenerationType.AUTO.equals(column.getIdGenerationType())) {
+                    hasAutoIdGenerator = true;
+                    break;
+                }
+            for (IdGenerator idGens : table.getIdGenerators())
+                if (hasAutoIdGenerator || idGens.dependOnAutoIdGenerator()) {
+                    hasAutoIdGenerator = true;
+                    break;
+                }
+        }
 
-		for (Object strOrObj : objectResultList) {
-			if (!StrUtils.isEmpty(strOrObj)) {
-				if (strOrObj instanceof String)
-					stringResultList.add((String) strOrObj);
-				else if (strOrObj instanceof TableIdGenerator)
-					tbGeneratorList.add((TableIdGenerator) strOrObj);
-				else if (strOrObj instanceof SequenceIdGenerator)
-					sequenceList.add((SequenceIdGenerator) strOrObj);
-				else if (strOrObj instanceof FKeyModel)
-					fKeyConstraintList.add((FKeyModel) strOrObj);
-			}
-		}
+        List<String> stringResultList = new ArrayList<String>();
+        List<TableIdGenerator> tbGeneratorList = new ArrayList<TableIdGenerator>();
+        List<SequenceIdGenerator> sequenceList = new ArrayList<SequenceIdGenerator>();
+        List<FKeyModel> fKeyConstraintList = new ArrayList<FKeyModel>();
 
-		if (hasAutoIdGenerator) {
-			IdGenerator realIdGen = AutoIdGenerator.INSTANCE.getSequenceOrTableIdGenerator(dialect);
-			if (realIdGen instanceof TableIdGenerator)
-				tbGeneratorList.add((TableIdGenerator) realIdGen);
-			else if (realIdGen instanceof SequenceIdGenerator)
-				sequenceList.add((SequenceIdGenerator) realIdGen);
-			else
-				throw new DialectException("Unknow exception happen for realIdGen, please report this bug");
-		}
+        for (Object strOrObj : objectResultList) {
+            if (!StrUtils.isEmpty(strOrObj)) {
+                if (strOrObj instanceof String)
+                    stringResultList.add((String) strOrObj);
+                else if (strOrObj instanceof TableIdGenerator)
+                    tbGeneratorList.add((TableIdGenerator) strOrObj);
+                else if (strOrObj instanceof SequenceIdGenerator)
+                    sequenceList.add((SequenceIdGenerator) strOrObj);
+                else if (strOrObj instanceof FKeyModel)
+                    fKeyConstraintList.add((FKeyModel) strOrObj);
+            }
+        }
 
-		buildDropSequenceDDL(dialect, stringResultList, sequenceList);
-		buildDropTableGeneratorDDL(dialect, stringResultList, tbGeneratorList);
-		outputDropFKeyConstraintDDL(dialect, stringResultList, fKeyConstraintList);
+        if (hasAutoIdGenerator) {
+            IdGenerator realIdGen = AutoIdGenerator.INSTANCE.getSequenceOrTableIdGenerator(dialect);
+            if (realIdGen instanceof TableIdGenerator)
+                tbGeneratorList.add((TableIdGenerator) realIdGen);
+            else if (realIdGen instanceof SequenceIdGenerator)
+                sequenceList.add((SequenceIdGenerator) realIdGen);
+            else
+                throw new DialectException("Unknow exception happen for realIdGen, please report this bug");
+        }
 
-		String[] result = stringResultList.toArray(new String[stringResultList.size()]);
-		if (Dialect.getGlobalAllowShowSql())
-			logger.info("Drop DDL:\r" + StrUtils.arrayToString(result, "\r"));
-		return result;
+        buildDropSequenceDDL(dialect, stringResultList, sequenceList);
+        buildDropTableGeneratorDDL(dialect, stringResultList, tbGeneratorList);
+        outputDropFKeyConstraintDDL(dialect, stringResultList, fKeyConstraintList);
 
-	}
+        String[] result = stringResultList.toArray(new String[stringResultList.size()]);
+        if (Dialect.getGlobalAllowShowSql())
+            logger.info("Drop DDL:\r" + StrUtils.arrayToString(result, "\r"));
+        return result;
 
-	/**
-	 * Transfer table to a mixed DDL String or TableGen Object list
-	 */
-	private static void transferTableToObjectList(Dialect dialect, TableModel t, List<Object> objectResultList) {
-		StringBuilder buf = new StringBuilder();
-		String tableName = t.getTableName();
-		List<ColumnModel> columns = t.getColumns();
+    }
 
-		// Reserved words check
-		dialect.checkNotEmptyReservedWords(tableName, "Table name", tableName);
+    /**
+     * Transfer table to a mixed DDL String or TableGen Object list
+     */
+    private static void transferTableToObjectList(Dialect dialect, TableModel t, List<Object> objectResultList) {
+        StringBuilder buf = new StringBuilder();
+        String tableName = t.getTableName();
+        List<ColumnModel> columns = t.getColumns();
 
-		List<IndexModel> l = t.getIndexConsts();// check index names
-		if (l != null && !l.isEmpty())
-			for (IndexModel index : l)
-				dialect.checkReservedWords(index.getName());
+        // Reserved words check
+        dialect.checkNotEmptyReservedWords(tableName, "Table name", tableName);
 
-		List<UniqueModel> l2 = t.getUniqueConsts();// check unique names
-		if (l2 != null && !l2.isEmpty())
-			for (UniqueModel unique : l2)
-				dialect.checkReservedWords(unique.getName());
+        List<IndexModel> l = t.getIndexConsts();// check index names
+        if (l != null && !l.isEmpty())
+            for (IndexModel index : l)
+                dialect.checkReservedWords(index.getName());
 
-		List<FKeyModel> fkeyChks = t.getFkeyConstraints();// check Fkey names
-		if (fkeyChks != null && !fkeyChks.isEmpty())
-			for (FKeyModel fkey : fkeyChks)
-				dialect.checkReservedWords(fkey.getFkeyName());
+        List<UniqueModel> l2 = t.getUniqueConsts();// check unique names
+        if (l2 != null && !l2.isEmpty())
+            for (UniqueModel unique : l2)
+                dialect.checkReservedWords(unique.getName());
 
-		for (ColumnModel col : columns)
-			if (!col.getTransientable())
-				dialect.checkNotEmptyReservedWords(col.getColumnName(), "Column name", tableName);
+        List<FKeyModel> fkeyChks = t.getFkeyConstraints();// check Fkey names
+        if (fkeyChks != null && !fkeyChks.isEmpty())
+            for (FKeyModel fkey : fkeyChks)
+                dialect.checkReservedWords(fkey.getFkeyName());
 
-		// idGenerator
-		for (IdGenerator idGen : t.getIdGenerators())
-			objectResultList.add(idGen);
+        for (ColumnModel col : columns)
+            if (!col.getTransientable())
+                dialect.checkNotEmptyReservedWords(col.getColumnName(), "Column name", tableName);
 
-		// Foreign key
-		for (FKeyModel fkey : t.getFkeyConstraints())
-			objectResultList.add(fkey);
+        // idGenerator
+        for (IdGenerator idGen : t.getIdGenerators())
+            objectResultList.add(idGen);
 
-		// drop table
-		buf.append(dialect.dropTableDDL(tableName));
-		objectResultList.add(buf.toString());
-	}
+        // Foreign key
+        for (FKeyModel fkey : t.getFkeyConstraints())
+            objectResultList.add(fkey);
 
-	private static void buildDropSequenceDDL(Dialect dialect, List<String> stringResultList,
-			List<SequenceIdGenerator> sequenceList) {
-		Set<SequenceIdGenerator> notRepeatedSequences = new HashSet<SequenceIdGenerator>();
-		for (SequenceIdGenerator seq : sequenceList)
-			DDLCreateUtils.checkAndInsertToNotRepeatSeq(notRepeatedSequences, seq);
-		DDLFeatures features = dialect.ddlFeatures;
+        // drop table
+        buf.append(dialect.dropTableDDL(tableName));
+        objectResultList.add(buf.toString());
+    }
 
-		for (SequenceIdGenerator seq : notRepeatedSequences) {
-			if (!features.supportBasicOrPooledSequence()) {
-				DialectException.throwEX("Dialect \"" + dialect + "\" does not support sequence setting on sequence \""
-						+ seq.getName() + "\"");
-			}
-			if (!DDLFeatures.NOT_SUPPORT.equals(features.dropSequenceStrings)
-					&& !StrUtils.isEmpty(features.dropSequenceStrings)) {
-				stringResultList.add(0,
-						StrUtils.replace(features.dropSequenceStrings, "_SEQNAME", seq.getSequenceName()));
-			} else
-				DialectException.throwEX("Dialect \"" + dialect
-						+ "\" does not support drop sequence ddl, on sequence \"" + seq.getName() + "\"");
-		}
-	}
+    private static void buildDropSequenceDDL(Dialect dialect, List<String> stringResultList, List<SequenceIdGenerator> sequenceList) {
+        Set<SequenceIdGenerator> notRepeatedSequences = new HashSet<SequenceIdGenerator>();
+        for (SequenceIdGenerator seq : sequenceList)
+            DDLCreateUtils.checkAndInsertToNotRepeatSeq(notRepeatedSequences, seq);
+        DDLFeatures features = dialect.ddlFeatures;
 
-	private static void buildDropTableGeneratorDDL(Dialect dialect, List<String> stringResultList,
-			List<TableIdGenerator> tbGeneratorList) {
-		for (TableIdGenerator tg : tbGeneratorList) {
-			// @formatter:off
+        for (SequenceIdGenerator seq : notRepeatedSequences) {
+            if (!features.supportBasicOrPooledSequence()) {
+                DialectException.throwEX("Dialect \"" + dialect + "\" does not support sequence setting on sequence \"" + seq.getName() + "\"");
+            }
+            if (!DDLFeatures.NOT_SUPPORT.equals(features.dropSequenceStrings) && !StrUtils.isEmpty(features.dropSequenceStrings)) {
+                stringResultList.add(0, StrUtils.replace(features.dropSequenceStrings, "_SEQNAME", seq.getSequenceName()));
+            } else
+                DialectException.throwEX("Dialect \"" + dialect + "\" does not support drop sequence ddl, on sequence \"" + seq.getName() + "\"");
+        }
+    }
+
+    private static void buildDropTableGeneratorDDL(Dialect dialect, List<String> stringResultList, List<TableIdGenerator> tbGeneratorList) {
+        for (TableIdGenerator tg : tbGeneratorList) {
+            // @formatter:off
 			DialectException.assureNotEmpty(tg.getName(), "TableGen name can not be empty");
 			DialectException.assureNotEmpty(tg.getTable(),
 					"TableGen tableName can not be empty of \"" + tg.getName() + "\"");
@@ -181,35 +189,32 @@ public class DDLDropUtils {
 			DialectException.assureNotEmpty(tg.getValueColumnName(),
 					"TableGen valueColumnName can not be empty of \"" + tg.getName() + "\"");
 			// @formatter:on
-		}
+        }
 
-		Set<String> tableExisted = new HashSet<String>();
-		for (TableIdGenerator tg : tbGeneratorList) {
-			String tableName = tg.getTable().toLowerCase();
-			if (!tableExisted.contains(tableName)) {
-				stringResultList.add(0, dialect.dropTableDDL(tableName));
-				tableExisted.add(tableName);
-			}
-		}
-	}
+        Set<String> tableExisted = new HashSet<String>();
+        for (TableIdGenerator tg : tbGeneratorList) {
+            String tableName = tg.getTable().toLowerCase();
+            if (!tableExisted.contains(tableName)) {
+                stringResultList.add(0, dialect.dropTableDDL(tableName));
+                tableExisted.add(tableName);
+            }
+        }
+    }
 
-	private static void outputDropFKeyConstraintDDL(Dialect dialect, List<String> stringResultList,
-			List<FKeyModel> trueList) {
-		if (DDLFeatures.NOT_SUPPORT.equals(dialect.ddlFeatures.addForeignKeyConstraintString))
-			return;
-		for (FKeyModel t : trueList) {
-			if (!t.getDdl())
-				continue; // if ddl is false, skip
-			String dropStr = dialect.ddlFeatures.dropForeignKeyString;
-			String constName = t.getFkeyName();
-			if (StrUtils.isEmpty(constName))
-				constName = "fk_" + t.getTableName().toLowerCase() + "_"
-						+ StrUtils.replace(StrUtils.listToString(t.getColumnNames()), ",", "_");
-			constName = StrUtils.clearQuote(constName);
-			if (DDLFeatures.NOT_SUPPORT.equals(dropStr))
-				DialectException.throwEX("Dialect \"" + dialect
-						+ "\" does not support drop foreign key, for setting: \"" + "fk_" + constName + "\"");
-			stringResultList.add(0, "alter table " + t.getTableName() + " " + dropStr + " " + constName);
-		}
-	}
+    private static void outputDropFKeyConstraintDDL(Dialect dialect, List<String> stringResultList, List<FKeyModel> trueList) {
+        if (DDLFeatures.NOT_SUPPORT.equals(dialect.ddlFeatures.addForeignKeyConstraintString))
+            return;
+        for (FKeyModel t : trueList) {
+            if (!t.getDdl())
+                continue; // if ddl is false, skip
+            String dropStr = dialect.ddlFeatures.dropForeignKeyString;
+            String constName = t.getFkeyName();
+            if (StrUtils.isEmpty(constName))
+                constName = "fk_" + t.getTableName().toLowerCase() + "_" + StrUtils.replace(StrUtils.listToString(t.getColumnNames()), ",", "_");
+            constName = StrUtils.clearQuote(constName);
+            if (DDLFeatures.NOT_SUPPORT.equals(dropStr))
+                DialectException.throwEX("Dialect \"" + dialect + "\" does not support drop foreign key, for setting: \"" + "fk_" + constName + "\"");
+            stringResultList.add(0, "alter table " + t.getTableName() + " " + dropStr + " " + constName);
+        }
+    }
 }

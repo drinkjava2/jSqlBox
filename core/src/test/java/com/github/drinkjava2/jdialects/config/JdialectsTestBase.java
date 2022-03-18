@@ -32,8 +32,8 @@ public class JdialectsTestBase {
 	@Before
 	public void initDao() {
 		Systemout.println("Current guessedDialect=" + guessedDialect);
-		Dialect.setGlobalAllowReservedWords(false);
-		Dialect.setGlobalAllowShowSql(false);
+		Dialect.setGlobalAllowReservedWords(true);
+		Dialect.setGlobalAllowShowSql(true);
 		Dialect.setGlobalSqlFunctionPrefix(null);
 	}
 
