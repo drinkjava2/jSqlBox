@@ -41,7 +41,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.11.jre8</version> <!-- 或最新版 -->
+   <version>5.0.12.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 
