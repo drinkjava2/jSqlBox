@@ -50,6 +50,7 @@ public abstract class DB  {// NOSONAR
 	public static final SqlOption AUTO_SQL = SqlOption.AUTO_SQL;
 	public static final SqlItem TAIL = new SqlItem(SqlOption.TAIL);
 	public static final SqlTemplateEngine TEMPLATE = BasicSqlTemplate.instance();
+	public static final SqlItem VQ = new SqlItem(SqlOption.VALUES_QUESTIONS); //same as DB.valuesQuestions();
 	//======================
 
 	protected void ________SqlItem_Methods________() {// NOSONAR

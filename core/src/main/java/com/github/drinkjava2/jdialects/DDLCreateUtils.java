@@ -51,8 +51,8 @@ public class DDLCreateUtils {// NOSONAR
             String tableName=c.getTableModel().getTableName();
             DialectException.assureNotEmpty(tableName, "tableModel's tableName can not be null or empty");
             StringBuilder sb = new StringBuilder();
-            sb.append("alter table ").append(tableName);//
-            sb.append(f.addColumnString).append(" ").append(c.getColumnName()); 
+            sb.append("alter table ").append(tableName).append(" ");//
+            sb.append(f.addColumnString).append(" "); 
             appendColumnDDLinBuf(dialect, sb, tableName, c);;
             result.add(sb.toString());
         }

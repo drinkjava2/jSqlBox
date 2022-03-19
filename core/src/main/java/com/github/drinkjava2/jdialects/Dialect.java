@@ -534,17 +534,17 @@ public class Dialect {
 	}
 
 	/**
-     * Transfer tables to create DDL
+     * Transfer columnModels to add column DDL String array
      */
-    public String[] toAddColumnDDL(ColumnModel... columModels) {
-        return null;
+    public String[] toAddColumnDDL(ColumnModel... columnModels) {
+        return DDLCreateUtils.toAddColumnDDL(this, columnModels);
     }
 
     /**
-     * Transfer tables to drop DDL
+     * Transfer columnModels to drop column DDL String array
      */
-    public String[] toDropColumnDDL(ColumnModel... columModels) {
-        return null;
+    public String[] toDropColumnDDL(ColumnModel... columnModels) {
+        return DDLDropUtils.toDropColumnDDL(this, columnModels);
     } 
 	
 	/**

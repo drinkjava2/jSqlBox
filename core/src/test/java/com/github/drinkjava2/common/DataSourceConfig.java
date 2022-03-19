@@ -21,7 +21,7 @@ public class DataSourceConfig {
 	 * "MySqlDataSourceBox" to test on MySql <br/>
 	 * ================================================================<br/>
 	 */
-	public static class DataSourceBox extends H2DataSourceBox {
+	public static class DataSourceBox extends MySqlDataSourceUtcTimeBox {
 	}
 
 	// H2Database memory database connection URL
@@ -78,12 +78,12 @@ public class DataSourceConfig {
 		// In jBeanBox, bean default is singleton
 		public HikariDataSource create() {
 			HikariDataSource ds = new HikariDataSource();
-			ds.addDataSourceProperty("cachePrepStmts", true);
+			ds.addDataSourceProperty("cachePrepStmts", false); //生产环境下，如果不动态增改列，要设成true以提高性能
 			ds.addDataSourceProperty("prepStmtCacheSize", 250);
 			ds.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
 			ds.addDataSourceProperty("useServerPrepStmts", true);
 			ds.setMaximumPoolSize(3);
-			ds.setConnectionTimeout(5000);
+			ds.setConnectionTimeout(5000); 
 			this.setPreDestroy("close");// jBeanBox will close pool
 			return ds;
 		}

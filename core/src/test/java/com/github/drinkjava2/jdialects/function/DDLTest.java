@@ -12,7 +12,9 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
 import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * This is unit test for DDL
@@ -432,4 +434,35 @@ public class DDLTest extends JdialectsTestBase {
         Systemout.println("a=" + db.qryObject("select a from test"));
         Systemout.println("b=" + db.qryObject("select b from test"));
     }
+	
+    @Test
+    public void testAddDropColumnsAtRuntime() {//动态添加删除列
+        DbContext db = new DbContext(ds);
+        Dialect dialect = db.getDialect();
+        db.setAllowShowSQL(true);
+        TableModel t1 = new TableModel("tb_test");
+        t1.column("id").INTEGER().pkey();
+        db.quiteExecute(db.toDropAndCreateDDL(t1));
+
+        db.exe("insert into tb_test (id) values(?)", DB.par(1));
+        Systemout.println("此时只有1列=" + db.qryMapList("select * from tb_test")); 
+
+        
+        ColumnModel name = new ColumnModel("name").STRING(10).comment("新增的列");//column可以单独创建，再设定它的tableModel
+        name.setTableModel(t1); 
+        String[] add = dialect.toAddColumnDDL(name, t1.column("age").INTEGER(), t1.column("price").DOUBLE());
+        db.executeDDL(add); //新增三个列
+        db.exe("insert into tb_test (id, name, age, price)", DB.par(2, "tom", 5, 100.0), DB.VQ);
+        Systemout.println("此时有4列 =" + db.qryMapList("select * from tb_test") ); //注意DDL动态改表后，某些数据池可能会出错，要关闭cachePrepStmts 
+        
+        db.executeDDL(dialect.toDropColumnDDL(t1.column("name"), t1.column("age"))); //删除两个列
+        Systemout.println("此时有2列=" + db.qryMapList("select * from tb_test")); //此时有2列
+        
+        //改名和改类型目前不能直接做到，只能先新新一列，再用SQL拷贝，然后再删除旧列
+        db.executeDDL(dialect.toAddColumnDDL(t1.column("new_price").DECIMAL(5, 2)));
+        db.exe("update tb_test set new_price=price");
+        db.executeDDL(dialect.toDropColumnDDL(t1.column("price")));
+        Systemout.println("此时price被改名成了new_price=" + db.qryMapList("select * from tb_test")); //此时price被改名成了new_price
+    }
+	   
 }

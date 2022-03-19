@@ -41,13 +41,14 @@ public class DDLDropUtils {
 
     /**
      * Transfer columnModels to drop column DDL String array like: 
-     * "alter table xx_table drop [column] xxx_column ... " by given dialect and columnModels
+     * "alter table xx_table drop [column] xxx_column ... " by given dialect and columnModels <br/>
+     * Please note: this method does not drop index/constraint/primary key/foreign keys related to column
      */
     public static String[] toDropColumnDDL(Dialect dialect, ColumnModel... columnModels) {
         DDLFeatures f = dialect.getDdlFeatures();
         List<String> result = new ArrayList<>();
         for (ColumnModel c : columnModels) {
-            result.add(new StringBuilder("alter table ").append(c.getTableModel().getTableName())//TODO: drop index, constrains on this column...
+            result.add(new StringBuilder("alter table ").append(c.getTableModel().getTableName()).append(" ")//
                     .append(f.dropColumnString).append(" ").append(c.getColumnName()).toString());
         }
         return result.toArray(new String[result.size()]);
