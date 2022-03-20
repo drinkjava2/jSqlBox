@@ -69,7 +69,7 @@
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jsqlbox</artifactId>
-      <version>5.0.10.jre8</version><!--Or newest jSqlBox -->
+      <version>5.0.12.jre8</version><!--Or newest jSqlBox -->
     </dependency>
 	
     <!-- H2Database memory database for jSqlBox demo -->
