@@ -11,7 +11,8 @@
  */
 package com.github.drinkjava2.jdialects.id;
 
-import com.github.drinkjava2.jdbpro.NormalJdbcTool;
+import java.sql.Connection;
+
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
 import com.github.drinkjava2.jdialects.Type;
@@ -54,8 +55,8 @@ public class SortedUUIDGenerator implements IdGenerator {
 	}
 	
 	@Override
-	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		String s = "" + AutoIdGenerator.INSTANCE.getNextID(jdbc, dialect, dataType);
+	public Object getNextID(Connection con, Dialect dialect, Type dataType) {
+		String s = "" + AutoIdGenerator.INSTANCE.getNextID(con, dialect, dataType);
 		if (s.length() > (sortedLength - 1))
 			throw new DialectException("SortedLength should set bigger than auto generated ID length");
 		StringBuilder sb = new StringBuilder("1");

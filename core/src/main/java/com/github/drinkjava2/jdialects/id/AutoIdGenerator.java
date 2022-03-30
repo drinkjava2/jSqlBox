@@ -11,6 +11,8 @@
  */
 package com.github.drinkjava2.jdialects.id;
 
+import java.sql.Connection;
+
 import com.github.drinkjava2.jdbpro.NormalJdbcTool;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.Type;
@@ -58,11 +60,11 @@ public class AutoIdGenerator implements IdGenerator {
 	}
 
 	@Override
-	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
+	public Object getNextID(Connection con, Dialect dialect, Type dataType) {
 		if (dialect.ddlFeatures.supportBasicOrPooledSequence())
-			return SEQ_AUTOID_INSTANCE.getNextID(jdbc, dialect, dataType);
+			return SEQ_AUTOID_INSTANCE.getNextID(con, dialect, dataType);
 		else
-			return TABLE_AUTOID_INSTANCE.getNextID(jdbc, dialect, dataType);
+			return TABLE_AUTOID_INSTANCE.getNextID(con, dialect, dataType);
 	}
 
 	/**

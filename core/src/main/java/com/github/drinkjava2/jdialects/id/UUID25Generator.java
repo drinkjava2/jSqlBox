@@ -12,9 +12,9 @@
 package com.github.drinkjava2.jdialects.id;
 
 import java.math.BigInteger;
+import java.sql.Connection;
 import java.util.UUID;
 
-import com.github.drinkjava2.jdbpro.NormalJdbcTool;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
@@ -41,10 +41,10 @@ public class UUID25Generator implements IdGenerator {
 		return "UUID25";
 	}
 
-	@Override
-	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		return getUUID25();
-	}
+    @Override
+    public Object getNextID(Connection con, Dialect dialect, Type dataType) {
+        return getUUID25();
+    }
 
 	@Override
 	public Boolean dependOnAutoIdGenerator() {

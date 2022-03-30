@@ -589,8 +589,8 @@ public class Dialect {
 	/**
 	 * Return next ID by given IdGenerator and NormalJdbcStyle instance
 	 */
-	public Object getNexID(IdGenerator idGenerator, NormalJdbcTool jdbc, Type dataType) {
-		return idGenerator.getNextID(jdbc, this, dataType);
+	public Object getNexID(IdGenerator idGenerator, Connection con, Type dataType) {
+		return idGenerator.getNextID(con, this, dataType);
 	}
 
 	// getter & setter====

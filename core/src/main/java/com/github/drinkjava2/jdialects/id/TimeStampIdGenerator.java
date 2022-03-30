@@ -11,7 +11,8 @@
  */
 package com.github.drinkjava2.jdialects.id;
 
-import com.github.drinkjava2.jdbpro.NormalJdbcTool;
+import java.sql.Connection;
+
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
@@ -39,7 +40,7 @@ public class TimeStampIdGenerator implements IdGenerator {
 	}
 
 	@Override
-	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
+	public Object getNextID(Connection con, Dialect dialect, Type dataType) {
 		return getNextID();
 	}
 
