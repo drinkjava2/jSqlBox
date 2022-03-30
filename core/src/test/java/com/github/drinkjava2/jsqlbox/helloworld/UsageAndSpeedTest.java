@@ -245,7 +245,7 @@ public class UsageAndSpeedTest {
                 Systemout.println("Exception found: " + e.getMessage());
             } finally {
                 try {
-                    ctx.close(conn);
+                    ctx.releaseConnection(conn);
                 } catch (SQLException e) {
                     Systemout.println("Exception found: " + e.getMessage());
                 }

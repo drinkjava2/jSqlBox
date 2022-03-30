@@ -177,6 +177,15 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		else
 			connectionManager.releaseConnection(conn, this.getDataSource());
 	}
+	
+    /** Close connection, if SqlException happend, wrap it to runtime exception DbProException */
+    public void closeQuiet(Connection conn) {
+        try {
+            this.close(conn);
+        } catch (SQLException e) {
+            throw new DbProException(e);
+        }
+    }
 
 	@Override
 	public Connection prepareConnection() throws SQLException {
@@ -185,7 +194,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		else
 			return connectionManager.getConnection(this);
 	}
-
+ 
+    public Connection prepareConnectionQuiet()  {
+      try {
+        return this.prepareConnection();
+    } catch (SQLException e) {
+      throw new DbProException(e);
+    }
+    }
 
 	// =========== Explain SQL about methods========================
 	/**
@@ -895,6 +911,15 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 		return this.getConnectionManager().getConnection(this);
 	}
 
+    /** Call getConnection but wrap SQLException to runtime exception DbProException */
+    public Connection getConnectionQuiet(){
+        try {
+            return getConnection();
+        } catch (SQLException e) {
+            throw new DbProException(e);
+        }
+    }
+    
 	/**
 	 * A ConnectionManager implementation determine how to close connection or
 	 * return connection to ThreadLocal or return to Spring or JTA or some
@@ -903,6 +928,15 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	public void releaseConnection(Connection conn) throws SQLException {
 		this.getConnectionManager().releaseConnection(conn, this);
 	}
+	
+    /** Call releaseConnection but wrap SQLException to runtime exception DbProException */
+    public void releaseConnectionQuiet(Connection conn) {
+        try {
+            this.releaseConnection(conn);
+        } catch (SQLException e) {
+            throw new DbProException(e);
+        }
+    }
 
 	/** Commit the transaction */
 	public TxResult commitTrans() throws Exception {

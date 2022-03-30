@@ -11,8 +11,10 @@
  */
 package com.github.drinkjava2.jdialects.id;
 
-import com.github.drinkjava2.jdbpro.NormalJdbcTool;
+import java.sql.Connection;
+
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.JdbcUtil;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
 
@@ -101,19 +103,19 @@ public class TableIdGenerator implements IdGenerator {
 	 * Get the next Table Generator ID
 	 */
 	@Override
-	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-		int countOfRec = ((Number) jdbc // NOSONAR
-				.jdbcQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?", pkColumnValue))
+	public Object getNextID(Connection con, Dialect dialect, Type dataType) {
+		int countOfRec = ((Number) JdbcUtil // NOSONAR
+				.qryOneObject(con, "select count(*) from " + table + " where " + pkColumnName + "=?", pkColumnValue))
 						.intValue();
 		if (countOfRec == 0) {
-			jdbc.jdbcExecute("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
+		    JdbcUtil.execute(con, "insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
 					pkColumnValue, initialValue);
 			return initialValue;
 		} else {
-			jdbc.jdbcExecute("update " + table + " set " + valueColumnName + "=" + valueColumnName + "+" + allocationSize
+		    JdbcUtil.execute(con, "update " + table + " set " + valueColumnName + "=" + valueColumnName + "+" + allocationSize
 					+ "  where " + pkColumnName + " =?", pkColumnValue);
 
-			int last = ((Number) jdbc.jdbcQueryForObject( // NOSONAR
+			int last = ((Number) JdbcUtil.qryOneObject(con, // NOSONAR
 					"select " + valueColumnName + " from " + table + " where " + pkColumnName + "=?", pkColumnValue))
 							.intValue();
 			return last;

@@ -24,7 +24,7 @@ public class DataSourceConfig {
      * Data source setting, change below line extends which DataSource
      * ================================================================<br/>
      */
-    public static class DataSourceBox extends BeeCPMySqlBox {
+    public static class DataSourceBox extends H2DataSourceBox {
     }
     
     

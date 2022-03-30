@@ -47,7 +47,7 @@ import com.github.drinkjava2.jdialects.Dialect;
  * @since 1.7.0
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOSONAR
+public class DbPro extends ImprovedQueryRunner {// NOSONAR
 	public DbPro() {
 		super();
 	}
@@ -414,49 +414,6 @@ public class DbPro extends ImprovedQueryRunner implements NormalJdbcTool {// NOS
 
 	}
 
-    @Override
-    public <T> T jdbcQueryForObject(Connection con, String sql, Object... params) {
-        PreparedSQL ps = new PreparedSQL(SqlOption.QUERY, null, SingleTonHandlers.scalarHandler, sql, params);
-        ps.addGlobalAndThreadedHandlers(this);
-        ps.setConnection(con);
-        return (T) runPreparedSQL(ps);
-    }
-    
-    
-	/**
-	 * Query for an Object, only return the first row and first column's value if
-	 * more than one column or more than 1 rows returned, a null object may return
-	 * if no result found , DbProRuntimeException may be threw if some SQL operation
-	 * Exception happen.
-	 * 
-	 * @param sql
-	 * @param params
-	 * @return An Object or null, Object type determined by SQL content
-	 */
-	@Override
-	public <T> T jdbcQueryForObject(String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlOption.QUERY, null, SingleTonHandlers.scalarHandler, sql, params);
-		ps.addGlobalAndThreadedHandlers(this);
-		return (T) runPreparedSQL(ps);
-	}
-
-    /**
-     * Executes the given INSERT, UPDATE, or DELETE SQL statement.
-     * 
-     * @param sql
-     *            the SQL
-     * @param params
-     *            the parameters if have
-     * @return The number of rows updated.
-     */
-	@Override
-	public int jdbcExecute(String sql, Object... params) {
-		PreparedSQL ps = new PreparedSQL(SqlOption.UPDATE, null, null, sql, params);
-		ps.addGlobalAndThreadedHandlers(this);
-		return (Integer) runPreparedSQL(ps);
-	}
-
- 
  
 	// ============================================================================
 

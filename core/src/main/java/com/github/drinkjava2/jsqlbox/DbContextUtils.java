@@ -697,6 +697,7 @@ public abstract class DbContextUtils {// NOSONAR
 		SqlItem shardTableItem = null;
 		SqlItem shardDbItem = null;
         IdGenerator identityGenerator=null; //identityGenerator can only have one
+        Connection con=ctx.prepareConnectionQuiet();
 		for (ColumnModel col : cols.values()) {// NOSONAR
 			if (col == null || col.getTransientable() || !col.getInsertable())
 				continue;
@@ -734,7 +735,7 @@ public abstract class DbContextUtils {// NOSONAR
 					writeValueToBeanFieldOrTail(col, entityBean, id);
 				} else {// Normal Id Generator
 					sqlBody.append(col.getColumnName());
-					Object id = idGen.getNextID(ctx, ctx.getDialect(), col.getColumnType());
+					Object id = idGen.getNextID(con, ctx.getDialect(), col.getColumnType());
 					sqlBody.append(par(id));
 					sqlBody.append(", ");
 					foundColumnToInsert = true;
@@ -777,13 +778,16 @@ public abstract class DbContextUtils {// NOSONAR
 		if (optionModel == null)// No optional model, force use entity's
 			sqlBody.frontAdd(model);
 
-		int result = ctx.upd(sqlBody.toArray());
-		if (ctx.isBatchEnabled())
+		int result = ctx.upd(con, sqlBody.toArray());
+		if (ctx.isBatchEnabled()) {
+		    ctx.releaseConnectionQuiet(con);
 			return 1; // in batch mode, direct return 1
+		}
         if (identityGenerator != null) {// write identity id to Bean field
-            Object identityId = identityGenerator.getNextID(ctx, ctx.getDialect(), identityType);
+            Object identityId = identityGenerator.getNextID(con, ctx.getDialect(), identityType);
             writeValueToBeanFieldOrTail(identityCol, entityBean, identityId);
         }
+           ctx.releaseConnectionQuiet(con);
 		return result;
 	}
 

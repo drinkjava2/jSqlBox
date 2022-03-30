@@ -18,7 +18,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.jdbpro.NormalJdbcTool;
 import com.github.drinkjava2.jdialects.converter.BasicJavaConverter;
 import com.github.drinkjava2.jdialects.converter.JavaConverter;
 import com.github.drinkjava2.jdialects.id.IdGenerator;

@@ -205,7 +205,7 @@ public class JdbcContext extends DbPro {// NOSONAR
     /** Execute DDL stored in a String array */
     public void executeDDL(String[] sqls) {
         for (String sql : sqls) {
-            jdbcExecute(sql);
+            exe(sql);
         }
     }
 

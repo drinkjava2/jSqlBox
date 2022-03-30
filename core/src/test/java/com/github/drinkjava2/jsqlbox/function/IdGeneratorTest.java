@@ -18,6 +18,9 @@ package com.github.drinkjava2.jsqlbox.function;
 import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -121,17 +124,17 @@ public class IdGeneratorTest extends TestBase {
 	}
 
 	@Test
-	public void testUUIDs() {// nextID
+	public void testUUIDs(){// nextID
 		TableModel table = new TableModel("testNextIdTable");
 		table.column("id1").STRING(25).pkey();
 		table.column("id2").STRING(32);
 		table.column("id3").STRING(36);
 		createAndRegTables(table);
-
+		Connection con=ctx.prepareConnectionQuiet();
 		for (int i = 0; i < 10; i++) {
-			Object id1 = dialect.getNexID(UUID25Generator.INSTANCE, ctx, null);
-			Object id2 = dialect.getNexID(UUID32Generator.INSTANCE, ctx, null);
-			Object id3 = dialect.getNexID(UUID36Generator.INSTANCE, ctx, null);
+			Object id1 = dialect.getNexID(UUID25Generator.INSTANCE, con, null);
+			Object id2 = dialect.getNexID(UUID32Generator.INSTANCE, con, null);
+			Object id3 = dialect.getNexID(UUID36Generator.INSTANCE, con, null);
 			Systemout.println("id1=" + id1);
 			Systemout.println("id2=" + id2);
 			Systemout.println("id3=" + id3);
@@ -140,51 +143,54 @@ public class IdGeneratorTest extends TestBase {
 			Assert.assertTrue(("" + id3).length() == 36);
 			ctx.exe("insert into testNextIdTable (id1,id2,id3) ", par(id1, id2, id3), valuesQuestions());
 		}
+		ctx.releaseConnectionQuiet(con);
 	}
 
 	@Test
-	public void testAutoIdGenerator() {
+	public void testAutoIdGenerator(){
 		TableModel table = new TableModel("testAutoIdGenerator");
 		table.column("id").STRING(30).pkey().autoId();
 		createAndRegTables(table);
-
+		Connection con=ctx.prepareConnectionQuiet();
 		IdGenerator gen = table.getColumnByColName("id").getIdGenerator();
 		for (int i = 0; i < 5; i++) {
-			Assert.assertNotNull(gen.getNextID(ctx, dialect, null));
-			Systemout.println(gen.getNextID(ctx, dialect, null));
+			Assert.assertNotNull(gen.getNextID(con, dialect, null));
+			Systemout.println(gen.getNextID(con, dialect, null));
 		}
 
 		gen = AutoIdGenerator.INSTANCE;
 		for (int i = 0; i < 5; i++) {
-			Assert.assertNotNull(gen.getNextID(ctx, dialect, null));
-			Systemout.println(gen.getNextID(ctx, dialect, null));
+			Assert.assertNotNull(gen.getNextID(con, dialect, null));
+			Systemout.println(gen.getNextID(con, dialect, null));
 		}
+		ctx.releaseConnectionQuiet(con);
 	}
 
 	@Test
-	public void testSortedUUIDGenerator() {
+	public void testSortedUUIDGenerator(){
 		TableModel table = new TableModel("testSortedUUIDGenerator");
 		table.sortedUUIDGenerator("sorteduuid", 8, 8);
 		table.addGenerator(new SortedUUIDGenerator("sorteduuid2", 10, 10));
 		table.column("id").STRING(30).pkey().idGenerator("sorteduuid");
 		table.column("id2").STRING(30).pkey().idGenerator("sorteduuid2");
 		createAndRegTables(table);
-
+		Connection con=ctx.prepareConnectionQuiet();
 		IdGenerator gen1 = table.getIdGenerator("sorteduuid");
 		for (int i = 0; i < 10; i++) {
-			Assert.assertNotNull(gen1.getNextID(ctx, dialect, null));
-			Systemout.println(gen1.getNextID(ctx, dialect, null));
+			Assert.assertNotNull(gen1.getNextID(con, dialect, null));
+			Systemout.println(gen1.getNextID(con, dialect, null));
 		}
 
 		IdGenerator gen2 = table.getIdGenerator("sorteduuid2");
 		for (int i = 0; i < 10; i++) {
-			Assert.assertNotNull(gen2.getNextID(ctx, dialect, null));
-			Systemout.println(gen2.getNextID(ctx, dialect, null));
+			Assert.assertNotNull(gen2.getNextID(con, dialect, null));
+			Systemout.println(gen2.getNextID(con, dialect, null));
 		}
+		ctx.releaseConnectionQuiet(con);
 	}
 
 	@Test
-	public void testSequenceIdGenerator() {
+	public void testSequenceIdGenerator(){
 		Systemout.println(dialect);
 		if (!dialect.ddlFeatures.supportBasicOrPooledSequence())
 			return;
@@ -199,24 +205,25 @@ public class IdGeneratorTest extends TestBase {
 		table2.column("id2").STRING(30).pkey().sequenceGenerator("seq2", "seq2", 1, 20);
 
 		createAndRegTables(table1, table2);
-
+		Connection con=ctx.prepareConnectionQuiet();
 		IdGenerator gen1 = table1.getIdGenerator("seq1");
 		IdGenerator gen2 = table1.getIdGenerator("seq2");
 		for (int i = 0; i < 3; i++) {
-			Systemout.println(gen1.getNextID(ctx, dialect, null));
-			Systemout.println(gen2.getNextID(ctx, dialect, null));
+			Systemout.println(gen1.getNextID(con, dialect, null));
+			Systemout.println(gen2.getNextID(con, dialect, null));
 		}
 
 		IdGenerator gen3 = table2.getIdGenerator("seq3");
 		IdGenerator gen4 = table2.getIdGenerator("seq2");
 		for (int i = 0; i < 3; i++) {
-			Systemout.println(gen3.getNextID(ctx, dialect, null));
-			Systemout.println(gen4.getNextID(ctx, dialect, null));
+			Systemout.println(gen3.getNextID(con, dialect, null));
+			Systemout.println(gen4.getNextID(con, dialect, null));
 		}
+		ctx.releaseConnectionQuiet(con);
 	}
 
 	@Test
-	public void testTableIdGenerator() {
+	public void testTableIdGenerator(){
 		TableModel table1 = new TableModel("testTableIdGenerator");
 		table1.tableGenerator("tab1", "tb1", "pkCol", "valueColname", "pkColVal", 1, 10);
 		table1.column("id").STRING(30).pkey().idGenerator("tab1");
@@ -230,20 +237,21 @@ public class IdGeneratorTest extends TestBase {
 				10);
 
 		createAndRegTables(table1, table2);
-
+		Connection con=ctx.prepareConnectionQuiet();
 		IdGenerator gen1 = table1.getIdGenerator("tab1");
 		IdGenerator gen2 = table1.getIdGenerator("tab2");
 		for (int i = 0; i < 3; i++) {
-			Systemout.println(gen1.getNextID(ctx, dialect, null));
-			Systemout.println(gen2.getNextID(ctx, dialect, null));
+			Systemout.println(gen1.getNextID(con, dialect, null));
+			Systemout.println(gen2.getNextID(con, dialect, null));
 		}
 
 		IdGenerator gen3 = table2.getIdGenerator("tab3");
 		IdGenerator gen4 = table2.getIdGenerator("tab2");
 		for (int i = 0; i < 3; i++) {
-			Systemout.println(gen3.getNextID(ctx, dialect, null));
-			Systemout.println(gen4.getNextID(ctx, dialect, null));
+			Systemout.println(gen3.getNextID(con, dialect, null));
+			Systemout.println(gen4.getNextID(con, dialect, null));
 		}
+		ctx.releaseConnectionQuiet(con);
 	}
 
 	@Test
@@ -254,14 +262,15 @@ public class IdGeneratorTest extends TestBase {
 		table.column("id").INTEGER().identityId().id();
 		table.column("name").STRING(30);
 		createAndRegTables(table);
-
+		Connection con=ctx.prepareConnectionQuiet();
 		ctx.exe("insert into testIdentity (name) values(?)", par("Tom"));
 		ctx.exe("insert into testIdentity (name) values(?)", par("Sam"));
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
-		Systemout.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
+		Systemout.println(idGen.getNextID(con, dialect, Type.INTEGER));
 
 		idGen = table.getColumnByColName("id").getIdGenerator();
-		Systemout.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
+		Systemout.println(idGen.getNextID(con, dialect, Type.INTEGER));
+		ctx.releaseConnectionQuiet(con);
 	}
 
 }

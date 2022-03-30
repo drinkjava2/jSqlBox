@@ -11,10 +11,12 @@
  */
 package com.github.drinkjava2.jdialects.id;
 
-import com.github.drinkjava2.jdbpro.NormalJdbcTool;
+import java.sql.Connection;
+
 import com.github.drinkjava2.jdialects.DDLFeatures;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
+import com.github.drinkjava2.jdialects.JdbcUtil;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
@@ -54,8 +56,8 @@ public class IdentityIdGenerator implements IdGenerator {
     }
 
     @Override
-    public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
-        if (!dialect.ddlFeatures.getSupportsIdentityColumns())
+    public Object getNextID(Connection con, Dialect dialect, Type dataType) {
+        if (!Boolean.TRUE.equals(dialect.ddlFeatures.getSupportsIdentityColumns()))
             throw new DialectException("Dialect '" + dialect + "' does not support identity type");
         String sql = null;
         if (Type.BIGINT.equals(dataType))
@@ -65,7 +67,7 @@ public class IdentityIdGenerator implements IdGenerator {
         if (StrUtils.isEmpty(sql) || DDLFeatures.NOT_SUPPORT.equals(sql))
             throw new DialectException("Dialect '" + dialect + "' does not support identity type");
         sql=StrUtils.replaceFirst(sql, "_table__col", new StringBuilder(table).append("_").append(column).toString());
-        return jdbc.jdbcQueryForObject(sql);
+        return JdbcUtil.qryOneObject(con, sql);
     }
 
     @Override

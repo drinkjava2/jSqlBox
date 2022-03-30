@@ -11,9 +11,11 @@
  */
 package com.github.drinkjava2.jdialects.id;
 
-import com.github.drinkjava2.jdbpro.NormalJdbcTool;
+import java.sql.Connection;
+
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.DialectException;
+import com.github.drinkjava2.jdialects.JdbcUtil;
 import com.github.drinkjava2.jdialects.StrUtils;
 import com.github.drinkjava2.jdialects.Type;
 import com.github.drinkjava2.jdialects.annotation.jpa.GenerationType;
@@ -63,11 +65,11 @@ public class SequenceIdGenerator implements IdGenerator {
 	}
 
  	@Override
-	public Object getNextID(NormalJdbcTool jdbc, Dialect dialect, Type dataType) {
+	public Object getNextID(Connection con, Dialect dialect, Type dataType) {
 		DialectException.assureNotEmpty(sequenceName, "sequenceName can not be empty");
 		String sequenctSQL = dialect.ddlFeatures.getSequenceNextValString();
 		sequenctSQL = StrUtils.replace(sequenctSQL, "_SEQNAME", sequenceName);
-		return jdbc.jdbcQueryForObject(sequenctSQL);
+		return JdbcUtil.qryOneObject(con, sequenctSQL);
 	}
 	 
 	@Override

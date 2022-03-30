@@ -14,8 +14,8 @@ import com.github.drinkjava2.common.DataSourceConfig.DataSourceBox;
 import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jbeanbox.JBEANBOX;
 import com.github.drinkjava2.jdialects.Dialect;
+import com.github.drinkjava2.jdialects.JdbcUtil;
 import com.github.drinkjava2.jdialects.model.TableModel;
-import com.github.drinkjava2.jdialects.utils.TinyJdbc;
 
 /**
  * This base test class in charge of configure and close data sources.
@@ -26,7 +26,6 @@ import com.github.drinkjava2.jdialects.utils.TinyJdbc;
  */
 public class JdialectsTestBase {
 	protected DataSource ds = JBEANBOX.getBean(DataSourceBox.class);
-	protected TinyJdbc dbPro = new TinyJdbc(ds);
 	protected Dialect guessedDialect = Dialect.guessDialect(ds);
 
 	@Before
@@ -51,7 +50,7 @@ public class JdialectsTestBase {
 	protected void quietExecuteDDLs(String... ddls) {
 		for (String sql : ddls) {
 			try {
-				dbPro.jdbcExecute(sql);
+				JdbcUtil.execute(ds, sql);
 			} catch (Exception e) {
 			}
 		}
@@ -59,7 +58,7 @@ public class JdialectsTestBase {
 
 	protected void executeDDLs(String... sqls) {
 		for (String sql : sqls)
-			dbPro.jdbcExecute(sql);
+		    JdbcUtil.execute(ds, sql);
 	}
 
 	public void reBuildDB(TableModel... tables) {

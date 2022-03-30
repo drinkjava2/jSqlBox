@@ -55,7 +55,7 @@ public class IdentityIdTest extends TestBase {
 
 	@Test
 	public void doTest() {
-	    for (int i = 0; i < 100; i++) { //change to 100 do better test 
+	    for (int i = 0; i < 200; i++) { //change to 100 do better test 
 	        System.out.println("======= "+i+" ========");
 	        init();
 	        createAndRegTables(EntityDemo.class); //create entitydemo table
