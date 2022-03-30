@@ -81,7 +81,7 @@ public class TransactionDemo {
 		DbContext.setGlobalDbContext(ctx);
 		String[] ddls = ctx.toCreateDDL(User.class);
 		for (String ddl : ddls)
-			ctx.jdbcExecute(ddl);
+			ctx.exe(ddl);
 		TransactionDemo demo = JBEANBOX.getBean(TransactionDemo.class);
 		demo.save();
 		JBEANBOX.close();

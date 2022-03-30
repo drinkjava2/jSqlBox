@@ -255,8 +255,8 @@ public class IdGeneratorTest extends TestBase {
 		table.column("name").STRING(30);
 		createAndRegTables(table);
 
-		ctx.jdbcExecute("insert into testIdentity (name) values(?)", "Tom");
-		ctx.jdbcExecute("insert into testIdentity (name) values(?)", "Sam");
+		ctx.exe("insert into testIdentity (name) values(?)", par("Tom"));
+		ctx.exe("insert into testIdentity (name) values(?)", par("Sam"));
 		IdGenerator idGen = table.getIdGenerator(GenerationType.IDENTITY);
 		Systemout.println(idGen.getNextID(ctx, dialect, Type.INTEGER));
 

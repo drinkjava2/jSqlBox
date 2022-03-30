@@ -53,8 +53,8 @@ public class GroupShardTxTest {
 	public void init() {
 		String[] ddlArray = ctx1.toDropAndCreateDDL(ShardUser.class);
 		for (String ddl : ddlArray) {
-			ctx1.jdbcExecute(ddl);
-			ctx2.jdbcExecute(ddl);
+			ctx1.exe(ddl);
+			ctx2.exe(ddl);
 		}
 		DbContext[] masters = new DbContext[] { ctx1, ctx2 };
 		DbContext.getGlobalDbContext().setMasters(masters);

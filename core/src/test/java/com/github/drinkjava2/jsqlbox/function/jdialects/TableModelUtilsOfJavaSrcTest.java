@@ -96,7 +96,6 @@ public class TableModelUtilsOfJavaSrcTest {
         setting.put(TableModelUtils.OPT_LINK_STYLE, true); // 链式getter/setter风格
 
         TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
-        Systemout.allowPrint = true;
         Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));
     }
 
@@ -118,7 +117,6 @@ public class TableModelUtilsOfJavaSrcTest {
         setting.put(TableModelUtils.OPT_FIELDS, false); // 属性
 
         TableModel model = TableModelUtilsOfEntity.entity2ReadOnlyModel(Entity1.class);
-        Systemout.allowPrint = true;
         Systemout.println(TableModelUtilsOfJavaSrc.modelToJavaSourceCode(model, setting));
     }
  

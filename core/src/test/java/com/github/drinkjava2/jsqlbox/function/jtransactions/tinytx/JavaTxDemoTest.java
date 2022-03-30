@@ -46,7 +46,7 @@ public class JavaTxDemoTest {
 	}
 
 	public void txInsert() {
-		ctx.jdbcExecute("insert into user_tb (id) values('abc')");
+		ctx.exe("insert into user_tb (id) values('abc')");
 		Systemout.println(1 / 0); // DIV 0!
 	}
 
@@ -54,13 +54,13 @@ public class JavaTxDemoTest {
 	public void doTest() throws Exception {
 		JBEANBOX.getBeanBox(JavaTxDemoTest.class).addBeanAop(new TinyTxAOP(), "tx*");
 		JavaTxDemoTest tester = JBEANBOX.getBean(JavaTxDemoTest.class);
-		ctx.jdbcExecute("create table user_tb (id varchar(40))engine=InnoDB");
+		ctx.exe("create table user_tb (id varchar(40))engine=InnoDB");
 		try {
 			tester.txInsert();// this one did not insert, rolled back
 		} catch (Exception e) {
 			Systemout.println("Exception found: " + e.getMessage());
 		}
-		ctx.jdbcExecute("drop table user_tb");
+		ctx.exe("drop table user_tb");
 		JBEANBOX.close();// Close DataSource Pool
 	}
 }

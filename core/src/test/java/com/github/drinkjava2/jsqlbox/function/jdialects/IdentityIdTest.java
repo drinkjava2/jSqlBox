@@ -55,22 +55,39 @@ public class IdentityIdTest extends TestBase {
 
 	@Test
 	public void doTest() {
+	    for (int i = 0; i < 100; i++) { //change to 100 do better test 
+	        System.out.println("======= "+i+" ========");
+	        init();
+	        createAndRegTables(EntityDemo.class); //create entitydemo table
+	        Test1();    
+	        cleanUp();//drop entitydemo table
+        }
+	}
+	
+	
+	public void Test1() {
 		if (!dialect.ddlFeatures.getSupportsIdentityColumns()) {
 			Systemout.print("Dialect '" + dialect + "' does not support identity type, skip IdentityId unit test.");
 			return;
 		}
-		createAndRegTables(EntityDemo.class);
-
+		 
 		EntityDemo e = new EntityDemo();
 		e.setFullName("a");
 		e.insert();
+		Integer id=e.getId();
+		System.out.println("e.id="+e.getId());
 
-		e.setPid(e.getId());
+		e.setPid(id);
 		e.setFullName("b");
 		e.setId(null);
 		e.insert();
 
-		Assert.assertEquals("a", e.loadById(e.getPid()).getFullName());
+		try {
+            Assert.assertEquals("a", e.loadById(id).getFullName());
+        } catch (Exception e1) {
+            e1.printStackTrace();
+           System.exit(0);
+        }		
 	}
 
 }

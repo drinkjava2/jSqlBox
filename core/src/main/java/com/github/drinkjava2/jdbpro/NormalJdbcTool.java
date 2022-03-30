@@ -15,6 +15,8 @@
  */
 package com.github.drinkjava2.jdbpro;
 
+import java.sql.Connection;
+
 /**
  * Interface of Normal JDBC methods, this interface is a bridge between jDbPro
  * and jTransactions to eliminate jar dependency, other projects need copy this
@@ -27,6 +29,20 @@ package com.github.drinkjava2.jdbpro;
 
 public interface NormalJdbcTool {// NOSONAR
 
+    
+    /**
+     * Query for an Object, only return the first row and first column's value if
+     * more than one column or more than 1 rows returned, a null object may return
+     * if no result found
+     * 
+     * @param con Connection
+     * @param sql SQL string
+     * @param params parameters
+     * @return An Object or null, Object type determined by SQL content
+     */
+    public <T> T jdbcQueryForObject(Connection con, String sql, Object... params);
+    
+    
 	/**
 	 * Query for an Object, only return the first row and first column's value if
 	 * more than one column or more than 1 rows returned, a null object may return
@@ -38,33 +54,15 @@ public interface NormalJdbcTool {// NOSONAR
 	 */
 	public <T> T jdbcQueryForObject(String sql, Object... params);
 
-	/**
-	 * Executes the given INSERT, UPDATE, or DELETE SQL statement.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @param params
-	 *            the parameters if have
-	 * @return The number of rows updated.
-	 */
-	public int jdbcUpdate(String sql, Object... params);
 
-	/**
-	 * Execute an statement, including a stored procedure call, which does not
-	 * return any result sets. Any parameters which are instances of
-	 * org.apache.commons.dbutils.OutParameter will be registered as OUT parameters.
-	 * Transaction mode is determined by connectionManager property.
-	 * <p>
-	 * Use this method when invoking a stored procedure with OUT parameters that
-	 * does not return any result sets. If you are not invoking a stored procedure,
-	 * or the stored procedure has no OUT parameters, consider using
-	 * {@link #Update(java.lang.String...) }. If the stored procedure returns result
-	 * sets, use
-	 * {@link #iExecute(org.apache.commons.dbutils.ResultSetHandler, java.lang.String...) }.
-	 * 
-	 * @param sql
-	 *            the SQL
-	 * @return The number of rows updated.
-	 */
+    /**
+     * Executes the given INSERT, UPDATE, or DELETE SQL statement.
+     * 
+     * @param sql
+     *            the SQL
+     * @param params
+     *            the parameters if have
+     * @return The number of rows updated.
+     */
 	public int jdbcExecute(String sql, Object... params);
 }

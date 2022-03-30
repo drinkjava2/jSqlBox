@@ -32,14 +32,45 @@ import com.github.drinkjava2.jdbpro.NormalJdbcTool;
  * @author Yong Zhu
  * @version 1.0.0
  */
+@SuppressWarnings("unchecked")
 public class TinyJdbc implements NormalJdbcTool {
 	private DataSource ds;
 
 	public TinyJdbc(DataSource ds) {
 		this.ds = ds;
 	}
+	 
+	@Override
+    public <T> T jdbcQueryForObject(Connection con, String sql, Object... params) {
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try {
+            int i = 1;
+            pst = con.prepareStatement(sql);// NOSONAR
+            for (Object obj : params)
+                pst.setObject(i++, obj);
+            rs = pst.executeQuery();
+            if (rs.next())
+                return (T) rs.getObject(1);
+            else
+                return null;
+        } catch (SQLException e) {
+            return null;
+        } finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            if (pst != null)
+                try {
+                    pst.close();
+                } catch (SQLException e) {
+                }
+        }
+    }
 
-	@SuppressWarnings("unchecked")
+	 
 	@Override
 	public <T> T jdbcQueryForObject(String sql, Object... params) {
 		ResultSet rs = null;
@@ -70,11 +101,6 @@ public class TinyJdbc implements NormalJdbcTool {
 	}
 
 	@Override
-	public int jdbcUpdate(String sql, Object... params) {
-		return jdbcExecute(sql, params);
-	}
-
-	@Override
 	public int jdbcExecute(String sql, Object... params) {
 		Connection con = null;
 		PreparedStatement pst = null;
@@ -98,5 +124,7 @@ public class TinyJdbc implements NormalJdbcTool {
 		}
 		return 0;
 	}
+
+ 
 
 }

@@ -106,11 +106,11 @@ public class TableIdGenerator implements IdGenerator {
 				.jdbcQueryForObject("select count(*) from " + table + " where " + pkColumnName + "=?", pkColumnValue))
 						.intValue();
 		if (countOfRec == 0) {
-			jdbc.jdbcUpdate("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
+			jdbc.jdbcExecute("insert into " + table + "( " + pkColumnName + "," + valueColumnName + " )  values(?,?)",
 					pkColumnValue, initialValue);
 			return initialValue;
 		} else {
-			jdbc.jdbcUpdate("update " + table + " set " + valueColumnName + "=" + valueColumnName + "+" + allocationSize
+			jdbc.jdbcExecute("update " + table + " set " + valueColumnName + "=" + valueColumnName + "+" + allocationSize
 					+ "  where " + pkColumnName + " =?", pkColumnValue);
 
 			int last = ((Number) jdbc.jdbcQueryForObject( // NOSONAR

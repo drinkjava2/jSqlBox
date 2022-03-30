@@ -111,7 +111,7 @@ public class ActiveRecordDemoTest {
 			u.insert();
 		}
 
-		Assert.assertEquals(100L, ((Number) ctx.jdbcQueryForObject("select count(*) from users")).longValue());
+		Assert.assertEquals(100L, ctx.qryLongValue("select count(*) from users"));
 
 		List<Map<String, Object>> users = ctx.qry(new MapListHandler(),
 				ctx.pagin(2, 10, "select concat(firstName, ' ', lastName) as UserName, age from users where age>?"),

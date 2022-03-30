@@ -48,8 +48,8 @@ public class GroupTxTest {
 
 		String[] ddlArray = ctx1.toDropAndCreateDDL(Usr.class);
 		for (String ddl : ddlArray) {
-			ctx1.jdbcExecute(ddl);
-			ctx2.jdbcExecute(ddl);
+			ctx1.exe(ddl);
+			ctx2.exe(ddl);
 		}
 
 		for (int i = 1; i <= 100; i++)

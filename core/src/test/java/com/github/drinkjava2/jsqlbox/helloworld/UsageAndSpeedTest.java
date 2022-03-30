@@ -52,7 +52,7 @@ public class UsageAndSpeedTest {
         DbContext.resetGlobalVariants();
         for (String ddl : ctx.getDialect().toDropAndCreateDDL(UserAR.class))
             try {
-                ctx.jdbcExecute(ddl);
+                ctx.exe(ddl);
             } catch (Exception e) {
             }
     }
@@ -487,7 +487,7 @@ public class UsageAndSpeedTest {
                 "China".equals(address) ? new Object[]{" and address=  ", que(address)} : "",//
                 " order by name"
         ));
-        ctx.jdbcExecute("delete from users");
+        ctx.exe("delete from users");
     }
 
     @Test
@@ -515,7 +515,7 @@ public class UsageAndSpeedTest {
                 when("China".equals(address), " and address=", que(address)),//
                 " order by name"
         ));
-        ctx.jdbcExecute("delete from users");
+        ctx.exe("delete from users");
     }
 
     @Test
