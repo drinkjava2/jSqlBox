@@ -22,6 +22,17 @@ import java.sql.SQLException;
  * @since 1.0.0
  */
 public interface ConnectionManager {
+    
+    /**
+     * A ThreadLocal tag to tell close(Connection) method do not close connection, usually used on entityInsert 
+     * to get identity ID, use this tag careful, always used in try... finally to restore it to false. 
+     */
+    public static ThreadLocal<Boolean> connecitonKeepOpen = new ThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
 
 	/** Start a transaction with default connection isolation level */
 	public void startTransaction();

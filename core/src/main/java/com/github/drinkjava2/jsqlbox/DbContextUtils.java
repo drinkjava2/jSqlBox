@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.drinkjava2.jdbpro.ImprovedQueryRunner;
 import com.github.drinkjava2.jdbpro.LinkArrayList;
 import com.github.drinkjava2.jdbpro.PreparedSQL;
 import com.github.drinkjava2.jdbpro.SingleTonHandlers;
@@ -55,6 +56,7 @@ import com.github.drinkjava2.jsqlbox.handler.EntityNetHandler;
 import com.github.drinkjava2.jsqlbox.sharding.ShardingTool;
 import com.github.drinkjava2.jsqlbox.sqlitem.EntityKeyItem;
 import com.github.drinkjava2.jsqlbox.sqlitem.SampleItem;
+import com.github.drinkjava2.jtransactions.ConnectionManager;
 
 /**
  * DbContextUtils is utility class store static methods about DbContext
@@ -639,8 +641,15 @@ public abstract class DbContextUtils {// NOSONAR
 			return entityInsertTry(paramCtx, entityBean, newParams);
 		}
 
-		int result = doEntityInsertTry(ctx, entityBean, optionItems);
-		if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxTag)) // if in GTX transaction?
+		int result;
+		
+		try {
+		    ConnectionManager.connecitonKeepOpen.set(true);
+            result = doEntityInsertTry(ctx, entityBean, optionItems);
+        } finally {
+            ConnectionManager.connecitonKeepOpen.set(false);
+        }
+        if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxTag)) // if in GTX transaction?
 			GtxUtils.reg(ctx, entityBean, GtxUtils.INSERT);
 		return result;
 	}
@@ -698,6 +707,7 @@ public abstract class DbContextUtils {// NOSONAR
 		SqlItem shardDbItem = null;
         IdGenerator identityGenerator=null; //identityGenerator can only have one
         Connection con=ctx.prepareConnectionQuiet();
+        printXXXXXXXXXXXXXXXXXXXXConnection(1,con);
 		for (ColumnModel col : cols.values()) {// NOSONAR
 			if (col == null || col.getTransientable() || !col.getInsertable())
 				continue;
@@ -777,19 +787,36 @@ public abstract class DbContextUtils {// NOSONAR
 
 		if (optionModel == null)// No optional model, force use entity's
 			sqlBody.frontAdd(model);
-
+		
+		 printXXXXXXXXXXXXXXXXXXXXConnection(2,con);
+		 try {
+            if(con.isClosed())
+                 System.out.println("_is closed");
+        } catch (SQLException e) { 
+            e.printStackTrace();
+        }
 		int result = ctx.upd(con, sqlBody.toArray());
 		if (ctx.isBatchEnabled()) {
-		    ctx.releaseConnectionQuiet(con);
+		    ConnectionManager.connecitonKeepOpen.set(false);
+	        ctx.releaseConnectionQuiet(con);
 			return 1; // in batch mode, direct return 1
 		}
+		 printXXXXXXXXXXXXXXXXXXXXConnection(3,con);
         if (identityGenerator != null) {// write identity id to Bean field
             Object identityId = identityGenerator.getNextID(con, ctx.getDialect(), identityType);
             writeValueToBeanFieldOrTail(identityCol, entityBean, identityId);
         }
-           ctx.releaseConnectionQuiet(con);
+        ConnectionManager.connecitonKeepOpen.set(false);
+        ctx.releaseConnectionQuiet(con);
 		return result;
 	}
+
+    private static void printXXXXXXXXXXXXXXXXXXXXConnection(int i, Connection con) {
+        try {
+            System.out.println(i+":"+con.isClosed());            
+        } catch (SQLException e) { 
+        }
+    }
 
 	/** Update entityBean according primary key, return row affected */
 	public static int entityUpdateTry(DbContext ctx, Object entityBean, Object... optionItems) {// NOSONAR

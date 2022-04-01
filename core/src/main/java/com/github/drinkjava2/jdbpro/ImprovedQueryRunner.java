@@ -171,12 +171,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	}
 
 	@Override
-	public void close(Connection conn) throws SQLException {
-		if (connectionManager == null)
-			super.close(conn);
-		else
-			connectionManager.releaseConnection(conn, this.getDataSource());
-	}
+    public void close(Connection conn) throws SQLException {
+        if (ConnectionManager.connecitonKeepOpen.get())
+            return; //if connectionKeepOpen is true then do nothing
+        if (connectionManager == null)
+            super.close(conn);
+        else
+            connectionManager.releaseConnection(conn, this.getDataSource());
+    }
 	
     /** Close connection, if SqlException happend, wrap it to runtime exception DbProException */
     public void closeQuiet(Connection conn) {
@@ -296,8 +298,11 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 			case UPDATE:
 			case EXECUTE: {
 				try {
-					if (first.getConnection() != null)
+					if (first.getConnection() != null) {
+					    if(first.getConnection().isClosed())
+					        System.out.println("IS closed");
 						result = ((int[]) batch(first.getConnection(), first.getSql(), allParams)).length;
+					}
 					else
 						result = ((int[]) batch(first.getSql(), allParams)).length;
 				} catch (SQLException e) {
