@@ -23,25 +23,25 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 /**
- * A tiny pure JDBC tool to access database, only used for unit test
+ * A tiny pure JDBC tool to access database
  * 
  *
  * @author Yong Zhu
  * @version 1.0.0
  */
-@SuppressWarnings("unchecked")
 public abstract class JdbcUtil {//NOSONAR 
 
     /**
      * Return sql query result object in first row first column
-     * @param con Connection
-     * @param sql sql
-     * @param params parameters
+     * @param Connection
+     * @param sql
+     * @param params
      * @return object in first row first column
      */
-    public static <T> T qryOneObject(Connection con, String sql, Object... params) {
+    @SuppressWarnings("unchecked")
+    public static <T> T qryOneObject(Connection conneciton, String sql, Object... params) {
         ResultSet rs = null;
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (PreparedStatement pst = conneciton.prepareStatement(sql)) {
             int i = 1;
             for (Object obj : params)
                 pst.setObject(i++, obj);
@@ -64,13 +64,13 @@ public abstract class JdbcUtil {//NOSONAR
 
     /**
      * Execute a sql, return rows quantity be affected
-     * @param ds
+     * @param connection
      * @param sql
      * @param params
      * @return rows quantity be affected
      */
-    public static int execute(Connection con, String sql, Object... params) {
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+    public static int execute(Connection connection, String sql, Object... params) {
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             int i = 1;
             for (Object obj : params)
                 pst.setObject(i++, obj);
@@ -83,14 +83,15 @@ public abstract class JdbcUtil {//NOSONAR
 
     /**
      * Return sql query result object in first row first column
-     * @param ds Datasource
-     * @param sql sql
-     * @param params parameters
+     * @param dataSource
+     * @param sql 
+     * @param params 
      * @return object in first row first column
      */
-    public static <T> T qryOneObject(DataSource ds, String sql, Object... params) {
+    @SuppressWarnings("unchecked")
+    public static <T> T qryOneObject(DataSource dataSource, String sql, Object... params) {
         ResultSet rs = null;
-        try (Connection con = ds.getConnection(); //
+        try (Connection con = dataSource.getConnection(); //
                 PreparedStatement pst = con.prepareStatement(sql);) {
             int i = 1;
             for (Object obj : params)
@@ -114,13 +115,13 @@ public abstract class JdbcUtil {//NOSONAR
 
     /**
      * Execute a sql, return rows quantity be affected
-     * @param ds
+     * @param dataSource
      * @param sql
      * @param params
      * @return rows quantity be affected
      */
-    public static int execute(DataSource ds, String sql, Object... params) {
-        try (Connection con = ds.getConnection(); //
+    public static int execute(DataSource dataSource, String sql, Object... params) {
+        try (Connection con = dataSource.getConnection(); //
                 PreparedStatement pst = con.prepareStatement(sql);) {
             int i = 1;
             for (Object obj : params)

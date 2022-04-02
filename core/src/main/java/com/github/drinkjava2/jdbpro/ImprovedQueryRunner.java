@@ -92,6 +92,9 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	/** A ThreadLocal TxResult instance store last transation result */
 	private static ThreadLocal<TxResult> lastTxResult = new ThreadLocal<TxResult>();
+	
+	/** A ThreadLocal Connection, in prepareConnection will return this one if exist */
+    public ThreadLocal<Connection> threadLocalConnection = new ThreadLocal<Connection>();
 
 	/** A ThreadLocal SqlHandler instance */
 	private static ThreadLocal<SqlHandler[]> threadLocalSqlHandlers = new ThreadLocal<SqlHandler[]>();
@@ -171,14 +174,14 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	}
 
 	@Override
-    public void close(Connection conn) throws SQLException {
-        if (ConnectionManager.connecitonKeepOpen.get())
-            return; //if connectionKeepOpen is true then do nothing
-        if (connectionManager == null)
-            super.close(conn);
-        else
-            connectionManager.releaseConnection(conn, this.getDataSource());
-    }
+	public void close(Connection conn) throws SQLException {
+	    if(this.threadLocalConnection.get()!=null) //if threaded connection exist, will not close
+	        return;
+		if (connectionManager == null)
+			super.close(conn);
+		else
+			connectionManager.releaseConnection(conn, this.getDataSource());
+	}
 	
     /** Close connection, if SqlException happend, wrap it to runtime exception DbProException */
     public void closeQuiet(Connection conn) {
@@ -191,6 +194,9 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 
 	@Override
 	public Connection prepareConnection() throws SQLException {
+	    Connection con=this.threadLocalConnection.get();
+	    if(con!=null)
+	        return con;
 		if (connectionManager == null)
 			return super.prepareConnection();
 		else
@@ -298,11 +304,8 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 			case UPDATE:
 			case EXECUTE: {
 				try {
-					if (first.getConnection() != null) {
-					    if(first.getConnection().isClosed())
-					        System.out.println("IS closed");
+					if (first.getConnection() != null)
 						result = ((int[]) batch(first.getConnection(), first.getSql(), allParams)).length;
-					}
 					else
 						result = ((int[]) batch(first.getSql(), allParams)).length;
 				} catch (SQLException e) {
@@ -913,25 +916,16 @@ public class ImprovedQueryRunner extends QueryRunner implements DataSourceHolder
 	 * DataSource or ThreadLocal or from Spring or JTA or some container...
 	 */
 	public Connection getConnection() throws SQLException {
-		return this.getConnectionManager().getConnection(this);
+		return this.prepareConnection();
 	}
-
-    /** Call getConnection but wrap SQLException to runtime exception DbProException */
-    public Connection getConnectionQuiet(){
-        try {
-            return getConnection();
-        } catch (SQLException e) {
-            throw new DbProException(e);
-        }
-    }
-    
+   
 	/**
 	 * A ConnectionManager implementation determine how to close connection or
 	 * return connection to ThreadLocal or return to Spring or JTA or some
 	 * container...
 	 */
 	public void releaseConnection(Connection conn) throws SQLException {
-		this.getConnectionManager().releaseConnection(conn, this);
+		this.close(conn);
 	}
 	
     /** Call releaseConnection but wrap SQLException to runtime exception DbProException */

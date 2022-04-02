@@ -24,7 +24,7 @@ public class DataSourceConfig {
      * Data source setting, change below line extends which DataSource
      * ================================================================<br/>
      */
-    public static class DataSourceBox extends H2DataSourceBox {
+    public static class DataSourceBox extends BeeCPH2Box {
     }
     
     
@@ -113,7 +113,7 @@ public class DataSourceConfig {
 		// In jBeanBox, bean default is singleton
 		public HikariDataSource create() {
 			HikariDataSource ds = new HikariDataSource();
-			ds.addDataSourceProperty("cachePrepStmts", false); //生产环境下，如果不动态增改列，要设成true以提高性能
+			ds.addDataSourceProperty("cachePrepStmts", true); //生产环境下，如果不动态增改列，要设成true以提高性能
 			ds.addDataSourceProperty("prepStmtCacheSize", 250);
 			ds.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
 			ds.addDataSourceProperty("useServerPrepStmts", true);

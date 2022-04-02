@@ -19,7 +19,6 @@ import static com.github.drinkjava2.jsqlbox.DB.par;
 import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.junit.Assert;
 import org.junit.Test;

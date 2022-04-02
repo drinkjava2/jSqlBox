@@ -14,7 +14,6 @@ import com.github.drinkjava2.jdialects.model.ColumnModel;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
-import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * This is unit test for DDL
