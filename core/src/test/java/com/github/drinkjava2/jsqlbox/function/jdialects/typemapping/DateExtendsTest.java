@@ -5,6 +5,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID26;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Temporal;
@@ -63,17 +64,17 @@ public class DateExtendsTest extends TestBase {
 		Child c = new Child();
 		c.setCreateTime(new Date(40000000000000L));
 		c.setBirthDay(new Date(40000000000001L));
-		System.out.println(c.getCreateTime());
-		System.out.println(c.getBirthDay());
+		Systemout.println(c.getCreateTime());
+		Systemout.println(c.getBirthDay());
 		c.insert();
-		System.out.println(c.getCreateTime());
-		System.out.println(c.getBirthDay());
-		System.out.println(c.getCreateTime().getClass());
+		Systemout.println(c.getCreateTime());
+		Systemout.println(c.getBirthDay());
+		Systemout.println(c.getCreateTime().getClass());
 
 		Child c2 = new Child().setId(c.getId()).load();
-		System.out.println(c2.getCreateTime());
-		System.out.println(c2.getBirthDay());
-		System.out.println(c2.getCreateTime().getClass());
+		Systemout.println(c2.getCreateTime());
+		Systemout.println(c2.getBirthDay());
+		Systemout.println(c2.getCreateTime().getClass());
 
 		Child c3 = new Child();
 		c3.setCreateTime(c2.getCreateTime());
@@ -81,9 +82,9 @@ public class DateExtendsTest extends TestBase {
 		c3.insert();
 
 		Child c4 = new Child().setId(c3.getId()).load();
-		System.out.println(c4.getCreateTime());
-		System.out.println(c4.getBirthDay());
-		System.out.println(c4.getCreateTime().getClass());
+		Systemout.println(c4.getCreateTime());
+		Systemout.println(c4.getBirthDay());
+		Systemout.println(c4.getCreateTime().getClass());
 
 	}
 

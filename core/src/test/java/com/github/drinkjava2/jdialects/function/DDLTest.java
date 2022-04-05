@@ -288,25 +288,27 @@ public class DDLTest extends JdialectsTestBase {
 
 	@Test
 	public void testFKEY() {// FKEY
+	    TableModel t0 = new TableModel("master0");
+	    t0.column("address").VARCHAR(20).pkey();
+	        
 		TableModel t1 = new TableModel("master1");
 		t1.column("id").INTEGER().pkey();
-
+		 
 		TableModel t2 = new TableModel("master2");
 		t2.column("name").VARCHAR(20).pkey();
 		t2.column("address").VARCHAR(20).pkey();
-		t2.column("fid").INTEGER().singleFKey("master1");
-
+		t2.column("fid").INTEGER().singleFKey("master1", "id");
+		 
 		TableModel t3 = new TableModel("child");
 		t3.column("id").INTEGER().pkey();
 		t3.column("masterid1").INTEGER().singleFKey("master1", "id").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE")
 				.fkeyName("fknm");
 		t3.column("myname").VARCHAR(20).singleFKey("master2", "name").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE");
-		t3.column("myaddress").VARCHAR(20).singleFKey("master2", "address");
+		t3.column("myaddress").VARCHAR(20).singleFKey("master0", "address");
 		t3.fkey().columns("masterid1").refs("master1", "id").fkeyTail("ON DELETE CASCADE ON UPDATE CASCADE");
-		;
-		t3.fkey("FKNAME1").columns("myname", "myaddress").refs("master2", "name", "address");
-		t3.fkey("FKNAME2").columns("myname", "myaddress").refs("master2");
-
+		 
+		t3.fkey("FKNAME1").columns("myname", "myaddress").refs("master2", "name", "address"); 
+		
 		TableModel t4 = new TableModel("child2");
 		t4.column("id").INTEGER().pkey();
 		t4.column("masterid2").INTEGER();
@@ -314,9 +316,10 @@ public class DDLTest extends JdialectsTestBase {
 		t4.column("myaddress2").VARCHAR(20);
 		t4.fkey().columns("masterid2").refs("master1", "id");
 		t4.fkey().columns("myname2", "myaddress2").refs("master2", "name", "address");
-		printAllDialectsDDLs(t1, t2, t3);
-		printOneDialectsDDLs(Dialect.MySQL5InnoDBDialect, t1, t2, t3, t4);
-		testOnCurrentRealDatabase(t1, t2, t3, t4);
+		System.out.println("================");
+		printAllDialectsDDLs(t0, t1, t2, t3);
+		printOneDialectsDDLs(Dialect.MySQL5InnoDBDialect, t0, t1, t2, t3, t4);
+		testOnCurrentRealDatabase(t0, t1, t2, t3, t4);
 	}
 
 	@Test
@@ -452,16 +455,18 @@ public class DDLTest extends JdialectsTestBase {
         String[] add = dialect.toAddColumnDDL(name, t1.column("age").INTEGER(), t1.column("price").DOUBLE());
         db.executeDDL(add); //新增三个列
         db.exe("insert into tb_test (id, name, age, price)", DB.par(2, "tom", 5, 100.0), DB.VQ);
-        Systemout.println("此时有4列 =" + db.qryMapList("select * from tb_test") ); //注意DDL动态改表后，某些数据池可能会出错，要关闭cachePrepStmts 
+        //注意DDL动态改表后，某些数据池可能会出错，要关闭cachePrepStmts，或使用不在缓存中的SQL，如下在每个SQL中加了空格以避免与缓存中的SQL相同  
+        Systemout.println("此时有4列 =" + db.qryMapList("select * from tb_test ") );  
         
         db.executeDDL(dialect.toDropColumnDDL(t1.column("name"), t1.column("age"))); //删除两个列
-        Systemout.println("此时有2列=" + db.qryMapList("select * from tb_test")); //此时有2列
+        Systemout.println("此时有2列=" + db.qryMapList("select * from tb_test  ")); //此时有2列
         
         //改名和改类型目前不能直接做到，只能先新新一列，再用SQL拷贝，然后再删除旧列
         db.executeDDL(dialect.toAddColumnDDL(t1.column("new_price").DECIMAL(5, 2)));
         db.exe("update tb_test set new_price=price");
         db.executeDDL(dialect.toDropColumnDDL(t1.column("price")));
-        Systemout.println("此时price被改名成了new_price=" + db.qryMapList("select * from tb_test")); //此时price被改名成了new_price
+        Systemout.println("此时price被改名成了new_price=" + db.qryMapList("select * from tb_test   ")); //此时price被改名成了new_price
+        
     }
 	   
 }

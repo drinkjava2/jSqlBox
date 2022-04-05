@@ -32,7 +32,7 @@ public class JdialectsTestBase {
 	public void initDao() {
 		Systemout.println("Current guessedDialect=" + guessedDialect);
 		Dialect.setGlobalAllowReservedWords(true);
-		Dialect.setGlobalAllowShowSql(true);
+		Dialect.setGlobalAllowShowSql(false);
 		Dialect.setGlobalSqlFunctionPrefix(null);
 	}
 
@@ -56,10 +56,12 @@ public class JdialectsTestBase {
 		}
 	}
 
-	protected void executeDDLs(String... sqls) {
-		for (String sql : sqls)
-		    JdbcUtil.execute(ds, sql);
-	}
+    protected void executeDDLs(String... sqls) {
+        for (String sql : sqls) {
+            //System.out.println("SQL="+sql);
+            JdbcUtil.execute(ds, sql);
+        }
+    }
 
 	public void reBuildDB(TableModel... tables) {
 		String[] ddls = guessedDialect.toDropDDL(tables);

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.handler.PrintSqlHandler;
 import com.github.drinkjava2.jdialects.annotation.jdia.PKey;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID26;
@@ -43,9 +44,9 @@ public class OthersTest extends TestBase {
 				when(name != null, " and name like ", que("%" + name + "%")), //
 				new PrintSqlHandler() //
 		);
-		System.out.println(result);
+		Systemout.println(result);
 		for (Object[] titles : getOthers())
-			System.out.println(Arrays.deepToString(titles));
+			Systemout.println(Arrays.deepToString(titles));
 	}
 
 	public static class OthersDemo implements ActiveEntity<OthersDemo> {

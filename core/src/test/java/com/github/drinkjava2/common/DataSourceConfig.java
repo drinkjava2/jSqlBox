@@ -24,7 +24,7 @@ public class DataSourceConfig {
      * Data source setting, change below line extends which DataSource
      * ================================================================<br/>
      */
-    public static class DataSourceBox extends BeeCPH2Box {
+    public static class DataSourceBox extends BeeCPMySqlBox {
     }
     
     
@@ -82,7 +82,7 @@ public class DataSourceConfig {
         {
             injectValue("jdbcUrl",
                     "jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false");
-            injectValue("driverClassName", "com.mysql.jdbc.Driver");
+            injectValue("driverClassName", "com.mysql.cj.jdbc.Driver"); //for MySQL connection6 and above
             injectValue("username", "root");// change to your user & password
             injectValue("password", "root888");
         }

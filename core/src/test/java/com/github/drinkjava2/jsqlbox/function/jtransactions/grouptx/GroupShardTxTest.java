@@ -20,6 +20,7 @@ import com.github.drinkjava2.jbeanbox.annotation.AOP;
 import com.github.drinkjava2.jdialects.annotation.jdia.ShardDatabase;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
+import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxAOP;
 import com.github.drinkjava2.jtransactions.grouptx.GroupTxConnectionManager;
@@ -38,7 +39,7 @@ public class GroupShardTxTest {
 	public static class ShardUser extends ActiveRecord<ShardUser> {
 		@Id
 		@ShardDatabase({ "MOD", "2" })
-		Integer id;
+		Integer id; //Note: sharding should not use Identity because 
 		String name;
 
 		//@formatter:off
@@ -57,8 +58,10 @@ public class GroupShardTxTest {
 			ctx2.exe(ddl);
 		}
 		DbContext[] masters = new DbContext[] { ctx1, ctx2 };
+		masters[0].setName("0");
+		masters[1].setName("1");
 		DbContext.getGlobalDbContext().setMasters(masters);
-
+		
 		for (int i = 1; i <= 100; i++)
 			new ShardUser().setId(i).setName("Foo" + i).insert(); // Sharded!
 

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Temporal;
@@ -43,7 +44,7 @@ public class DatetimeTimestampTest extends TestBase {
     @Test
     public void doTest() {
         TableModel m= TableModelUtils.entity2Model(TestEntity.class);
-        System.out.println(m.getDebugInfo());
+        Systemout.println(m.getDebugInfo());
         
         createAndRegTables(TestEntity.class);
 
@@ -54,8 +55,8 @@ public class DatetimeTimestampTest extends TestBase {
         t.setD1(new Date());
         t.setD2(new Date());
         t.insert();
-        System.out.println(DB.qryString("select d1 from TestEntity"));
-        System.out.println(DB.qryString("select d2 from TestEntity"));
+        Systemout.println(DB.qryString("select d1 from TestEntity"));
+        Systemout.println(DB.qryString("select d2 from TestEntity"));
     }
 
 }

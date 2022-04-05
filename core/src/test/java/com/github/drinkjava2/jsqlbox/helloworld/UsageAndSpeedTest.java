@@ -1,5 +1,13 @@
 package com.github.drinkjava2.jsqlbox.helloworld;
 
+import static com.github.drinkjava2.jsqlbox.DB.TEMPLATE;
+import static com.github.drinkjava2.jsqlbox.DB.bind;
+import static com.github.drinkjava2.jsqlbox.DB.notNull;
+import static com.github.drinkjava2.jsqlbox.DB.par;
+import static com.github.drinkjava2.jsqlbox.DB.que;
+import static com.github.drinkjava2.jsqlbox.DB.valuesQuestions;
+import static com.github.drinkjava2.jsqlbox.DB.when;
+
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,8 +34,6 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
 import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.DbContext;
 import com.zaxxer.hikari.HikariDataSource;
-
-import static com.github.drinkjava2.jsqlbox.DB.*;
 
 /**
  * Usage of different SQL style and speed test
@@ -70,7 +76,7 @@ public class UsageAndSpeedTest {
             runTestMethods();
             PRINT_TIMEUSED = true;
             REPEAT_TIMES = 10;// Change to 10000 to do speed test
-            System.out.println("Speed test, compare method execute time for repeat " + REPEAT_TIMES + " times:");
+            Systemout.println("Speed test, compare method execute time for repeat " + REPEAT_TIMES + " times:");
             runTestMethods();
         } finally {
             PRINT_TIMEUSED = false;
@@ -96,7 +102,7 @@ public class UsageAndSpeedTest {
         long end = System.currentTimeMillis();
         String timeused = "" + (end - start) / 1000 + "." + (end - start) % 1000;
         if (PRINT_TIMEUSED)
-            System.out.println(String.format("%35s: %6s s", methodName, timeused));
+            Systemout.println(String.format("%35s: %6s s", methodName, timeused));
     }
 
     @Table(name = "users")
@@ -534,12 +540,12 @@ public class UsageAndSpeedTest {
             ctx.qryMapList("select * from users");
             ctx.qryMap("select * from users");
             ctx.qryString("select name from users where name=?", par(name));
-            System.out.println();
+            Systemout.println();
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 //test on PGSQL
                 if (e.getMessage().indexOf("cancelled") != -1 || e.getMessage().indexOf("timeout") != -1) {
-                    System.out.println("execute sql timeout...");
+                    Systemout.println("execute sql timeout...");
                 }
             }
 

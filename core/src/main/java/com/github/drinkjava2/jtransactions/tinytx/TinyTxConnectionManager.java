@@ -50,7 +50,8 @@ public class TinyTxConnectionManager extends ThreadConnectionManager {
 			ds = (DataSource) dsOrHolder;
 		else
 			ds = ((DataSourceHolder) dsOrHolder).getDataSource();
-		TransactionsException.assureNotNull(ds, "DataSource can not be null");
+		if(ds==null)
+		    return null; //if ds=null, may caused by sharding ctx have no ds, but master have
 		if (isInTransaction()) {
 			TxInfo tx = getThreadTxInfo();
 			if (tx.getConnectionCache().size() > 1)

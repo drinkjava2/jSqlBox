@@ -7,7 +7,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jtransactions.ConnectionManager;
 import com.github.drinkjava2.jtransactions.DataSourceHolder;
 
@@ -27,8 +26,7 @@ public class JTransTinyJdbc implements DataSourceHolder {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T queryForObject(String sql) {
-		Systemout.println("SQL=" + sql);
+	public <T> T queryForObject(String sql) { 
 		Connection con = getConnection();
 		PreparedStatement pst = null;
 		try {
@@ -47,8 +45,7 @@ public class JTransTinyJdbc implements DataSourceHolder {
 		}
 	}
 
-	public void executeSql(String sql) {
-		Systemout.println("SQL=" + sql);
+	public void executeSql(String sql) { 
 		Connection con = getConnection();
 		PreparedStatement pst = null;
 		try {

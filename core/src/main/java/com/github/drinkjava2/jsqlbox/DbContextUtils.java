@@ -640,18 +640,20 @@ public abstract class DbContextUtils {// NOSONAR
 		}
 
 		int result;
-		
-		Connection con=null;
-		try {
-		    con = ctx.threadLocalConnection.get();
+		 
+		try { //In doEntityInsertTry need use same connection to get right identity
+		    Connection con = ctx.threadLocalConnection.get();
 		    if(con==null) {
 		        con=ctx.prepareConnectionQuiet();
 		        ctx.threadLocalConnection.set(con);
 		    }
             result = doEntityInsertTry(ctx, entityBean, optionItems);
         } finally {
+            Connection con=ctx.threadLocalConnection.get();
             ctx.threadLocalConnection.set(null);
-            ctx.releaseConnectionQuiet(con);
+            if (con != null)
+                ctx.releaseConnectionQuiet(con);
+            
         }
         if (result == 1 && ctx.isGtxOpen() && !(entityBean instanceof GtxTag)) // if in GTX transaction?
 			GtxUtils.reg(ctx, entityBean, GtxUtils.INSERT);

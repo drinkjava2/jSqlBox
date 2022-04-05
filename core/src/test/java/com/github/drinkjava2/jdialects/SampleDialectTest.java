@@ -74,6 +74,6 @@ public class SampleDialectTest {
         SampleDialect2 dialect = new SampleDialect2();
         Systemout.println(dialect.getName());
         for (String ddl : dialect.toCreateDDL(UserTB.class))
-            System.out.println(ddl);
+            Systemout.println(ddl);
     }
 }

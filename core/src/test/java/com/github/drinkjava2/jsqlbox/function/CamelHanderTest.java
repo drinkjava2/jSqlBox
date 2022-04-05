@@ -24,6 +24,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdbpro.handler.CamelHander;
 import com.github.drinkjava2.jdialects.annotation.jpa.Column;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
@@ -86,15 +87,15 @@ public class CamelHanderTest extends TestBase {
     @Test
     public void testCamelHandler() {
         Map<String, Object> mp = DB.qryMap("select * from DemoUser order by id ", DB.pagin(1, 10));
-        System.out.println(mp);
+        Systemout.println(mp);
         mp = DB.qryMap("select * from DemoUser order by id ", DB.pagin(1, 10), new CamelHander());
-        System.out.println(mp);
+        Systemout.println(mp);
 
         List<Map<String, Object>> listMp = DB.qryMapList("select * from DemoUser order by id ", DB.pagin(1, 10));
-        System.out.println(listMp);
+        Systemout.println(listMp);
 
         listMp = DB.qryMapList("select * from DemoUser order by id ", DB.pagin(1, 10), new CamelHander());
-        System.out.println(listMp);
+        Systemout.println(listMp);
     }
 
     @Test
@@ -108,7 +109,7 @@ public class CamelHanderTest extends TestBase {
         a[1] = l;
         a[2] = l;
         a = (Object[]) CamelHander.transToCamel(a);
-        System.out.println(Arrays.asList(a));
+        Systemout.println(Arrays.asList(a));
     }
 
 }
