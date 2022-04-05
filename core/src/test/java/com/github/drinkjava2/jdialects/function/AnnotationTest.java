@@ -12,7 +12,6 @@ import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jdialects.DebugUtils;
 import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
-import com.github.drinkjava2.jdialects.TypeUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.FKey;
 import com.github.drinkjava2.jdialects.annotation.jdia.FKey1;
 import com.github.drinkjava2.jdialects.annotation.jdia.SingleFKey;
@@ -79,14 +78,14 @@ public class AnnotationTest extends JdialectsTestBase {
 		@SequenceGenerator(name = "seqID2", sequenceName = "seqName2", initialValue = 2, allocationSize = 20)
 		@TableGenerator(name = "tableID2", table = "table2", pkColumnName = "pkCol1", valueColumnName = "vcol1", pkColumnValue = "pkcolval1", initialValue = 2, allocationSize = 20)
 		@Id
-		@Column(columnDefinition = TypeUtils.VARCHAR, length = 20)
+		@Column(columnDefinition = "VARCHAR", length = 20)
 		public String field1;
 
-		@Column(name = "field2", nullable = false, columnDefinition = TypeUtils.BIGINT)
+		@Column(name = "field2", nullable = false, columnDefinition = "BIGINT")
 		public String field2;
 
 		@GeneratedValue(strategy = GenerationType.TABLE, generator = "CUST_GEN")
-		@Column(name = "field3", nullable = false, columnDefinition = TypeUtils.BIGINT)
+		@Column(name = "field3", nullable = false, columnDefinition = "BIGINT")
 		@SingleFKey(name = "singleFkey1", ddl = true, refs = { "Entity1", "field1" })
 		@SingleIndex
 		@SingleUnique
@@ -181,14 +180,14 @@ public class AnnotationTest extends JdialectsTestBase {
 	public static class EntityForMySql {
 		@TableGenerator(name = "tableID2", table = "table2", pkColumnName = "pkCol1", valueColumnName = "vcol1", pkColumnValue = "pkcolval1", initialValue = 2, allocationSize = 20)
 		@Id
-		@Column(columnDefinition = TypeUtils.VARCHAR, length = 20)
+		@Column(columnDefinition = "VARCHAR", length = 20)
 		public String field1;
 
-		@Column(name = "field2", nullable = false, columnDefinition = TypeUtils.BIGINT)
+		@Column(name = "field2", nullable = false, columnDefinition = "BIGINT")
 		public String field2;
 
 		@GeneratedValue(strategy = GenerationType.TABLE, generator = "CUST_GEN")
-		@Column(name = "field3", nullable = false, columnDefinition = TypeUtils.BIGINT)
+		@Column(name = "field3", nullable = false, columnDefinition = "BIGINT")
 		@SingleFKey(name = "singleFkey1", ddl = true, refs = { "Entity1", "field1" })
 		@SingleIndex
 		@SingleUnique

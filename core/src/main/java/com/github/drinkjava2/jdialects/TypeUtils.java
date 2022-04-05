@@ -24,37 +24,6 @@ import java.util.Map;
  */
 public abstract class TypeUtils {// NOSONAR
 
-	public static final String BIGINT = "BIGINT";
-	public static final String BINARY = "BINARY";
-	public static final String BIT = "BIT";
-	public static final String BLOB = "BLOB";
-	public static final String BOOLEAN = "BOOLEAN";
-	public static final String CHAR = "CHAR";
-	public static final String CLOB = "CLOB";
-	public static final String DATE = "DATE";
-	public static final String DECIMAL = "DECIMAL";
-	public static final String DOUBLE = "DOUBLE";
-	public static final String FLOAT = "FLOAT";
-	public static final String INTEGER = "INTEGER";
-	public static final String INT = "INT";
-	public static final String JAVA_OBJECT = "JAVA_OBJECT";
-	public static final String LONGNVARCHAR = "LONGNVARCHAR";
-	public static final String LONGVARBINARY = "LONGVARBINARY";
-	public static final String LONGVARCHAR = "LONGVARCHAR";
-	public static final String NCHAR = "NCHAR";
-	public static final String NCLOB = "NCLOB";
-	public static final String NUMERIC = "NUMERIC";
-	public static final String NVARCHAR = "NVARCHAR";
-	public static final String UNKNOW = "UNKNOW";
-	public static final String REAL = "REAL";
-	public static final String SMALLINT = "SMALLINT";
-	public static final String TIME = "TIME";
-	public static final String TIMESTAMP = "TIMESTAMP";
-    public static final String DATETIME = "DATETIME"; //DATETIME is only DB column type
-	public static final String TINYINT = "TINYINT";
-	public static final String VARBINARY = "VARBINARY";
-	public static final String VARCHAR = "VARCHAR";
-
 	private static final Map<Class<?>, Type> JAVA_TO_TYPE_MAP = new HashMap<Class<?>, Type>();
 	private static final Map<Type, Class<?>> TYPE_TO_JAVA_MAP = new HashMap<Type, Class<?>>();
 	static {
@@ -148,69 +117,13 @@ public abstract class TypeUtils {// NOSONAR
 	 */
 	public static Type colDef2DialectType(String columnDefination) {
 		String columnDef = StrUtils.substringBefore(columnDefination, "(");
-		if (BIGINT.equalsIgnoreCase(columnDef))
-			return Type.BIGINT;
-		if (BINARY.equalsIgnoreCase(columnDef))
-			return Type.BINARY;
-		if (BIT.equalsIgnoreCase(columnDef))
-			return Type.BIT;
-		if (BLOB.equalsIgnoreCase(columnDef))
-			return Type.BLOB;
-		if (BOOLEAN.equalsIgnoreCase(columnDef))
-			return Type.BOOLEAN;
-		if (CHAR.equalsIgnoreCase(columnDef))
-			return Type.CHAR;
-		if (CLOB.equalsIgnoreCase(columnDef))
-			return Type.CLOB;
-		if (DATE.equalsIgnoreCase(columnDef))
-			return Type.DATE;
-		if (DECIMAL.equalsIgnoreCase(columnDef))
-			return Type.DECIMAL;
-		if (DOUBLE.equalsIgnoreCase(columnDef))
-			return Type.DOUBLE;
-		if (FLOAT.equalsIgnoreCase(columnDef))
-			return Type.FLOAT;
-		if (INTEGER.equalsIgnoreCase(columnDef))
-			return Type.INTEGER;
-		if (INT.equalsIgnoreCase(columnDef))
-			return Type.INTEGER;
-		if (JAVA_OBJECT.equalsIgnoreCase(columnDef))
-			return Type.JAVA_OBJECT;
-		if (LONGNVARCHAR.equalsIgnoreCase(columnDef))
-			return Type.LONGNVARCHAR;
-		if (LONGVARBINARY.equalsIgnoreCase(columnDef))
-			return Type.LONGVARBINARY;
-		if (LONGVARCHAR.equalsIgnoreCase(columnDef))
-			return Type.LONGVARCHAR;
-		if (NCHAR.equalsIgnoreCase(columnDef))
-			return Type.NCHAR;
-		if (NCLOB.equalsIgnoreCase(columnDef))
-			return Type.NCLOB;
-		if (NUMERIC.equalsIgnoreCase(columnDef))
-			return Type.NUMERIC;
-		if (NVARCHAR.equalsIgnoreCase(columnDef))
-			return Type.NVARCHAR;
-		if (UNKNOW.equalsIgnoreCase(columnDef))
-			return Type.UNKNOW;
-		if (REAL.equalsIgnoreCase(columnDef))
-			return Type.REAL;
-		if (SMALLINT.equalsIgnoreCase(columnDef))
-			return Type.SMALLINT;
-		if (TIME.equalsIgnoreCase(columnDef))
-			return Type.TIME;
-        if (TIMESTAMP.equalsIgnoreCase(columnDef))
-            return Type.TIMESTAMP;
-        if (DATETIME.equalsIgnoreCase(columnDef)) //DATETIME is only DB column type, no Java type 
-            return Type.TIMESTAMP;
-		if (TINYINT.equalsIgnoreCase(columnDef))
-			return Type.TINYINT;
-		if (VARBINARY.equalsIgnoreCase(columnDef))
-			return Type.VARBINARY;
-		if (VARCHAR.equalsIgnoreCase(columnDef))
-			return Type.VARCHAR;
-	      if ("TEXT".equalsIgnoreCase(columnDef))
-	            return Type.VARCHAR;
-		throw new DialectException("'" + columnDef + "' can not be map to a dialect type");
+       if ("TEXT".equalsIgnoreCase(columnDef))
+            return Type.VARCHAR;
+       if ("DATETIME".equalsIgnoreCase(columnDef)) //DATETIME is only DB column type, no Java type 
+           return Type.TIMESTAMP;
+       return Type.getByTypeName(columnDef);
+		// @formatter:on
+//		throw new DialectException("'" + columnDef + "' can not be map to a dialect type");
 	}
 
 	/** Convert java.sql.Types.xxx type to Dialect's Type */

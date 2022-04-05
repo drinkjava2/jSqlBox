@@ -20,15 +20,24 @@ import cn.beecp.BeeDataSourceConfig;
 public class DataSourceConfig {
     
     /**
-     * ================================================================<br/>
-     * Data source setting, change below line extends which DataSource
-     * ================================================================<br/>
+     * <pre>
+     * ================================================================ 
+     * Data source setting, change DataSourceBox extends which DataSource to do unit test
+     * Now have below to choose:
+     * 
+     * BeeCPMySqlBox (MySql on BeeCP)
+     * BeeCPH2Box (H2 on BeeCP)
+     * H2DataSourceBox (H2 on HikariCP)
+     * MySqlDataSourceUtcTimeBox (MySql on HikariCP, time is UTC)
+     * MySqlDataSourceBox (MySql on HikariCP)
+     * OracleDataSourceBox (Oracle on HikariCP)
+     * MsSqlServerDataSourceBox (MsSqlServer on HikariCP)
+     * ================================================================
+     * <pre/>
      */
-    public static class DataSourceBox extends BeeCPMySqlBox {
+    public static class DataSourceBox extends H2DataSourceBox { //usually test on H2 or MySql
     }
-    
-    
-    
+     
     public static class BeeCPMySqlBox extends BeanBox {
         public BeeDataSource create() {
             BeeDataSourceConfig config = new BeeDataSourceConfig();

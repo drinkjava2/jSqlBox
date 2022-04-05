@@ -22,6 +22,8 @@ public class DDLFeatures {
     public static final String NOT_SUPPORT = "NOT_SUPPORT";
     protected String addColumnString;
     protected String addColumnSuffixString;
+    protected String columnSuffixString;
+    protected String modifyColumnString;
     protected String addForeignKeyConstraintString;
     protected String addFKeyRefPkeyString;// If ref pkey, can ignore ref columns
     protected String addPrimaryKeyConstraintString;
@@ -88,6 +90,9 @@ public class DDLFeatures {
         DDLFeatures ddl = new DDLFeatures();
         ddl.addColumnString = "add";
         ddl.addColumnSuffixString = "";
+        ddl.dropColumnString = NOT_SUPPORT;
+        ddl.columnSuffixString = NOT_SUPPORT;
+        ddl.modifyColumnString = NOT_SUPPORT;
         ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE";
         ddl.addForeignKeyConstraintString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
         ddl.addPrimaryKeyConstraintString = " add constraint _PKEYNAME primary key ";
@@ -844,10 +849,15 @@ public class DDLFeatures {
         }
             break;
         case MySQLDialect: {
-            ddl.addColumnString = "add column";
+	    	ddl.addColumnString = "add";
+	        ddl.addColumnSuffixString = "";
+	        ddl.dropColumnString = NOT_SUPPORT;
+	        ddl.columnSuffixString = NOT_SUPPORT;
+	        ddl.modifyColumnString = NOT_SUPPORT;
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -876,6 +886,7 @@ public class DDLFeatures {
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -902,9 +913,14 @@ public class DDLFeatures {
             break;
         case MySQL55Dialect: {
             ddl.addColumnString = "add column";
+	        ddl.addColumnSuffixString = "";
+	        ddl.dropColumnString = "alter table";
+	        ddl.columnSuffixString = NOT_SUPPORT;
+	        ddl.modifyColumnString = NOT_SUPPORT;
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -935,6 +951,7 @@ public class DDLFeatures {
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -965,6 +982,7 @@ public class DDLFeatures {
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -995,6 +1013,7 @@ public class DDLFeatures {
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -1025,6 +1044,7 @@ public class DDLFeatures {
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -1054,6 +1074,7 @@ public class DDLFeatures {
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;
@@ -1082,6 +1103,7 @@ public class DDLFeatures {
             ddl.addFKeyRefPkeyString = " add constraint _FKEYNAME foreign key (_FK1, _FK2) references _REFTABLE (_REF1, _REF2)";
             ddl.closeQuote = "`";
             ddl.columnComment = " comment '_COMMENT'";
+            ddl.createTableString = "create table if not exists";
             ddl.createCatalogCommand = "create database _CATALOGNAME";
             ddl.createPooledSequenceStrings = NOT_SUPPORT;
             ddl.createSchemaCommand = NOT_SUPPORT;

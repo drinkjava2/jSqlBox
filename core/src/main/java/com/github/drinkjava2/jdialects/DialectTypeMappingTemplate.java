@@ -51,7 +51,7 @@ import java.util.Map;
 public class DialectTypeMappingTemplate {
 
     protected static void initTypeMappingTemplates() {
-
+    	
         //================SQLiteDialect family===============
         Map<Type, String> m = Dialect.SQLiteDialect.typeMappings;
         m.put(BIGINT, "bigint");
@@ -921,33 +921,41 @@ public class DialectTypeMappingTemplate {
 
         //================MySQLDialect family===============
         m = Dialect.MySQLDialect.typeMappings;
-        m.put(BIGINT, "bigint");
-        m.put(BINARY, "binary($l)");
-        m.put(BIT, "bit");
-        m.put(BLOB, "longblob");
-        m.put(BOOLEAN, "bit");
-        m.put(CHAR, "char(1)");
-        m.put(CLOB, "longtext");
-        m.put(DATE, "date");
+        m.put(Type.BINARY, "binary($l)");
+        m.put(Type.BIT, "bit");
+        m.put(Type.LONGBLOB,"longblob");
+        m.put(Type.BLOB, "blob");
+        m.put(Type.BOOLEAN, "bit");
+        m.put(Type.CHAR, "char($l)");
+        m.put(Type.CLOB, "longtext");
+        m.put(Type.DATE, "date");
+        m.put(Type.DOUBLE, "double precision");
+        m.put(Type.FLOAT, "float");
+        m.put(Type.INTEGER, "integer");
+        m.put(Type.LONGVARBINARY, "mediumblob<16777215|longblob");
+        m.put(Type.LONGVARCHAR, "longtext");
+        m.put(Type.NCLOB, "longtext");
+        m.put(Type.NUMERIC, "decimal($p,$s)");
+        m.put(Type.TIME, "time");
+        m.put(Type.DATETIME, "datetime");
+        m.put(Type.VARBINARY, "tinyblob<255|blob<65535|mediumblob<16777215|longblob");
+        
         m.put(DECIMAL, "decimal($p,$s)");
-        m.put(DOUBLE, "double precision");
-        m.put(FLOAT, "float");
-        m.put(INTEGER, "integer");
-        m.put(JAVA_OBJECT, "N/A");
-        m.put(LONGNVARCHAR, "nvarchar($l)");
-        m.put(LONGVARBINARY, "mediumblob<16777215|longblob");
-        m.put(LONGVARCHAR, "longtext");
-        m.put(NCHAR, "nchar($l)");
-        m.put(NCLOB, "longtext");
-        m.put(NUMERIC, "decimal($p,$s)");
-        m.put(NVARCHAR, "nvarchar($l)");
-        m.put(REAL, "real");
-        m.put(SMALLINT, "smallint");
-        m.put(TIME, "time");
-        m.put(TIMESTAMP, "datetime");
-        m.put(TINYINT, "tinyint");
-        m.put(VARBINARY, "tinyblob<255|blob<65535|mediumblob<16777215|longblob");
-        m.put(VARCHAR, "varchar($l)<255|longtext");
+        m.put(Type.SMALLINT, "smallint($l)");
+        m.put(Type.MEDIUMINT, "MEDIUMINT($l)");
+        m.put(Type.TINYINT, "tinyint($l)");
+        m.put(Type.BIGINT, "bigint($l)");
+        m.put(Type.YEAR, "year($l)");
+        m.put(Type.VARCHAR, "varchar($l)<65535|longtext");
+        m.put(Type.TIMESTAMP, "timestamp");
+        m.put(Type.INT, "INT($l)");
+        m.put(Type.TINYBLOB, "TINYBLOB");
+        m.put(Type.TINYTEXT, "TINYTEXT");
+        m.put(Type.TEXT, "TEXT($l)");
+        m.put(Type.MEDIUMBLOB, "MEDIUMBLOB");
+        m.put(Type.MEDIUMTEXT, "MEDIUMTEXT");
+        m.put(Type.LONGTEXT, "LONGTEXT");
+        m.put(Type.JSON, "JSON");
 
         m = Dialect.MySQL5Dialect.typeMappings;
         m.putAll(Dialect.MySQLDialect.typeMappings);//extends from MySQLDialect
@@ -988,21 +996,17 @@ public class DialectTypeMappingTemplate {
         //================OracleDialect family===============
         m = Dialect.OracleDialect.typeMappings;
         m.put(BIGINT, "number(19,0)");
-        m.put(BINARY, "N/A");
         m.put(BIT, "number(1,0)");
         m.put(BLOB, "blob");
-        m.put(BOOLEAN, "boolean");
-        m.put(CHAR, "char(1)");
+        m.put(CHAR, "char($l)");
         m.put(CLOB, "clob");
         m.put(DATE, "date");
         m.put(DECIMAL, "number($p,$s)");
-        m.put(DOUBLE, "double precision");
+        m.put(DOUBLE, "double");
         m.put(FLOAT, "float");
-        m.put(INTEGER, "number(10,0)");
+        m.put(INTEGER, "number($l,0)");
         m.put(JAVA_OBJECT, "N/A");
-        m.put(LONGNVARCHAR, "nvarchar($l)");
-        m.put(LONGVARBINARY, "bit varying($l)");
-        m.put(LONGVARCHAR, "varchar($l)");
+        m.put(LONGNVARCHAR, "nvarchar2($l)");
         m.put(NCHAR, "nchar($l)");
         m.put(NCLOB, "nclob");
         m.put(NUMERIC, "number($p,$s)");
@@ -1010,34 +1014,45 @@ public class DialectTypeMappingTemplate {
         m.put(REAL, "real");
         m.put(SMALLINT, "number(5,0)");
         m.put(TIME, "date");
-        m.put(TIMESTAMP, "date");
+        m.put(TIMESTAMP, "timestamp");
         m.put(TINYINT, "number(3,0)");
         m.put(VARBINARY, "raw($l)<2000|long raw");
-        m.put(VARCHAR, "varchar2($l)<4000|long");
+        //add new
+        m.put(Type.BINARY_FLOAT, "BINARY_FLOAT");
+        m.put(Type.BINARY_DOUBLE, "BINARY_DOUBLE");
+        m.put(Type.DOUBLE_PRECISION, "DOUBLE PRECISION");
+        m.put(Type.TIMESTAMP_WITH_TIME_ZONE, "TIMESTAMP WITH TIME ZONE");
+        m.put(Type.TIMESTAMP_WITH_LOCAL_TIME_ZONE, "TIMESTAMP WITH LOCAL TIME ZONE");
+        m.put(Type.INTERVAL_YEAR_TO_MONTH, "INTERVAL YEAR($l) TO MONTH");
+        m.put(Type.INTERVAL_DAY_TO_SECOND, "INTERVAL DAY($p) TO SECOND($s)");
+        m.put(Type.VARCHAR2, "varchar2($l)");
+        m.put(Type.BINARY, "raw($l)<2000|long raw");
+        m.put(Type.BOOLEAN, "number(1,0)");
+        m.put(Type.LONGVARBINARY, "long raw");
+        m.put(Type.LONGVARCHAR, "long");
+        m.put(Type.VARCHAR, "varchar($l char)<4000|long");
 
         m = Dialect.Oracle10gDialect.typeMappings;
         m.putAll(Dialect.OracleDialect.typeMappings);//extends from OracleDialect
         m.put(BINARY, "raw($l)<2000|long raw");
         m.put(BOOLEAN, "number(1,0)");
-        m.put(CHAR, "char(1 char)");
+        m.put(CHAR, "char($l char)");
         m.put(LONGNVARCHAR, "nvarchar2($l)");
         m.put(LONGVARBINARY, "long raw");
         m.put(LONGVARCHAR, "long");
         m.put(NVARCHAR, "nvarchar2($l)");
         m.put(TIMESTAMP, "timestamp");
-        m.put(VARCHAR, "varchar2($l char)<4000|long");
 
         m = Dialect.Oracle12cDialect.typeMappings;
         m.putAll(Dialect.OracleDialect.typeMappings);//extends from OracleDialect
         m.put(BINARY, "raw($l)<2000|long raw");
         m.put(BOOLEAN, "number(1,0)");
-        m.put(CHAR, "char(1 char)");
+        m.put(CHAR, "char($l char)");
         m.put(LONGNVARCHAR, "nvarchar2($l)");
         m.put(LONGVARBINARY, "long raw");
         m.put(LONGVARCHAR, "long");
         m.put(NVARCHAR, "nvarchar2($l)");
         m.put(TIMESTAMP, "timestamp");
-        m.put(VARCHAR, "varchar2($l char)<4000|long");
 
         m = Dialect.Oracle8iDialect.typeMappings;
         m.putAll(Dialect.OracleDialect.typeMappings);//extends from OracleDialect
@@ -1048,21 +1063,19 @@ public class DialectTypeMappingTemplate {
 
         m = Dialect.Oracle9Dialect.typeMappings;
         m.putAll(Dialect.OracleDialect.typeMappings);//extends from OracleDialect
-        m.put(CHAR, "char(1 char)");
+        m.put(CHAR, "char($l char)");
         m.put(TIMESTAMP, "timestamp");
-        m.put(VARCHAR, "varchar2($l char)<4000|long");
 
         m = Dialect.Oracle9iDialect.typeMappings;
         m.putAll(Dialect.OracleDialect.typeMappings);//extends from OracleDialect
         m.put(BINARY, "raw($l)<2000|long raw");
         m.put(BOOLEAN, "number(1,0)");
-        m.put(CHAR, "char(1 char)");
+        m.put(CHAR, "char($l char)");
         m.put(LONGNVARCHAR, "nvarchar2($l)");
         m.put(LONGVARBINARY, "long raw");
         m.put(LONGVARCHAR, "long");
         m.put(NVARCHAR, "nvarchar2($l)");
         m.put(TIMESTAMP, "timestamp");
-        m.put(VARCHAR, "varchar2($l char)<4000|long");
 
         //================PointbaseDialect family===============
         m = Dialect.PointbaseDialect.typeMappings;

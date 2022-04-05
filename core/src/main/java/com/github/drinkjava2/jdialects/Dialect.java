@@ -299,7 +299,7 @@ public class Dialect {
 			for (String templ : typeTempls) {
 				if (templ.contains("<")) {// varchar($l)<255
 					String[] limitType = StrUtils.split("<", templ);
-					if (col.getLength() > 0 && col.getLength() < Integer.parseInt(limitType[1]))// NOSONAR
+					if (col.getLength() > 0 && col.getLength() <= Integer.parseInt(limitType[1]))// NOSONAR
 						return replacePlaceHolders(type, limitType[0], col);
 				} else {// varchar($l)
 					return replacePlaceHolders(type, templ, col);

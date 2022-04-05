@@ -11,6 +11,7 @@
  */
 package com.github.drinkjava2.jdialects;
 
+
 /**
  * Virtual SQL Type definitions
  * 
@@ -45,6 +46,39 @@ public enum Type {
 	, TIMESTAMP//
 	, TINYINT//
 	, VARBINARY//
-	, VARCHAR;
+	, VARCHAR
+	//mysql
+	, DATETIME
+	, MEDIUMINT
+	, INT
+	, TINYBLOB
+	, TINYTEXT
+	, TEXT
+	, MEDIUMBLOB
+	, MEDIUMTEXT
+	, LONGBLOB
+	, LONGTEXT
+	, YEAR
+	, JSON
+	//oracle
+	, BINARY_FLOAT
+	, DOUBLE_PRECISION
+	, BINARY_DOUBLE
+	, TIMESTAMP_WITH_TIME_ZONE
+	, TIMESTAMP_WITH_LOCAL_TIME_ZONE
+	, VARCHAR2
+	,INTERVAL_YEAR_TO_MONTH
+	,INTERVAL_DAY_TO_SECOND
+	;
+	
+	//TODO 此处需要考虑数据类型多对一的情况
+	public static Type getByTypeName(String typeName) {
+        for (Type val : Type.values()) {
+            if (val.name().equalsIgnoreCase(typeName)) {
+                return val;
+            }
+        }
+        throw new DialectException("'" + typeName + "' can not be map to a dialect type");
+    }
 
 }
