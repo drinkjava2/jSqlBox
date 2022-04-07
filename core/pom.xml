@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
  <packaging>jar</packaging>
- <version>5.0.13.jre8</version> <!-- not release -->
+ <version>5.0.13.jre8</version>
  
  <name>jSqlBox</name>
  <description>jSqlBox is a full function DAO tool</description>
@@ -74,12 +74,12 @@
     </dependency>  
     
     <!-- BeeCP DataSource pool -->
-    <dependency>
+    <!-- dependency>
       <groupId>com.github.chris2018998</groupId>
       <artifactId>beecp</artifactId>
       <version>3.3.4</version>
       <scope>test</scope>      
-    </dependency>
+    </dependency-->
     
    <!-- H2 Memory database for unit test -->
    <dependency>

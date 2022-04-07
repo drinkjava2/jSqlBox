@@ -14,7 +14,6 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.config.JdialectsTestBase;
 import com.github.drinkjava2.jdialects.entity.RoleTB;
 import com.github.drinkjava2.jdialects.entity.UserTB;
-import com.github.drinkjava2.jdialects.function.AnnotationTest.EntityForAll;
 import com.github.drinkjava2.jdialects.function.AnnotationTest.EntityForMySql;
 import com.github.drinkjava2.jdialects.function.AnnotationTest.EntityForOracle;
 

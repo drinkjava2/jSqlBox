@@ -41,7 +41,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.12.jre8</version> <!-- 或最新版 -->
+   <version>5.0.13.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 
@@ -76,7 +76,7 @@ jSqlBox是源码包含模块式架构，目的是隔离功能点，并分享给�
 <dependency>
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jdialects</artifactId>
-    <version>5.0.11.jre8</version>
+    <version>5.0.13.jre8</version>
 </dependency>
 ```
 
@@ -115,7 +115,7 @@ for (int i = 0; i < 10; i++)
    DB.qry(cache, new EntityListHandler(), DemoUser.class, "select u.* from DemoUser u where u.age>?", par(10));
 ```
 
-### 为Java8及以下开发环境提供多行文本支持，方便利用IDE快速定位到多行SQL文本上
+### 为Java8开发环境提供多行文本支持，方便利用IDE快速定位到多行SQL文本上
 ```
 public static class InsertDemoSQL extends Text {
 /*-  

@@ -3,9 +3,6 @@ package com.github.drinkjava2.common;
 import com.github.drinkjava2.jbeanbox.BeanBox;
 import com.zaxxer.hikari.HikariDataSource;
 
-import cn.beecp.BeeDataSource;
-import cn.beecp.BeeDataSourceConfig;
-
 /**
  * jSqlBox need pass unit tested on H2, MySql, MSSQL, Oracle
  * 
@@ -25,49 +22,19 @@ public class DataSourceConfig {
      * Data source setting, change DataSourceBox extends which DataSource to do unit test
      * Now have below to choose:
      * 
-     * BeeCPMySqlBox (MySql on BeeCP)
-     * BeeCPH2Box (H2 on BeeCP)
      * H2DataSourceBox (H2 on HikariCP)
      * MySqlDataSourceUtcTimeBox (MySql on HikariCP, time is UTC)
      * MySqlDataSourceBox (MySql on HikariCP)
      * OracleDataSourceBox (Oracle on HikariCP)
      * MsSqlServerDataSourceBox (MsSqlServer on HikariCP)
+     * BeeCPMySqlBox (MySql on BeeCP)
+     * BeeCPH2Box (H2 on BeeCP)
      * ================================================================
      * <pre/>
      */
     public static class DataSourceBox extends H2DataSourceBox { //usually test on H2 or MySql
     }
-     
-    public static class BeeCPMySqlBox extends BeanBox {
-        public BeeDataSource create() {
-            BeeDataSourceConfig config = new BeeDataSourceConfig();
-            config.setDriverClassName("com.mysql.jdbc.Driver");
-            config.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false&serverTimezone=UTC");
-            config.setUsername("root");
-            config.setPassword("root888"); 
-            config.setForceCloseUsingOnClear(true);
-            config.setDelayTimeForNextClear(0);
-            BeeDataSource ds = new BeeDataSource(config);
-            this.setPreDestroy("close");// jBeanBox will close pool
-            return ds;
-        }
-    }
-
-    public static class BeeCPH2Box extends BeanBox {
-        public BeeDataSource create() {
-            BeeDataSourceConfig config = new BeeDataSourceConfig();
-            config.setDriverClassName("org.h2.Driver");
-            config.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
-            config.setUsername("sa");
-            config.setPassword("");
-            config.setForceCloseUsingOnClear(true);
-            config.setDelayTimeForNextClear(0);
-            BeeDataSource ds = new BeeDataSource(config);
-            this.setPreDestroy("close");// jBeanBox will close pool
-            return ds;
-        }
-    } 
-
+ 
 	// H2Database memory database connection URL
 	public static class H2DataSourceBox extends HikariCPBox {
 		{
@@ -133,4 +100,35 @@ public class DataSourceConfig {
 		}
 	}
 
+	/*
+    public static class BeeCPMySqlBox extends BeanBox {
+        public BeeDataSource create() {
+            BeeDataSourceConfig config = new BeeDataSourceConfig();
+            config.setDriverClassName("com.mysql.jdbc.Driver");
+            config.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/jsqlboxtest?rewriteBatchedStatements=true&useSSL=false&serverTimezone=UTC");
+            config.setUsername("root");
+            config.setPassword("root888"); 
+            config.setForceCloseUsingOnClear(true);
+            config.setDelayTimeForNextClear(0);
+            BeeDataSource ds = new BeeDataSource(config);
+            this.setPreDestroy("close");// jBeanBox will close pool
+            return ds;
+        }
+    }
+
+    public static class BeeCPH2Box extends BeanBox {
+        public BeeDataSource create() {
+            BeeDataSourceConfig config = new BeeDataSourceConfig();
+            config.setDriverClassName("org.h2.Driver");
+            config.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+            config.setUsername("sa");
+            config.setPassword("");
+            config.setForceCloseUsingOnClear(true);
+            config.setDelayTimeForNextClear(0);
+            BeeDataSource ds = new BeeDataSource(config);
+            this.setPreDestroy("close");// jBeanBox will close pool
+            return ds;
+        }
+    } 
+    */
 }
