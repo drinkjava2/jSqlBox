@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
  <packaging>jar</packaging>
- <version>5.0.13.jre8</version>
+ <version>5.0.14.jre8</version> <!--not released-->
  
  <name>jSqlBox</name>
  <description>jSqlBox is a full function DAO tool</description>
@@ -93,7 +93,7 @@
    <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.16</version>
+      <version>8.0.28</version>
       <scope>test</scope>
    </dependency>
     
