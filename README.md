@@ -41,7 +41,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.13.jre8</version> <!-- 或最新版 -->
+   <version>5.0.14.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 
@@ -140,6 +140,145 @@ TreeNode node = net.pickOneEntity("t", d.getId());
 ```
 不同于Hibernate和MyBatis复杂的配置，在jSqlBox中，实体关联查询只不过是一种参数略微复杂的SQL而已，随用随拼，不需要配置。
 
+### 图查询
+2022年9月新加功能，将参数内嵌式SQL写成阶梯形式，即可类似GraphQL的主从表多级图询，其特点是输出格式与输入格式一致，所见即所得，比上节的实体关联查询使用简单，采用纯Java和原生SQL，功能强，可定制性好
+```
+        GraphQuery q1 = //
+                $("usertb", "where id=? or id=?", par("u2", "u4"), //
+                        $("select id, userId from userroletb", ms("id", "userId"), //
+                                $("roletb as role", ms("rid", "id"), // ms也可写成masterSlave, 参数分别是主、从表的主键
+                                        $("roleprivilegetb as rp", ms("id", "rid"), //
+                                                $("privilegetb as privilege", ms("pid", "id")) //                                                     
+                                        )//
+                                ) //
+                        ), //  
+                        $("emailtb as email", ms("id", "userId")), //
+                        $("addresstb", ms("id", "userId"))//
+                );
+        GraphQuery q2 = //
+                $("addresstb as address", "where id>", que("a2"), //
+                        $("usertb as users", ms("userId", "id"), //
+                                $("userroletb", ms("id", "userId"), //
+                                        $("roletb as role", ms("rid", "id"), //
+                                                $("roleprivilegetb as rp", ms("id", "rid"), //
+                                                        $("privilegetb as privilege", ms("pid", "id")) //                                                     
+                                                )//
+                                        ), //  
+                                        $("emailtb", ms("id", "userId"))//
+                                ) // 
+                        )//
+                );
+        Object result = DB.graphQuery(q1, q2);
+        String json = JsonUtil.toJSONFormatted(result);
+```
+示例详见GraphQueryTest.java，graphQuery的输出为Map<List>对象，可以用Jackson等工具转化为Json, 输出示例如下：
+```
+{
+  "usertb" : [ {
+    "id" : "u2",
+    "userName" : "user2",
+    "userroletb" : [ {
+      "id" : "28t27n868r7glrcm4l4r1v2dw",
+      "userId" : "u2"
+    }, {
+      "id" : "8easgkk10stp5p4qivme77isz",
+      "userId" : "u2"
+    }, {
+      "id" : "40c3trjk27usuvw6zj2t9ebki",
+      "userId" : "u2"
+    } ],
+    "email" : [ {
+      "emailName" : "email3",
+      "id" : "e3",
+      "userId" : "u2"
+    }, {
+      "emailName" : "email4",
+      "id" : "e4",
+      "userId" : "u2"
+    } ],
+    "addresstb" : [ {
+      "addressName" : "address2",
+      "id" : "a2",
+      "userId" : "u2"
+    } ]
+  }, {
+    "id" : "u4",
+    "userName" : "user4",
+    "userroletb" : [ {
+      "id" : "1ec67h3l6deo4bpzaxxidk1by",
+      "userId" : "u4"
+    } ],
+    "addresstb" : [ {
+      "addressName" : "address4",
+      "id" : "a4",
+      "userId" : "u4"
+    } ]
+  } ],
+  "address" : [ {
+    "addressName" : "address3",
+    "id" : "a3",
+    "userId" : "u3",
+    "users" : [ {
+      "id" : "u3",
+      "userName" : "user3",
+      "userroletb" : [ {
+        "id" : "axuh0whpiqff5mixt6wicm2dv",
+        "rid" : "r4",
+        "userId" : "u3",
+        "role" : [ {
+          "id" : "r4",
+          "roleName" : "role4",
+          "rp" : [ {
+            "id" : "2an80lf6nhopzkoi8hik17geq",
+            "pid" : "p1",
+            "rid" : "r4",
+            "privilege" : [ {
+              "id" : "p1",
+              "privilegeName" : "privilege1"
+            } ]
+          } ]
+        } ]
+      } ]
+    } ]
+  }, {
+    "addressName" : "address4",
+    "id" : "a4",
+    "userId" : "u4",
+    "users" : [ {
+      "id" : "u4",
+      "userName" : "user4",
+      "userroletb" : [ {
+        "id" : "1ec67h3l6deo4bpzaxxidk1by",
+        "rid" : "r1",
+        "userId" : "u4",
+        "role" : [ {
+          "id" : "r1",
+          "roleName" : "role1",
+          "rp" : [ {
+            "id" : "4ia4vks0jcth4szt8fwz0axl1",
+            "pid" : "p1",
+            "rid" : "r1",
+            "privilege" : [ {
+              "id" : "p1",
+              "privilegeName" : "privilege1"
+            } ]
+          } ]
+        } ]
+      } ]
+    } ]
+  }, {
+    "addressName" : "address5",
+    "id" : "a5",
+    "userId" : "u5",
+    "users" : [ {
+      "id" : "u5",
+      "userName" : "user5"
+    } ]
+  } ]
+}
+```
+
+
 ### 兼容主要JPA注解，支持在运行期动态更改配置
 为了方便学习，jSqlBox兼容JPA实体类的以下主要注解:
 ```
@@ -211,7 +350,7 @@ pom.xml中引入：
     <dependency>
       <groupId>com.github.drinkjava2</groupId>
        <artifactId>jsqlbox</artifactId> 
-       <version>5.0.10.jre8</version> <!-- 或最新版 -->
+       <version>5.0.14.jre8</version> <!-- 或最新版 -->
     </dependency>
 
     <dependency>

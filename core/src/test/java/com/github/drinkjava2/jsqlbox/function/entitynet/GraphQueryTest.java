@@ -14,7 +14,7 @@ import com.github.drinkjava2.jsqlbox.function.entitynet.entity.User;
 import com.github.drinkjava2.jsqlbox.function.entitynet.entity.UserRole;
 import com.github.drinkjava2.util.JsonUtil;
 
-public class DQLTest extends TestBase {
+public class GraphQueryTest extends TestBase {
     {
         regTables(User.class, Email.class, Address.class, Role.class, Privilege.class, UserRole.class, RolePrivilege.class);
     }
