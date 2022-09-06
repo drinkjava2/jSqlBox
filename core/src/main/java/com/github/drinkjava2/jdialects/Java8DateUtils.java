@@ -20,7 +20,8 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime; 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Date; 
  
 public abstract class Java8DateUtils {// NOSONAR 
@@ -47,12 +48,45 @@ public abstract class Java8DateUtils {// NOSONAR
 		return new Date(Date.from(zdt.toInstant()).getTime());
 	}
 
+    public static java.sql.Date localDateTime2SqlDate(LocalDateTime localDateTime) {
+        return java.sql.Date.valueOf(localDateTime.toLocalDate());
+    }
+
+    public static java.time.Instant localDateTime2Instant(LocalDateTime localDateTime) {
+        return localDateTime.toInstant(ZoneOffset.UTC); 
+    }
+
+    public static java.time.OffsetDateTime localDateTime2OffsetDateTime(LocalDateTime localDateTime) { 
+        return localDateTime.atOffset(ZoneOffset.UTC);
+    }
+    
+    public static java.time.ZonedDateTime localDateTime2ZonedDateTime(LocalDateTime localDateTime) {  
+        return localDateTime.atZone( zoneId ); 
+    }
+    
+	    
 	// below to conver java8 date types to sql type
 
 	public static java.sql.Date localDate2SqlDate(LocalDate localDate) {
 		ZonedDateTime zdt = localDate.atStartOfDay(zoneId);
 		return new java.sql.Date(Date.from(zdt.toInstant()).getTime());
 	}
+	
+    public static java.sql.Timestamp localDate2SqlTimestamp(LocalDate localDate) {
+        return Timestamp.valueOf(localDate.atStartOfDay());
+    }
+    
+    public static java.time.ZonedDateTime localDate2ZonedDateTime(LocalDate localDate) {
+       return localDate.atStartOfDay(zoneId);
+    }
+    
+    public static java.time.Instant localDate2Instant(LocalDate localDate) {
+        return Instant.from(localDate);
+    }
+    
+    public static java.time.OffsetDateTime localDate2OffsetDateTime(LocalDate localDate) {
+       return OffsetDateTime.of(localDate,LocalTime.NOON, ZoneOffset.UTC);
+    }
 
 	public static java.sql.Time localTime2SqlTime(LocalTime localTime) {
 		return java.sql.Time.valueOf(localTime);

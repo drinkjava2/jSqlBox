@@ -3,6 +3,8 @@ package com.github.drinkjava2.jdialects.converter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -209,7 +211,36 @@ public class BasicJavaConverter implements JavaConverter {
 				return Java8DateUtils.date2LocalDate((Date) value);
 			if (targetType == java.time.LocalDateTime.class)
 				return Java8DateUtils.date2LocalDateTime((Date) value);
-		}
+		} else if (vType == java.time.LocalDate.class) {
+            if (targetType == java.util.Date.class)
+                return Java8DateUtils.localDate2Date((LocalDate) value); //ok
+            if (targetType == java.sql.Date.class)
+                return Java8DateUtils.localDate2SqlDate((LocalDate) value); //ok
+            if (targetType == java.sql.Timestamp.class)
+                return Java8DateUtils.localDate2SqlTimestamp((LocalDate) value); //ok
+            if (targetType == java.time.Instant.class)
+                return Java8DateUtils.localDate2Instant((LocalDate) value); //ok 
+            if (targetType == java.time.OffsetDateTime.class)
+                return Java8DateUtils.localDate2OffsetDateTime((LocalDate) value); 
+            if (targetType == java.time.ZonedDateTime.class)
+                return Java8DateUtils.localDate2ZonedDateTime((LocalDate) value); 
+        } else if (vType == java.time.LocalDateTime.class) {
+            if (targetType == java.util.Date.class)
+                return Java8DateUtils.localDateTime2Date((LocalDateTime) value); //ok
+            if (targetType == java.sql.Date.class)
+                return Java8DateUtils.localDateTime2SqlDate((LocalDateTime) value); //ok
+            if (targetType == java.sql.Timestamp.class)
+                return Java8DateUtils.localDateTime2SqlTimestamp((LocalDateTime) value); //ok
+            if (targetType == java.time.Instant.class)
+                return Java8DateUtils.localDateTime2Instant((LocalDateTime) value); //ok 
+            if (targetType == java.time.OffsetDateTime.class)
+                return Java8DateUtils.localDateTime2OffsetDateTime((LocalDateTime) value); 
+            if (targetType == java.time.ZonedDateTime.class)
+                return Java8DateUtils.localDateTime2ZonedDateTime((LocalDateTime) value); 
+        }
+		    
+		
+		
 		/* JAVA8_END */
 		String oracleTip = "oracle.sql.TIMESTAMP".equals(vType.getName()) // NOSONAR
 				? "\nBelow setting may solve this Oracle JDBC compliant issue:\n" + "System.getProperties().setProperty(\"oracle.jdbc.J2EE13Compliant\", \"true\");"
