@@ -626,6 +626,12 @@ public class DbContext extends DbPro {// NOSONAR
 		Dialect.setGlobalJdbcTypeConverter(jdbcTypeConverter);
 	}
 	
+	//================ graphQuery about =======
+	@SuppressWarnings("rawtypes")
+    public Map<String, List> graphQuery(GraphQuery... graphQls) {
+	    return GraphQuery.graphQuery(this, graphQls);
+	}
+	
 	protected void getteSetters__________________________() {// NOSONAR
 	}
 

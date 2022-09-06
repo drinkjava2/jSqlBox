@@ -6,7 +6,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
-@Table(name = "RolePrivilegetb")
+@Table(name = "roleprivilegetb")
 public class RolePrivilege extends ActiveRecord<RolePrivilege> {
 	@Id
 	@UUID25

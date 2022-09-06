@@ -73,18 +73,18 @@ public class GroupTxTest {
 			try {
 				Assert.assertEquals(100, ctx1.entityCount(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx1);
-				Assert.assertEquals(101, ctx1.entityCount(Tail.class, tail("users")));
+				Assert.assertEquals(101, ctx1.entityCount(Tail.class, tail("usrtb")));
 
 				Assert.assertEquals(100, ctx2.entityCount(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx2);
-				Assert.assertEquals(101, ctx2.entityCount(Tail.class, tail("users")));
+				Assert.assertEquals(101, ctx2.entityCount(Tail.class, tail("usrtb")));
 				Systemout.println(1 / 0); // Div 0!
 				ctx1.commitTrans();
 			} catch (Exception e) {
 				ctx1.rollbackTrans();
 			}
-			Assert.assertEquals(100, ctx1.entityCount(Tail.class, tail("users")));
-			Assert.assertEquals(100, ctx2.entityCount(Tail.class, tail("users")));
+			Assert.assertEquals(100, ctx1.entityCount(Tail.class, tail("usrtb")));
+			Assert.assertEquals(100, ctx2.entityCount(Tail.class, tail("usrtb")));
 		}
 	}
 
@@ -101,8 +101,8 @@ public class GroupTxTest {
 				ctx1.rollbackTrans();
 			}
 		}
-		Assert.assertEquals(200, ctx1.entityCount(Tail.class, tail("users")));
-		Assert.assertEquals(300, ctx2.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(200, ctx1.entityCount(Tail.class, tail("usrtb")));
+		Assert.assertEquals(300, ctx2.entityCount(Tail.class, tail("usrtb")));
 
 		Assert.assertEquals(200, ctx1.entityCount(Usr.class));
 		Assert.assertEquals(300, ctx2.entityCount(Usr.class));
@@ -111,7 +111,7 @@ public class GroupTxTest {
 
 	@Test
 	public void groupPartialCommitTest() { // simulate partial commit test
-		Assert.assertEquals(100, ctx1.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(100, ctx1.entityCount(Tail.class, tail("usrtb")));
 		ctx1.startTrans();
 		try {
 			new Usr().putField("firstName", "Foo").insert(ctx1);
@@ -125,7 +125,7 @@ public class GroupTxTest {
 				//e1.printStackTrace();
 			}
 		}
-		Assert.assertEquals(101, ctx1.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(101, ctx1.entityCount(Tail.class, tail("usrtb")));
 	}
 
 }

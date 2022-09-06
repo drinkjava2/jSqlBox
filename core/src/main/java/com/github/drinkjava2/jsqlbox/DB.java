@@ -342,4 +342,11 @@ public abstract class DB  {// NOSONAR
 	public static PreparedSQL prepare(Object... items) { return gctx().prepare(items); }
 
   
+	//graphQuery shortcut methods
+    @SuppressWarnings("rawtypes")
+    public static Map<String, List> graphQuery(GraphQuery... graphQls) {return gctx().graphQuery(graphQls);}
+    public static SqlItem ms(String... masterSlaveIds) { return GraphQuery.masterSlave(masterSlaveIds);}
+    public static SqlItem key(String key) { return GraphQuery.key(key);}
+    public static GraphQuery $(Object... items) {return GraphQuery.graphQL(items);}
+    
 }

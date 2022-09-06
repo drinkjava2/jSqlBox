@@ -38,7 +38,7 @@ public class DataSourceConfig {
 	// H2Database memory database connection URL
 	public static class H2DataSourceBox extends HikariCPBox {
 		{
-			injectValue("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+			injectValue("jdbcUrl", "jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0;DATABASE_TO_UPPER=false");
 			injectValue("driverClassName", "org.h2.Driver");
 			injectValue("username", "sa");
 			injectValue("password", "");

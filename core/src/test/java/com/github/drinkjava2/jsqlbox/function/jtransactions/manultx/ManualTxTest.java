@@ -24,7 +24,7 @@ public class ManualTxTest {
 		dataSource = new HikariDataSource();// DataSource
 		// H2 is a memory database
 		dataSource.setDriverClassName("org.h2.Driver");
-		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0");
+		dataSource.setJdbcUrl("jdbc:h2:mem:DBName;MODE=MYSQL;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=0;DATABASE_TO_UPPER=false");
 		dataSource.setUsername("sa");
 		dataSource.setPassword("");
 
@@ -49,30 +49,30 @@ public class ManualTxTest {
 			try {
 				Assert.assertEquals(100, ctx.entityCount(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx);
-				Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("users")));
+				Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("usrtb")));
 				Systemout.println(1 / 0);
 				new Usr().putField("firstName", "Bar").insert(ctx);
 				ctx.commitTrans();
 			} catch (Exception e) {
 				ctx.rollbackTrans();
 			}
-			Assert.assertEquals(100, ctx.entityCount(Tail.class, tail("users")));
+			Assert.assertEquals(100, ctx.entityCount(Tail.class, tail("usrtb")));
 		}
 
 		ctx.startTrans();
 		try {
 			Assert.assertEquals(100, ctx.entityCount(Usr.class));
 			new Usr().putField("firstName", "Foo").insert(ctx);
-			Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("users")));
+			Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("usrtb")));
 			new Usr().putField("firstName", "Bar").insert(ctx);
 			ctx.commitTrans();
 		} catch (Exception e) {
 			ctx.rollbackTrans();
 		}
-		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("usrtb")));
 
 		ctx.setConnectionManager(null);
-		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("usrtb")));
 	}
 
 }

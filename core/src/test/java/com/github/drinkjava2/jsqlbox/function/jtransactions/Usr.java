@@ -5,7 +5,7 @@ import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
-@Table(name = "users")
+@Table(name = "usrtb")
 public class Usr extends ActiveRecord<Usr> {
 	@UUID32
 	@Id

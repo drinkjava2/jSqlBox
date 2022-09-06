@@ -23,6 +23,7 @@ import com.github.drinkjava2.jdialects.Dialect;
 import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.annotation.jdia.UUID25;
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
+import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jdialects.model.TableModel;
 import com.github.drinkjava2.jlogs.ConsoleLog;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -154,6 +155,7 @@ public class TestBase {
 		return ds;
 	}
 
+	@Table(name="demo")
 	public static class Demo extends ActiveRecord<Demo> {
 		@Id
 		@UUID25

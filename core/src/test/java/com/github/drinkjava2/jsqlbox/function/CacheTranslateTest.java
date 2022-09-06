@@ -156,7 +156,7 @@ public class CacheTranslateTest extends TestBase {
 		Map<Integer, Map<String, Object>> groupnm = ctx.qry("select * from groupnm", new KeyedHandler<Integer>("id"));
 		long oldTime = System.currentTimeMillis();
 		List<Map<String, Object>> orders = ctx
-				.qryMapList("select id,orderNo,userId,groupId from orders where id>'10' ");
+				.qryMapList("select id,orderNO,userId,groupId from orders where id>'10' ");
 		CacheTransUtils.translate(orders, users, "userID", "name", "userName", "age", "userAge", groupnm, "groupId",
 				"groupName", "groupName");
 		Systemout.println("Cache Translate, Time used(ms):" + (System.currentTimeMillis() - oldTime));

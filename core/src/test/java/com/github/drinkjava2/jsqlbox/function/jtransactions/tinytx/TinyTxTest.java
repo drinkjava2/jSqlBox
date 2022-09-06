@@ -47,30 +47,30 @@ public class TinyTxTest {
 			try {
 				Assert.assertEquals(100, ctx.entityCount(Usr.class));
 				new Usr().putField("firstName", "Foo").insert(ctx);
-				Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("users")));
+				Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("usrtb")));
 				Systemout.println(1 / 0);
 				new Usr().putField("firstName", "Bar").insert(ctx);
 				ctx.commitTrans();
 			} catch (Exception e) {
 				ctx.rollbackTrans();
 			}
-			Assert.assertEquals(100, ctx.entityCount(Tail.class, tail("users")));
+			Assert.assertEquals(100, ctx.entityCount(Tail.class, tail("usrtb")));
 		}
 
 		ctx.startTrans();
 		try {
 			Assert.assertEquals(100, ctx.entityCount(Usr.class));
 			new Usr().putField("firstName", "Foo").insert(ctx);
-			Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("users")));
+			Assert.assertEquals(101, ctx.entityCount(Tail.class, tail("usrtb")));
 			new Usr().putField("firstName", "Bar").insert(ctx);
 			ctx.commitTrans();
 		} catch (Exception e) {
 			ctx.rollbackTrans();
 		}
-		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("usrtb")));
 
 		ctx.setConnectionManager(null);
-		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("users")));
+		Assert.assertEquals(102, ctx.entityCount(Tail.class, tail("usrtb")));
 
 	}
 

@@ -91,7 +91,7 @@ public class EntityNetTest extends TestBase {
 	public void testAutoAlias() {
 		insertDemoData();
 		EntityNet net = ctx.qry(targets, "select u.**, ur.**, r.**, p.**, rp.** from usertb u ", //
-				" left join userroletb ur on u.id=ur.userid ", //
+				" left join userroletb ur on u.id=ur.userId ", //
 				" left join roletb r on ur.rid=r.id ", //
 				" left join roleprivilegetb rp on rp.rid=r.id ", //
 				" left join privilegetb p on p.id=rp.pid ", //
@@ -340,8 +340,8 @@ public class EntityNetTest extends TestBase {
 	public void testTail() {
 		insertDemoData();
 		EntityNet net = ctx.qry(new EntityNetHandler(), User.class, UserRole.class, Role.class, giveBoth("r", "u"), //
-				"select u.**, u.username as u_name2, ur.**, r.**, r.id as r_id2 from usertb u ", //
-				" left join userroletb ur on u.id=ur.userid ", //
+				"select u.**, u.userName as u_name2, ur.**, r.**, r.id as r_id2 from usertb u ", //
+				" left join userroletb ur on u.id=ur.userId ", //
 				" left join roletb r on ur.rid=r.id ");
 		Set<User> userList = net.pickEntitySet("u");
 		for (User u : userList) {

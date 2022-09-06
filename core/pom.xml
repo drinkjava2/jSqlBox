@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jsqlbox</artifactId>
  <packaging>jar</packaging>
- <version>5.0.14.jre8</version> <!--not released-->
+ <version>5.0.14.jre8</version>
  
  <name>jSqlBox</name>
  <description>jSqlBox is a full function DAO tool</description>
@@ -73,6 +73,14 @@
       <scope>test</scope>
     </dependency>  
     
+    <!-- For JSON test -->
+	<dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-databind</artifactId>
+    	<version>2.13.3</version>
+    	<scope>test</scope>
+	</dependency>
+	
     <!-- BeeCP DataSource pool -->
     <!-- dependency>
       <groupId>com.github.chris2018998</groupId>
