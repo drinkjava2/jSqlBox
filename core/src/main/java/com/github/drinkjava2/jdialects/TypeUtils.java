@@ -160,7 +160,7 @@ public abstract class TypeUtils {// NOSONAR
 		case java.sql.Types.TIME:
 			return Type.TIME;
 		case java.sql.Types.TIMESTAMP:
-			return Type.TIMESTAMP;
+			return Type.DATE;
 		case java.sql.Types.BINARY:
 			return Type.BINARY;
 		case java.sql.Types.VARBINARY:

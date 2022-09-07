@@ -17,6 +17,7 @@ public class GraphQuery { //DQL Object
     private List<GraphQuery> childGQ = new ArrayList<GraphQuery>(); //child GraphQuery List
     private String[] masterIds; //master slave Ids,
     private String[] slaveIds; //master slave Ids,
+    private boolean one = false; //if single is true, store data in record, not in records list
 
     //output
     private List<Map<String, Object>> records; //each record is a line in database table
@@ -69,6 +70,14 @@ public class GraphQuery { //DQL Object
         this.slaveIds = slaveIds;
     }
 
+    public boolean isOne() {
+        return one;
+    }
+
+    public void setOne(boolean one) {
+        this.one = one;
+    }
+
     //========End of getter& setter======= 
 
     /** return a sqlitem, name is "MASTERSLAVE_IDS", parameters store master and slave ids, usage: masterSlave("masterId1", "masterId2", "slaveId1", "slaveId2") */
@@ -85,14 +94,20 @@ public class GraphQuery { //DQL Object
         return item;
     }
 
-    
+    /** tell child only have one record, no need put in records list, but put in record */
+    public static SqlItem one() {
+        SqlItem item = new SqlItem(null, new Object[]{});
+        item.setName("ONE");
+        return item;
+    }
+
     /**
      * return a DQL Object, items stored as normal sqlItems except extract key and masterSlave Ids. 
      */
-    public static GraphQuery graphQL(Object... items) {
-        GraphQuery d = new GraphQuery();
+    public static GraphQuery graphQuery(Object... items) {
+        GraphQuery q = new GraphQuery();
         DbException.assureTrue(items != null && items.length > 0, "DQL items can not be empty");
-        d.setSqlItems(items);
+        q.setSqlItems(items);
 
         //first item is key, can be single word or "select * from key" or "select * from table as key"
         String key = StrUtils.replace((String) items[0], "\t", " ");
@@ -101,12 +116,12 @@ public class GraphQuery { //DQL Object
         if (key.contains(" ")) { //if key have space use last word as key,  for example "select * from usr as u", will use "u" as key
             key = StrUtils.substringAfterLast(key, " ");
         }
-        d.setKey(key);
+        q.setKey(key);
 
-        if (StrUtils.startsWithIgnoreCase((String) (d.sqlItems[0]), "select "))
-            d.sqlItems[0] = d.sqlItems[0] + " ";
+        if (StrUtils.startsWithIgnoreCase((String) (q.sqlItems[0]), "select "))
+            q.sqlItems[0] = q.sqlItems[0] + " ";
         else
-            d.sqlItems[0] = "select * from " + d.sqlItems[0] + " ";
+            q.sqlItems[0] = "select * from " + q.sqlItems[0] + " ";
 
         for (int i = 0; i < items.length; i++) {
             Object item = items[i];
@@ -119,16 +134,19 @@ public class GraphQuery { //DQL Object
                     String[] slaveIds = new String[idQTY];
                     System.arraycopy(msids, 0, masterIds, 0, idQTY);//masterIds
                     System.arraycopy(msids, idQTY, slaveIds, 0, idQTY);//childIds 
-                    d.setMasterIds(masterIds);
-                    d.setSlaveIds(slaveIds);
+                    q.setMasterIds(masterIds);
+                    q.setSlaveIds(slaveIds);
                     items[i] = ""; //remove this item by change it to "".   
                 } else if ("KEY".equals(sqlItem.getName())) {
-                    d.setKey((String) sqlItem.getParameters()[0]); //change key to given value
-                    items[i] = ""; //remove this item by change it to "". 
+                    q.setKey((String) sqlItem.getParameters()[0]); //change key to given value
+                    items[i] = "";
+                } else if ("ONE".equals(sqlItem.getName())) {
+                    q.setOne(true);
+                    items[i] = "";
                 }
             }
         }
-        return d;
+        return q;
     }
 
     /**
@@ -137,11 +155,15 @@ public class GraphQuery { //DQL Object
      * @param dqls
      * @return Map<String, List> result
      */
-    public static Map<String, List> graphQuery(DbContext db, GraphQuery... dqls) {
-        Map<String, List> result = new HashMap<String, List>();
-        for (GraphQuery graphQuery : dqls) {
-            singleGraphQuery(db, null, graphQuery);
-            result.put(graphQuery.getKey(), graphQuery.getRecords());
+    public static Map<String, Object> graphQuery(DbContext db, GraphQuery... dqls) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        for (GraphQuery q : dqls) {
+            singleGraphQuery(db, null, q);
+            if (q.isOne()) {
+                if (q.getRecords() != null && !q.getRecords().isEmpty())
+                    result.put(q.getKey(), q.getRecords().get(0));
+            } else
+                result.put(q.getKey(), q.getRecords());
         }
         return result;
     }
@@ -178,6 +200,8 @@ public class GraphQuery { //DQL Object
                 where.remove(where.size() - 1); //remove last ","
                 where.add(")");
                 where.add(",");
+                if (parent.isOne()) //if isOne, only use first records
+                    break;
             }
             where.remove(where.size() - 1); //remove last ","
             where.add(") ");
@@ -194,21 +218,16 @@ public class GraphQuery { //DQL Object
                 singleGraphQuery(db, self, (GraphQuery) item);
     }
 
-    /**
-     * align master and slave data by id
-     * @param parent
-     * @param child
-     */
     private static void alignMasterSlaveData(GraphQuery parent, GraphQuery child) {
-        if (parent == null || child == null || parent.getRecords() == null || child.getRecords() == null || parent.getRecords().isEmpty() || child.getRecords().isEmpty())
+        if (parent == null || child == null || child.getMasterIds() == null || child.getSlaveIds() == null || (child.getMasterIds().length != child.getSlaveIds().length))
             return;
-        if (child.getMasterIds() == null || child.getChildGQ() == null || (child.getMasterIds().length != child.getSlaveIds().length))
+        if (parent.getRecords() == null || child.getRecords() == null || parent.getRecords().isEmpty() || child.getRecords().isEmpty())
             return;
         int idQTY = child.getMasterIds().length;
         for (Map<String, Object> mRecord : parent.getRecords()) {
             Object[] mIdValue = new Object[idQTY];
             for (int i = 0; i < idQTY; i++) {
-                mIdValue[i] = mRecord.get(child.getMasterIds()[i]);
+                mIdValue[i] = mRecord.get(child.getMasterIds()[i]); //parent id values, may be compound ids
             }
 
             for (Map<String, Object> cRecord : child.getRecords()) {
@@ -216,16 +235,26 @@ public class GraphQuery { //DQL Object
                 for (int i = 0; i < idQTY; i++) {
                     cIdValue[i] = cRecord.get(child.getSlaveIds()[i]);
                 }
-
+                
+                boolean foundOne=false;
                 if (idValueEqual(mIdValue, cIdValue)) { //if id equal, link child record to master record
-                    List l = (List) mRecord.get(child.getKey());
-                    if (l == null) {
-                        l = new ArrayList<>();
-                        mRecord.put(child.getKey(), l);
-                    }
-                    l.add(cRecord);
+                    if (child.isOne()) {
+                        foundOne=true;
+                        mRecord.put(child.getKey(), cRecord);
+                    } else  {
+                        List l = (List) mRecord.get(child.getKey());
+                        if (l == null) {
+                            l = new ArrayList<>();
+                            mRecord.put(child.getKey(), l);
+                        }
+                        l.add(cRecord);
+                    } 
                 }
+                if (child.isOne() && foundOne) //if child is one and found one for parent, break
+                    break;
             }
+            if (parent.isOne()) //if parent is one, break
+                break;
         }
     }
 

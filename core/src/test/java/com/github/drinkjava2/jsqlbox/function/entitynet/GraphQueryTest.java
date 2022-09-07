@@ -1,7 +1,13 @@
 package com.github.drinkjava2.jsqlbox.function.entitynet;
 
+import static com.github.drinkjava2.jsqlbox.DB.$;
+import static com.github.drinkjava2.jsqlbox.DB.$1;
+import static com.github.drinkjava2.jsqlbox.DB.ms;
+import static com.github.drinkjava2.jsqlbox.DB.one;
+import static com.github.drinkjava2.jsqlbox.DB.que;
+
 import org.junit.Test;
-import static com.github.drinkjava2.jsqlbox.DB.*;
+
 import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.GraphQuery;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
@@ -73,32 +79,33 @@ public class GraphQueryTest extends TestBase {
     @Test
     public void testGraphQuery() {
         insertDemoData();
+        DB.gctx().setAllowShowSQL(true);
         GraphQuery d1 = //
-                $("usertb", "where id=? or id=?", par("u2", "u4"), //
-                        $("select id, userId from userroletb", ms("id", "userId"), //
-                                $("roletb as role", ms("rid", "id"), //
+                $("usertb", //
+                        $("userroletb", ms("id", "userId"),//
+                                $1("roletb as role", ms("rid", "id"),//
                                         $("roleprivilegetb as rp", ms("id", "rid"), //
-                                                $("privilegetb as privilege", ms("pid", "id")) //                                                     
+                                                $1("privilegetb as privilege", ms("pid", "id")) //                                                     
                                         )//
                                 ) //
                         ), //  
                         $("emailtb as email", ms("id", "userId")), //
-                        $("addresstb", ms("id", "userId"))//
+                        $1("addresstb", ms("id", "userId"))//
                 );
         GraphQuery d2 = //
-                $("addresstb as address", "where id>", que("a2"), //
-                        $("usertb as users", ms("userId", "id"), //
+                $("addresstb as address", "where id>", que("a0"), //
+                        $1("usertb as users", ms("userId", "id"), //
                                 $("userroletb", ms("id", "userId"), //
                                         $("roletb as role", ms("rid", "id"), //
                                                 $("roleprivilegetb as rp", ms("id", "rid"), //
                                                         $("privilegetb as privilege", ms("pid", "id")) //                                                     
                                                 )//
-                                        ), //  
-                                        $("emailtb", ms("id", "userId"))//
-                                ) // 
+                                        ) //  
+                                ), //
+                                $("emailtb", ms("id", "userId"), one)//
                         )//
                 );
-        Object result = DB.graphQuery(d1, d2);
+        Object result = DB.graphQuery(d1,d2);
         String json = JsonUtil.toJSONFormatted(result);
         System.out.println(json);
     }

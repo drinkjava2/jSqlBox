@@ -248,6 +248,7 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 			body.append("import com.github.drinkjava2.jdialects.annotation.jdia.*;\n");
 			body.append("import com.github.drinkjava2.jdialects.annotation.jpa.*;\n");
 			body.append("import com.github.drinkjava2.jsqlbox.*;\n");
+			body.append("import java.util.*;\n");
 			body.append("\n");
 		}
 		String imports = (String) setting.get(TableModelUtils.OPT_IMPORTS);
@@ -331,7 +332,7 @@ public abstract class TableModelUtilsOfJavaSrc {// NOSONAR
 				accessModifier = "public";
 			}
 			sb.append("\t").append(accessModifier).append(' ').append(javaType.getSimpleName()).append(' ')
-					.append(fieldName).append(";\n");
+					.append(fieldName).append(";\n\n");
 		}
 
 		body.append(pkeySB.toString()).append("\n").append(normalSB.toString()).append("\n");

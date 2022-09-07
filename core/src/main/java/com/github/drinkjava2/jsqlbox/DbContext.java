@@ -627,8 +627,7 @@ public class DbContext extends DbPro {// NOSONAR
 	}
 	
 	//================ graphQuery about =======
-	@SuppressWarnings("rawtypes")
-    public Map<String, List> graphQuery(GraphQuery... graphQls) {
+    public Map<String, Object> graphQuery(GraphQuery... graphQls) {
 	    return GraphQuery.graphQuery(this, graphQls);
 	}
 	

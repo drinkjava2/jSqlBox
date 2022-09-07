@@ -23,7 +23,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
+ 
  * Small Jackson util， all methods will return null if exception happen
+ * to use this utility, need add below dependency in pom.xml:
+ * 
+ *  <dependency>
+ *      <groupId>com.fasterxml.jackson.core</groupId>
+ *      <artifactId>jackson-databind</artifactId>
+ *       <version>2.13.3</version> <!--or latest version-->
+ *  </dependency>
+ *  
  *  
  * @author Yong
  */

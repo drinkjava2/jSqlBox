@@ -64,11 +64,11 @@ public class TestBase {
 
 	@After
 	public void cleanUp() {
-		if (tablesForTest != null)
-			dropTables(tablesForTest);
-		tablesForTest = null;
-		JBEANBOX.close(); // IOC tool will close dataSource
-		DbContext.resetGlobalVariants();
+//		if (tablesForTest != null)
+//			dropTables(tablesForTest);
+//		tablesForTest = null;
+//		JBEANBOX.close(); // IOC tool will close dataSource
+//		DbContext.resetGlobalVariants();
 	}
 
 	public void quietExecuteDDLs(String[] ddls) {
