@@ -10,105 +10,135 @@ import com.github.drinkjava2.jsqlbox.ActiveRecord;
 
 @Table(name = "usertb")
 public class User extends ActiveRecord<User> {
-	@Id
-	String id;
+    @Id
+    String id;
 
-	String userName;
+    String userName;
 
-	String teatherId;
+    String teatherId;
 
-	String bossId;
+    String bossId;
 
-	Integer age;
+    Integer age;
 
-	Address address;
+    Address address;
 
-	List<Role> roleList;
-	
-	List<Email> emailList;
+    List<Role> roleList;
 
-	Map<Integer, Role> roleMap;
+    List<UserRole> userRoleList;
 
-	Set<Privilege> privilegeSet;
+    List<Email> emailList;
 
-	public String getId() {
-		return id;
-	}
+    List<Address> addressList;
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    Email email;
 
-	public String getUserName() {
-		return userName;
-	}
+    Map<Integer, Role> roleMap;
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    Set<Privilege> privilegeSet;
 
-	public String getTeatherId() {
-		return teatherId;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setTeatherId(String teatherId) {
-		this.teatherId = teatherId;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getBossId() {
-		return bossId;
-	}
+    public String getUserName() {
+        return userName;
+    }
 
-	public void setBossId(String bossId) {
-		this.bossId = bossId;
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	public Integer getAge() {
-		return age;
-	}
+    public String getTeatherId() {
+        return teatherId;
+    }
 
-	public void setAge(Integer age) {
-		this.age = age;
-	}
+    public void setTeatherId(String teatherId) {
+        this.teatherId = teatherId;
+    }
 
-	public Address getAddress() {
-		return address;
-	}
+    public String getBossId() {
+        return bossId;
+    }
 
-	public void setAddress(Address address) {
-		this.address = address;
-	}
+    public void setBossId(String bossId) {
+        this.bossId = bossId;
+    }
 
-	public List<Role> getRoleList() {
-		return roleList;
-	}
+    public Integer getAge() {
+        return age;
+    }
 
-	public void setRoleList(List<Role> roleList) {
-		this.roleList = roleList;
-	}
+    public void setAge(Integer age) {
+        this.age = age;
+    }
 
-	public Set<Privilege> getPrivilegeSet() {
-		return privilegeSet;
-	}
+    public Address getAddress() {
+        return address;
+    }
 
-	public void setPrivilegeSet(Set<Privilege> privilegeSet) {
-		this.privilegeSet = privilegeSet;
-	}
+    public void setAddress(Address address) {
+        this.address = address;
+    }
 
-	public Map<Integer, Role> getRoleMap() {
-		return roleMap;
-	}
+    public List<Role> getRoleList() {
+        return roleList;
+    }
 
-	public void setRoleMap(Map<Integer, Role> roleMap) {
-		this.roleMap = roleMap;
-	}
+    public void setRoleList(List<Role> roleList) {
+        this.roleList = roleList;
+    }
 
-	public List<Email> getEmailList() {
-		return emailList;
-	}
+    public Set<Privilege> getPrivilegeSet() {
+        return privilegeSet;
+    }
 
-	public void setEmailList(List<Email> emailList) {
-		this.emailList = emailList;
-	}
+    public void setPrivilegeSet(Set<Privilege> privilegeSet) {
+        this.privilegeSet = privilegeSet;
+    }
+
+    public Map<Integer, Role> getRoleMap() {
+        return roleMap;
+    }
+
+    public void setRoleMap(Map<Integer, Role> roleMap) {
+        this.roleMap = roleMap;
+    }
+
+    public List<Email> getEmailList() {
+        return emailList;
+    }
+
+    public void setEmailList(List<Email> emailList) {
+        this.emailList = emailList;
+    }
+
+    public List<UserRole> getUserRoleList() {
+        return userRoleList;
+    }
+
+    public void setUserRoleList(List<UserRole> userRoleList) {
+        this.userRoleList = userRoleList;
+    }
+
+    public List<Address> getAddressList() {
+        return addressList;
+    }
+
+    public void setAddressList(List<Address> addressList) {
+        this.addressList = addressList;
+    }
+
+    public Email getEmail() {
+        return email;
+    }
+
+    public void setEmail(Email email) {
+        this.email = email;
+    }
 
 }

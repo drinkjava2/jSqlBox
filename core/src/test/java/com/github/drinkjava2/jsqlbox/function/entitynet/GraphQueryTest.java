@@ -2,12 +2,16 @@ package com.github.drinkjava2.jsqlbox.function.entitynet;
 
 import static com.github.drinkjava2.jsqlbox.DB.$;
 import static com.github.drinkjava2.jsqlbox.DB.$1;
+import static com.github.drinkjava2.jsqlbox.DB.entity;
+import static com.github.drinkjava2.jsqlbox.DB.key;
 import static com.github.drinkjava2.jsqlbox.DB.ms;
 import static com.github.drinkjava2.jsqlbox.DB.one;
+import static com.github.drinkjava2.jsqlbox.DB.pagin;
 import static com.github.drinkjava2.jsqlbox.DB.que;
 
 import org.junit.Test;
 
+import com.github.drinkjava2.common.Systemout;
 import com.github.drinkjava2.jsqlbox.DB;
 import com.github.drinkjava2.jsqlbox.GraphQuery;
 import com.github.drinkjava2.jsqlbox.config.TestBase;
@@ -76,33 +80,62 @@ public class GraphQueryTest extends TestBase {
         new RolePrivilege().putValues("r4", "p1").insert();
     }
 
-    @Test
-    public void testGraphQuery() {
+    public void testMapListGraphQuery() {
         insertDemoData();
+        Systemout.setAllowPrint(true);
         DB.gctx().setAllowShowSQL(true);
-         
-        GraphQuery q2 = //
-                $("roletb as role", ms("rid", "id"), //
-                        $("roleprivilegetb as rp", ms("id", "rid"), //
-                                $1("privilegetb as privilege", ms("pid", "id")) //                                                     
-                        )//
-                ); //
-        
         GraphQuery q1 = //
-                $("addresstb as address", "where id>", que("a0"), //
-                        $1("usertb as users", ms("userId", "id"), //
+                $("addresstb as a", "where id>", que("a0"), //
+                        $1("usertb", ms("userId", "id"), //
                                 $("userroletb", ms("id", "userId"), //
-                                       q2// 
+                                        $("roletb as role", ms("rid", "id"), //
+                                                $("roleprivilegetb as rp", ms("id", "rid"), //
+                                                        $1("privilegetb as privilege", ms("pid", "id")) //                                                     
+                                                )//
+                                        )//
                                 ), //
-                                $("emailtb", ms("id", "userId"), one),//
-                                $1("addresstb as address", ms("id","userId"))//
+                                $("emailtb", ms("id", "userId"), one), //
+                                $1("addresstb as address", ms("id", "userId"))//
                         )//
                 );
-   
-        Object result = DB.graphQuery( q1, q2);
-        
+        GraphQuery q2 = //
+                $("usertb as u", "where id>", que("u2"), pagin(1, 10), //
+                        $("emailtb", ms("id", "userId"), one), //
+                        $1("addresstb", ms("id", "userId"))//
+                );
+        Object result = DB.graphQuery(q1, q2);
         String json = JsonUtil.toJSONFormatted(result);
-        System.out.println(json);
+        Systemout.println(json);
+    }
+
+    @Test
+    public void testObjectGraphQuery() {
+        insertDemoData();
+        Systemout.setAllowPrint(true);
+        DB.gctx().setAllowShowSQL(true);
+        GraphQuery q1 = //
+                $("addresstb as a", "where id>", que("a0"), entity(Address.class), //
+                        $1("usertb", key("user"), ms("userId", "id"), entity(User.class), //user是SQL保留字，采用手工指定key
+                                $("userroletb as userRoleList", ms("id", "userId"), entity(UserRole.class), //
+                                        $("roletb as roleList", ms("rid", "id"), entity(Role.class), //
+                                                $("roleprivilegetb as rolePrivilegeList", ms("id", "rid"), entity(RolePrivilege.class), //
+                                                        $1("privilegetb as privilege", ms("pid", "id"), entity(Privilege.class)) //                                                 
+                                                )//
+                                        )//
+                                ), //
+                                $1("emailtb as email", ms("id", "userId"), one, entity(Email.class)), //
+                                $("addresstb as addressList", ms("id", "userId"), entity(Address.class))//
+                        )//
+                );
+        GraphQuery q2 = //
+                $("usertb as u", "where id>", que("u2"), pagin(1, 10), entity(User.class), //
+                        $1("emailtb as email", ms("id", "userId"), one, entity(Email.class)), //
+                        $("addresstb as addressList", ms("id", "userId"), entity(Address.class))//
+                );
+        Object result = DB.graphQuery(q1, q2);
+        Systemout.println(result);
+        String json = JsonUtil.toJSONFormatted(result);
+        Systemout.println(json);
     }
 
 }

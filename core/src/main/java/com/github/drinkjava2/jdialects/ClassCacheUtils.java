@@ -173,32 +173,42 @@ public abstract class ClassCacheUtils {// NOSONAR
 	public static Method getClassFieldWriteMethod(Class<?> clazz, String fieldName) {
 		return getClassWriteMethods(clazz).get(fieldName);
 	}
+	
+	/** According given bean class type, read value from entityBean field */
+    public static Object readValueFromBeanField(Class<?> beanClass, Object entityBean, String fieldName) {
+        Method readMethod = ClassCacheUtils.getClassFieldReadMethod(beanClass, fieldName);
+        if (readMethod == null) {
+            throw new DialectException(
+                    "Can not find Java bean read method '" + fieldName + "' in " + beanClass);
+        } else
+            try {
+                return readMethod.invoke(entityBean);
+            } catch (Exception e) {
+                throw new DialectException(e);
+            }
+    }
 
 	/** Read value from entityBean field */
 	public static Object readValueFromBeanField(Object entityBean, String fieldName) {
-		Method readMethod = ClassCacheUtils.getClassFieldReadMethod(entityBean.getClass(), fieldName);
-		if (readMethod == null) {
-			throw new DialectException(
-					"No mapping found for field '" + fieldName + "' in '" + entityBean.getClass() + "'");
-		} else
-			try {
-				return readMethod.invoke(entityBean);
-			} catch (Exception e) {
-				throw new DialectException(e);
-			}
+	    return readValueFromBeanField(entityBean.getClass(), entityBean, fieldName);
 	}
 
+	/** According given bean class type, write value to entityBean field */
+    public static void writeValueToBeanField(Class<?> beanClass, Object entityBean, String fieldName, Object value) {
+        Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(beanClass, fieldName);
+        if (writeMethod == null) {
+            throw new DialectException("Can not find Java bean write method '" + fieldName + "' in "+beanClass);
+        } else
+            try {
+                writeMethod.invoke(entityBean, value);
+            } catch (Exception e) {
+                throw new DialectException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);
+            }
+    }
+    
 	/** write value to entityBean field */
 	public static void writeValueToBeanField(Object entityBean, String fieldName, Object value) {
-		Method writeMethod = ClassCacheUtils.getClassFieldWriteMethod(entityBean.getClass(), fieldName);
-		if (writeMethod == null) {
-			throw new DialectException("Can not find Java bean read method '" + fieldName + "'");
-		} else
-			try {
-				writeMethod.invoke(entityBean, value);
-			} catch (Exception e) {
-				throw new DialectException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);
-			}
+	    writeValueToBeanField(entityBean.getClass(), entityBean, fieldName, value);
 	}
 
 	/**

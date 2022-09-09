@@ -338,7 +338,8 @@ public abstract class DB {// NOSONAR
     public static Map<String, Object> graphQuery(GraphQuery... graphQls) {return gctx().graphQuery(graphQls);}
     public static SqlItem ms(String... masterSlaveIds) { return GraphQuery.masterSlave(masterSlaveIds);}
     public static SqlItem key(String key) { return GraphQuery.key(key);}
-    public static SqlItem one=GraphQuery.one();
+    public static SqlItem one=GraphQuery.one();//NOSONAR
+    public static SqlItem entity(Class<?> entityClass) {return GraphQuery.entity(entityClass);};
     public static GraphQuery $(Object... items) {return GraphQuery.graphQuery(items);}
     public static GraphQuery $1(Object... items) {GraphQuery q=GraphQuery.graphQuery(items); q.setOne(true);return q;}
     

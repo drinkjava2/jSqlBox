@@ -1,3 +1,14 @@
+/*
+ * Copyright 2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ * OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ */
 package com.github.drinkjava2.jsqlbox;
 
 import java.util.ArrayList;
@@ -6,8 +17,18 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.drinkjava2.jdbpro.SqlItem;
-import com.github.drinkjava2.jdbpro.SqlOption;
+import com.github.drinkjava2.jdialects.ClassCacheUtils;
 import com.github.drinkjava2.jdialects.StrUtils;
+import com.github.drinkjava2.jdialects.TableModelUtils;
+import com.github.drinkjava2.jdialects.model.TableModel;
+
+/**
+ * GraphQuery, usage see jSqlBox' wiki.
+ * 
+ * @author Yong Zhu
+ * @since 5.0.14
+ *
+*/
 
 @SuppressWarnings("all")
 public class GraphQuery { //DQL Object
@@ -18,9 +39,10 @@ public class GraphQuery { //DQL Object
     private String[] masterIds; //master slave Ids,
     private String[] slaveIds; //master slave Ids,
     private boolean one = false; //if one is true, store result in Object or Map, not in list<Object> or List<Map>
+    private Class<?> entity; //optional, if not null, conver sql result Map to entity
 
     //output
-    private List<Map<String, Object>> records; //each record is a line in database table
+    private List<Object> records; //each record is a line in database table, Object here can be entity or Map
 
     public String getKey() {
         return key;
@@ -46,11 +68,11 @@ public class GraphQuery { //DQL Object
         this.childGQ = childGQ;
     }
 
-    public List<Map<String, Object>> getRecords() {
+    public List<Object> getRecords() {
         return records;
     }
 
-    public void setRecords(List<Map<String, Object>> records) {
+    public void setRecords(List<Object> records) {
         this.records = records;
     }
 
@@ -78,27 +100,57 @@ public class GraphQuery { //DQL Object
         this.one = one;
     }
 
+    public Class<?> getEntity() {
+        return entity;
+    }
+
+    public void setEntity(Class<?> entity) {
+        this.entity = entity;
+    }
     //========End of getter& setter======= 
+
+    //========util ======= 
+
+    private static Object readValueFromMapOrEntity(GraphQuery q, Object mapOrEntity, String field) {
+        if (q == null || mapOrEntity == null)
+            return null;
+        if (q.getEntity() == null)
+            return ((Map) mapOrEntity).get(field);
+        else
+            return ClassCacheUtils.readValueFromBeanField(q.getEntity(), mapOrEntity, field);
+    }
+
+    private static void writeValueToMapOrEntity(GraphQuery q, Object mapOrEntity, String field, Object value) {
+        if (q == null || mapOrEntity == null)
+            return;
+        if (q.getEntity() == null) {
+            ((Map) mapOrEntity).put(field, value);
+            return;
+        } else {
+            ClassCacheUtils.writeValueToBeanField(q.getEntity(), mapOrEntity, field, value);
+        }
+    }
+
+    //========End of util =======
 
     /** return a sqlitem, name is "MASTERSLAVE_IDS", parameters store master and slave ids, usage: masterSlave("masterId1", "masterId2", "slaveId1", "slaveId2") */
     public static SqlItem masterSlave(String... masterSlaveIds) {
-        SqlItem item = new SqlItem(null, (Object[]) masterSlaveIds);
-        item.setName("MASTERSLAVE_IDS");
-        return item;
+        return new SqlItem("MASTERSLAVE_IDS", null, (Object[]) masterSlaveIds);
     }
 
     /** change key setting */
     public static SqlItem key(String key) {
-        SqlItem item = new SqlItem(null, new Object[]{key});
-        item.setName("KEY");
-        return item;
+        return new SqlItem("KEY", null, new Object[]{key});
+    }
+
+    /** Set a entityClass item */
+    public static SqlItem entity(Class<?> entityClass) {
+        return new SqlItem("ENTITY", null, new Object[]{entityClass});
     }
 
     /** tell child only have one record, no need put in records list, but put in record */
     public static SqlItem one() {
-        SqlItem item = new SqlItem(null, new Object[]{});
-        item.setName("ONE");
-        return item;
+        return new SqlItem("ONE", null, new Object[]{});
     }
 
     /**
@@ -143,18 +195,16 @@ public class GraphQuery { //DQL Object
                 } else if ("ONE".equals(sqlItem.getName())) {
                     q.setOne(true);
                     items[i] = "";
+                } else if ("ENTITY".equals(sqlItem.getName())) {
+                    q.setEntity((Class<?>) sqlItem.getParameters()[0]);
+                    items[i] = "";
                 }
             }
         }
         return q;
     }
 
-    /**
-     * Execute DQL query, allow multiple DQL
-     * @param db
-     * @param dqls
-     * @return Map<String, List> result
-     */
+    /** Execute GraphQuery, allow multiple GraphQuerys  */
     public static Map<String, Object> graphQuery(DbContext db, GraphQuery... dqls) {
         Map<String, Object> result = new HashMap<String, Object>();
         for (GraphQuery q : dqls) {
@@ -190,11 +240,11 @@ public class GraphQuery { //DQL Object
             where.remove(where.size() - 1); //remove last ","
 
             where.add(") in (");
-            for (Map<String, Object> m : parent.getRecords()) {
+            for (Object m : parent.getRecords()) {
                 where.add("(");
                 for (String mid : self.getMasterIds()) {
                     where.add("?");
-                    where.add(DB.param(m.get(mid))); //jSqlBox inline SQl parameter usage
+                    where.add(DB.param(readValueFromMapOrEntity(parent, m, mid))); //jSqlBox inline SQl parameter usage
                     where.add(",");
                 }
                 where.remove(where.size() - 1); //remove last ","
@@ -208,9 +258,19 @@ public class GraphQuery { //DQL Object
         if (where != null)
             sqlItems.addAll(1, where);
         List<Map<String, Object>> records = db.qryMapList(sqlItems.toArray(new Object[sqlItems.size()]));
-        self.setRecords(records);
-        alignMasterSlaveData(parent, self); //if have parent, align master and slave data by id
+        if (self.getEntity() == null)
+            self.setRecords((List) records);
+        else {
+            List<Object> beanList = new ArrayList<>();
+            TableModel model = TableModelUtils.entity2Model(self.getEntity());
+            for (Map<String, Object> row : records) {
+                Object entityBean = DbContextUtils.mapToEntityBean(model, row); //Conver to entityBean
+                beanList.add(entityBean);
+            }
+            self.setRecords(beanList);
+        }
 
+        alignMasterSlaveData(parent, self); //if have parent, align master and slave data by id 
         for (Object item : self.getSqlItems()) //child DQL query
             if (item instanceof GraphQuery)
                 singleGraphQuery(db, self, (GraphQuery) item);
@@ -222,31 +282,31 @@ public class GraphQuery { //DQL Object
         if (parent.getRecords() == null || child.getRecords() == null || parent.getRecords().isEmpty() || child.getRecords().isEmpty())
             return;
         int idQTY = child.getMasterIds().length;
-        for (Map<String, Object> mRecord : parent.getRecords()) {
+        for (Object mRecord : parent.getRecords()) {
             Object[] mIdValue = new Object[idQTY];
             for (int i = 0; i < idQTY; i++) {
-                mIdValue[i] = mRecord.get(child.getMasterIds()[i]); //parent id values, may be compound ids
+                mIdValue[i] = readValueFromMapOrEntity(parent, mRecord, child.getMasterIds()[i]); //parent id values, may be compound ids
             }
 
-            for (Map<String, Object> cRecord : child.getRecords()) {
+            for (Object cRecord : child.getRecords()) {
                 Object[] cIdValue = new Object[idQTY];
                 for (int i = 0; i < idQTY; i++) {
-                    cIdValue[i] = cRecord.get(child.getSlaveIds()[i]);
+                    cIdValue[i] = readValueFromMapOrEntity(child, cRecord, child.getSlaveIds()[i]);
                 }
-                
-                boolean foundOne=false;
+
+                boolean foundOne = false;
                 if (idValueEqual(mIdValue, cIdValue)) { //if id equal, link child record to master record
                     if (child.isOne()) {
-                        foundOne=true;
-                        mRecord.put(child.getKey(), cRecord);
-                    } else  {
-                        List l = (List) mRecord.get(child.getKey());
+                        foundOne = true;
+                        writeValueToMapOrEntity(parent, mRecord, child.getKey(), cRecord);
+                    } else {
+                        List l = (List) readValueFromMapOrEntity(parent, mRecord, child.getKey());
                         if (l == null) {
                             l = new ArrayList<>();
-                            mRecord.put(child.getKey(), l);
+                            writeValueToMapOrEntity(parent, mRecord, child.getKey(), l);
                         }
                         l.add(cRecord);
-                    } 
+                    }
                 }
                 if (child.isOne() && foundOne) //if child is one and found one for parent, break
                     break;
@@ -258,9 +318,7 @@ public class GraphQuery { //DQL Object
         for (int i = 0; i < idValue1.length; i++) {
             Object o1 = idValue1[i];
             Object o2 = idValue2[i];
-            if (o1 == null || o2 == null)
-                return false;
-            if (!o1.equals(o2))
+            if (o1 == null || o2 == null || !o1.equals(o2))
                 return false;
         }
         return true;

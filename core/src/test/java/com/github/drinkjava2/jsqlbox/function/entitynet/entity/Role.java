@@ -1,5 +1,7 @@
 package com.github.drinkjava2.jsqlbox.function.entitynet.entity;
 
+import java.util.List;
+
 import com.github.drinkjava2.jdialects.annotation.jpa.Id;
 import com.github.drinkjava2.jdialects.annotation.jpa.Table;
 import com.github.drinkjava2.jsqlbox.ActiveRecord;
@@ -13,6 +15,8 @@ public class Role extends ActiveRecord<Role> {
 
 	User user;
 
+	List<RolePrivilege> rolePrivilegeList;
+	
 	public String getId() {
 		return id;
 	}
@@ -36,5 +40,13 @@ public class Role extends ActiveRecord<Role> {
 	public void setUser(User user) {
 		this.user = user;
 	}
+
+    public List<RolePrivilege> getRolePrivilegeList() {
+        return rolePrivilegeList;
+    }
+
+    public void setRolePrivilegeList(List<RolePrivilege> rolePrivilegeList) {
+        this.rolePrivilegeList = rolePrivilegeList;
+    }
 
 }

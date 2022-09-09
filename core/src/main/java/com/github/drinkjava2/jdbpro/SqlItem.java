@@ -23,42 +23,48 @@ package com.github.drinkjava2.jdbpro;
  */
 public class SqlItem {
 
-	private SqlOption type;
-	private String name;
-	private Object[] parameters;
+    private SqlOption type;
+    private String name;
+    private Object[] parameters;
 
-	public SqlItem(String sqlPiece) {
-		this.type = SqlOption.SQL;
-		this.parameters = new Object[] { sqlPiece };
-	}
+    public SqlItem(String sqlPiece) {
+        this.type = SqlOption.SQL;
+        this.parameters = new Object[]{sqlPiece};
+    }
 
-	public SqlItem(SqlOption type, Object... params) {
-		this.type = type;
-		this.parameters = params;
-	}
+    public SqlItem(SqlOption type, Object... params) {
+        this.type = type;
+        this.parameters = params;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public SqlItem(String name, SqlOption type, Object... params) {
+        this.name=name;
+        this.type = type;
+        this.parameters = params;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Object[] getParameters() {
-		return parameters;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public SqlOption getType() {
-		return type;
-	}
+    public Object[] getParameters() {
+        return parameters;
+    }
 
-	public void setType(SqlOption type) {
-		this.type = type;
-	}
+    public SqlOption getType() {
+        return type;
+    }
 
-	public void setParameters(Object[] parameters) {
-		this.parameters = parameters;
-	}
+    public void setType(SqlOption type) {
+        this.type = type;
+    }
+
+    public void setParameters(Object[] parameters) {
+        this.parameters = parameters;
+    }
 
 }

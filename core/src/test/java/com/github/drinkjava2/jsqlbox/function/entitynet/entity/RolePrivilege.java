@@ -18,6 +18,8 @@ public class RolePrivilege extends ActiveRecord<RolePrivilege> {
 	@SingleFKey(refs = { "privilegetb", "id" })
 	String pid;
 
+	Privilege privilege;
+	
 	public String getId() {
 		return id;
 	}
@@ -41,5 +43,13 @@ public class RolePrivilege extends ActiveRecord<RolePrivilege> {
 	public void setPid(String pid) {
 		this.pid = pid;
 	}
+
+    public Privilege getPrivilege() {
+        return privilege;
+    }
+
+    public void setPrivilege(Privilege privilege) {
+        this.privilege = privilege;
+    }
 
 }
