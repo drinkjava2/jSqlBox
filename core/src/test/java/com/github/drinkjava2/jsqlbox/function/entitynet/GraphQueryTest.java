@@ -80,32 +80,27 @@ public class GraphQueryTest extends TestBase {
     public void testGraphQuery() {
         insertDemoData();
         DB.gctx().setAllowShowSQL(true);
-        GraphQuery d1 = //
-                $("usertb", //
-                        $("userroletb", ms("id", "userId"),//
-                                $1("roletb as role", ms("rid", "id"),//
-                                        $("roleprivilegetb as rp", ms("id", "rid"), //
-                                                $1("privilegetb as privilege", ms("pid", "id")) //                                                     
-                                        )//
-                                ) //
-                        ), //  
-                        $("emailtb as email", ms("id", "userId")), //
-                        $1("addresstb", ms("id", "userId"))//
-                );
-        GraphQuery d2 = //
+         
+        GraphQuery q2 = //
+                $("roletb as role", ms("rid", "id"), //
+                        $("roleprivilegetb as rp", ms("id", "rid"), //
+                                $1("privilegetb as privilege", ms("pid", "id")) //                                                     
+                        )//
+                ); //
+        
+        GraphQuery q1 = //
                 $("addresstb as address", "where id>", que("a0"), //
                         $1("usertb as users", ms("userId", "id"), //
                                 $("userroletb", ms("id", "userId"), //
-                                        $("roletb as role", ms("rid", "id"), //
-                                                $("roleprivilegetb as rp", ms("id", "rid"), //
-                                                        $("privilegetb as privilege", ms("pid", "id")) //                                                     
-                                                )//
-                                        ) //  
+                                       q2// 
                                 ), //
-                                $("emailtb", ms("id", "userId"), one)//
+                                $("emailtb", ms("id", "userId"), one),//
+                                $1("addresstb as address", ms("id","userId"))//
                         )//
                 );
-        Object result = DB.graphQuery(d1,d2);
+   
+        Object result = DB.graphQuery( q1, q2);
+        
         String json = JsonUtil.toJSONFormatted(result);
         System.out.println(json);
     }

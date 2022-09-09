@@ -17,7 +17,7 @@ public class GraphQuery { //DQL Object
     private List<GraphQuery> childGQ = new ArrayList<GraphQuery>(); //child GraphQuery List
     private String[] masterIds; //master slave Ids,
     private String[] slaveIds; //master slave Ids,
-    private boolean one = false; //if single is true, store data in record, not in records list
+    private boolean one = false; //if one is true, store result in Object or Map, not in list<Object> or List<Map>
 
     //output
     private List<Map<String, Object>> records; //each record is a line in database table
@@ -200,8 +200,6 @@ public class GraphQuery { //DQL Object
                 where.remove(where.size() - 1); //remove last ","
                 where.add(")");
                 where.add(",");
-                if (parent.isOne()) //if isOne, only use first records
-                    break;
             }
             where.remove(where.size() - 1); //remove last ","
             where.add(") ");
@@ -253,8 +251,6 @@ public class GraphQuery { //DQL Object
                 if (child.isOne() && foundOne) //if child is one and found one for parent, break
                     break;
             }
-            if (parent.isOne()) //if parent is one, break
-                break;
         }
     }
 
