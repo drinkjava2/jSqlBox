@@ -23,16 +23,13 @@ import com.github.drinkjava2.jdialects.TableModelUtils;
 import com.github.drinkjava2.jdialects.model.TableModel;
 
 /**
- * GraphQuery, usage see jSqlBox' wiki.
+ * GraphQuery, usage see jSqlBox user manual
  * 
  * @author Yong Zhu
  * @since 5.0.14
- *
 */
-
 @SuppressWarnings("all")
 public class GraphQuery { //DQL Object
-    //input
     private String key; //key name
     private Object[] sqlItems = new Object[]{}; //normal sql items
     private List<GraphQuery> childGQ = new ArrayList<GraphQuery>(); //child GraphQuery List
@@ -40,8 +37,6 @@ public class GraphQuery { //DQL Object
     private String[] slaveIds; //master slave Ids,
     private boolean one = false; //if one is true, store result in Object or Map, not in list<Object> or List<Map>
     private Class<?> entity; //optional, if not null, conver sql result Map to entity
-
-    //output
     private List<Object> records; //each record is a line in database table, Object here can be entity or Map
 
     public String getKey() {
@@ -107,31 +102,24 @@ public class GraphQuery { //DQL Object
     public void setEntity(Class<?> entity) {
         this.entity = entity;
     }
-    //========End of getter& setter======= 
 
-    //========util ======= 
-
-    private static Object readValueFromMapOrEntity(GraphQuery q, Object mapOrEntity, String field) {
+    private static Object readValueFromMapOrEntity(GraphQuery q, Object mapOrEntity, String field) {//as title
         if (q == null || mapOrEntity == null)
             return null;
-        if (q.getEntity() == null)
-            return ((Map) mapOrEntity).get(field);
-        else
+        if (q.getEntity() != null)
             return ClassCacheUtils.readValueFromBeanField(q.getEntity(), mapOrEntity, field);
+        else
+            return ((Map) mapOrEntity).get(field);
     }
 
-    private static void writeValueToMapOrEntity(GraphQuery q, Object mapOrEntity, String field, Object value) {
+    private static void writeValueToMapOrEntity(GraphQuery q, Object mapOrEntity, String field, Object value) {//as title
         if (q == null || mapOrEntity == null)
             return;
-        if (q.getEntity() == null) {
-            ((Map) mapOrEntity).put(field, value);
-            return;
-        } else {
+        if (q.getEntity() != null)
             ClassCacheUtils.writeValueToBeanField(q.getEntity(), mapOrEntity, field, value);
-        }
+        else
+            ((Map) mapOrEntity).put(field, value);
     }
-
-    //========End of util =======
 
     /** return a sqlitem, name is "MASTERSLAVE_IDS", parameters store master and slave ids, usage: masterSlave("masterId1", "masterId2", "slaveId1", "slaveId2") */
     public static SqlItem masterSlave(String... masterSlaveIds) {
@@ -161,13 +149,11 @@ public class GraphQuery { //DQL Object
         DbException.assureTrue(items != null && items.length > 0, "DQL items can not be empty");
         q.setSqlItems(items);
 
-        //first item is key, can be single word or "select * from key" or "select * from table as key"
-        String key = StrUtils.replace((String) items[0], "\t", " ");
+        String key = StrUtils.replace((String) items[0], "\t", " "); // start to find key
         key = StrUtils.trimWhitespace(key);
         DbException.assureNotEmpty(key);
-        if (key.contains(" ")) { //if key have space use last word as key,  for example "select * from usr as u", will use "u" as key
+        if (key.contains(" ")) //if key have space use last word as key,  for example "select * from usr as u", will use "u" as key
             key = StrUtils.substringAfterLast(key, " ");
-        }
         q.setKey(key);
 
         if (StrUtils.startsWithIgnoreCase((String) (q.sqlItems[0]), "select "))
@@ -284,15 +270,13 @@ public class GraphQuery { //DQL Object
         int idQTY = child.getMasterIds().length;
         for (Object mRecord : parent.getRecords()) {
             Object[] mIdValue = new Object[idQTY];
-            for (int i = 0; i < idQTY; i++) {
-                mIdValue[i] = readValueFromMapOrEntity(parent, mRecord, child.getMasterIds()[i]); //parent id values, may be compound ids
-            }
+            for (int i = 0; i < idQTY; i++)
+                mIdValue[i] = readValueFromMapOrEntity(parent, mRecord, child.getMasterIds()[i]); //parent id values, may be compound ids 
 
             for (Object cRecord : child.getRecords()) {
                 Object[] cIdValue = new Object[idQTY];
-                for (int i = 0; i < idQTY; i++) {
+                for (int i = 0; i < idQTY; i++)
                     cIdValue[i] = readValueFromMapOrEntity(child, cRecord, child.getSlaveIds()[i]);
-                }
 
                 boolean foundOne = false;
                 if (idValueEqual(mIdValue, cIdValue)) { //if id equal, link child record to master record
@@ -323,5 +307,4 @@ public class GraphQuery { //DQL Object
         }
         return true;
     }
-
 }

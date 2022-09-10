@@ -32,6 +32,8 @@ public class User extends ActiveRecord<User> {
     List<Address> addressList;
 
     Email email;
+    
+    Map<String, Object> emailMap;
 
     Map<Integer, Role> roleMap;
 
@@ -139,6 +141,14 @@ public class User extends ActiveRecord<User> {
 
     public void setEmail(Email email) {
         this.email = email;
+    }
+
+    public Map<String, Object> getEmailMap() {
+        return emailMap;
+    }
+
+    public void setEmailMap(Map<String, Object> emailMap) {
+        this.emailMap = emailMap;
     }
 
 }

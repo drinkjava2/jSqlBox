@@ -202,7 +202,7 @@ public abstract class ClassCacheUtils {// NOSONAR
             try {
                 writeMethod.invoke(entityBean, value);
             } catch (Exception e) {
-                throw new DialectException("FieldName '" + fieldName + "' can not write with value '" + value + "'", e);
+                throw new DialectException("FieldName '" + fieldName + "' can not write with value '" + value + "' in "+beanClass, e);
             }
     }
     

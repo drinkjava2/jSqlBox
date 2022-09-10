@@ -336,6 +336,7 @@ public abstract class DB {// NOSONAR
   
 	//graphQuery shortcut methods
     public static Map<String, Object> graphQuery(GraphQuery... graphQls) {return gctx().graphQuery(graphQls);}
+    public static SqlItem masterSlave(String... masterSlaveIds) { return GraphQuery.masterSlave(masterSlaveIds);}
     public static SqlItem ms(String... masterSlaveIds) { return GraphQuery.masterSlave(masterSlaveIds);}
     public static SqlItem key(String key) { return GraphQuery.key(key);}
     public static SqlItem one=GraphQuery.one();//NOSONAR

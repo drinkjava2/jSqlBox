@@ -11,7 +11,7 @@
 </p>
 
 <p align="center"> 
-  基于DbUtils内核的全功能数据库持久层工具
+  Java全功能数据库持久层工具
 </p>
 
 <p align="center">
@@ -41,7 +41,7 @@ jSqlBox是一个全功能开源Java数据库持久层工具，在架构、功能
 <dependency>
    <groupId>com.github.drinkjava2</groupId>
    <artifactId>jsqlbox</artifactId>  
-   <version>5.0.14.jre8</version> <!-- 或最新版 -->
+   <version>5.0.15.jre8</version> <!-- 或最新版 -->
 </dependency> 
 ```
 
@@ -76,7 +76,7 @@ jSqlBox是源码包含模块式架构，目的是隔离功能点，并分享给�
 <dependency>
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jdialects</artifactId>
-    <version>5.0.13.jre8</version>
+    <version>5.0.13.jre8</version> <!--或最新版-->
 </dependency>
 ```
 
@@ -128,8 +128,8 @@ values( ?,  ?)
 DB.exe(InsertDemoSQL.class, par("1", "Foo"));
 ```
  
-### 灵活的实体关联查询
-例如下例，可以一次无递归查询树节点并装配成内存中对象树，其中的EntityNetHandler、alias, give等方法都是与实体关联映射相关的SQL参数：
+### 实体关联查询
+利用SQL的多表关联查询可以用一条SQL返回关联的对象结构。例如下例可以一次无递归查询树节点并装配成内存中对象树，其中的EntityNetHandler、alias, give等方法都是与实体关联映射相关的SQL参数：
 ```
 Object[] targets = new Object[] { new EntityNetHandler(), TreeNode.class, TreeNode.class,
 		alias("t", "p"), give("p", "t", "parent"), give("t", "p", "childs") };
@@ -140,141 +140,106 @@ TreeNode node = net.pickOneEntity("t", d.getId());
 ```
 不同于Hibernate和MyBatis复杂的配置，在jSqlBox中，实体关联查询只不过是一种参数略微复杂的SQL而已，随用随拼，不需要配置。
 
-### 图查询
-2022年9月新加功能，将参数内嵌式SQL写成阶梯形式，即可类似GraphQL的主从表多级图询，其特点是输出格式与输入格式一致，所见即所得，比上节的实体关联查询使用简单，采用纯Java和原生SQL，功能强，可定制性好
+### jSqlBox的主从表查询
+jSqlBox的主从表查询是5.0.15版起新增的功能，将参数内嵌式SQL查询写成树状，即可实现类似GraphQL的结构化查询，输入和输出的树状结构一致，所见即所得。其优点有：  
+   1.只需要编写针对单表查询的SQL，会自动按主从关联列名生成类似“id in (?, ?...?)”的SQL片段，并将最终查询结果组装成主从表树状结构。  
+   2.采用纯Java和原生SQL，功能强，学习成本低。  
+   3.没有直接输出为JSON，而是输出Map/List对象或Java实体对象，查询结果可以在后端继续修改。  
+   4.可以直接利用Java的IDE格式化和语法检查功能，不需要第三方工具。  
+   5.jSqlBox的内嵌式SQL参数、分页、分库分表、拦截器、事务等依然可以直接使用。  
+   6.没有涉及安全、权限功能，无学习成本。安全、权限这些不属于ORM工具的职能，而应由后端的SpringSecurity/Shiro工具包或独立的Serverless/JsonAPI服务来提供。  
+   7.如果结合我写的MyServerless项目使用，可以实现前端直接在html里书写Java、定制主从表多级查询并返回json, 实现类似GraphQL的功能，将业务逻辑前移到前端。  
+   8.性能好，用"in"的方式进行数据库表的关联查询，不存在1+N问题。  
+   9.源码简洁(实现这个功能仅用了300行源码，见GraphQuery.java)  
+使用示例：  
 ```
         GraphQuery q1 = //
-                $("usertb", "where id=? or id=?", par("u2", "u4"), //
-                        $("select id, userId from userroletb", ms("id", "userId"), //
-                                $("roletb as role", ms("rid", "id"), // ms也可写成masterSlave, 参数分别是主、从表的主键
-                                        $("roleprivilegetb as rp", ms("id", "rid"), //
-                                                $("privilegetb as privilege", ms("pid", "id")) //                                                     
+                $("addresstb as addresses", "where id>", que("a1"), " and id<", que("a5"), pagin(1, 10), //
+                        $1("usertb", key("user"), ms("userId", "id"), $("userroletb as userRoleList", ms("id", "userId"), //
+                                $("roletb as roleList", ms("rid", "id"), // ms方法也可以写成DB.masterSlave()，它的参数是主、从表的键名
+                                        $("roleprivilegetb as rolePrivilegeList", ms("id", "rid"), //
+                                                $1("privilegetb as privilege", ms("pid", "id")) //                                                 
                                         )//
-                                ) //
-                        ), //  
-                        $("emailtb as email", ms("id", "userId")), //
-                        $("addresstb", ms("id", "userId"))//
-                );
-        GraphQuery q2 = //
-                $("addresstb as address", "where id>", que("a2"), //
-                        $("usertb as users", ms("userId", "id"), //
-                                $("userroletb", ms("id", "userId"), //
-                                        $("roletb as role", ms("rid", "id"), //
-                                                $("roleprivilegetb as rp", ms("id", "rid"), //
-                                                        $("privilegetb as privilege", ms("pid", "id")) //                                                     
-                                                )//
-                                        ), //  
-                                        $("emailtb", ms("id", "userId"))//
-                                ) // 
+                                )//
+                        ), //
+                                $1("select * from emailtb as email", ms("id", "userId"), one), //
+                                $("addresstb as addressList", ms("id", "userId"), "and addressName like ?", par("addr%"))//
                         )//
                 );
-        Object result = DB.graphQuery(q1, q2);
-        String json = JsonUtil.toJSONFormatted(result);
+        GraphQuery q2 = //
+                $("usertb as u", "where id>", que("u2"), pagin(1, 10), entity(User.class), //
+                        $1("emailtb as emailMap", ms("id", "userId"), one), //
+                        $("addresstb as addressList", ms("id", "userId"))//
+                );
+        Object result = DB.graphQuery(q1, q2); //result是查询结果
+        String json = JsonUtil.toJSONFormatted(result); //输出为JSON文本
 ```
-示例详见GraphQueryTest.java，graphQuery的输出为Map<List>对象，可以用Jackson等工具转化为Json, 输出示例如下：
+更多关于实体主从表查询的使用请详见[用户手册](https://gitee.com/drinkjava2/jsqlbox/wikis/pages)。以上示例详见单元测试下的GraphQueryTest.java，示例结果输出如下：  
 ```
 {
-  "usertb" : [ {
-    "id" : "u2",
-    "userName" : "user2",
-    "userroletb" : [ {
-      "id" : "28t27n868r7glrcm4l4r1v2dw",
-      "userId" : "u2"
-    }, {
-      "id" : "8easgkk10stp5p4qivme77isz",
-      "userId" : "u2"
-    }, {
-      "id" : "40c3trjk27usuvw6zj2t9ebki",
-      "userId" : "u2"
-    } ],
-    "email" : [ {
-      "emailName" : "email3",
-      "id" : "e3",
-      "userId" : "u2"
-    }, {
-      "emailName" : "email4",
-      "id" : "e4",
-      "userId" : "u2"
-    } ],
-    "addresstb" : [ {
-      "addressName" : "address2",
-      "id" : "a2",
-      "userId" : "u2"
-    } ]
-  }, {
-    "id" : "u4",
-    "userName" : "user4",
-    "userroletb" : [ {
-      "id" : "1ec67h3l6deo4bpzaxxidk1by",
-      "userId" : "u4"
-    } ],
-    "addresstb" : [ {
-      "addressName" : "address4",
-      "id" : "a4",
-      "userId" : "u4"
-    } ]
-  } ],
-  "address" : [ {
-    "addressName" : "address3",
-    "id" : "a3",
-    "userId" : "u3",
-    "users" : [ {
-      "id" : "u3",
-      "userName" : "user3",
-      "userroletb" : [ {
-        "id" : "axuh0whpiqff5mixt6wicm2dv",
-        "rid" : "r4",
-        "userId" : "u3",
-        "role" : [ {
-          "id" : "r4",
-          "roleName" : "role4",
-          "rp" : [ {
-            "id" : "2an80lf6nhopzkoi8hik17geq",
-            "pid" : "p1",
-            "rid" : "r4",
-            "privilege" : [ {
-              "id" : "p1",
-              "privilegeName" : "privilege1"
-            } ]
-          } ]
-        } ]
-      } ]
-    } ]
-  }, {
-    "addressName" : "address4",
-    "id" : "a4",
-    "userId" : "u4",
-    "users" : [ {
-      "id" : "u4",
-      "userName" : "user4",
-      "userroletb" : [ {
-        "id" : "1ec67h3l6deo4bpzaxxidk1by",
-        "rid" : "r1",
-        "userId" : "u4",
-        "role" : [ {
-          "id" : "r1",
-          "roleName" : "role1",
-          "rp" : [ {
-            "id" : "4ia4vks0jcth4szt8fwz0axl1",
-            "pid" : "p1",
-            "rid" : "r1",
-            "privilege" : [ {
-              "id" : "p1",
-              "privilegeName" : "privilege1"
-            } ]
-          } ]
-        } ]
-      } ]
-    } ]
-  }, {
-    "addressName" : "address5",
-    "id" : "a5",
-    "userId" : "u5",
-    "users" : [ {
-      "id" : "u5",
-      "userName" : "user5"
-    } ]
-  } ]
+   "addresses":[
+      {
+         "addressName":"address2",
+         "id":"a2",
+         "userId":"u2",
+         "user":{
+            "id":"u2",
+            "userName":"user2",
+            "userRoleList":[
+               {
+                  "id":"3i6yaxy2fusjkgisyfhypkti9",
+                  "rid":"r1",
+                  "userId":"u2",
+                  "roleList":[
+                     {
+                        "id":"r1",
+                        "roleName":"role1",
+                        "rolePrivilegeList":[
+                           {
+                              "id":"b484ze4k44xemtkstehnprhxq",
+                              "pid":"p1",
+                              "rid":"r1",
+                              "privilege":{
+                                 "id":"p1",
+                                 "privilegeName":"privilege1"
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               },
+            ......
+      }
+   ],
+   "u":[
+      {
+         "id":"u3",
+         "userName":"user3",
+         "addressList":[
+            {
+               "addressName":"address3",
+               "id":"a3",
+               "userId":"u3"
+            }
+         ],
+         "emailMap":{
+            "emailName":"email5",
+            "id":"e5",
+            "userId":"u3"
+         }
+      },
+      {
+         "id":"u5",
+         "userName":"user5",
+         "addressList":[
+            {
+               "addressName":"address5",
+               "id":"a5",
+               "userId":"u5"
+            }
+         ]
+      }
+   ]
 }
 ```
 
