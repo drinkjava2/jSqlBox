@@ -26,7 +26,7 @@
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin> 
         
-        <spring.version>4.3.30.RELEASE</spring.version>
+        <spring.version>5.2.21.RELEASE</spring.version>
  </properties> 
  
     
